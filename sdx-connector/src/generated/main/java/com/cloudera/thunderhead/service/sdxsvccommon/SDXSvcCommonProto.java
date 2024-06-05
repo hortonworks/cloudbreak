@@ -69,23 +69,55 @@ public final class SDXSvcCommonProto {
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
        * <pre>
-       * AWS Cloud Platform.
+       * UNSET
        * </pre>
        *
-       * <code>AWS = 0;</code>
+       * <code>UNSET = 0;</code>
        */
-      AWS(0),
-      UNRECOGNIZED(-1),
-      ;
-
+      UNSET(0),
       /**
        * <pre>
        * AWS Cloud Platform.
        * </pre>
        *
-       * <code>AWS = 0;</code>
+       * <code>AWS = 1;</code>
        */
-      public static final int AWS_VALUE = 0;
+      AWS(1),
+      /**
+       * <pre>
+       * Local setup
+       * </pre>
+       *
+       * <code>LOCAL = 99 [(.options.EnumValueExtension.hidden) = true];</code>
+       */
+      LOCAL(99),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * AWS Cloud Platform.
+       * </pre>
+       *
+       * <code>AWS = 1;</code>
+       */
+      public static final int AWS_VALUE = 1;
+      /**
+       * <pre>
+       * Local setup
+       * </pre>
+       *
+       * <code>LOCAL = 99 [(.options.EnumValueExtension.hidden) = true];</code>
+       */
+      public static final int LOCAL_VALUE = 99;
 
 
       public final int getNumber() {
@@ -112,7 +144,9 @@ public final class SDXSvcCommonProto {
        */
       public static Value forNumber(int value) {
         switch (value) {
-          case 0: return AWS;
+          case 0: return UNSET;
+          case 1: return AWS;
+          case 99: return LOCAL;
           default: return null;
         }
       }
@@ -585,31 +619,39 @@ public final class SDXSvcCommonProto {
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
        * <pre>
-       * AWS PrivateLink Endpoint connection.
+       * UNSET
        * </pre>
        *
-       * <code>AWS_PRIVATELINK = 0;</code>
+       * <code>UNSET = 0;</code>
        */
-      AWS_PRIVATELINK(0),
-      /**
-       * <code>AWS_PRIVATELINK_FOR_HMS_DATABASE = 1;</code>
-       */
-      AWS_PRIVATELINK_FOR_HMS_DATABASE(1),
-      UNRECOGNIZED(-1),
-      ;
-
+      UNSET(0),
       /**
        * <pre>
        * AWS PrivateLink Endpoint connection.
        * </pre>
        *
-       * <code>AWS_PRIVATELINK = 0;</code>
+       * <code>AWS_PRIVATELINK = 1;</code>
        */
-      public static final int AWS_PRIVATELINK_VALUE = 0;
+      AWS_PRIVATELINK(1),
+      UNRECOGNIZED(-1),
+      ;
+
       /**
-       * <code>AWS_PRIVATELINK_FOR_HMS_DATABASE = 1;</code>
+       * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
        */
-      public static final int AWS_PRIVATELINK_FOR_HMS_DATABASE_VALUE = 1;
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * AWS PrivateLink Endpoint connection.
+       * </pre>
+       *
+       * <code>AWS_PRIVATELINK = 1;</code>
+       */
+      public static final int AWS_PRIVATELINK_VALUE = 1;
 
 
       public final int getNumber() {
@@ -636,8 +678,8 @@ public final class SDXSvcCommonProto {
        */
       public static Value forNumber(int value) {
         switch (value) {
-          case 0: return AWS_PRIVATELINK;
-          case 1: return AWS_PRIVATELINK_FOR_HMS_DATABASE;
+          case 0: return UNSET;
+          case 1: return AWS_PRIVATELINK;
           default: return null;
         }
       }
@@ -1065,7 +1107,7 @@ public final class SDXSvcCommonProto {
      * The cloud platform the region belongs to.
      * </pre>
      *
-     * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+     * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
      * @return The enum numeric value on the wire for platform.
      */
     int getPlatformValue();
@@ -1074,10 +1116,10 @@ public final class SDXSvcCommonProto {
      * The cloud platform the region belongs to.
      * </pre>
      *
-     * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+     * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
      * @return The platform.
      */
-    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value getPlatform();
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getPlatform();
 
     /**
      * <pre>
@@ -1147,7 +1189,7 @@ public final class SDXSvcCommonProto {
      * The cloud platform the region belongs to.
      * </pre>
      *
-     * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+     * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
      * @return The enum numeric value on the wire for platform.
      */
     @java.lang.Override public int getPlatformValue() {
@@ -1158,12 +1200,12 @@ public final class SDXSvcCommonProto {
      * The cloud platform the region belongs to.
      * </pre>
      *
-     * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+     * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
      * @return The platform.
      */
-    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value getPlatform() {
-      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.forNumber(platform_);
-      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.UNRECOGNIZED : result;
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getPlatform() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(platform_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
     }
 
     public static final int REGION_FIELD_NUMBER = 2;
@@ -1227,7 +1269,7 @@ public final class SDXSvcCommonProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (platform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.AWS_PRIVATELINK.getNumber()) {
+      if (platform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(1, platform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(region_)) {
@@ -1242,7 +1284,7 @@ public final class SDXSvcCommonProto {
       if (size != -1) return size;
 
       size = 0;
-      if (platform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.AWS_PRIVATELINK.getNumber()) {
+      if (platform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, platform_);
       }
@@ -1571,7 +1613,7 @@ public final class SDXSvcCommonProto {
        * The cloud platform the region belongs to.
        * </pre>
        *
-       * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+       * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
        * @return The enum numeric value on the wire for platform.
        */
       @java.lang.Override public int getPlatformValue() {
@@ -1582,7 +1624,7 @@ public final class SDXSvcCommonProto {
        * The cloud platform the region belongs to.
        * </pre>
        *
-       * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+       * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
        * @param value The enum numeric value on the wire for platform to set.
        * @return This builder for chaining.
        */
@@ -1597,24 +1639,24 @@ public final class SDXSvcCommonProto {
        * The cloud platform the region belongs to.
        * </pre>
        *
-       * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+       * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
        * @return The platform.
        */
       @java.lang.Override
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value getPlatform() {
-        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.forNumber(platform_);
-        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.UNRECOGNIZED : result;
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getPlatform() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(platform_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
       }
       /**
        * <pre>
        * The cloud platform the region belongs to.
        * </pre>
        *
-       * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+       * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
        * @param value The platform to set.
        * @return This builder for chaining.
        */
-      public Builder setPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value value) {
+      public Builder setPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value value) {
         if (value == null) {
           throw new NullPointerException();
         }
@@ -1628,7 +1670,7 @@ public final class SDXSvcCommonProto {
        * The cloud platform the region belongs to.
        * </pre>
        *
-       * <code>.sdxsvccommon.ConnectionType.Value platform = 1;</code>
+       * <code>.sdxsvccommon.CloudPlatform.Value platform = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearPlatform() {
@@ -2627,36 +2669,36 @@ public final class SDXSvcCommonProto {
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
        * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
        * Instance is being provisioned.
        * </pre>
        *
-       * <code>PROVISIONING = 0;</code>
+       * <code>PROVISIONING = 1;</code>
        */
-      PROVISIONING(0),
+      PROVISIONING(1),
       /**
        * <pre>
-       * Instance is healthy
+       * Instance is running
        * </pre>
        *
-       * <code>HEALTHY = 1;</code>
+       * <code>RUNNING = 2;</code>
        */
-      HEALTHY(1),
+      RUNNING(2),
       /**
        * <pre>
        * Instance is unhealthy
        * </pre>
        *
-       * <code>UNHEALTHY = 2;</code>
+       * <code>UNHEALTHY = 3;</code>
        */
-      UNHEALTHY(2),
-      /**
-       * <pre>
-       * Instance is being deleted.
-       * </pre>
-       *
-       * <code>DELETING = 3;</code>
-       */
-      DELETING(3),
+      UNHEALTHY(3),
       /**
        * <pre>
        * Instance is stopped.
@@ -2667,47 +2709,79 @@ public final class SDXSvcCommonProto {
       STOPPED(4),
       /**
        * <pre>
-       * Instance is in an Unknown State
+       * Instance is being deleted.
        * </pre>
        *
-       * <code>UNKNOWN = 5;</code>
+       * <code>DELETING = 5;</code>
        */
-      UNKNOWN(5),
-      UNRECOGNIZED(-1),
-      ;
-
+      DELETING(5),
       /**
        * <pre>
-       * Instance is being provisioned.
+       * Instance is deleted.
        * </pre>
        *
-       * <code>PROVISIONING = 0;</code>
+       * <code>DELETED = 6;</code>
        */
-      public static final int PROVISIONING_VALUE = 0;
+      DELETED(6),
       /**
        * <pre>
        * Instance is healthy
        * </pre>
        *
-       * <code>HEALTHY = 1;</code>
+       * <code>HEALTHY = 7;</code>
        */
-      public static final int HEALTHY_VALUE = 1;
+      HEALTHY(7),
+      /**
+       * <pre>
+       * Instance is in an Unknown State
+       * </pre>
+       *
+       * <code>UNKNOWN = 8;</code>
+       */
+      UNKNOWN(8),
+      /**
+       * <pre>
+       * Instance provisioning failed
+       * </pre>
+       *
+       * <code>FAILED = 9;</code>
+       */
+      FAILED(9),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * Instance is being provisioned.
+       * </pre>
+       *
+       * <code>PROVISIONING = 1;</code>
+       */
+      public static final int PROVISIONING_VALUE = 1;
+      /**
+       * <pre>
+       * Instance is running
+       * </pre>
+       *
+       * <code>RUNNING = 2;</code>
+       */
+      public static final int RUNNING_VALUE = 2;
       /**
        * <pre>
        * Instance is unhealthy
        * </pre>
        *
-       * <code>UNHEALTHY = 2;</code>
+       * <code>UNHEALTHY = 3;</code>
        */
-      public static final int UNHEALTHY_VALUE = 2;
-      /**
-       * <pre>
-       * Instance is being deleted.
-       * </pre>
-       *
-       * <code>DELETING = 3;</code>
-       */
-      public static final int DELETING_VALUE = 3;
+      public static final int UNHEALTHY_VALUE = 3;
       /**
        * <pre>
        * Instance is stopped.
@@ -2718,12 +2792,44 @@ public final class SDXSvcCommonProto {
       public static final int STOPPED_VALUE = 4;
       /**
        * <pre>
+       * Instance is being deleted.
+       * </pre>
+       *
+       * <code>DELETING = 5;</code>
+       */
+      public static final int DELETING_VALUE = 5;
+      /**
+       * <pre>
+       * Instance is deleted.
+       * </pre>
+       *
+       * <code>DELETED = 6;</code>
+       */
+      public static final int DELETED_VALUE = 6;
+      /**
+       * <pre>
+       * Instance is healthy
+       * </pre>
+       *
+       * <code>HEALTHY = 7;</code>
+       */
+      public static final int HEALTHY_VALUE = 7;
+      /**
+       * <pre>
        * Instance is in an Unknown State
        * </pre>
        *
-       * <code>UNKNOWN = 5;</code>
+       * <code>UNKNOWN = 8;</code>
        */
-      public static final int UNKNOWN_VALUE = 5;
+      public static final int UNKNOWN_VALUE = 8;
+      /**
+       * <pre>
+       * Instance provisioning failed
+       * </pre>
+       *
+       * <code>FAILED = 9;</code>
+       */
+      public static final int FAILED_VALUE = 9;
 
 
       public final int getNumber() {
@@ -2750,12 +2856,16 @@ public final class SDXSvcCommonProto {
        */
       public static Value forNumber(int value) {
         switch (value) {
-          case 0: return PROVISIONING;
-          case 1: return HEALTHY;
-          case 2: return UNHEALTHY;
-          case 3: return DELETING;
+          case 0: return UNSET;
+          case 1: return PROVISIONING;
+          case 2: return RUNNING;
+          case 3: return UNHEALTHY;
           case 4: return STOPPED;
-          case 5: return UNKNOWN;
+          case 5: return DELETING;
+          case 6: return DELETED;
+          case 7: return HEALTHY;
+          case 8: return UNKNOWN;
+          case 9: return FAILED;
           default: return null;
         }
       }
@@ -3228,119 +3338,135 @@ public final class SDXSvcCommonProto {
         implements com.google.protobuf.ProtocolMessageEnum {
       /**
        * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
        * Service is being prepared
        * </pre>
        *
-       * <code>PROVISIONING = 0;</code>
+       * <code>PROVISIONING = 1;</code>
        */
-      PROVISIONING(0),
+      PROVISIONING(1),
       /**
        * <pre>
        * Service is healthy
        * </pre>
        *
-       * <code>HEALTHY = 1;</code>
+       * <code>HEALTHY = 2;</code>
        */
-      HEALTHY(1),
+      HEALTHY(2),
       /**
        * <pre>
        * Service is unhealthy
        * </pre>
        *
-       * <code>UNHEALTHY = 2;</code>
+       * <code>UNHEALTHY = 3;</code>
        */
-      UNHEALTHY(2),
+      UNHEALTHY(3),
       /**
        * <pre>
        * Service is upgrading
        * </pre>
        *
-       * <code>UPGRADING = 3;</code>
+       * <code>UPGRADING = 4;</code>
        */
-      UPGRADING(3),
+      UPGRADING(4),
       /**
        * <pre>
        * Service is being removed.
        * </pre>
        *
-       * <code>REMOVING = 4;</code>
+       * <code>REMOVING = 5;</code>
        */
-      REMOVING(4),
+      REMOVING(5),
       /**
        * <pre>
        * Service is stopped.
        * </pre>
        *
-       * <code>STOPPED = 5;</code>
+       * <code>STOPPED = 6;</code>
        */
-      STOPPED(5),
+      STOPPED(6),
       /**
        * <pre>
        * Service is in an Unknown State
        * </pre>
        *
-       * <code>UNKNOWN = 6;</code>
+       * <code>UNKNOWN = 7;</code>
        */
-      UNKNOWN(6),
+      UNKNOWN(7),
       UNRECOGNIZED(-1),
       ;
 
       /**
        * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
        * Service is being prepared
        * </pre>
        *
-       * <code>PROVISIONING = 0;</code>
+       * <code>PROVISIONING = 1;</code>
        */
-      public static final int PROVISIONING_VALUE = 0;
+      public static final int PROVISIONING_VALUE = 1;
       /**
        * <pre>
        * Service is healthy
        * </pre>
        *
-       * <code>HEALTHY = 1;</code>
+       * <code>HEALTHY = 2;</code>
        */
-      public static final int HEALTHY_VALUE = 1;
+      public static final int HEALTHY_VALUE = 2;
       /**
        * <pre>
        * Service is unhealthy
        * </pre>
        *
-       * <code>UNHEALTHY = 2;</code>
+       * <code>UNHEALTHY = 3;</code>
        */
-      public static final int UNHEALTHY_VALUE = 2;
+      public static final int UNHEALTHY_VALUE = 3;
       /**
        * <pre>
        * Service is upgrading
        * </pre>
        *
-       * <code>UPGRADING = 3;</code>
+       * <code>UPGRADING = 4;</code>
        */
-      public static final int UPGRADING_VALUE = 3;
+      public static final int UPGRADING_VALUE = 4;
       /**
        * <pre>
        * Service is being removed.
        * </pre>
        *
-       * <code>REMOVING = 4;</code>
+       * <code>REMOVING = 5;</code>
        */
-      public static final int REMOVING_VALUE = 4;
+      public static final int REMOVING_VALUE = 5;
       /**
        * <pre>
        * Service is stopped.
        * </pre>
        *
-       * <code>STOPPED = 5;</code>
+       * <code>STOPPED = 6;</code>
        */
-      public static final int STOPPED_VALUE = 5;
+      public static final int STOPPED_VALUE = 6;
       /**
        * <pre>
        * Service is in an Unknown State
        * </pre>
        *
-       * <code>UNKNOWN = 6;</code>
+       * <code>UNKNOWN = 7;</code>
        */
-      public static final int UNKNOWN_VALUE = 6;
+      public static final int UNKNOWN_VALUE = 7;
 
 
       public final int getNumber() {
@@ -3367,13 +3493,14 @@ public final class SDXSvcCommonProto {
        */
       public static Value forNumber(int value) {
         switch (value) {
-          case 0: return PROVISIONING;
-          case 1: return HEALTHY;
-          case 2: return UNHEALTHY;
-          case 3: return UPGRADING;
-          case 4: return REMOVING;
-          case 5: return STOPPED;
-          case 6: return UNKNOWN;
+          case 0: return UNSET;
+          case 1: return PROVISIONING;
+          case 2: return HEALTHY;
+          case 3: return UNHEALTHY;
+          case 4: return UPGRADING;
+          case 5: return REMOVING;
+          case 6: return STOPPED;
+          case 7: return UNKNOWN;
           default: return null;
         }
       }
@@ -3857,46 +3984,6 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * Admin Username Vault Path
-     * </pre>
-     *
-     * <code>string usernameVaultPath = 4;</code>
-     * @return The usernameVaultPath.
-     */
-    java.lang.String getUsernameVaultPath();
-    /**
-     * <pre>
-     * Admin Username Vault Path
-     * </pre>
-     *
-     * <code>string usernameVaultPath = 4;</code>
-     * @return The bytes for usernameVaultPath.
-     */
-    com.google.protobuf.ByteString
-        getUsernameVaultPathBytes();
-
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string passwordVaultPath = 5;</code>
-     * @return The passwordVaultPath.
-     */
-    java.lang.String getPasswordVaultPath();
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string passwordVaultPath = 5;</code>
-     * @return The bytes for passwordVaultPath.
-     */
-    com.google.protobuf.ByteString
-        getPasswordVaultPathBytes();
-
-    /**
-     * <pre>
      * The database name
      * </pre>
      *
@@ -3987,23 +4074,43 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * The SDX Service's Id database instance is attached to.
+     * The SDX resource the DB is attached to.
      * </pre>
      *
-     * <code>string serviceId = 11;</code>
-     * @return The serviceId.
+     * <code>string resourceId = 11;</code>
+     * @return The resourceId.
      */
-    java.lang.String getServiceId();
+    java.lang.String getResourceId();
     /**
      * <pre>
-     * The SDX Service's Id database instance is attached to.
+     * The SDX resource the DB is attached to.
      * </pre>
      *
-     * <code>string serviceId = 11;</code>
-     * @return The bytes for serviceId.
+     * <code>string resourceId = 11;</code>
+     * @return The bytes for resourceId.
      */
     com.google.protobuf.ByteString
-        getServiceIdBytes();
+        getResourceIdBytes();
+
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 12;</code>
+     * @return The credentialsVaultPath.
+     */
+    java.lang.String getCredentialsVaultPath();
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 12;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes();
   }
   /**
    * <pre>
@@ -4025,13 +4132,12 @@ public final class SDXSvcCommonProto {
       assignmentId_ = "";
       cloudPlatform_ = 0;
       cloudRegion_ = "";
-      usernameVaultPath_ = "";
-      passwordVaultPath_ = "";
       databaseName_ = "";
       accessHostname_ = "";
       accessPort_ = "";
       instanceId_ = "";
-      serviceId_ = "";
+      resourceId_ = "";
+      credentialsVaultPath_ = "";
     }
 
     @java.lang.Override
@@ -4168,100 +4274,6 @@ public final class SDXSvcCommonProto {
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         cloudRegion_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int USERNAMEVAULTPATH_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object usernameVaultPath_ = "";
-    /**
-     * <pre>
-     * Admin Username Vault Path
-     * </pre>
-     *
-     * <code>string usernameVaultPath = 4;</code>
-     * @return The usernameVaultPath.
-     */
-    @java.lang.Override
-    public java.lang.String getUsernameVaultPath() {
-      java.lang.Object ref = usernameVaultPath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        usernameVaultPath_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Admin Username Vault Path
-     * </pre>
-     *
-     * <code>string usernameVaultPath = 4;</code>
-     * @return The bytes for usernameVaultPath.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getUsernameVaultPathBytes() {
-      java.lang.Object ref = usernameVaultPath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        usernameVaultPath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int PASSWORDVAULTPATH_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object passwordVaultPath_ = "";
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string passwordVaultPath = 5;</code>
-     * @return The passwordVaultPath.
-     */
-    @java.lang.Override
-    public java.lang.String getPasswordVaultPath() {
-      java.lang.Object ref = passwordVaultPath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        passwordVaultPath_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string passwordVaultPath = 5;</code>
-     * @return The bytes for passwordVaultPath.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPasswordVaultPathBytes() {
-      java.lang.Object ref = passwordVaultPath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        passwordVaultPath_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -4471,47 +4483,94 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int SERVICEID_FIELD_NUMBER = 11;
+    public static final int RESOURCEID_FIELD_NUMBER = 11;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object serviceId_ = "";
+    private volatile java.lang.Object resourceId_ = "";
     /**
      * <pre>
-     * The SDX Service's Id database instance is attached to.
+     * The SDX resource the DB is attached to.
      * </pre>
      *
-     * <code>string serviceId = 11;</code>
-     * @return The serviceId.
+     * <code>string resourceId = 11;</code>
+     * @return The resourceId.
      */
     @java.lang.Override
-    public java.lang.String getServiceId() {
-      java.lang.Object ref = serviceId_;
+    public java.lang.String getResourceId() {
+      java.lang.Object ref = resourceId_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        serviceId_ = s;
+        resourceId_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * The SDX Service's Id database instance is attached to.
+     * The SDX resource the DB is attached to.
      * </pre>
      *
-     * <code>string serviceId = 11;</code>
-     * @return The bytes for serviceId.
+     * <code>string resourceId = 11;</code>
+     * @return The bytes for resourceId.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getServiceIdBytes() {
-      java.lang.Object ref = serviceId_;
+        getResourceIdBytes() {
+      java.lang.Object ref = resourceId_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        serviceId_ = b;
+        resourceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREDENTIALSVAULTPATH_FIELD_NUMBER = 12;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object credentialsVaultPath_ = "";
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 12;</code>
+     * @return The credentialsVaultPath.
+     */
+    @java.lang.Override
+    public java.lang.String getCredentialsVaultPath() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        credentialsVaultPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 12;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        credentialsVaultPath_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -4535,17 +4594,11 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, assignmentId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(2, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudRegion_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(usernameVaultPath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, usernameVaultPath_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(passwordVaultPath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, passwordVaultPath_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(databaseName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, databaseName_);
@@ -4562,8 +4615,11 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, instanceId_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, serviceId_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, resourceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, credentialsVaultPath_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -4577,18 +4633,12 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, assignmentId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudRegion_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(usernameVaultPath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, usernameVaultPath_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(passwordVaultPath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, passwordVaultPath_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(databaseName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, databaseName_);
@@ -4606,8 +4656,11 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, instanceId_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, serviceId_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, resourceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, credentialsVaultPath_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -4629,10 +4682,6 @@ public final class SDXSvcCommonProto {
       if (cloudPlatform_ != other.cloudPlatform_) return false;
       if (!getCloudRegion()
           .equals(other.getCloudRegion())) return false;
-      if (!getUsernameVaultPath()
-          .equals(other.getUsernameVaultPath())) return false;
-      if (!getPasswordVaultPath()
-          .equals(other.getPasswordVaultPath())) return false;
       if (!getDatabaseName()
           .equals(other.getDatabaseName())) return false;
       if (!getAccessHostname()
@@ -4643,8 +4692,10 @@ public final class SDXSvcCommonProto {
           != other.getTlsEnabled()) return false;
       if (!getInstanceId()
           .equals(other.getInstanceId())) return false;
-      if (!getServiceId()
-          .equals(other.getServiceId())) return false;
+      if (!getResourceId()
+          .equals(other.getResourceId())) return false;
+      if (!getCredentialsVaultPath()
+          .equals(other.getCredentialsVaultPath())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -4662,10 +4713,6 @@ public final class SDXSvcCommonProto {
       hash = (53 * hash) + cloudPlatform_;
       hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
       hash = (53 * hash) + getCloudRegion().hashCode();
-      hash = (37 * hash) + USERNAMEVAULTPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getUsernameVaultPath().hashCode();
-      hash = (37 * hash) + PASSWORDVAULTPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getPasswordVaultPath().hashCode();
       hash = (37 * hash) + DATABASENAME_FIELD_NUMBER;
       hash = (53 * hash) + getDatabaseName().hashCode();
       hash = (37 * hash) + ACCESSHOSTNAME_FIELD_NUMBER;
@@ -4677,8 +4724,10 @@ public final class SDXSvcCommonProto {
           getTlsEnabled());
       hash = (37 * hash) + INSTANCEID_FIELD_NUMBER;
       hash = (53 * hash) + getInstanceId().hashCode();
-      hash = (37 * hash) + SERVICEID_FIELD_NUMBER;
-      hash = (53 * hash) + getServiceId().hashCode();
+      hash = (37 * hash) + RESOURCEID_FIELD_NUMBER;
+      hash = (53 * hash) + getResourceId().hashCode();
+      hash = (37 * hash) + CREDENTIALSVAULTPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getCredentialsVaultPath().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4817,14 +4866,13 @@ public final class SDXSvcCommonProto {
         assignmentId_ = "";
         cloudPlatform_ = 0;
         cloudRegion_ = "";
-        usernameVaultPath_ = "";
-        passwordVaultPath_ = "";
         databaseName_ = "";
         accessHostname_ = "";
         accessPort_ = "";
         tlsEnabled_ = false;
         instanceId_ = "";
-        serviceId_ = "";
+        resourceId_ = "";
+        credentialsVaultPath_ = "";
         return this;
       }
 
@@ -4868,28 +4916,25 @@ public final class SDXSvcCommonProto {
           result.cloudRegion_ = cloudRegion_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.usernameVaultPath_ = usernameVaultPath_;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.passwordVaultPath_ = passwordVaultPath_;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
           result.databaseName_ = databaseName_;
         }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
+        if (((from_bitField0_ & 0x00000010) != 0)) {
           result.accessHostname_ = accessHostname_;
         }
-        if (((from_bitField0_ & 0x00000080) != 0)) {
+        if (((from_bitField0_ & 0x00000020) != 0)) {
           result.accessPort_ = accessPort_;
         }
-        if (((from_bitField0_ & 0x00000100) != 0)) {
+        if (((from_bitField0_ & 0x00000040) != 0)) {
           result.tlsEnabled_ = tlsEnabled_;
         }
-        if (((from_bitField0_ & 0x00000200) != 0)) {
+        if (((from_bitField0_ & 0x00000080) != 0)) {
           result.instanceId_ = instanceId_;
         }
-        if (((from_bitField0_ & 0x00000400) != 0)) {
-          result.serviceId_ = serviceId_;
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.resourceId_ = resourceId_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.credentialsVaultPath_ = credentialsVaultPath_;
         }
       }
 
@@ -4950,29 +4995,19 @@ public final class SDXSvcCommonProto {
           bitField0_ |= 0x00000004;
           onChanged();
         }
-        if (!other.getUsernameVaultPath().isEmpty()) {
-          usernameVaultPath_ = other.usernameVaultPath_;
-          bitField0_ |= 0x00000008;
-          onChanged();
-        }
-        if (!other.getPasswordVaultPath().isEmpty()) {
-          passwordVaultPath_ = other.passwordVaultPath_;
-          bitField0_ |= 0x00000010;
-          onChanged();
-        }
         if (!other.getDatabaseName().isEmpty()) {
           databaseName_ = other.databaseName_;
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (!other.getAccessHostname().isEmpty()) {
           accessHostname_ = other.accessHostname_;
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (!other.getAccessPort().isEmpty()) {
           accessPort_ = other.accessPort_;
-          bitField0_ |= 0x00000080;
+          bitField0_ |= 0x00000020;
           onChanged();
         }
         if (other.getTlsEnabled() != false) {
@@ -4980,12 +5015,17 @@ public final class SDXSvcCommonProto {
         }
         if (!other.getInstanceId().isEmpty()) {
           instanceId_ = other.instanceId_;
-          bitField0_ |= 0x00000200;
+          bitField0_ |= 0x00000080;
           onChanged();
         }
-        if (!other.getServiceId().isEmpty()) {
-          serviceId_ = other.serviceId_;
-          bitField0_ |= 0x00000400;
+        if (!other.getResourceId().isEmpty()) {
+          resourceId_ = other.resourceId_;
+          bitField0_ |= 0x00000100;
+          onChanged();
+        }
+        if (!other.getCredentialsVaultPath().isEmpty()) {
+          credentialsVaultPath_ = other.credentialsVaultPath_;
+          bitField0_ |= 0x00000200;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -5029,46 +5069,41 @@ public final class SDXSvcCommonProto {
                 bitField0_ |= 0x00000004;
                 break;
               } // case 26
-              case 34: {
-                usernameVaultPath_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000008;
-                break;
-              } // case 34
-              case 42: {
-                passwordVaultPath_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000010;
-                break;
-              } // case 42
               case 50: {
                 databaseName_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000020;
+                bitField0_ |= 0x00000008;
                 break;
               } // case 50
               case 58: {
                 accessHostname_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000040;
+                bitField0_ |= 0x00000010;
                 break;
               } // case 58
               case 66: {
                 accessPort_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000080;
+                bitField0_ |= 0x00000020;
                 break;
               } // case 66
               case 72: {
                 tlsEnabled_ = input.readBool();
-                bitField0_ |= 0x00000100;
+                bitField0_ |= 0x00000040;
                 break;
               } // case 72
               case 82: {
                 instanceId_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000200;
+                bitField0_ |= 0x00000080;
                 break;
               } // case 82
               case 90: {
-                serviceId_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000400;
+                resourceId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000100;
                 break;
               } // case 90
+              case 98: {
+                credentialsVaultPath_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 98
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -5343,190 +5378,6 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
-      private java.lang.Object usernameVaultPath_ = "";
-      /**
-       * <pre>
-       * Admin Username Vault Path
-       * </pre>
-       *
-       * <code>string usernameVaultPath = 4;</code>
-       * @return The usernameVaultPath.
-       */
-      public java.lang.String getUsernameVaultPath() {
-        java.lang.Object ref = usernameVaultPath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          usernameVaultPath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Admin Username Vault Path
-       * </pre>
-       *
-       * <code>string usernameVaultPath = 4;</code>
-       * @return The bytes for usernameVaultPath.
-       */
-      public com.google.protobuf.ByteString
-          getUsernameVaultPathBytes() {
-        java.lang.Object ref = usernameVaultPath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          usernameVaultPath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Admin Username Vault Path
-       * </pre>
-       *
-       * <code>string usernameVaultPath = 4;</code>
-       * @param value The usernameVaultPath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUsernameVaultPath(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        usernameVaultPath_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Admin Username Vault Path
-       * </pre>
-       *
-       * <code>string usernameVaultPath = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearUsernameVaultPath() {
-        usernameVaultPath_ = getDefaultInstance().getUsernameVaultPath();
-        bitField0_ = (bitField0_ & ~0x00000008);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Admin Username Vault Path
-       * </pre>
-       *
-       * <code>string usernameVaultPath = 4;</code>
-       * @param value The bytes for usernameVaultPath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setUsernameVaultPathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        usernameVaultPath_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object passwordVaultPath_ = "";
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string passwordVaultPath = 5;</code>
-       * @return The passwordVaultPath.
-       */
-      public java.lang.String getPasswordVaultPath() {
-        java.lang.Object ref = passwordVaultPath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          passwordVaultPath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string passwordVaultPath = 5;</code>
-       * @return The bytes for passwordVaultPath.
-       */
-      public com.google.protobuf.ByteString
-          getPasswordVaultPathBytes() {
-        java.lang.Object ref = passwordVaultPath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          passwordVaultPath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string passwordVaultPath = 5;</code>
-       * @param value The passwordVaultPath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPasswordVaultPath(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        passwordVaultPath_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string passwordVaultPath = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPasswordVaultPath() {
-        passwordVaultPath_ = getDefaultInstance().getPasswordVaultPath();
-        bitField0_ = (bitField0_ & ~0x00000010);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string passwordVaultPath = 5;</code>
-       * @param value The bytes for passwordVaultPath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPasswordVaultPathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        passwordVaultPath_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object databaseName_ = "";
       /**
        * <pre>
@@ -5582,7 +5433,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         databaseName_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -5596,7 +5447,7 @@ public final class SDXSvcCommonProto {
        */
       public Builder clearDatabaseName() {
         databaseName_ = getDefaultInstance().getDatabaseName();
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -5614,7 +5465,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         databaseName_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -5674,7 +5525,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         accessHostname_ = value;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -5688,7 +5539,7 @@ public final class SDXSvcCommonProto {
        */
       public Builder clearAccessHostname() {
         accessHostname_ = getDefaultInstance().getAccessHostname();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -5706,7 +5557,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         accessHostname_ = value;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -5766,7 +5617,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         accessPort_ = value;
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -5780,7 +5631,7 @@ public final class SDXSvcCommonProto {
        */
       public Builder clearAccessPort() {
         accessPort_ = getDefaultInstance().getAccessPort();
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
@@ -5798,7 +5649,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         accessPort_ = value;
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -5828,7 +5679,7 @@ public final class SDXSvcCommonProto {
       public Builder setTlsEnabled(boolean value) {
 
         tlsEnabled_ = value;
-        bitField0_ |= 0x00000100;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -5841,7 +5692,7 @@ public final class SDXSvcCommonProto {
        * @return This builder for chaining.
        */
       public Builder clearTlsEnabled() {
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000040);
         tlsEnabled_ = false;
         onChanged();
         return this;
@@ -5902,7 +5753,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         instanceId_ = value;
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -5916,7 +5767,7 @@ public final class SDXSvcCommonProto {
        */
       public Builder clearInstanceId() {
         instanceId_ = getDefaultInstance().getInstanceId();
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000080);
         onChanged();
         return this;
       }
@@ -5934,27 +5785,27 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         instanceId_ = value;
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
 
-      private java.lang.Object serviceId_ = "";
+      private java.lang.Object resourceId_ = "";
       /**
        * <pre>
-       * The SDX Service's Id database instance is attached to.
+       * The SDX resource the DB is attached to.
        * </pre>
        *
-       * <code>string serviceId = 11;</code>
-       * @return The serviceId.
+       * <code>string resourceId = 11;</code>
+       * @return The resourceId.
        */
-      public java.lang.String getServiceId() {
-        java.lang.Object ref = serviceId_;
+      public java.lang.String getResourceId() {
+        java.lang.Object ref = resourceId_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          serviceId_ = s;
+          resourceId_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -5962,20 +5813,20 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The SDX Service's Id database instance is attached to.
+       * The SDX resource the DB is attached to.
        * </pre>
        *
-       * <code>string serviceId = 11;</code>
-       * @return The bytes for serviceId.
+       * <code>string resourceId = 11;</code>
+       * @return The bytes for resourceId.
        */
       public com.google.protobuf.ByteString
-          getServiceIdBytes() {
-        java.lang.Object ref = serviceId_;
+          getResourceIdBytes() {
+        java.lang.Object ref = resourceId_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          serviceId_ = b;
+          resourceId_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -5983,50 +5834,142 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The SDX Service's Id database instance is attached to.
+       * The SDX resource the DB is attached to.
        * </pre>
        *
-       * <code>string serviceId = 11;</code>
-       * @param value The serviceId to set.
+       * <code>string resourceId = 11;</code>
+       * @param value The resourceId to set.
        * @return This builder for chaining.
        */
-      public Builder setServiceId(
+      public Builder setResourceId(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        serviceId_ = value;
-        bitField0_ |= 0x00000400;
+        resourceId_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The SDX Service's Id database instance is attached to.
+       * The SDX resource the DB is attached to.
        * </pre>
        *
-       * <code>string serviceId = 11;</code>
+       * <code>string resourceId = 11;</code>
        * @return This builder for chaining.
        */
-      public Builder clearServiceId() {
-        serviceId_ = getDefaultInstance().getServiceId();
-        bitField0_ = (bitField0_ & ~0x00000400);
+      public Builder clearResourceId() {
+        resourceId_ = getDefaultInstance().getResourceId();
+        bitField0_ = (bitField0_ & ~0x00000100);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The SDX Service's Id database instance is attached to.
+       * The SDX resource the DB is attached to.
        * </pre>
        *
-       * <code>string serviceId = 11;</code>
-       * @param value The bytes for serviceId to set.
+       * <code>string resourceId = 11;</code>
+       * @param value The bytes for resourceId to set.
        * @return This builder for chaining.
        */
-      public Builder setServiceIdBytes(
+      public Builder setResourceIdBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        serviceId_ = value;
-        bitField0_ |= 0x00000400;
+        resourceId_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object credentialsVaultPath_ = "";
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 12;</code>
+       * @return The credentialsVaultPath.
+       */
+      public java.lang.String getCredentialsVaultPath() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          credentialsVaultPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 12;</code>
+       * @return The bytes for credentialsVaultPath.
+       */
+      public com.google.protobuf.ByteString
+          getCredentialsVaultPathBytes() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          credentialsVaultPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 12;</code>
+       * @param value The credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCredentialsVaultPath() {
+        credentialsVaultPath_ = getDefaultInstance().getCredentialsVaultPath();
+        bitField0_ = (bitField0_ & ~0x00000200);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 12;</code>
+       * @param value The bytes for credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -6219,43 +6162,43 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * Admin Username Vault Path
+     * Admin Username
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 7;</code>
-     * @return The adminUsernameVaultPath.
+     * <code>string adminUsername = 7;</code>
+     * @return The adminUsername.
      */
-    java.lang.String getAdminUsernameVaultPath();
+    java.lang.String getAdminUsername();
     /**
      * <pre>
-     * Admin Username Vault Path
+     * Admin Username
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 7;</code>
-     * @return The bytes for adminUsernameVaultPath.
+     * <code>string adminUsername = 7;</code>
+     * @return The bytes for adminUsername.
      */
     com.google.protobuf.ByteString
-        getAdminUsernameVaultPathBytes();
+        getAdminUsernameBytes();
 
     /**
      * <pre>
-     * Admin Password Vault Path
+     * The Role Arn to be used to connect to the database
      * </pre>
      *
-     * <code>string adminPasswordVaultPath = 8;</code>
-     * @return The adminPasswordVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The roleArn.
      */
-    java.lang.String getAdminPasswordVaultPath();
+    java.lang.String getRoleArn();
     /**
      * <pre>
-     * Admin Password Vault Path
+     * The Role Arn to be used to connect to the database
      * </pre>
      *
-     * <code>string adminPasswordVaultPath = 8;</code>
-     * @return The bytes for adminPasswordVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The bytes for roleArn.
      */
     com.google.protobuf.ByteString
-        getAdminPasswordVaultPathBytes();
+        getRoleArnBytes();
 
     /**
      * <pre>
@@ -6374,8 +6317,8 @@ public final class SDXSvcCommonProto {
       cloudRegion_ = "";
       accessHostname_ = "";
       accessPort_ = "";
-      adminUsernameVaultPath_ = "";
-      adminPasswordVaultPath_ = "";
+      adminUsername_ = "";
+      roleArn_ = "";
       id_ = "";
       assignments_ = java.util.Collections.emptyList();
     }
@@ -6661,94 +6604,94 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int ADMINUSERNAMEVAULTPATH_FIELD_NUMBER = 7;
+    public static final int ADMINUSERNAME_FIELD_NUMBER = 7;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object adminUsernameVaultPath_ = "";
+    private volatile java.lang.Object adminUsername_ = "";
     /**
      * <pre>
-     * Admin Username Vault Path
+     * Admin Username
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 7;</code>
-     * @return The adminUsernameVaultPath.
+     * <code>string adminUsername = 7;</code>
+     * @return The adminUsername.
      */
     @java.lang.Override
-    public java.lang.String getAdminUsernameVaultPath() {
-      java.lang.Object ref = adminUsernameVaultPath_;
+    public java.lang.String getAdminUsername() {
+      java.lang.Object ref = adminUsername_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        adminUsernameVaultPath_ = s;
+        adminUsername_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * Admin Username Vault Path
+     * Admin Username
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 7;</code>
-     * @return The bytes for adminUsernameVaultPath.
+     * <code>string adminUsername = 7;</code>
+     * @return The bytes for adminUsername.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getAdminUsernameVaultPathBytes() {
-      java.lang.Object ref = adminUsernameVaultPath_;
+        getAdminUsernameBytes() {
+      java.lang.Object ref = adminUsername_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        adminUsernameVaultPath_ = b;
+        adminUsername_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    public static final int ADMINPASSWORDVAULTPATH_FIELD_NUMBER = 8;
+    public static final int ROLEARN_FIELD_NUMBER = 8;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object adminPasswordVaultPath_ = "";
+    private volatile java.lang.Object roleArn_ = "";
     /**
      * <pre>
-     * Admin Password Vault Path
+     * The Role Arn to be used to connect to the database
      * </pre>
      *
-     * <code>string adminPasswordVaultPath = 8;</code>
-     * @return The adminPasswordVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The roleArn.
      */
     @java.lang.Override
-    public java.lang.String getAdminPasswordVaultPath() {
-      java.lang.Object ref = adminPasswordVaultPath_;
+    public java.lang.String getRoleArn() {
+      java.lang.Object ref = roleArn_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        adminPasswordVaultPath_ = s;
+        roleArn_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * Admin Password Vault Path
+     * The Role Arn to be used to connect to the database
      * </pre>
      *
-     * <code>string adminPasswordVaultPath = 8;</code>
-     * @return The bytes for adminPasswordVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The bytes for roleArn.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getAdminPasswordVaultPathBytes() {
-      java.lang.Object ref = adminPasswordVaultPath_;
+        getRoleArnBytes() {
+      java.lang.Object ref = roleArn_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        adminPasswordVaultPath_ = b;
+        roleArn_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -6928,7 +6871,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(3, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -6940,11 +6883,11 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessPort_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, accessPort_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminUsernameVaultPath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, adminUsernameVaultPath_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminUsername_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, adminUsername_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminPasswordVaultPath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, adminPasswordVaultPath_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, roleArn_);
       }
       if (assignable_ != false) {
         output.writeBool(9, assignable_);
@@ -6976,7 +6919,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, cloudPlatform_);
       }
@@ -6989,11 +6932,11 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessPort_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, accessPort_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminUsernameVaultPath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, adminUsernameVaultPath_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminUsername_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, adminUsername_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminPasswordVaultPath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, adminPasswordVaultPath_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, roleArn_);
       }
       if (assignable_ != false) {
         size += com.google.protobuf.CodedOutputStream
@@ -7040,10 +6983,10 @@ public final class SDXSvcCommonProto {
           .equals(other.getAccessHostname())) return false;
       if (!getAccessPort()
           .equals(other.getAccessPort())) return false;
-      if (!getAdminUsernameVaultPath()
-          .equals(other.getAdminUsernameVaultPath())) return false;
-      if (!getAdminPasswordVaultPath()
-          .equals(other.getAdminPasswordVaultPath())) return false;
+      if (!getAdminUsername()
+          .equals(other.getAdminUsername())) return false;
+      if (!getRoleArn()
+          .equals(other.getRoleArn())) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
       if (!getId()
@@ -7077,10 +7020,10 @@ public final class SDXSvcCommonProto {
       hash = (53 * hash) + getAccessHostname().hashCode();
       hash = (37 * hash) + ACCESSPORT_FIELD_NUMBER;
       hash = (53 * hash) + getAccessPort().hashCode();
-      hash = (37 * hash) + ADMINUSERNAMEVAULTPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getAdminUsernameVaultPath().hashCode();
-      hash = (37 * hash) + ADMINPASSWORDVAULTPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getAdminPasswordVaultPath().hashCode();
+      hash = (37 * hash) + ADMINUSERNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getAdminUsername().hashCode();
+      hash = (37 * hash) + ROLEARN_FIELD_NUMBER;
+      hash = (53 * hash) + getRoleArn().hashCode();
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
@@ -7237,8 +7180,8 @@ public final class SDXSvcCommonProto {
         cloudRegion_ = "";
         accessHostname_ = "";
         accessPort_ = "";
-        adminUsernameVaultPath_ = "";
-        adminPasswordVaultPath_ = "";
+        adminUsername_ = "";
+        roleArn_ = "";
         assignable_ = false;
         id_ = "";
         registeredTimestamp_ = 0L;
@@ -7315,10 +7258,10 @@ public final class SDXSvcCommonProto {
           result.accessPort_ = accessPort_;
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.adminUsernameVaultPath_ = adminUsernameVaultPath_;
+          result.adminUsername_ = adminUsername_;
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.adminPasswordVaultPath_ = adminPasswordVaultPath_;
+          result.roleArn_ = roleArn_;
         }
         if (((from_bitField0_ & 0x00000100) != 0)) {
           result.assignable_ = assignable_;
@@ -7406,13 +7349,13 @@ public final class SDXSvcCommonProto {
           bitField0_ |= 0x00000020;
           onChanged();
         }
-        if (!other.getAdminUsernameVaultPath().isEmpty()) {
-          adminUsernameVaultPath_ = other.adminUsernameVaultPath_;
+        if (!other.getAdminUsername().isEmpty()) {
+          adminUsername_ = other.adminUsername_;
           bitField0_ |= 0x00000040;
           onChanged();
         }
-        if (!other.getAdminPasswordVaultPath().isEmpty()) {
-          adminPasswordVaultPath_ = other.adminPasswordVaultPath_;
+        if (!other.getRoleArn().isEmpty()) {
+          roleArn_ = other.roleArn_;
           bitField0_ |= 0x00000080;
           onChanged();
         }
@@ -7513,12 +7456,12 @@ public final class SDXSvcCommonProto {
                 break;
               } // case 50
               case 58: {
-                adminUsernameVaultPath_ = input.readStringRequireUtf8();
+                adminUsername_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000040;
                 break;
               } // case 58
               case 66: {
-                adminPasswordVaultPath_ = input.readStringRequireUtf8();
+                roleArn_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000080;
                 break;
               } // case 66
@@ -8105,22 +8048,22 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
-      private java.lang.Object adminUsernameVaultPath_ = "";
+      private java.lang.Object adminUsername_ = "";
       /**
        * <pre>
-       * Admin Username Vault Path
+       * Admin Username
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 7;</code>
-       * @return The adminUsernameVaultPath.
+       * <code>string adminUsername = 7;</code>
+       * @return The adminUsername.
        */
-      public java.lang.String getAdminUsernameVaultPath() {
-        java.lang.Object ref = adminUsernameVaultPath_;
+      public java.lang.String getAdminUsername() {
+        java.lang.Object ref = adminUsername_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          adminUsernameVaultPath_ = s;
+          adminUsername_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -8128,20 +8071,20 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * Admin Username
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 7;</code>
-       * @return The bytes for adminUsernameVaultPath.
+       * <code>string adminUsername = 7;</code>
+       * @return The bytes for adminUsername.
        */
       public com.google.protobuf.ByteString
-          getAdminUsernameVaultPathBytes() {
-        java.lang.Object ref = adminUsernameVaultPath_;
+          getAdminUsernameBytes() {
+        java.lang.Object ref = adminUsername_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          adminUsernameVaultPath_ = b;
+          adminUsername_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -8149,70 +8092,70 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * Admin Username
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 7;</code>
-       * @param value The adminUsernameVaultPath to set.
+       * <code>string adminUsername = 7;</code>
+       * @param value The adminUsername to set.
        * @return This builder for chaining.
        */
-      public Builder setAdminUsernameVaultPath(
+      public Builder setAdminUsername(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        adminUsernameVaultPath_ = value;
+        adminUsername_ = value;
         bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * Admin Username
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 7;</code>
+       * <code>string adminUsername = 7;</code>
        * @return This builder for chaining.
        */
-      public Builder clearAdminUsernameVaultPath() {
-        adminUsernameVaultPath_ = getDefaultInstance().getAdminUsernameVaultPath();
+      public Builder clearAdminUsername() {
+        adminUsername_ = getDefaultInstance().getAdminUsername();
         bitField0_ = (bitField0_ & ~0x00000040);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * Admin Username
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 7;</code>
-       * @param value The bytes for adminUsernameVaultPath to set.
+       * <code>string adminUsername = 7;</code>
+       * @param value The bytes for adminUsername to set.
        * @return This builder for chaining.
        */
-      public Builder setAdminUsernameVaultPathBytes(
+      public Builder setAdminUsernameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        adminUsernameVaultPath_ = value;
+        adminUsername_ = value;
         bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
 
-      private java.lang.Object adminPasswordVaultPath_ = "";
+      private java.lang.Object roleArn_ = "";
       /**
        * <pre>
-       * Admin Password Vault Path
+       * The Role Arn to be used to connect to the database
        * </pre>
        *
-       * <code>string adminPasswordVaultPath = 8;</code>
-       * @return The adminPasswordVaultPath.
+       * <code>string roleArn = 8;</code>
+       * @return The roleArn.
        */
-      public java.lang.String getAdminPasswordVaultPath() {
-        java.lang.Object ref = adminPasswordVaultPath_;
+      public java.lang.String getRoleArn() {
+        java.lang.Object ref = roleArn_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          adminPasswordVaultPath_ = s;
+          roleArn_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -8220,20 +8163,20 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Admin Password Vault Path
+       * The Role Arn to be used to connect to the database
        * </pre>
        *
-       * <code>string adminPasswordVaultPath = 8;</code>
-       * @return The bytes for adminPasswordVaultPath.
+       * <code>string roleArn = 8;</code>
+       * @return The bytes for roleArn.
        */
       public com.google.protobuf.ByteString
-          getAdminPasswordVaultPathBytes() {
-        java.lang.Object ref = adminPasswordVaultPath_;
+          getRoleArnBytes() {
+        java.lang.Object ref = roleArn_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          adminPasswordVaultPath_ = b;
+          roleArn_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -8241,49 +8184,49 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Admin Password Vault Path
+       * The Role Arn to be used to connect to the database
        * </pre>
        *
-       * <code>string adminPasswordVaultPath = 8;</code>
-       * @param value The adminPasswordVaultPath to set.
+       * <code>string roleArn = 8;</code>
+       * @param value The roleArn to set.
        * @return This builder for chaining.
        */
-      public Builder setAdminPasswordVaultPath(
+      public Builder setRoleArn(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        adminPasswordVaultPath_ = value;
+        roleArn_ = value;
         bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Admin Password Vault Path
+       * The Role Arn to be used to connect to the database
        * </pre>
        *
-       * <code>string adminPasswordVaultPath = 8;</code>
+       * <code>string roleArn = 8;</code>
        * @return This builder for chaining.
        */
-      public Builder clearAdminPasswordVaultPath() {
-        adminPasswordVaultPath_ = getDefaultInstance().getAdminPasswordVaultPath();
+      public Builder clearRoleArn() {
+        roleArn_ = getDefaultInstance().getRoleArn();
         bitField0_ = (bitField0_ & ~0x00000080);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Admin Password Vault Path
+       * The Role Arn to be used to connect to the database
        * </pre>
        *
-       * <code>string adminPasswordVaultPath = 8;</code>
-       * @param value The bytes for adminPasswordVaultPath to set.
+       * <code>string roleArn = 8;</code>
+       * @param value The bytes for roleArn to set.
        * @return This builder for chaining.
        */
-      public Builder setAdminPasswordVaultPathBytes(
+      public Builder setRoleArnBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        adminPasswordVaultPath_ = value;
+        roleArn_ = value;
         bitField0_ |= 0x00000080;
         onChanged();
         return this;
@@ -9991,10 +9934,29 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    int getCloudPlatformValue();
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The cloudPlatform.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform();
+
+    /**
+     * <pre>
      * The cloud region the Operational Environment is in
      * </pre>
      *
-     * <code>string cloudRegion = 3;</code>
+     * <code>string cloudRegion = 4;</code>
      * @return The cloudRegion.
      */
     java.lang.String getCloudRegion();
@@ -10003,7 +9965,7 @@ public final class SDXSvcCommonProto {
      * The cloud region the Operational Environment is in
      * </pre>
      *
-     * <code>string cloudRegion = 3;</code>
+     * <code>string cloudRegion = 4;</code>
      * @return The bytes for cloudRegion.
      */
     com.google.protobuf.ByteString
@@ -10014,7 +9976,7 @@ public final class SDXSvcCommonProto {
      * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
      * </pre>
      *
-     * <code>string sdxTrafficHostname = 4;</code>
+     * <code>string sdxTrafficHostname = 5;</code>
      * @return The sdxTrafficHostname.
      */
     java.lang.String getSdxTrafficHostname();
@@ -10023,7 +9985,7 @@ public final class SDXSvcCommonProto {
      * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
      * </pre>
      *
-     * <code>string sdxTrafficHostname = 4;</code>
+     * <code>string sdxTrafficHostname = 5;</code>
      * @return The bytes for sdxTrafficHostname.
      */
     com.google.protobuf.ByteString
@@ -10034,7 +9996,7 @@ public final class SDXSvcCommonProto {
      * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
      * </pre>
      *
-     * <code>string adminTrafficHostname = 5;</code>
+     * <code>string adminTrafficHostname = 6;</code>
      * @return The adminTrafficHostname.
      */
     java.lang.String getAdminTrafficHostname();
@@ -10043,7 +10005,7 @@ public final class SDXSvcCommonProto {
      * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
      * </pre>
      *
-     * <code>string adminTrafficHostname = 5;</code>
+     * <code>string adminTrafficHostname = 6;</code>
      * @return The bytes for adminTrafficHostname.
      */
     com.google.protobuf.ByteString
@@ -10051,30 +10013,10 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * The kube-config for the Operational Environment
-     * </pre>
-     *
-     * <code>string kubeConfig = 6;</code>
-     * @return The kubeConfig.
-     */
-    java.lang.String getKubeConfig();
-    /**
-     * <pre>
-     * The kube-config for the Operational Environment
-     * </pre>
-     *
-     * <code>string kubeConfig = 6;</code>
-     * @return The bytes for kubeConfig.
-     */
-    com.google.protobuf.ByteString
-        getKubeConfigBytes();
-
-    /**
-     * <pre>
      * The K8s API Server Endpoint
      * </pre>
      *
-     * <code>string apiServerEndpoint = 7;</code>
+     * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The apiServerEndpoint.
      */
     java.lang.String getApiServerEndpoint();
@@ -10083,7 +10025,7 @@ public final class SDXSvcCommonProto {
      * The K8s API Server Endpoint
      * </pre>
      *
-     * <code>string apiServerEndpoint = 7;</code>
+     * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The bytes for apiServerEndpoint.
      */
     com.google.protobuf.ByteString
@@ -10094,7 +10036,7 @@ public final class SDXSvcCommonProto {
      * The OpenId Connection provider endpoint
      * </pre>
      *
-     * <code>string openIdProviderEndpoint = 8;</code>
+     * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The openIdProviderEndpoint.
      */
     java.lang.String getOpenIdProviderEndpoint();
@@ -10103,7 +10045,7 @@ public final class SDXSvcCommonProto {
      * The OpenId Connection provider endpoint
      * </pre>
      *
-     * <code>string openIdProviderEndpoint = 8;</code>
+     * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The bytes for openIdProviderEndpoint.
      */
     com.google.protobuf.ByteString
@@ -10114,7 +10056,7 @@ public final class SDXSvcCommonProto {
      * The CA Cert for the Cluster
      * </pre>
      *
-     * <code>string caCert = 9;</code>
+     * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The caCert.
      */
     java.lang.String getCaCert();
@@ -10123,7 +10065,7 @@ public final class SDXSvcCommonProto {
      * The CA Cert for the Cluster
      * </pre>
      *
-     * <code>string caCert = 9;</code>
+     * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The bytes for caCert.
      */
     com.google.protobuf.ByteString
@@ -10222,6 +10164,66 @@ public final class SDXSvcCommonProto {
      * @return The updatedTimestamp.
      */
     long getUpdatedTimestamp();
+
+    /**
+     * <pre>
+     *The AWS target group for the operational environment.
+     * </pre>
+     *
+     * <code>string targetGroup = 15;</code>
+     * @return The targetGroup.
+     */
+    java.lang.String getTargetGroup();
+    /**
+     * <pre>
+     *The AWS target group for the operational environment.
+     * </pre>
+     *
+     * <code>string targetGroup = 15;</code>
+     * @return The bytes for targetGroup.
+     */
+    com.google.protobuf.ByteString
+        getTargetGroupBytes();
+
+    /**
+     * <pre>
+     * The vault auth method
+     * </pre>
+     *
+     * <code>string vaultAuthMethod = 16;</code>
+     * @return The vaultAuthMethod.
+     */
+    java.lang.String getVaultAuthMethod();
+    /**
+     * <pre>
+     * The vault auth method
+     * </pre>
+     *
+     * <code>string vaultAuthMethod = 16;</code>
+     * @return The bytes for vaultAuthMethod.
+     */
+    com.google.protobuf.ByteString
+        getVaultAuthMethodBytes();
+
+    /**
+     * <pre>
+     * The OpenId Connection provider cloudId
+     * </pre>
+     *
+     * <code>string openIdProviderCloudId = 17;</code>
+     * @return The openIdProviderCloudId.
+     */
+    java.lang.String getOpenIdProviderCloudId();
+    /**
+     * <pre>
+     * The OpenId Connection provider cloudId
+     * </pre>
+     *
+     * <code>string openIdProviderCloudId = 17;</code>
+     * @return The bytes for openIdProviderCloudId.
+     */
+    com.google.protobuf.ByteString
+        getOpenIdProviderCloudIdBytes();
   }
   /**
    * <pre>
@@ -10242,15 +10244,18 @@ public final class SDXSvcCommonProto {
     private OperationalEnvironment() {
       name_ = "";
       cloudId_ = "";
+      cloudPlatform_ = 0;
       cloudRegion_ = "";
       sdxTrafficHostname_ = "";
       adminTrafficHostname_ = "";
-      kubeConfig_ = "";
       apiServerEndpoint_ = "";
       openIdProviderEndpoint_ = "";
       caCert_ = "";
       id_ = "";
       assignments_ = java.util.Collections.emptyList();
+      targetGroup_ = "";
+      vaultAuthMethod_ = "";
+      openIdProviderCloudId_ = "";
     }
 
     @java.lang.Override
@@ -10367,7 +10372,33 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int CLOUDREGION_FIELD_NUMBER = 3;
+    public static final int CLOUDPLATFORM_FIELD_NUMBER = 3;
+    private int cloudPlatform_ = 0;
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    @java.lang.Override public int getCloudPlatformValue() {
+      return cloudPlatform_;
+    }
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The cloudPlatform.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int CLOUDREGION_FIELD_NUMBER = 4;
     @SuppressWarnings("serial")
     private volatile java.lang.Object cloudRegion_ = "";
     /**
@@ -10375,7 +10406,7 @@ public final class SDXSvcCommonProto {
      * The cloud region the Operational Environment is in
      * </pre>
      *
-     * <code>string cloudRegion = 3;</code>
+     * <code>string cloudRegion = 4;</code>
      * @return The cloudRegion.
      */
     @java.lang.Override
@@ -10396,7 +10427,7 @@ public final class SDXSvcCommonProto {
      * The cloud region the Operational Environment is in
      * </pre>
      *
-     * <code>string cloudRegion = 3;</code>
+     * <code>string cloudRegion = 4;</code>
      * @return The bytes for cloudRegion.
      */
     @java.lang.Override
@@ -10414,7 +10445,7 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int SDXTRAFFICHOSTNAME_FIELD_NUMBER = 4;
+    public static final int SDXTRAFFICHOSTNAME_FIELD_NUMBER = 5;
     @SuppressWarnings("serial")
     private volatile java.lang.Object sdxTrafficHostname_ = "";
     /**
@@ -10422,7 +10453,7 @@ public final class SDXSvcCommonProto {
      * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
      * </pre>
      *
-     * <code>string sdxTrafficHostname = 4;</code>
+     * <code>string sdxTrafficHostname = 5;</code>
      * @return The sdxTrafficHostname.
      */
     @java.lang.Override
@@ -10443,7 +10474,7 @@ public final class SDXSvcCommonProto {
      * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
      * </pre>
      *
-     * <code>string sdxTrafficHostname = 4;</code>
+     * <code>string sdxTrafficHostname = 5;</code>
      * @return The bytes for sdxTrafficHostname.
      */
     @java.lang.Override
@@ -10461,7 +10492,7 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int ADMINTRAFFICHOSTNAME_FIELD_NUMBER = 5;
+    public static final int ADMINTRAFFICHOSTNAME_FIELD_NUMBER = 6;
     @SuppressWarnings("serial")
     private volatile java.lang.Object adminTrafficHostname_ = "";
     /**
@@ -10469,7 +10500,7 @@ public final class SDXSvcCommonProto {
      * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
      * </pre>
      *
-     * <code>string adminTrafficHostname = 5;</code>
+     * <code>string adminTrafficHostname = 6;</code>
      * @return The adminTrafficHostname.
      */
     @java.lang.Override
@@ -10490,7 +10521,7 @@ public final class SDXSvcCommonProto {
      * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
      * </pre>
      *
-     * <code>string adminTrafficHostname = 5;</code>
+     * <code>string adminTrafficHostname = 6;</code>
      * @return The bytes for adminTrafficHostname.
      */
     @java.lang.Override
@@ -10508,53 +10539,6 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int KUBECONFIG_FIELD_NUMBER = 6;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object kubeConfig_ = "";
-    /**
-     * <pre>
-     * The kube-config for the Operational Environment
-     * </pre>
-     *
-     * <code>string kubeConfig = 6;</code>
-     * @return The kubeConfig.
-     */
-    @java.lang.Override
-    public java.lang.String getKubeConfig() {
-      java.lang.Object ref = kubeConfig_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        kubeConfig_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The kube-config for the Operational Environment
-     * </pre>
-     *
-     * <code>string kubeConfig = 6;</code>
-     * @return The bytes for kubeConfig.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getKubeConfigBytes() {
-      java.lang.Object ref = kubeConfig_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        kubeConfig_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     public static final int APISERVERENDPOINT_FIELD_NUMBER = 7;
     @SuppressWarnings("serial")
     private volatile java.lang.Object apiServerEndpoint_ = "";
@@ -10563,7 +10547,7 @@ public final class SDXSvcCommonProto {
      * The K8s API Server Endpoint
      * </pre>
      *
-     * <code>string apiServerEndpoint = 7;</code>
+     * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The apiServerEndpoint.
      */
     @java.lang.Override
@@ -10584,7 +10568,7 @@ public final class SDXSvcCommonProto {
      * The K8s API Server Endpoint
      * </pre>
      *
-     * <code>string apiServerEndpoint = 7;</code>
+     * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The bytes for apiServerEndpoint.
      */
     @java.lang.Override
@@ -10610,7 +10594,7 @@ public final class SDXSvcCommonProto {
      * The OpenId Connection provider endpoint
      * </pre>
      *
-     * <code>string openIdProviderEndpoint = 8;</code>
+     * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The openIdProviderEndpoint.
      */
     @java.lang.Override
@@ -10631,7 +10615,7 @@ public final class SDXSvcCommonProto {
      * The OpenId Connection provider endpoint
      * </pre>
      *
-     * <code>string openIdProviderEndpoint = 8;</code>
+     * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
      * @return The bytes for openIdProviderEndpoint.
      */
     @java.lang.Override
@@ -10657,7 +10641,7 @@ public final class SDXSvcCommonProto {
      * The CA Cert for the Cluster
      * </pre>
      *
-     * <code>string caCert = 9;</code>
+     * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The caCert.
      */
     @java.lang.Override
@@ -10678,7 +10662,7 @@ public final class SDXSvcCommonProto {
      * The CA Cert for the Cluster
      * </pre>
      *
-     * <code>string caCert = 9;</code>
+     * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The bytes for caCert.
      */
     @java.lang.Override
@@ -10849,6 +10833,147 @@ public final class SDXSvcCommonProto {
       return updatedTimestamp_;
     }
 
+    public static final int TARGETGROUP_FIELD_NUMBER = 15;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object targetGroup_ = "";
+    /**
+     * <pre>
+     *The AWS target group for the operational environment.
+     * </pre>
+     *
+     * <code>string targetGroup = 15;</code>
+     * @return The targetGroup.
+     */
+    @java.lang.Override
+    public java.lang.String getTargetGroup() {
+      java.lang.Object ref = targetGroup_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        targetGroup_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *The AWS target group for the operational environment.
+     * </pre>
+     *
+     * <code>string targetGroup = 15;</code>
+     * @return The bytes for targetGroup.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getTargetGroupBytes() {
+      java.lang.Object ref = targetGroup_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        targetGroup_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VAULTAUTHMETHOD_FIELD_NUMBER = 16;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object vaultAuthMethod_ = "";
+    /**
+     * <pre>
+     * The vault auth method
+     * </pre>
+     *
+     * <code>string vaultAuthMethod = 16;</code>
+     * @return The vaultAuthMethod.
+     */
+    @java.lang.Override
+    public java.lang.String getVaultAuthMethod() {
+      java.lang.Object ref = vaultAuthMethod_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        vaultAuthMethod_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The vault auth method
+     * </pre>
+     *
+     * <code>string vaultAuthMethod = 16;</code>
+     * @return The bytes for vaultAuthMethod.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVaultAuthMethodBytes() {
+      java.lang.Object ref = vaultAuthMethod_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        vaultAuthMethod_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OPENIDPROVIDERCLOUDID_FIELD_NUMBER = 17;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object openIdProviderCloudId_ = "";
+    /**
+     * <pre>
+     * The OpenId Connection provider cloudId
+     * </pre>
+     *
+     * <code>string openIdProviderCloudId = 17;</code>
+     * @return The openIdProviderCloudId.
+     */
+    @java.lang.Override
+    public java.lang.String getOpenIdProviderCloudId() {
+      java.lang.Object ref = openIdProviderCloudId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        openIdProviderCloudId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The OpenId Connection provider cloudId
+     * </pre>
+     *
+     * <code>string openIdProviderCloudId = 17;</code>
+     * @return The bytes for openIdProviderCloudId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getOpenIdProviderCloudIdBytes() {
+      java.lang.Object ref = openIdProviderCloudId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        openIdProviderCloudId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -10869,17 +10994,17 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cloudId_);
       }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        output.writeEnum(3, cloudPlatform_);
+      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudRegion_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cloudRegion_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sdxTrafficHostname_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, sdxTrafficHostname_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, sdxTrafficHostname_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminTrafficHostname_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, adminTrafficHostname_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kubeConfig_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, kubeConfig_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, adminTrafficHostname_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(apiServerEndpoint_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, apiServerEndpoint_);
@@ -10905,6 +11030,15 @@ public final class SDXSvcCommonProto {
       if (updatedTimestamp_ != 0L) {
         output.writeInt64(14, updatedTimestamp_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(targetGroup_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 15, targetGroup_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(vaultAuthMethod_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 16, vaultAuthMethod_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(openIdProviderCloudId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 17, openIdProviderCloudId_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -10920,17 +11054,18 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cloudId_);
       }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, cloudPlatform_);
+      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudRegion_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cloudRegion_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sdxTrafficHostname_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, sdxTrafficHostname_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, sdxTrafficHostname_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminTrafficHostname_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, adminTrafficHostname_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(kubeConfig_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, kubeConfig_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, adminTrafficHostname_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(apiServerEndpoint_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, apiServerEndpoint_);
@@ -10960,6 +11095,15 @@ public final class SDXSvcCommonProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(14, updatedTimestamp_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(targetGroup_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, targetGroup_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(vaultAuthMethod_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(16, vaultAuthMethod_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(openIdProviderCloudId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, openIdProviderCloudId_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -10979,14 +11123,13 @@ public final class SDXSvcCommonProto {
           .equals(other.getName())) return false;
       if (!getCloudId()
           .equals(other.getCloudId())) return false;
+      if (cloudPlatform_ != other.cloudPlatform_) return false;
       if (!getCloudRegion()
           .equals(other.getCloudRegion())) return false;
       if (!getSdxTrafficHostname()
           .equals(other.getSdxTrafficHostname())) return false;
       if (!getAdminTrafficHostname()
           .equals(other.getAdminTrafficHostname())) return false;
-      if (!getKubeConfig()
-          .equals(other.getKubeConfig())) return false;
       if (!getApiServerEndpoint()
           .equals(other.getApiServerEndpoint())) return false;
       if (!getOpenIdProviderEndpoint()
@@ -11003,6 +11146,12 @@ public final class SDXSvcCommonProto {
           .equals(other.getAssignmentsList())) return false;
       if (getUpdatedTimestamp()
           != other.getUpdatedTimestamp()) return false;
+      if (!getTargetGroup()
+          .equals(other.getTargetGroup())) return false;
+      if (!getVaultAuthMethod()
+          .equals(other.getVaultAuthMethod())) return false;
+      if (!getOpenIdProviderCloudId()
+          .equals(other.getOpenIdProviderCloudId())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -11018,14 +11167,14 @@ public final class SDXSvcCommonProto {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + CLOUDID_FIELD_NUMBER;
       hash = (53 * hash) + getCloudId().hashCode();
+      hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
+      hash = (53 * hash) + cloudPlatform_;
       hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
       hash = (53 * hash) + getCloudRegion().hashCode();
       hash = (37 * hash) + SDXTRAFFICHOSTNAME_FIELD_NUMBER;
       hash = (53 * hash) + getSdxTrafficHostname().hashCode();
       hash = (37 * hash) + ADMINTRAFFICHOSTNAME_FIELD_NUMBER;
       hash = (53 * hash) + getAdminTrafficHostname().hashCode();
-      hash = (37 * hash) + KUBECONFIG_FIELD_NUMBER;
-      hash = (53 * hash) + getKubeConfig().hashCode();
       hash = (37 * hash) + APISERVERENDPOINT_FIELD_NUMBER;
       hash = (53 * hash) + getApiServerEndpoint().hashCode();
       hash = (37 * hash) + OPENIDPROVIDERENDPOINT_FIELD_NUMBER;
@@ -11047,6 +11196,12 @@ public final class SDXSvcCommonProto {
       hash = (37 * hash) + UPDATEDTIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getUpdatedTimestamp());
+      hash = (37 * hash) + TARGETGROUP_FIELD_NUMBER;
+      hash = (53 * hash) + getTargetGroup().hashCode();
+      hash = (37 * hash) + VAULTAUTHMETHOD_FIELD_NUMBER;
+      hash = (53 * hash) + getVaultAuthMethod().hashCode();
+      hash = (37 * hash) + OPENIDPROVIDERCLOUDID_FIELD_NUMBER;
+      hash = (53 * hash) + getOpenIdProviderCloudId().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11184,10 +11339,10 @@ public final class SDXSvcCommonProto {
         bitField0_ = 0;
         name_ = "";
         cloudId_ = "";
+        cloudPlatform_ = 0;
         cloudRegion_ = "";
         sdxTrafficHostname_ = "";
         adminTrafficHostname_ = "";
-        kubeConfig_ = "";
         apiServerEndpoint_ = "";
         openIdProviderEndpoint_ = "";
         caCert_ = "";
@@ -11202,6 +11357,9 @@ public final class SDXSvcCommonProto {
         }
         bitField0_ = (bitField0_ & ~0x00001000);
         updatedTimestamp_ = 0L;
+        targetGroup_ = "";
+        vaultAuthMethod_ = "";
+        openIdProviderCloudId_ = "";
         return this;
       }
 
@@ -11255,16 +11413,16 @@ public final class SDXSvcCommonProto {
           result.cloudId_ = cloudId_;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.cloudRegion_ = cloudRegion_;
+          result.cloudPlatform_ = cloudPlatform_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.sdxTrafficHostname_ = sdxTrafficHostname_;
+          result.cloudRegion_ = cloudRegion_;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.adminTrafficHostname_ = adminTrafficHostname_;
+          result.sdxTrafficHostname_ = sdxTrafficHostname_;
         }
         if (((from_bitField0_ & 0x00000020) != 0)) {
-          result.kubeConfig_ = kubeConfig_;
+          result.adminTrafficHostname_ = adminTrafficHostname_;
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
           result.apiServerEndpoint_ = apiServerEndpoint_;
@@ -11286,6 +11444,15 @@ public final class SDXSvcCommonProto {
         }
         if (((from_bitField0_ & 0x00002000) != 0)) {
           result.updatedTimestamp_ = updatedTimestamp_;
+        }
+        if (((from_bitField0_ & 0x00004000) != 0)) {
+          result.targetGroup_ = targetGroup_;
+        }
+        if (((from_bitField0_ & 0x00008000) != 0)) {
+          result.vaultAuthMethod_ = vaultAuthMethod_;
+        }
+        if (((from_bitField0_ & 0x00010000) != 0)) {
+          result.openIdProviderCloudId_ = openIdProviderCloudId_;
         }
       }
 
@@ -11343,23 +11510,21 @@ public final class SDXSvcCommonProto {
           bitField0_ |= 0x00000002;
           onChanged();
         }
+        if (other.cloudPlatform_ != 0) {
+          setCloudPlatformValue(other.getCloudPlatformValue());
+        }
         if (!other.getCloudRegion().isEmpty()) {
           cloudRegion_ = other.cloudRegion_;
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (!other.getSdxTrafficHostname().isEmpty()) {
           sdxTrafficHostname_ = other.sdxTrafficHostname_;
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (!other.getAdminTrafficHostname().isEmpty()) {
           adminTrafficHostname_ = other.adminTrafficHostname_;
-          bitField0_ |= 0x00000010;
-          onChanged();
-        }
-        if (!other.getKubeConfig().isEmpty()) {
-          kubeConfig_ = other.kubeConfig_;
           bitField0_ |= 0x00000020;
           onChanged();
         }
@@ -11418,6 +11583,21 @@ public final class SDXSvcCommonProto {
         if (other.getUpdatedTimestamp() != 0L) {
           setUpdatedTimestamp(other.getUpdatedTimestamp());
         }
+        if (!other.getTargetGroup().isEmpty()) {
+          targetGroup_ = other.targetGroup_;
+          bitField0_ |= 0x00004000;
+          onChanged();
+        }
+        if (!other.getVaultAuthMethod().isEmpty()) {
+          vaultAuthMethod_ = other.vaultAuthMethod_;
+          bitField0_ |= 0x00008000;
+          onChanged();
+        }
+        if (!other.getOpenIdProviderCloudId().isEmpty()) {
+          openIdProviderCloudId_ = other.openIdProviderCloudId_;
+          bitField0_ |= 0x00010000;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -11454,23 +11634,23 @@ public final class SDXSvcCommonProto {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 18
-              case 26: {
-                cloudRegion_ = input.readStringRequireUtf8();
+              case 24: {
+                cloudPlatform_ = input.readEnum();
                 bitField0_ |= 0x00000004;
                 break;
-              } // case 26
+              } // case 24
               case 34: {
-                sdxTrafficHostname_ = input.readStringRequireUtf8();
+                cloudRegion_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
-                adminTrafficHostname_ = input.readStringRequireUtf8();
+                sdxTrafficHostname_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 50: {
-                kubeConfig_ = input.readStringRequireUtf8();
+                adminTrafficHostname_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000020;
                 break;
               } // case 50
@@ -11522,6 +11702,21 @@ public final class SDXSvcCommonProto {
                 bitField0_ |= 0x00002000;
                 break;
               } // case 112
+              case 122: {
+                targetGroup_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00004000;
+                break;
+              } // case 122
+              case 130: {
+                vaultAuthMethod_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00008000;
+                break;
+              } // case 130
+              case 138: {
+                openIdProviderCloudId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00010000;
+                break;
+              } // case 138
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -11723,13 +11918,86 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
+      private int cloudPlatform_ = 0;
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return The enum numeric value on the wire for cloudPlatform.
+       */
+      @java.lang.Override public int getCloudPlatformValue() {
+        return cloudPlatform_;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @param value The enum numeric value on the wire for cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatformValue(int value) {
+        cloudPlatform_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return The cloudPlatform.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @param value The cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
+        cloudPlatform_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudPlatform() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        cloudPlatform_ = 0;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object cloudRegion_ = "";
       /**
        * <pre>
        * The cloud region the Operational Environment is in
        * </pre>
        *
-       * <code>string cloudRegion = 3;</code>
+       * <code>string cloudRegion = 4;</code>
        * @return The cloudRegion.
        */
       public java.lang.String getCloudRegion() {
@@ -11749,7 +12017,7 @@ public final class SDXSvcCommonProto {
        * The cloud region the Operational Environment is in
        * </pre>
        *
-       * <code>string cloudRegion = 3;</code>
+       * <code>string cloudRegion = 4;</code>
        * @return The bytes for cloudRegion.
        */
       public com.google.protobuf.ByteString
@@ -11770,7 +12038,7 @@ public final class SDXSvcCommonProto {
        * The cloud region the Operational Environment is in
        * </pre>
        *
-       * <code>string cloudRegion = 3;</code>
+       * <code>string cloudRegion = 4;</code>
        * @param value The cloudRegion to set.
        * @return This builder for chaining.
        */
@@ -11778,7 +12046,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         cloudRegion_ = value;
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -11787,12 +12055,12 @@ public final class SDXSvcCommonProto {
        * The cloud region the Operational Environment is in
        * </pre>
        *
-       * <code>string cloudRegion = 3;</code>
+       * <code>string cloudRegion = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearCloudRegion() {
         cloudRegion_ = getDefaultInstance().getCloudRegion();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -11801,7 +12069,7 @@ public final class SDXSvcCommonProto {
        * The cloud region the Operational Environment is in
        * </pre>
        *
-       * <code>string cloudRegion = 3;</code>
+       * <code>string cloudRegion = 4;</code>
        * @param value The bytes for cloudRegion to set.
        * @return This builder for chaining.
        */
@@ -11810,7 +12078,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         cloudRegion_ = value;
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -11821,7 +12089,7 @@ public final class SDXSvcCommonProto {
        * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
        * </pre>
        *
-       * <code>string sdxTrafficHostname = 4;</code>
+       * <code>string sdxTrafficHostname = 5;</code>
        * @return The sdxTrafficHostname.
        */
       public java.lang.String getSdxTrafficHostname() {
@@ -11841,7 +12109,7 @@ public final class SDXSvcCommonProto {
        * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
        * </pre>
        *
-       * <code>string sdxTrafficHostname = 4;</code>
+       * <code>string sdxTrafficHostname = 5;</code>
        * @return The bytes for sdxTrafficHostname.
        */
       public com.google.protobuf.ByteString
@@ -11862,7 +12130,7 @@ public final class SDXSvcCommonProto {
        * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
        * </pre>
        *
-       * <code>string sdxTrafficHostname = 4;</code>
+       * <code>string sdxTrafficHostname = 5;</code>
        * @param value The sdxTrafficHostname to set.
        * @return This builder for chaining.
        */
@@ -11870,7 +12138,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         sdxTrafficHostname_ = value;
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -11879,12 +12147,12 @@ public final class SDXSvcCommonProto {
        * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
        * </pre>
        *
-       * <code>string sdxTrafficHostname = 4;</code>
+       * <code>string sdxTrafficHostname = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearSdxTrafficHostname() {
         sdxTrafficHostname_ = getDefaultInstance().getSdxTrafficHostname();
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -11893,7 +12161,7 @@ public final class SDXSvcCommonProto {
        * Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
        * </pre>
        *
-       * <code>string sdxTrafficHostname = 4;</code>
+       * <code>string sdxTrafficHostname = 5;</code>
        * @param value The bytes for sdxTrafficHostname to set.
        * @return This builder for chaining.
        */
@@ -11902,7 +12170,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         sdxTrafficHostname_ = value;
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -11913,7 +12181,7 @@ public final class SDXSvcCommonProto {
        * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
        * </pre>
        *
-       * <code>string adminTrafficHostname = 5;</code>
+       * <code>string adminTrafficHostname = 6;</code>
        * @return The adminTrafficHostname.
        */
       public java.lang.String getAdminTrafficHostname() {
@@ -11933,7 +12201,7 @@ public final class SDXSvcCommonProto {
        * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
        * </pre>
        *
-       * <code>string adminTrafficHostname = 5;</code>
+       * <code>string adminTrafficHostname = 6;</code>
        * @return The bytes for adminTrafficHostname.
        */
       public com.google.protobuf.ByteString
@@ -11954,7 +12222,7 @@ public final class SDXSvcCommonProto {
        * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
        * </pre>
        *
-       * <code>string adminTrafficHostname = 5;</code>
+       * <code>string adminTrafficHostname = 6;</code>
        * @param value The adminTrafficHostname to set.
        * @return This builder for chaining.
        */
@@ -11962,7 +12230,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         adminTrafficHostname_ = value;
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -11971,12 +12239,12 @@ public final class SDXSvcCommonProto {
        * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
        * </pre>
        *
-       * <code>string adminTrafficHostname = 5;</code>
+       * <code>string adminTrafficHostname = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearAdminTrafficHostname() {
         adminTrafficHostname_ = getDefaultInstance().getAdminTrafficHostname();
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
@@ -11985,7 +12253,7 @@ public final class SDXSvcCommonProto {
        * Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
        * </pre>
        *
-       * <code>string adminTrafficHostname = 5;</code>
+       * <code>string adminTrafficHostname = 6;</code>
        * @param value The bytes for adminTrafficHostname to set.
        * @return This builder for chaining.
        */
@@ -11994,98 +12262,6 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         adminTrafficHostname_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object kubeConfig_ = "";
-      /**
-       * <pre>
-       * The kube-config for the Operational Environment
-       * </pre>
-       *
-       * <code>string kubeConfig = 6;</code>
-       * @return The kubeConfig.
-       */
-      public java.lang.String getKubeConfig() {
-        java.lang.Object ref = kubeConfig_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          kubeConfig_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The kube-config for the Operational Environment
-       * </pre>
-       *
-       * <code>string kubeConfig = 6;</code>
-       * @return The bytes for kubeConfig.
-       */
-      public com.google.protobuf.ByteString
-          getKubeConfigBytes() {
-        java.lang.Object ref = kubeConfig_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          kubeConfig_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The kube-config for the Operational Environment
-       * </pre>
-       *
-       * <code>string kubeConfig = 6;</code>
-       * @param value The kubeConfig to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKubeConfig(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        kubeConfig_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The kube-config for the Operational Environment
-       * </pre>
-       *
-       * <code>string kubeConfig = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKubeConfig() {
-        kubeConfig_ = getDefaultInstance().getKubeConfig();
-        bitField0_ = (bitField0_ & ~0x00000020);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The kube-config for the Operational Environment
-       * </pre>
-       *
-       * <code>string kubeConfig = 6;</code>
-       * @param value The bytes for kubeConfig to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKubeConfigBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        kubeConfig_ = value;
         bitField0_ |= 0x00000020;
         onChanged();
         return this;
@@ -12097,7 +12273,7 @@ public final class SDXSvcCommonProto {
        * The K8s API Server Endpoint
        * </pre>
        *
-       * <code>string apiServerEndpoint = 7;</code>
+       * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
        * @return The apiServerEndpoint.
        */
       public java.lang.String getApiServerEndpoint() {
@@ -12117,7 +12293,7 @@ public final class SDXSvcCommonProto {
        * The K8s API Server Endpoint
        * </pre>
        *
-       * <code>string apiServerEndpoint = 7;</code>
+       * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
        * @return The bytes for apiServerEndpoint.
        */
       public com.google.protobuf.ByteString
@@ -12138,7 +12314,7 @@ public final class SDXSvcCommonProto {
        * The K8s API Server Endpoint
        * </pre>
        *
-       * <code>string apiServerEndpoint = 7;</code>
+       * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
        * @param value The apiServerEndpoint to set.
        * @return This builder for chaining.
        */
@@ -12155,7 +12331,7 @@ public final class SDXSvcCommonProto {
        * The K8s API Server Endpoint
        * </pre>
        *
-       * <code>string apiServerEndpoint = 7;</code>
+       * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearApiServerEndpoint() {
@@ -12169,7 +12345,7 @@ public final class SDXSvcCommonProto {
        * The K8s API Server Endpoint
        * </pre>
        *
-       * <code>string apiServerEndpoint = 7;</code>
+       * <code>string apiServerEndpoint = 7 [(.options.FieldExtension.noParamfile) = true];</code>
        * @param value The bytes for apiServerEndpoint to set.
        * @return This builder for chaining.
        */
@@ -12189,7 +12365,7 @@ public final class SDXSvcCommonProto {
        * The OpenId Connection provider endpoint
        * </pre>
        *
-       * <code>string openIdProviderEndpoint = 8;</code>
+       * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
        * @return The openIdProviderEndpoint.
        */
       public java.lang.String getOpenIdProviderEndpoint() {
@@ -12209,7 +12385,7 @@ public final class SDXSvcCommonProto {
        * The OpenId Connection provider endpoint
        * </pre>
        *
-       * <code>string openIdProviderEndpoint = 8;</code>
+       * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
        * @return The bytes for openIdProviderEndpoint.
        */
       public com.google.protobuf.ByteString
@@ -12230,7 +12406,7 @@ public final class SDXSvcCommonProto {
        * The OpenId Connection provider endpoint
        * </pre>
        *
-       * <code>string openIdProviderEndpoint = 8;</code>
+       * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
        * @param value The openIdProviderEndpoint to set.
        * @return This builder for chaining.
        */
@@ -12247,7 +12423,7 @@ public final class SDXSvcCommonProto {
        * The OpenId Connection provider endpoint
        * </pre>
        *
-       * <code>string openIdProviderEndpoint = 8;</code>
+       * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearOpenIdProviderEndpoint() {
@@ -12261,7 +12437,7 @@ public final class SDXSvcCommonProto {
        * The OpenId Connection provider endpoint
        * </pre>
        *
-       * <code>string openIdProviderEndpoint = 8;</code>
+       * <code>string openIdProviderEndpoint = 8 [(.options.FieldExtension.noParamfile) = true];</code>
        * @param value The bytes for openIdProviderEndpoint to set.
        * @return This builder for chaining.
        */
@@ -12281,7 +12457,7 @@ public final class SDXSvcCommonProto {
        * The CA Cert for the Cluster
        * </pre>
        *
-       * <code>string caCert = 9;</code>
+       * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
        * @return The caCert.
        */
       public java.lang.String getCaCert() {
@@ -12301,7 +12477,7 @@ public final class SDXSvcCommonProto {
        * The CA Cert for the Cluster
        * </pre>
        *
-       * <code>string caCert = 9;</code>
+       * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
        * @return The bytes for caCert.
        */
       public com.google.protobuf.ByteString
@@ -12322,7 +12498,7 @@ public final class SDXSvcCommonProto {
        * The CA Cert for the Cluster
        * </pre>
        *
-       * <code>string caCert = 9;</code>
+       * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
        * @param value The caCert to set.
        * @return This builder for chaining.
        */
@@ -12339,7 +12515,7 @@ public final class SDXSvcCommonProto {
        * The CA Cert for the Cluster
        * </pre>
        *
-       * <code>string caCert = 9;</code>
+       * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearCaCert() {
@@ -12353,7 +12529,7 @@ public final class SDXSvcCommonProto {
        * The CA Cert for the Cluster
        * </pre>
        *
-       * <code>string caCert = 9;</code>
+       * <code>string caCert = 9 [(.options.FieldExtension.sensitive) = true];</code>
        * @param value The bytes for caCert to set.
        * @return This builder for chaining.
        */
@@ -12899,6 +13075,282 @@ public final class SDXSvcCommonProto {
       public Builder clearUpdatedTimestamp() {
         bitField0_ = (bitField0_ & ~0x00002000);
         updatedTimestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object targetGroup_ = "";
+      /**
+       * <pre>
+       *The AWS target group for the operational environment.
+       * </pre>
+       *
+       * <code>string targetGroup = 15;</code>
+       * @return The targetGroup.
+       */
+      public java.lang.String getTargetGroup() {
+        java.lang.Object ref = targetGroup_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          targetGroup_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *The AWS target group for the operational environment.
+       * </pre>
+       *
+       * <code>string targetGroup = 15;</code>
+       * @return The bytes for targetGroup.
+       */
+      public com.google.protobuf.ByteString
+          getTargetGroupBytes() {
+        java.lang.Object ref = targetGroup_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          targetGroup_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *The AWS target group for the operational environment.
+       * </pre>
+       *
+       * <code>string targetGroup = 15;</code>
+       * @param value The targetGroup to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTargetGroup(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        targetGroup_ = value;
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *The AWS target group for the operational environment.
+       * </pre>
+       *
+       * <code>string targetGroup = 15;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTargetGroup() {
+        targetGroup_ = getDefaultInstance().getTargetGroup();
+        bitField0_ = (bitField0_ & ~0x00004000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *The AWS target group for the operational environment.
+       * </pre>
+       *
+       * <code>string targetGroup = 15;</code>
+       * @param value The bytes for targetGroup to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTargetGroupBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        targetGroup_ = value;
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object vaultAuthMethod_ = "";
+      /**
+       * <pre>
+       * The vault auth method
+       * </pre>
+       *
+       * <code>string vaultAuthMethod = 16;</code>
+       * @return The vaultAuthMethod.
+       */
+      public java.lang.String getVaultAuthMethod() {
+        java.lang.Object ref = vaultAuthMethod_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          vaultAuthMethod_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The vault auth method
+       * </pre>
+       *
+       * <code>string vaultAuthMethod = 16;</code>
+       * @return The bytes for vaultAuthMethod.
+       */
+      public com.google.protobuf.ByteString
+          getVaultAuthMethodBytes() {
+        java.lang.Object ref = vaultAuthMethod_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          vaultAuthMethod_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The vault auth method
+       * </pre>
+       *
+       * <code>string vaultAuthMethod = 16;</code>
+       * @param value The vaultAuthMethod to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVaultAuthMethod(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        vaultAuthMethod_ = value;
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The vault auth method
+       * </pre>
+       *
+       * <code>string vaultAuthMethod = 16;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVaultAuthMethod() {
+        vaultAuthMethod_ = getDefaultInstance().getVaultAuthMethod();
+        bitField0_ = (bitField0_ & ~0x00008000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The vault auth method
+       * </pre>
+       *
+       * <code>string vaultAuthMethod = 16;</code>
+       * @param value The bytes for vaultAuthMethod to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVaultAuthMethodBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        vaultAuthMethod_ = value;
+        bitField0_ |= 0x00008000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object openIdProviderCloudId_ = "";
+      /**
+       * <pre>
+       * The OpenId Connection provider cloudId
+       * </pre>
+       *
+       * <code>string openIdProviderCloudId = 17;</code>
+       * @return The openIdProviderCloudId.
+       */
+      public java.lang.String getOpenIdProviderCloudId() {
+        java.lang.Object ref = openIdProviderCloudId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          openIdProviderCloudId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The OpenId Connection provider cloudId
+       * </pre>
+       *
+       * <code>string openIdProviderCloudId = 17;</code>
+       * @return The bytes for openIdProviderCloudId.
+       */
+      public com.google.protobuf.ByteString
+          getOpenIdProviderCloudIdBytes() {
+        java.lang.Object ref = openIdProviderCloudId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          openIdProviderCloudId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The OpenId Connection provider cloudId
+       * </pre>
+       *
+       * <code>string openIdProviderCloudId = 17;</code>
+       * @param value The openIdProviderCloudId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOpenIdProviderCloudId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        openIdProviderCloudId_ = value;
+        bitField0_ |= 0x00010000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The OpenId Connection provider cloudId
+       * </pre>
+       *
+       * <code>string openIdProviderCloudId = 17;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOpenIdProviderCloudId() {
+        openIdProviderCloudId_ = getDefaultInstance().getOpenIdProviderCloudId();
+        bitField0_ = (bitField0_ & ~0x00010000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The OpenId Connection provider cloudId
+       * </pre>
+       *
+       * <code>string openIdProviderCloudId = 17;</code>
+       * @param value The bytes for openIdProviderCloudId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOpenIdProviderCloudIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        openIdProviderCloudId_ = value;
+        bitField0_ |= 0x00010000;
         onChanged();
         return this;
       }
@@ -14424,50 +14876,6 @@ public final class SDXSvcCommonProto {
      * @return The percentTraffic.
      */
     int getPercentTraffic();
-
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service> 
-        getServicesList();
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service getServices(int index);
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    int getServicesCount();
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder> 
-        getServicesOrBuilderList();
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder getServicesOrBuilder(
-        int index);
   }
   /**
    * <pre>
@@ -14487,7 +14895,6 @@ public final class SDXSvcCommonProto {
     }
     private InstanceDeployment() {
       operationalEnvironment_ = "";
-      services_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -14572,67 +14979,6 @@ public final class SDXSvcCommonProto {
       return percentTraffic_;
     }
 
-    public static final int SERVICES_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service> services_;
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    @java.lang.Override
-    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service> getServicesList() {
-      return services_;
-    }
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder> 
-        getServicesOrBuilderList() {
-      return services_;
-    }
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    @java.lang.Override
-    public int getServicesCount() {
-      return services_.size();
-    }
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service getServices(int index) {
-      return services_.get(index);
-    }
-    /**
-     * <pre>
-     * The SDX Services deployed in the SDX Instance.
-     * </pre>
-     *
-     * <code>repeated .sdxsvccommon.Service services = 3;</code>
-     */
-    @java.lang.Override
-    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder getServicesOrBuilder(
-        int index) {
-      return services_.get(index);
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -14653,9 +14999,6 @@ public final class SDXSvcCommonProto {
       if (percentTraffic_ != 0) {
         output.writeInt32(2, percentTraffic_);
       }
-      for (int i = 0; i < services_.size(); i++) {
-        output.writeMessage(3, services_.get(i));
-      }
       getUnknownFields().writeTo(output);
     }
 
@@ -14671,10 +15014,6 @@ public final class SDXSvcCommonProto {
       if (percentTraffic_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, percentTraffic_);
-      }
-      for (int i = 0; i < services_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, services_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -14695,8 +15034,6 @@ public final class SDXSvcCommonProto {
           .equals(other.getOperationalEnvironment())) return false;
       if (getPercentTraffic()
           != other.getPercentTraffic()) return false;
-      if (!getServicesList()
-          .equals(other.getServicesList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -14712,10 +15049,6 @@ public final class SDXSvcCommonProto {
       hash = (53 * hash) + getOperationalEnvironment().hashCode();
       hash = (37 * hash) + PERCENTTRAFFIC_FIELD_NUMBER;
       hash = (53 * hash) + getPercentTraffic();
-      if (getServicesCount() > 0) {
-        hash = (37 * hash) + SERVICES_FIELD_NUMBER;
-        hash = (53 * hash) + getServicesList().hashCode();
-      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -14853,13 +15186,6 @@ public final class SDXSvcCommonProto {
         bitField0_ = 0;
         operationalEnvironment_ = "";
         percentTraffic_ = 0;
-        if (servicesBuilder_ == null) {
-          services_ = java.util.Collections.emptyList();
-        } else {
-          services_ = null;
-          servicesBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -14886,22 +15212,9 @@ public final class SDXSvcCommonProto {
       @java.lang.Override
       public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceDeployment buildPartial() {
         com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceDeployment result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceDeployment(this);
-        buildPartialRepeatedFields(result);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
-      }
-
-      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceDeployment result) {
-        if (servicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) != 0)) {
-            services_ = java.util.Collections.unmodifiableList(services_);
-            bitField0_ = (bitField0_ & ~0x00000004);
-          }
-          result.services_ = services_;
-        } else {
-          result.services_ = servicesBuilder_.build();
-        }
       }
 
       private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceDeployment result) {
@@ -14966,32 +15279,6 @@ public final class SDXSvcCommonProto {
         if (other.getPercentTraffic() != 0) {
           setPercentTraffic(other.getPercentTraffic());
         }
-        if (servicesBuilder_ == null) {
-          if (!other.services_.isEmpty()) {
-            if (services_.isEmpty()) {
-              services_ = other.services_;
-              bitField0_ = (bitField0_ & ~0x00000004);
-            } else {
-              ensureServicesIsMutable();
-              services_.addAll(other.services_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.services_.isEmpty()) {
-            if (servicesBuilder_.isEmpty()) {
-              servicesBuilder_.dispose();
-              servicesBuilder_ = null;
-              services_ = other.services_;
-              bitField0_ = (bitField0_ & ~0x00000004);
-              servicesBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getServicesFieldBuilder() : null;
-            } else {
-              servicesBuilder_.addAllMessages(other.services_);
-            }
-          }
-        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -15028,19 +15315,6 @@ public final class SDXSvcCommonProto {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 16
-              case 26: {
-                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service m =
-                    input.readMessage(
-                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.parser(),
-                        extensionRegistry);
-                if (servicesBuilder_ == null) {
-                  ensureServicesIsMutable();
-                  services_.add(m);
-                } else {
-                  servicesBuilder_.addMessage(m);
-                }
-                break;
-              } // case 26
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -15192,318 +15466,6 @@ public final class SDXSvcCommonProto {
         percentTraffic_ = 0;
         onChanged();
         return this;
-      }
-
-      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service> services_ =
-        java.util.Collections.emptyList();
-      private void ensureServicesIsMutable() {
-        if (!((bitField0_ & 0x00000004) != 0)) {
-          services_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service>(services_);
-          bitField0_ |= 0x00000004;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder> servicesBuilder_;
-
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service> getServicesList() {
-        if (servicesBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(services_);
-        } else {
-          return servicesBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public int getServicesCount() {
-        if (servicesBuilder_ == null) {
-          return services_.size();
-        } else {
-          return servicesBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service getServices(int index) {
-        if (servicesBuilder_ == null) {
-          return services_.get(index);
-        } else {
-          return servicesBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder setServices(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service value) {
-        if (servicesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServicesIsMutable();
-          services_.set(index, value);
-          onChanged();
-        } else {
-          servicesBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder setServices(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder builderForValue) {
-        if (servicesBuilder_ == null) {
-          ensureServicesIsMutable();
-          services_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          servicesBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder addServices(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service value) {
-        if (servicesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServicesIsMutable();
-          services_.add(value);
-          onChanged();
-        } else {
-          servicesBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder addServices(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service value) {
-        if (servicesBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServicesIsMutable();
-          services_.add(index, value);
-          onChanged();
-        } else {
-          servicesBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder addServices(
-          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder builderForValue) {
-        if (servicesBuilder_ == null) {
-          ensureServicesIsMutable();
-          services_.add(builderForValue.build());
-          onChanged();
-        } else {
-          servicesBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder addServices(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder builderForValue) {
-        if (servicesBuilder_ == null) {
-          ensureServicesIsMutable();
-          services_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          servicesBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder addAllServices(
-          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service> values) {
-        if (servicesBuilder_ == null) {
-          ensureServicesIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, services_);
-          onChanged();
-        } else {
-          servicesBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder clearServices() {
-        if (servicesBuilder_ == null) {
-          services_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
-          onChanged();
-        } else {
-          servicesBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public Builder removeServices(int index) {
-        if (servicesBuilder_ == null) {
-          ensureServicesIsMutable();
-          services_.remove(index);
-          onChanged();
-        } else {
-          servicesBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder getServicesBuilder(
-          int index) {
-        return getServicesFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder getServicesOrBuilder(
-          int index) {
-        if (servicesBuilder_ == null) {
-          return services_.get(index);  } else {
-          return servicesBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder> 
-           getServicesOrBuilderList() {
-        if (servicesBuilder_ != null) {
-          return servicesBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(services_);
-        }
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder addServicesBuilder() {
-        return getServicesFieldBuilder().addBuilder(
-            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder addServicesBuilder(
-          int index) {
-        return getServicesFieldBuilder().addBuilder(
-            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * The SDX Services deployed in the SDX Instance.
-       * </pre>
-       *
-       * <code>repeated .sdxsvccommon.Service services = 3;</code>
-       */
-      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder> 
-           getServicesBuilderList() {
-        return getServicesFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder> 
-          getServicesFieldBuilder() {
-        if (servicesBuilder_ == null) {
-          servicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceOrBuilder>(
-                  services_,
-                  ((bitField0_ & 0x00000004) != 0),
-                  getParentForChildren(),
-                  isClean());
-          services_ = null;
-        }
-        return servicesBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -16204,7 +16166,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(helmDeployment_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, helmDeployment_);
       }
-      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceStatus.Value.PROVISIONING.getNumber()) {
+      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceStatus.Value.UNSET.getNumber()) {
         output.writeEnum(7, status_);
       }
       for (int i = 0; i < history_.size(); i++) {
@@ -16237,7 +16199,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(helmDeployment_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, helmDeployment_);
       }
-      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceStatus.Value.PROVISIONING.getNumber()) {
+      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ServiceStatus.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(7, status_);
       }
@@ -18569,10 +18531,10 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, crn_);
       }
-      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceHighLevelStatus.Value.PROVISIONING.getNumber()) {
+      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceHighLevelStatus.Value.UNSET.getNumber()) {
         output.writeEnum(3, status_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(4, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -18614,11 +18576,11 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, crn_);
       }
-      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceHighLevelStatus.Value.PROVISIONING.getNumber()) {
+      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.InstanceHighLevelStatus.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, status_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, cloudPlatform_);
       }
@@ -20799,43 +20761,42 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * CRN of the SDX Connection.
+     * CRN of the environment.
      * </pre>
      *
-     * <code>string crn = 2;</code>
-     * @return The crn.
+     * <code>string environment = 2;</code>
+     * @return The environment.
      */
-    java.lang.String getCrn();
+    java.lang.String getEnvironment();
     /**
      * <pre>
-     * CRN of the SDX Connection.
+     * CRN of the environment.
      * </pre>
      *
-     * <code>string crn = 2;</code>
-     * @return The bytes for crn.
+     * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
     com.google.protobuf.ByteString
-        getCrnBytes();
+        getEnvironmentBytes();
 
     /**
      * <pre>
      * Status of the SDX Connection.
      * </pre>
      *
-     * <code>string status = 3;</code>
-     * @return The status.
+     * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    java.lang.String getStatus();
+    int getStatusValue();
     /**
      * <pre>
      * Status of the SDX Connection.
      * </pre>
      *
-     * <code>string status = 3;</code>
-     * @return The bytes for status.
+     * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
+     * @return The status.
      */
-    com.google.protobuf.ByteString
-        getStatusBytes();
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value getStatus();
 
     /**
      * <pre>
@@ -21029,8 +20990,8 @@ public final class SDXSvcCommonProto {
     }
     private Connection() {
       name_ = "";
-      crn_ = "";
-      status_ = "";
+      environment_ = "";
+      status_ = 0;
       type_ = 0;
       cloudPlatform_ = "";
       cloudRegion_ = "";
@@ -21107,47 +21068,47 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int CRN_FIELD_NUMBER = 2;
+    public static final int ENVIRONMENT_FIELD_NUMBER = 2;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object crn_ = "";
+    private volatile java.lang.Object environment_ = "";
     /**
      * <pre>
-     * CRN of the SDX Connection.
+     * CRN of the environment.
      * </pre>
      *
-     * <code>string crn = 2;</code>
-     * @return The crn.
+     * <code>string environment = 2;</code>
+     * @return The environment.
      */
     @java.lang.Override
-    public java.lang.String getCrn() {
-      java.lang.Object ref = crn_;
+    public java.lang.String getEnvironment() {
+      java.lang.Object ref = environment_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        crn_ = s;
+        environment_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * CRN of the SDX Connection.
+     * CRN of the environment.
      * </pre>
      *
-     * <code>string crn = 2;</code>
-     * @return The bytes for crn.
+     * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getCrnBytes() {
-      java.lang.Object ref = crn_;
+        getEnvironmentBytes() {
+      java.lang.Object ref = environment_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        crn_ = b;
+        environment_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -21155,50 +21116,29 @@ public final class SDXSvcCommonProto {
     }
 
     public static final int STATUS_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object status_ = "";
+    private int status_ = 0;
     /**
      * <pre>
      * Status of the SDX Connection.
      * </pre>
      *
-     * <code>string status = 3;</code>
-     * @return The status.
+     * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    @java.lang.Override
-    public java.lang.String getStatus() {
-      java.lang.Object ref = status_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        status_ = s;
-        return s;
-      }
+    @java.lang.Override public int getStatusValue() {
+      return status_;
     }
     /**
      * <pre>
      * Status of the SDX Connection.
      * </pre>
      *
-     * <code>string status = 3;</code>
-     * @return The bytes for status.
+     * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
+     * @return The status.
      */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getStatusBytes() {
-      java.lang.Object ref = status_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        status_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value getStatus() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value.forNumber(status_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value.UNRECOGNIZED : result;
     }
 
     public static final int TYPE_FIELD_NUMBER = 4;
@@ -21514,13 +21454,13 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, crn_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environment_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
+      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value.UNSET.getNumber()) {
+        output.writeEnum(3, status_);
       }
-      if (type_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.AWS_PRIVATELINK.getNumber()) {
+      if (type_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.UNSET.getNumber()) {
         output.writeEnum(4, type_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudPlatform_)) {
@@ -21553,13 +21493,14 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, crn_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environment_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
+      if (status_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, status_);
       }
-      if (type_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.AWS_PRIVATELINK.getNumber()) {
+      if (type_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ConnectionType.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, type_);
       }
@@ -21605,10 +21546,9 @@ public final class SDXSvcCommonProto {
 
       if (!getName()
           .equals(other.getName())) return false;
-      if (!getCrn()
-          .equals(other.getCrn())) return false;
-      if (!getStatus()
-          .equals(other.getStatus())) return false;
+      if (!getEnvironment()
+          .equals(other.getEnvironment())) return false;
+      if (status_ != other.status_) return false;
       if (type_ != other.type_) return false;
       if (!getCloudPlatform()
           .equals(other.getCloudPlatform())) return false;
@@ -21635,10 +21575,10 @@ public final class SDXSvcCommonProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + NAME_FIELD_NUMBER;
       hash = (53 * hash) + getName().hashCode();
-      hash = (37 * hash) + CRN_FIELD_NUMBER;
-      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + ENVIRONMENT_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironment().hashCode();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
-      hash = (53 * hash) + getStatus().hashCode();
+      hash = (53 * hash) + status_;
       hash = (37 * hash) + TYPE_FIELD_NUMBER;
       hash = (53 * hash) + type_;
       hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
@@ -21794,8 +21734,8 @@ public final class SDXSvcCommonProto {
         super.clear();
         bitField0_ = 0;
         name_ = "";
-        crn_ = "";
-        status_ = "";
+        environment_ = "";
+        status_ = 0;
         type_ = 0;
         cloudPlatform_ = "";
         cloudRegion_ = "";
@@ -21860,7 +21800,7 @@ public final class SDXSvcCommonProto {
           result.name_ = name_;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.crn_ = crn_;
+          result.environment_ = environment_;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.status_ = status_;
@@ -21935,15 +21875,13 @@ public final class SDXSvcCommonProto {
           bitField0_ |= 0x00000001;
           onChanged();
         }
-        if (!other.getCrn().isEmpty()) {
-          crn_ = other.crn_;
+        if (!other.getEnvironment().isEmpty()) {
+          environment_ = other.environment_;
           bitField0_ |= 0x00000002;
           onChanged();
         }
-        if (!other.getStatus().isEmpty()) {
-          status_ = other.status_;
-          bitField0_ |= 0x00000004;
-          onChanged();
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
         }
         if (other.type_ != 0) {
           setTypeValue(other.getTypeValue());
@@ -22034,15 +21972,15 @@ public final class SDXSvcCommonProto {
                 break;
               } // case 10
               case 18: {
-                crn_ = input.readStringRequireUtf8();
+                environment_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000002;
                 break;
               } // case 18
-              case 26: {
-                status_ = input.readStringRequireUtf8();
+              case 24: {
+                status_ = input.readEnum();
                 bitField0_ |= 0x00000004;
                 break;
-              } // case 26
+              } // case 24
               case 32: {
                 type_ = input.readEnum();
                 bitField0_ |= 0x00000008;
@@ -22196,22 +22134,22 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
-      private java.lang.Object crn_ = "";
+      private java.lang.Object environment_ = "";
       /**
        * <pre>
-       * CRN of the SDX Connection.
+       * CRN of the environment.
        * </pre>
        *
-       * <code>string crn = 2;</code>
-       * @return The crn.
+       * <code>string environment = 2;</code>
+       * @return The environment.
        */
-      public java.lang.String getCrn() {
-        java.lang.Object ref = crn_;
+      public java.lang.String getEnvironment() {
+        java.lang.Object ref = environment_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          crn_ = s;
+          environment_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -22219,20 +22157,20 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * CRN of the SDX Connection.
+       * CRN of the environment.
        * </pre>
        *
-       * <code>string crn = 2;</code>
-       * @return The bytes for crn.
+       * <code>string environment = 2;</code>
+       * @return The bytes for environment.
        */
       public com.google.protobuf.ByteString
-          getCrnBytes() {
-        java.lang.Object ref = crn_;
+          getEnvironmentBytes() {
+        java.lang.Object ref = environment_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          crn_ = b;
+          environment_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -22240,110 +22178,109 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * CRN of the SDX Connection.
+       * CRN of the environment.
        * </pre>
        *
-       * <code>string crn = 2;</code>
-       * @param value The crn to set.
+       * <code>string environment = 2;</code>
+       * @param value The environment to set.
        * @return This builder for chaining.
        */
-      public Builder setCrn(
+      public Builder setEnvironment(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        crn_ = value;
+        environment_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * CRN of the SDX Connection.
+       * CRN of the environment.
        * </pre>
        *
-       * <code>string crn = 2;</code>
+       * <code>string environment = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearCrn() {
-        crn_ = getDefaultInstance().getCrn();
+      public Builder clearEnvironment() {
+        environment_ = getDefaultInstance().getEnvironment();
         bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * CRN of the SDX Connection.
+       * CRN of the environment.
        * </pre>
        *
-       * <code>string crn = 2;</code>
-       * @param value The bytes for crn to set.
+       * <code>string environment = 2;</code>
+       * @param value The bytes for environment to set.
        * @return This builder for chaining.
        */
-      public Builder setCrnBytes(
+      public Builder setEnvironmentBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        crn_ = value;
+        environment_ = value;
         bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
 
-      private java.lang.Object status_ = "";
+      private int status_ = 0;
       /**
        * <pre>
        * Status of the SDX Connection.
        * </pre>
        *
-       * <code>string status = 3;</code>
+       * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
+       * @return The enum numeric value on the wire for status.
+       */
+      @java.lang.Override public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * Status of the SDX Connection.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusValue(int value) {
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the SDX Connection.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
        * @return The status.
        */
-      public java.lang.String getStatus() {
-        java.lang.Object ref = status_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          status_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value getStatus() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value.forNumber(status_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value.UNRECOGNIZED : result;
       }
       /**
        * <pre>
        * Status of the SDX Connection.
        * </pre>
        *
-       * <code>string status = 3;</code>
-       * @return The bytes for status.
-       */
-      public com.google.protobuf.ByteString
-          getStatusBytes() {
-        java.lang.Object ref = status_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          status_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Status of the SDX Connection.
-       * </pre>
-       *
-       * <code>string status = 3;</code>
+       * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
        * @param value The status to set.
        * @return This builder for chaining.
        */
-      public Builder setStatus(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        status_ = value;
+      public Builder setStatus(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
         bitField0_ |= 0x00000004;
+        status_ = value.getNumber();
         onChanged();
         return this;
       }
@@ -22352,30 +22289,12 @@ public final class SDXSvcCommonProto {
        * Status of the SDX Connection.
        * </pre>
        *
-       * <code>string status = 3;</code>
+       * <code>.sdxsvccommon.AwsPrivateLinkState.Value status = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearStatus() {
-        status_ = getDefaultInstance().getStatus();
         bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Status of the SDX Connection.
-       * </pre>
-       *
-       * <code>string status = 3;</code>
-       * @param value The bytes for status to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStatusBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        status_ = value;
-        bitField0_ |= 0x00000004;
+        status_ = 0;
         onChanged();
         return this;
       }
@@ -23301,7 +23220,7 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * The CRN of the Instance
+     * The CRN of the SDX Instance
      * </pre>
      *
      * <code>string instance = 1;</code>
@@ -23310,7 +23229,7 @@ public final class SDXSvcCommonProto {
     java.lang.String getInstance();
     /**
      * <pre>
-     * The CRN of the Instance
+     * The CRN of the SDX Instance
      * </pre>
      *
      * <code>string instance = 1;</code>
@@ -23364,7 +23283,7 @@ public final class SDXSvcCommonProto {
     private volatile java.lang.Object instance_ = "";
     /**
      * <pre>
-     * The CRN of the Instance
+     * The CRN of the SDX Instance
      * </pre>
      *
      * <code>string instance = 1;</code>
@@ -23385,7 +23304,7 @@ public final class SDXSvcCommonProto {
     }
     /**
      * <pre>
-     * The CRN of the Instance
+     * The CRN of the SDX Instance
      * </pre>
      *
      * <code>string instance = 1;</code>
@@ -23739,7 +23658,7 @@ public final class SDXSvcCommonProto {
       private java.lang.Object instance_ = "";
       /**
        * <pre>
-       * The CRN of the Instance
+       * The CRN of the SDX Instance
        * </pre>
        *
        * <code>string instance = 1;</code>
@@ -23759,7 +23678,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The CRN of the Instance
+       * The CRN of the SDX Instance
        * </pre>
        *
        * <code>string instance = 1;</code>
@@ -23780,7 +23699,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The CRN of the Instance
+       * The CRN of the SDX Instance
        * </pre>
        *
        * <code>string instance = 1;</code>
@@ -23797,7 +23716,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The CRN of the Instance
+       * The CRN of the SDX Instance
        * </pre>
        *
        * <code>string instance = 1;</code>
@@ -23811,7 +23730,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The CRN of the Instance
+       * The CRN of the SDX Instance
        * </pre>
        *
        * <code>string instance = 1;</code>
@@ -24774,7 +24693,7 @@ public final class SDXSvcCommonProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(1, cloudPlatform_);
       }
       getUnknownFields().writeTo(output);
@@ -24786,7 +24705,7 @@ public final class SDXSvcCommonProto {
       if (size != -1) return size;
 
       size = 0;
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, cloudPlatform_);
       }
@@ -27652,50 +27571,30 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * Admin Username Vault Path
+     * The Role Arn to be used to create assignments
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 8;</code>
-     * @return The adminUsernameVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The roleArn.
      */
-    java.lang.String getAdminUsernameVaultPath();
+    java.lang.String getRoleArn();
     /**
      * <pre>
-     * Admin Username Vault Path
+     * The Role Arn to be used to create assignments
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 8;</code>
-     * @return The bytes for adminUsernameVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The bytes for roleArn.
      */
     com.google.protobuf.ByteString
-        getAdminUsernameVaultPathBytes();
-
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string adminPasswordVaultPath = 9;</code>
-     * @return The adminPasswordVaultPath.
-     */
-    java.lang.String getAdminPasswordVaultPath();
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string adminPasswordVaultPath = 9;</code>
-     * @return The bytes for adminPasswordVaultPath.
-     */
-    com.google.protobuf.ByteString
-        getAdminPasswordVaultPathBytes();
+        getRoleArnBytes();
 
     /**
      * <pre>
      * Is the Indexer assignable
      * </pre>
      *
-     * <code>bool assignable = 10;</code>
+     * <code>bool assignable = 9;</code>
      * @return The assignable.
      */
     boolean getAssignable();
@@ -27705,7 +27604,7 @@ public final class SDXSvcCommonProto {
      * Indexer instance Id - unique Id that will be auto generated by the RM on registration
      * </pre>
      *
-     * <code>string id = 11;</code>
+     * <code>string id = 10;</code>
      * @return The id.
      */
     java.lang.String getId();
@@ -27714,7 +27613,7 @@ public final class SDXSvcCommonProto {
      * Indexer instance Id - unique Id that will be auto generated by the RM on registration
      * </pre>
      *
-     * <code>string id = 11;</code>
+     * <code>string id = 10;</code>
      * @return The bytes for id.
      */
     com.google.protobuf.ByteString
@@ -27725,7 +27624,7 @@ public final class SDXSvcCommonProto {
      * Timestamp of registration
      * </pre>
      *
-     * <code>int64 registeredTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 registeredTimestamp = 11 [(.options.FieldExtension.datetime) = true];</code>
      * @return The registeredTimestamp.
      */
     long getRegisteredTimestamp();
@@ -27735,7 +27634,7 @@ public final class SDXSvcCommonProto {
      * Timestamp of last update
      * </pre>
      *
-     * <code>int64 updatedTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 updatedTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
      * @return The updatedTimestamp.
      */
     long getUpdatedTimestamp();
@@ -27745,7 +27644,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment> 
         getAssignmentsList();
@@ -27754,7 +27653,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment getAssignments(int index);
     /**
@@ -27762,7 +27661,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     int getAssignmentsCount();
     /**
@@ -27770,7 +27669,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder> 
         getAssignmentsOrBuilderList();
@@ -27779,7 +27678,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder getAssignmentsOrBuilder(
         int index);
@@ -27807,8 +27706,7 @@ public final class SDXSvcCommonProto {
       cloudRegion_ = "";
       accessHostname_ = "";
       accessPort_ = "";
-      adminUsernameVaultPath_ = "";
-      adminPasswordVaultPath_ = "";
+      roleArn_ = "";
       id_ = "";
       assignments_ = java.util.Collections.emptyList();
     }
@@ -28109,108 +28007,61 @@ public final class SDXSvcCommonProto {
       return tlsEnabled_;
     }
 
-    public static final int ADMINUSERNAMEVAULTPATH_FIELD_NUMBER = 8;
+    public static final int ROLEARN_FIELD_NUMBER = 8;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object adminUsernameVaultPath_ = "";
+    private volatile java.lang.Object roleArn_ = "";
     /**
      * <pre>
-     * Admin Username Vault Path
+     * The Role Arn to be used to create assignments
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 8;</code>
-     * @return The adminUsernameVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The roleArn.
      */
     @java.lang.Override
-    public java.lang.String getAdminUsernameVaultPath() {
-      java.lang.Object ref = adminUsernameVaultPath_;
+    public java.lang.String getRoleArn() {
+      java.lang.Object ref = roleArn_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        adminUsernameVaultPath_ = s;
+        roleArn_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * Admin Username Vault Path
+     * The Role Arn to be used to create assignments
      * </pre>
      *
-     * <code>string adminUsernameVaultPath = 8;</code>
-     * @return The bytes for adminUsernameVaultPath.
+     * <code>string roleArn = 8;</code>
+     * @return The bytes for roleArn.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getAdminUsernameVaultPathBytes() {
-      java.lang.Object ref = adminUsernameVaultPath_;
+        getRoleArnBytes() {
+      java.lang.Object ref = roleArn_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        adminUsernameVaultPath_ = b;
+        roleArn_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    public static final int ADMINPASSWORDVAULTPATH_FIELD_NUMBER = 9;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object adminPasswordVaultPath_ = "";
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string adminPasswordVaultPath = 9;</code>
-     * @return The adminPasswordVaultPath.
-     */
-    @java.lang.Override
-    public java.lang.String getAdminPasswordVaultPath() {
-      java.lang.Object ref = adminPasswordVaultPath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        adminPasswordVaultPath_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Admin Password Vault Path
-     * </pre>
-     *
-     * <code>string adminPasswordVaultPath = 9;</code>
-     * @return The bytes for adminPasswordVaultPath.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getAdminPasswordVaultPathBytes() {
-      java.lang.Object ref = adminPasswordVaultPath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        adminPasswordVaultPath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int ASSIGNABLE_FIELD_NUMBER = 10;
+    public static final int ASSIGNABLE_FIELD_NUMBER = 9;
     private boolean assignable_ = false;
     /**
      * <pre>
      * Is the Indexer assignable
      * </pre>
      *
-     * <code>bool assignable = 10;</code>
+     * <code>bool assignable = 9;</code>
      * @return The assignable.
      */
     @java.lang.Override
@@ -28218,7 +28069,7 @@ public final class SDXSvcCommonProto {
       return assignable_;
     }
 
-    public static final int ID_FIELD_NUMBER = 11;
+    public static final int ID_FIELD_NUMBER = 10;
     @SuppressWarnings("serial")
     private volatile java.lang.Object id_ = "";
     /**
@@ -28226,7 +28077,7 @@ public final class SDXSvcCommonProto {
      * Indexer instance Id - unique Id that will be auto generated by the RM on registration
      * </pre>
      *
-     * <code>string id = 11;</code>
+     * <code>string id = 10;</code>
      * @return The id.
      */
     @java.lang.Override
@@ -28247,7 +28098,7 @@ public final class SDXSvcCommonProto {
      * Indexer instance Id - unique Id that will be auto generated by the RM on registration
      * </pre>
      *
-     * <code>string id = 11;</code>
+     * <code>string id = 10;</code>
      * @return The bytes for id.
      */
     @java.lang.Override
@@ -28265,14 +28116,14 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int REGISTEREDTIMESTAMP_FIELD_NUMBER = 12;
+    public static final int REGISTEREDTIMESTAMP_FIELD_NUMBER = 11;
     private long registeredTimestamp_ = 0L;
     /**
      * <pre>
      * Timestamp of registration
      * </pre>
      *
-     * <code>int64 registeredTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 registeredTimestamp = 11 [(.options.FieldExtension.datetime) = true];</code>
      * @return The registeredTimestamp.
      */
     @java.lang.Override
@@ -28280,14 +28131,14 @@ public final class SDXSvcCommonProto {
       return registeredTimestamp_;
     }
 
-    public static final int UPDATEDTIMESTAMP_FIELD_NUMBER = 13;
+    public static final int UPDATEDTIMESTAMP_FIELD_NUMBER = 12;
     private long updatedTimestamp_ = 0L;
     /**
      * <pre>
      * Timestamp of last update
      * </pre>
      *
-     * <code>int64 updatedTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 updatedTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
      * @return The updatedTimestamp.
      */
     @java.lang.Override
@@ -28295,7 +28146,7 @@ public final class SDXSvcCommonProto {
       return updatedTimestamp_;
     }
 
-    public static final int ASSIGNMENTS_FIELD_NUMBER = 14;
+    public static final int ASSIGNMENTS_FIELD_NUMBER = 13;
     @SuppressWarnings("serial")
     private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment> assignments_;
     /**
@@ -28303,7 +28154,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment> getAssignmentsList() {
@@ -28314,7 +28165,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder> 
@@ -28326,7 +28177,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     @java.lang.Override
     public int getAssignmentsCount() {
@@ -28337,7 +28188,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     @java.lang.Override
     public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment getAssignments(int index) {
@@ -28348,7 +28199,7 @@ public final class SDXSvcCommonProto {
      * Assignment to this indexer
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+     * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
      */
     @java.lang.Override
     public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder getAssignmentsOrBuilder(
@@ -28376,7 +28227,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(3, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -28391,26 +28242,23 @@ public final class SDXSvcCommonProto {
       if (tlsEnabled_ != false) {
         output.writeBool(7, tlsEnabled_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminUsernameVaultPath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, adminUsernameVaultPath_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminPasswordVaultPath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, adminPasswordVaultPath_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, roleArn_);
       }
       if (assignable_ != false) {
-        output.writeBool(10, assignable_);
+        output.writeBool(9, assignable_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, id_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, id_);
       }
       if (registeredTimestamp_ != 0L) {
-        output.writeInt64(12, registeredTimestamp_);
+        output.writeInt64(11, registeredTimestamp_);
       }
       if (updatedTimestamp_ != 0L) {
-        output.writeInt64(13, updatedTimestamp_);
+        output.writeInt64(12, updatedTimestamp_);
       }
       for (int i = 0; i < assignments_.size(); i++) {
-        output.writeMessage(14, assignments_.get(i));
+        output.writeMessage(13, assignments_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -28427,7 +28275,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, cloudPlatform_);
       }
@@ -28444,30 +28292,27 @@ public final class SDXSvcCommonProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, tlsEnabled_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminUsernameVaultPath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, adminUsernameVaultPath_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminPasswordVaultPath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, adminPasswordVaultPath_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, roleArn_);
       }
       if (assignable_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(10, assignable_);
+          .computeBoolSize(9, assignable_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, id_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, id_);
       }
       if (registeredTimestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(12, registeredTimestamp_);
+          .computeInt64Size(11, registeredTimestamp_);
       }
       if (updatedTimestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(13, updatedTimestamp_);
+          .computeInt64Size(12, updatedTimestamp_);
       }
       for (int i = 0; i < assignments_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(14, assignments_.get(i));
+          .computeMessageSize(13, assignments_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -28497,10 +28342,8 @@ public final class SDXSvcCommonProto {
           .equals(other.getAccessPort())) return false;
       if (getTlsEnabled()
           != other.getTlsEnabled()) return false;
-      if (!getAdminUsernameVaultPath()
-          .equals(other.getAdminUsernameVaultPath())) return false;
-      if (!getAdminPasswordVaultPath()
-          .equals(other.getAdminPasswordVaultPath())) return false;
+      if (!getRoleArn()
+          .equals(other.getRoleArn())) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
       if (!getId()
@@ -28537,10 +28380,8 @@ public final class SDXSvcCommonProto {
       hash = (37 * hash) + TLSENABLED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getTlsEnabled());
-      hash = (37 * hash) + ADMINUSERNAMEVAULTPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getAdminUsernameVaultPath().hashCode();
-      hash = (37 * hash) + ADMINPASSWORDVAULTPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getAdminPasswordVaultPath().hashCode();
+      hash = (37 * hash) + ROLEARN_FIELD_NUMBER;
+      hash = (53 * hash) + getRoleArn().hashCode();
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
@@ -28698,8 +28539,7 @@ public final class SDXSvcCommonProto {
         accessHostname_ = "";
         accessPort_ = "";
         tlsEnabled_ = false;
-        adminUsernameVaultPath_ = "";
-        adminPasswordVaultPath_ = "";
+        roleArn_ = "";
         assignable_ = false;
         id_ = "";
         registeredTimestamp_ = 0L;
@@ -28710,7 +28550,7 @@ public final class SDXSvcCommonProto {
           assignments_ = null;
           assignmentsBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00002000);
+        bitField0_ = (bitField0_ & ~0x00001000);
         return this;
       }
 
@@ -28745,9 +28585,9 @@ public final class SDXSvcCommonProto {
 
       private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer result) {
         if (assignmentsBuilder_ == null) {
-          if (((bitField0_ & 0x00002000) != 0)) {
+          if (((bitField0_ & 0x00001000) != 0)) {
             assignments_ = java.util.Collections.unmodifiableList(assignments_);
-            bitField0_ = (bitField0_ & ~0x00002000);
+            bitField0_ = (bitField0_ & ~0x00001000);
           }
           result.assignments_ = assignments_;
         } else {
@@ -28779,21 +28619,18 @@ public final class SDXSvcCommonProto {
           result.tlsEnabled_ = tlsEnabled_;
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.adminUsernameVaultPath_ = adminUsernameVaultPath_;
+          result.roleArn_ = roleArn_;
         }
         if (((from_bitField0_ & 0x00000100) != 0)) {
-          result.adminPasswordVaultPath_ = adminPasswordVaultPath_;
-        }
-        if (((from_bitField0_ & 0x00000200) != 0)) {
           result.assignable_ = assignable_;
         }
-        if (((from_bitField0_ & 0x00000400) != 0)) {
+        if (((from_bitField0_ & 0x00000200) != 0)) {
           result.id_ = id_;
         }
-        if (((from_bitField0_ & 0x00000800) != 0)) {
+        if (((from_bitField0_ & 0x00000400) != 0)) {
           result.registeredTimestamp_ = registeredTimestamp_;
         }
-        if (((from_bitField0_ & 0x00001000) != 0)) {
+        if (((from_bitField0_ & 0x00000800) != 0)) {
           result.updatedTimestamp_ = updatedTimestamp_;
         }
       }
@@ -28873,14 +28710,9 @@ public final class SDXSvcCommonProto {
         if (other.getTlsEnabled() != false) {
           setTlsEnabled(other.getTlsEnabled());
         }
-        if (!other.getAdminUsernameVaultPath().isEmpty()) {
-          adminUsernameVaultPath_ = other.adminUsernameVaultPath_;
+        if (!other.getRoleArn().isEmpty()) {
+          roleArn_ = other.roleArn_;
           bitField0_ |= 0x00000080;
-          onChanged();
-        }
-        if (!other.getAdminPasswordVaultPath().isEmpty()) {
-          adminPasswordVaultPath_ = other.adminPasswordVaultPath_;
-          bitField0_ |= 0x00000100;
           onChanged();
         }
         if (other.getAssignable() != false) {
@@ -28888,7 +28720,7 @@ public final class SDXSvcCommonProto {
         }
         if (!other.getId().isEmpty()) {
           id_ = other.id_;
-          bitField0_ |= 0x00000400;
+          bitField0_ |= 0x00000200;
           onChanged();
         }
         if (other.getRegisteredTimestamp() != 0L) {
@@ -28901,7 +28733,7 @@ public final class SDXSvcCommonProto {
           if (!other.assignments_.isEmpty()) {
             if (assignments_.isEmpty()) {
               assignments_ = other.assignments_;
-              bitField0_ = (bitField0_ & ~0x00002000);
+              bitField0_ = (bitField0_ & ~0x00001000);
             } else {
               ensureAssignmentsIsMutable();
               assignments_.addAll(other.assignments_);
@@ -28914,7 +28746,7 @@ public final class SDXSvcCommonProto {
               assignmentsBuilder_.dispose();
               assignmentsBuilder_ = null;
               assignments_ = other.assignments_;
-              bitField0_ = (bitField0_ & ~0x00002000);
+              bitField0_ = (bitField0_ & ~0x00001000);
               assignmentsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAssignmentsFieldBuilder() : null;
@@ -28985,36 +28817,31 @@ public final class SDXSvcCommonProto {
                 break;
               } // case 56
               case 66: {
-                adminUsernameVaultPath_ = input.readStringRequireUtf8();
+                roleArn_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000080;
                 break;
               } // case 66
-              case 74: {
-                adminPasswordVaultPath_ = input.readStringRequireUtf8();
+              case 72: {
+                assignable_ = input.readBool();
                 bitField0_ |= 0x00000100;
                 break;
-              } // case 74
-              case 80: {
-                assignable_ = input.readBool();
+              } // case 72
+              case 82: {
+                id_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000200;
                 break;
-              } // case 80
-              case 90: {
-                id_ = input.readStringRequireUtf8();
+              } // case 82
+              case 88: {
+                registeredTimestamp_ = input.readInt64();
                 bitField0_ |= 0x00000400;
                 break;
-              } // case 90
+              } // case 88
               case 96: {
-                registeredTimestamp_ = input.readInt64();
+                updatedTimestamp_ = input.readInt64();
                 bitField0_ |= 0x00000800;
                 break;
               } // case 96
-              case 104: {
-                updatedTimestamp_ = input.readInt64();
-                bitField0_ |= 0x00001000;
-                break;
-              } // case 104
-              case 114: {
+              case 106: {
                 com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment m =
                     input.readMessage(
                         com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.parser(),
@@ -29026,7 +28853,7 @@ public final class SDXSvcCommonProto {
                   assignmentsBuilder_.addMessage(m);
                 }
                 break;
-              } // case 114
+              } // case 106
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -29621,22 +29448,22 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
-      private java.lang.Object adminUsernameVaultPath_ = "";
+      private java.lang.Object roleArn_ = "";
       /**
        * <pre>
-       * Admin Username Vault Path
+       * The Role Arn to be used to create assignments
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 8;</code>
-       * @return The adminUsernameVaultPath.
+       * <code>string roleArn = 8;</code>
+       * @return The roleArn.
        */
-      public java.lang.String getAdminUsernameVaultPath() {
-        java.lang.Object ref = adminUsernameVaultPath_;
+      public java.lang.String getRoleArn() {
+        java.lang.Object ref = roleArn_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          adminUsernameVaultPath_ = s;
+          roleArn_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -29644,20 +29471,20 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * The Role Arn to be used to create assignments
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 8;</code>
-       * @return The bytes for adminUsernameVaultPath.
+       * <code>string roleArn = 8;</code>
+       * @return The bytes for roleArn.
        */
       public com.google.protobuf.ByteString
-          getAdminUsernameVaultPathBytes() {
-        java.lang.Object ref = adminUsernameVaultPath_;
+          getRoleArnBytes() {
+        java.lang.Object ref = roleArn_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          adminUsernameVaultPath_ = b;
+          roleArn_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -29665,142 +29492,50 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * The Role Arn to be used to create assignments
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 8;</code>
-       * @param value The adminUsernameVaultPath to set.
+       * <code>string roleArn = 8;</code>
+       * @param value The roleArn to set.
        * @return This builder for chaining.
        */
-      public Builder setAdminUsernameVaultPath(
+      public Builder setRoleArn(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        adminUsernameVaultPath_ = value;
+        roleArn_ = value;
         bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * The Role Arn to be used to create assignments
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 8;</code>
+       * <code>string roleArn = 8;</code>
        * @return This builder for chaining.
        */
-      public Builder clearAdminUsernameVaultPath() {
-        adminUsernameVaultPath_ = getDefaultInstance().getAdminUsernameVaultPath();
+      public Builder clearRoleArn() {
+        roleArn_ = getDefaultInstance().getRoleArn();
         bitField0_ = (bitField0_ & ~0x00000080);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * Admin Username Vault Path
+       * The Role Arn to be used to create assignments
        * </pre>
        *
-       * <code>string adminUsernameVaultPath = 8;</code>
-       * @param value The bytes for adminUsernameVaultPath to set.
+       * <code>string roleArn = 8;</code>
+       * @param value The bytes for roleArn to set.
        * @return This builder for chaining.
        */
-      public Builder setAdminUsernameVaultPathBytes(
+      public Builder setRoleArnBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        adminUsernameVaultPath_ = value;
+        roleArn_ = value;
         bitField0_ |= 0x00000080;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object adminPasswordVaultPath_ = "";
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string adminPasswordVaultPath = 9;</code>
-       * @return The adminPasswordVaultPath.
-       */
-      public java.lang.String getAdminPasswordVaultPath() {
-        java.lang.Object ref = adminPasswordVaultPath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          adminPasswordVaultPath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string adminPasswordVaultPath = 9;</code>
-       * @return The bytes for adminPasswordVaultPath.
-       */
-      public com.google.protobuf.ByteString
-          getAdminPasswordVaultPathBytes() {
-        java.lang.Object ref = adminPasswordVaultPath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          adminPasswordVaultPath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string adminPasswordVaultPath = 9;</code>
-       * @param value The adminPasswordVaultPath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAdminPasswordVaultPath(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        adminPasswordVaultPath_ = value;
-        bitField0_ |= 0x00000100;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string adminPasswordVaultPath = 9;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAdminPasswordVaultPath() {
-        adminPasswordVaultPath_ = getDefaultInstance().getAdminPasswordVaultPath();
-        bitField0_ = (bitField0_ & ~0x00000100);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Admin Password Vault Path
-       * </pre>
-       *
-       * <code>string adminPasswordVaultPath = 9;</code>
-       * @param value The bytes for adminPasswordVaultPath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAdminPasswordVaultPathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        adminPasswordVaultPath_ = value;
-        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -29811,7 +29546,7 @@ public final class SDXSvcCommonProto {
        * Is the Indexer assignable
        * </pre>
        *
-       * <code>bool assignable = 10;</code>
+       * <code>bool assignable = 9;</code>
        * @return The assignable.
        */
       @java.lang.Override
@@ -29823,14 +29558,14 @@ public final class SDXSvcCommonProto {
        * Is the Indexer assignable
        * </pre>
        *
-       * <code>bool assignable = 10;</code>
+       * <code>bool assignable = 9;</code>
        * @param value The assignable to set.
        * @return This builder for chaining.
        */
       public Builder setAssignable(boolean value) {
 
         assignable_ = value;
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -29839,11 +29574,11 @@ public final class SDXSvcCommonProto {
        * Is the Indexer assignable
        * </pre>
        *
-       * <code>bool assignable = 10;</code>
+       * <code>bool assignable = 9;</code>
        * @return This builder for chaining.
        */
       public Builder clearAssignable() {
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
         assignable_ = false;
         onChanged();
         return this;
@@ -29855,7 +29590,7 @@ public final class SDXSvcCommonProto {
        * Indexer instance Id - unique Id that will be auto generated by the RM on registration
        * </pre>
        *
-       * <code>string id = 11;</code>
+       * <code>string id = 10;</code>
        * @return The id.
        */
       public java.lang.String getId() {
@@ -29875,7 +29610,7 @@ public final class SDXSvcCommonProto {
        * Indexer instance Id - unique Id that will be auto generated by the RM on registration
        * </pre>
        *
-       * <code>string id = 11;</code>
+       * <code>string id = 10;</code>
        * @return The bytes for id.
        */
       public com.google.protobuf.ByteString
@@ -29896,7 +29631,7 @@ public final class SDXSvcCommonProto {
        * Indexer instance Id - unique Id that will be auto generated by the RM on registration
        * </pre>
        *
-       * <code>string id = 11;</code>
+       * <code>string id = 10;</code>
        * @param value The id to set.
        * @return This builder for chaining.
        */
@@ -29904,7 +29639,7 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         id_ = value;
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -29913,12 +29648,12 @@ public final class SDXSvcCommonProto {
        * Indexer instance Id - unique Id that will be auto generated by the RM on registration
        * </pre>
        *
-       * <code>string id = 11;</code>
+       * <code>string id = 10;</code>
        * @return This builder for chaining.
        */
       public Builder clearId() {
         id_ = getDefaultInstance().getId();
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000200);
         onChanged();
         return this;
       }
@@ -29927,7 +29662,7 @@ public final class SDXSvcCommonProto {
        * Indexer instance Id - unique Id that will be auto generated by the RM on registration
        * </pre>
        *
-       * <code>string id = 11;</code>
+       * <code>string id = 10;</code>
        * @param value The bytes for id to set.
        * @return This builder for chaining.
        */
@@ -29936,7 +29671,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         id_ = value;
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -29947,7 +29682,7 @@ public final class SDXSvcCommonProto {
        * Timestamp of registration
        * </pre>
        *
-       * <code>int64 registeredTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 registeredTimestamp = 11 [(.options.FieldExtension.datetime) = true];</code>
        * @return The registeredTimestamp.
        */
       @java.lang.Override
@@ -29959,14 +29694,14 @@ public final class SDXSvcCommonProto {
        * Timestamp of registration
        * </pre>
        *
-       * <code>int64 registeredTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 registeredTimestamp = 11 [(.options.FieldExtension.datetime) = true];</code>
        * @param value The registeredTimestamp to set.
        * @return This builder for chaining.
        */
       public Builder setRegisteredTimestamp(long value) {
 
         registeredTimestamp_ = value;
-        bitField0_ |= 0x00000800;
+        bitField0_ |= 0x00000400;
         onChanged();
         return this;
       }
@@ -29975,11 +29710,11 @@ public final class SDXSvcCommonProto {
        * Timestamp of registration
        * </pre>
        *
-       * <code>int64 registeredTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 registeredTimestamp = 11 [(.options.FieldExtension.datetime) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearRegisteredTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000800);
+        bitField0_ = (bitField0_ & ~0x00000400);
         registeredTimestamp_ = 0L;
         onChanged();
         return this;
@@ -29991,7 +29726,7 @@ public final class SDXSvcCommonProto {
        * Timestamp of last update
        * </pre>
        *
-       * <code>int64 updatedTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 updatedTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
        * @return The updatedTimestamp.
        */
       @java.lang.Override
@@ -30003,14 +29738,14 @@ public final class SDXSvcCommonProto {
        * Timestamp of last update
        * </pre>
        *
-       * <code>int64 updatedTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 updatedTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
        * @param value The updatedTimestamp to set.
        * @return This builder for chaining.
        */
       public Builder setUpdatedTimestamp(long value) {
 
         updatedTimestamp_ = value;
-        bitField0_ |= 0x00001000;
+        bitField0_ |= 0x00000800;
         onChanged();
         return this;
       }
@@ -30019,11 +29754,11 @@ public final class SDXSvcCommonProto {
        * Timestamp of last update
        * </pre>
        *
-       * <code>int64 updatedTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 updatedTimestamp = 12 [(.options.FieldExtension.datetime) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearUpdatedTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00001000);
+        bitField0_ = (bitField0_ & ~0x00000800);
         updatedTimestamp_ = 0L;
         onChanged();
         return this;
@@ -30032,9 +29767,9 @@ public final class SDXSvcCommonProto {
       private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment> assignments_ =
         java.util.Collections.emptyList();
       private void ensureAssignmentsIsMutable() {
-        if (!((bitField0_ & 0x00002000) != 0)) {
+        if (!((bitField0_ & 0x00001000) != 0)) {
           assignments_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment>(assignments_);
-          bitField0_ |= 0x00002000;
+          bitField0_ |= 0x00001000;
          }
       }
 
@@ -30046,7 +29781,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment> getAssignmentsList() {
         if (assignmentsBuilder_ == null) {
@@ -30060,7 +29795,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public int getAssignmentsCount() {
         if (assignmentsBuilder_ == null) {
@@ -30074,7 +29809,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment getAssignments(int index) {
         if (assignmentsBuilder_ == null) {
@@ -30088,7 +29823,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder setAssignments(
           int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment value) {
@@ -30109,7 +29844,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder setAssignments(
           int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder builderForValue) {
@@ -30127,7 +29862,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder addAssignments(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment value) {
         if (assignmentsBuilder_ == null) {
@@ -30147,7 +29882,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder addAssignments(
           int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment value) {
@@ -30168,7 +29903,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder addAssignments(
           com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder builderForValue) {
@@ -30186,7 +29921,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder addAssignments(
           int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder builderForValue) {
@@ -30204,7 +29939,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder addAllAssignments(
           java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment> values) {
@@ -30223,12 +29958,12 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder clearAssignments() {
         if (assignmentsBuilder_ == null) {
           assignments_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00002000);
+          bitField0_ = (bitField0_ & ~0x00001000);
           onChanged();
         } else {
           assignmentsBuilder_.clear();
@@ -30240,7 +29975,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public Builder removeAssignments(int index) {
         if (assignmentsBuilder_ == null) {
@@ -30257,7 +29992,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder getAssignmentsBuilder(
           int index) {
@@ -30268,7 +30003,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder getAssignmentsOrBuilder(
           int index) {
@@ -30282,7 +30017,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder> 
            getAssignmentsOrBuilderList() {
@@ -30297,7 +30032,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder addAssignmentsBuilder() {
         return getAssignmentsFieldBuilder().addBuilder(
@@ -30308,7 +30043,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder addAssignmentsBuilder(
           int index) {
@@ -30320,7 +30055,7 @@ public final class SDXSvcCommonProto {
        * Assignment to this indexer
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 14;</code>
+       * <code>repeated .sdxsvccommon.IndexerAssignment assignments = 13;</code>
        */
       public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder> 
            getAssignmentsBuilderList() {
@@ -30333,7 +30068,7 @@ public final class SDXSvcCommonProto {
           assignmentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.IndexerAssignmentOrBuilder>(
                   assignments_,
-                  ((bitField0_ & 0x00002000) != 0),
+                  ((bitField0_ & 0x00001000) != 0),
                   getParentForChildren(),
                   isClean());
           assignments_ = null;
@@ -30489,7 +30224,7 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * DB name
+     * The Indexer Prefix generated from instanceId and serviceId
      * </pre>
      *
      * <code>string indexPrefix = 5;</code>
@@ -30498,7 +30233,7 @@ public final class SDXSvcCommonProto {
     java.lang.String getIndexPrefix();
     /**
      * <pre>
-     * DB name
+     * The Indexer Prefix generated from instanceId and serviceId
      * </pre>
      *
      * <code>string indexPrefix = 5;</code>
@@ -30596,6 +30331,26 @@ public final class SDXSvcCommonProto {
      */
     com.google.protobuf.ByteString
         getServiceIdBytes();
+
+    /**
+     * <pre>
+     * Admin Credential Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 11;</code>
+     * @return The credentialsVaultPath.
+     */
+    java.lang.String getCredentialsVaultPath();
+    /**
+     * <pre>
+     * Admin Credential Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 11;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes();
   }
   /**
    * <pre>
@@ -30623,6 +30378,7 @@ public final class SDXSvcCommonProto {
       accessPort_ = "";
       instanceId_ = "";
       serviceId_ = "";
+      credentialsVaultPath_ = "";
     }
 
     @java.lang.Override
@@ -30817,7 +30573,7 @@ public final class SDXSvcCommonProto {
     private volatile java.lang.Object indexPrefix_ = "";
     /**
      * <pre>
-     * DB name
+     * The Indexer Prefix generated from instanceId and serviceId
      * </pre>
      *
      * <code>string indexPrefix = 5;</code>
@@ -30838,7 +30594,7 @@ public final class SDXSvcCommonProto {
     }
     /**
      * <pre>
-     * DB name
+     * The Indexer Prefix generated from instanceId and serviceId
      * </pre>
      *
      * <code>string indexPrefix = 5;</code>
@@ -31062,6 +30818,53 @@ public final class SDXSvcCommonProto {
       }
     }
 
+    public static final int CREDENTIALSVAULTPATH_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object credentialsVaultPath_ = "";
+    /**
+     * <pre>
+     * Admin Credential Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 11;</code>
+     * @return The credentialsVaultPath.
+     */
+    @java.lang.Override
+    public java.lang.String getCredentialsVaultPath() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        credentialsVaultPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Admin Credential Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 11;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        credentialsVaultPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -31079,7 +30882,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, assignmentId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(2, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -31106,6 +30909,9 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, serviceId_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, credentialsVaultPath_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -31118,7 +30924,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, assignmentId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, cloudPlatform_);
       }
@@ -31146,6 +30952,9 @@ public final class SDXSvcCommonProto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, serviceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, credentialsVaultPath_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -31181,6 +30990,8 @@ public final class SDXSvcCommonProto {
           .equals(other.getInstanceId())) return false;
       if (!getServiceId()
           .equals(other.getServiceId())) return false;
+      if (!getCredentialsVaultPath()
+          .equals(other.getCredentialsVaultPath())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -31213,6 +31024,8 @@ public final class SDXSvcCommonProto {
       hash = (53 * hash) + getInstanceId().hashCode();
       hash = (37 * hash) + SERVICEID_FIELD_NUMBER;
       hash = (53 * hash) + getServiceId().hashCode();
+      hash = (37 * hash) + CREDENTIALSVAULTPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getCredentialsVaultPath().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -31358,6 +31171,7 @@ public final class SDXSvcCommonProto {
         tlsEnabled_ = false;
         instanceId_ = "";
         serviceId_ = "";
+        credentialsVaultPath_ = "";
         return this;
       }
 
@@ -31420,6 +31234,9 @@ public final class SDXSvcCommonProto {
         }
         if (((from_bitField0_ & 0x00000200) != 0)) {
           result.serviceId_ = serviceId_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.credentialsVaultPath_ = credentialsVaultPath_;
         }
       }
 
@@ -31513,6 +31330,11 @@ public final class SDXSvcCommonProto {
           bitField0_ |= 0x00000200;
           onChanged();
         }
+        if (!other.getCredentialsVaultPath().isEmpty()) {
+          credentialsVaultPath_ = other.credentialsVaultPath_;
+          bitField0_ |= 0x00000400;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -31589,6 +31411,11 @@ public final class SDXSvcCommonProto {
                 bitField0_ |= 0x00000200;
                 break;
               } // case 82
+              case 90: {
+                credentialsVaultPath_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 90
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -31958,7 +31785,7 @@ public final class SDXSvcCommonProto {
       private java.lang.Object indexPrefix_ = "";
       /**
        * <pre>
-       * DB name
+       * The Indexer Prefix generated from instanceId and serviceId
        * </pre>
        *
        * <code>string indexPrefix = 5;</code>
@@ -31978,7 +31805,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * DB name
+       * The Indexer Prefix generated from instanceId and serviceId
        * </pre>
        *
        * <code>string indexPrefix = 5;</code>
@@ -31999,7 +31826,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * DB name
+       * The Indexer Prefix generated from instanceId and serviceId
        * </pre>
        *
        * <code>string indexPrefix = 5;</code>
@@ -32016,7 +31843,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * DB name
+       * The Indexer Prefix generated from instanceId and serviceId
        * </pre>
        *
        * <code>string indexPrefix = 5;</code>
@@ -32030,7 +31857,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * DB name
+       * The Indexer Prefix generated from instanceId and serviceId
        * </pre>
        *
        * <code>string indexPrefix = 5;</code>
@@ -32458,6 +32285,98 @@ public final class SDXSvcCommonProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object credentialsVaultPath_ = "";
+      /**
+       * <pre>
+       * Admin Credential Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 11;</code>
+       * @return The credentialsVaultPath.
+       */
+      public java.lang.String getCredentialsVaultPath() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          credentialsVaultPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credential Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 11;</code>
+       * @return The bytes for credentialsVaultPath.
+       */
+      public com.google.protobuf.ByteString
+          getCredentialsVaultPathBytes() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          credentialsVaultPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credential Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 11;</code>
+       * @param value The credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credential Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCredentialsVaultPath() {
+        credentialsVaultPath_ = getDefaultInstance().getCredentialsVaultPath();
+        bitField0_ = (bitField0_ & ~0x00000400);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credential Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 11;</code>
+       * @param value The bytes for credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -32607,7 +32526,7 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * The cloud region the Storage Root. is in
+     * The cloud region the Storage Root is in.
      * </pre>
      *
      * <code>string cloudRegion = 5;</code>
@@ -32616,7 +32535,7 @@ public final class SDXSvcCommonProto {
     java.lang.String getCloudRegion();
     /**
      * <pre>
-     * The cloud region the Storage Root. is in
+     * The cloud region the Storage Root is in.
      * </pre>
      *
      * <code>string cloudRegion = 5;</code>
@@ -32627,77 +32546,117 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * Timestamp of registration
+     * Timestamp of registration.
      * </pre>
      *
-     * <code>int64 registeredTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 registeredTimestamp = 6 [(.options.FieldExtension.datetime) = true];</code>
      * @return The registeredTimestamp.
      */
     long getRegisteredTimestamp();
 
     /**
      * <pre>
-     * Timestamp of last update
+     * Timestamp of last update.
      * </pre>
      *
-     * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 updatedTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
      * @return The updatedTimestamp.
      */
     long getUpdatedTimestamp();
 
     /**
      * <pre>
-     * Is the Storage Root assignable
+     * Is the Storage Root assignable.
      * </pre>
      *
-     * <code>bool assignable = 9;</code>
+     * <code>bool assignable = 8;</code>
      * @return The assignable.
      */
     boolean getAssignable();
 
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Role Arn to be used to create instances.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>string roleArn = 9;</code>
+     * @return The roleArn.
      */
-    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> 
-        getAssignedStorageList();
+    java.lang.String getRoleArn();
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Role Arn to be used to create instances.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>string roleArn = 9;</code>
+     * @return The bytes for roleArn.
      */
-    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getAssignedStorage(int index);
+    com.google.protobuf.ByteString
+        getRoleArnBytes();
+
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Storage instance assigned to the Storage Root.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
      */
-    int getAssignedStorageCount();
+    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance> 
+        getStorageInstancesList();
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Storage instance assigned to the Storage Root.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
      */
-    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
-        getAssignedStorageOrBuilderList();
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance getStorageInstances(int index);
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Storage instance assigned to the Storage Root.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
      */
-    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder getAssignedStorageOrBuilder(
+    int getStorageInstancesCount();
+    /**
+     * <pre>
+     * The Storage instance assigned to the Storage Root.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder> 
+        getStorageInstancesOrBuilderList();
+    /**
+     * <pre>
+     * The Storage instance assigned to the Storage Root.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder getStorageInstancesOrBuilder(
         int index);
+
+    /**
+     * <pre>
+     * The Permissions Boundary a role attached to this Storage Root has to follow
+     * </pre>
+     *
+     * <code>string permissionsBoundary = 11;</code>
+     * @return The permissionsBoundary.
+     */
+    java.lang.String getPermissionsBoundary();
+    /**
+     * <pre>
+     * The Permissions Boundary a role attached to this Storage Root has to follow
+     * </pre>
+     *
+     * <code>string permissionsBoundary = 11;</code>
+     * @return The bytes for permissionsBoundary.
+     */
+    com.google.protobuf.ByteString
+        getPermissionsBoundaryBytes();
   }
   /**
    * <pre>
@@ -32721,7 +32680,9 @@ public final class SDXSvcCommonProto {
       cloudId_ = "";
       cloudPlatform_ = 0;
       cloudRegion_ = "";
-      assignedStorage_ = java.util.Collections.emptyList();
+      roleArn_ = "";
+      storageInstances_ = java.util.Collections.emptyList();
+      permissionsBoundary_ = "";
     }
 
     @java.lang.Override
@@ -32916,7 +32877,7 @@ public final class SDXSvcCommonProto {
     private volatile java.lang.Object cloudRegion_ = "";
     /**
      * <pre>
-     * The cloud region the Storage Root. is in
+     * The cloud region the Storage Root is in.
      * </pre>
      *
      * <code>string cloudRegion = 5;</code>
@@ -32937,7 +32898,7 @@ public final class SDXSvcCommonProto {
     }
     /**
      * <pre>
-     * The cloud region the Storage Root. is in
+     * The cloud region the Storage Root is in.
      * </pre>
      *
      * <code>string cloudRegion = 5;</code>
@@ -32958,14 +32919,14 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int REGISTEREDTIMESTAMP_FIELD_NUMBER = 7;
+    public static final int REGISTEREDTIMESTAMP_FIELD_NUMBER = 6;
     private long registeredTimestamp_ = 0L;
     /**
      * <pre>
-     * Timestamp of registration
+     * Timestamp of registration.
      * </pre>
      *
-     * <code>int64 registeredTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 registeredTimestamp = 6 [(.options.FieldExtension.datetime) = true];</code>
      * @return The registeredTimestamp.
      */
     @java.lang.Override
@@ -32973,14 +32934,14 @@ public final class SDXSvcCommonProto {
       return registeredTimestamp_;
     }
 
-    public static final int UPDATEDTIMESTAMP_FIELD_NUMBER = 8;
+    public static final int UPDATEDTIMESTAMP_FIELD_NUMBER = 7;
     private long updatedTimestamp_ = 0L;
     /**
      * <pre>
-     * Timestamp of last update
+     * Timestamp of last update.
      * </pre>
      *
-     * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 updatedTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
      * @return The updatedTimestamp.
      */
     @java.lang.Override
@@ -32988,14 +32949,14 @@ public final class SDXSvcCommonProto {
       return updatedTimestamp_;
     }
 
-    public static final int ASSIGNABLE_FIELD_NUMBER = 9;
+    public static final int ASSIGNABLE_FIELD_NUMBER = 8;
     private boolean assignable_ = false;
     /**
      * <pre>
-     * Is the Storage Root assignable
+     * Is the Storage Root assignable.
      * </pre>
      *
-     * <code>bool assignable = 9;</code>
+     * <code>bool assignable = 8;</code>
      * @return The assignable.
      */
     @java.lang.Override
@@ -33003,65 +32964,159 @@ public final class SDXSvcCommonProto {
       return assignable_;
     }
 
-    public static final int ASSIGNEDSTORAGE_FIELD_NUMBER = 10;
+    public static final int ROLEARN_FIELD_NUMBER = 9;
     @SuppressWarnings("serial")
-    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> assignedStorage_;
+    private volatile java.lang.Object roleArn_ = "";
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Role Arn to be used to create instances.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>string roleArn = 9;</code>
+     * @return The roleArn.
      */
     @java.lang.Override
-    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> getAssignedStorageList() {
-      return assignedStorage_;
+    public java.lang.String getRoleArn() {
+      java.lang.Object ref = roleArn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        roleArn_ = s;
+        return s;
+      }
     }
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Role Arn to be used to create instances.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>string roleArn = 9;</code>
+     * @return The bytes for roleArn.
      */
     @java.lang.Override
-    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
-        getAssignedStorageOrBuilderList() {
-      return assignedStorage_;
+    public com.google.protobuf.ByteString
+        getRoleArnBytes() {
+      java.lang.Object ref = roleArn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        roleArn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STORAGEINSTANCES_FIELD_NUMBER = 10;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance> storageInstances_;
+    /**
+     * <pre>
+     * The Storage instance assigned to the Storage Root.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance> getStorageInstancesList() {
+      return storageInstances_;
     }
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Storage instance assigned to the Storage Root.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
      */
     @java.lang.Override
-    public int getAssignedStorageCount() {
-      return assignedStorage_.size();
+    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder> 
+        getStorageInstancesOrBuilderList() {
+      return storageInstances_;
     }
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Storage instance assigned to the Storage Root.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
      */
     @java.lang.Override
-    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getAssignedStorage(int index) {
-      return assignedStorage_.get(index);
+    public int getStorageInstancesCount() {
+      return storageInstances_.size();
     }
     /**
      * <pre>
-     * The Storage assigned to the Storage Root
+     * The Storage instance assigned to the Storage Root.
      * </pre>
      *
-     * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
      */
     @java.lang.Override
-    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder getAssignedStorageOrBuilder(
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance getStorageInstances(int index) {
+      return storageInstances_.get(index);
+    }
+    /**
+     * <pre>
+     * The Storage instance assigned to the Storage Root.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder getStorageInstancesOrBuilder(
         int index) {
-      return assignedStorage_.get(index);
+      return storageInstances_.get(index);
+    }
+
+    public static final int PERMISSIONSBOUNDARY_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object permissionsBoundary_ = "";
+    /**
+     * <pre>
+     * The Permissions Boundary a role attached to this Storage Root has to follow
+     * </pre>
+     *
+     * <code>string permissionsBoundary = 11;</code>
+     * @return The permissionsBoundary.
+     */
+    @java.lang.Override
+    public java.lang.String getPermissionsBoundary() {
+      java.lang.Object ref = permissionsBoundary_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        permissionsBoundary_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Permissions Boundary a role attached to this Storage Root has to follow
+     * </pre>
+     *
+     * <code>string permissionsBoundary = 11;</code>
+     * @return The bytes for permissionsBoundary.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPermissionsBoundaryBytes() {
+      java.lang.Object ref = permissionsBoundary_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        permissionsBoundary_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private byte memoizedIsInitialized = -1;
@@ -33087,23 +33142,29 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(4, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cloudRegion_);
       }
       if (registeredTimestamp_ != 0L) {
-        output.writeInt64(7, registeredTimestamp_);
+        output.writeInt64(6, registeredTimestamp_);
       }
       if (updatedTimestamp_ != 0L) {
-        output.writeInt64(8, updatedTimestamp_);
+        output.writeInt64(7, updatedTimestamp_);
       }
       if (assignable_ != false) {
-        output.writeBool(9, assignable_);
+        output.writeBool(8, assignable_);
       }
-      for (int i = 0; i < assignedStorage_.size(); i++) {
-        output.writeMessage(10, assignedStorage_.get(i));
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, roleArn_);
+      }
+      for (int i = 0; i < storageInstances_.size(); i++) {
+        output.writeMessage(10, storageInstances_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(permissionsBoundary_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, permissionsBoundary_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -33123,7 +33184,7 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, cloudPlatform_);
       }
@@ -33132,19 +33193,25 @@ public final class SDXSvcCommonProto {
       }
       if (registeredTimestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(7, registeredTimestamp_);
+          .computeInt64Size(6, registeredTimestamp_);
       }
       if (updatedTimestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(8, updatedTimestamp_);
+          .computeInt64Size(7, updatedTimestamp_);
       }
       if (assignable_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(9, assignable_);
+          .computeBoolSize(8, assignable_);
       }
-      for (int i = 0; i < assignedStorage_.size(); i++) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, roleArn_);
+      }
+      for (int i = 0; i < storageInstances_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, assignedStorage_.get(i));
+          .computeMessageSize(10, storageInstances_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(permissionsBoundary_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, permissionsBoundary_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -33176,8 +33243,12 @@ public final class SDXSvcCommonProto {
           != other.getUpdatedTimestamp()) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
-      if (!getAssignedStorageList()
-          .equals(other.getAssignedStorageList())) return false;
+      if (!getRoleArn()
+          .equals(other.getRoleArn())) return false;
+      if (!getStorageInstancesList()
+          .equals(other.getStorageInstancesList())) return false;
+      if (!getPermissionsBoundary()
+          .equals(other.getPermissionsBoundary())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -33208,10 +33279,14 @@ public final class SDXSvcCommonProto {
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
-      if (getAssignedStorageCount() > 0) {
-        hash = (37 * hash) + ASSIGNEDSTORAGE_FIELD_NUMBER;
-        hash = (53 * hash) + getAssignedStorageList().hashCode();
+      hash = (37 * hash) + ROLEARN_FIELD_NUMBER;
+      hash = (53 * hash) + getRoleArn().hashCode();
+      if (getStorageInstancesCount() > 0) {
+        hash = (37 * hash) + STORAGEINSTANCES_FIELD_NUMBER;
+        hash = (53 * hash) + getStorageInstancesList().hashCode();
       }
+      hash = (37 * hash) + PERMISSIONSBOUNDARY_FIELD_NUMBER;
+      hash = (53 * hash) + getPermissionsBoundary().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -33355,13 +33430,15 @@ public final class SDXSvcCommonProto {
         registeredTimestamp_ = 0L;
         updatedTimestamp_ = 0L;
         assignable_ = false;
-        if (assignedStorageBuilder_ == null) {
-          assignedStorage_ = java.util.Collections.emptyList();
+        roleArn_ = "";
+        if (storageInstancesBuilder_ == null) {
+          storageInstances_ = java.util.Collections.emptyList();
         } else {
-          assignedStorage_ = null;
-          assignedStorageBuilder_.clear();
+          storageInstances_ = null;
+          storageInstancesBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
+        permissionsBoundary_ = "";
         return this;
       }
 
@@ -33395,14 +33472,14 @@ public final class SDXSvcCommonProto {
       }
 
       private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot result) {
-        if (assignedStorageBuilder_ == null) {
-          if (((bitField0_ & 0x00000100) != 0)) {
-            assignedStorage_ = java.util.Collections.unmodifiableList(assignedStorage_);
-            bitField0_ = (bitField0_ & ~0x00000100);
+        if (storageInstancesBuilder_ == null) {
+          if (((bitField0_ & 0x00000200) != 0)) {
+            storageInstances_ = java.util.Collections.unmodifiableList(storageInstances_);
+            bitField0_ = (bitField0_ & ~0x00000200);
           }
-          result.assignedStorage_ = assignedStorage_;
+          result.storageInstances_ = storageInstances_;
         } else {
-          result.assignedStorage_ = assignedStorageBuilder_.build();
+          result.storageInstances_ = storageInstancesBuilder_.build();
         }
       }
 
@@ -33431,6 +33508,12 @@ public final class SDXSvcCommonProto {
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
           result.assignable_ = assignable_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.roleArn_ = roleArn_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.permissionsBoundary_ = permissionsBoundary_;
         }
       }
 
@@ -33510,31 +33593,41 @@ public final class SDXSvcCommonProto {
         if (other.getAssignable() != false) {
           setAssignable(other.getAssignable());
         }
-        if (assignedStorageBuilder_ == null) {
-          if (!other.assignedStorage_.isEmpty()) {
-            if (assignedStorage_.isEmpty()) {
-              assignedStorage_ = other.assignedStorage_;
-              bitField0_ = (bitField0_ & ~0x00000100);
+        if (!other.getRoleArn().isEmpty()) {
+          roleArn_ = other.roleArn_;
+          bitField0_ |= 0x00000100;
+          onChanged();
+        }
+        if (storageInstancesBuilder_ == null) {
+          if (!other.storageInstances_.isEmpty()) {
+            if (storageInstances_.isEmpty()) {
+              storageInstances_ = other.storageInstances_;
+              bitField0_ = (bitField0_ & ~0x00000200);
             } else {
-              ensureAssignedStorageIsMutable();
-              assignedStorage_.addAll(other.assignedStorage_);
+              ensureStorageInstancesIsMutable();
+              storageInstances_.addAll(other.storageInstances_);
             }
             onChanged();
           }
         } else {
-          if (!other.assignedStorage_.isEmpty()) {
-            if (assignedStorageBuilder_.isEmpty()) {
-              assignedStorageBuilder_.dispose();
-              assignedStorageBuilder_ = null;
-              assignedStorage_ = other.assignedStorage_;
-              bitField0_ = (bitField0_ & ~0x00000100);
-              assignedStorageBuilder_ = 
+          if (!other.storageInstances_.isEmpty()) {
+            if (storageInstancesBuilder_.isEmpty()) {
+              storageInstancesBuilder_.dispose();
+              storageInstancesBuilder_ = null;
+              storageInstances_ = other.storageInstances_;
+              bitField0_ = (bitField0_ & ~0x00000200);
+              storageInstancesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getAssignedStorageFieldBuilder() : null;
+                   getStorageInstancesFieldBuilder() : null;
             } else {
-              assignedStorageBuilder_.addAllMessages(other.assignedStorage_);
+              storageInstancesBuilder_.addAllMessages(other.storageInstances_);
             }
           }
+        }
+        if (!other.getPermissionsBoundary().isEmpty()) {
+          permissionsBoundary_ = other.permissionsBoundary_;
+          bitField0_ |= 0x00000400;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -33587,34 +33680,44 @@ public final class SDXSvcCommonProto {
                 bitField0_ |= 0x00000010;
                 break;
               } // case 42
-              case 56: {
+              case 48: {
                 registeredTimestamp_ = input.readInt64();
                 bitField0_ |= 0x00000020;
                 break;
-              } // case 56
-              case 64: {
+              } // case 48
+              case 56: {
                 updatedTimestamp_ = input.readInt64();
                 bitField0_ |= 0x00000040;
                 break;
-              } // case 64
-              case 72: {
+              } // case 56
+              case 64: {
                 assignable_ = input.readBool();
                 bitField0_ |= 0x00000080;
                 break;
-              } // case 72
+              } // case 64
+              case 74: {
+                roleArn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
               case 82: {
-                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment m =
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance m =
                     input.readMessage(
-                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.parser(),
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.parser(),
                         extensionRegistry);
-                if (assignedStorageBuilder_ == null) {
-                  ensureAssignedStorageIsMutable();
-                  assignedStorage_.add(m);
+                if (storageInstancesBuilder_ == null) {
+                  ensureStorageInstancesIsMutable();
+                  storageInstances_.add(m);
                 } else {
-                  assignedStorageBuilder_.addMessage(m);
+                  storageInstancesBuilder_.addMessage(m);
                 }
                 break;
               } // case 82
+              case 90: {
+                permissionsBoundary_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 90
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -33984,7 +34087,7 @@ public final class SDXSvcCommonProto {
       private java.lang.Object cloudRegion_ = "";
       /**
        * <pre>
-       * The cloud region the Storage Root. is in
+       * The cloud region the Storage Root is in.
        * </pre>
        *
        * <code>string cloudRegion = 5;</code>
@@ -34004,7 +34107,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The cloud region the Storage Root. is in
+       * The cloud region the Storage Root is in.
        * </pre>
        *
        * <code>string cloudRegion = 5;</code>
@@ -34025,7 +34128,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The cloud region the Storage Root. is in
+       * The cloud region the Storage Root is in.
        * </pre>
        *
        * <code>string cloudRegion = 5;</code>
@@ -34042,7 +34145,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The cloud region the Storage Root. is in
+       * The cloud region the Storage Root is in.
        * </pre>
        *
        * <code>string cloudRegion = 5;</code>
@@ -34056,7 +34159,7 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The cloud region the Storage Root. is in
+       * The cloud region the Storage Root is in.
        * </pre>
        *
        * <code>string cloudRegion = 5;</code>
@@ -34076,10 +34179,10 @@ public final class SDXSvcCommonProto {
       private long registeredTimestamp_ ;
       /**
        * <pre>
-       * Timestamp of registration
+       * Timestamp of registration.
        * </pre>
        *
-       * <code>int64 registeredTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 registeredTimestamp = 6 [(.options.FieldExtension.datetime) = true];</code>
        * @return The registeredTimestamp.
        */
       @java.lang.Override
@@ -34088,10 +34191,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Timestamp of registration
+       * Timestamp of registration.
        * </pre>
        *
-       * <code>int64 registeredTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 registeredTimestamp = 6 [(.options.FieldExtension.datetime) = true];</code>
        * @param value The registeredTimestamp to set.
        * @return This builder for chaining.
        */
@@ -34104,10 +34207,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Timestamp of registration
+       * Timestamp of registration.
        * </pre>
        *
-       * <code>int64 registeredTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 registeredTimestamp = 6 [(.options.FieldExtension.datetime) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearRegisteredTimestamp() {
@@ -34120,10 +34223,10 @@ public final class SDXSvcCommonProto {
       private long updatedTimestamp_ ;
       /**
        * <pre>
-       * Timestamp of last update
+       * Timestamp of last update.
        * </pre>
        *
-       * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 updatedTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
        * @return The updatedTimestamp.
        */
       @java.lang.Override
@@ -34132,10 +34235,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Timestamp of last update
+       * Timestamp of last update.
        * </pre>
        *
-       * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 updatedTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
        * @param value The updatedTimestamp to set.
        * @return This builder for chaining.
        */
@@ -34148,10 +34251,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Timestamp of last update
+       * Timestamp of last update.
        * </pre>
        *
-       * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 updatedTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearUpdatedTimestamp() {
@@ -34164,10 +34267,10 @@ public final class SDXSvcCommonProto {
       private boolean assignable_ ;
       /**
        * <pre>
-       * Is the Storage Root assignable
+       * Is the Storage Root assignable.
        * </pre>
        *
-       * <code>bool assignable = 9;</code>
+       * <code>bool assignable = 8;</code>
        * @return The assignable.
        */
       @java.lang.Override
@@ -34176,10 +34279,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Is the Storage Root assignable
+       * Is the Storage Root assignable.
        * </pre>
        *
-       * <code>bool assignable = 9;</code>
+       * <code>bool assignable = 8;</code>
        * @param value The assignable to set.
        * @return This builder for chaining.
        */
@@ -34192,10 +34295,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * Is the Storage Root assignable
+       * Is the Storage Root assignable.
        * </pre>
        *
-       * <code>bool assignable = 9;</code>
+       * <code>bool assignable = 8;</code>
        * @return This builder for chaining.
        */
       public Builder clearAssignable() {
@@ -34205,316 +34308,500 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
-      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> assignedStorage_ =
+      private java.lang.Object roleArn_ = "";
+      /**
+       * <pre>
+       * The Role Arn to be used to create instances.
+       * </pre>
+       *
+       * <code>string roleArn = 9;</code>
+       * @return The roleArn.
+       */
+      public java.lang.String getRoleArn() {
+        java.lang.Object ref = roleArn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          roleArn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Role Arn to be used to create instances.
+       * </pre>
+       *
+       * <code>string roleArn = 9;</code>
+       * @return The bytes for roleArn.
+       */
+      public com.google.protobuf.ByteString
+          getRoleArnBytes() {
+        java.lang.Object ref = roleArn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          roleArn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Role Arn to be used to create instances.
+       * </pre>
+       *
+       * <code>string roleArn = 9;</code>
+       * @param value The roleArn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRoleArn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        roleArn_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Role Arn to be used to create instances.
+       * </pre>
+       *
+       * <code>string roleArn = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRoleArn() {
+        roleArn_ = getDefaultInstance().getRoleArn();
+        bitField0_ = (bitField0_ & ~0x00000100);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Role Arn to be used to create instances.
+       * </pre>
+       *
+       * <code>string roleArn = 9;</code>
+       * @param value The bytes for roleArn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRoleArnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        roleArn_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance> storageInstances_ =
         java.util.Collections.emptyList();
-      private void ensureAssignedStorageIsMutable() {
-        if (!((bitField0_ & 0x00000100) != 0)) {
-          assignedStorage_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment>(assignedStorage_);
-          bitField0_ |= 0x00000100;
+      private void ensureStorageInstancesIsMutable() {
+        if (!((bitField0_ & 0x00000200) != 0)) {
+          storageInstances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance>(storageInstances_);
+          bitField0_ |= 0x00000200;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> assignedStorageBuilder_;
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder> storageInstancesBuilder_;
 
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> getAssignedStorageList() {
-        if (assignedStorageBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(assignedStorage_);
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance> getStorageInstancesList() {
+        if (storageInstancesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(storageInstances_);
         } else {
-          return assignedStorageBuilder_.getMessageList();
+          return storageInstancesBuilder_.getMessageList();
         }
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public int getAssignedStorageCount() {
-        if (assignedStorageBuilder_ == null) {
-          return assignedStorage_.size();
+      public int getStorageInstancesCount() {
+        if (storageInstancesBuilder_ == null) {
+          return storageInstances_.size();
         } else {
-          return assignedStorageBuilder_.getCount();
+          return storageInstancesBuilder_.getCount();
         }
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getAssignedStorage(int index) {
-        if (assignedStorageBuilder_ == null) {
-          return assignedStorage_.get(index);
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance getStorageInstances(int index) {
+        if (storageInstancesBuilder_ == null) {
+          return storageInstances_.get(index);
         } else {
-          return assignedStorageBuilder_.getMessage(index);
+          return storageInstancesBuilder_.getMessage(index);
         }
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder setAssignedStorage(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment value) {
-        if (assignedStorageBuilder_ == null) {
+      public Builder setStorageInstances(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance value) {
+        if (storageInstancesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.set(index, value);
+          ensureStorageInstancesIsMutable();
+          storageInstances_.set(index, value);
           onChanged();
         } else {
-          assignedStorageBuilder_.setMessage(index, value);
+          storageInstancesBuilder_.setMessage(index, value);
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder setAssignedStorage(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder builderForValue) {
-        if (assignedStorageBuilder_ == null) {
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.set(index, builderForValue.build());
+      public Builder setStorageInstances(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder builderForValue) {
+        if (storageInstancesBuilder_ == null) {
+          ensureStorageInstancesIsMutable();
+          storageInstances_.set(index, builderForValue.build());
           onChanged();
         } else {
-          assignedStorageBuilder_.setMessage(index, builderForValue.build());
+          storageInstancesBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder addAssignedStorage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment value) {
-        if (assignedStorageBuilder_ == null) {
+      public Builder addStorageInstances(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance value) {
+        if (storageInstancesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.add(value);
+          ensureStorageInstancesIsMutable();
+          storageInstances_.add(value);
           onChanged();
         } else {
-          assignedStorageBuilder_.addMessage(value);
+          storageInstancesBuilder_.addMessage(value);
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder addAssignedStorage(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment value) {
-        if (assignedStorageBuilder_ == null) {
+      public Builder addStorageInstances(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance value) {
+        if (storageInstancesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.add(index, value);
+          ensureStorageInstancesIsMutable();
+          storageInstances_.add(index, value);
           onChanged();
         } else {
-          assignedStorageBuilder_.addMessage(index, value);
+          storageInstancesBuilder_.addMessage(index, value);
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder addAssignedStorage(
-          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder builderForValue) {
-        if (assignedStorageBuilder_ == null) {
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.add(builderForValue.build());
+      public Builder addStorageInstances(
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder builderForValue) {
+        if (storageInstancesBuilder_ == null) {
+          ensureStorageInstancesIsMutable();
+          storageInstances_.add(builderForValue.build());
           onChanged();
         } else {
-          assignedStorageBuilder_.addMessage(builderForValue.build());
+          storageInstancesBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder addAssignedStorage(
-          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder builderForValue) {
-        if (assignedStorageBuilder_ == null) {
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.add(index, builderForValue.build());
+      public Builder addStorageInstances(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder builderForValue) {
+        if (storageInstancesBuilder_ == null) {
+          ensureStorageInstancesIsMutable();
+          storageInstances_.add(index, builderForValue.build());
           onChanged();
         } else {
-          assignedStorageBuilder_.addMessage(index, builderForValue.build());
+          storageInstancesBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder addAllAssignedStorage(
-          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> values) {
-        if (assignedStorageBuilder_ == null) {
-          ensureAssignedStorageIsMutable();
+      public Builder addAllStorageInstances(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance> values) {
+        if (storageInstancesBuilder_ == null) {
+          ensureStorageInstancesIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, assignedStorage_);
+              values, storageInstances_);
           onChanged();
         } else {
-          assignedStorageBuilder_.addAllMessages(values);
+          storageInstancesBuilder_.addAllMessages(values);
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder clearAssignedStorage() {
-        if (assignedStorageBuilder_ == null) {
-          assignedStorage_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000100);
+      public Builder clearStorageInstances() {
+        if (storageInstancesBuilder_ == null) {
+          storageInstances_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000200);
           onChanged();
         } else {
-          assignedStorageBuilder_.clear();
+          storageInstancesBuilder_.clear();
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public Builder removeAssignedStorage(int index) {
-        if (assignedStorageBuilder_ == null) {
-          ensureAssignedStorageIsMutable();
-          assignedStorage_.remove(index);
+      public Builder removeStorageInstances(int index) {
+        if (storageInstancesBuilder_ == null) {
+          ensureStorageInstancesIsMutable();
+          storageInstances_.remove(index);
           onChanged();
         } else {
-          assignedStorageBuilder_.remove(index);
+          storageInstancesBuilder_.remove(index);
         }
         return this;
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder getAssignedStorageBuilder(
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder getStorageInstancesBuilder(
           int index) {
-        return getAssignedStorageFieldBuilder().getBuilder(index);
+        return getStorageInstancesFieldBuilder().getBuilder(index);
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder getAssignedStorageOrBuilder(
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder getStorageInstancesOrBuilder(
           int index) {
-        if (assignedStorageBuilder_ == null) {
-          return assignedStorage_.get(index);  } else {
-          return assignedStorageBuilder_.getMessageOrBuilder(index);
+        if (storageInstancesBuilder_ == null) {
+          return storageInstances_.get(index);  } else {
+          return storageInstancesBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
-           getAssignedStorageOrBuilderList() {
-        if (assignedStorageBuilder_ != null) {
-          return assignedStorageBuilder_.getMessageOrBuilderList();
+      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder> 
+           getStorageInstancesOrBuilderList() {
+        if (storageInstancesBuilder_ != null) {
+          return storageInstancesBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(assignedStorage_);
+          return java.util.Collections.unmodifiableList(storageInstances_);
         }
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder addAssignedStorageBuilder() {
-        return getAssignedStorageFieldBuilder().addBuilder(
-            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance());
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder addStorageInstancesBuilder() {
+        return getStorageInstancesFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.getDefaultInstance());
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder addAssignedStorageBuilder(
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder addStorageInstancesBuilder(
           int index) {
-        return getAssignedStorageFieldBuilder().addBuilder(
-            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance());
+        return getStorageInstancesFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.getDefaultInstance());
       }
       /**
        * <pre>
-       * The Storage assigned to the Storage Root
+       * The Storage instance assigned to the Storage Root.
        * </pre>
        *
-       * <code>repeated .sdxsvccommon.StorageAssignment assignedStorage = 10;</code>
+       * <code>repeated .sdxsvccommon.StorageInstance storageInstances = 10;</code>
        */
-      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder> 
-           getAssignedStorageBuilderList() {
-        return getAssignedStorageFieldBuilder().getBuilderList();
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder> 
+           getStorageInstancesBuilderList() {
+        return getStorageInstancesFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
-          getAssignedStorageFieldBuilder() {
-        if (assignedStorageBuilder_ == null) {
-          assignedStorageBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder>(
-                  assignedStorage_,
-                  ((bitField0_ & 0x00000100) != 0),
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder> 
+          getStorageInstancesFieldBuilder() {
+        if (storageInstancesBuilder_ == null) {
+          storageInstancesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder>(
+                  storageInstances_,
+                  ((bitField0_ & 0x00000200) != 0),
                   getParentForChildren(),
                   isClean());
-          assignedStorage_ = null;
+          storageInstances_ = null;
         }
-        return assignedStorageBuilder_;
+        return storageInstancesBuilder_;
+      }
+
+      private java.lang.Object permissionsBoundary_ = "";
+      /**
+       * <pre>
+       * The Permissions Boundary a role attached to this Storage Root has to follow
+       * </pre>
+       *
+       * <code>string permissionsBoundary = 11;</code>
+       * @return The permissionsBoundary.
+       */
+      public java.lang.String getPermissionsBoundary() {
+        java.lang.Object ref = permissionsBoundary_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          permissionsBoundary_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Permissions Boundary a role attached to this Storage Root has to follow
+       * </pre>
+       *
+       * <code>string permissionsBoundary = 11;</code>
+       * @return The bytes for permissionsBoundary.
+       */
+      public com.google.protobuf.ByteString
+          getPermissionsBoundaryBytes() {
+        java.lang.Object ref = permissionsBoundary_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          permissionsBoundary_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Permissions Boundary a role attached to this Storage Root has to follow
+       * </pre>
+       *
+       * <code>string permissionsBoundary = 11;</code>
+       * @param value The permissionsBoundary to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPermissionsBoundary(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        permissionsBoundary_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Permissions Boundary a role attached to this Storage Root has to follow
+       * </pre>
+       *
+       * <code>string permissionsBoundary = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPermissionsBoundary() {
+        permissionsBoundary_ = getDefaultInstance().getPermissionsBoundary();
+        bitField0_ = (bitField0_ & ~0x00000400);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Permissions Boundary a role attached to this Storage Root has to follow
+       * </pre>
+       *
+       * <code>string permissionsBoundary = 11;</code>
+       * @param value The bytes for permissionsBoundary to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPermissionsBoundaryBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        permissionsBoundary_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -34580,8 +34867,9466 @@ public final class SDXSvcCommonProto {
 
   }
 
+  public interface StorageInstanceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.StorageInstance)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The unique instance Id.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The id.
+     */
+    java.lang.String getId();
+    /**
+     * <pre>
+     * The unique instance Id.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The bytes for id.
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    int getCloudPlatformValue();
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The cloudPlatform.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform();
+
+    /**
+     * <pre>
+     * The cloud region the storage instance is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The cloudRegion.
+     */
+    java.lang.String getCloudRegion();
+    /**
+     * <pre>
+     * The cloud region the storage instance is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The bytes for cloudRegion.
+     */
+    com.google.protobuf.ByteString
+        getCloudRegionBytes();
+
+    /**
+     * <pre>
+     * The path for the storage.
+     * </pre>
+     *
+     * <code>string storagePath = 4;</code>
+     * @return The storagePath.
+     */
+    java.lang.String getStoragePath();
+    /**
+     * <pre>
+     * The path for the storage.
+     * </pre>
+     *
+     * <code>string storagePath = 4;</code>
+     * @return The bytes for storagePath.
+     */
+    com.google.protobuf.ByteString
+        getStoragePathBytes();
+
+    /**
+     * <pre>
+     * The SDX Instance Id the SDX Service's storage instancce is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The instanceId.
+     */
+    java.lang.String getInstanceId();
+    /**
+     * <pre>
+     * The SDX Instance Id the SDX Service's storage instancce is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The bytes for instanceId.
+     */
+    com.google.protobuf.ByteString
+        getInstanceIdBytes();
+
+    /**
+     * <pre>
+     * Timestamp of storage instance creation.
+     * </pre>
+     *
+     * <code>int64 created = 6 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    long getCreated();
+
+    /**
+     * <pre>
+     * Timestamp of storage instance last updated.
+     * </pre>
+     *
+     * <code>int64 updated = 7 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updated.
+     */
+    long getUpdated();
+
+    /**
+     * <pre>
+     * The encryption key Id for the storage.
+     * </pre>
+     *
+     * <code>string encryptionKeyId = 9;</code>
+     * @return The encryptionKeyId.
+     */
+    java.lang.String getEncryptionKeyId();
+    /**
+     * <pre>
+     * The encryption key Id for the storage.
+     * </pre>
+     *
+     * <code>string encryptionKeyId = 9;</code>
+     * @return The bytes for encryptionKeyId.
+     */
+    com.google.protobuf.ByteString
+        getEncryptionKeyIdBytes();
+
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> 
+        getStorageAssignmentsList();
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getStorageAssignments(int index);
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    int getStorageAssignmentsCount();
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
+        getStorageAssignmentsOrBuilderList();
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder getStorageAssignmentsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * The instance information for a service to an storage location.
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.StorageInstance}
+   */
+  public static final class StorageInstance extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.StorageInstance)
+      StorageInstanceOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StorageInstance.newBuilder() to construct.
+    private StorageInstance(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StorageInstance() {
+      id_ = "";
+      cloudPlatform_ = 0;
+      cloudRegion_ = "";
+      storagePath_ = "";
+      instanceId_ = "";
+      encryptionKeyId_ = "";
+      storageAssignments_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StorageInstance();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageInstance_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageInstance_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object id_ = "";
+    /**
+     * <pre>
+     * The unique instance Id.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The unique instance Id.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The bytes for id.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDPLATFORM_FIELD_NUMBER = 2;
+    private int cloudPlatform_ = 0;
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    @java.lang.Override public int getCloudPlatformValue() {
+      return cloudPlatform_;
+    }
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The cloudPlatform.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int CLOUDREGION_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cloudRegion_ = "";
+    /**
+     * <pre>
+     * The cloud region the storage instance is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The cloudRegion.
+     */
+    @java.lang.Override
+    public java.lang.String getCloudRegion() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cloudRegion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud region the storage instance is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The bytes for cloudRegion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCloudRegionBytes() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cloudRegion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STORAGEPATH_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object storagePath_ = "";
+    /**
+     * <pre>
+     * The path for the storage.
+     * </pre>
+     *
+     * <code>string storagePath = 4;</code>
+     * @return The storagePath.
+     */
+    @java.lang.Override
+    public java.lang.String getStoragePath() {
+      java.lang.Object ref = storagePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        storagePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The path for the storage.
+     * </pre>
+     *
+     * <code>string storagePath = 4;</code>
+     * @return The bytes for storagePath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStoragePathBytes() {
+      java.lang.Object ref = storagePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        storagePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int INSTANCEID_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object instanceId_ = "";
+    /**
+     * <pre>
+     * The SDX Instance Id the SDX Service's storage instancce is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The instanceId.
+     */
+    @java.lang.Override
+    public java.lang.String getInstanceId() {
+      java.lang.Object ref = instanceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        instanceId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The SDX Instance Id the SDX Service's storage instancce is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The bytes for instanceId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getInstanceIdBytes() {
+      java.lang.Object ref = instanceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREATED_FIELD_NUMBER = 6;
+    private long created_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of storage instance creation.
+     * </pre>
+     *
+     * <code>int64 created = 6 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    @java.lang.Override
+    public long getCreated() {
+      return created_;
+    }
+
+    public static final int UPDATED_FIELD_NUMBER = 7;
+    private long updated_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of storage instance last updated.
+     * </pre>
+     *
+     * <code>int64 updated = 7 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updated.
+     */
+    @java.lang.Override
+    public long getUpdated() {
+      return updated_;
+    }
+
+    public static final int ENCRYPTIONKEYID_FIELD_NUMBER = 9;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object encryptionKeyId_ = "";
+    /**
+     * <pre>
+     * The encryption key Id for the storage.
+     * </pre>
+     *
+     * <code>string encryptionKeyId = 9;</code>
+     * @return The encryptionKeyId.
+     */
+    @java.lang.Override
+    public java.lang.String getEncryptionKeyId() {
+      java.lang.Object ref = encryptionKeyId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        encryptionKeyId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The encryption key Id for the storage.
+     * </pre>
+     *
+     * <code>string encryptionKeyId = 9;</code>
+     * @return The bytes for encryptionKeyId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEncryptionKeyIdBytes() {
+      java.lang.Object ref = encryptionKeyId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        encryptionKeyId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STORAGEASSIGNMENTS_FIELD_NUMBER = 10;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> storageAssignments_;
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> getStorageAssignmentsList() {
+      return storageAssignments_;
+    }
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
+        getStorageAssignmentsOrBuilderList() {
+      return storageAssignments_;
+    }
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    @java.lang.Override
+    public int getStorageAssignmentsCount() {
+      return storageAssignments_.size();
+    }
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getStorageAssignments(int index) {
+      return storageAssignments_.get(index);
+    }
+    /**
+     * <pre>
+     * The Storage assigned to the Storage Instance.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder getStorageAssignmentsOrBuilder(
+        int index) {
+      return storageAssignments_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        output.writeEnum(2, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, storagePath_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, instanceId_);
+      }
+      if (created_ != 0L) {
+        output.writeInt64(6, created_);
+      }
+      if (updated_ != 0L) {
+        output.writeInt64(7, updated_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encryptionKeyId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, encryptionKeyId_);
+      }
+      for (int i = 0; i < storageAssignments_.size(); i++) {
+        output.writeMessage(10, storageAssignments_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, storagePath_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, instanceId_);
+      }
+      if (created_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(6, created_);
+      }
+      if (updated_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(7, updated_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encryptionKeyId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, encryptionKeyId_);
+      }
+      for (int i = 0; i < storageAssignments_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(10, storageAssignments_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance) obj;
+
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (cloudPlatform_ != other.cloudPlatform_) return false;
+      if (!getCloudRegion()
+          .equals(other.getCloudRegion())) return false;
+      if (!getStoragePath()
+          .equals(other.getStoragePath())) return false;
+      if (!getInstanceId()
+          .equals(other.getInstanceId())) return false;
+      if (getCreated()
+          != other.getCreated()) return false;
+      if (getUpdated()
+          != other.getUpdated()) return false;
+      if (!getEncryptionKeyId()
+          .equals(other.getEncryptionKeyId())) return false;
+      if (!getStorageAssignmentsList()
+          .equals(other.getStorageAssignmentsList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
+      hash = (53 * hash) + cloudPlatform_;
+      hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
+      hash = (53 * hash) + getCloudRegion().hashCode();
+      hash = (37 * hash) + STORAGEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getStoragePath().hashCode();
+      hash = (37 * hash) + INSTANCEID_FIELD_NUMBER;
+      hash = (53 * hash) + getInstanceId().hashCode();
+      hash = (37 * hash) + CREATED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCreated());
+      hash = (37 * hash) + UPDATED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUpdated());
+      hash = (37 * hash) + ENCRYPTIONKEYID_FIELD_NUMBER;
+      hash = (53 * hash) + getEncryptionKeyId().hashCode();
+      if (getStorageAssignmentsCount() > 0) {
+        hash = (37 * hash) + STORAGEASSIGNMENTS_FIELD_NUMBER;
+        hash = (53 * hash) + getStorageAssignmentsList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The instance information for a service to an storage location.
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.StorageInstance}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.StorageInstance)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstanceOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageInstance_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageInstance_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        id_ = "";
+        cloudPlatform_ = 0;
+        cloudRegion_ = "";
+        storagePath_ = "";
+        instanceId_ = "";
+        created_ = 0L;
+        updated_ = 0L;
+        encryptionKeyId_ = "";
+        if (storageAssignmentsBuilder_ == null) {
+          storageAssignments_ = java.util.Collections.emptyList();
+        } else {
+          storageAssignments_ = null;
+          storageAssignmentsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000100);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageInstance_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance result) {
+        if (storageAssignmentsBuilder_ == null) {
+          if (((bitField0_ & 0x00000100) != 0)) {
+            storageAssignments_ = java.util.Collections.unmodifiableList(storageAssignments_);
+            bitField0_ = (bitField0_ & ~0x00000100);
+          }
+          result.storageAssignments_ = storageAssignments_;
+        } else {
+          result.storageAssignments_ = storageAssignmentsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.cloudPlatform_ = cloudPlatform_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.cloudRegion_ = cloudRegion_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.storagePath_ = storagePath_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.instanceId_ = instanceId_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.created_ = created_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.updated_ = updated_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.encryptionKeyId_ = encryptionKeyId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance.getDefaultInstance()) return this;
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.cloudPlatform_ != 0) {
+          setCloudPlatformValue(other.getCloudPlatformValue());
+        }
+        if (!other.getCloudRegion().isEmpty()) {
+          cloudRegion_ = other.cloudRegion_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getStoragePath().isEmpty()) {
+          storagePath_ = other.storagePath_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (!other.getInstanceId().isEmpty()) {
+          instanceId_ = other.instanceId_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (other.getCreated() != 0L) {
+          setCreated(other.getCreated());
+        }
+        if (other.getUpdated() != 0L) {
+          setUpdated(other.getUpdated());
+        }
+        if (!other.getEncryptionKeyId().isEmpty()) {
+          encryptionKeyId_ = other.encryptionKeyId_;
+          bitField0_ |= 0x00000080;
+          onChanged();
+        }
+        if (storageAssignmentsBuilder_ == null) {
+          if (!other.storageAssignments_.isEmpty()) {
+            if (storageAssignments_.isEmpty()) {
+              storageAssignments_ = other.storageAssignments_;
+              bitField0_ = (bitField0_ & ~0x00000100);
+            } else {
+              ensureStorageAssignmentsIsMutable();
+              storageAssignments_.addAll(other.storageAssignments_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.storageAssignments_.isEmpty()) {
+            if (storageAssignmentsBuilder_.isEmpty()) {
+              storageAssignmentsBuilder_.dispose();
+              storageAssignmentsBuilder_ = null;
+              storageAssignments_ = other.storageAssignments_;
+              bitField0_ = (bitField0_ & ~0x00000100);
+              storageAssignmentsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getStorageAssignmentsFieldBuilder() : null;
+            } else {
+              storageAssignmentsBuilder_.addAllMessages(other.storageAssignments_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                id_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                cloudPlatform_ = input.readEnum();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                cloudRegion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                storagePath_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                instanceId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 48: {
+                created_ = input.readInt64();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 56: {
+                updated_ = input.readInt64();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 74: {
+                encryptionKeyId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 74
+              case 82: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.parser(),
+                        extensionRegistry);
+                if (storageAssignmentsBuilder_ == null) {
+                  ensureStorageAssignmentsIsMutable();
+                  storageAssignments_.add(m);
+                } else {
+                  storageAssignmentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 82
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object id_ = "";
+      /**
+       * <pre>
+       * The unique instance Id.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return The id.
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The unique instance Id.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return The bytes for id.
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The unique instance Id.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The unique instance Id.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        id_ = getDefaultInstance().getId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The unique instance Id.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private int cloudPlatform_ = 0;
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @return The enum numeric value on the wire for cloudPlatform.
+       */
+      @java.lang.Override public int getCloudPlatformValue() {
+        return cloudPlatform_;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @param value The enum numeric value on the wire for cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatformValue(int value) {
+        cloudPlatform_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @return The cloudPlatform.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @param value The cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        cloudPlatform_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudPlatform() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        cloudPlatform_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cloudRegion_ = "";
+      /**
+       * <pre>
+       * The cloud region the storage instance is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @return The cloudRegion.
+       */
+      public java.lang.String getCloudRegion() {
+        java.lang.Object ref = cloudRegion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cloudRegion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud region the storage instance is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @return The bytes for cloudRegion.
+       */
+      public com.google.protobuf.ByteString
+          getCloudRegionBytes() {
+        java.lang.Object ref = cloudRegion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cloudRegion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud region the storage instance is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @param value The cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud region the storage instance is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudRegion() {
+        cloudRegion_ = getDefaultInstance().getCloudRegion();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud region the storage instance is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @param value The bytes for cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object storagePath_ = "";
+      /**
+       * <pre>
+       * The path for the storage.
+       * </pre>
+       *
+       * <code>string storagePath = 4;</code>
+       * @return The storagePath.
+       */
+      public java.lang.String getStoragePath() {
+        java.lang.Object ref = storagePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          storagePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The path for the storage.
+       * </pre>
+       *
+       * <code>string storagePath = 4;</code>
+       * @return The bytes for storagePath.
+       */
+      public com.google.protobuf.ByteString
+          getStoragePathBytes() {
+        java.lang.Object ref = storagePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          storagePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The path for the storage.
+       * </pre>
+       *
+       * <code>string storagePath = 4;</code>
+       * @param value The storagePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStoragePath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        storagePath_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The path for the storage.
+       * </pre>
+       *
+       * <code>string storagePath = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStoragePath() {
+        storagePath_ = getDefaultInstance().getStoragePath();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The path for the storage.
+       * </pre>
+       *
+       * <code>string storagePath = 4;</code>
+       * @param value The bytes for storagePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStoragePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        storagePath_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object instanceId_ = "";
+      /**
+       * <pre>
+       * The SDX Instance Id the SDX Service's storage instancce is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @return The instanceId.
+       */
+      public java.lang.String getInstanceId() {
+        java.lang.Object ref = instanceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          instanceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the SDX Service's storage instancce is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @return The bytes for instanceId.
+       */
+      public com.google.protobuf.ByteString
+          getInstanceIdBytes() {
+        java.lang.Object ref = instanceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the SDX Service's storage instancce is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @param value The instanceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInstanceId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        instanceId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the SDX Service's storage instancce is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearInstanceId() {
+        instanceId_ = getDefaultInstance().getInstanceId();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the SDX Service's storage instancce is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @param value The bytes for instanceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInstanceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        instanceId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private long created_ ;
+      /**
+       * <pre>
+       * Timestamp of storage instance creation.
+       * </pre>
+       *
+       * <code>int64 created = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The created.
+       */
+      @java.lang.Override
+      public long getCreated() {
+        return created_;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance creation.
+       * </pre>
+       *
+       * <code>int64 created = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The created to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCreated(long value) {
+
+        created_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance creation.
+       * </pre>
+       *
+       * <code>int64 created = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCreated() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        created_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long updated_ ;
+      /**
+       * <pre>
+       * Timestamp of storage instance last updated.
+       * </pre>
+       *
+       * <code>int64 updated = 7 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The updated.
+       */
+      @java.lang.Override
+      public long getUpdated() {
+        return updated_;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance last updated.
+       * </pre>
+       *
+       * <code>int64 updated = 7 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The updated to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUpdated(long value) {
+
+        updated_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance last updated.
+       * </pre>
+       *
+       * <code>int64 updated = 7 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUpdated() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        updated_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object encryptionKeyId_ = "";
+      /**
+       * <pre>
+       * The encryption key Id for the storage.
+       * </pre>
+       *
+       * <code>string encryptionKeyId = 9;</code>
+       * @return The encryptionKeyId.
+       */
+      public java.lang.String getEncryptionKeyId() {
+        java.lang.Object ref = encryptionKeyId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          encryptionKeyId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The encryption key Id for the storage.
+       * </pre>
+       *
+       * <code>string encryptionKeyId = 9;</code>
+       * @return The bytes for encryptionKeyId.
+       */
+      public com.google.protobuf.ByteString
+          getEncryptionKeyIdBytes() {
+        java.lang.Object ref = encryptionKeyId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          encryptionKeyId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The encryption key Id for the storage.
+       * </pre>
+       *
+       * <code>string encryptionKeyId = 9;</code>
+       * @param value The encryptionKeyId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEncryptionKeyId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        encryptionKeyId_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The encryption key Id for the storage.
+       * </pre>
+       *
+       * <code>string encryptionKeyId = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEncryptionKeyId() {
+        encryptionKeyId_ = getDefaultInstance().getEncryptionKeyId();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The encryption key Id for the storage.
+       * </pre>
+       *
+       * <code>string encryptionKeyId = 9;</code>
+       * @param value The bytes for encryptionKeyId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEncryptionKeyIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        encryptionKeyId_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> storageAssignments_ =
+        java.util.Collections.emptyList();
+      private void ensureStorageAssignmentsIsMutable() {
+        if (!((bitField0_ & 0x00000100) != 0)) {
+          storageAssignments_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment>(storageAssignments_);
+          bitField0_ |= 0x00000100;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> storageAssignmentsBuilder_;
+
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> getStorageAssignmentsList() {
+        if (storageAssignmentsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(storageAssignments_);
+        } else {
+          return storageAssignmentsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public int getStorageAssignmentsCount() {
+        if (storageAssignmentsBuilder_ == null) {
+          return storageAssignments_.size();
+        } else {
+          return storageAssignmentsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getStorageAssignments(int index) {
+        if (storageAssignmentsBuilder_ == null) {
+          return storageAssignments_.get(index);
+        } else {
+          return storageAssignmentsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder setStorageAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment value) {
+        if (storageAssignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.set(index, value);
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder setStorageAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder builderForValue) {
+        if (storageAssignmentsBuilder_ == null) {
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder addStorageAssignments(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment value) {
+        if (storageAssignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.add(value);
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder addStorageAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment value) {
+        if (storageAssignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.add(index, value);
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder addStorageAssignments(
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder builderForValue) {
+        if (storageAssignmentsBuilder_ == null) {
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.add(builderForValue.build());
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder addStorageAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder builderForValue) {
+        if (storageAssignmentsBuilder_ == null) {
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder addAllStorageAssignments(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment> values) {
+        if (storageAssignmentsBuilder_ == null) {
+          ensureStorageAssignmentsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, storageAssignments_);
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder clearStorageAssignments() {
+        if (storageAssignmentsBuilder_ == null) {
+          storageAssignments_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000100);
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public Builder removeStorageAssignments(int index) {
+        if (storageAssignmentsBuilder_ == null) {
+          ensureStorageAssignmentsIsMutable();
+          storageAssignments_.remove(index);
+          onChanged();
+        } else {
+          storageAssignmentsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder getStorageAssignmentsBuilder(
+          int index) {
+        return getStorageAssignmentsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder getStorageAssignmentsOrBuilder(
+          int index) {
+        if (storageAssignmentsBuilder_ == null) {
+          return storageAssignments_.get(index);  } else {
+          return storageAssignmentsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
+           getStorageAssignmentsOrBuilderList() {
+        if (storageAssignmentsBuilder_ != null) {
+          return storageAssignmentsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(storageAssignments_);
+        }
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder addStorageAssignmentsBuilder() {
+        return getStorageAssignmentsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder addStorageAssignmentsBuilder(
+          int index) {
+        return getStorageAssignmentsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The Storage assigned to the Storage Instance.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.StorageAssignment storageAssignments = 10;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder> 
+           getStorageAssignmentsBuilderList() {
+        return getStorageAssignmentsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder> 
+          getStorageAssignmentsFieldBuilder() {
+        if (storageAssignmentsBuilder_ == null) {
+          storageAssignmentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder>(
+                  storageAssignments_,
+                  ((bitField0_ & 0x00000100) != 0),
+                  getParentForChildren(),
+                  isClean());
+          storageAssignments_ = null;
+        }
+        return storageAssignmentsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.StorageInstance)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.StorageInstance)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StorageInstance>
+        PARSER = new com.google.protobuf.AbstractParser<StorageInstance>() {
+      @java.lang.Override
+      public StorageInstance parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<StorageInstance> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StorageInstance> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageInstance getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface StorageAssignmentOrBuilder extends
       // @@protoc_insertion_point(interface_extends:sdxsvccommon.StorageAssignment)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The unique assignment Id.
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The assignmentId.
+     */
+    java.lang.String getAssignmentId();
+    /**
+     * <pre>
+     * The unique assignment Id.
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The bytes for assignmentId.
+     */
+    com.google.protobuf.ByteString
+        getAssignmentIdBytes();
+
+    /**
+     * <pre>
+     * Access Role
+     * </pre>
+     *
+     * <code>string accessRole = 2;</code>
+     * @return The accessRole.
+     */
+    java.lang.String getAccessRole();
+    /**
+     * <pre>
+     * Access Role
+     * </pre>
+     *
+     * <code>string accessRole = 2;</code>
+     * @return The bytes for accessRole.
+     */
+    com.google.protobuf.ByteString
+        getAccessRoleBytes();
+
+    /**
+     * <pre>
+     * The path for the storage
+     * </pre>
+     *
+     * <code>string storagePath = 3;</code>
+     * @return The storagePath.
+     */
+    java.lang.String getStoragePath();
+    /**
+     * <pre>
+     * The path for the storage
+     * </pre>
+     *
+     * <code>string storagePath = 3;</code>
+     * @return The bytes for storagePath.
+     */
+    com.google.protobuf.ByteString
+        getStoragePathBytes();
+
+    /**
+     * <pre>
+     * The SDX storage resource identifier name.
+     * </pre>
+     *
+     * <code>string resourceId = 4;</code>
+     * @return The resourceId.
+     */
+    java.lang.String getResourceId();
+    /**
+     * <pre>
+     * The SDX storage resource identifier name.
+     * </pre>
+     *
+     * <code>string resourceId = 4;</code>
+     * @return The bytes for resourceId.
+     */
+    com.google.protobuf.ByteString
+        getResourceIdBytes();
+
+    /**
+     * <pre>
+     * Timestamp of storage instance creation.
+     * </pre>
+     *
+     * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    long getCreated();
+
+    /**
+     * <pre>
+     * Timestamp of storage instance last updated.
+     * </pre>
+     *
+     * <code>int64 updated = 6 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updated.
+     */
+    long getUpdated();
+
+    /**
+     * <pre>
+     * The vault credentials path for the storage assignment
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The credentialsVaultPath.
+     */
+    java.lang.String getCredentialsVaultPath();
+    /**
+     * <pre>
+     * The vault credentials path for the storage assignment
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes();
+  }
+  /**
+   * <pre>
+   * The assignment information for a service to an storage location assignment.
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.StorageAssignment}
+   */
+  public static final class StorageAssignment extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.StorageAssignment)
+      StorageAssignmentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StorageAssignment.newBuilder() to construct.
+    private StorageAssignment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StorageAssignment() {
+      assignmentId_ = "";
+      accessRole_ = "";
+      storagePath_ = "";
+      resourceId_ = "";
+      credentialsVaultPath_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StorageAssignment();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder.class);
+    }
+
+    public static final int ASSIGNMENTID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object assignmentId_ = "";
+    /**
+     * <pre>
+     * The unique assignment Id.
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The assignmentId.
+     */
+    @java.lang.Override
+    public java.lang.String getAssignmentId() {
+      java.lang.Object ref = assignmentId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        assignmentId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The unique assignment Id.
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The bytes for assignmentId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAssignmentIdBytes() {
+      java.lang.Object ref = assignmentId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        assignmentId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCESSROLE_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accessRole_ = "";
+    /**
+     * <pre>
+     * Access Role
+     * </pre>
+     *
+     * <code>string accessRole = 2;</code>
+     * @return The accessRole.
+     */
+    @java.lang.Override
+    public java.lang.String getAccessRole() {
+      java.lang.Object ref = accessRole_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accessRole_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Access Role
+     * </pre>
+     *
+     * <code>string accessRole = 2;</code>
+     * @return The bytes for accessRole.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccessRoleBytes() {
+      java.lang.Object ref = accessRole_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accessRole_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STORAGEPATH_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object storagePath_ = "";
+    /**
+     * <pre>
+     * The path for the storage
+     * </pre>
+     *
+     * <code>string storagePath = 3;</code>
+     * @return The storagePath.
+     */
+    @java.lang.Override
+    public java.lang.String getStoragePath() {
+      java.lang.Object ref = storagePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        storagePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The path for the storage
+     * </pre>
+     *
+     * <code>string storagePath = 3;</code>
+     * @return The bytes for storagePath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStoragePathBytes() {
+      java.lang.Object ref = storagePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        storagePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESOURCEID_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object resourceId_ = "";
+    /**
+     * <pre>
+     * The SDX storage resource identifier name.
+     * </pre>
+     *
+     * <code>string resourceId = 4;</code>
+     * @return The resourceId.
+     */
+    @java.lang.Override
+    public java.lang.String getResourceId() {
+      java.lang.Object ref = resourceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resourceId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The SDX storage resource identifier name.
+     * </pre>
+     *
+     * <code>string resourceId = 4;</code>
+     * @return The bytes for resourceId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getResourceIdBytes() {
+      java.lang.Object ref = resourceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resourceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREATED_FIELD_NUMBER = 5;
+    private long created_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of storage instance creation.
+     * </pre>
+     *
+     * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    @java.lang.Override
+    public long getCreated() {
+      return created_;
+    }
+
+    public static final int UPDATED_FIELD_NUMBER = 6;
+    private long updated_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of storage instance last updated.
+     * </pre>
+     *
+     * <code>int64 updated = 6 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updated.
+     */
+    @java.lang.Override
+    public long getUpdated() {
+      return updated_;
+    }
+
+    public static final int CREDENTIALSVAULTPATH_FIELD_NUMBER = 7;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object credentialsVaultPath_ = "";
+    /**
+     * <pre>
+     * The vault credentials path for the storage assignment
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The credentialsVaultPath.
+     */
+    @java.lang.Override
+    public java.lang.String getCredentialsVaultPath() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        credentialsVaultPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The vault credentials path for the storage assignment
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        credentialsVaultPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, assignmentId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessRole_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accessRole_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, storagePath_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, resourceId_);
+      }
+      if (created_ != 0L) {
+        output.writeInt64(5, created_);
+      }
+      if (updated_ != 0L) {
+        output.writeInt64(6, updated_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, credentialsVaultPath_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, assignmentId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessRole_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accessRole_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, storagePath_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, resourceId_);
+      }
+      if (created_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, created_);
+      }
+      if (updated_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(6, updated_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, credentialsVaultPath_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment) obj;
+
+      if (!getAssignmentId()
+          .equals(other.getAssignmentId())) return false;
+      if (!getAccessRole()
+          .equals(other.getAccessRole())) return false;
+      if (!getStoragePath()
+          .equals(other.getStoragePath())) return false;
+      if (!getResourceId()
+          .equals(other.getResourceId())) return false;
+      if (getCreated()
+          != other.getCreated()) return false;
+      if (getUpdated()
+          != other.getUpdated()) return false;
+      if (!getCredentialsVaultPath()
+          .equals(other.getCredentialsVaultPath())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ASSIGNMENTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAssignmentId().hashCode();
+      hash = (37 * hash) + ACCESSROLE_FIELD_NUMBER;
+      hash = (53 * hash) + getAccessRole().hashCode();
+      hash = (37 * hash) + STORAGEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getStoragePath().hashCode();
+      hash = (37 * hash) + RESOURCEID_FIELD_NUMBER;
+      hash = (53 * hash) + getResourceId().hashCode();
+      hash = (37 * hash) + CREATED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCreated());
+      hash = (37 * hash) + UPDATED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUpdated());
+      hash = (37 * hash) + CREDENTIALSVAULTPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getCredentialsVaultPath().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The assignment information for a service to an storage location assignment.
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.StorageAssignment}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.StorageAssignment)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        assignmentId_ = "";
+        accessRole_ = "";
+        storagePath_ = "";
+        resourceId_ = "";
+        created_ = 0L;
+        updated_ = 0L;
+        credentialsVaultPath_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.assignmentId_ = assignmentId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.accessRole_ = accessRole_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.storagePath_ = storagePath_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.resourceId_ = resourceId_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.created_ = created_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.updated_ = updated_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.credentialsVaultPath_ = credentialsVaultPath_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance()) return this;
+        if (!other.getAssignmentId().isEmpty()) {
+          assignmentId_ = other.assignmentId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getAccessRole().isEmpty()) {
+          accessRole_ = other.accessRole_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getStoragePath().isEmpty()) {
+          storagePath_ = other.storagePath_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getResourceId().isEmpty()) {
+          resourceId_ = other.resourceId_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (other.getCreated() != 0L) {
+          setCreated(other.getCreated());
+        }
+        if (other.getUpdated() != 0L) {
+          setUpdated(other.getUpdated());
+        }
+        if (!other.getCredentialsVaultPath().isEmpty()) {
+          credentialsVaultPath_ = other.credentialsVaultPath_;
+          bitField0_ |= 0x00000040;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                assignmentId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                accessRole_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                storagePath_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                resourceId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                created_ = input.readInt64();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
+                updated_ = input.readInt64();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 58: {
+                credentialsVaultPath_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object assignmentId_ = "";
+      /**
+       * <pre>
+       * The unique assignment Id.
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @return The assignmentId.
+       */
+      public java.lang.String getAssignmentId() {
+        java.lang.Object ref = assignmentId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          assignmentId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The unique assignment Id.
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @return The bytes for assignmentId.
+       */
+      public com.google.protobuf.ByteString
+          getAssignmentIdBytes() {
+        java.lang.Object ref = assignmentId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          assignmentId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The unique assignment Id.
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @param value The assignmentId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAssignmentId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        assignmentId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The unique assignment Id.
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAssignmentId() {
+        assignmentId_ = getDefaultInstance().getAssignmentId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The unique assignment Id.
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @param value The bytes for assignmentId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAssignmentIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        assignmentId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accessRole_ = "";
+      /**
+       * <pre>
+       * Access Role
+       * </pre>
+       *
+       * <code>string accessRole = 2;</code>
+       * @return The accessRole.
+       */
+      public java.lang.String getAccessRole() {
+        java.lang.Object ref = accessRole_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accessRole_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Access Role
+       * </pre>
+       *
+       * <code>string accessRole = 2;</code>
+       * @return The bytes for accessRole.
+       */
+      public com.google.protobuf.ByteString
+          getAccessRoleBytes() {
+        java.lang.Object ref = accessRole_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accessRole_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Access Role
+       * </pre>
+       *
+       * <code>string accessRole = 2;</code>
+       * @param value The accessRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccessRole(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accessRole_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Access Role
+       * </pre>
+       *
+       * <code>string accessRole = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccessRole() {
+        accessRole_ = getDefaultInstance().getAccessRole();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Access Role
+       * </pre>
+       *
+       * <code>string accessRole = 2;</code>
+       * @param value The bytes for accessRole to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccessRoleBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accessRole_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object storagePath_ = "";
+      /**
+       * <pre>
+       * The path for the storage
+       * </pre>
+       *
+       * <code>string storagePath = 3;</code>
+       * @return The storagePath.
+       */
+      public java.lang.String getStoragePath() {
+        java.lang.Object ref = storagePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          storagePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The path for the storage
+       * </pre>
+       *
+       * <code>string storagePath = 3;</code>
+       * @return The bytes for storagePath.
+       */
+      public com.google.protobuf.ByteString
+          getStoragePathBytes() {
+        java.lang.Object ref = storagePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          storagePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The path for the storage
+       * </pre>
+       *
+       * <code>string storagePath = 3;</code>
+       * @param value The storagePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStoragePath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        storagePath_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The path for the storage
+       * </pre>
+       *
+       * <code>string storagePath = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStoragePath() {
+        storagePath_ = getDefaultInstance().getStoragePath();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The path for the storage
+       * </pre>
+       *
+       * <code>string storagePath = 3;</code>
+       * @param value The bytes for storagePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStoragePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        storagePath_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object resourceId_ = "";
+      /**
+       * <pre>
+       * The SDX storage resource identifier name.
+       * </pre>
+       *
+       * <code>string resourceId = 4;</code>
+       * @return The resourceId.
+       */
+      public java.lang.String getResourceId() {
+        java.lang.Object ref = resourceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resourceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX storage resource identifier name.
+       * </pre>
+       *
+       * <code>string resourceId = 4;</code>
+       * @return The bytes for resourceId.
+       */
+      public com.google.protobuf.ByteString
+          getResourceIdBytes() {
+        java.lang.Object ref = resourceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resourceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX storage resource identifier name.
+       * </pre>
+       *
+       * <code>string resourceId = 4;</code>
+       * @param value The resourceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        resourceId_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX storage resource identifier name.
+       * </pre>
+       *
+       * <code>string resourceId = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResourceId() {
+        resourceId_ = getDefaultInstance().getResourceId();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX storage resource identifier name.
+       * </pre>
+       *
+       * <code>string resourceId = 4;</code>
+       * @param value The bytes for resourceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        resourceId_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private long created_ ;
+      /**
+       * <pre>
+       * Timestamp of storage instance creation.
+       * </pre>
+       *
+       * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The created.
+       */
+      @java.lang.Override
+      public long getCreated() {
+        return created_;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance creation.
+       * </pre>
+       *
+       * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The created to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCreated(long value) {
+
+        created_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance creation.
+       * </pre>
+       *
+       * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCreated() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        created_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long updated_ ;
+      /**
+       * <pre>
+       * Timestamp of storage instance last updated.
+       * </pre>
+       *
+       * <code>int64 updated = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The updated.
+       */
+      @java.lang.Override
+      public long getUpdated() {
+        return updated_;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance last updated.
+       * </pre>
+       *
+       * <code>int64 updated = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The updated to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUpdated(long value) {
+
+        updated_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of storage instance last updated.
+       * </pre>
+       *
+       * <code>int64 updated = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUpdated() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        updated_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object credentialsVaultPath_ = "";
+      /**
+       * <pre>
+       * The vault credentials path for the storage assignment
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @return The credentialsVaultPath.
+       */
+      public java.lang.String getCredentialsVaultPath() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          credentialsVaultPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The vault credentials path for the storage assignment
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @return The bytes for credentialsVaultPath.
+       */
+      public com.google.protobuf.ByteString
+          getCredentialsVaultPathBytes() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          credentialsVaultPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The vault credentials path for the storage assignment
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @param value The credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The vault credentials path for the storage assignment
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCredentialsVaultPath() {
+        credentialsVaultPath_ = getDefaultInstance().getCredentialsVaultPath();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The vault credentials path for the storage assignment
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @param value The bytes for credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.StorageAssignment)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.StorageAssignment)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StorageAssignment>
+        PARSER = new com.google.protobuf.AbstractParser<StorageAssignment>() {
+      @java.lang.Override
+      public StorageAssignment parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<StorageAssignment> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StorageAssignment> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ChartRegistryAuthTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.ChartRegistryAuthType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Chart Registry Types
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.ChartRegistryAuthType}
+   */
+  public static final class ChartRegistryAuthType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.ChartRegistryAuthType)
+      ChartRegistryAuthTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ChartRegistryAuthType.newBuilder() to construct.
+    private ChartRegistryAuthType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ChartRegistryAuthType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChartRegistryAuthType();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRegistryAuthType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRegistryAuthType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Builder.class);
+    }
+
+    /**
+     * <pre>
+     * The Chart Registry Type Value
+     * </pre>
+     *
+     * Protobuf enum {@code sdxsvccommon.ChartRegistryAuthType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * Unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * No authentication to the registry is necessary.
+       * </pre>
+       *
+       * <code>NONE = 1;</code>
+       */
+      NONE(1),
+      /**
+       * <pre>
+       * Standard Username and Password.
+       * </pre>
+       *
+       * <code>STANDARD = 2;</code>
+       */
+      STANDARD(2),
+      /**
+       * <pre>
+       * AWS ECR credentials for running IAM Role.
+       * </pre>
+       *
+       * <code>AWS_ECR = 3;</code>
+       */
+      AWS_ECR(3),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * Unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * No authentication to the registry is necessary.
+       * </pre>
+       *
+       * <code>NONE = 1;</code>
+       */
+      public static final int NONE_VALUE = 1;
+      /**
+       * <pre>
+       * Standard Username and Password.
+       * </pre>
+       *
+       * <code>STANDARD = 2;</code>
+       */
+      public static final int STANDARD_VALUE = 2;
+      /**
+       * <pre>
+       * AWS ECR credentials for running IAM Role.
+       * </pre>
+       *
+       * <code>AWS_ECR = 3;</code>
+       */
+      public static final int AWS_ECR_VALUE = 3;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return NONE;
+          case 2: return STANDARD;
+          case 3: return AWS_ECR;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:sdxsvccommon.ChartRegistryAuthType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Chart Registry Types
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.ChartRegistryAuthType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.ChartRegistryAuthType)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRegistryAuthType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRegistryAuthType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRegistryAuthType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.ChartRegistryAuthType)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.ChartRegistryAuthType)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ChartRegistryAuthType>
+        PARSER = new com.google.protobuf.AbstractParser<ChartRegistryAuthType>() {
+      @java.lang.Override
+      public ChartRegistryAuthType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ChartRegistryAuthType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ChartRegistryAuthType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ChartRepositoryOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.ChartRepository)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+     * </pre>
+     *
+     * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+     * @return The url.
+     */
+    java.lang.String getUrl();
+    /**
+     * <pre>
+     * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+     * </pre>
+     *
+     * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+     * @return The bytes for url.
+     */
+    com.google.protobuf.ByteString
+        getUrlBytes();
+
+    /**
+     * <pre>
+     * The chart repository type.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The enum numeric value on the wire for authType.
+     */
+    int getAuthTypeValue();
+    /**
+     * <pre>
+     * The chart repository type.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The authType.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value getAuthType();
+
+    /**
+     * <pre>
+     * The username for the chart repository.
+     * </pre>
+     *
+     * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The username.
+     */
+    java.lang.String getUsername();
+    /**
+     * <pre>
+     * The username for the chart repository.
+     * </pre>
+     *
+     * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for username.
+     */
+    com.google.protobuf.ByteString
+        getUsernameBytes();
+
+    /**
+     * <pre>
+     * The password for the chart repository.
+     * </pre>
+     *
+     * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The password.
+     */
+    java.lang.String getPassword();
+    /**
+     * <pre>
+     * The password for the chart repository.
+     * </pre>
+     *
+     * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for password.
+     */
+    com.google.protobuf.ByteString
+        getPasswordBytes();
+
+    /**
+     * <pre>
+     * Use the registry in insecure mode.
+     * </pre>
+     *
+     * <code>bool insecure = 5;</code>
+     * @return The insecure.
+     */
+    boolean getInsecure();
+  }
+  /**
+   * <pre>
+   * A Helm Chart Repository
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.ChartRepository}
+   */
+  public static final class ChartRepository extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.ChartRepository)
+      ChartRepositoryOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ChartRepository.newBuilder() to construct.
+    private ChartRepository(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ChartRepository() {
+      url_ = "";
+      authType_ = 0;
+      username_ = "";
+      password_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChartRepository();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRepository_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRepository_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder.class);
+    }
+
+    public static final int URL_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object url_ = "";
+    /**
+     * <pre>
+     * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+     * </pre>
+     *
+     * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+     * @return The url.
+     */
+    @java.lang.Override
+    public java.lang.String getUrl() {
+      java.lang.Object ref = url_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        url_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+     * </pre>
+     *
+     * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+     * @return The bytes for url.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getUrlBytes() {
+      java.lang.Object ref = url_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        url_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int AUTHTYPE_FIELD_NUMBER = 2;
+    private int authType_ = 0;
+    /**
+     * <pre>
+     * The chart repository type.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The enum numeric value on the wire for authType.
+     */
+    @java.lang.Override public int getAuthTypeValue() {
+      return authType_;
+    }
+    /**
+     * <pre>
+     * The chart repository type.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The authType.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value getAuthType() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value.forNumber(authType_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int USERNAME_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object username_ = "";
+    /**
+     * <pre>
+     * The username for the chart repository.
+     * </pre>
+     *
+     * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The username.
+     */
+    @java.lang.Override
+    public java.lang.String getUsername() {
+      java.lang.Object ref = username_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        username_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The username for the chart repository.
+     * </pre>
+     *
+     * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for username.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getUsernameBytes() {
+      java.lang.Object ref = username_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        username_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PASSWORD_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object password_ = "";
+    /**
+     * <pre>
+     * The password for the chart repository.
+     * </pre>
+     *
+     * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The password.
+     */
+    @java.lang.Override
+    public java.lang.String getPassword() {
+      java.lang.Object ref = password_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        password_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The password for the chart repository.
+     * </pre>
+     *
+     * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for password.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPasswordBytes() {
+      java.lang.Object ref = password_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        password_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int INSECURE_FIELD_NUMBER = 5;
+    private boolean insecure_ = false;
+    /**
+     * <pre>
+     * Use the registry in insecure mode.
+     * </pre>
+     *
+     * <code>bool insecure = 5;</code>
+     * @return The insecure.
+     */
+    @java.lang.Override
+    public boolean getInsecure() {
+      return insecure_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, url_);
+      }
+      if (authType_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value.UNSET.getNumber()) {
+        output.writeEnum(2, authType_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(username_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, username_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, password_);
+      }
+      if (insecure_ != false) {
+        output.writeBool(5, insecure_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, url_);
+      }
+      if (authType_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, authType_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(username_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, username_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, password_);
+      }
+      if (insecure_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, insecure_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository) obj;
+
+      if (!getUrl()
+          .equals(other.getUrl())) return false;
+      if (authType_ != other.authType_) return false;
+      if (!getUsername()
+          .equals(other.getUsername())) return false;
+      if (!getPassword()
+          .equals(other.getPassword())) return false;
+      if (getInsecure()
+          != other.getInsecure()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + URL_FIELD_NUMBER;
+      hash = (53 * hash) + getUrl().hashCode();
+      hash = (37 * hash) + AUTHTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + authType_;
+      hash = (37 * hash) + USERNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getUsername().hashCode();
+      hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
+      hash = (53 * hash) + getPassword().hashCode();
+      hash = (37 * hash) + INSECURE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getInsecure());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A Helm Chart Repository
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.ChartRepository}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.ChartRepository)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRepository_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRepository_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        url_ = "";
+        authType_ = 0;
+        username_ = "";
+        password_ = "";
+        insecure_ = false;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_ChartRepository_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.url_ = url_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.authType_ = authType_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.username_ = username_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.password_ = password_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.insecure_ = insecure_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance()) return this;
+        if (!other.getUrl().isEmpty()) {
+          url_ = other.url_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.authType_ != 0) {
+          setAuthTypeValue(other.getAuthTypeValue());
+        }
+        if (!other.getUsername().isEmpty()) {
+          username_ = other.username_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getPassword().isEmpty()) {
+          password_ = other.password_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (other.getInsecure() != false) {
+          setInsecure(other.getInsecure());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                url_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                authType_ = input.readEnum();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                username_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                password_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                insecure_ = input.readBool();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object url_ = "";
+      /**
+       * <pre>
+       * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+       * </pre>
+       *
+       * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+       * @return The url.
+       */
+      public java.lang.String getUrl() {
+        java.lang.Object ref = url_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          url_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+       * </pre>
+       *
+       * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+       * @return The bytes for url.
+       */
+      public com.google.protobuf.ByteString
+          getUrlBytes() {
+        java.lang.Object ref = url_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          url_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+       * </pre>
+       *
+       * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+       * @param value The url to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        url_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+       * </pre>
+       *
+       * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUrl() {
+        url_ = getDefaultInstance().getUrl();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * End root URL of the chart repository.  This will include schemas like http://, https://, or oci://
+       * </pre>
+       *
+       * <code>string url = 1 [(.options.FieldExtension.required) = true, (.options.FieldExtension.noParamfile) = true];</code>
+       * @param value The bytes for url to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        url_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private int authType_ = 0;
+      /**
+       * <pre>
+       * The chart repository type.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The enum numeric value on the wire for authType.
+       */
+      @java.lang.Override public int getAuthTypeValue() {
+        return authType_;
+      }
+      /**
+       * <pre>
+       * The chart repository type.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The enum numeric value on the wire for authType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAuthTypeValue(int value) {
+        authType_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The chart repository type.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The authType.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value getAuthType() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value.forNumber(authType_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The chart repository type.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The authType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAuthType(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRegistryAuthType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        authType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The chart repository type.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRegistryAuthType.Value authType = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAuthType() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        authType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object username_ = "";
+      /**
+       * <pre>
+       * The username for the chart repository.
+       * </pre>
+       *
+       * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The username.
+       */
+      public java.lang.String getUsername() {
+        java.lang.Object ref = username_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          username_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The username for the chart repository.
+       * </pre>
+       *
+       * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The bytes for username.
+       */
+      public com.google.protobuf.ByteString
+          getUsernameBytes() {
+        java.lang.Object ref = username_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          username_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The username for the chart repository.
+       * </pre>
+       *
+       * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The username to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUsername(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        username_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The username for the chart repository.
+       * </pre>
+       *
+       * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUsername() {
+        username_ = getDefaultInstance().getUsername();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The username for the chart repository.
+       * </pre>
+       *
+       * <code>string username = 3 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The bytes for username to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUsernameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        username_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object password_ = "";
+      /**
+       * <pre>
+       * The password for the chart repository.
+       * </pre>
+       *
+       * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The password.
+       */
+      public java.lang.String getPassword() {
+        java.lang.Object ref = password_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          password_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The password for the chart repository.
+       * </pre>
+       *
+       * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The bytes for password.
+       */
+      public com.google.protobuf.ByteString
+          getPasswordBytes() {
+        java.lang.Object ref = password_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          password_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The password for the chart repository.
+       * </pre>
+       *
+       * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The password to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPassword(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        password_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The password for the chart repository.
+       * </pre>
+       *
+       * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPassword() {
+        password_ = getDefaultInstance().getPassword();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The password for the chart repository.
+       * </pre>
+       *
+       * <code>string password = 4 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The bytes for password to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPasswordBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        password_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private boolean insecure_ ;
+      /**
+       * <pre>
+       * Use the registry in insecure mode.
+       * </pre>
+       *
+       * <code>bool insecure = 5;</code>
+       * @return The insecure.
+       */
+      @java.lang.Override
+      public boolean getInsecure() {
+        return insecure_;
+      }
+      /**
+       * <pre>
+       * Use the registry in insecure mode.
+       * </pre>
+       *
+       * <code>bool insecure = 5;</code>
+       * @param value The insecure to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInsecure(boolean value) {
+
+        insecure_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Use the registry in insecure mode.
+       * </pre>
+       *
+       * <code>bool insecure = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearInsecure() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        insecure_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.ChartRepository)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.ChartRepository)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ChartRepository>
+        PARSER = new com.google.protobuf.AbstractParser<ChartRepository>() {
+      @java.lang.Override
+      public ChartRepository parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ChartRepository> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ChartRepository> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DeploymentVersionOverrideOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.DeploymentVersionOverride)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The name of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string chartName = 1;</code>
+     * @return The chartName.
+     */
+    java.lang.String getChartName();
+    /**
+     * <pre>
+     * The name of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string chartName = 1;</code>
+     * @return The bytes for chartName.
+     */
+    com.google.protobuf.ByteString
+        getChartNameBytes();
+
+    /**
+     * <pre>
+     * The version of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The version.
+     */
+    java.lang.String getVersion();
+    /**
+     * <pre>
+     * The version of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The bytes for version.
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+
+    /**
+     * <pre>
+     * The deployment name being overriden.
+     * </pre>
+     *
+     * <code>string deploymentName = 3;</code>
+     * @return The deploymentName.
+     */
+    java.lang.String getDeploymentName();
+    /**
+     * <pre>
+     * The deployment name being overriden.
+     * </pre>
+     *
+     * <code>string deploymentName = 3;</code>
+     * @return The bytes for deploymentName.
+     */
+    com.google.protobuf.ByteString
+        getDeploymentNameBytes();
+
+    /**
+     * <pre>
+     * The repo where the chart is being used for the override.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+     * @return Whether the chartRepository field is set.
+     */
+    boolean hasChartRepository();
+    /**
+     * <pre>
+     * The repo where the chart is being used for the override.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+     * @return The chartRepository.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository getChartRepository();
+    /**
+     * <pre>
+     * The repo where the chart is being used for the override.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder getChartRepositoryOrBuilder();
+
+    /**
+     * <pre>
+     * The docker registry where the image is being used for the override.
+     * </pre>
+     *
+     * <code>string imageRegistry = 5;</code>
+     * @return The imageRegistry.
+     */
+    java.lang.String getImageRegistry();
+    /**
+     * <pre>
+     * The docker registry where the image is being used for the override.
+     * </pre>
+     *
+     * <code>string imageRegistry = 5;</code>
+     * @return The bytes for imageRegistry.
+     */
+    com.google.protobuf.ByteString
+        getImageRegistryBytes();
+  }
+  /**
+   * <pre>
+   * Overide of a Chart Version for a Shape
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.DeploymentVersionOverride}
+   */
+  public static final class DeploymentVersionOverride extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.DeploymentVersionOverride)
+      DeploymentVersionOverrideOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DeploymentVersionOverride.newBuilder() to construct.
+    private DeploymentVersionOverride(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DeploymentVersionOverride() {
+      chartName_ = "";
+      version_ = "";
+      deploymentName_ = "";
+      imageRegistry_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeploymentVersionOverride();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_DeploymentVersionOverride_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_DeploymentVersionOverride_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int CHARTNAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object chartName_ = "";
+    /**
+     * <pre>
+     * The name of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string chartName = 1;</code>
+     * @return The chartName.
+     */
+    @java.lang.Override
+    public java.lang.String getChartName() {
+      java.lang.Object ref = chartName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        chartName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string chartName = 1;</code>
+     * @return The bytes for chartName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getChartNameBytes() {
+      java.lang.Object ref = chartName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        chartName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object version_ = "";
+    /**
+     * <pre>
+     * The version of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The version of the chart to use as an override.
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The bytes for version.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DEPLOYMENTNAME_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object deploymentName_ = "";
+    /**
+     * <pre>
+     * The deployment name being overriden.
+     * </pre>
+     *
+     * <code>string deploymentName = 3;</code>
+     * @return The deploymentName.
+     */
+    @java.lang.Override
+    public java.lang.String getDeploymentName() {
+      java.lang.Object ref = deploymentName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        deploymentName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The deployment name being overriden.
+     * </pre>
+     *
+     * <code>string deploymentName = 3;</code>
+     * @return The bytes for deploymentName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDeploymentNameBytes() {
+      java.lang.Object ref = deploymentName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        deploymentName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CHARTREPOSITORY_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository chartRepository_;
+    /**
+     * <pre>
+     * The repo where the chart is being used for the override.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+     * @return Whether the chartRepository field is set.
+     */
+    @java.lang.Override
+    public boolean hasChartRepository() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * The repo where the chart is being used for the override.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+     * @return The chartRepository.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository getChartRepository() {
+      return chartRepository_ == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance() : chartRepository_;
+    }
+    /**
+     * <pre>
+     * The repo where the chart is being used for the override.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder getChartRepositoryOrBuilder() {
+      return chartRepository_ == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance() : chartRepository_;
+    }
+
+    public static final int IMAGEREGISTRY_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object imageRegistry_ = "";
+    /**
+     * <pre>
+     * The docker registry where the image is being used for the override.
+     * </pre>
+     *
+     * <code>string imageRegistry = 5;</code>
+     * @return The imageRegistry.
+     */
+    @java.lang.Override
+    public java.lang.String getImageRegistry() {
+      java.lang.Object ref = imageRegistry_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        imageRegistry_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The docker registry where the image is being used for the override.
+     * </pre>
+     *
+     * <code>string imageRegistry = 5;</code>
+     * @return The bytes for imageRegistry.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getImageRegistryBytes() {
+      java.lang.Object ref = imageRegistry_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        imageRegistry_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(chartName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, chartName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, version_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(deploymentName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, deploymentName_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeMessage(4, getChartRepository());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(imageRegistry_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, imageRegistry_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(chartName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, chartName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, version_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(deploymentName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, deploymentName_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getChartRepository());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(imageRegistry_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, imageRegistry_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride) obj;
+
+      if (!getChartName()
+          .equals(other.getChartName())) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (!getDeploymentName()
+          .equals(other.getDeploymentName())) return false;
+      if (hasChartRepository() != other.hasChartRepository()) return false;
+      if (hasChartRepository()) {
+        if (!getChartRepository()
+            .equals(other.getChartRepository())) return false;
+      }
+      if (!getImageRegistry()
+          .equals(other.getImageRegistry())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CHARTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getChartName().hashCode();
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion().hashCode();
+      hash = (37 * hash) + DEPLOYMENTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getDeploymentName().hashCode();
+      if (hasChartRepository()) {
+        hash = (37 * hash) + CHARTREPOSITORY_FIELD_NUMBER;
+        hash = (53 * hash) + getChartRepository().hashCode();
+      }
+      hash = (37 * hash) + IMAGEREGISTRY_FIELD_NUMBER;
+      hash = (53 * hash) + getImageRegistry().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Overide of a Chart Version for a Shape
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.DeploymentVersionOverride}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.DeploymentVersionOverride)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_DeploymentVersionOverride_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_DeploymentVersionOverride_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getChartRepositoryFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        chartName_ = "";
+        version_ = "";
+        deploymentName_ = "";
+        chartRepository_ = null;
+        if (chartRepositoryBuilder_ != null) {
+          chartRepositoryBuilder_.dispose();
+          chartRepositoryBuilder_ = null;
+        }
+        imageRegistry_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_DeploymentVersionOverride_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.chartName_ = chartName_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.version_ = version_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.deploymentName_ = deploymentName_;
+        }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.chartRepository_ = chartRepositoryBuilder_ == null
+              ? chartRepository_
+              : chartRepositoryBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.imageRegistry_ = imageRegistry_;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.getDefaultInstance()) return this;
+        if (!other.getChartName().isEmpty()) {
+          chartName_ = other.chartName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getVersion().isEmpty()) {
+          version_ = other.version_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getDeploymentName().isEmpty()) {
+          deploymentName_ = other.deploymentName_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (other.hasChartRepository()) {
+          mergeChartRepository(other.getChartRepository());
+        }
+        if (!other.getImageRegistry().isEmpty()) {
+          imageRegistry_ = other.imageRegistry_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                chartName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                version_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                deploymentName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getChartRepositoryFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                imageRegistry_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object chartName_ = "";
+      /**
+       * <pre>
+       * The name of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string chartName = 1;</code>
+       * @return The chartName.
+       */
+      public java.lang.String getChartName() {
+        java.lang.Object ref = chartName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          chartName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string chartName = 1;</code>
+       * @return The bytes for chartName.
+       */
+      public com.google.protobuf.ByteString
+          getChartNameBytes() {
+        java.lang.Object ref = chartName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          chartName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string chartName = 1;</code>
+       * @param value The chartName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setChartName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        chartName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string chartName = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearChartName() {
+        chartName_ = getDefaultInstance().getChartName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string chartName = 1;</code>
+       * @param value The bytes for chartName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setChartNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        chartName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <pre>
+       * The version of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @return The version.
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          version_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The version of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @return The bytes for version.
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The version of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        version_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The version of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        version_ = getDefaultInstance().getVersion();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The version of the chart to use as an override.
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        version_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object deploymentName_ = "";
+      /**
+       * <pre>
+       * The deployment name being overriden.
+       * </pre>
+       *
+       * <code>string deploymentName = 3;</code>
+       * @return The deploymentName.
+       */
+      public java.lang.String getDeploymentName() {
+        java.lang.Object ref = deploymentName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          deploymentName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The deployment name being overriden.
+       * </pre>
+       *
+       * <code>string deploymentName = 3;</code>
+       * @return The bytes for deploymentName.
+       */
+      public com.google.protobuf.ByteString
+          getDeploymentNameBytes() {
+        java.lang.Object ref = deploymentName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          deploymentName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The deployment name being overriden.
+       * </pre>
+       *
+       * <code>string deploymentName = 3;</code>
+       * @param value The deploymentName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeploymentName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        deploymentName_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The deployment name being overriden.
+       * </pre>
+       *
+       * <code>string deploymentName = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDeploymentName() {
+        deploymentName_ = getDefaultInstance().getDeploymentName();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The deployment name being overriden.
+       * </pre>
+       *
+       * <code>string deploymentName = 3;</code>
+       * @param value The bytes for deploymentName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeploymentNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        deploymentName_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository chartRepository_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder> chartRepositoryBuilder_;
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       * @return Whether the chartRepository field is set.
+       */
+      public boolean hasChartRepository() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       * @return The chartRepository.
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository getChartRepository() {
+        if (chartRepositoryBuilder_ == null) {
+          return chartRepository_ == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance() : chartRepository_;
+        } else {
+          return chartRepositoryBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      public Builder setChartRepository(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository value) {
+        if (chartRepositoryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          chartRepository_ = value;
+        } else {
+          chartRepositoryBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      public Builder setChartRepository(
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder builderForValue) {
+        if (chartRepositoryBuilder_ == null) {
+          chartRepository_ = builderForValue.build();
+        } else {
+          chartRepositoryBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      public Builder mergeChartRepository(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository value) {
+        if (chartRepositoryBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0) &&
+            chartRepository_ != null &&
+            chartRepository_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance()) {
+            getChartRepositoryBuilder().mergeFrom(value);
+          } else {
+            chartRepository_ = value;
+          }
+        } else {
+          chartRepositoryBuilder_.mergeFrom(value);
+        }
+        if (chartRepository_ != null) {
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      public Builder clearChartRepository() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        chartRepository_ = null;
+        if (chartRepositoryBuilder_ != null) {
+          chartRepositoryBuilder_.dispose();
+          chartRepositoryBuilder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder getChartRepositoryBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getChartRepositoryFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder getChartRepositoryOrBuilder() {
+        if (chartRepositoryBuilder_ != null) {
+          return chartRepositoryBuilder_.getMessageOrBuilder();
+        } else {
+          return chartRepository_ == null ?
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.getDefaultInstance() : chartRepository_;
+        }
+      }
+      /**
+       * <pre>
+       * The repo where the chart is being used for the override.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.ChartRepository chartRepository = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder> 
+          getChartRepositoryFieldBuilder() {
+        if (chartRepositoryBuilder_ == null) {
+          chartRepositoryBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepository.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.ChartRepositoryOrBuilder>(
+                  getChartRepository(),
+                  getParentForChildren(),
+                  isClean());
+          chartRepository_ = null;
+        }
+        return chartRepositoryBuilder_;
+      }
+
+      private java.lang.Object imageRegistry_ = "";
+      /**
+       * <pre>
+       * The docker registry where the image is being used for the override.
+       * </pre>
+       *
+       * <code>string imageRegistry = 5;</code>
+       * @return The imageRegistry.
+       */
+      public java.lang.String getImageRegistry() {
+        java.lang.Object ref = imageRegistry_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          imageRegistry_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The docker registry where the image is being used for the override.
+       * </pre>
+       *
+       * <code>string imageRegistry = 5;</code>
+       * @return The bytes for imageRegistry.
+       */
+      public com.google.protobuf.ByteString
+          getImageRegistryBytes() {
+        java.lang.Object ref = imageRegistry_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          imageRegistry_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The docker registry where the image is being used for the override.
+       * </pre>
+       *
+       * <code>string imageRegistry = 5;</code>
+       * @param value The imageRegistry to set.
+       * @return This builder for chaining.
+       */
+      public Builder setImageRegistry(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        imageRegistry_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The docker registry where the image is being used for the override.
+       * </pre>
+       *
+       * <code>string imageRegistry = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearImageRegistry() {
+        imageRegistry_ = getDefaultInstance().getImageRegistry();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The docker registry where the image is being used for the override.
+       * </pre>
+       *
+       * <code>string imageRegistry = 5;</code>
+       * @param value The bytes for imageRegistry to set.
+       * @return This builder for chaining.
+       */
+      public Builder setImageRegistryBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        imageRegistry_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.DeploymentVersionOverride)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.DeploymentVersionOverride)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DeploymentVersionOverride>
+        PARSER = new com.google.protobuf.AbstractParser<DeploymentVersionOverride>() {
+      @java.lang.Override
+      public DeploymentVersionOverride parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DeploymentVersionOverride> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DeploymentVersionOverride> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CodEnvironmentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.CodEnvironment)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * unique Id that will be auto generated for the COD Environment on registration
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The id.
+     */
+    java.lang.String getId();
+    /**
+     * <pre>
+     * unique Id that will be auto generated for the COD Environment on registration
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The bytes for id.
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <pre>
+     * The name of the COD Environment.
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The name of the COD Environment.
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    int getCloudPlatformValue();
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The cloudPlatform.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform();
+
+    /**
+     * <pre>
+     * The cloud region the Load Balancer is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The cloudRegion.
+     */
+    java.lang.String getCloudRegion();
+    /**
+     * <pre>
+     * The cloud region the Load Balancer is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The bytes for cloudRegion.
+     */
+    com.google.protobuf.ByteString
+        getCloudRegionBytes();
+
+    /**
+     * <pre>
+     * The CRN for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0Crn = 5;</code>
+     * @return The cluster0Crn.
+     */
+    java.lang.String getCluster0Crn();
+    /**
+     * <pre>
+     * The CRN for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0Crn = 5;</code>
+     * @return The bytes for cluster0Crn.
+     */
+    com.google.protobuf.ByteString
+        getCluster0CrnBytes();
+
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0ZookeeperHost = 6;</code>
+     * @return The cluster0ZookeeperHost.
+     */
+    java.lang.String getCluster0ZookeeperHost();
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0ZookeeperHost = 6;</code>
+     * @return The bytes for cluster0ZookeeperHost.
+     */
+    com.google.protobuf.ByteString
+        getCluster0ZookeeperHostBytes();
+
+    /**
+     * <pre>
+     * The CRN for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1Crn = 8;</code>
+     * @return The cluster1Crn.
+     */
+    java.lang.String getCluster1Crn();
+    /**
+     * <pre>
+     * The CRN for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1Crn = 8;</code>
+     * @return The bytes for cluster1Crn.
+     */
+    com.google.protobuf.ByteString
+        getCluster1CrnBytes();
+
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1ZookeeperHost = 9;</code>
+     * @return The cluster1ZookeeperHost.
+     */
+    java.lang.String getCluster1ZookeeperHost();
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1ZookeeperHost = 9;</code>
+     * @return The bytes for cluster1ZookeeperHost.
+     */
+    com.google.protobuf.ByteString
+        getCluster1ZookeeperHostBytes();
+
+    /**
+     * <pre>
+     * Is the Load Balancer assignable
+     * </pre>
+     *
+     * <code>bool assignable = 11;</code>
+     * @return The assignable.
+     */
+    boolean getAssignable();
+
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment> 
+        getAssignmentsList();
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment getAssignments(int index);
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    int getAssignmentsCount();
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder> 
+        getAssignmentsOrBuilderList();
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder getAssignmentsOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Timestamp of registration
+     * </pre>
+     *
+     * <code>int64 registeredTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The registeredTimestamp.
+     */
+    long getRegisteredTimestamp();
+
+    /**
+     * <pre>
+     * Timestamp of last update
+     * </pre>
+     *
+     * <code>int64 updatedTimestamp = 14 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updatedTimestamp.
+     */
+    long getUpdatedTimestamp();
+  }
+  /**
+   * <pre>
+   * An instance of a COD Environment.
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.CodEnvironment}
+   */
+  public static final class CodEnvironment extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.CodEnvironment)
+      CodEnvironmentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CodEnvironment.newBuilder() to construct.
+    private CodEnvironment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CodEnvironment() {
+      id_ = "";
+      name_ = "";
+      cloudPlatform_ = 0;
+      cloudRegion_ = "";
+      cluster0Crn_ = "";
+      cluster0ZookeeperHost_ = "";
+      cluster1Crn_ = "";
+      cluster1ZookeeperHost_ = "";
+      assignments_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CodEnvironment();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodEnvironment_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodEnvironment_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object id_ = "";
+    /**
+     * <pre>
+     * unique Id that will be auto generated for the COD Environment on registration
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * unique Id that will be auto generated for the COD Environment on registration
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     * @return The bytes for id.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The name of the COD Environment.
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the COD Environment.
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDPLATFORM_FIELD_NUMBER = 3;
+    private int cloudPlatform_ = 0;
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    @java.lang.Override public int getCloudPlatformValue() {
+      return cloudPlatform_;
+    }
+    /**
+     * <pre>
+     * The cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The cloudPlatform.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int CLOUDREGION_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cloudRegion_ = "";
+    /**
+     * <pre>
+     * The cloud region the Load Balancer is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The cloudRegion.
+     */
+    @java.lang.Override
+    public java.lang.String getCloudRegion() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cloudRegion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud region the Load Balancer is in.
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The bytes for cloudRegion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCloudRegionBytes() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cloudRegion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTER0CRN_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cluster0Crn_ = "";
+    /**
+     * <pre>
+     * The CRN for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0Crn = 5;</code>
+     * @return The cluster0Crn.
+     */
+    @java.lang.Override
+    public java.lang.String getCluster0Crn() {
+      java.lang.Object ref = cluster0Crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cluster0Crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0Crn = 5;</code>
+     * @return The bytes for cluster0Crn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCluster0CrnBytes() {
+      java.lang.Object ref = cluster0Crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cluster0Crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTER0ZOOKEEPERHOST_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cluster0ZookeeperHost_ = "";
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0ZookeeperHost = 6;</code>
+     * @return The cluster0ZookeeperHost.
+     */
+    @java.lang.Override
+    public java.lang.String getCluster0ZookeeperHost() {
+      java.lang.Object ref = cluster0ZookeeperHost_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cluster0ZookeeperHost_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster0
+     * </pre>
+     *
+     * <code>string cluster0ZookeeperHost = 6;</code>
+     * @return The bytes for cluster0ZookeeperHost.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCluster0ZookeeperHostBytes() {
+      java.lang.Object ref = cluster0ZookeeperHost_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cluster0ZookeeperHost_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTER1CRN_FIELD_NUMBER = 8;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cluster1Crn_ = "";
+    /**
+     * <pre>
+     * The CRN for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1Crn = 8;</code>
+     * @return The cluster1Crn.
+     */
+    @java.lang.Override
+    public java.lang.String getCluster1Crn() {
+      java.lang.Object ref = cluster1Crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cluster1Crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1Crn = 8;</code>
+     * @return The bytes for cluster1Crn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCluster1CrnBytes() {
+      java.lang.Object ref = cluster1Crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cluster1Crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTER1ZOOKEEPERHOST_FIELD_NUMBER = 9;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cluster1ZookeeperHost_ = "";
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1ZookeeperHost = 9;</code>
+     * @return The cluster1ZookeeperHost.
+     */
+    @java.lang.Override
+    public java.lang.String getCluster1ZookeeperHost() {
+      java.lang.Object ref = cluster1ZookeeperHost_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cluster1ZookeeperHost_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Zookeeper quorum host for COD cluster1
+     * </pre>
+     *
+     * <code>string cluster1ZookeeperHost = 9;</code>
+     * @return The bytes for cluster1ZookeeperHost.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCluster1ZookeeperHostBytes() {
+      java.lang.Object ref = cluster1ZookeeperHost_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cluster1ZookeeperHost_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ASSIGNABLE_FIELD_NUMBER = 11;
+    private boolean assignable_ = false;
+    /**
+     * <pre>
+     * Is the Load Balancer assignable
+     * </pre>
+     *
+     * <code>bool assignable = 11;</code>
+     * @return The assignable.
+     */
+    @java.lang.Override
+    public boolean getAssignable() {
+      return assignable_;
+    }
+
+    public static final int ASSIGNMENTS_FIELD_NUMBER = 12;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment> assignments_;
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment> getAssignmentsList() {
+      return assignments_;
+    }
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder> 
+        getAssignmentsOrBuilderList() {
+      return assignments_;
+    }
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    @java.lang.Override
+    public int getAssignmentsCount() {
+      return assignments_.size();
+    }
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment getAssignments(int index) {
+      return assignments_.get(index);
+    }
+    /**
+     * <pre>
+     * The SDX Instances assigned to the Load Balancer
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder getAssignmentsOrBuilder(
+        int index) {
+      return assignments_.get(index);
+    }
+
+    public static final int REGISTEREDTIMESTAMP_FIELD_NUMBER = 13;
+    private long registeredTimestamp_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of registration
+     * </pre>
+     *
+     * <code>int64 registeredTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The registeredTimestamp.
+     */
+    @java.lang.Override
+    public long getRegisteredTimestamp() {
+      return registeredTimestamp_;
+    }
+
+    public static final int UPDATEDTIMESTAMP_FIELD_NUMBER = 14;
+    private long updatedTimestamp_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of last update
+     * </pre>
+     *
+     * <code>int64 updatedTimestamp = 14 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updatedTimestamp.
+     */
+    @java.lang.Override
+    public long getUpdatedTimestamp() {
+      return updatedTimestamp_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        output.writeEnum(3, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster0Crn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cluster0Crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster0ZookeeperHost_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, cluster0ZookeeperHost_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster1Crn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, cluster1Crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster1ZookeeperHost_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, cluster1ZookeeperHost_);
+      }
+      if (assignable_ != false) {
+        output.writeBool(11, assignable_);
+      }
+      for (int i = 0; i < assignments_.size(); i++) {
+        output.writeMessage(12, assignments_.get(i));
+      }
+      if (registeredTimestamp_ != 0L) {
+        output.writeInt64(13, registeredTimestamp_);
+      }
+      if (updatedTimestamp_ != 0L) {
+        output.writeInt64(14, updatedTimestamp_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster0Crn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cluster0Crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster0ZookeeperHost_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, cluster0ZookeeperHost_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster1Crn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, cluster1Crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster1ZookeeperHost_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, cluster1ZookeeperHost_);
+      }
+      if (assignable_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(11, assignable_);
+      }
+      for (int i = 0; i < assignments_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(12, assignments_.get(i));
+      }
+      if (registeredTimestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(13, registeredTimestamp_);
+      }
+      if (updatedTimestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(14, updatedTimestamp_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment) obj;
+
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (cloudPlatform_ != other.cloudPlatform_) return false;
+      if (!getCloudRegion()
+          .equals(other.getCloudRegion())) return false;
+      if (!getCluster0Crn()
+          .equals(other.getCluster0Crn())) return false;
+      if (!getCluster0ZookeeperHost()
+          .equals(other.getCluster0ZookeeperHost())) return false;
+      if (!getCluster1Crn()
+          .equals(other.getCluster1Crn())) return false;
+      if (!getCluster1ZookeeperHost()
+          .equals(other.getCluster1ZookeeperHost())) return false;
+      if (getAssignable()
+          != other.getAssignable()) return false;
+      if (!getAssignmentsList()
+          .equals(other.getAssignmentsList())) return false;
+      if (getRegisteredTimestamp()
+          != other.getRegisteredTimestamp()) return false;
+      if (getUpdatedTimestamp()
+          != other.getUpdatedTimestamp()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
+      hash = (53 * hash) + cloudPlatform_;
+      hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
+      hash = (53 * hash) + getCloudRegion().hashCode();
+      hash = (37 * hash) + CLUSTER0CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCluster0Crn().hashCode();
+      hash = (37 * hash) + CLUSTER0ZOOKEEPERHOST_FIELD_NUMBER;
+      hash = (53 * hash) + getCluster0ZookeeperHost().hashCode();
+      hash = (37 * hash) + CLUSTER1CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCluster1Crn().hashCode();
+      hash = (37 * hash) + CLUSTER1ZOOKEEPERHOST_FIELD_NUMBER;
+      hash = (53 * hash) + getCluster1ZookeeperHost().hashCode();
+      hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAssignable());
+      if (getAssignmentsCount() > 0) {
+        hash = (37 * hash) + ASSIGNMENTS_FIELD_NUMBER;
+        hash = (53 * hash) + getAssignmentsList().hashCode();
+      }
+      hash = (37 * hash) + REGISTEREDTIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRegisteredTimestamp());
+      hash = (37 * hash) + UPDATEDTIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUpdatedTimestamp());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * An instance of a COD Environment.
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.CodEnvironment}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.CodEnvironment)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironmentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodEnvironment_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodEnvironment_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        id_ = "";
+        name_ = "";
+        cloudPlatform_ = 0;
+        cloudRegion_ = "";
+        cluster0Crn_ = "";
+        cluster0ZookeeperHost_ = "";
+        cluster1Crn_ = "";
+        cluster1ZookeeperHost_ = "";
+        assignable_ = false;
+        if (assignmentsBuilder_ == null) {
+          assignments_ = java.util.Collections.emptyList();
+        } else {
+          assignments_ = null;
+          assignmentsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000200);
+        registeredTimestamp_ = 0L;
+        updatedTimestamp_ = 0L;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodEnvironment_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment result) {
+        if (assignmentsBuilder_ == null) {
+          if (((bitField0_ & 0x00000200) != 0)) {
+            assignments_ = java.util.Collections.unmodifiableList(assignments_);
+            bitField0_ = (bitField0_ & ~0x00000200);
+          }
+          result.assignments_ = assignments_;
+        } else {
+          result.assignments_ = assignmentsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.cloudPlatform_ = cloudPlatform_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.cloudRegion_ = cloudRegion_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.cluster0Crn_ = cluster0Crn_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.cluster0ZookeeperHost_ = cluster0ZookeeperHost_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.cluster1Crn_ = cluster1Crn_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.cluster1ZookeeperHost_ = cluster1ZookeeperHost_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.assignable_ = assignable_;
+        }
+        if (((from_bitField0_ & 0x00000400) != 0)) {
+          result.registeredTimestamp_ = registeredTimestamp_;
+        }
+        if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.updatedTimestamp_ = updatedTimestamp_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment.getDefaultInstance()) return this;
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (other.cloudPlatform_ != 0) {
+          setCloudPlatformValue(other.getCloudPlatformValue());
+        }
+        if (!other.getCloudRegion().isEmpty()) {
+          cloudRegion_ = other.cloudRegion_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (!other.getCluster0Crn().isEmpty()) {
+          cluster0Crn_ = other.cluster0Crn_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getCluster0ZookeeperHost().isEmpty()) {
+          cluster0ZookeeperHost_ = other.cluster0ZookeeperHost_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        if (!other.getCluster1Crn().isEmpty()) {
+          cluster1Crn_ = other.cluster1Crn_;
+          bitField0_ |= 0x00000040;
+          onChanged();
+        }
+        if (!other.getCluster1ZookeeperHost().isEmpty()) {
+          cluster1ZookeeperHost_ = other.cluster1ZookeeperHost_;
+          bitField0_ |= 0x00000080;
+          onChanged();
+        }
+        if (other.getAssignable() != false) {
+          setAssignable(other.getAssignable());
+        }
+        if (assignmentsBuilder_ == null) {
+          if (!other.assignments_.isEmpty()) {
+            if (assignments_.isEmpty()) {
+              assignments_ = other.assignments_;
+              bitField0_ = (bitField0_ & ~0x00000200);
+            } else {
+              ensureAssignmentsIsMutable();
+              assignments_.addAll(other.assignments_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.assignments_.isEmpty()) {
+            if (assignmentsBuilder_.isEmpty()) {
+              assignmentsBuilder_.dispose();
+              assignmentsBuilder_ = null;
+              assignments_ = other.assignments_;
+              bitField0_ = (bitField0_ & ~0x00000200);
+              assignmentsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getAssignmentsFieldBuilder() : null;
+            } else {
+              assignmentsBuilder_.addAllMessages(other.assignments_);
+            }
+          }
+        }
+        if (other.getRegisteredTimestamp() != 0L) {
+          setRegisteredTimestamp(other.getRegisteredTimestamp());
+        }
+        if (other.getUpdatedTimestamp() != 0L) {
+          setUpdatedTimestamp(other.getUpdatedTimestamp());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                id_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                cloudPlatform_ = input.readEnum();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                cloudRegion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                cluster0Crn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                cluster0ZookeeperHost_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 66: {
+                cluster1Crn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 66
+              case 74: {
+                cluster1ZookeeperHost_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 74
+              case 88: {
+                assignable_ = input.readBool();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 88
+              case 98: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.parser(),
+                        extensionRegistry);
+                if (assignmentsBuilder_ == null) {
+                  ensureAssignmentsIsMutable();
+                  assignments_.add(m);
+                } else {
+                  assignmentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 98
+              case 104: {
+                registeredTimestamp_ = input.readInt64();
+                bitField0_ |= 0x00000400;
+                break;
+              } // case 104
+              case 112: {
+                updatedTimestamp_ = input.readInt64();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 112
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object id_ = "";
+      /**
+       * <pre>
+       * unique Id that will be auto generated for the COD Environment on registration
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return The id.
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * unique Id that will be auto generated for the COD Environment on registration
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return The bytes for id.
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * unique Id that will be auto generated for the COD Environment on registration
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * unique Id that will be auto generated for the COD Environment on registration
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        id_ = getDefaultInstance().getId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * unique Id that will be auto generated for the COD Environment on registration
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The name of the COD Environment.
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the COD Environment.
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the COD Environment.
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the COD Environment.
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the COD Environment.
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private int cloudPlatform_ = 0;
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return The enum numeric value on the wire for cloudPlatform.
+       */
+      @java.lang.Override public int getCloudPlatformValue() {
+        return cloudPlatform_;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @param value The enum numeric value on the wire for cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatformValue(int value) {
+        cloudPlatform_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return The cloudPlatform.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @param value The cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
+        cloudPlatform_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudPlatform() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        cloudPlatform_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cloudRegion_ = "";
+      /**
+       * <pre>
+       * The cloud region the Load Balancer is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @return The cloudRegion.
+       */
+      public java.lang.String getCloudRegion() {
+        java.lang.Object ref = cloudRegion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cloudRegion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud region the Load Balancer is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @return The bytes for cloudRegion.
+       */
+      public com.google.protobuf.ByteString
+          getCloudRegionBytes() {
+        java.lang.Object ref = cloudRegion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cloudRegion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud region the Load Balancer is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @param value The cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud region the Load Balancer is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudRegion() {
+        cloudRegion_ = getDefaultInstance().getCloudRegion();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud region the Load Balancer is in.
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @param value The bytes for cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cluster0Crn_ = "";
+      /**
+       * <pre>
+       * The CRN for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0Crn = 5;</code>
+       * @return The cluster0Crn.
+       */
+      public java.lang.String getCluster0Crn() {
+        java.lang.Object ref = cluster0Crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cluster0Crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0Crn = 5;</code>
+       * @return The bytes for cluster0Crn.
+       */
+      public com.google.protobuf.ByteString
+          getCluster0CrnBytes() {
+        java.lang.Object ref = cluster0Crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cluster0Crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0Crn = 5;</code>
+       * @param value The cluster0Crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster0Crn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cluster0Crn_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0Crn = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCluster0Crn() {
+        cluster0Crn_ = getDefaultInstance().getCluster0Crn();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0Crn = 5;</code>
+       * @param value The bytes for cluster0Crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster0CrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cluster0Crn_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cluster0ZookeeperHost_ = "";
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0ZookeeperHost = 6;</code>
+       * @return The cluster0ZookeeperHost.
+       */
+      public java.lang.String getCluster0ZookeeperHost() {
+        java.lang.Object ref = cluster0ZookeeperHost_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cluster0ZookeeperHost_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0ZookeeperHost = 6;</code>
+       * @return The bytes for cluster0ZookeeperHost.
+       */
+      public com.google.protobuf.ByteString
+          getCluster0ZookeeperHostBytes() {
+        java.lang.Object ref = cluster0ZookeeperHost_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cluster0ZookeeperHost_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0ZookeeperHost = 6;</code>
+       * @param value The cluster0ZookeeperHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster0ZookeeperHost(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cluster0ZookeeperHost_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0ZookeeperHost = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCluster0ZookeeperHost() {
+        cluster0ZookeeperHost_ = getDefaultInstance().getCluster0ZookeeperHost();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster0
+       * </pre>
+       *
+       * <code>string cluster0ZookeeperHost = 6;</code>
+       * @param value The bytes for cluster0ZookeeperHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster0ZookeeperHostBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cluster0ZookeeperHost_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cluster1Crn_ = "";
+      /**
+       * <pre>
+       * The CRN for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1Crn = 8;</code>
+       * @return The cluster1Crn.
+       */
+      public java.lang.String getCluster1Crn() {
+        java.lang.Object ref = cluster1Crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cluster1Crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1Crn = 8;</code>
+       * @return The bytes for cluster1Crn.
+       */
+      public com.google.protobuf.ByteString
+          getCluster1CrnBytes() {
+        java.lang.Object ref = cluster1Crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cluster1Crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1Crn = 8;</code>
+       * @param value The cluster1Crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster1Crn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cluster1Crn_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1Crn = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCluster1Crn() {
+        cluster1Crn_ = getDefaultInstance().getCluster1Crn();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1Crn = 8;</code>
+       * @param value The bytes for cluster1Crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster1CrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cluster1Crn_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cluster1ZookeeperHost_ = "";
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1ZookeeperHost = 9;</code>
+       * @return The cluster1ZookeeperHost.
+       */
+      public java.lang.String getCluster1ZookeeperHost() {
+        java.lang.Object ref = cluster1ZookeeperHost_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cluster1ZookeeperHost_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1ZookeeperHost = 9;</code>
+       * @return The bytes for cluster1ZookeeperHost.
+       */
+      public com.google.protobuf.ByteString
+          getCluster1ZookeeperHostBytes() {
+        java.lang.Object ref = cluster1ZookeeperHost_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cluster1ZookeeperHost_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1ZookeeperHost = 9;</code>
+       * @param value The cluster1ZookeeperHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster1ZookeeperHost(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cluster1ZookeeperHost_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1ZookeeperHost = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCluster1ZookeeperHost() {
+        cluster1ZookeeperHost_ = getDefaultInstance().getCluster1ZookeeperHost();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Zookeeper quorum host for COD cluster1
+       * </pre>
+       *
+       * <code>string cluster1ZookeeperHost = 9;</code>
+       * @param value The bytes for cluster1ZookeeperHost to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster1ZookeeperHostBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cluster1ZookeeperHost_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+
+      private boolean assignable_ ;
+      /**
+       * <pre>
+       * Is the Load Balancer assignable
+       * </pre>
+       *
+       * <code>bool assignable = 11;</code>
+       * @return The assignable.
+       */
+      @java.lang.Override
+      public boolean getAssignable() {
+        return assignable_;
+      }
+      /**
+       * <pre>
+       * Is the Load Balancer assignable
+       * </pre>
+       *
+       * <code>bool assignable = 11;</code>
+       * @param value The assignable to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAssignable(boolean value) {
+
+        assignable_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Is the Load Balancer assignable
+       * </pre>
+       *
+       * <code>bool assignable = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAssignable() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        assignable_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment> assignments_ =
+        java.util.Collections.emptyList();
+      private void ensureAssignmentsIsMutable() {
+        if (!((bitField0_ & 0x00000200) != 0)) {
+          assignments_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment>(assignments_);
+          bitField0_ |= 0x00000200;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder> assignmentsBuilder_;
+
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment> getAssignmentsList() {
+        if (assignmentsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(assignments_);
+        } else {
+          return assignmentsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public int getAssignmentsCount() {
+        if (assignmentsBuilder_ == null) {
+          return assignments_.size();
+        } else {
+          return assignmentsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment getAssignments(int index) {
+        if (assignmentsBuilder_ == null) {
+          return assignments_.get(index);
+        } else {
+          return assignmentsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder setAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment value) {
+        if (assignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAssignmentsIsMutable();
+          assignments_.set(index, value);
+          onChanged();
+        } else {
+          assignmentsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder setAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder builderForValue) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          assignmentsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder addAssignments(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment value) {
+        if (assignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAssignmentsIsMutable();
+          assignments_.add(value);
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder addAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment value) {
+        if (assignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAssignmentsIsMutable();
+          assignments_.add(index, value);
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder addAssignments(
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder builderForValue) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.add(builderForValue.build());
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder addAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder builderForValue) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder addAllAssignments(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment> values) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, assignments_);
+          onChanged();
+        } else {
+          assignmentsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder clearAssignments() {
+        if (assignmentsBuilder_ == null) {
+          assignments_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000200);
+          onChanged();
+        } else {
+          assignmentsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public Builder removeAssignments(int index) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.remove(index);
+          onChanged();
+        } else {
+          assignmentsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder getAssignmentsBuilder(
+          int index) {
+        return getAssignmentsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder getAssignmentsOrBuilder(
+          int index) {
+        if (assignmentsBuilder_ == null) {
+          return assignments_.get(index);  } else {
+          return assignmentsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder> 
+           getAssignmentsOrBuilderList() {
+        if (assignmentsBuilder_ != null) {
+          return assignmentsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(assignments_);
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder addAssignmentsBuilder() {
+        return getAssignmentsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder addAssignmentsBuilder(
+          int index) {
+        return getAssignmentsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The SDX Instances assigned to the Load Balancer
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.CodNamespaceAssignment assignments = 12;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder> 
+           getAssignmentsBuilderList() {
+        return getAssignmentsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder> 
+          getAssignmentsFieldBuilder() {
+        if (assignmentsBuilder_ == null) {
+          assignmentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder>(
+                  assignments_,
+                  ((bitField0_ & 0x00000200) != 0),
+                  getParentForChildren(),
+                  isClean());
+          assignments_ = null;
+        }
+        return assignmentsBuilder_;
+      }
+
+      private long registeredTimestamp_ ;
+      /**
+       * <pre>
+       * Timestamp of registration
+       * </pre>
+       *
+       * <code>int64 registeredTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The registeredTimestamp.
+       */
+      @java.lang.Override
+      public long getRegisteredTimestamp() {
+        return registeredTimestamp_;
+      }
+      /**
+       * <pre>
+       * Timestamp of registration
+       * </pre>
+       *
+       * <code>int64 registeredTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The registeredTimestamp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRegisteredTimestamp(long value) {
+
+        registeredTimestamp_ = value;
+        bitField0_ |= 0x00000400;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of registration
+       * </pre>
+       *
+       * <code>int64 registeredTimestamp = 13 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRegisteredTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000400);
+        registeredTimestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long updatedTimestamp_ ;
+      /**
+       * <pre>
+       * Timestamp of last update
+       * </pre>
+       *
+       * <code>int64 updatedTimestamp = 14 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The updatedTimestamp.
+       */
+      @java.lang.Override
+      public long getUpdatedTimestamp() {
+        return updatedTimestamp_;
+      }
+      /**
+       * <pre>
+       * Timestamp of last update
+       * </pre>
+       *
+       * <code>int64 updatedTimestamp = 14 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The updatedTimestamp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUpdatedTimestamp(long value) {
+
+        updatedTimestamp_ = value;
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of last update
+       * </pre>
+       *
+       * <code>int64 updatedTimestamp = 14 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUpdatedTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000800);
+        updatedTimestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.CodEnvironment)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.CodEnvironment)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CodEnvironment>
+        PARSER = new com.google.protobuf.AbstractParser<CodEnvironment>() {
+      @java.lang.Override
+      public CodEnvironment parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CodEnvironment> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CodEnvironment> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodEnvironment getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CodNamespaceAssignmentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.CodNamespaceAssignment)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -34645,59 +44390,19 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * Access Role
+     * The SDX Instance Id the SDX Service's COD Namespace is attached to.
      * </pre>
      *
-     * <code>string accessRole = 4;</code>
-     * @return The accessRole.
-     */
-    java.lang.String getAccessRole();
-    /**
-     * <pre>
-     * Access Role
-     * </pre>
-     *
-     * <code>string accessRole = 4;</code>
-     * @return The bytes for accessRole.
-     */
-    com.google.protobuf.ByteString
-        getAccessRoleBytes();
-
-    /**
-     * <pre>
-     * The path for the storage
-     * </pre>
-     *
-     * <code>string storagePath = 5;</code>
-     * @return The storagePath.
-     */
-    java.lang.String getStoragePath();
-    /**
-     * <pre>
-     * The path for the storage
-     * </pre>
-     *
-     * <code>string storagePath = 5;</code>
-     * @return The bytes for storagePath.
-     */
-    com.google.protobuf.ByteString
-        getStoragePathBytes();
-
-    /**
-     * <pre>
-     * The SDX Instance Id the SDX Service's Indexer instance is attached to.
-     * </pre>
-     *
-     * <code>string instanceId = 6;</code>
+     * <code>string instanceId = 4;</code>
      * @return The instanceId.
      */
     java.lang.String getInstanceId();
     /**
      * <pre>
-     * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+     * The SDX Instance Id the SDX Service's COD Namespace is attached to.
      * </pre>
      *
-     * <code>string instanceId = 6;</code>
+     * <code>string instanceId = 4;</code>
      * @return The bytes for instanceId.
      */
     com.google.protobuf.ByteString
@@ -34705,19 +44410,19 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
-     * The SDX Service's Id the Indexer instance is attached to.
+     * The SDX Service's Id COD Namespace is attached to.
      * </pre>
      *
-     * <code>string serviceId = 7;</code>
+     * <code>string serviceId = 5;</code>
      * @return The serviceId.
      */
     java.lang.String getServiceId();
     /**
      * <pre>
-     * The SDX Service's Id the Indexer instance is attached to.
+     * The SDX Service's Id COD Namespace is attached to.
      * </pre>
      *
-     * <code>string serviceId = 7;</code>
+     * <code>string serviceId = 5;</code>
      * @return The bytes for serviceId.
      */
     com.google.protobuf.ByteString
@@ -34725,79 +44430,87 @@ public final class SDXSvcCommonProto {
 
     /**
      * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 6;</code>
+     * @return The credentialsVaultPath.
+     */
+    java.lang.String getCredentialsVaultPath();
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 6;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes();
+
+    /**
+     * <pre>
      * Timestamp of assginment.
      * </pre>
      *
-     * <code>int64 assignmentTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 assignmentTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
      * @return The assignmentTimestamp.
      */
     long getAssignmentTimestamp();
 
     /**
      * <pre>
-     * The encryption key Id for the storage.
+     * Timestamp of last update
      * </pre>
      *
-     * <code>string encryptionKeyId = 9;</code>
-     * @return The encryptionKeyId.
+     * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updatedTimestamp.
      */
-    java.lang.String getEncryptionKeyId();
-    /**
-     * <pre>
-     * The encryption key Id for the storage.
-     * </pre>
-     *
-     * <code>string encryptionKeyId = 9;</code>
-     * @return The bytes for encryptionKeyId.
-     */
-    com.google.protobuf.ByteString
-        getEncryptionKeyIdBytes();
+    long getUpdatedTimestamp();
   }
   /**
    * <pre>
-   * The assignment infor for a service to a Indexer instance
+   * The assignment info for a Load Balancer
    * </pre>
    *
-   * Protobuf type {@code sdxsvccommon.StorageAssignment}
+   * Protobuf type {@code sdxsvccommon.CodNamespaceAssignment}
    */
-  public static final class StorageAssignment extends
+  public static final class CodNamespaceAssignment extends
       com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:sdxsvccommon.StorageAssignment)
-      StorageAssignmentOrBuilder {
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.CodNamespaceAssignment)
+      CodNamespaceAssignmentOrBuilder {
   private static final long serialVersionUID = 0L;
-    // Use StorageAssignment.newBuilder() to construct.
-    private StorageAssignment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    // Use CodNamespaceAssignment.newBuilder() to construct.
+    private CodNamespaceAssignment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
-    private StorageAssignment() {
+    private CodNamespaceAssignment() {
       assignmentId_ = "";
       cloudPlatform_ = 0;
       cloudRegion_ = "";
-      accessRole_ = "";
-      storagePath_ = "";
       instanceId_ = "";
       serviceId_ = "";
-      encryptionKeyId_ = "";
+      credentialsVaultPath_ = "";
     }
 
     @java.lang.Override
     @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
         UnusedPrivateParameter unused) {
-      return new StorageAssignment();
+      return new CodNamespaceAssignment();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_descriptor;
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodNamespaceAssignment_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_fieldAccessorTable
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodNamespaceAssignment_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder.class);
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder.class);
     }
 
     public static final int ASSIGNMENTID_FIELD_NUMBER = 1;
@@ -34920,109 +44633,15 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int ACCESSROLE_FIELD_NUMBER = 4;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object accessRole_ = "";
-    /**
-     * <pre>
-     * Access Role
-     * </pre>
-     *
-     * <code>string accessRole = 4;</code>
-     * @return The accessRole.
-     */
-    @java.lang.Override
-    public java.lang.String getAccessRole() {
-      java.lang.Object ref = accessRole_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        accessRole_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Access Role
-     * </pre>
-     *
-     * <code>string accessRole = 4;</code>
-     * @return The bytes for accessRole.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getAccessRoleBytes() {
-      java.lang.Object ref = accessRole_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        accessRole_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int STORAGEPATH_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object storagePath_ = "";
-    /**
-     * <pre>
-     * The path for the storage
-     * </pre>
-     *
-     * <code>string storagePath = 5;</code>
-     * @return The storagePath.
-     */
-    @java.lang.Override
-    public java.lang.String getStoragePath() {
-      java.lang.Object ref = storagePath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        storagePath_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The path for the storage
-     * </pre>
-     *
-     * <code>string storagePath = 5;</code>
-     * @return The bytes for storagePath.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getStoragePathBytes() {
-      java.lang.Object ref = storagePath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        storagePath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int INSTANCEID_FIELD_NUMBER = 6;
+    public static final int INSTANCEID_FIELD_NUMBER = 4;
     @SuppressWarnings("serial")
     private volatile java.lang.Object instanceId_ = "";
     /**
      * <pre>
-     * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+     * The SDX Instance Id the SDX Service's COD Namespace is attached to.
      * </pre>
      *
-     * <code>string instanceId = 6;</code>
+     * <code>string instanceId = 4;</code>
      * @return The instanceId.
      */
     @java.lang.Override
@@ -35040,10 +44659,10 @@ public final class SDXSvcCommonProto {
     }
     /**
      * <pre>
-     * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+     * The SDX Instance Id the SDX Service's COD Namespace is attached to.
      * </pre>
      *
-     * <code>string instanceId = 6;</code>
+     * <code>string instanceId = 4;</code>
      * @return The bytes for instanceId.
      */
     @java.lang.Override
@@ -35061,15 +44680,15 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int SERVICEID_FIELD_NUMBER = 7;
+    public static final int SERVICEID_FIELD_NUMBER = 5;
     @SuppressWarnings("serial")
     private volatile java.lang.Object serviceId_ = "";
     /**
      * <pre>
-     * The SDX Service's Id the Indexer instance is attached to.
+     * The SDX Service's Id COD Namespace is attached to.
      * </pre>
      *
-     * <code>string serviceId = 7;</code>
+     * <code>string serviceId = 5;</code>
      * @return The serviceId.
      */
     @java.lang.Override
@@ -35087,10 +44706,10 @@ public final class SDXSvcCommonProto {
     }
     /**
      * <pre>
-     * The SDX Service's Id the Indexer instance is attached to.
+     * The SDX Service's Id COD Namespace is attached to.
      * </pre>
      *
-     * <code>string serviceId = 7;</code>
+     * <code>string serviceId = 5;</code>
      * @return The bytes for serviceId.
      */
     @java.lang.Override
@@ -35108,14 +44727,61 @@ public final class SDXSvcCommonProto {
       }
     }
 
-    public static final int ASSIGNMENTTIMESTAMP_FIELD_NUMBER = 8;
+    public static final int CREDENTIALSVAULTPATH_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object credentialsVaultPath_ = "";
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 6;</code>
+     * @return The credentialsVaultPath.
+     */
+    @java.lang.Override
+    public java.lang.String getCredentialsVaultPath() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        credentialsVaultPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 6;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        credentialsVaultPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ASSIGNMENTTIMESTAMP_FIELD_NUMBER = 7;
     private long assignmentTimestamp_ = 0L;
     /**
      * <pre>
      * Timestamp of assginment.
      * </pre>
      *
-     * <code>int64 assignmentTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+     * <code>int64 assignmentTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
      * @return The assignmentTimestamp.
      */
     @java.lang.Override
@@ -35123,51 +44789,19 @@ public final class SDXSvcCommonProto {
       return assignmentTimestamp_;
     }
 
-    public static final int ENCRYPTIONKEYID_FIELD_NUMBER = 9;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object encryptionKeyId_ = "";
+    public static final int UPDATEDTIMESTAMP_FIELD_NUMBER = 8;
+    private long updatedTimestamp_ = 0L;
     /**
      * <pre>
-     * The encryption key Id for the storage.
+     * Timestamp of last update
      * </pre>
      *
-     * <code>string encryptionKeyId = 9;</code>
-     * @return The encryptionKeyId.
+     * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The updatedTimestamp.
      */
     @java.lang.Override
-    public java.lang.String getEncryptionKeyId() {
-      java.lang.Object ref = encryptionKeyId_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        encryptionKeyId_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The encryption key Id for the storage.
-     * </pre>
-     *
-     * <code>string encryptionKeyId = 9;</code>
-     * @return The bytes for encryptionKeyId.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getEncryptionKeyIdBytes() {
-      java.lang.Object ref = encryptionKeyId_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        encryptionKeyId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getUpdatedTimestamp() {
+      return updatedTimestamp_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -35187,29 +44821,26 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, assignmentId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(2, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudRegion_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessRole_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accessRole_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, storagePath_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, instanceId_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, instanceId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, serviceId_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, serviceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, credentialsVaultPath_);
       }
       if (assignmentTimestamp_ != 0L) {
-        output.writeInt64(8, assignmentTimestamp_);
+        output.writeInt64(7, assignmentTimestamp_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encryptionKeyId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, encryptionKeyId_);
+      if (updatedTimestamp_ != 0L) {
+        output.writeInt64(8, updatedTimestamp_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -35223,31 +44854,29 @@ public final class SDXSvcCommonProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, assignmentId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudRegion_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessRole_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accessRole_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storagePath_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, storagePath_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, instanceId_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, instanceId_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, serviceId_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, serviceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, credentialsVaultPath_);
       }
       if (assignmentTimestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(8, assignmentTimestamp_);
+          .computeInt64Size(7, assignmentTimestamp_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encryptionKeyId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, encryptionKeyId_);
+      if (updatedTimestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(8, updatedTimestamp_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -35259,28 +44888,26 @@ public final class SDXSvcCommonProto {
       if (obj == this) {
        return true;
       }
-      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment)) {
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment)) {
         return super.equals(obj);
       }
-      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment) obj;
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment) obj;
 
       if (!getAssignmentId()
           .equals(other.getAssignmentId())) return false;
       if (cloudPlatform_ != other.cloudPlatform_) return false;
       if (!getCloudRegion()
           .equals(other.getCloudRegion())) return false;
-      if (!getAccessRole()
-          .equals(other.getAccessRole())) return false;
-      if (!getStoragePath()
-          .equals(other.getStoragePath())) return false;
       if (!getInstanceId()
           .equals(other.getInstanceId())) return false;
       if (!getServiceId()
           .equals(other.getServiceId())) return false;
+      if (!getCredentialsVaultPath()
+          .equals(other.getCredentialsVaultPath())) return false;
       if (getAssignmentTimestamp()
           != other.getAssignmentTimestamp()) return false;
-      if (!getEncryptionKeyId()
-          .equals(other.getEncryptionKeyId())) return false;
+      if (getUpdatedTimestamp()
+          != other.getUpdatedTimestamp()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -35298,62 +44925,61 @@ public final class SDXSvcCommonProto {
       hash = (53 * hash) + cloudPlatform_;
       hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
       hash = (53 * hash) + getCloudRegion().hashCode();
-      hash = (37 * hash) + ACCESSROLE_FIELD_NUMBER;
-      hash = (53 * hash) + getAccessRole().hashCode();
-      hash = (37 * hash) + STORAGEPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getStoragePath().hashCode();
       hash = (37 * hash) + INSTANCEID_FIELD_NUMBER;
       hash = (53 * hash) + getInstanceId().hashCode();
       hash = (37 * hash) + SERVICEID_FIELD_NUMBER;
       hash = (53 * hash) + getServiceId().hashCode();
+      hash = (37 * hash) + CREDENTIALSVAULTPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getCredentialsVaultPath().hashCode();
       hash = (37 * hash) + ASSIGNMENTTIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getAssignmentTimestamp());
-      hash = (37 * hash) + ENCRYPTIONKEYID_FIELD_NUMBER;
-      hash = (53 * hash) + getEncryptionKeyId().hashCode();
+      hash = (37 * hash) + UPDATEDTIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUpdatedTimestamp());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
 
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         java.nio.ByteBuffer data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(byte[] data)
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -35361,26 +44987,26 @@ public final class SDXSvcCommonProto {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseDelimitedFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageV3
           .parseWithIOException(PARSER, input);
     }
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment parseFrom(
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -35393,7 +45019,7 @@ public final class SDXSvcCommonProto {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment prototype) {
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
     @java.lang.Override
@@ -35410,29 +45036,29 @@ public final class SDXSvcCommonProto {
     }
     /**
      * <pre>
-     * The assignment infor for a service to a Indexer instance
+     * The assignment info for a Load Balancer
      * </pre>
      *
-     * Protobuf type {@code sdxsvccommon.StorageAssignment}
+     * Protobuf type {@code sdxsvccommon.CodNamespaceAssignment}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:sdxsvccommon.StorageAssignment)
-        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignmentOrBuilder {
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.CodNamespaceAssignment)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignmentOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_descriptor;
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodNamespaceAssignment_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_fieldAccessorTable
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodNamespaceAssignment_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.Builder.class);
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.Builder.class);
       }
 
-      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.newBuilder()
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.newBuilder()
       private Builder() {
 
       }
@@ -35449,29 +45075,28 @@ public final class SDXSvcCommonProto {
         assignmentId_ = "";
         cloudPlatform_ = 0;
         cloudRegion_ = "";
-        accessRole_ = "";
-        storagePath_ = "";
         instanceId_ = "";
         serviceId_ = "";
+        credentialsVaultPath_ = "";
         assignmentTimestamp_ = 0L;
-        encryptionKeyId_ = "";
+        updatedTimestamp_ = 0L;
         return this;
       }
 
       @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_StorageAssignment_descriptor;
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_CodNamespaceAssignment_descriptor;
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getDefaultInstanceForType() {
-        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance();
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.getDefaultInstance();
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment build() {
-        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment result = buildPartial();
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
@@ -35479,14 +45104,14 @@ public final class SDXSvcCommonProto {
       }
 
       @java.lang.Override
-      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment buildPartial() {
-        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment(this);
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment(this);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment result) {
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment result) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.assignmentId_ = assignmentId_;
@@ -35498,22 +45123,19 @@ public final class SDXSvcCommonProto {
           result.cloudRegion_ = cloudRegion_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.accessRole_ = accessRole_;
-        }
-        if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.storagePath_ = storagePath_;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
           result.instanceId_ = instanceId_;
         }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
+        if (((from_bitField0_ & 0x00000010) != 0)) {
           result.serviceId_ = serviceId_;
         }
-        if (((from_bitField0_ & 0x00000080) != 0)) {
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.credentialsVaultPath_ = credentialsVaultPath_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
           result.assignmentTimestamp_ = assignmentTimestamp_;
         }
-        if (((from_bitField0_ & 0x00000100) != 0)) {
-          result.encryptionKeyId_ = encryptionKeyId_;
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.updatedTimestamp_ = updatedTimestamp_;
         }
       }
 
@@ -35551,16 +45173,16 @@ public final class SDXSvcCommonProto {
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment) {
-          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment)other);
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment other) {
-        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment.getDefaultInstance()) return this;
         if (!other.getAssignmentId().isEmpty()) {
           assignmentId_ = other.assignmentId_;
           bitField0_ |= 0x00000001;
@@ -35574,33 +45196,26 @@ public final class SDXSvcCommonProto {
           bitField0_ |= 0x00000004;
           onChanged();
         }
-        if (!other.getAccessRole().isEmpty()) {
-          accessRole_ = other.accessRole_;
-          bitField0_ |= 0x00000008;
-          onChanged();
-        }
-        if (!other.getStoragePath().isEmpty()) {
-          storagePath_ = other.storagePath_;
-          bitField0_ |= 0x00000010;
-          onChanged();
-        }
         if (!other.getInstanceId().isEmpty()) {
           instanceId_ = other.instanceId_;
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (!other.getServiceId().isEmpty()) {
           serviceId_ = other.serviceId_;
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getCredentialsVaultPath().isEmpty()) {
+          credentialsVaultPath_ = other.credentialsVaultPath_;
+          bitField0_ |= 0x00000020;
           onChanged();
         }
         if (other.getAssignmentTimestamp() != 0L) {
           setAssignmentTimestamp(other.getAssignmentTimestamp());
         }
-        if (!other.getEncryptionKeyId().isEmpty()) {
-          encryptionKeyId_ = other.encryptionKeyId_;
-          bitField0_ |= 0x00000100;
-          onChanged();
+        if (other.getUpdatedTimestamp() != 0L) {
+          setUpdatedTimestamp(other.getUpdatedTimestamp());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -35644,35 +45259,30 @@ public final class SDXSvcCommonProto {
                 break;
               } // case 26
               case 34: {
-                accessRole_ = input.readStringRequireUtf8();
+                instanceId_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
-                storagePath_ = input.readStringRequireUtf8();
+                serviceId_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 50: {
-                instanceId_ = input.readStringRequireUtf8();
+                credentialsVaultPath_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000020;
                 break;
               } // case 50
-              case 58: {
-                serviceId_ = input.readStringRequireUtf8();
+              case 56: {
+                assignmentTimestamp_ = input.readInt64();
                 bitField0_ |= 0x00000040;
                 break;
-              } // case 58
+              } // case 56
               case 64: {
-                assignmentTimestamp_ = input.readInt64();
+                updatedTimestamp_ = input.readInt64();
                 bitField0_ |= 0x00000080;
                 break;
               } // case 64
-              case 74: {
-                encryptionKeyId_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000100;
-                break;
-              } // case 74
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -35947,197 +45557,13 @@ public final class SDXSvcCommonProto {
         return this;
       }
 
-      private java.lang.Object accessRole_ = "";
-      /**
-       * <pre>
-       * Access Role
-       * </pre>
-       *
-       * <code>string accessRole = 4;</code>
-       * @return The accessRole.
-       */
-      public java.lang.String getAccessRole() {
-        java.lang.Object ref = accessRole_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          accessRole_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Access Role
-       * </pre>
-       *
-       * <code>string accessRole = 4;</code>
-       * @return The bytes for accessRole.
-       */
-      public com.google.protobuf.ByteString
-          getAccessRoleBytes() {
-        java.lang.Object ref = accessRole_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          accessRole_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Access Role
-       * </pre>
-       *
-       * <code>string accessRole = 4;</code>
-       * @param value The accessRole to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAccessRole(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        accessRole_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Access Role
-       * </pre>
-       *
-       * <code>string accessRole = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearAccessRole() {
-        accessRole_ = getDefaultInstance().getAccessRole();
-        bitField0_ = (bitField0_ & ~0x00000008);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Access Role
-       * </pre>
-       *
-       * <code>string accessRole = 4;</code>
-       * @param value The bytes for accessRole to set.
-       * @return This builder for chaining.
-       */
-      public Builder setAccessRoleBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        accessRole_ = value;
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object storagePath_ = "";
-      /**
-       * <pre>
-       * The path for the storage
-       * </pre>
-       *
-       * <code>string storagePath = 5;</code>
-       * @return The storagePath.
-       */
-      public java.lang.String getStoragePath() {
-        java.lang.Object ref = storagePath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          storagePath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The path for the storage
-       * </pre>
-       *
-       * <code>string storagePath = 5;</code>
-       * @return The bytes for storagePath.
-       */
-      public com.google.protobuf.ByteString
-          getStoragePathBytes() {
-        java.lang.Object ref = storagePath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          storagePath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The path for the storage
-       * </pre>
-       *
-       * <code>string storagePath = 5;</code>
-       * @param value The storagePath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStoragePath(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        storagePath_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The path for the storage
-       * </pre>
-       *
-       * <code>string storagePath = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearStoragePath() {
-        storagePath_ = getDefaultInstance().getStoragePath();
-        bitField0_ = (bitField0_ & ~0x00000010);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The path for the storage
-       * </pre>
-       *
-       * <code>string storagePath = 5;</code>
-       * @param value The bytes for storagePath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setStoragePathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        storagePath_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object instanceId_ = "";
       /**
        * <pre>
-       * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+       * The SDX Instance Id the SDX Service's COD Namespace is attached to.
        * </pre>
        *
-       * <code>string instanceId = 6;</code>
+       * <code>string instanceId = 4;</code>
        * @return The instanceId.
        */
       public java.lang.String getInstanceId() {
@@ -36154,10 +45580,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+       * The SDX Instance Id the SDX Service's COD Namespace is attached to.
        * </pre>
        *
-       * <code>string instanceId = 6;</code>
+       * <code>string instanceId = 4;</code>
        * @return The bytes for instanceId.
        */
       public com.google.protobuf.ByteString
@@ -36175,10 +45601,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+       * The SDX Instance Id the SDX Service's COD Namespace is attached to.
        * </pre>
        *
-       * <code>string instanceId = 6;</code>
+       * <code>string instanceId = 4;</code>
        * @param value The instanceId to set.
        * @return This builder for chaining.
        */
@@ -36186,30 +45612,30 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         instanceId_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+       * The SDX Instance Id the SDX Service's COD Namespace is attached to.
        * </pre>
        *
-       * <code>string instanceId = 6;</code>
+       * <code>string instanceId = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearInstanceId() {
         instanceId_ = getDefaultInstance().getInstanceId();
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The SDX Instance Id the SDX Service's Indexer instance is attached to.
+       * The SDX Instance Id the SDX Service's COD Namespace is attached to.
        * </pre>
        *
-       * <code>string instanceId = 6;</code>
+       * <code>string instanceId = 4;</code>
        * @param value The bytes for instanceId to set.
        * @return This builder for chaining.
        */
@@ -36218,7 +45644,7 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         instanceId_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -36226,10 +45652,10 @@ public final class SDXSvcCommonProto {
       private java.lang.Object serviceId_ = "";
       /**
        * <pre>
-       * The SDX Service's Id the Indexer instance is attached to.
+       * The SDX Service's Id COD Namespace is attached to.
        * </pre>
        *
-       * <code>string serviceId = 7;</code>
+       * <code>string serviceId = 5;</code>
        * @return The serviceId.
        */
       public java.lang.String getServiceId() {
@@ -36246,10 +45672,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The SDX Service's Id the Indexer instance is attached to.
+       * The SDX Service's Id COD Namespace is attached to.
        * </pre>
        *
-       * <code>string serviceId = 7;</code>
+       * <code>string serviceId = 5;</code>
        * @return The bytes for serviceId.
        */
       public com.google.protobuf.ByteString
@@ -36267,10 +45693,10 @@ public final class SDXSvcCommonProto {
       }
       /**
        * <pre>
-       * The SDX Service's Id the Indexer instance is attached to.
+       * The SDX Service's Id COD Namespace is attached to.
        * </pre>
        *
-       * <code>string serviceId = 7;</code>
+       * <code>string serviceId = 5;</code>
        * @param value The serviceId to set.
        * @return This builder for chaining.
        */
@@ -36278,30 +45704,30 @@ public final class SDXSvcCommonProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         serviceId_ = value;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The SDX Service's Id the Indexer instance is attached to.
+       * The SDX Service's Id COD Namespace is attached to.
        * </pre>
        *
-       * <code>string serviceId = 7;</code>
+       * <code>string serviceId = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearServiceId() {
         serviceId_ = getDefaultInstance().getServiceId();
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The SDX Service's Id the Indexer instance is attached to.
+       * The SDX Service's Id COD Namespace is attached to.
        * </pre>
        *
-       * <code>string serviceId = 7;</code>
+       * <code>string serviceId = 5;</code>
        * @param value The bytes for serviceId to set.
        * @return This builder for chaining.
        */
@@ -36310,7 +45736,99 @@ public final class SDXSvcCommonProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         serviceId_ = value;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object credentialsVaultPath_ = "";
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 6;</code>
+       * @return The credentialsVaultPath.
+       */
+      public java.lang.String getCredentialsVaultPath() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          credentialsVaultPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 6;</code>
+       * @return The bytes for credentialsVaultPath.
+       */
+      public com.google.protobuf.ByteString
+          getCredentialsVaultPathBytes() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          credentialsVaultPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 6;</code>
+       * @param value The credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCredentialsVaultPath() {
+        credentialsVaultPath_ = getDefaultInstance().getCredentialsVaultPath();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 6;</code>
+       * @param value The bytes for credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -36321,7 +45839,7 @@ public final class SDXSvcCommonProto {
        * Timestamp of assginment.
        * </pre>
        *
-       * <code>int64 assignmentTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 assignmentTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
        * @return The assignmentTimestamp.
        */
       @java.lang.Override
@@ -36333,14 +45851,14 @@ public final class SDXSvcCommonProto {
        * Timestamp of assginment.
        * </pre>
        *
-       * <code>int64 assignmentTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 assignmentTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
        * @param value The assignmentTimestamp to set.
        * @return This builder for chaining.
        */
       public Builder setAssignmentTimestamp(long value) {
 
         assignmentTimestamp_ = value;
-        bitField0_ |= 0x00000080;
+        bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
@@ -36349,104 +45867,56 @@ public final class SDXSvcCommonProto {
        * Timestamp of assginment.
        * </pre>
        *
-       * <code>int64 assignmentTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * <code>int64 assignmentTimestamp = 7 [(.options.FieldExtension.datetime) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearAssignmentTimestamp() {
-        bitField0_ = (bitField0_ & ~0x00000080);
+        bitField0_ = (bitField0_ & ~0x00000040);
         assignmentTimestamp_ = 0L;
         onChanged();
         return this;
       }
 
-      private java.lang.Object encryptionKeyId_ = "";
+      private long updatedTimestamp_ ;
       /**
        * <pre>
-       * The encryption key Id for the storage.
+       * Timestamp of last update
        * </pre>
        *
-       * <code>string encryptionKeyId = 9;</code>
-       * @return The encryptionKeyId.
+       * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The updatedTimestamp.
        */
-      public java.lang.String getEncryptionKeyId() {
-        java.lang.Object ref = encryptionKeyId_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          encryptionKeyId_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getUpdatedTimestamp() {
+        return updatedTimestamp_;
       }
       /**
        * <pre>
-       * The encryption key Id for the storage.
+       * Timestamp of last update
        * </pre>
        *
-       * <code>string encryptionKeyId = 9;</code>
-       * @return The bytes for encryptionKeyId.
-       */
-      public com.google.protobuf.ByteString
-          getEncryptionKeyIdBytes() {
-        java.lang.Object ref = encryptionKeyId_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          encryptionKeyId_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The encryption key Id for the storage.
-       * </pre>
-       *
-       * <code>string encryptionKeyId = 9;</code>
-       * @param value The encryptionKeyId to set.
+       * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The updatedTimestamp to set.
        * @return This builder for chaining.
        */
-      public Builder setEncryptionKeyId(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        encryptionKeyId_ = value;
-        bitField0_ |= 0x00000100;
+      public Builder setUpdatedTimestamp(long value) {
+
+        updatedTimestamp_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The encryption key Id for the storage.
+       * Timestamp of last update
        * </pre>
        *
-       * <code>string encryptionKeyId = 9;</code>
+       * <code>int64 updatedTimestamp = 8 [(.options.FieldExtension.datetime) = true];</code>
        * @return This builder for chaining.
        */
-      public Builder clearEncryptionKeyId() {
-        encryptionKeyId_ = getDefaultInstance().getEncryptionKeyId();
-        bitField0_ = (bitField0_ & ~0x00000100);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The encryption key Id for the storage.
-       * </pre>
-       *
-       * <code>string encryptionKeyId = 9;</code>
-       * @param value The bytes for encryptionKeyId to set.
-       * @return This builder for chaining.
-       */
-      public Builder setEncryptionKeyIdBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        encryptionKeyId_ = value;
-        bitField0_ |= 0x00000100;
+      public Builder clearUpdatedTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        updatedTimestamp_ = 0L;
         onChanged();
         return this;
       }
@@ -36463,23 +45933,23 @@ public final class SDXSvcCommonProto {
       }
 
 
-      // @@protoc_insertion_point(builder_scope:sdxsvccommon.StorageAssignment)
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.CodNamespaceAssignment)
     }
 
-    // @@protoc_insertion_point(class_scope:sdxsvccommon.StorageAssignment)
-    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.CodNamespaceAssignment)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment DEFAULT_INSTANCE;
     static {
-      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment();
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment();
     }
 
-    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getDefaultInstance() {
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<StorageAssignment>
-        PARSER = new com.google.protobuf.AbstractParser<StorageAssignment>() {
+    private static final com.google.protobuf.Parser<CodNamespaceAssignment>
+        PARSER = new com.google.protobuf.AbstractParser<CodNamespaceAssignment>() {
       @java.lang.Override
-      public StorageAssignment parsePartialFrom(
+      public CodNamespaceAssignment parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -36498,17 +45968,6606 @@ public final class SDXSvcCommonProto {
       }
     };
 
-    public static com.google.protobuf.Parser<StorageAssignment> parser() {
+    public static com.google.protobuf.Parser<CodNamespaceAssignment> parser() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<StorageAssignment> getParserForType() {
+    public com.google.protobuf.Parser<CodNamespaceAssignment> getParserForType() {
       return PARSER;
     }
 
     @java.lang.Override
-    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageAssignment getDefaultInstanceForType() {
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CodNamespaceAssignment getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface KafkaTopicAssignmentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.KafkaTopicAssignment)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The unique assignment id
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The assignmentId.
+     */
+    java.lang.String getAssignmentId();
+    /**
+     * <pre>
+     * The unique assignment id
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The bytes for assignmentId.
+     */
+    com.google.protobuf.ByteString
+        getAssignmentIdBytes();
+
+    /**
+     * <pre>
+     * The Cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    int getCloudPlatformValue();
+    /**
+     * <pre>
+     * The Cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The cloudPlatform.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform();
+
+    /**
+     * <pre>
+     * the cloud region the kafka topic is in
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The cloudRegion.
+     */
+    java.lang.String getCloudRegion();
+    /**
+     * <pre>
+     * the cloud region the kafka topic is in
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The bytes for cloudRegion.
+     */
+    com.google.protobuf.ByteString
+        getCloudRegionBytes();
+
+    /**
+     * <pre>
+     * The topic name
+     * </pre>
+     *
+     * <code>string topicName = 4;</code>
+     * @return The topicName.
+     */
+    java.lang.String getTopicName();
+    /**
+     * <pre>
+     * The topic name
+     * </pre>
+     *
+     * <code>string topicName = 4;</code>
+     * @return The bytes for topicName.
+     */
+    com.google.protobuf.ByteString
+        getTopicNameBytes();
+
+    /**
+     * <pre>
+     * The SDX Instance Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The instanceId.
+     */
+    java.lang.String getInstanceId();
+    /**
+     * <pre>
+     * The SDX Instance Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The bytes for instanceId.
+     */
+    com.google.protobuf.ByteString
+        getInstanceIdBytes();
+
+    /**
+     * <pre>
+     * The SDX resource Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string resourceId = 6;</code>
+     * @return The resourceId.
+     */
+    java.lang.String getResourceId();
+    /**
+     * <pre>
+     * The SDX resource Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string resourceId = 6;</code>
+     * @return The bytes for resourceId.
+     */
+    com.google.protobuf.ByteString
+        getResourceIdBytes();
+
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The credentialsVaultPath.
+     */
+    java.lang.String getCredentialsVaultPath();
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes();
+  }
+  /**
+   * <pre>
+   * The assignment info for a service to a kafka topic
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.KafkaTopicAssignment}
+   */
+  public static final class KafkaTopicAssignment extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.KafkaTopicAssignment)
+      KafkaTopicAssignmentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use KafkaTopicAssignment.newBuilder() to construct.
+    private KafkaTopicAssignment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private KafkaTopicAssignment() {
+      assignmentId_ = "";
+      cloudPlatform_ = 0;
+      cloudRegion_ = "";
+      topicName_ = "";
+      instanceId_ = "";
+      resourceId_ = "";
+      credentialsVaultPath_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new KafkaTopicAssignment();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaTopicAssignment_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaTopicAssignment_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder.class);
+    }
+
+    public static final int ASSIGNMENTID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object assignmentId_ = "";
+    /**
+     * <pre>
+     * The unique assignment id
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The assignmentId.
+     */
+    @java.lang.Override
+    public java.lang.String getAssignmentId() {
+      java.lang.Object ref = assignmentId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        assignmentId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The unique assignment id
+     * </pre>
+     *
+     * <code>string assignmentId = 1;</code>
+     * @return The bytes for assignmentId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAssignmentIdBytes() {
+      java.lang.Object ref = assignmentId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        assignmentId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDPLATFORM_FIELD_NUMBER = 2;
+    private int cloudPlatform_ = 0;
+    /**
+     * <pre>
+     * The Cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    @java.lang.Override public int getCloudPlatformValue() {
+      return cloudPlatform_;
+    }
+    /**
+     * <pre>
+     * The Cloud platform.
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+     * @return The cloudPlatform.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int CLOUDREGION_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cloudRegion_ = "";
+    /**
+     * <pre>
+     * the cloud region the kafka topic is in
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The cloudRegion.
+     */
+    @java.lang.Override
+    public java.lang.String getCloudRegion() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cloudRegion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the cloud region the kafka topic is in
+     * </pre>
+     *
+     * <code>string cloudRegion = 3;</code>
+     * @return The bytes for cloudRegion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCloudRegionBytes() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cloudRegion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TOPICNAME_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object topicName_ = "";
+    /**
+     * <pre>
+     * The topic name
+     * </pre>
+     *
+     * <code>string topicName = 4;</code>
+     * @return The topicName.
+     */
+    @java.lang.Override
+    public java.lang.String getTopicName() {
+      java.lang.Object ref = topicName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        topicName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The topic name
+     * </pre>
+     *
+     * <code>string topicName = 4;</code>
+     * @return The bytes for topicName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getTopicNameBytes() {
+      java.lang.Object ref = topicName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        topicName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int INSTANCEID_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object instanceId_ = "";
+    /**
+     * <pre>
+     * The SDX Instance Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The instanceId.
+     */
+    @java.lang.Override
+    public java.lang.String getInstanceId() {
+      java.lang.Object ref = instanceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        instanceId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The SDX Instance Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string instanceId = 5;</code>
+     * @return The bytes for instanceId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getInstanceIdBytes() {
+      java.lang.Object ref = instanceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESOURCEID_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object resourceId_ = "";
+    /**
+     * <pre>
+     * The SDX resource Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string resourceId = 6;</code>
+     * @return The resourceId.
+     */
+    @java.lang.Override
+    public java.lang.String getResourceId() {
+      java.lang.Object ref = resourceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resourceId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The SDX resource Id the topic is attached to.
+     * </pre>
+     *
+     * <code>string resourceId = 6;</code>
+     * @return The bytes for resourceId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getResourceIdBytes() {
+      java.lang.Object ref = resourceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resourceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREDENTIALSVAULTPATH_FIELD_NUMBER = 7;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object credentialsVaultPath_ = "";
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The credentialsVaultPath.
+     */
+    @java.lang.Override
+    public java.lang.String getCredentialsVaultPath() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        credentialsVaultPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Admin Credentials Vault Path
+     * </pre>
+     *
+     * <code>string credentialsVaultPath = 7;</code>
+     * @return The bytes for credentialsVaultPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCredentialsVaultPathBytes() {
+      java.lang.Object ref = credentialsVaultPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        credentialsVaultPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, assignmentId_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        output.writeEnum(2, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(topicName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, topicName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, instanceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, resourceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, credentialsVaultPath_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(assignmentId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, assignmentId_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(topicName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, topicName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, instanceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resourceId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, resourceId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialsVaultPath_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, credentialsVaultPath_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment) obj;
+
+      if (!getAssignmentId()
+          .equals(other.getAssignmentId())) return false;
+      if (cloudPlatform_ != other.cloudPlatform_) return false;
+      if (!getCloudRegion()
+          .equals(other.getCloudRegion())) return false;
+      if (!getTopicName()
+          .equals(other.getTopicName())) return false;
+      if (!getInstanceId()
+          .equals(other.getInstanceId())) return false;
+      if (!getResourceId()
+          .equals(other.getResourceId())) return false;
+      if (!getCredentialsVaultPath()
+          .equals(other.getCredentialsVaultPath())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ASSIGNMENTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAssignmentId().hashCode();
+      hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
+      hash = (53 * hash) + cloudPlatform_;
+      hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
+      hash = (53 * hash) + getCloudRegion().hashCode();
+      hash = (37 * hash) + TOPICNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getTopicName().hashCode();
+      hash = (37 * hash) + INSTANCEID_FIELD_NUMBER;
+      hash = (53 * hash) + getInstanceId().hashCode();
+      hash = (37 * hash) + RESOURCEID_FIELD_NUMBER;
+      hash = (53 * hash) + getResourceId().hashCode();
+      hash = (37 * hash) + CREDENTIALSVAULTPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getCredentialsVaultPath().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The assignment info for a service to a kafka topic
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.KafkaTopicAssignment}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.KafkaTopicAssignment)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaTopicAssignment_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaTopicAssignment_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        assignmentId_ = "";
+        cloudPlatform_ = 0;
+        cloudRegion_ = "";
+        topicName_ = "";
+        instanceId_ = "";
+        resourceId_ = "";
+        credentialsVaultPath_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaTopicAssignment_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.assignmentId_ = assignmentId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.cloudPlatform_ = cloudPlatform_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.cloudRegion_ = cloudRegion_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.topicName_ = topicName_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.instanceId_ = instanceId_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.resourceId_ = resourceId_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.credentialsVaultPath_ = credentialsVaultPath_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.getDefaultInstance()) return this;
+        if (!other.getAssignmentId().isEmpty()) {
+          assignmentId_ = other.assignmentId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.cloudPlatform_ != 0) {
+          setCloudPlatformValue(other.getCloudPlatformValue());
+        }
+        if (!other.getCloudRegion().isEmpty()) {
+          cloudRegion_ = other.cloudRegion_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getTopicName().isEmpty()) {
+          topicName_ = other.topicName_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (!other.getInstanceId().isEmpty()) {
+          instanceId_ = other.instanceId_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getResourceId().isEmpty()) {
+          resourceId_ = other.resourceId_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        if (!other.getCredentialsVaultPath().isEmpty()) {
+          credentialsVaultPath_ = other.credentialsVaultPath_;
+          bitField0_ |= 0x00000040;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                assignmentId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                cloudPlatform_ = input.readEnum();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                cloudRegion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                topicName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                instanceId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                resourceId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 58: {
+                credentialsVaultPath_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object assignmentId_ = "";
+      /**
+       * <pre>
+       * The unique assignment id
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @return The assignmentId.
+       */
+      public java.lang.String getAssignmentId() {
+        java.lang.Object ref = assignmentId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          assignmentId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The unique assignment id
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @return The bytes for assignmentId.
+       */
+      public com.google.protobuf.ByteString
+          getAssignmentIdBytes() {
+        java.lang.Object ref = assignmentId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          assignmentId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The unique assignment id
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @param value The assignmentId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAssignmentId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        assignmentId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The unique assignment id
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAssignmentId() {
+        assignmentId_ = getDefaultInstance().getAssignmentId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The unique assignment id
+       * </pre>
+       *
+       * <code>string assignmentId = 1;</code>
+       * @param value The bytes for assignmentId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAssignmentIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        assignmentId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private int cloudPlatform_ = 0;
+      /**
+       * <pre>
+       * The Cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @return The enum numeric value on the wire for cloudPlatform.
+       */
+      @java.lang.Override public int getCloudPlatformValue() {
+        return cloudPlatform_;
+      }
+      /**
+       * <pre>
+       * The Cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @param value The enum numeric value on the wire for cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatformValue(int value) {
+        cloudPlatform_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @return The cloudPlatform.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The Cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @param value The cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        cloudPlatform_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloud platform.
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudPlatform() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        cloudPlatform_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cloudRegion_ = "";
+      /**
+       * <pre>
+       * the cloud region the kafka topic is in
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @return The cloudRegion.
+       */
+      public java.lang.String getCloudRegion() {
+        java.lang.Object ref = cloudRegion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cloudRegion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the cloud region the kafka topic is in
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @return The bytes for cloudRegion.
+       */
+      public com.google.protobuf.ByteString
+          getCloudRegionBytes() {
+        java.lang.Object ref = cloudRegion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cloudRegion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the cloud region the kafka topic is in
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @param value The cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the cloud region the kafka topic is in
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudRegion() {
+        cloudRegion_ = getDefaultInstance().getCloudRegion();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the cloud region the kafka topic is in
+       * </pre>
+       *
+       * <code>string cloudRegion = 3;</code>
+       * @param value The bytes for cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object topicName_ = "";
+      /**
+       * <pre>
+       * The topic name
+       * </pre>
+       *
+       * <code>string topicName = 4;</code>
+       * @return The topicName.
+       */
+      public java.lang.String getTopicName() {
+        java.lang.Object ref = topicName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          topicName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The topic name
+       * </pre>
+       *
+       * <code>string topicName = 4;</code>
+       * @return The bytes for topicName.
+       */
+      public com.google.protobuf.ByteString
+          getTopicNameBytes() {
+        java.lang.Object ref = topicName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          topicName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The topic name
+       * </pre>
+       *
+       * <code>string topicName = 4;</code>
+       * @param value The topicName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTopicName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        topicName_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic name
+       * </pre>
+       *
+       * <code>string topicName = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTopicName() {
+        topicName_ = getDefaultInstance().getTopicName();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic name
+       * </pre>
+       *
+       * <code>string topicName = 4;</code>
+       * @param value The bytes for topicName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTopicNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        topicName_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object instanceId_ = "";
+      /**
+       * <pre>
+       * The SDX Instance Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @return The instanceId.
+       */
+      public java.lang.String getInstanceId() {
+        java.lang.Object ref = instanceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          instanceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @return The bytes for instanceId.
+       */
+      public com.google.protobuf.ByteString
+          getInstanceIdBytes() {
+        java.lang.Object ref = instanceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @param value The instanceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInstanceId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        instanceId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearInstanceId() {
+        instanceId_ = getDefaultInstance().getInstanceId();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX Instance Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string instanceId = 5;</code>
+       * @param value The bytes for instanceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInstanceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        instanceId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object resourceId_ = "";
+      /**
+       * <pre>
+       * The SDX resource Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string resourceId = 6;</code>
+       * @return The resourceId.
+       */
+      public java.lang.String getResourceId() {
+        java.lang.Object ref = resourceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resourceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX resource Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string resourceId = 6;</code>
+       * @return The bytes for resourceId.
+       */
+      public com.google.protobuf.ByteString
+          getResourceIdBytes() {
+        java.lang.Object ref = resourceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resourceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The SDX resource Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string resourceId = 6;</code>
+       * @param value The resourceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        resourceId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX resource Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string resourceId = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResourceId() {
+        resourceId_ = getDefaultInstance().getResourceId();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The SDX resource Id the topic is attached to.
+       * </pre>
+       *
+       * <code>string resourceId = 6;</code>
+       * @param value The bytes for resourceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResourceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        resourceId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object credentialsVaultPath_ = "";
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @return The credentialsVaultPath.
+       */
+      public java.lang.String getCredentialsVaultPath() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          credentialsVaultPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @return The bytes for credentialsVaultPath.
+       */
+      public com.google.protobuf.ByteString
+          getCredentialsVaultPathBytes() {
+        java.lang.Object ref = credentialsVaultPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          credentialsVaultPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @param value The credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPath(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCredentialsVaultPath() {
+        credentialsVaultPath_ = getDefaultInstance().getCredentialsVaultPath();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin Credentials Vault Path
+       * </pre>
+       *
+       * <code>string credentialsVaultPath = 7;</code>
+       * @param value The bytes for credentialsVaultPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialsVaultPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        credentialsVaultPath_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.KafkaTopicAssignment)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.KafkaTopicAssignment)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<KafkaTopicAssignment>
+        PARSER = new com.google.protobuf.AbstractParser<KafkaTopicAssignment>() {
+      @java.lang.Override
+      public KafkaTopicAssignment parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<KafkaTopicAssignment> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<KafkaTopicAssignment> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface KafkaInstanceOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.KafkaInstance)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The name of the Kafka Instance
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The name of the Kafka Instance
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The cloud id
+     * </pre>
+     *
+     * <code>string cloudId = 2;</code>
+     * @return The cloudId.
+     */
+    java.lang.String getCloudId();
+    /**
+     * <pre>
+     * The cloud id
+     * </pre>
+     *
+     * <code>string cloudId = 2;</code>
+     * @return The bytes for cloudId.
+     */
+    com.google.protobuf.ByteString
+        getCloudIdBytes();
+
+    /**
+     * <pre>
+     * The cloud platform
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    int getCloudPlatformValue();
+    /**
+     * <pre>
+     * The cloud platform
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The cloudPlatform.
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform();
+
+    /**
+     * <pre>
+     * The cloud region
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The cloudRegion.
+     */
+    java.lang.String getCloudRegion();
+    /**
+     * <pre>
+     * The cloud region
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The bytes for cloudRegion.
+     */
+    com.google.protobuf.ByteString
+        getCloudRegionBytes();
+
+    /**
+     * <pre>
+     * A list of host:port pairs for establishing the initial connection to the cluster
+     * </pre>
+     *
+     * <code>string adminEndpoint = 5;</code>
+     * @return The adminEndpoint.
+     */
+    java.lang.String getAdminEndpoint();
+    /**
+     * <pre>
+     * A list of host:port pairs for establishing the initial connection to the cluster
+     * </pre>
+     *
+     * <code>string adminEndpoint = 5;</code>
+     * @return The bytes for adminEndpoint.
+     */
+    com.google.protobuf.ByteString
+        getAdminEndpointBytes();
+
+    /**
+     * <pre>
+     * Host and ports of Zookeeper servers
+     * </pre>
+     *
+     * <code>string zookeeperEndpoint = 6;</code>
+     * @return The zookeeperEndpoint.
+     */
+    java.lang.String getZookeeperEndpoint();
+    /**
+     * <pre>
+     * Host and ports of Zookeeper servers
+     * </pre>
+     *
+     * <code>string zookeeperEndpoint = 6;</code>
+     * @return The bytes for zookeeperEndpoint.
+     */
+    com.google.protobuf.ByteString
+        getZookeeperEndpointBytes();
+
+    /**
+     * <pre>
+     * The role ARN to be used to connect
+     * </pre>
+     *
+     * <code>string roleArn = 7;</code>
+     * @return The roleArn.
+     */
+    java.lang.String getRoleArn();
+    /**
+     * <pre>
+     * The role ARN to be used to connect
+     * </pre>
+     *
+     * <code>string roleArn = 7;</code>
+     * @return The bytes for roleArn.
+     */
+    com.google.protobuf.ByteString
+        getRoleArnBytes();
+
+    /**
+     * <pre>
+     * Is the kafka assignable
+     * </pre>
+     *
+     * <code>bool assignable = 8;</code>
+     * @return The assignable.
+     */
+    boolean getAssignable();
+
+    /**
+     * <pre>
+     * Instance id
+     * </pre>
+     *
+     * <code>string id = 9;</code>
+     * @return The id.
+     */
+    java.lang.String getId();
+    /**
+     * <pre>
+     * Instance id
+     * </pre>
+     *
+     * <code>string id = 9;</code>
+     * @return The bytes for id.
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <pre>
+     * Timestamp of registration
+     * </pre>
+     *
+     * <code>int64 registeredTimestamp = 10 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The registeredTimestamp.
+     */
+    long getRegisteredTimestamp();
+
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment> 
+        getAssignmentsList();
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment getAssignments(int index);
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    int getAssignmentsCount();
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder> 
+        getAssignmentsOrBuilderList();
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder getAssignmentsOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * TLS enabled
+     * </pre>
+     *
+     * <code>bool tlsEnabled = 12;</code>
+     * @return The tlsEnabled.
+     */
+    boolean getTlsEnabled();
+  }
+  /**
+   * <pre>
+   * The Kafka instance information
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.KafkaInstance}
+   */
+  public static final class KafkaInstance extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.KafkaInstance)
+      KafkaInstanceOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use KafkaInstance.newBuilder() to construct.
+    private KafkaInstance(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private KafkaInstance() {
+      name_ = "";
+      cloudId_ = "";
+      cloudPlatform_ = 0;
+      cloudRegion_ = "";
+      adminEndpoint_ = "";
+      zookeeperEndpoint_ = "";
+      roleArn_ = "";
+      id_ = "";
+      assignments_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new KafkaInstance();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaInstance_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaInstance_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The name of the Kafka Instance
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the Kafka Instance
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDID_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cloudId_ = "";
+    /**
+     * <pre>
+     * The cloud id
+     * </pre>
+     *
+     * <code>string cloudId = 2;</code>
+     * @return The cloudId.
+     */
+    @java.lang.Override
+    public java.lang.String getCloudId() {
+      java.lang.Object ref = cloudId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cloudId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud id
+     * </pre>
+     *
+     * <code>string cloudId = 2;</code>
+     * @return The bytes for cloudId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCloudIdBytes() {
+      java.lang.Object ref = cloudId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cloudId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDPLATFORM_FIELD_NUMBER = 3;
+    private int cloudPlatform_ = 0;
+    /**
+     * <pre>
+     * The cloud platform
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    @java.lang.Override public int getCloudPlatformValue() {
+      return cloudPlatform_;
+    }
+    /**
+     * <pre>
+     * The cloud platform
+     * </pre>
+     *
+     * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+     * @return The cloudPlatform.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+      return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int CLOUDREGION_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cloudRegion_ = "";
+    /**
+     * <pre>
+     * The cloud region
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The cloudRegion.
+     */
+    @java.lang.Override
+    public java.lang.String getCloudRegion() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cloudRegion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cloud region
+     * </pre>
+     *
+     * <code>string cloudRegion = 4;</code>
+     * @return The bytes for cloudRegion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCloudRegionBytes() {
+      java.lang.Object ref = cloudRegion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cloudRegion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ADMINENDPOINT_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object adminEndpoint_ = "";
+    /**
+     * <pre>
+     * A list of host:port pairs for establishing the initial connection to the cluster
+     * </pre>
+     *
+     * <code>string adminEndpoint = 5;</code>
+     * @return The adminEndpoint.
+     */
+    @java.lang.Override
+    public java.lang.String getAdminEndpoint() {
+      java.lang.Object ref = adminEndpoint_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        adminEndpoint_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A list of host:port pairs for establishing the initial connection to the cluster
+     * </pre>
+     *
+     * <code>string adminEndpoint = 5;</code>
+     * @return The bytes for adminEndpoint.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAdminEndpointBytes() {
+      java.lang.Object ref = adminEndpoint_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        adminEndpoint_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ZOOKEEPERENDPOINT_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object zookeeperEndpoint_ = "";
+    /**
+     * <pre>
+     * Host and ports of Zookeeper servers
+     * </pre>
+     *
+     * <code>string zookeeperEndpoint = 6;</code>
+     * @return The zookeeperEndpoint.
+     */
+    @java.lang.Override
+    public java.lang.String getZookeeperEndpoint() {
+      java.lang.Object ref = zookeeperEndpoint_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        zookeeperEndpoint_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Host and ports of Zookeeper servers
+     * </pre>
+     *
+     * <code>string zookeeperEndpoint = 6;</code>
+     * @return The bytes for zookeeperEndpoint.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getZookeeperEndpointBytes() {
+      java.lang.Object ref = zookeeperEndpoint_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        zookeeperEndpoint_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ROLEARN_FIELD_NUMBER = 7;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object roleArn_ = "";
+    /**
+     * <pre>
+     * The role ARN to be used to connect
+     * </pre>
+     *
+     * <code>string roleArn = 7;</code>
+     * @return The roleArn.
+     */
+    @java.lang.Override
+    public java.lang.String getRoleArn() {
+      java.lang.Object ref = roleArn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        roleArn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The role ARN to be used to connect
+     * </pre>
+     *
+     * <code>string roleArn = 7;</code>
+     * @return The bytes for roleArn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRoleArnBytes() {
+      java.lang.Object ref = roleArn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        roleArn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ASSIGNABLE_FIELD_NUMBER = 8;
+    private boolean assignable_ = false;
+    /**
+     * <pre>
+     * Is the kafka assignable
+     * </pre>
+     *
+     * <code>bool assignable = 8;</code>
+     * @return The assignable.
+     */
+    @java.lang.Override
+    public boolean getAssignable() {
+      return assignable_;
+    }
+
+    public static final int ID_FIELD_NUMBER = 9;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object id_ = "";
+    /**
+     * <pre>
+     * Instance id
+     * </pre>
+     *
+     * <code>string id = 9;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Instance id
+     * </pre>
+     *
+     * <code>string id = 9;</code>
+     * @return The bytes for id.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int REGISTEREDTIMESTAMP_FIELD_NUMBER = 10;
+    private long registeredTimestamp_ = 0L;
+    /**
+     * <pre>
+     * Timestamp of registration
+     * </pre>
+     *
+     * <code>int64 registeredTimestamp = 10 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The registeredTimestamp.
+     */
+    @java.lang.Override
+    public long getRegisteredTimestamp() {
+      return registeredTimestamp_;
+    }
+
+    public static final int ASSIGNMENTS_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment> assignments_;
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment> getAssignmentsList() {
+      return assignments_;
+    }
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder> 
+        getAssignmentsOrBuilderList() {
+      return assignments_;
+    }
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    @java.lang.Override
+    public int getAssignmentsCount() {
+      return assignments_.size();
+    }
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment getAssignments(int index) {
+      return assignments_.get(index);
+    }
+    /**
+     * <pre>
+     * The topic assignments on this instance
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder getAssignmentsOrBuilder(
+        int index) {
+      return assignments_.get(index);
+    }
+
+    public static final int TLSENABLED_FIELD_NUMBER = 12;
+    private boolean tlsEnabled_ = false;
+    /**
+     * <pre>
+     * TLS enabled
+     * </pre>
+     *
+     * <code>bool tlsEnabled = 12;</code>
+     * @return The tlsEnabled.
+     */
+    @java.lang.Override
+    public boolean getTlsEnabled() {
+      return tlsEnabled_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cloudId_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        output.writeEnum(3, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminEndpoint_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, adminEndpoint_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(zookeeperEndpoint_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, zookeeperEndpoint_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, roleArn_);
+      }
+      if (assignable_ != false) {
+        output.writeBool(8, assignable_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, id_);
+      }
+      if (registeredTimestamp_ != 0L) {
+        output.writeInt64(10, registeredTimestamp_);
+      }
+      for (int i = 0; i < assignments_.size(); i++) {
+        output.writeMessage(11, assignments_.get(i));
+      }
+      if (tlsEnabled_ != false) {
+        output.writeBool(12, tlsEnabled_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cloudId_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, cloudPlatform_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cloudRegion_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminEndpoint_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, adminEndpoint_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(zookeeperEndpoint_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, zookeeperEndpoint_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(roleArn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, roleArn_);
+      }
+      if (assignable_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, assignable_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, id_);
+      }
+      if (registeredTimestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(10, registeredTimestamp_);
+      }
+      for (int i = 0; i < assignments_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, assignments_.get(i));
+      }
+      if (tlsEnabled_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(12, tlsEnabled_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getCloudId()
+          .equals(other.getCloudId())) return false;
+      if (cloudPlatform_ != other.cloudPlatform_) return false;
+      if (!getCloudRegion()
+          .equals(other.getCloudRegion())) return false;
+      if (!getAdminEndpoint()
+          .equals(other.getAdminEndpoint())) return false;
+      if (!getZookeeperEndpoint()
+          .equals(other.getZookeeperEndpoint())) return false;
+      if (!getRoleArn()
+          .equals(other.getRoleArn())) return false;
+      if (getAssignable()
+          != other.getAssignable()) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (getRegisteredTimestamp()
+          != other.getRegisteredTimestamp()) return false;
+      if (!getAssignmentsList()
+          .equals(other.getAssignmentsList())) return false;
+      if (getTlsEnabled()
+          != other.getTlsEnabled()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + CLOUDID_FIELD_NUMBER;
+      hash = (53 * hash) + getCloudId().hashCode();
+      hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
+      hash = (53 * hash) + cloudPlatform_;
+      hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
+      hash = (53 * hash) + getCloudRegion().hashCode();
+      hash = (37 * hash) + ADMINENDPOINT_FIELD_NUMBER;
+      hash = (53 * hash) + getAdminEndpoint().hashCode();
+      hash = (37 * hash) + ZOOKEEPERENDPOINT_FIELD_NUMBER;
+      hash = (53 * hash) + getZookeeperEndpoint().hashCode();
+      hash = (37 * hash) + ROLEARN_FIELD_NUMBER;
+      hash = (53 * hash) + getRoleArn().hashCode();
+      hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAssignable());
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + REGISTEREDTIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRegisteredTimestamp());
+      if (getAssignmentsCount() > 0) {
+        hash = (37 * hash) + ASSIGNMENTS_FIELD_NUMBER;
+        hash = (53 * hash) + getAssignmentsList().hashCode();
+      }
+      hash = (37 * hash) + TLSENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTlsEnabled());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The Kafka instance information
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.KafkaInstance}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.KafkaInstance)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstanceOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaInstance_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaInstance_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        cloudId_ = "";
+        cloudPlatform_ = 0;
+        cloudRegion_ = "";
+        adminEndpoint_ = "";
+        zookeeperEndpoint_ = "";
+        roleArn_ = "";
+        assignable_ = false;
+        id_ = "";
+        registeredTimestamp_ = 0L;
+        if (assignmentsBuilder_ == null) {
+          assignments_ = java.util.Collections.emptyList();
+        } else {
+          assignments_ = null;
+          assignmentsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000400);
+        tlsEnabled_ = false;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_KafkaInstance_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance result) {
+        if (assignmentsBuilder_ == null) {
+          if (((bitField0_ & 0x00000400) != 0)) {
+            assignments_ = java.util.Collections.unmodifiableList(assignments_);
+            bitField0_ = (bitField0_ & ~0x00000400);
+          }
+          result.assignments_ = assignments_;
+        } else {
+          result.assignments_ = assignmentsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.cloudId_ = cloudId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.cloudPlatform_ = cloudPlatform_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.cloudRegion_ = cloudRegion_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.adminEndpoint_ = adminEndpoint_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.zookeeperEndpoint_ = zookeeperEndpoint_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.roleArn_ = roleArn_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.assignable_ = assignable_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.id_ = id_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.registeredTimestamp_ = registeredTimestamp_;
+        }
+        if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.tlsEnabled_ = tlsEnabled_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getCloudId().isEmpty()) {
+          cloudId_ = other.cloudId_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (other.cloudPlatform_ != 0) {
+          setCloudPlatformValue(other.getCloudPlatformValue());
+        }
+        if (!other.getCloudRegion().isEmpty()) {
+          cloudRegion_ = other.cloudRegion_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (!other.getAdminEndpoint().isEmpty()) {
+          adminEndpoint_ = other.adminEndpoint_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getZookeeperEndpoint().isEmpty()) {
+          zookeeperEndpoint_ = other.zookeeperEndpoint_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        if (!other.getRoleArn().isEmpty()) {
+          roleArn_ = other.roleArn_;
+          bitField0_ |= 0x00000040;
+          onChanged();
+        }
+        if (other.getAssignable() != false) {
+          setAssignable(other.getAssignable());
+        }
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          bitField0_ |= 0x00000100;
+          onChanged();
+        }
+        if (other.getRegisteredTimestamp() != 0L) {
+          setRegisteredTimestamp(other.getRegisteredTimestamp());
+        }
+        if (assignmentsBuilder_ == null) {
+          if (!other.assignments_.isEmpty()) {
+            if (assignments_.isEmpty()) {
+              assignments_ = other.assignments_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+            } else {
+              ensureAssignmentsIsMutable();
+              assignments_.addAll(other.assignments_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.assignments_.isEmpty()) {
+            if (assignmentsBuilder_.isEmpty()) {
+              assignmentsBuilder_.dispose();
+              assignmentsBuilder_ = null;
+              assignments_ = other.assignments_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+              assignmentsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getAssignmentsFieldBuilder() : null;
+            } else {
+              assignmentsBuilder_.addAllMessages(other.assignments_);
+            }
+          }
+        }
+        if (other.getTlsEnabled() != false) {
+          setTlsEnabled(other.getTlsEnabled());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                cloudId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                cloudPlatform_ = input.readEnum();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                cloudRegion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 42: {
+                adminEndpoint_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                zookeeperEndpoint_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 58: {
+                roleArn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 58
+              case 64: {
+                assignable_ = input.readBool();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 64
+              case 74: {
+                id_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
+              case 80: {
+                registeredTimestamp_ = input.readInt64();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 80
+              case 90: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.parser(),
+                        extensionRegistry);
+                if (assignmentsBuilder_ == null) {
+                  ensureAssignmentsIsMutable();
+                  assignments_.add(m);
+                } else {
+                  assignmentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 90
+              case 96: {
+                tlsEnabled_ = input.readBool();
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 96
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The name of the Kafka Instance
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the Kafka Instance
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the Kafka Instance
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the Kafka Instance
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the Kafka Instance
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cloudId_ = "";
+      /**
+       * <pre>
+       * The cloud id
+       * </pre>
+       *
+       * <code>string cloudId = 2;</code>
+       * @return The cloudId.
+       */
+      public java.lang.String getCloudId() {
+        java.lang.Object ref = cloudId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cloudId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud id
+       * </pre>
+       *
+       * <code>string cloudId = 2;</code>
+       * @return The bytes for cloudId.
+       */
+      public com.google.protobuf.ByteString
+          getCloudIdBytes() {
+        java.lang.Object ref = cloudId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cloudId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud id
+       * </pre>
+       *
+       * <code>string cloudId = 2;</code>
+       * @param value The cloudId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cloudId_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud id
+       * </pre>
+       *
+       * <code>string cloudId = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudId() {
+        cloudId_ = getDefaultInstance().getCloudId();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud id
+       * </pre>
+       *
+       * <code>string cloudId = 2;</code>
+       * @param value The bytes for cloudId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cloudId_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private int cloudPlatform_ = 0;
+      /**
+       * <pre>
+       * The cloud platform
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return The enum numeric value on the wire for cloudPlatform.
+       */
+      @java.lang.Override public int getCloudPlatformValue() {
+        return cloudPlatform_;
+      }
+      /**
+       * <pre>
+       * The cloud platform
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @param value The enum numeric value on the wire for cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatformValue(int value) {
+        cloudPlatform_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return The cloudPlatform.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value getCloudPlatform() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value result = com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.forNumber(cloudPlatform_);
+        return result == null ? com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The cloud platform
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @param value The cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatform(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
+        cloudPlatform_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud platform
+       * </pre>
+       *
+       * <code>.sdxsvccommon.CloudPlatform.Value cloudPlatform = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudPlatform() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        cloudPlatform_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cloudRegion_ = "";
+      /**
+       * <pre>
+       * The cloud region
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @return The cloudRegion.
+       */
+      public java.lang.String getCloudRegion() {
+        java.lang.Object ref = cloudRegion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cloudRegion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud region
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @return The bytes for cloudRegion.
+       */
+      public com.google.protobuf.ByteString
+          getCloudRegionBytes() {
+        java.lang.Object ref = cloudRegion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cloudRegion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cloud region
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @param value The cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud region
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudRegion() {
+        cloudRegion_ = getDefaultInstance().getCloudRegion();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cloud region
+       * </pre>
+       *
+       * <code>string cloudRegion = 4;</code>
+       * @param value The bytes for cloudRegion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudRegionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cloudRegion_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object adminEndpoint_ = "";
+      /**
+       * <pre>
+       * A list of host:port pairs for establishing the initial connection to the cluster
+       * </pre>
+       *
+       * <code>string adminEndpoint = 5;</code>
+       * @return The adminEndpoint.
+       */
+      public java.lang.String getAdminEndpoint() {
+        java.lang.Object ref = adminEndpoint_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          adminEndpoint_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A list of host:port pairs for establishing the initial connection to the cluster
+       * </pre>
+       *
+       * <code>string adminEndpoint = 5;</code>
+       * @return The bytes for adminEndpoint.
+       */
+      public com.google.protobuf.ByteString
+          getAdminEndpointBytes() {
+        java.lang.Object ref = adminEndpoint_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          adminEndpoint_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A list of host:port pairs for establishing the initial connection to the cluster
+       * </pre>
+       *
+       * <code>string adminEndpoint = 5;</code>
+       * @param value The adminEndpoint to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAdminEndpoint(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        adminEndpoint_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A list of host:port pairs for establishing the initial connection to the cluster
+       * </pre>
+       *
+       * <code>string adminEndpoint = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAdminEndpoint() {
+        adminEndpoint_ = getDefaultInstance().getAdminEndpoint();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A list of host:port pairs for establishing the initial connection to the cluster
+       * </pre>
+       *
+       * <code>string adminEndpoint = 5;</code>
+       * @param value The bytes for adminEndpoint to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAdminEndpointBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        adminEndpoint_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object zookeeperEndpoint_ = "";
+      /**
+       * <pre>
+       * Host and ports of Zookeeper servers
+       * </pre>
+       *
+       * <code>string zookeeperEndpoint = 6;</code>
+       * @return The zookeeperEndpoint.
+       */
+      public java.lang.String getZookeeperEndpoint() {
+        java.lang.Object ref = zookeeperEndpoint_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          zookeeperEndpoint_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Host and ports of Zookeeper servers
+       * </pre>
+       *
+       * <code>string zookeeperEndpoint = 6;</code>
+       * @return The bytes for zookeeperEndpoint.
+       */
+      public com.google.protobuf.ByteString
+          getZookeeperEndpointBytes() {
+        java.lang.Object ref = zookeeperEndpoint_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          zookeeperEndpoint_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Host and ports of Zookeeper servers
+       * </pre>
+       *
+       * <code>string zookeeperEndpoint = 6;</code>
+       * @param value The zookeeperEndpoint to set.
+       * @return This builder for chaining.
+       */
+      public Builder setZookeeperEndpoint(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        zookeeperEndpoint_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Host and ports of Zookeeper servers
+       * </pre>
+       *
+       * <code>string zookeeperEndpoint = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearZookeeperEndpoint() {
+        zookeeperEndpoint_ = getDefaultInstance().getZookeeperEndpoint();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Host and ports of Zookeeper servers
+       * </pre>
+       *
+       * <code>string zookeeperEndpoint = 6;</code>
+       * @param value The bytes for zookeeperEndpoint to set.
+       * @return This builder for chaining.
+       */
+      public Builder setZookeeperEndpointBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        zookeeperEndpoint_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object roleArn_ = "";
+      /**
+       * <pre>
+       * The role ARN to be used to connect
+       * </pre>
+       *
+       * <code>string roleArn = 7;</code>
+       * @return The roleArn.
+       */
+      public java.lang.String getRoleArn() {
+        java.lang.Object ref = roleArn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          roleArn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The role ARN to be used to connect
+       * </pre>
+       *
+       * <code>string roleArn = 7;</code>
+       * @return The bytes for roleArn.
+       */
+      public com.google.protobuf.ByteString
+          getRoleArnBytes() {
+        java.lang.Object ref = roleArn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          roleArn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The role ARN to be used to connect
+       * </pre>
+       *
+       * <code>string roleArn = 7;</code>
+       * @param value The roleArn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRoleArn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        roleArn_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The role ARN to be used to connect
+       * </pre>
+       *
+       * <code>string roleArn = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRoleArn() {
+        roleArn_ = getDefaultInstance().getRoleArn();
+        bitField0_ = (bitField0_ & ~0x00000040);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The role ARN to be used to connect
+       * </pre>
+       *
+       * <code>string roleArn = 7;</code>
+       * @param value The bytes for roleArn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRoleArnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        roleArn_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+
+      private boolean assignable_ ;
+      /**
+       * <pre>
+       * Is the kafka assignable
+       * </pre>
+       *
+       * <code>bool assignable = 8;</code>
+       * @return The assignable.
+       */
+      @java.lang.Override
+      public boolean getAssignable() {
+        return assignable_;
+      }
+      /**
+       * <pre>
+       * Is the kafka assignable
+       * </pre>
+       *
+       * <code>bool assignable = 8;</code>
+       * @param value The assignable to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAssignable(boolean value) {
+
+        assignable_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Is the kafka assignable
+       * </pre>
+       *
+       * <code>bool assignable = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAssignable() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        assignable_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object id_ = "";
+      /**
+       * <pre>
+       * Instance id
+       * </pre>
+       *
+       * <code>string id = 9;</code>
+       * @return The id.
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Instance id
+       * </pre>
+       *
+       * <code>string id = 9;</code>
+       * @return The bytes for id.
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Instance id
+       * </pre>
+       *
+       * <code>string id = 9;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        id_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Instance id
+       * </pre>
+       *
+       * <code>string id = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        id_ = getDefaultInstance().getId();
+        bitField0_ = (bitField0_ & ~0x00000100);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Instance id
+       * </pre>
+       *
+       * <code>string id = 9;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        id_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+
+      private long registeredTimestamp_ ;
+      /**
+       * <pre>
+       * Timestamp of registration
+       * </pre>
+       *
+       * <code>int64 registeredTimestamp = 10 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The registeredTimestamp.
+       */
+      @java.lang.Override
+      public long getRegisteredTimestamp() {
+        return registeredTimestamp_;
+      }
+      /**
+       * <pre>
+       * Timestamp of registration
+       * </pre>
+       *
+       * <code>int64 registeredTimestamp = 10 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The registeredTimestamp to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRegisteredTimestamp(long value) {
+
+        registeredTimestamp_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Timestamp of registration
+       * </pre>
+       *
+       * <code>int64 registeredTimestamp = 10 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRegisteredTimestamp() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        registeredTimestamp_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment> assignments_ =
+        java.util.Collections.emptyList();
+      private void ensureAssignmentsIsMutable() {
+        if (!((bitField0_ & 0x00000400) != 0)) {
+          assignments_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment>(assignments_);
+          bitField0_ |= 0x00000400;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder> assignmentsBuilder_;
+
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment> getAssignmentsList() {
+        if (assignmentsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(assignments_);
+        } else {
+          return assignmentsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public int getAssignmentsCount() {
+        if (assignmentsBuilder_ == null) {
+          return assignments_.size();
+        } else {
+          return assignmentsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment getAssignments(int index) {
+        if (assignmentsBuilder_ == null) {
+          return assignments_.get(index);
+        } else {
+          return assignmentsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder setAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment value) {
+        if (assignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAssignmentsIsMutable();
+          assignments_.set(index, value);
+          onChanged();
+        } else {
+          assignmentsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder setAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder builderForValue) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          assignmentsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder addAssignments(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment value) {
+        if (assignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAssignmentsIsMutable();
+          assignments_.add(value);
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder addAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment value) {
+        if (assignmentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureAssignmentsIsMutable();
+          assignments_.add(index, value);
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder addAssignments(
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder builderForValue) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.add(builderForValue.build());
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder addAssignments(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder builderForValue) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          assignmentsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder addAllAssignments(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment> values) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, assignments_);
+          onChanged();
+        } else {
+          assignmentsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder clearAssignments() {
+        if (assignmentsBuilder_ == null) {
+          assignments_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000400);
+          onChanged();
+        } else {
+          assignmentsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public Builder removeAssignments(int index) {
+        if (assignmentsBuilder_ == null) {
+          ensureAssignmentsIsMutable();
+          assignments_.remove(index);
+          onChanged();
+        } else {
+          assignmentsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder getAssignmentsBuilder(
+          int index) {
+        return getAssignmentsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder getAssignmentsOrBuilder(
+          int index) {
+        if (assignmentsBuilder_ == null) {
+          return assignments_.get(index);  } else {
+          return assignmentsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder> 
+           getAssignmentsOrBuilderList() {
+        if (assignmentsBuilder_ != null) {
+          return assignmentsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(assignments_);
+        }
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder addAssignmentsBuilder() {
+        return getAssignmentsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder addAssignmentsBuilder(
+          int index) {
+        return getAssignmentsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The topic assignments on this instance
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.KafkaTopicAssignment assignments = 11;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder> 
+           getAssignmentsBuilderList() {
+        return getAssignmentsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder> 
+          getAssignmentsFieldBuilder() {
+        if (assignmentsBuilder_ == null) {
+          assignmentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignment.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaTopicAssignmentOrBuilder>(
+                  assignments_,
+                  ((bitField0_ & 0x00000400) != 0),
+                  getParentForChildren(),
+                  isClean());
+          assignments_ = null;
+        }
+        return assignmentsBuilder_;
+      }
+
+      private boolean tlsEnabled_ ;
+      /**
+       * <pre>
+       * TLS enabled
+       * </pre>
+       *
+       * <code>bool tlsEnabled = 12;</code>
+       * @return The tlsEnabled.
+       */
+      @java.lang.Override
+      public boolean getTlsEnabled() {
+        return tlsEnabled_;
+      }
+      /**
+       * <pre>
+       * TLS enabled
+       * </pre>
+       *
+       * <code>bool tlsEnabled = 12;</code>
+       * @param value The tlsEnabled to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTlsEnabled(boolean value) {
+
+        tlsEnabled_ = value;
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * TLS enabled
+       * </pre>
+       *
+       * <code>bool tlsEnabled = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTlsEnabled() {
+        bitField0_ = (bitField0_ & ~0x00000800);
+        tlsEnabled_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.KafkaInstance)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.KafkaInstance)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<KafkaInstance>
+        PARSER = new com.google.protobuf.AbstractParser<KafkaInstance>() {
+      @java.lang.Override
+      public KafkaInstance parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<KafkaInstance> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<KafkaInstance> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KafkaInstance getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AwsPrivateLinkStateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.AwsPrivateLinkState)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * AWS Private Link Endpoint state
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.AwsPrivateLinkState}
+   */
+  public static final class AwsPrivateLinkState extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.AwsPrivateLinkState)
+      AwsPrivateLinkStateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AwsPrivateLinkState.newBuilder() to construct.
+    private AwsPrivateLinkState(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AwsPrivateLinkState() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AwsPrivateLinkState();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_AwsPrivateLinkState_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_AwsPrivateLinkState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Builder.class);
+    }
+
+    /**
+     * <pre>
+     * AWS Private Link Endpoint state Value
+     * </pre>
+     *
+     * Protobuf enum {@code sdxsvccommon.AwsPrivateLinkState.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * UNSET.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * The connection request is pending. This is the initial state if requests are manually accepted.
+       * </pre>
+       *
+       * <code>PENDINGACCEPTANCE = 1;</code>
+       */
+      PENDINGACCEPTANCE(1),
+      /**
+       * <pre>
+       * The service provider accepted the connection request. This is the initial state if requests are automatically accepted. The VPC endpoint returns to this state if the service consumer modifies the VPC endpoint.
+       * </pre>
+       *
+       * <code>PENDING = 2;</code>
+       */
+      PENDING(2),
+      /**
+       * <pre>
+       * The VPC endpoint is available for use.
+       * </pre>
+       *
+       * <code>AVAILABLE = 3;</code>
+       */
+      AVAILABLE(3),
+      /**
+       * <pre>
+       * The service provider rejected the connection request. The service provider can also reject a connection after it is available for use.
+       * </pre>
+       *
+       * <code>REJECTED = 4;</code>
+       */
+      REJECTED(4),
+      /**
+       * <pre>
+       * The connection request expired.
+       * </pre>
+       *
+       * <code>EXPIRED = 5;</code>
+       */
+      EXPIRED(5),
+      /**
+       * <pre>
+       * The VPC endpoint could not be made available.
+       * </pre>
+       *
+       * <code>FAILED = 6;</code>
+       */
+      FAILED(6),
+      /**
+       * <pre>
+       * The service consumer deleted the VPC endpoint and deletion is in progress.
+       * </pre>
+       *
+       * <code>DELETING = 7;</code>
+       */
+      DELETING(7),
+      /**
+       * <pre>
+       * The VPC endpoint is deleted.
+       * </pre>
+       *
+       * <code>DELETED = 8;</code>
+       */
+      DELETED(8),
+      /**
+       * <pre>
+       * unknown.
+       * </pre>
+       *
+       * <code>UNKNOWN = 9;</code>
+       */
+      UNKNOWN(9),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * UNSET.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * The connection request is pending. This is the initial state if requests are manually accepted.
+       * </pre>
+       *
+       * <code>PENDINGACCEPTANCE = 1;</code>
+       */
+      public static final int PENDINGACCEPTANCE_VALUE = 1;
+      /**
+       * <pre>
+       * The service provider accepted the connection request. This is the initial state if requests are automatically accepted. The VPC endpoint returns to this state if the service consumer modifies the VPC endpoint.
+       * </pre>
+       *
+       * <code>PENDING = 2;</code>
+       */
+      public static final int PENDING_VALUE = 2;
+      /**
+       * <pre>
+       * The VPC endpoint is available for use.
+       * </pre>
+       *
+       * <code>AVAILABLE = 3;</code>
+       */
+      public static final int AVAILABLE_VALUE = 3;
+      /**
+       * <pre>
+       * The service provider rejected the connection request. The service provider can also reject a connection after it is available for use.
+       * </pre>
+       *
+       * <code>REJECTED = 4;</code>
+       */
+      public static final int REJECTED_VALUE = 4;
+      /**
+       * <pre>
+       * The connection request expired.
+       * </pre>
+       *
+       * <code>EXPIRED = 5;</code>
+       */
+      public static final int EXPIRED_VALUE = 5;
+      /**
+       * <pre>
+       * The VPC endpoint could not be made available.
+       * </pre>
+       *
+       * <code>FAILED = 6;</code>
+       */
+      public static final int FAILED_VALUE = 6;
+      /**
+       * <pre>
+       * The service consumer deleted the VPC endpoint and deletion is in progress.
+       * </pre>
+       *
+       * <code>DELETING = 7;</code>
+       */
+      public static final int DELETING_VALUE = 7;
+      /**
+       * <pre>
+       * The VPC endpoint is deleted.
+       * </pre>
+       *
+       * <code>DELETED = 8;</code>
+       */
+      public static final int DELETED_VALUE = 8;
+      /**
+       * <pre>
+       * unknown.
+       * </pre>
+       *
+       * <code>UNKNOWN = 9;</code>
+       */
+      public static final int UNKNOWN_VALUE = 9;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return PENDINGACCEPTANCE;
+          case 2: return PENDING;
+          case 3: return AVAILABLE;
+          case 4: return REJECTED;
+          case 5: return EXPIRED;
+          case 6: return FAILED;
+          case 7: return DELETING;
+          case 8: return DELETED;
+          case 9: return UNKNOWN;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:sdxsvccommon.AwsPrivateLinkState.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * AWS Private Link Endpoint state
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.AwsPrivateLinkState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.AwsPrivateLinkState)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_AwsPrivateLinkState_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_AwsPrivateLinkState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_AwsPrivateLinkState_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.AwsPrivateLinkState)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.AwsPrivateLinkState)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AwsPrivateLinkState>
+        PARSER = new com.google.protobuf.AbstractParser<AwsPrivateLinkState>() {
+      @java.lang.Override
+      public AwsPrivateLinkState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AwsPrivateLinkState> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AwsPrivateLinkState> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.AwsPrivateLinkState getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SDXServicesOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.SDXServices)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * service name.
+     * </pre>
+     *
+     * <code>string serviceName = 1;</code>
+     * @return The serviceName.
+     */
+    java.lang.String getServiceName();
+    /**
+     * <pre>
+     * service name.
+     * </pre>
+     *
+     * <code>string serviceName = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    com.google.protobuf.ByteString
+        getServiceNameBytes();
+
+    /**
+     * <pre>
+     * service URL.
+     * </pre>
+     *
+     * <code>string serviceUrl = 2;</code>
+     * @return The serviceUrl.
+     */
+    java.lang.String getServiceUrl();
+    /**
+     * <pre>
+     * service URL.
+     * </pre>
+     *
+     * <code>string serviceUrl = 2;</code>
+     * @return The bytes for serviceUrl.
+     */
+    com.google.protobuf.ByteString
+        getServiceUrlBytes();
+
+    /**
+     * <pre>
+     * application name.
+     * </pre>
+     *
+     * <code>string applicationName = 3;</code>
+     * @return The applicationName.
+     */
+    java.lang.String getApplicationName();
+    /**
+     * <pre>
+     * application name.
+     * </pre>
+     *
+     * <code>string applicationName = 3;</code>
+     * @return The bytes for applicationName.
+     */
+    com.google.protobuf.ByteString
+        getApplicationNameBytes();
+  }
+  /**
+   * <pre>
+   * An SDX Service object.
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.SDXServices}
+   */
+  public static final class SDXServices extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.SDXServices)
+      SDXServicesOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SDXServices.newBuilder() to construct.
+    private SDXServices(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SDXServices() {
+      serviceName_ = "";
+      serviceUrl_ = "";
+      applicationName_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SDXServices();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_SDXServices_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_SDXServices_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.Builder.class);
+    }
+
+    public static final int SERVICENAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object serviceName_ = "";
+    /**
+     * <pre>
+     * service name.
+     * </pre>
+     *
+     * <code>string serviceName = 1;</code>
+     * @return The serviceName.
+     */
+    @java.lang.Override
+    public java.lang.String getServiceName() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        serviceName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * service name.
+     * </pre>
+     *
+     * <code>string serviceName = 1;</code>
+     * @return The bytes for serviceName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getServiceNameBytes() {
+      java.lang.Object ref = serviceName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        serviceName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SERVICEURL_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object serviceUrl_ = "";
+    /**
+     * <pre>
+     * service URL.
+     * </pre>
+     *
+     * <code>string serviceUrl = 2;</code>
+     * @return The serviceUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getServiceUrl() {
+      java.lang.Object ref = serviceUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        serviceUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * service URL.
+     * </pre>
+     *
+     * <code>string serviceUrl = 2;</code>
+     * @return The bytes for serviceUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getServiceUrlBytes() {
+      java.lang.Object ref = serviceUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        serviceUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int APPLICATIONNAME_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object applicationName_ = "";
+    /**
+     * <pre>
+     * application name.
+     * </pre>
+     *
+     * <code>string applicationName = 3;</code>
+     * @return The applicationName.
+     */
+    @java.lang.Override
+    public java.lang.String getApplicationName() {
+      java.lang.Object ref = applicationName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        applicationName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * application name.
+     * </pre>
+     *
+     * <code>string applicationName = 3;</code>
+     * @return The bytes for applicationName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getApplicationNameBytes() {
+      java.lang.Object ref = applicationName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        applicationName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serviceName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(applicationName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, applicationName_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serviceName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(applicationName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, applicationName_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices) obj;
+
+      if (!getServiceName()
+          .equals(other.getServiceName())) return false;
+      if (!getServiceUrl()
+          .equals(other.getServiceUrl())) return false;
+      if (!getApplicationName()
+          .equals(other.getApplicationName())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SERVICENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getServiceName().hashCode();
+      hash = (37 * hash) + SERVICEURL_FIELD_NUMBER;
+      hash = (53 * hash) + getServiceUrl().hashCode();
+      hash = (37 * hash) + APPLICATIONNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getApplicationName().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * An SDX Service object.
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.SDXServices}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.SDXServices)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServicesOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_SDXServices_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_SDXServices_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        serviceName_ = "";
+        serviceUrl_ = "";
+        applicationName_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_SDXServices_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.serviceName_ = serviceName_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.serviceUrl_ = serviceUrl_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.applicationName_ = applicationName_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices.getDefaultInstance()) return this;
+        if (!other.getServiceName().isEmpty()) {
+          serviceName_ = other.serviceName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getServiceUrl().isEmpty()) {
+          serviceUrl_ = other.serviceUrl_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getApplicationName().isEmpty()) {
+          applicationName_ = other.applicationName_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                serviceName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                serviceUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                applicationName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object serviceName_ = "";
+      /**
+       * <pre>
+       * service name.
+       * </pre>
+       *
+       * <code>string serviceName = 1;</code>
+       * @return The serviceName.
+       */
+      public java.lang.String getServiceName() {
+        java.lang.Object ref = serviceName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          serviceName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * service name.
+       * </pre>
+       *
+       * <code>string serviceName = 1;</code>
+       * @return The bytes for serviceName.
+       */
+      public com.google.protobuf.ByteString
+          getServiceNameBytes() {
+        java.lang.Object ref = serviceName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * service name.
+       * </pre>
+       *
+       * <code>string serviceName = 1;</code>
+       * @param value The serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * service name.
+       * </pre>
+       *
+       * <code>string serviceName = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearServiceName() {
+        serviceName_ = getDefaultInstance().getServiceName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * service name.
+       * </pre>
+       *
+       * <code>string serviceName = 1;</code>
+       * @param value The bytes for serviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        serviceName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object serviceUrl_ = "";
+      /**
+       * <pre>
+       * service URL.
+       * </pre>
+       *
+       * <code>string serviceUrl = 2;</code>
+       * @return The serviceUrl.
+       */
+      public java.lang.String getServiceUrl() {
+        java.lang.Object ref = serviceUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          serviceUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * service URL.
+       * </pre>
+       *
+       * <code>string serviceUrl = 2;</code>
+       * @return The bytes for serviceUrl.
+       */
+      public com.google.protobuf.ByteString
+          getServiceUrlBytes() {
+        java.lang.Object ref = serviceUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          serviceUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * service URL.
+       * </pre>
+       *
+       * <code>string serviceUrl = 2;</code>
+       * @param value The serviceUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        serviceUrl_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * service URL.
+       * </pre>
+       *
+       * <code>string serviceUrl = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearServiceUrl() {
+        serviceUrl_ = getDefaultInstance().getServiceUrl();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * service URL.
+       * </pre>
+       *
+       * <code>string serviceUrl = 2;</code>
+       * @param value The bytes for serviceUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setServiceUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        serviceUrl_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object applicationName_ = "";
+      /**
+       * <pre>
+       * application name.
+       * </pre>
+       *
+       * <code>string applicationName = 3;</code>
+       * @return The applicationName.
+       */
+      public java.lang.String getApplicationName() {
+        java.lang.Object ref = applicationName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          applicationName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * application name.
+       * </pre>
+       *
+       * <code>string applicationName = 3;</code>
+       * @return The bytes for applicationName.
+       */
+      public com.google.protobuf.ByteString
+          getApplicationNameBytes() {
+        java.lang.Object ref = applicationName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          applicationName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * application name.
+       * </pre>
+       *
+       * <code>string applicationName = 3;</code>
+       * @param value The applicationName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setApplicationName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        applicationName_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * application name.
+       * </pre>
+       *
+       * <code>string applicationName = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearApplicationName() {
+        applicationName_ = getDefaultInstance().getApplicationName();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * application name.
+       * </pre>
+       *
+       * <code>string applicationName = 3;</code>
+       * @param value The bytes for applicationName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setApplicationNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        applicationName_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.SDXServices)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.SDXServices)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SDXServices>
+        PARSER = new com.google.protobuf.AbstractParser<SDXServices>() {
+      @java.lang.Override
+      public SDXServices parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<SDXServices> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SDXServices> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SDXServices getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FeatureFlagOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:sdxsvccommon.FeatureFlag)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The name of the feature flag.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The name of the feature flag.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * Is the feature flag active.
+     * </pre>
+     *
+     * <code>bool active = 2;</code>
+     * @return The active.
+     */
+    boolean getActive();
+  }
+  /**
+   * <pre>
+   * A feature flag.
+   * </pre>
+   *
+   * Protobuf type {@code sdxsvccommon.FeatureFlag}
+   */
+  public static final class FeatureFlag extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:sdxsvccommon.FeatureFlag)
+      FeatureFlagOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FeatureFlag.newBuilder() to construct.
+    private FeatureFlag(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FeatureFlag() {
+      name_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FeatureFlag();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_FeatureFlag_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_FeatureFlag_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The name of the feature flag.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the feature flag.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACTIVE_FIELD_NUMBER = 2;
+    private boolean active_ = false;
+    /**
+     * <pre>
+     * Is the feature flag active.
+     * </pre>
+     *
+     * <code>bool active = 2;</code>
+     * @return The active.
+     */
+    @java.lang.Override
+    public boolean getActive() {
+      return active_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (active_ != false) {
+        output.writeBool(2, active_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (active_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, active_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag other = (com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (getActive()
+          != other.getActive()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + ACTIVE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getActive());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * A feature flag.
+     * </pre>
+     *
+     * Protobuf type {@code sdxsvccommon.FeatureFlag}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:sdxsvccommon.FeatureFlag)
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlagOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_FeatureFlag_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_FeatureFlag_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.class, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        active_ = false;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.internal_static_sdxsvccommon_FeatureFlag_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag build() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag buildPartial() {
+        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag result = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.active_ = active_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag) {
+          return mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag other) {
+        if (other == com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.getActive() != false) {
+          setActive(other.getActive());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 16: {
+                active_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The name of the feature flag.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the feature flag.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the feature flag.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the feature flag.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the feature flag.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private boolean active_ ;
+      /**
+       * <pre>
+       * Is the feature flag active.
+       * </pre>
+       *
+       * <code>bool active = 2;</code>
+       * @return The active.
+       */
+      @java.lang.Override
+      public boolean getActive() {
+        return active_;
+      }
+      /**
+       * <pre>
+       * Is the feature flag active.
+       * </pre>
+       *
+       * <code>bool active = 2;</code>
+       * @param value The active to set.
+       * @return This builder for chaining.
+       */
+      public Builder setActive(boolean value) {
+
+        active_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Is the feature flag active.
+       * </pre>
+       *
+       * <code>bool active = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearActive() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        active_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:sdxsvccommon.FeatureFlag)
+    }
+
+    // @@protoc_insertion_point(class_scope:sdxsvccommon.FeatureFlag)
+    private static final com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag();
+    }
+
+    public static com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FeatureFlag>
+        PARSER = new com.google.protobuf.AbstractParser<FeatureFlag>() {
+      @java.lang.Override
+      public FeatureFlag parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<FeatureFlag> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FeatureFlag> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.FeatureFlag getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -36640,10 +52699,65 @@ public final class SDXSvcCommonProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_sdxsvccommon_StorageRoot_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_StorageInstance_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_StorageInstance_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_sdxsvccommon_StorageAssignment_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_sdxsvccommon_StorageAssignment_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_ChartRegistryAuthType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_ChartRegistryAuthType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_ChartRepository_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_ChartRepository_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_DeploymentVersionOverride_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_DeploymentVersionOverride_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_CodEnvironment_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_CodEnvironment_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_CodNamespaceAssignment_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_CodNamespaceAssignment_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_KafkaTopicAssignment_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_KafkaTopicAssignment_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_KafkaInstance_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_KafkaInstance_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_AwsPrivateLinkState_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_AwsPrivateLinkState_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_SDXServices_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_SDXServices_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_sdxsvccommon_FeatureFlag_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_sdxsvccommon_FeatureFlag_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -36654,118 +52768,176 @@ public final class SDXSvcCommonProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\022sdxsvccommon.proto\022\014sdxsvccommon\032\ropti" +
-      "ons.proto\"!\n\rCloudPlatform\"\020\n\005Value\022\007\n\003A" +
-      "WS\020\000\"T\n\016ConnectionType\"B\n\005Value\022\023\n\017AWS_P" +
-      "RIVATELINK\020\000\022$\n AWS_PRIVATELINK_FOR_HMS_" +
-      "DATABASE\020\001\"[\n\023CloudPlatformRegion\0224\n\010pla" +
-      "tform\030\001 \001(\0162\".sdxsvccommon.ConnectionTyp" +
-      "e.Value\022\016\n\006region\030\002 \001(\t\"*\n\014KeyValuePair\022" +
-      "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"x\n\027InstanceH" +
-      "ighLevelStatus\"]\n\005Value\022\020\n\014PROVISIONING\020" +
-      "\000\022\013\n\007HEALTHY\020\001\022\r\n\tUNHEALTHY\020\002\022\014\n\010DELETIN" +
-      "G\020\003\022\013\n\007STOPPED\020\004\022\013\n\007UNKNOWN\020\005\"}\n\rService" +
-      "Status\"l\n\005Value\022\020\n\014PROVISIONING\020\000\022\013\n\007HEA" +
-      "LTHY\020\001\022\r\n\tUNHEALTHY\020\002\022\r\n\tUPGRADING\020\003\022\014\n\010" +
-      "REMOVING\020\004\022\013\n\007STOPPED\020\005\022\013\n\007UNKNOWN\020\006\"\254\002\n" +
-      "\022DatabaseAssignment\022\024\n\014assignmentId\030\001 \001(" +
-      "\t\0228\n\rcloudPlatform\030\002 \001(\0162!.sdxsvccommon." +
-      "CloudPlatform.Value\022\023\n\013cloudRegion\030\003 \001(\t" +
-      "\022\031\n\021usernameVaultPath\030\004 \001(\t\022\031\n\021passwordV" +
-      "aultPath\030\005 \001(\t\022\024\n\014databaseName\030\006 \001(\t\022\026\n\016" +
-      "accessHostname\030\007 \001(\t\022\022\n\naccessPort\030\010 \001(\t" +
-      "\022\022\n\ntlsEnabled\030\t \001(\010\022\022\n\ninstanceId\030\n \001(\t" +
-      "\022\021\n\tserviceId\030\013 \001(\t\"\367\002\n\rRdbmsInstance\022\014\n" +
+      "ons.proto\"=\n\rCloudPlatform\",\n\005Value\022\t\n\005U" +
+      "NSET\020\000\022\007\n\003AWS\020\001\022\017\n\005LOCAL\020c\032\004\200\371+\001\"9\n\016Conn" +
+      "ectionType\"\'\n\005Value\022\t\n\005UNSET\020\000\022\023\n\017AWS_PR" +
+      "IVATELINK\020\001\"Z\n\023CloudPlatformRegion\0223\n\010pl" +
+      "atform\030\001 \001(\0162!.sdxsvccommon.CloudPlatfor" +
+      "m.Value\022\016\n\006region\030\002 \001(\t\"*\n\014KeyValuePair\022" +
+      "\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\252\001\n\027Instance" +
+      "HighLevelStatus\"\216\001\n\005Value\022\t\n\005UNSET\020\000\022\020\n\014" +
+      "PROVISIONING\020\001\022\013\n\007RUNNING\020\002\022\r\n\tUNHEALTHY" +
+      "\020\003\022\013\n\007STOPPED\020\004\022\014\n\010DELETING\020\005\022\013\n\007DELETED" +
+      "\020\006\022\013\n\007HEALTHY\020\007\022\013\n\007UNKNOWN\020\010\022\n\n\006FAILED\020\t" +
+      "\"\210\001\n\rServiceStatus\"w\n\005Value\022\t\n\005UNSET\020\000\022\020" +
+      "\n\014PROVISIONING\020\001\022\013\n\007HEALTHY\020\002\022\r\n\tUNHEALT" +
+      "HY\020\003\022\r\n\tUPGRADING\020\004\022\014\n\010REMOVING\020\005\022\013\n\007STO" +
+      "PPED\020\006\022\013\n\007UNKNOWN\020\007\"\225\002\n\022DatabaseAssignme" +
+      "nt\022\024\n\014assignmentId\030\001 \001(\t\0228\n\rcloudPlatfor" +
+      "m\030\002 \001(\0162!.sdxsvccommon.CloudPlatform.Val" +
+      "ue\022\023\n\013cloudRegion\030\003 \001(\t\022\024\n\014databaseName\030" +
+      "\006 \001(\t\022\026\n\016accessHostname\030\007 \001(\t\022\022\n\naccessP" +
+      "ort\030\010 \001(\t\022\022\n\ntlsEnabled\030\t \001(\010\022\022\n\ninstanc" +
+      "eId\030\n \001(\t\022\022\n\nresourceId\030\013 \001(\t\022\034\n\024credent" +
+      "ialsVaultPath\030\014 \001(\t\"\337\002\n\rRdbmsInstance\022\014\n" +
       "\004name\030\001 \001(\t\022\017\n\007cloudId\030\002 \001(\t\0228\n\rcloudPla" +
       "tform\030\003 \001(\0162!.sdxsvccommon.CloudPlatform" +
       ".Value\022\023\n\013cloudRegion\030\004 \001(\t\022\026\n\016accessHos" +
-      "tname\030\005 \001(\t\022\022\n\naccessPort\030\006 \001(\t\022\036\n\026admin" +
-      "UsernameVaultPath\030\007 \001(\t\022\036\n\026adminPassword" +
-      "VaultPath\030\010 \001(\t\022\022\n\nassignable\030\t \001(\010\022\n\n\002i" +
-      "d\030\n \001(\t\022!\n\023registeredTimestamp\030\013 \001(\003B\004\260\265" +
-      "\030\001\0225\n\013assignments\030\014 \003(\0132 .sdxsvccommon.D" +
-      "atabaseAssignment\022\022\n\ntlsEnabled\030\r \001(\010\"\201\001" +
-      "\n OperationalEnvironmentAssignment\022\024\n\014as" +
-      "signmentId\030\001 \001(\t\022\023\n\013instanceCrn\030\002 \001(\t\022\021\n" +
-      "\tnamespace\030\003 \001(\t\022\037\n\021assignedTimestamp\030\004 " +
-      "\001(\003B\004\260\265\030\001\"\215\003\n\026OperationalEnvironment\022\014\n\004" +
-      "name\030\001 \001(\t\022\017\n\007cloudId\030\002 \001(\t\022\023\n\013cloudRegi" +
-      "on\030\003 \001(\t\022\032\n\022sdxTrafficHostname\030\004 \001(\t\022\034\n\024" +
-      "adminTrafficHostname\030\005 \001(\t\022\022\n\nkubeConfig" +
-      "\030\006 \001(\t\022\031\n\021apiServerEndpoint\030\007 \001(\t\022\036\n\026ope" +
-      "nIdProviderEndpoint\030\010 \001(\t\022\016\n\006caCert\030\t \001(" +
-      "\t\022\022\n\nassignable\030\n \001(\010\022\n\n\002id\030\013 \001(\t\022!\n\023reg" +
-      "isteredTimestamp\030\014 \001(\003B\004\260\265\030\001\022C\n\013assignme" +
-      "nts\030\r \003(\0132..sdxsvccommon.OperationalEnvi" +
-      "ronmentAssignment\022\036\n\020updatedTimestamp\030\016 " +
-      "\001(\003B\004\260\265\030\001\"r\n\005Event\022\n\n\002id\030\001 \001(\t\022\021\n\treques" +
-      "tId\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\030\n\noccurredAt\030" +
-      "\004 \001(\003B\004\260\265\030\001\022\017\n\007message\030\005 \001(\t\022\017\n\007details\030" +
-      "\006 \001(\t\"u\n\022InstanceDeployment\022\036\n\026operation" +
-      "alEnvironment\030\001 \001(\t\022\026\n\016percentTraffic\030\002 " +
-      "\001(\005\022\'\n\010services\030\003 \003(\0132\025.sdxsvccommon.Ser" +
-      "vice\"\316\001\n\007Service\022\023\n\013serviceType\030\001 \001(\t\022\014\n" +
-      "\004name\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\tnamespace\030\004 " +
-      "\001(\t\022\017\n\007version\030\005 \001(\t\022\026\n\016helmDeployment\030\006" +
-      " \001(\t\0221\n\006status\030\007 \001(\0162!.sdxsvccommon.Serv" +
-      "iceStatus.Value\022$\n\007history\030\010 \003(\0132\023.sdxsv" +
-      "ccommon.Event\"\360\002\n\010Instance\022\014\n\004name\030\001 \001(\t" +
-      "\022\013\n\003crn\030\002 \001(\t\022;\n\006status\030\003 \001(\0162+.sdxsvcco" +
-      "mmon.InstanceHighLevelStatus.Value\0228\n\rcl" +
-      "oudPlatform\030\004 \001(\0162!.sdxsvccommon.CloudPl" +
-      "atform.Value\022\023\n\013cloudRegion\030\005 \001(\t\022\023\n\013des" +
-      "cription\030\006 \001(\t\022\025\n\007created\030\007 \001(\003B\004\260\265\030\001\022\020\n" +
-      "\010hostname\030\010 \001(\t\022\014\n\004port\030\t \001(\005\022\024\n\014environ" +
-      "ments\030\n \003(\t\0225\n\013deployments\030\013 \003(\0132 .sdxsv" +
-      "ccommon.InstanceDeployment\022$\n\007history\030\014 " +
-      "\003(\0132\023.sdxsvccommon.Event\"\375\001\n\nConnection\022" +
-      "\014\n\004name\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\016\n\006status\030\003 \001" +
-      "(\t\0220\n\004type\030\004 \001(\0162\".sdxsvccommon.Connecti" +
-      "onType.Value\022\025\n\rcloudPlatform\030\005 \001(\t\022\023\n\013c" +
-      "loudRegion\030\006 \001(\t\022\017\n\007cloudId\030\007 \001(\t\022\030\n\020clo" +
-      "udIpAddresses\030\010 \003(\t\022\025\n\007created\030\t \001(\003B\004\260\265" +
-      "\030\001\022$\n\007history\030\n \003(\0132\023.sdxsvccommon.Event" +
-      "\"$\n\020SearchByInstance\022\020\n\010instance\030\001 \001(\t\"6" +
-      "\n\017SearchByService\022\020\n\010instance\030\001 \001(\t\022\021\n\ts" +
-      "erviceId\030\002 \001(\t\"Q\n\025SearchByCloudPlatform\022" +
-      "8\n\rcloudPlatform\030\001 \001(\0162!.sdxsvccommon.Cl" +
-      "oudPlatform.Value\"*\n\023SearchByEnvironment" +
-      "\022\023\n\013environment\030\001 \001(\t\"@\n\036SearchByOperati" +
-      "onalEnvironment\022\036\n\026operationalEnvironmen" +
-      "t\030\001 \001(\t\"*\n\023SearchByCloudRegion\022\023\n\013cloudR" +
-      "egion\030\001 \001(\t\"+\n\025SearchByAssignability\022\022\n\n" +
-      "assignable\030\001 \001(\010\"\220\003\n\007Indexer\022\014\n\004name\030\001 \001" +
-      "(\t\022\017\n\007cloudId\030\002 \001(\t\0228\n\rcloudPlatform\030\003 \001" +
-      "(\0162!.sdxsvccommon.CloudPlatform.Value\022\023\n" +
-      "\013cloudRegion\030\004 \001(\t\022\026\n\016accessHostname\030\005 \001" +
-      "(\t\022\022\n\naccessPort\030\006 \001(\t\022\022\n\ntlsEnabled\030\007 \001" +
-      "(\010\022\036\n\026adminUsernameVaultPath\030\010 \001(\t\022\036\n\026ad" +
-      "minPasswordVaultPath\030\t \001(\t\022\022\n\nassignable" +
-      "\030\n \001(\010\022\n\n\002id\030\013 \001(\t\022!\n\023registeredTimestam" +
-      "p\030\014 \001(\003B\004\260\265\030\001\022\036\n\020updatedTimestamp\030\r \001(\003B" +
-      "\004\260\265\030\001\0224\n\013assignments\030\016 \003(\0132\037.sdxsvccommo" +
-      "n.IndexerAssignment\"\210\002\n\021IndexerAssignmen" +
-      "t\022\024\n\014assignmentId\030\001 \001(\t\0228\n\rcloudPlatform" +
-      "\030\002 \001(\0162!.sdxsvccommon.CloudPlatform.Valu" +
-      "e\022\023\n\013cloudRegion\030\003 \001(\t\022\022\n\naccessRole\030\004 \001" +
-      "(\t\022\023\n\013indexPrefix\030\005 \001(\t\022\026\n\016accessHostnam" +
-      "e\030\006 \001(\t\022\022\n\naccessPort\030\007 \001(\t\022\022\n\ntlsEnable" +
-      "d\030\010 \001(\010\022\022\n\ninstanceId\030\t \001(\t\022\021\n\tserviceId" +
-      "\030\n \001(\t\"\230\002\n\013StorageRoot\022\n\n\002id\030\001 \001(\t\022\014\n\004na" +
-      "me\030\002 \001(\t\022\017\n\007cloudId\030\003 \001(\t\0228\n\rcloudPlatfo" +
-      "rm\030\004 \001(\0162!.sdxsvccommon.CloudPlatform.Va" +
-      "lue\022\023\n\013cloudRegion\030\005 \001(\t\022!\n\023registeredTi" +
-      "mestamp\030\007 \001(\003B\004\260\265\030\001\022\036\n\020updatedTimestamp\030" +
-      "\010 \001(\003B\004\260\265\030\001\022\022\n\nassignable\030\t \001(\010\0228\n\017assig" +
-      "nedStorage\030\n \003(\0132\037.sdxsvccommon.StorageA" +
-      "ssignment\"\204\002\n\021StorageAssignment\022\024\n\014assig" +
+      "tname\030\005 \001(\t\022\022\n\naccessPort\030\006 \001(\t\022\025\n\radmin" +
+      "Username\030\007 \001(\t\022\017\n\007roleArn\030\010 \001(\t\022\022\n\nassig" +
+      "nable\030\t \001(\010\022\n\n\002id\030\n \001(\t\022!\n\023registeredTim" +
+      "estamp\030\013 \001(\003B\004\260\265\030\001\0225\n\013assignments\030\014 \003(\0132" +
+      " .sdxsvccommon.DatabaseAssignment\022\022\n\ntls" +
+      "Enabled\030\r \001(\010\"\201\001\n OperationalEnvironment" +
+      "Assignment\022\024\n\014assignmentId\030\001 \001(\t\022\023\n\013inst" +
+      "anceCrn\030\002 \001(\t\022\021\n\tnamespace\030\003 \001(\t\022\037\n\021assi" +
+      "gnedTimestamp\030\004 \001(\003B\004\260\265\030\001\"\222\004\n\026Operationa" +
+      "lEnvironment\022\014\n\004name\030\001 \001(\t\022\017\n\007cloudId\030\002 " +
+      "\001(\t\0228\n\rcloudPlatform\030\003 \001(\0162!.sdxsvccommo" +
+      "n.CloudPlatform.Value\022\023\n\013cloudRegion\030\004 \001" +
+      "(\t\022\032\n\022sdxTrafficHostname\030\005 \001(\t\022\034\n\024adminT" +
+      "rafficHostname\030\006 \001(\t\022\037\n\021apiServerEndpoin" +
+      "t\030\007 \001(\tB\004\200\266\030\001\022$\n\026openIdProviderEndpoint\030" +
+      "\010 \001(\tB\004\200\266\030\001\022\024\n\006caCert\030\t \001(\tB\004\200\265\030\001\022\022\n\nass" +
+      "ignable\030\n \001(\010\022\n\n\002id\030\013 \001(\t\022!\n\023registeredT" +
+      "imestamp\030\014 \001(\003B\004\260\265\030\001\022C\n\013assignments\030\r \003(" +
+      "\0132..sdxsvccommon.OperationalEnvironmentA" +
+      "ssignment\022\036\n\020updatedTimestamp\030\016 \001(\003B\004\260\265\030" +
+      "\001\022\023\n\013targetGroup\030\017 \001(\t\022\027\n\017vaultAuthMetho" +
+      "d\030\020 \001(\t\022\035\n\025openIdProviderCloudId\030\021 \001(\t\"r" +
+      "\n\005Event\022\n\n\002id\030\001 \001(\t\022\021\n\trequestId\030\002 \001(\t\022\016" +
+      "\n\006status\030\003 \001(\t\022\030\n\noccurredAt\030\004 \001(\003B\004\260\265\030\001" +
+      "\022\017\n\007message\030\005 \001(\t\022\017\n\007details\030\006 \001(\t\"L\n\022In" +
+      "stanceDeployment\022\036\n\026operationalEnvironme" +
+      "nt\030\001 \001(\t\022\026\n\016percentTraffic\030\002 \001(\005\"\316\001\n\007Ser" +
+      "vice\022\023\n\013serviceType\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022" +
+      "\013\n\003crn\030\003 \001(\t\022\021\n\tnamespace\030\004 \001(\t\022\017\n\007versi" +
+      "on\030\005 \001(\t\022\026\n\016helmDeployment\030\006 \001(\t\0221\n\006stat" +
+      "us\030\007 \001(\0162!.sdxsvccommon.ServiceStatus.Va" +
+      "lue\022$\n\007history\030\010 \003(\0132\023.sdxsvccommon.Even" +
+      "t\"\360\002\n\010Instance\022\014\n\004name\030\001 \001(\t\022\013\n\003crn\030\002 \001(" +
+      "\t\022;\n\006status\030\003 \001(\0162+.sdxsvccommon.Instanc" +
+      "eHighLevelStatus.Value\0228\n\rcloudPlatform\030" +
+      "\004 \001(\0162!.sdxsvccommon.CloudPlatform.Value" +
+      "\022\023\n\013cloudRegion\030\005 \001(\t\022\023\n\013description\030\006 \001" +
+      "(\t\022\025\n\007created\030\007 \001(\003B\004\260\265\030\001\022\020\n\010hostname\030\010 " +
+      "\001(\t\022\014\n\004port\030\t \001(\005\022\024\n\014environments\030\n \003(\t\022" +
+      "5\n\013deployments\030\013 \003(\0132 .sdxsvccommon.Inst" +
+      "anceDeployment\022$\n\007history\030\014 \003(\0132\023.sdxsvc" +
+      "common.Event\"\256\002\n\nConnection\022\014\n\004name\030\001 \001(" +
+      "\t\022\023\n\013environment\030\002 \001(\t\0227\n\006status\030\003 \001(\0162\'" +
+      ".sdxsvccommon.AwsPrivateLinkState.Value\022" +
+      "0\n\004type\030\004 \001(\0162\".sdxsvccommon.ConnectionT" +
+      "ype.Value\022\025\n\rcloudPlatform\030\005 \001(\t\022\023\n\013clou" +
+      "dRegion\030\006 \001(\t\022\017\n\007cloudId\030\007 \001(\t\022\030\n\020cloudI" +
+      "pAddresses\030\010 \003(\t\022\025\n\007created\030\t \001(\003B\004\260\265\030\001\022" +
+      "$\n\007history\030\n \003(\0132\023.sdxsvccommon.Event\"$\n" +
+      "\020SearchByInstance\022\020\n\010instance\030\001 \001(\t\"6\n\017S" +
+      "earchByService\022\020\n\010instance\030\001 \001(\t\022\021\n\tserv" +
+      "iceId\030\002 \001(\t\"Q\n\025SearchByCloudPlatform\0228\n\r" +
+      "cloudPlatform\030\001 \001(\0162!.sdxsvccommon.Cloud" +
+      "Platform.Value\"*\n\023SearchByEnvironment\022\023\n" +
+      "\013environment\030\001 \001(\t\"@\n\036SearchByOperationa" +
+      "lEnvironment\022\036\n\026operationalEnvironment\030\001" +
+      " \001(\t\"*\n\023SearchByCloudRegion\022\023\n\013cloudRegi" +
+      "on\030\001 \001(\t\"+\n\025SearchByAssignability\022\022\n\nass" +
+      "ignable\030\001 \001(\010\"\341\002\n\007Indexer\022\014\n\004name\030\001 \001(\t\022" +
+      "\017\n\007cloudId\030\002 \001(\t\0228\n\rcloudPlatform\030\003 \001(\0162" +
+      "!.sdxsvccommon.CloudPlatform.Value\022\023\n\013cl" +
+      "oudRegion\030\004 \001(\t\022\026\n\016accessHostname\030\005 \001(\t\022" +
+      "\022\n\naccessPort\030\006 \001(\t\022\022\n\ntlsEnabled\030\007 \001(\010\022" +
+      "\017\n\007roleArn\030\010 \001(\t\022\022\n\nassignable\030\t \001(\010\022\n\n\002" +
+      "id\030\n \001(\t\022!\n\023registeredTimestamp\030\013 \001(\003B\004\260" +
+      "\265\030\001\022\036\n\020updatedTimestamp\030\014 \001(\003B\004\260\265\030\001\0224\n\013a" +
+      "ssignments\030\r \003(\0132\037.sdxsvccommon.IndexerA" +
+      "ssignment\"\246\002\n\021IndexerAssignment\022\024\n\014assig" +
       "nmentId\030\001 \001(\t\0228\n\rcloudPlatform\030\002 \001(\0162!.s" +
       "dxsvccommon.CloudPlatform.Value\022\023\n\013cloud" +
-      "Region\030\003 \001(\t\022\022\n\naccessRole\030\004 \001(\t\022\023\n\013stor" +
-      "agePath\030\005 \001(\t\022\022\n\ninstanceId\030\006 \001(\t\022\021\n\tser" +
-      "viceId\030\007 \001(\t\022!\n\023assignmentTimestamp\030\010 \001(" +
-      "\003B\004\260\265\030\001\022\027\n\017encryptionKeyId\030\t \001(\tBB\n-com." +
-      "cloudera.thunderhead.service.sdxsvccommo" +
-      "nB\021SDXSvcCommonProtob\006proto3"
+      "Region\030\003 \001(\t\022\022\n\naccessRole\030\004 \001(\t\022\023\n\013inde" +
+      "xPrefix\030\005 \001(\t\022\026\n\016accessHostname\030\006 \001(\t\022\022\n" +
+      "\naccessPort\030\007 \001(\t\022\022\n\ntlsEnabled\030\010 \001(\010\022\022\n" +
+      "\ninstanceId\030\t \001(\t\022\021\n\tserviceId\030\n \001(\t\022\034\n\024" +
+      "credentialsVaultPath\030\013 \001(\t\"\305\002\n\013StorageRo" +
+      "ot\022\n\n\002id\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007cloudId\030" +
+      "\003 \001(\t\0228\n\rcloudPlatform\030\004 \001(\0162!.sdxsvccom" +
+      "mon.CloudPlatform.Value\022\023\n\013cloudRegion\030\005" +
+      " \001(\t\022!\n\023registeredTimestamp\030\006 \001(\003B\004\260\265\030\001\022" +
+      "\036\n\020updatedTimestamp\030\007 \001(\003B\004\260\265\030\001\022\022\n\nassig" +
+      "nable\030\010 \001(\010\022\017\n\007roleArn\030\t \001(\t\0227\n\020storageI" +
+      "nstances\030\n \003(\0132\035.sdxsvccommon.StorageIns" +
+      "tance\022\033\n\023permissionsBoundary\030\013 \001(\t\"\231\002\n\017S" +
+      "torageInstance\022\n\n\002id\030\001 \001(\t\0228\n\rcloudPlatf" +
+      "orm\030\002 \001(\0162!.sdxsvccommon.CloudPlatform.V" +
+      "alue\022\023\n\013cloudRegion\030\003 \001(\t\022\023\n\013storagePath" +
+      "\030\004 \001(\t\022\022\n\ninstanceId\030\005 \001(\t\022\025\n\007created\030\006 " +
+      "\001(\003B\004\260\265\030\001\022\025\n\007updated\030\007 \001(\003B\004\260\265\030\001\022\027\n\017encr" +
+      "yptionKeyId\030\t \001(\t\022;\n\022storageAssignments\030" +
+      "\n \003(\0132\037.sdxsvccommon.StorageAssignment\"\262" +
+      "\001\n\021StorageAssignment\022\024\n\014assignmentId\030\001 \001" +
+      "(\t\022\022\n\naccessRole\030\002 \001(\t\022\023\n\013storagePath\030\003 " +
+      "\001(\t\022\022\n\nresourceId\030\004 \001(\t\022\025\n\007created\030\005 \001(\003" +
+      "B\004\260\265\030\001\022\025\n\007updated\030\006 \001(\003B\004\260\265\030\001\022\034\n\024credent" +
+      "ialsVaultPath\030\007 \001(\t\"P\n\025ChartRegistryAuth" +
+      "Type\"7\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004NONE\020\001\022\014\n\010ST" +
+      "ANDARD\020\002\022\013\n\007AWS_ECR\020\003\"\255\001\n\017ChartRepositor" +
+      "y\022\025\n\003url\030\001 \001(\tB\010\320\265\030\001\200\266\030\001\022A\n\010authType\030\002 \001" +
+      "(\0162).sdxsvccommon.ChartRegistryAuthType." +
+      "ValueB\004\320\265\030\001\022\026\n\010username\030\003 \001(\tB\004\200\265\030\001\022\026\n\010p" +
+      "assword\030\004 \001(\tB\004\200\265\030\001\022\020\n\010insecure\030\005 \001(\010\"\246\001" +
+      "\n\031DeploymentVersionOverride\022\021\n\tchartName" +
+      "\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\026\n\016deploymentNam" +
+      "e\030\003 \001(\t\0226\n\017chartRepository\030\004 \001(\0132\035.sdxsv" +
+      "ccommon.ChartRepository\022\025\n\rimageRegistry" +
+      "\030\005 \001(\t\"\363\002\n\016CodEnvironment\022\n\n\002id\030\001 \001(\t\022\014\n" +
+      "\004name\030\002 \001(\t\0228\n\rcloudPlatform\030\003 \001(\0162!.sdx" +
+      "svccommon.CloudPlatform.Value\022\023\n\013cloudRe" +
+      "gion\030\004 \001(\t\022\023\n\013cluster0Crn\030\005 \001(\t\022\035\n\025clust" +
+      "er0ZookeeperHost\030\006 \001(\t\022\023\n\013cluster1Crn\030\010 " +
+      "\001(\t\022\035\n\025cluster1ZookeeperHost\030\t \001(\t\022\022\n\nas" +
+      "signable\030\013 \001(\010\0229\n\013assignments\030\014 \003(\0132$.sd" +
+      "xsvccommon.CodNamespaceAssignment\022!\n\023reg" +
+      "isteredTimestamp\030\r \001(\003B\004\260\265\030\001\022\036\n\020updatedT" +
+      "imestamp\030\016 \001(\003B\004\260\265\030\001\"\205\002\n\026CodNamespaceAss" +
+      "ignment\022\024\n\014assignmentId\030\001 \001(\t\0228\n\rcloudPl" +
+      "atform\030\002 \001(\0162!.sdxsvccommon.CloudPlatfor" +
+      "m.Value\022\023\n\013cloudRegion\030\003 \001(\t\022\022\n\ninstance" +
+      "Id\030\004 \001(\t\022\021\n\tserviceId\030\005 \001(\t\022\034\n\024credentia" +
+      "lsVaultPath\030\006 \001(\t\022!\n\023assignmentTimestamp" +
+      "\030\007 \001(\003B\004\260\265\030\001\022\036\n\020updatedTimestamp\030\010 \001(\003B\004" +
+      "\260\265\030\001\"\324\001\n\024KafkaTopicAssignment\022\024\n\014assignm" +
+      "entId\030\001 \001(\t\0228\n\rcloudPlatform\030\002 \001(\0162!.sdx" +
+      "svccommon.CloudPlatform.Value\022\023\n\013cloudRe" +
+      "gion\030\003 \001(\t\022\021\n\ttopicName\030\004 \001(\t\022\022\n\ninstanc" +
+      "eId\030\005 \001(\t\022\022\n\nresourceId\030\006 \001(\t\022\034\n\024credent" +
+      "ialsVaultPath\030\007 \001(\t\"\320\002\n\rKafkaInstance\022\014\n" +
+      "\004name\030\001 \001(\t\022\017\n\007cloudId\030\002 \001(\t\0228\n\rcloudPla" +
+      "tform\030\003 \001(\0162!.sdxsvccommon.CloudPlatform" +
+      ".Value\022\023\n\013cloudRegion\030\004 \001(\t\022\025\n\radminEndp" +
+      "oint\030\005 \001(\t\022\031\n\021zookeeperEndpoint\030\006 \001(\t\022\017\n" +
+      "\007roleArn\030\007 \001(\t\022\022\n\nassignable\030\010 \001(\010\022\n\n\002id" +
+      "\030\t \001(\t\022!\n\023registeredTimestamp\030\n \001(\003B\004\260\265\030" +
+      "\001\0227\n\013assignments\030\013 \003(\0132\".sdxsvccommon.Ka" +
+      "fkaTopicAssignment\022\022\n\ntlsEnabled\030\014 \001(\010\"\254" +
+      "\001\n\023AwsPrivateLinkState\"\224\001\n\005Value\022\t\n\005UNSE" +
+      "T\020\000\022\025\n\021PENDINGACCEPTANCE\020\001\022\013\n\007PENDING\020\002\022" +
+      "\r\n\tAVAILABLE\020\003\022\014\n\010REJECTED\020\004\022\013\n\007EXPIRED\020" +
+      "\005\022\n\n\006FAILED\020\006\022\014\n\010DELETING\020\007\022\013\n\007DELETED\020\010" +
+      "\022\013\n\007UNKNOWN\020\t\"O\n\013SDXServices\022\023\n\013serviceN" +
+      "ame\030\001 \001(\t\022\022\n\nserviceUrl\030\002 \001(\t\022\027\n\017applica" +
+      "tionName\030\003 \001(\t\"+\n\013FeatureFlag\022\014\n\004name\030\001 " +
+      "\001(\t\022\016\n\006active\030\002 \001(\010BB\n-com.cloudera.thun" +
+      "derhead.service.sdxsvccommonB\021SDXSvcComm" +
+      "onProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -36813,13 +52985,13 @@ public final class SDXSvcCommonProto {
     internal_static_sdxsvccommon_DatabaseAssignment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_DatabaseAssignment_descriptor,
-        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "UsernameVaultPath", "PasswordVaultPath", "DatabaseName", "AccessHostname", "AccessPort", "TlsEnabled", "InstanceId", "ServiceId", });
+        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "DatabaseName", "AccessHostname", "AccessPort", "TlsEnabled", "InstanceId", "ResourceId", "CredentialsVaultPath", });
     internal_static_sdxsvccommon_RdbmsInstance_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_sdxsvccommon_RdbmsInstance_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_RdbmsInstance_descriptor,
-        new java.lang.String[] { "Name", "CloudId", "CloudPlatform", "CloudRegion", "AccessHostname", "AccessPort", "AdminUsernameVaultPath", "AdminPasswordVaultPath", "Assignable", "Id", "RegisteredTimestamp", "Assignments", "TlsEnabled", });
+        new java.lang.String[] { "Name", "CloudId", "CloudPlatform", "CloudRegion", "AccessHostname", "AccessPort", "AdminUsername", "RoleArn", "Assignable", "Id", "RegisteredTimestamp", "Assignments", "TlsEnabled", });
     internal_static_sdxsvccommon_OperationalEnvironmentAssignment_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_sdxsvccommon_OperationalEnvironmentAssignment_fieldAccessorTable = new
@@ -36831,7 +53003,7 @@ public final class SDXSvcCommonProto {
     internal_static_sdxsvccommon_OperationalEnvironment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_OperationalEnvironment_descriptor,
-        new java.lang.String[] { "Name", "CloudId", "CloudRegion", "SdxTrafficHostname", "AdminTrafficHostname", "KubeConfig", "ApiServerEndpoint", "OpenIdProviderEndpoint", "CaCert", "Assignable", "Id", "RegisteredTimestamp", "Assignments", "UpdatedTimestamp", });
+        new java.lang.String[] { "Name", "CloudId", "CloudPlatform", "CloudRegion", "SdxTrafficHostname", "AdminTrafficHostname", "ApiServerEndpoint", "OpenIdProviderEndpoint", "CaCert", "Assignable", "Id", "RegisteredTimestamp", "Assignments", "UpdatedTimestamp", "TargetGroup", "VaultAuthMethod", "OpenIdProviderCloudId", });
     internal_static_sdxsvccommon_Event_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_sdxsvccommon_Event_fieldAccessorTable = new
@@ -36843,7 +53015,7 @@ public final class SDXSvcCommonProto {
     internal_static_sdxsvccommon_InstanceDeployment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_InstanceDeployment_descriptor,
-        new java.lang.String[] { "OperationalEnvironment", "PercentTraffic", "Services", });
+        new java.lang.String[] { "OperationalEnvironment", "PercentTraffic", });
     internal_static_sdxsvccommon_Service_descriptor =
       getDescriptor().getMessageTypes().get(12);
     internal_static_sdxsvccommon_Service_fieldAccessorTable = new
@@ -36861,7 +53033,7 @@ public final class SDXSvcCommonProto {
     internal_static_sdxsvccommon_Connection_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_Connection_descriptor,
-        new java.lang.String[] { "Name", "Crn", "Status", "Type", "CloudPlatform", "CloudRegion", "CloudId", "CloudIpAddresses", "Created", "History", });
+        new java.lang.String[] { "Name", "Environment", "Status", "Type", "CloudPlatform", "CloudRegion", "CloudId", "CloudIpAddresses", "Created", "History", });
     internal_static_sdxsvccommon_SearchByInstance_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_sdxsvccommon_SearchByInstance_fieldAccessorTable = new
@@ -36909,28 +53081,98 @@ public final class SDXSvcCommonProto {
     internal_static_sdxsvccommon_Indexer_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_Indexer_descriptor,
-        new java.lang.String[] { "Name", "CloudId", "CloudPlatform", "CloudRegion", "AccessHostname", "AccessPort", "TlsEnabled", "AdminUsernameVaultPath", "AdminPasswordVaultPath", "Assignable", "Id", "RegisteredTimestamp", "UpdatedTimestamp", "Assignments", });
+        new java.lang.String[] { "Name", "CloudId", "CloudPlatform", "CloudRegion", "AccessHostname", "AccessPort", "TlsEnabled", "RoleArn", "Assignable", "Id", "RegisteredTimestamp", "UpdatedTimestamp", "Assignments", });
     internal_static_sdxsvccommon_IndexerAssignment_descriptor =
       getDescriptor().getMessageTypes().get(23);
     internal_static_sdxsvccommon_IndexerAssignment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_IndexerAssignment_descriptor,
-        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "AccessRole", "IndexPrefix", "AccessHostname", "AccessPort", "TlsEnabled", "InstanceId", "ServiceId", });
+        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "AccessRole", "IndexPrefix", "AccessHostname", "AccessPort", "TlsEnabled", "InstanceId", "ServiceId", "CredentialsVaultPath", });
     internal_static_sdxsvccommon_StorageRoot_descriptor =
       getDescriptor().getMessageTypes().get(24);
     internal_static_sdxsvccommon_StorageRoot_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_StorageRoot_descriptor,
-        new java.lang.String[] { "Id", "Name", "CloudId", "CloudPlatform", "CloudRegion", "RegisteredTimestamp", "UpdatedTimestamp", "Assignable", "AssignedStorage", });
-    internal_static_sdxsvccommon_StorageAssignment_descriptor =
+        new java.lang.String[] { "Id", "Name", "CloudId", "CloudPlatform", "CloudRegion", "RegisteredTimestamp", "UpdatedTimestamp", "Assignable", "RoleArn", "StorageInstances", "PermissionsBoundary", });
+    internal_static_sdxsvccommon_StorageInstance_descriptor =
       getDescriptor().getMessageTypes().get(25);
+    internal_static_sdxsvccommon_StorageInstance_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_StorageInstance_descriptor,
+        new java.lang.String[] { "Id", "CloudPlatform", "CloudRegion", "StoragePath", "InstanceId", "Created", "Updated", "EncryptionKeyId", "StorageAssignments", });
+    internal_static_sdxsvccommon_StorageAssignment_descriptor =
+      getDescriptor().getMessageTypes().get(26);
     internal_static_sdxsvccommon_StorageAssignment_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_sdxsvccommon_StorageAssignment_descriptor,
-        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "AccessRole", "StoragePath", "InstanceId", "ServiceId", "AssignmentTimestamp", "EncryptionKeyId", });
+        new java.lang.String[] { "AssignmentId", "AccessRole", "StoragePath", "ResourceId", "Created", "Updated", "CredentialsVaultPath", });
+    internal_static_sdxsvccommon_ChartRegistryAuthType_descriptor =
+      getDescriptor().getMessageTypes().get(27);
+    internal_static_sdxsvccommon_ChartRegistryAuthType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_ChartRegistryAuthType_descriptor,
+        new java.lang.String[] { });
+    internal_static_sdxsvccommon_ChartRepository_descriptor =
+      getDescriptor().getMessageTypes().get(28);
+    internal_static_sdxsvccommon_ChartRepository_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_ChartRepository_descriptor,
+        new java.lang.String[] { "Url", "AuthType", "Username", "Password", "Insecure", });
+    internal_static_sdxsvccommon_DeploymentVersionOverride_descriptor =
+      getDescriptor().getMessageTypes().get(29);
+    internal_static_sdxsvccommon_DeploymentVersionOverride_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_DeploymentVersionOverride_descriptor,
+        new java.lang.String[] { "ChartName", "Version", "DeploymentName", "ChartRepository", "ImageRegistry", });
+    internal_static_sdxsvccommon_CodEnvironment_descriptor =
+      getDescriptor().getMessageTypes().get(30);
+    internal_static_sdxsvccommon_CodEnvironment_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_CodEnvironment_descriptor,
+        new java.lang.String[] { "Id", "Name", "CloudPlatform", "CloudRegion", "Cluster0Crn", "Cluster0ZookeeperHost", "Cluster1Crn", "Cluster1ZookeeperHost", "Assignable", "Assignments", "RegisteredTimestamp", "UpdatedTimestamp", });
+    internal_static_sdxsvccommon_CodNamespaceAssignment_descriptor =
+      getDescriptor().getMessageTypes().get(31);
+    internal_static_sdxsvccommon_CodNamespaceAssignment_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_CodNamespaceAssignment_descriptor,
+        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "InstanceId", "ServiceId", "CredentialsVaultPath", "AssignmentTimestamp", "UpdatedTimestamp", });
+    internal_static_sdxsvccommon_KafkaTopicAssignment_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_sdxsvccommon_KafkaTopicAssignment_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_KafkaTopicAssignment_descriptor,
+        new java.lang.String[] { "AssignmentId", "CloudPlatform", "CloudRegion", "TopicName", "InstanceId", "ResourceId", "CredentialsVaultPath", });
+    internal_static_sdxsvccommon_KafkaInstance_descriptor =
+      getDescriptor().getMessageTypes().get(33);
+    internal_static_sdxsvccommon_KafkaInstance_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_KafkaInstance_descriptor,
+        new java.lang.String[] { "Name", "CloudId", "CloudPlatform", "CloudRegion", "AdminEndpoint", "ZookeeperEndpoint", "RoleArn", "Assignable", "Id", "RegisteredTimestamp", "Assignments", "TlsEnabled", });
+    internal_static_sdxsvccommon_AwsPrivateLinkState_descriptor =
+      getDescriptor().getMessageTypes().get(34);
+    internal_static_sdxsvccommon_AwsPrivateLinkState_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_AwsPrivateLinkState_descriptor,
+        new java.lang.String[] { });
+    internal_static_sdxsvccommon_SDXServices_descriptor =
+      getDescriptor().getMessageTypes().get(35);
+    internal_static_sdxsvccommon_SDXServices_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_SDXServices_descriptor,
+        new java.lang.String[] { "ServiceName", "ServiceUrl", "ApplicationName", });
+    internal_static_sdxsvccommon_FeatureFlag_descriptor =
+      getDescriptor().getMessageTypes().get(36);
+    internal_static_sdxsvccommon_FeatureFlag_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_sdxsvccommon_FeatureFlag_descriptor,
+        new java.lang.String[] { "Name", "Active", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.datetime);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.noParamfile);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
     com.google.protobuf.Descriptors.FileDescriptor
         .internalUpdateFileDescriptor(descriptor, registry);
     com.cloudera.thunderhead.service.common.options.Options.getDescriptor();

@@ -16050,7 +16050,7 @@ public final class SDXSvcAdminProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(1, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -16074,7 +16074,7 @@ public final class SDXSvcAdminProto {
       if (size != -1) return size;
 
       size = 0;
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, cloudPlatform_);
       }
@@ -26342,7 +26342,7 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(2, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -26378,7 +26378,7 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, cloudPlatform_);
       }
@@ -48983,7 +48983,7 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(3, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -49022,7 +49022,7 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, cloudPlatform_);
       }
@@ -60623,7 +60623,7 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         output.writeEnum(3, cloudPlatform_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
@@ -60659,7 +60659,7 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cloudId_);
       }
-      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.AWS.getNumber()) {
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatform.Value.UNSET.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, cloudPlatform_);
       }

@@ -690,6 +690,14 @@ public final class CdlCrudProto {
        * <code>UNAVAILABLE = 13;</code>
        */
       UNAVAILABLE(13),
+      /**
+       * <code>BACKING_UP_DB = 14;</code>
+       */
+      BACKING_UP_DB(14),
+      /**
+       * <code>RESTORING_DB = 15;</code>
+       */
+      RESTORING_DB(15),
       UNRECOGNIZED(-1),
       ;
 
@@ -757,6 +765,14 @@ public final class CdlCrudProto {
        * <code>UNAVAILABLE = 13;</code>
        */
       public static final int UNAVAILABLE_VALUE = 13;
+      /**
+       * <code>BACKING_UP_DB = 14;</code>
+       */
+      public static final int BACKING_UP_DB_VALUE = 14;
+      /**
+       * <code>RESTORING_DB = 15;</code>
+       */
+      public static final int RESTORING_DB_VALUE = 15;
 
 
       public final int getNumber() {
@@ -797,6 +813,8 @@ public final class CdlCrudProto {
           case 11: return UNKNOWN;
           case 12: return LIMITED_FUNCTIONALITY;
           case 13: return UNAVAILABLE;
+          case 14: return BACKING_UP_DB;
+          case 15: return RESTORING_DB;
           default: return null;
         }
       }
@@ -1210,6 +1228,528 @@ public final class CdlCrudProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StatusType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface OperationStatusTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.OperationStatusType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Status of the Datalake Operation
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.OperationStatusType}
+   */
+  public static final class OperationStatusType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.OperationStatusType)
+      OperationStatusTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use OperationStatusType.newBuilder() to construct.
+    private OperationStatusType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private OperationStatusType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new OperationStatusType();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_OperationStatusType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_OperationStatusType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code cdlcrud.OperationStatusType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>IN_PROGRESS = 0;</code>
+       */
+      IN_PROGRESS(0),
+      /**
+       * <code>FAILED = 1;</code>
+       */
+      FAILED(1),
+      /**
+       * <code>SUCCEEDED = 2;</code>
+       */
+      SUCCEEDED(2),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>IN_PROGRESS = 0;</code>
+       */
+      public static final int IN_PROGRESS_VALUE = 0;
+      /**
+       * <code>FAILED = 1;</code>
+       */
+      public static final int FAILED_VALUE = 1;
+      /**
+       * <code>SUCCEEDED = 2;</code>
+       */
+      public static final int SUCCEEDED_VALUE = 2;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return IN_PROGRESS;
+          case 1: return FAILED;
+          case 2: return SUCCEEDED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:cdlcrud.OperationStatusType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Status of the Datalake Operation
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.OperationStatusType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.OperationStatusType)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_OperationStatusType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_OperationStatusType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_OperationStatusType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.OperationStatusType)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.OperationStatusType)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<OperationStatusType>
+        PARSER = new com.google.protobuf.AbstractParser<OperationStatusType>() {
+      @java.lang.Override
+      public OperationStatusType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<OperationStatusType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<OperationStatusType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -13735,6 +14275,193 @@ java.lang.String defaultValue);
      * <code>optional .cdlcrud.AwsConfiguration awsConfiguration = 10;</code>
      */
     com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.AwsConfigurationOrBuilder getAwsConfigurationOrBuilder();
+
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride> 
+        getServiceOverrideList();
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride getServiceOverride(int index);
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    int getServiceOverrideCount();
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder> 
+        getServiceOverrideOrBuilderList();
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder getServiceOverrideOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    int getConfigurationOverridesCount();
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    boolean containsConfigurationOverrides(
+        java.lang.String key);
+    /**
+     * Use {@link #getConfigurationOverridesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getConfigurationOverrides();
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getConfigurationOverridesMap();
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    /* nullable */
+java.lang.String getConfigurationOverridesOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    java.lang.String getConfigurationOverridesOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * Crn of the external liftie cluster to use for creation
+     * </pre>
+     *
+     * <code>optional string externalLiftieClusterCrn = 13;</code>
+     * @return Whether the externalLiftieClusterCrn field is set.
+     */
+    boolean hasExternalLiftieClusterCrn();
+    /**
+     * <pre>
+     * Crn of the external liftie cluster to use for creation
+     * </pre>
+     *
+     * <code>optional string externalLiftieClusterCrn = 13;</code>
+     * @return The externalLiftieClusterCrn.
+     */
+    java.lang.String getExternalLiftieClusterCrn();
+    /**
+     * <pre>
+     * Crn of the external liftie cluster to use for creation
+     * </pre>
+     *
+     * <code>optional string externalLiftieClusterCrn = 13;</code>
+     * @return The bytes for externalLiftieClusterCrn.
+     */
+    com.google.protobuf.ByteString
+        getExternalLiftieClusterCrnBytes();
+
+    /**
+     * <pre>
+     * The type of Cloud Platform
+     * </pre>
+     *
+     * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    int getCloudPlatformValue();
+    /**
+     * <pre>
+     * The type of Cloud Platform
+     * </pre>
+     *
+     * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+     * @return The cloudPlatform.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value getCloudPlatform();
+
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @return A list containing the profiles.
+     */
+    java.util.List<java.lang.String>
+        getProfilesList();
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @return The count of profiles.
+     */
+    int getProfilesCount();
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @param index The index of the element to return.
+     * @return The profiles at the given index.
+     */
+    java.lang.String getProfiles(int index);
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the profiles at the given index.
+     */
+    com.google.protobuf.ByteString
+        getProfilesBytes(int index);
   }
   /**
    * <pre>
@@ -13759,6 +14486,11 @@ java.lang.String defaultValue);
       databaseEngineVersion_ = "";
       clouderaRuntimeVersion_ = "";
       layout_ = "";
+      serviceOverride_ = java.util.Collections.emptyList();
+      externalLiftieClusterCrn_ = "";
+      cloudPlatform_ = 0;
+      profiles_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
     }
 
     @java.lang.Override
@@ -13780,6 +14512,8 @@ java.lang.String defaultValue);
       switch (number) {
         case 4:
           return internalGetTags();
+        case 12:
+          return internalGetConfigurationOverrides();
         default:
           throw new RuntimeException(
               "Invalid map field number: " + number);
@@ -14277,6 +15011,300 @@ java.lang.String defaultValue) {
       return awsConfiguration_ == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.AwsConfiguration.getDefaultInstance() : awsConfiguration_;
     }
 
+    public static final int SERVICEOVERRIDE_FIELD_NUMBER = 11;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride> serviceOverride_;
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride> getServiceOverrideList() {
+      return serviceOverride_;
+    }
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder> 
+        getServiceOverrideOrBuilderList() {
+      return serviceOverride_;
+    }
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    @java.lang.Override
+    public int getServiceOverrideCount() {
+      return serviceOverride_.size();
+    }
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride getServiceOverride(int index) {
+      return serviceOverride_.get(index);
+    }
+    /**
+     * <pre>
+     * Requested service versions for creation.
+     * </pre>
+     *
+     * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder getServiceOverrideOrBuilder(
+        int index) {
+      return serviceOverride_.get(index);
+    }
+
+    public static final int CONFIGURATIONOVERRIDES_FIELD_NUMBER = 12;
+    private static final class ConfigurationOverridesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CreateDatalakeRequest_ConfigurationOverridesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> configurationOverrides_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetConfigurationOverrides() {
+      if (configurationOverrides_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ConfigurationOverridesDefaultEntryHolder.defaultEntry);
+      }
+      return configurationOverrides_;
+    }
+    public int getConfigurationOverridesCount() {
+      return internalGetConfigurationOverrides().getMap().size();
+    }
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    @java.lang.Override
+    public boolean containsConfigurationOverrides(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetConfigurationOverrides().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getConfigurationOverridesMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getConfigurationOverrides() {
+      return getConfigurationOverridesMap();
+    }
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getConfigurationOverridesMap() {
+      return internalGetConfigurationOverrides().getMap();
+    }
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getConfigurationOverridesOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigurationOverrides().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Requested Configuration Overrides
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getConfigurationOverridesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetConfigurationOverrides().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int EXTERNALLIFTIECLUSTERCRN_FIELD_NUMBER = 13;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object externalLiftieClusterCrn_ = "";
+    /**
+     * <pre>
+     * Crn of the external liftie cluster to use for creation
+     * </pre>
+     *
+     * <code>optional string externalLiftieClusterCrn = 13;</code>
+     * @return Whether the externalLiftieClusterCrn field is set.
+     */
+    @java.lang.Override
+    public boolean hasExternalLiftieClusterCrn() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <pre>
+     * Crn of the external liftie cluster to use for creation
+     * </pre>
+     *
+     * <code>optional string externalLiftieClusterCrn = 13;</code>
+     * @return The externalLiftieClusterCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getExternalLiftieClusterCrn() {
+      java.lang.Object ref = externalLiftieClusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        externalLiftieClusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Crn of the external liftie cluster to use for creation
+     * </pre>
+     *
+     * <code>optional string externalLiftieClusterCrn = 13;</code>
+     * @return The bytes for externalLiftieClusterCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getExternalLiftieClusterCrnBytes() {
+      java.lang.Object ref = externalLiftieClusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        externalLiftieClusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDPLATFORM_FIELD_NUMBER = 14;
+    private int cloudPlatform_ = 0;
+    /**
+     * <pre>
+     * The type of Cloud Platform
+     * </pre>
+     *
+     * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+     * @return The enum numeric value on the wire for cloudPlatform.
+     */
+    @java.lang.Override public int getCloudPlatformValue() {
+      return cloudPlatform_;
+    }
+    /**
+     * <pre>
+     * The type of Cloud Platform
+     * </pre>
+     *
+     * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+     * @return The cloudPlatform.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value getCloudPlatform() {
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value.forNumber(cloudPlatform_);
+      return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int PROFILES_FIELD_NUMBER = 15;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.LazyStringArrayList profiles_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @return A list containing the profiles.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getProfilesList() {
+      return profiles_;
+    }
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @return The count of profiles.
+     */
+    public int getProfilesCount() {
+      return profiles_.size();
+    }
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @param index The index of the element to return.
+     * @return The profiles at the given index.
+     */
+    public java.lang.String getProfiles(int index) {
+      return profiles_.get(index);
+    }
+    /**
+     * <pre>
+     * The profiles to be used for the Cluster
+     * </pre>
+     *
+     * <code>repeated string profiles = 15;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the profiles at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getProfilesBytes(int index) {
+      return profiles_.getByteString(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -14323,6 +15351,24 @@ java.lang.String defaultValue) {
       }
       if (((bitField0_ & 0x00000020) != 0)) {
         output.writeMessage(10, getAwsConfiguration());
+      }
+      for (int i = 0; i < serviceOverride_.size(); i++) {
+        output.writeMessage(11, serviceOverride_.get(i));
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetConfigurationOverrides(),
+          ConfigurationOverridesDefaultEntryHolder.defaultEntry,
+          12);
+      if (((bitField0_ & 0x00000040) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 13, externalLiftieClusterCrn_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value.AWS.getNumber()) {
+        output.writeEnum(14, cloudPlatform_);
+      }
+      for (int i = 0; i < profiles_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 15, profiles_.getRaw(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -14373,6 +15419,35 @@ java.lang.String defaultValue) {
       if (((bitField0_ & 0x00000020) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, getAwsConfiguration());
+      }
+      for (int i = 0; i < serviceOverride_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, serviceOverride_.get(i));
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetConfigurationOverrides().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        configurationOverrides__ = ConfigurationOverridesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(12, configurationOverrides__);
+      }
+      if (((bitField0_ & 0x00000040) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, externalLiftieClusterCrn_);
+      }
+      if (cloudPlatform_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value.AWS.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(14, cloudPlatform_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < profiles_.size(); i++) {
+          dataSize += computeStringSizeNoTag(profiles_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getProfilesList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -14426,6 +15501,18 @@ java.lang.String defaultValue) {
         if (!getAwsConfiguration()
             .equals(other.getAwsConfiguration())) return false;
       }
+      if (!getServiceOverrideList()
+          .equals(other.getServiceOverrideList())) return false;
+      if (!internalGetConfigurationOverrides().equals(
+          other.internalGetConfigurationOverrides())) return false;
+      if (hasExternalLiftieClusterCrn() != other.hasExternalLiftieClusterCrn()) return false;
+      if (hasExternalLiftieClusterCrn()) {
+        if (!getExternalLiftieClusterCrn()
+            .equals(other.getExternalLiftieClusterCrn())) return false;
+      }
+      if (cloudPlatform_ != other.cloudPlatform_) return false;
+      if (!getProfilesList()
+          .equals(other.getProfilesList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -14472,6 +15559,24 @@ java.lang.String defaultValue) {
       if (hasAwsConfiguration()) {
         hash = (37 * hash) + AWSCONFIGURATION_FIELD_NUMBER;
         hash = (53 * hash) + getAwsConfiguration().hashCode();
+      }
+      if (getServiceOverrideCount() > 0) {
+        hash = (37 * hash) + SERVICEOVERRIDE_FIELD_NUMBER;
+        hash = (53 * hash) + getServiceOverrideList().hashCode();
+      }
+      if (!internalGetConfigurationOverrides().getMap().isEmpty()) {
+        hash = (37 * hash) + CONFIGURATIONOVERRIDES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetConfigurationOverrides().hashCode();
+      }
+      if (hasExternalLiftieClusterCrn()) {
+        hash = (37 * hash) + EXTERNALLIFTIECLUSTERCRN_FIELD_NUMBER;
+        hash = (53 * hash) + getExternalLiftieClusterCrn().hashCode();
+      }
+      hash = (37 * hash) + CLOUDPLATFORM_FIELD_NUMBER;
+      hash = (53 * hash) + cloudPlatform_;
+      if (getProfilesCount() > 0) {
+        hash = (37 * hash) + PROFILES_FIELD_NUMBER;
+        hash = (53 * hash) + getProfilesList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -14592,6 +15697,8 @@ java.lang.String defaultValue) {
         switch (number) {
           case 4:
             return internalGetTags();
+          case 12:
+            return internalGetConfigurationOverrides();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -14603,6 +15710,8 @@ java.lang.String defaultValue) {
         switch (number) {
           case 4:
             return internalGetMutableTags();
+          case 12:
+            return internalGetMutableConfigurationOverrides();
           default:
             throw new RuntimeException(
                 "Invalid map field number: " + number);
@@ -14630,6 +15739,7 @@ java.lang.String defaultValue) {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
           getAwsConfigurationFieldBuilder();
+          getServiceOverrideFieldBuilder();
         }
       }
       @java.lang.Override
@@ -14650,6 +15760,18 @@ java.lang.String defaultValue) {
           awsConfigurationBuilder_.dispose();
           awsConfigurationBuilder_ = null;
         }
+        if (serviceOverrideBuilder_ == null) {
+          serviceOverride_ = java.util.Collections.emptyList();
+        } else {
+          serviceOverride_ = null;
+          serviceOverrideBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000400);
+        internalGetMutableConfigurationOverrides().clear();
+        externalLiftieClusterCrn_ = "";
+        cloudPlatform_ = 0;
+        profiles_ =
+            com.google.protobuf.LazyStringArrayList.emptyList();
         return this;
       }
 
@@ -14676,9 +15798,22 @@ java.lang.String defaultValue) {
       @java.lang.Override
       public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest buildPartial() {
         com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest(this);
+        buildPartialRepeatedFields(result);
         if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest result) {
+        if (serviceOverrideBuilder_ == null) {
+          if (((bitField0_ & 0x00000400) != 0)) {
+            serviceOverride_ = java.util.Collections.unmodifiableList(serviceOverride_);
+            bitField0_ = (bitField0_ & ~0x00000400);
+          }
+          result.serviceOverride_ = serviceOverride_;
+        } else {
+          result.serviceOverride_ = serviceOverrideBuilder_.build();
+        }
       }
 
       private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest result) {
@@ -14722,6 +15857,21 @@ java.lang.String defaultValue) {
               ? awsConfiguration_
               : awsConfigurationBuilder_.build();
           to_bitField0_ |= 0x00000020;
+        }
+        if (((from_bitField0_ & 0x00000800) != 0)) {
+          result.configurationOverrides_ = internalGetConfigurationOverrides();
+          result.configurationOverrides_.makeImmutable();
+        }
+        if (((from_bitField0_ & 0x00001000) != 0)) {
+          result.externalLiftieClusterCrn_ = externalLiftieClusterCrn_;
+          to_bitField0_ |= 0x00000040;
+        }
+        if (((from_bitField0_ & 0x00002000) != 0)) {
+          result.cloudPlatform_ = cloudPlatform_;
+        }
+        if (((from_bitField0_ & 0x00004000) != 0)) {
+          profiles_.makeImmutable();
+          result.profiles_ = profiles_;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -14810,6 +15960,53 @@ java.lang.String defaultValue) {
         if (other.hasAwsConfiguration()) {
           mergeAwsConfiguration(other.getAwsConfiguration());
         }
+        if (serviceOverrideBuilder_ == null) {
+          if (!other.serviceOverride_.isEmpty()) {
+            if (serviceOverride_.isEmpty()) {
+              serviceOverride_ = other.serviceOverride_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+            } else {
+              ensureServiceOverrideIsMutable();
+              serviceOverride_.addAll(other.serviceOverride_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.serviceOverride_.isEmpty()) {
+            if (serviceOverrideBuilder_.isEmpty()) {
+              serviceOverrideBuilder_.dispose();
+              serviceOverrideBuilder_ = null;
+              serviceOverride_ = other.serviceOverride_;
+              bitField0_ = (bitField0_ & ~0x00000400);
+              serviceOverrideBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getServiceOverrideFieldBuilder() : null;
+            } else {
+              serviceOverrideBuilder_.addAllMessages(other.serviceOverride_);
+            }
+          }
+        }
+        internalGetMutableConfigurationOverrides().mergeFrom(
+            other.internalGetConfigurationOverrides());
+        bitField0_ |= 0x00000800;
+        if (other.hasExternalLiftieClusterCrn()) {
+          externalLiftieClusterCrn_ = other.externalLiftieClusterCrn_;
+          bitField0_ |= 0x00001000;
+          onChanged();
+        }
+        if (other.cloudPlatform_ != 0) {
+          setCloudPlatformValue(other.getCloudPlatformValue());
+        }
+        if (!other.profiles_.isEmpty()) {
+          if (profiles_.isEmpty()) {
+            profiles_ = other.profiles_;
+            bitField0_ |= 0x00004000;
+          } else {
+            ensureProfilesIsMutable();
+            profiles_.addAll(other.profiles_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -14892,6 +16089,44 @@ java.lang.String defaultValue) {
                 bitField0_ |= 0x00000200;
                 break;
               } // case 82
+              case 90: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.parser(),
+                        extensionRegistry);
+                if (serviceOverrideBuilder_ == null) {
+                  ensureServiceOverrideIsMutable();
+                  serviceOverride_.add(m);
+                } else {
+                  serviceOverrideBuilder_.addMessage(m);
+                }
+                break;
+              } // case 90
+              case 98: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                configurationOverrides__ = input.readMessage(
+                    ConfigurationOverridesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableConfigurationOverrides().getMutableMap().put(
+                    configurationOverrides__.getKey(), configurationOverrides__.getValue());
+                bitField0_ |= 0x00000800;
+                break;
+              } // case 98
+              case 106: {
+                externalLiftieClusterCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00001000;
+                break;
+              } // case 106
+              case 112: {
+                cloudPlatform_ = input.readEnum();
+                bitField0_ |= 0x00002000;
+                break;
+              } // case 112
+              case 122: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureProfilesIsMutable();
+                profiles_.add(s);
+                break;
+              } // case 122
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -15897,6 +17132,796 @@ java.lang.String defaultValue) {
           awsConfiguration_ = null;
         }
         return awsConfigurationBuilder_;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride> serviceOverride_ =
+        java.util.Collections.emptyList();
+      private void ensureServiceOverrideIsMutable() {
+        if (!((bitField0_ & 0x00000400) != 0)) {
+          serviceOverride_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride>(serviceOverride_);
+          bitField0_ |= 0x00000400;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder> serviceOverrideBuilder_;
+
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride> getServiceOverrideList() {
+        if (serviceOverrideBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(serviceOverride_);
+        } else {
+          return serviceOverrideBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public int getServiceOverrideCount() {
+        if (serviceOverrideBuilder_ == null) {
+          return serviceOverride_.size();
+        } else {
+          return serviceOverrideBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride getServiceOverride(int index) {
+        if (serviceOverrideBuilder_ == null) {
+          return serviceOverride_.get(index);
+        } else {
+          return serviceOverrideBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder setServiceOverride(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride value) {
+        if (serviceOverrideBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.set(index, value);
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder setServiceOverride(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder builderForValue) {
+        if (serviceOverrideBuilder_ == null) {
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder addServiceOverride(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride value) {
+        if (serviceOverrideBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.add(value);
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder addServiceOverride(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride value) {
+        if (serviceOverrideBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.add(index, value);
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder addServiceOverride(
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder builderForValue) {
+        if (serviceOverrideBuilder_ == null) {
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.add(builderForValue.build());
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder addServiceOverride(
+          int index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder builderForValue) {
+        if (serviceOverrideBuilder_ == null) {
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder addAllServiceOverride(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride> values) {
+        if (serviceOverrideBuilder_ == null) {
+          ensureServiceOverrideIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, serviceOverride_);
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder clearServiceOverride() {
+        if (serviceOverrideBuilder_ == null) {
+          serviceOverride_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000400);
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public Builder removeServiceOverride(int index) {
+        if (serviceOverrideBuilder_ == null) {
+          ensureServiceOverrideIsMutable();
+          serviceOverride_.remove(index);
+          onChanged();
+        } else {
+          serviceOverrideBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder getServiceOverrideBuilder(
+          int index) {
+        return getServiceOverrideFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder getServiceOverrideOrBuilder(
+          int index) {
+        if (serviceOverrideBuilder_ == null) {
+          return serviceOverride_.get(index);  } else {
+          return serviceOverrideBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder> 
+           getServiceOverrideOrBuilderList() {
+        if (serviceOverrideBuilder_ != null) {
+          return serviceOverrideBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(serviceOverride_);
+        }
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder addServiceOverrideBuilder() {
+        return getServiceOverrideFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder addServiceOverrideBuilder(
+          int index) {
+        return getServiceOverrideFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Requested service versions for creation.
+       * </pre>
+       *
+       * <code>repeated .sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder> 
+           getServiceOverrideBuilderList() {
+        return getServiceOverrideFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder> 
+          getServiceOverrideFieldBuilder() {
+        if (serviceOverrideBuilder_ == null) {
+          serviceOverrideBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverride.Builder, com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.DeploymentVersionOverrideOrBuilder>(
+                  serviceOverride_,
+                  ((bitField0_ & 0x00000400) != 0),
+                  getParentForChildren(),
+                  isClean());
+          serviceOverride_ = null;
+        }
+        return serviceOverrideBuilder_;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> configurationOverrides_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetConfigurationOverrides() {
+        if (configurationOverrides_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              ConfigurationOverridesDefaultEntryHolder.defaultEntry);
+        }
+        return configurationOverrides_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetMutableConfigurationOverrides() {
+        if (configurationOverrides_ == null) {
+          configurationOverrides_ = com.google.protobuf.MapField.newMapField(
+              ConfigurationOverridesDefaultEntryHolder.defaultEntry);
+        }
+        if (!configurationOverrides_.isMutable()) {
+          configurationOverrides_ = configurationOverrides_.copy();
+        }
+        bitField0_ |= 0x00000800;
+        onChanged();
+        return configurationOverrides_;
+      }
+      public int getConfigurationOverridesCount() {
+        return internalGetConfigurationOverrides().getMap().size();
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      @java.lang.Override
+      public boolean containsConfigurationOverrides(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetConfigurationOverrides().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getConfigurationOverridesMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getConfigurationOverrides() {
+        return getConfigurationOverridesMap();
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, java.lang.String> getConfigurationOverridesMap() {
+        return internalGetConfigurationOverrides().getMap();
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+java.lang.String getConfigurationOverridesOrDefault(
+          java.lang.String key,
+          /* nullable */
+java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetConfigurationOverrides().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      @java.lang.Override
+      public java.lang.String getConfigurationOverridesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetConfigurationOverrides().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+      public Builder clearConfigurationOverrides() {
+        bitField0_ = (bitField0_ & ~0x00000800);
+        internalGetMutableConfigurationOverrides().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      public Builder removeConfigurationOverrides(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableConfigurationOverrides().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+          getMutableConfigurationOverrides() {
+        bitField0_ |= 0x00000800;
+        return internalGetMutableConfigurationOverrides().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      public Builder putConfigurationOverrides(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableConfigurationOverrides().getMutableMap()
+            .put(key, value);
+        bitField0_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested Configuration Overrides
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; configurationOverrides = 12;</code>
+       */
+      public Builder putAllConfigurationOverrides(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableConfigurationOverrides().getMutableMap()
+            .putAll(values);
+        bitField0_ |= 0x00000800;
+        return this;
+      }
+
+      private java.lang.Object externalLiftieClusterCrn_ = "";
+      /**
+       * <pre>
+       * Crn of the external liftie cluster to use for creation
+       * </pre>
+       *
+       * <code>optional string externalLiftieClusterCrn = 13;</code>
+       * @return Whether the externalLiftieClusterCrn field is set.
+       */
+      public boolean hasExternalLiftieClusterCrn() {
+        return ((bitField0_ & 0x00001000) != 0);
+      }
+      /**
+       * <pre>
+       * Crn of the external liftie cluster to use for creation
+       * </pre>
+       *
+       * <code>optional string externalLiftieClusterCrn = 13;</code>
+       * @return The externalLiftieClusterCrn.
+       */
+      public java.lang.String getExternalLiftieClusterCrn() {
+        java.lang.Object ref = externalLiftieClusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          externalLiftieClusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Crn of the external liftie cluster to use for creation
+       * </pre>
+       *
+       * <code>optional string externalLiftieClusterCrn = 13;</code>
+       * @return The bytes for externalLiftieClusterCrn.
+       */
+      public com.google.protobuf.ByteString
+          getExternalLiftieClusterCrnBytes() {
+        java.lang.Object ref = externalLiftieClusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          externalLiftieClusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Crn of the external liftie cluster to use for creation
+       * </pre>
+       *
+       * <code>optional string externalLiftieClusterCrn = 13;</code>
+       * @param value The externalLiftieClusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExternalLiftieClusterCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        externalLiftieClusterCrn_ = value;
+        bitField0_ |= 0x00001000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Crn of the external liftie cluster to use for creation
+       * </pre>
+       *
+       * <code>optional string externalLiftieClusterCrn = 13;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearExternalLiftieClusterCrn() {
+        externalLiftieClusterCrn_ = getDefaultInstance().getExternalLiftieClusterCrn();
+        bitField0_ = (bitField0_ & ~0x00001000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Crn of the external liftie cluster to use for creation
+       * </pre>
+       *
+       * <code>optional string externalLiftieClusterCrn = 13;</code>
+       * @param value The bytes for externalLiftieClusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExternalLiftieClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        externalLiftieClusterCrn_ = value;
+        bitField0_ |= 0x00001000;
+        onChanged();
+        return this;
+      }
+
+      private int cloudPlatform_ = 0;
+      /**
+       * <pre>
+       * The type of Cloud Platform
+       * </pre>
+       *
+       * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+       * @return The enum numeric value on the wire for cloudPlatform.
+       */
+      @java.lang.Override public int getCloudPlatformValue() {
+        return cloudPlatform_;
+      }
+      /**
+       * <pre>
+       * The type of Cloud Platform
+       * </pre>
+       *
+       * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+       * @param value The enum numeric value on the wire for cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatformValue(int value) {
+        cloudPlatform_ = value;
+        bitField0_ |= 0x00002000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of Cloud Platform
+       * </pre>
+       *
+       * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+       * @return The cloudPlatform.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value getCloudPlatform() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value.forNumber(cloudPlatform_);
+        return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The type of Cloud Platform
+       * </pre>
+       *
+       * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+       * @param value The cloudPlatform to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudPlatform(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00002000;
+        cloudPlatform_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of Cloud Platform
+       * </pre>
+       *
+       * <code>.cdlcrud.CloudPlatformType.Value cloudPlatform = 14;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudPlatform() {
+        bitField0_ = (bitField0_ & ~0x00002000);
+        cloudPlatform_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.LazyStringArrayList profiles_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+      private void ensureProfilesIsMutable() {
+        if (!profiles_.isModifiable()) {
+          profiles_ = new com.google.protobuf.LazyStringArrayList(profiles_);
+        }
+        bitField0_ |= 0x00004000;
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @return A list containing the profiles.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getProfilesList() {
+        profiles_.makeImmutable();
+        return profiles_;
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @return The count of profiles.
+       */
+      public int getProfilesCount() {
+        return profiles_.size();
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @param index The index of the element to return.
+       * @return The profiles at the given index.
+       */
+      public java.lang.String getProfiles(int index) {
+        return profiles_.get(index);
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the profiles at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getProfilesBytes(int index) {
+        return profiles_.getByteString(index);
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @param index The index to set the value at.
+       * @param value The profiles to set.
+       * @return This builder for chaining.
+       */
+      public Builder setProfiles(
+          int index, java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureProfilesIsMutable();
+        profiles_.set(index, value);
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @param value The profiles to add.
+       * @return This builder for chaining.
+       */
+      public Builder addProfiles(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        ensureProfilesIsMutable();
+        profiles_.add(value);
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @param values The profiles to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllProfiles(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureProfilesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, profiles_);
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearProfiles() {
+        profiles_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
+        bitField0_ = (bitField0_ & ~0x00004000);;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The profiles to be used for the Cluster
+       * </pre>
+       *
+       * <code>repeated string profiles = 15;</code>
+       * @param value The bytes of the profiles to add.
+       * @return This builder for chaining.
+       */
+      public Builder addProfilesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        ensureProfilesIsMutable();
+        profiles_.add(value);
+        bitField0_ |= 0x00004000;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -17973,6 +19998,16 @@ java.lang.String defaultValue) {
      */
     com.google.protobuf.ByteString
         getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Force deletion or not
+     * </pre>
+     *
+     * <code>bool force = 2;</code>
+     * @return The force.
+     */
+    boolean getForce();
   }
   /**
    * <pre>
@@ -18061,6 +20096,21 @@ java.lang.String defaultValue) {
       }
     }
 
+    public static final int FORCE_FIELD_NUMBER = 2;
+    private boolean force_ = false;
+    /**
+     * <pre>
+     * Force deletion or not
+     * </pre>
+     *
+     * <code>bool force = 2;</code>
+     * @return The force.
+     */
+    @java.lang.Override
+    public boolean getForce() {
+      return force_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -18078,6 +20128,9 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
       }
+      if (force_ != false) {
+        output.writeBool(2, force_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -18089,6 +20142,10 @@ java.lang.String defaultValue) {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (force_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, force_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -18107,6 +20164,8 @@ java.lang.String defaultValue) {
 
       if (!getDatalake()
           .equals(other.getDatalake())) return false;
+      if (getForce()
+          != other.getForce()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -18120,6 +20179,9 @@ java.lang.String defaultValue) {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
       hash = (53 * hash) + getDatalake().hashCode();
+      hash = (37 * hash) + FORCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getForce());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -18256,6 +20318,7 @@ java.lang.String defaultValue) {
         super.clear();
         bitField0_ = 0;
         datalake_ = "";
+        force_ = false;
         return this;
       }
 
@@ -18291,6 +20354,9 @@ java.lang.String defaultValue) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.datalake_ = datalake_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.force_ = force_;
         }
       }
 
@@ -18343,6 +20409,9 @@ java.lang.String defaultValue) {
           bitField0_ |= 0x00000001;
           onChanged();
         }
+        if (other.getForce() != false) {
+          setForce(other.getForce());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -18374,6 +20443,11 @@ java.lang.String defaultValue) {
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 16: {
+                force_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -18479,6 +20553,50 @@ java.lang.String defaultValue) {
         checkByteStringIsUtf8(value);
         datalake_ = value;
         bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private boolean force_ ;
+      /**
+       * <pre>
+       * Force deletion or not
+       * </pre>
+       *
+       * <code>bool force = 2;</code>
+       * @return The force.
+       */
+      @java.lang.Override
+      public boolean getForce() {
+        return force_;
+      }
+      /**
+       * <pre>
+       * Force deletion or not
+       * </pre>
+       *
+       * <code>bool force = 2;</code>
+       * @param value The force to set.
+       * @return This builder for chaining.
+       */
+      public Builder setForce(boolean value) {
+
+        force_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Force deletion or not
+       * </pre>
+       *
+       * <code>bool force = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearForce() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        force_ = false;
         onChanged();
         return this;
       }
@@ -20602,6 +22720,86 @@ java.lang.String defaultValue);
      * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
      */
     com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder getProductVersionOrBuilder();
+
+    /**
+     * <pre>
+     * Environment Name
+     * </pre>
+     *
+     * <code>string environmentName = 21;</code>
+     * @return The environmentName.
+     */
+    java.lang.String getEnvironmentName();
+    /**
+     * <pre>
+     * Environment Name
+     * </pre>
+     *
+     * <code>string environmentName = 21;</code>
+     * @return The bytes for environmentName.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentNameBytes();
+
+    /**
+     * <pre>
+     * Liftie Cluster id
+     * </pre>
+     *
+     * <code>string cluster = 22;</code>
+     * @return The cluster.
+     */
+    java.lang.String getCluster();
+    /**
+     * <pre>
+     * Liftie Cluster id
+     * </pre>
+     *
+     * <code>string cluster = 22;</code>
+     * @return The bytes for cluster.
+     */
+    com.google.protobuf.ByteString
+        getClusterBytes();
+
+    /**
+     * <pre>
+     * Credentials used to create the cdl
+     * </pre>
+     *
+     * <code>string credentialName = 23;</code>
+     * @return The credentialName.
+     */
+    java.lang.String getCredentialName();
+    /**
+     * <pre>
+     * Credentials used to create the cdl
+     * </pre>
+     *
+     * <code>string credentialName = 23;</code>
+     * @return The bytes for credentialName.
+     */
+    com.google.protobuf.ByteString
+        getCredentialNameBytes();
+
+    /**
+     * <pre>
+     * Path to the storage location
+     * </pre>
+     *
+     * <code>string cloudStorageBaseLocation = 24;</code>
+     * @return The cloudStorageBaseLocation.
+     */
+    java.lang.String getCloudStorageBaseLocation();
+    /**
+     * <pre>
+     * Path to the storage location
+     * </pre>
+     *
+     * <code>string cloudStorageBaseLocation = 24;</code>
+     * @return The bytes for cloudStorageBaseLocation.
+     */
+    com.google.protobuf.ByteString
+        getCloudStorageBaseLocationBytes();
   }
   /**
    * <pre>
@@ -20634,6 +22832,10 @@ java.lang.String defaultValue);
       statusReason_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       region_ = "";
+      environmentName_ = "";
+      cluster_ = "";
+      credentialName_ = "";
+      cloudStorageBaseLocation_ = "";
     }
 
     @java.lang.Override
@@ -21547,6 +23749,194 @@ java.lang.String defaultValue) {
       return productVersion_ == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.getDefaultInstance() : productVersion_;
     }
 
+    public static final int ENVIRONMENTNAME_FIELD_NUMBER = 21;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object environmentName_ = "";
+    /**
+     * <pre>
+     * Environment Name
+     * </pre>
+     *
+     * <code>string environmentName = 21;</code>
+     * @return The environmentName.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentName() {
+      java.lang.Object ref = environmentName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Environment Name
+     * </pre>
+     *
+     * <code>string environmentName = 21;</code>
+     * @return The bytes for environmentName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentNameBytes() {
+      java.lang.Object ref = environmentName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTER_FIELD_NUMBER = 22;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cluster_ = "";
+    /**
+     * <pre>
+     * Liftie Cluster id
+     * </pre>
+     *
+     * <code>string cluster = 22;</code>
+     * @return The cluster.
+     */
+    @java.lang.Override
+    public java.lang.String getCluster() {
+      java.lang.Object ref = cluster_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cluster_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Liftie Cluster id
+     * </pre>
+     *
+     * <code>string cluster = 22;</code>
+     * @return The bytes for cluster.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterBytes() {
+      java.lang.Object ref = cluster_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cluster_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREDENTIALNAME_FIELD_NUMBER = 23;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object credentialName_ = "";
+    /**
+     * <pre>
+     * Credentials used to create the cdl
+     * </pre>
+     *
+     * <code>string credentialName = 23;</code>
+     * @return The credentialName.
+     */
+    @java.lang.Override
+    public java.lang.String getCredentialName() {
+      java.lang.Object ref = credentialName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        credentialName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Credentials used to create the cdl
+     * </pre>
+     *
+     * <code>string credentialName = 23;</code>
+     * @return The bytes for credentialName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCredentialNameBytes() {
+      java.lang.Object ref = credentialName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        credentialName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDSTORAGEBASELOCATION_FIELD_NUMBER = 24;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cloudStorageBaseLocation_ = "";
+    /**
+     * <pre>
+     * Path to the storage location
+     * </pre>
+     *
+     * <code>string cloudStorageBaseLocation = 24;</code>
+     * @return The cloudStorageBaseLocation.
+     */
+    @java.lang.Override
+    public java.lang.String getCloudStorageBaseLocation() {
+      java.lang.Object ref = cloudStorageBaseLocation_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cloudStorageBaseLocation_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Path to the storage location
+     * </pre>
+     *
+     * <code>string cloudStorageBaseLocation = 24;</code>
+     * @return The bytes for cloudStorageBaseLocation.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCloudStorageBaseLocationBytes() {
+      java.lang.Object ref = cloudStorageBaseLocation_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cloudStorageBaseLocation_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -21623,6 +24013,18 @@ java.lang.String defaultValue) {
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeMessage(20, getProductVersion());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 21, environmentName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 22, cluster_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 23, credentialName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudStorageBaseLocation_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 24, cloudStorageBaseLocation_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -21714,6 +24116,18 @@ java.lang.String defaultValue) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(20, getProductVersion());
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(21, environmentName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cluster_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, cluster_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, credentialName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudStorageBaseLocation_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(24, cloudStorageBaseLocation_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -21777,6 +24191,14 @@ java.lang.String defaultValue) {
         if (!getProductVersion()
             .equals(other.getProductVersion())) return false;
       }
+      if (!getEnvironmentName()
+          .equals(other.getEnvironmentName())) return false;
+      if (!getCluster()
+          .equals(other.getCluster())) return false;
+      if (!getCredentialName()
+          .equals(other.getCredentialName())) return false;
+      if (!getCloudStorageBaseLocation()
+          .equals(other.getCloudStorageBaseLocation())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -21845,6 +24267,14 @@ java.lang.String defaultValue) {
         hash = (37 * hash) + PRODUCTVERSION_FIELD_NUMBER;
         hash = (53 * hash) + getProductVersion().hashCode();
       }
+      hash = (37 * hash) + ENVIRONMENTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentName().hashCode();
+      hash = (37 * hash) + CLUSTER_FIELD_NUMBER;
+      hash = (53 * hash) + getCluster().hashCode();
+      hash = (37 * hash) + CREDENTIALNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getCredentialName().hashCode();
+      hash = (37 * hash) + CLOUDSTORAGEBASELOCATION_FIELD_NUMBER;
+      hash = (53 * hash) + getCloudStorageBaseLocation().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -22057,6 +24487,10 @@ java.lang.String defaultValue) {
           productVersionBuilder_.dispose();
           productVersionBuilder_ = null;
         }
+        environmentName_ = "";
+        cluster_ = "";
+        credentialName_ = "";
+        cloudStorageBaseLocation_ = "";
         return this;
       }
 
@@ -22177,6 +24611,18 @@ java.lang.String defaultValue) {
               ? productVersion_
               : productVersionBuilder_.build();
           to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00100000) != 0)) {
+          result.environmentName_ = environmentName_;
+        }
+        if (((from_bitField0_ & 0x00200000) != 0)) {
+          result.cluster_ = cluster_;
+        }
+        if (((from_bitField0_ & 0x00400000) != 0)) {
+          result.credentialName_ = credentialName_;
+        }
+        if (((from_bitField0_ & 0x00800000) != 0)) {
+          result.cloudStorageBaseLocation_ = cloudStorageBaseLocation_;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -22356,6 +24802,26 @@ java.lang.String defaultValue) {
         if (other.hasProductVersion()) {
           mergeProductVersion(other.getProductVersion());
         }
+        if (!other.getEnvironmentName().isEmpty()) {
+          environmentName_ = other.environmentName_;
+          bitField0_ |= 0x00100000;
+          onChanged();
+        }
+        if (!other.getCluster().isEmpty()) {
+          cluster_ = other.cluster_;
+          bitField0_ |= 0x00200000;
+          onChanged();
+        }
+        if (!other.getCredentialName().isEmpty()) {
+          credentialName_ = other.credentialName_;
+          bitField0_ |= 0x00400000;
+          onChanged();
+        }
+        if (!other.getCloudStorageBaseLocation().isEmpty()) {
+          cloudStorageBaseLocation_ = other.cloudStorageBaseLocation_;
+          bitField0_ |= 0x00800000;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -22509,6 +24975,26 @@ java.lang.String defaultValue) {
                 bitField0_ |= 0x00080000;
                 break;
               } // case 162
+              case 170: {
+                environmentName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00100000;
+                break;
+              } // case 170
+              case 178: {
+                cluster_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00200000;
+                break;
+              } // case 178
+              case 186: {
+                credentialName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00400000;
+                break;
+              } // case 186
+              case 194: {
+                cloudStorageBaseLocation_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00800000;
+                break;
+              } // case 194
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -24954,6 +27440,374 @@ java.lang.String defaultValue) {
           productVersion_ = null;
         }
         return productVersionBuilder_;
+      }
+
+      private java.lang.Object environmentName_ = "";
+      /**
+       * <pre>
+       * Environment Name
+       * </pre>
+       *
+       * <code>string environmentName = 21;</code>
+       * @return The environmentName.
+       */
+      public java.lang.String getEnvironmentName() {
+        java.lang.Object ref = environmentName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment Name
+       * </pre>
+       *
+       * <code>string environmentName = 21;</code>
+       * @return The bytes for environmentName.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentNameBytes() {
+        java.lang.Object ref = environmentName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment Name
+       * </pre>
+       *
+       * <code>string environmentName = 21;</code>
+       * @param value The environmentName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        environmentName_ = value;
+        bitField0_ |= 0x00100000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment Name
+       * </pre>
+       *
+       * <code>string environmentName = 21;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentName() {
+        environmentName_ = getDefaultInstance().getEnvironmentName();
+        bitField0_ = (bitField0_ & ~0x00100000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment Name
+       * </pre>
+       *
+       * <code>string environmentName = 21;</code>
+       * @param value The bytes for environmentName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        environmentName_ = value;
+        bitField0_ |= 0x00100000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cluster_ = "";
+      /**
+       * <pre>
+       * Liftie Cluster id
+       * </pre>
+       *
+       * <code>string cluster = 22;</code>
+       * @return The cluster.
+       */
+      public java.lang.String getCluster() {
+        java.lang.Object ref = cluster_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cluster_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Liftie Cluster id
+       * </pre>
+       *
+       * <code>string cluster = 22;</code>
+       * @return The bytes for cluster.
+       */
+      public com.google.protobuf.ByteString
+          getClusterBytes() {
+        java.lang.Object ref = cluster_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cluster_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Liftie Cluster id
+       * </pre>
+       *
+       * <code>string cluster = 22;</code>
+       * @param value The cluster to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCluster(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cluster_ = value;
+        bitField0_ |= 0x00200000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Liftie Cluster id
+       * </pre>
+       *
+       * <code>string cluster = 22;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCluster() {
+        cluster_ = getDefaultInstance().getCluster();
+        bitField0_ = (bitField0_ & ~0x00200000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Liftie Cluster id
+       * </pre>
+       *
+       * <code>string cluster = 22;</code>
+       * @param value The bytes for cluster to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cluster_ = value;
+        bitField0_ |= 0x00200000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object credentialName_ = "";
+      /**
+       * <pre>
+       * Credentials used to create the cdl
+       * </pre>
+       *
+       * <code>string credentialName = 23;</code>
+       * @return The credentialName.
+       */
+      public java.lang.String getCredentialName() {
+        java.lang.Object ref = credentialName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          credentialName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Credentials used to create the cdl
+       * </pre>
+       *
+       * <code>string credentialName = 23;</code>
+       * @return The bytes for credentialName.
+       */
+      public com.google.protobuf.ByteString
+          getCredentialNameBytes() {
+        java.lang.Object ref = credentialName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          credentialName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Credentials used to create the cdl
+       * </pre>
+       *
+       * <code>string credentialName = 23;</code>
+       * @param value The credentialName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        credentialName_ = value;
+        bitField0_ |= 0x00400000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Credentials used to create the cdl
+       * </pre>
+       *
+       * <code>string credentialName = 23;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCredentialName() {
+        credentialName_ = getDefaultInstance().getCredentialName();
+        bitField0_ = (bitField0_ & ~0x00400000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Credentials used to create the cdl
+       * </pre>
+       *
+       * <code>string credentialName = 23;</code>
+       * @param value The bytes for credentialName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCredentialNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        credentialName_ = value;
+        bitField0_ |= 0x00400000;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cloudStorageBaseLocation_ = "";
+      /**
+       * <pre>
+       * Path to the storage location
+       * </pre>
+       *
+       * <code>string cloudStorageBaseLocation = 24;</code>
+       * @return The cloudStorageBaseLocation.
+       */
+      public java.lang.String getCloudStorageBaseLocation() {
+        java.lang.Object ref = cloudStorageBaseLocation_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cloudStorageBaseLocation_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Path to the storage location
+       * </pre>
+       *
+       * <code>string cloudStorageBaseLocation = 24;</code>
+       * @return The bytes for cloudStorageBaseLocation.
+       */
+      public com.google.protobuf.ByteString
+          getCloudStorageBaseLocationBytes() {
+        java.lang.Object ref = cloudStorageBaseLocation_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cloudStorageBaseLocation_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Path to the storage location
+       * </pre>
+       *
+       * <code>string cloudStorageBaseLocation = 24;</code>
+       * @param value The cloudStorageBaseLocation to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudStorageBaseLocation(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cloudStorageBaseLocation_ = value;
+        bitField0_ |= 0x00800000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Path to the storage location
+       * </pre>
+       *
+       * <code>string cloudStorageBaseLocation = 24;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloudStorageBaseLocation() {
+        cloudStorageBaseLocation_ = getDefaultInstance().getCloudStorageBaseLocation();
+        bitField0_ = (bitField0_ & ~0x00800000);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Path to the storage location
+       * </pre>
+       *
+       * <code>string cloudStorageBaseLocation = 24;</code>
+       * @param value The bytes for cloudStorageBaseLocation to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloudStorageBaseLocationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cloudStorageBaseLocation_ = value;
+        bitField0_ |= 0x00800000;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -30265,6 +33119,26 @@ java.lang.String defaultValue) {
      */
     com.google.protobuf.ByteString
         getStorageBucketLocationBytes();
+
+    /**
+     * <pre>
+     *IDBroker instance profile
+     * </pre>
+     *
+     * <code>string idbrokerInstanceProfile = 2;</code>
+     * @return The idbrokerInstanceProfile.
+     */
+    java.lang.String getIdbrokerInstanceProfile();
+    /**
+     * <pre>
+     *IDBroker instance profile
+     * </pre>
+     *
+     * <code>string idbrokerInstanceProfile = 2;</code>
+     * @return The bytes for idbrokerInstanceProfile.
+     */
+    com.google.protobuf.ByteString
+        getIdbrokerInstanceProfileBytes();
   }
   /**
    * <pre>
@@ -30284,6 +33158,7 @@ java.lang.String defaultValue) {
     }
     private AwsConfiguration() {
       storageBucketLocation_ = "";
+      idbrokerInstanceProfile_ = "";
     }
 
     @java.lang.Override
@@ -30353,6 +33228,53 @@ java.lang.String defaultValue) {
       }
     }
 
+    public static final int IDBROKERINSTANCEPROFILE_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object idbrokerInstanceProfile_ = "";
+    /**
+     * <pre>
+     *IDBroker instance profile
+     * </pre>
+     *
+     * <code>string idbrokerInstanceProfile = 2;</code>
+     * @return The idbrokerInstanceProfile.
+     */
+    @java.lang.Override
+    public java.lang.String getIdbrokerInstanceProfile() {
+      java.lang.Object ref = idbrokerInstanceProfile_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        idbrokerInstanceProfile_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *IDBroker instance profile
+     * </pre>
+     *
+     * <code>string idbrokerInstanceProfile = 2;</code>
+     * @return The bytes for idbrokerInstanceProfile.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdbrokerInstanceProfileBytes() {
+      java.lang.Object ref = idbrokerInstanceProfile_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        idbrokerInstanceProfile_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -30370,6 +33292,9 @@ java.lang.String defaultValue) {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageBucketLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, storageBucketLocation_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idbrokerInstanceProfile_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, idbrokerInstanceProfile_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -30381,6 +33306,9 @@ java.lang.String defaultValue) {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageBucketLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, storageBucketLocation_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idbrokerInstanceProfile_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, idbrokerInstanceProfile_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -30399,6 +33327,8 @@ java.lang.String defaultValue) {
 
       if (!getStorageBucketLocation()
           .equals(other.getStorageBucketLocation())) return false;
+      if (!getIdbrokerInstanceProfile()
+          .equals(other.getIdbrokerInstanceProfile())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -30412,6 +33342,8 @@ java.lang.String defaultValue) {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + STORAGEBUCKETLOCATION_FIELD_NUMBER;
       hash = (53 * hash) + getStorageBucketLocation().hashCode();
+      hash = (37 * hash) + IDBROKERINSTANCEPROFILE_FIELD_NUMBER;
+      hash = (53 * hash) + getIdbrokerInstanceProfile().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -30548,6 +33480,7 @@ java.lang.String defaultValue) {
         super.clear();
         bitField0_ = 0;
         storageBucketLocation_ = "";
+        idbrokerInstanceProfile_ = "";
         return this;
       }
 
@@ -30583,6 +33516,9 @@ java.lang.String defaultValue) {
         int from_bitField0_ = bitField0_;
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.storageBucketLocation_ = storageBucketLocation_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.idbrokerInstanceProfile_ = idbrokerInstanceProfile_;
         }
       }
 
@@ -30635,6 +33571,11 @@ java.lang.String defaultValue) {
           bitField0_ |= 0x00000001;
           onChanged();
         }
+        if (!other.getIdbrokerInstanceProfile().isEmpty()) {
+          idbrokerInstanceProfile_ = other.idbrokerInstanceProfile_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -30666,6 +33607,11 @@ java.lang.String defaultValue) {
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 18: {
+                idbrokerInstanceProfile_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -30771,6 +33717,98 @@ java.lang.String defaultValue) {
         checkByteStringIsUtf8(value);
         storageBucketLocation_ = value;
         bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object idbrokerInstanceProfile_ = "";
+      /**
+       * <pre>
+       *IDBroker instance profile
+       * </pre>
+       *
+       * <code>string idbrokerInstanceProfile = 2;</code>
+       * @return The idbrokerInstanceProfile.
+       */
+      public java.lang.String getIdbrokerInstanceProfile() {
+        java.lang.Object ref = idbrokerInstanceProfile_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          idbrokerInstanceProfile_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *IDBroker instance profile
+       * </pre>
+       *
+       * <code>string idbrokerInstanceProfile = 2;</code>
+       * @return The bytes for idbrokerInstanceProfile.
+       */
+      public com.google.protobuf.ByteString
+          getIdbrokerInstanceProfileBytes() {
+        java.lang.Object ref = idbrokerInstanceProfile_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          idbrokerInstanceProfile_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *IDBroker instance profile
+       * </pre>
+       *
+       * <code>string idbrokerInstanceProfile = 2;</code>
+       * @param value The idbrokerInstanceProfile to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdbrokerInstanceProfile(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        idbrokerInstanceProfile_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *IDBroker instance profile
+       * </pre>
+       *
+       * <code>string idbrokerInstanceProfile = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIdbrokerInstanceProfile() {
+        idbrokerInstanceProfile_ = getDefaultInstance().getIdbrokerInstanceProfile();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *IDBroker instance profile
+       * </pre>
+       *
+       * <code>string idbrokerInstanceProfile = 2;</code>
+       * @param value The bytes for idbrokerInstanceProfile to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdbrokerInstanceProfileBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        idbrokerInstanceProfile_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -39200,6 +42238,12719 @@ java.lang.String defaultValue) {
 
   }
 
+  public interface UpgradeDatalakeRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.UpgradeDatalakeRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Optional runtime version to upgrade services to
+     * </pre>
+     *
+     * <code>optional string clouderaRuntimeVersion = 2;</code>
+     * @return Whether the clouderaRuntimeVersion field is set.
+     */
+    boolean hasClouderaRuntimeVersion();
+    /**
+     * <pre>
+     * Optional runtime version to upgrade services to
+     * </pre>
+     *
+     * <code>optional string clouderaRuntimeVersion = 2;</code>
+     * @return The clouderaRuntimeVersion.
+     */
+    java.lang.String getClouderaRuntimeVersion();
+    /**
+     * <pre>
+     * Optional runtime version to upgrade services to
+     * </pre>
+     *
+     * <code>optional string clouderaRuntimeVersion = 2;</code>
+     * @return The bytes for clouderaRuntimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getClouderaRuntimeVersionBytes();
+
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    int getCustomConfigOverridesCount();
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    boolean containsCustomConfigOverrides(
+        java.lang.String key);
+    /**
+     * Use {@link #getCustomConfigOverridesMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getCustomConfigOverrides();
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getCustomConfigOverridesMap();
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    /* nullable */
+java.lang.String getCustomConfigOverridesOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    java.lang.String getCustomConfigOverridesOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * Whether to skip the full upgrade and just apply custom config overrides or not
+     * </pre>
+     *
+     * <code>optional bool skipFullUpgrade = 4;</code>
+     * @return Whether the skipFullUpgrade field is set.
+     */
+    boolean hasSkipFullUpgrade();
+    /**
+     * <pre>
+     * Whether to skip the full upgrade and just apply custom config overrides or not
+     * </pre>
+     *
+     * <code>optional bool skipFullUpgrade = 4;</code>
+     * @return The skipFullUpgrade.
+     */
+    boolean getSkipFullUpgrade();
+  }
+  /**
+   * <pre>
+   * Upgrade Datalake Request
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.UpgradeDatalakeRequest}
+   */
+  public static final class UpgradeDatalakeRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.UpgradeDatalakeRequest)
+      UpgradeDatalakeRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UpgradeDatalakeRequest.newBuilder() to construct.
+    private UpgradeDatalakeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UpgradeDatalakeRequest() {
+      datalake_ = "";
+      clouderaRuntimeVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UpgradeDatalakeRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 3:
+          return internalGetCustomConfigOverrides();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalake_ = "";
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOUDERARUNTIMEVERSION_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object clouderaRuntimeVersion_ = "";
+    /**
+     * <pre>
+     * Optional runtime version to upgrade services to
+     * </pre>
+     *
+     * <code>optional string clouderaRuntimeVersion = 2;</code>
+     * @return Whether the clouderaRuntimeVersion field is set.
+     */
+    @java.lang.Override
+    public boolean hasClouderaRuntimeVersion() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * Optional runtime version to upgrade services to
+     * </pre>
+     *
+     * <code>optional string clouderaRuntimeVersion = 2;</code>
+     * @return The clouderaRuntimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getClouderaRuntimeVersion() {
+      java.lang.Object ref = clouderaRuntimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clouderaRuntimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Optional runtime version to upgrade services to
+     * </pre>
+     *
+     * <code>optional string clouderaRuntimeVersion = 2;</code>
+     * @return The bytes for clouderaRuntimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClouderaRuntimeVersionBytes() {
+      java.lang.Object ref = clouderaRuntimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clouderaRuntimeVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CUSTOMCONFIGOVERRIDES_FIELD_NUMBER = 3;
+    private static final class CustomConfigOverridesDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeRequest_CustomConfigOverridesEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> customConfigOverrides_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetCustomConfigOverrides() {
+      if (customConfigOverrides_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            CustomConfigOverridesDefaultEntryHolder.defaultEntry);
+      }
+      return customConfigOverrides_;
+    }
+    public int getCustomConfigOverridesCount() {
+      return internalGetCustomConfigOverrides().getMap().size();
+    }
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    @java.lang.Override
+    public boolean containsCustomConfigOverrides(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetCustomConfigOverrides().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getCustomConfigOverridesMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getCustomConfigOverrides() {
+      return getCustomConfigOverridesMap();
+    }
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getCustomConfigOverridesMap() {
+      return internalGetCustomConfigOverrides().getMap();
+    }
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getCustomConfigOverridesOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetCustomConfigOverrides().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Optional config overrides to apply with upgrade
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getCustomConfigOverridesOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetCustomConfigOverrides().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int SKIPFULLUPGRADE_FIELD_NUMBER = 4;
+    private boolean skipFullUpgrade_ = false;
+    /**
+     * <pre>
+     * Whether to skip the full upgrade and just apply custom config overrides or not
+     * </pre>
+     *
+     * <code>optional bool skipFullUpgrade = 4;</code>
+     * @return Whether the skipFullUpgrade field is set.
+     */
+    @java.lang.Override
+    public boolean hasSkipFullUpgrade() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * Whether to skip the full upgrade and just apply custom config overrides or not
+     * </pre>
+     *
+     * <code>optional bool skipFullUpgrade = 4;</code>
+     * @return The skipFullUpgrade.
+     */
+    @java.lang.Override
+    public boolean getSkipFullUpgrade() {
+      return skipFullUpgrade_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, clouderaRuntimeVersion_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetCustomConfigOverrides(),
+          CustomConfigOverridesDefaultEntryHolder.defaultEntry,
+          3);
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeBool(4, skipFullUpgrade_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, clouderaRuntimeVersion_);
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetCustomConfigOverrides().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        customConfigOverrides__ = CustomConfigOverridesDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(3, customConfigOverrides__);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, skipFullUpgrade_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (hasClouderaRuntimeVersion() != other.hasClouderaRuntimeVersion()) return false;
+      if (hasClouderaRuntimeVersion()) {
+        if (!getClouderaRuntimeVersion()
+            .equals(other.getClouderaRuntimeVersion())) return false;
+      }
+      if (!internalGetCustomConfigOverrides().equals(
+          other.internalGetCustomConfigOverrides())) return false;
+      if (hasSkipFullUpgrade() != other.hasSkipFullUpgrade()) return false;
+      if (hasSkipFullUpgrade()) {
+        if (getSkipFullUpgrade()
+            != other.getSkipFullUpgrade()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      if (hasClouderaRuntimeVersion()) {
+        hash = (37 * hash) + CLOUDERARUNTIMEVERSION_FIELD_NUMBER;
+        hash = (53 * hash) + getClouderaRuntimeVersion().hashCode();
+      }
+      if (!internalGetCustomConfigOverrides().getMap().isEmpty()) {
+        hash = (37 * hash) + CUSTOMCONFIGOVERRIDES_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetCustomConfigOverrides().hashCode();
+      }
+      if (hasSkipFullUpgrade()) {
+        hash = (37 * hash) + SKIPFULLUPGRADE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getSkipFullUpgrade());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Upgrade Datalake Request
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.UpgradeDatalakeRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.UpgradeDatalakeRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 3:
+            return internalGetCustomConfigOverrides();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 3:
+            return internalGetMutableCustomConfigOverrides();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalake_ = "";
+        clouderaRuntimeVersion_ = "";
+        internalGetMutableCustomConfigOverrides().clear();
+        skipFullUpgrade_ = false;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalake_ = datalake_;
+        }
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.clouderaRuntimeVersion_ = clouderaRuntimeVersion_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.customConfigOverrides_ = internalGetCustomConfigOverrides();
+          result.customConfigOverrides_.makeImmutable();
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.skipFullUpgrade_ = skipFullUpgrade_;
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (other.hasClouderaRuntimeVersion()) {
+          clouderaRuntimeVersion_ = other.clouderaRuntimeVersion_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        internalGetMutableCustomConfigOverrides().mergeFrom(
+            other.internalGetCustomConfigOverrides());
+        bitField0_ |= 0x00000004;
+        if (other.hasSkipFullUpgrade()) {
+          setSkipFullUpgrade(other.getSkipFullUpgrade());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                clouderaRuntimeVersion_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                customConfigOverrides__ = input.readMessage(
+                    CustomConfigOverridesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableCustomConfigOverrides().getMutableMap().put(
+                    customConfigOverrides__.getKey(), customConfigOverrides__.getValue());
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 32: {
+                skipFullUpgrade_ = input.readBool();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        datalake_ = getDefaultInstance().getDatalake();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clouderaRuntimeVersion_ = "";
+      /**
+       * <pre>
+       * Optional runtime version to upgrade services to
+       * </pre>
+       *
+       * <code>optional string clouderaRuntimeVersion = 2;</code>
+       * @return Whether the clouderaRuntimeVersion field is set.
+       */
+      public boolean hasClouderaRuntimeVersion() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <pre>
+       * Optional runtime version to upgrade services to
+       * </pre>
+       *
+       * <code>optional string clouderaRuntimeVersion = 2;</code>
+       * @return The clouderaRuntimeVersion.
+       */
+      public java.lang.String getClouderaRuntimeVersion() {
+        java.lang.Object ref = clouderaRuntimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clouderaRuntimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Optional runtime version to upgrade services to
+       * </pre>
+       *
+       * <code>optional string clouderaRuntimeVersion = 2;</code>
+       * @return The bytes for clouderaRuntimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getClouderaRuntimeVersionBytes() {
+        java.lang.Object ref = clouderaRuntimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clouderaRuntimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Optional runtime version to upgrade services to
+       * </pre>
+       *
+       * <code>optional string clouderaRuntimeVersion = 2;</code>
+       * @param value The clouderaRuntimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClouderaRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        clouderaRuntimeVersion_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional runtime version to upgrade services to
+       * </pre>
+       *
+       * <code>optional string clouderaRuntimeVersion = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClouderaRuntimeVersion() {
+        clouderaRuntimeVersion_ = getDefaultInstance().getClouderaRuntimeVersion();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional runtime version to upgrade services to
+       * </pre>
+       *
+       * <code>optional string clouderaRuntimeVersion = 2;</code>
+       * @param value The bytes for clouderaRuntimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClouderaRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        clouderaRuntimeVersion_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> customConfigOverrides_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetCustomConfigOverrides() {
+        if (customConfigOverrides_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              CustomConfigOverridesDefaultEntryHolder.defaultEntry);
+        }
+        return customConfigOverrides_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetMutableCustomConfigOverrides() {
+        if (customConfigOverrides_ == null) {
+          customConfigOverrides_ = com.google.protobuf.MapField.newMapField(
+              CustomConfigOverridesDefaultEntryHolder.defaultEntry);
+        }
+        if (!customConfigOverrides_.isMutable()) {
+          customConfigOverrides_ = customConfigOverrides_.copy();
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return customConfigOverrides_;
+      }
+      public int getCustomConfigOverridesCount() {
+        return internalGetCustomConfigOverrides().getMap().size();
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      @java.lang.Override
+      public boolean containsCustomConfigOverrides(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetCustomConfigOverrides().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getCustomConfigOverridesMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getCustomConfigOverrides() {
+        return getCustomConfigOverridesMap();
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, java.lang.String> getCustomConfigOverridesMap() {
+        return internalGetCustomConfigOverrides().getMap();
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+java.lang.String getCustomConfigOverridesOrDefault(
+          java.lang.String key,
+          /* nullable */
+java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetCustomConfigOverrides().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      @java.lang.Override
+      public java.lang.String getCustomConfigOverridesOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetCustomConfigOverrides().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+      public Builder clearCustomConfigOverrides() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        internalGetMutableCustomConfigOverrides().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      public Builder removeCustomConfigOverrides(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableCustomConfigOverrides().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+          getMutableCustomConfigOverrides() {
+        bitField0_ |= 0x00000004;
+        return internalGetMutableCustomConfigOverrides().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      public Builder putCustomConfigOverrides(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableCustomConfigOverrides().getMutableMap()
+            .put(key, value);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional config overrides to apply with upgrade
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; customConfigOverrides = 3;</code>
+       */
+      public Builder putAllCustomConfigOverrides(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableCustomConfigOverrides().getMutableMap()
+            .putAll(values);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+
+      private boolean skipFullUpgrade_ ;
+      /**
+       * <pre>
+       * Whether to skip the full upgrade and just apply custom config overrides or not
+       * </pre>
+       *
+       * <code>optional bool skipFullUpgrade = 4;</code>
+       * @return Whether the skipFullUpgrade field is set.
+       */
+      @java.lang.Override
+      public boolean hasSkipFullUpgrade() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * Whether to skip the full upgrade and just apply custom config overrides or not
+       * </pre>
+       *
+       * <code>optional bool skipFullUpgrade = 4;</code>
+       * @return The skipFullUpgrade.
+       */
+      @java.lang.Override
+      public boolean getSkipFullUpgrade() {
+        return skipFullUpgrade_;
+      }
+      /**
+       * <pre>
+       * Whether to skip the full upgrade and just apply custom config overrides or not
+       * </pre>
+       *
+       * <code>optional bool skipFullUpgrade = 4;</code>
+       * @param value The skipFullUpgrade to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipFullUpgrade(boolean value) {
+
+        skipFullUpgrade_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether to skip the full upgrade and just apply custom config overrides or not
+       * </pre>
+       *
+       * <code>optional bool skipFullUpgrade = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipFullUpgrade() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        skipFullUpgrade_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.UpgradeDatalakeRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.UpgradeDatalakeRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<UpgradeDatalakeRequest>
+        PARSER = new com.google.protobuf.AbstractParser<UpgradeDatalakeRequest>() {
+      @java.lang.Override
+      public UpgradeDatalakeRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<UpgradeDatalakeRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UpgradeDatalakeRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface UpgradeDatalakeResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.UpgradeDatalakeResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
+     */
+    java.lang.String getDatalakeName();
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeNameBytes();
+
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeCrn = 2;</code>
+     * @return The datalakeCrn.
+     */
+    java.lang.String getDatalakeCrn();
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeCrn = 2;</code>
+     * @return The bytes for datalakeCrn.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeCrnBytes();
+
+    /**
+     * <pre>
+     * Status of the upgrade operation
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The status.
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * Status of the upgrade operation
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The bytes for status.
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+
+    /**
+     * <pre>
+     * Workflow ID for the upgrade action
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     * @return The workflowId.
+     */
+    java.lang.String getWorkflowId();
+    /**
+     * <pre>
+     * Workflow ID for the upgrade action
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     * @return The bytes for workflowId.
+     */
+    com.google.protobuf.ByteString
+        getWorkflowIdBytes();
+  }
+  /**
+   * <pre>
+   * Upgrade Datalake Response
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.UpgradeDatalakeResponse}
+   */
+  public static final class UpgradeDatalakeResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.UpgradeDatalakeResponse)
+      UpgradeDatalakeResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use UpgradeDatalakeResponse.newBuilder() to construct.
+    private UpgradeDatalakeResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private UpgradeDatalakeResponse() {
+      datalakeName_ = "";
+      datalakeCrn_ = "";
+      status_ = "";
+      workflowId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UpgradeDatalakeResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.Builder.class);
+    }
+
+    public static final int DATALAKENAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalakeName_ = "";
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalakeName() {
+      java.lang.Object ref = datalakeName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalakeName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeNameBytes() {
+      java.lang.Object ref = datalakeName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalakeName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DATALAKECRN_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalakeCrn_ = "";
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeCrn = 2;</code>
+     * @return The datalakeCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalakeCrn() {
+      java.lang.Object ref = datalakeCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalakeCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalakeCrn = 2;</code>
+     * @return The bytes for datalakeCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeCrnBytes() {
+      java.lang.Object ref = datalakeCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalakeCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object status_ = "";
+    /**
+     * <pre>
+     * Status of the upgrade operation
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the upgrade operation
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int WORKFLOWID_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object workflowId_ = "";
+    /**
+     * <pre>
+     * Workflow ID for the upgrade action
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     * @return The workflowId.
+     */
+    @java.lang.Override
+    public java.lang.String getWorkflowId() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        workflowId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Workflow ID for the upgrade action
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     * @return The bytes for workflowId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getWorkflowIdBytes() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        workflowId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, datalakeCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workflowId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, workflowId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, datalakeCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workflowId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, workflowId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse) obj;
+
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (!getDatalakeCrn()
+          .equals(other.getDatalakeCrn())) return false;
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getWorkflowId()
+          .equals(other.getWorkflowId())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalakeName().hashCode();
+      hash = (37 * hash) + DATALAKECRN_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalakeCrn().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (37 * hash) + WORKFLOWID_FIELD_NUMBER;
+      hash = (53 * hash) + getWorkflowId().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Upgrade Datalake Response
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.UpgradeDatalakeResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.UpgradeDatalakeResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalakeName_ = "";
+        datalakeCrn_ = "";
+        status_ = "";
+        workflowId_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_UpgradeDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalakeName_ = datalakeName_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.datalakeCrn_ = datalakeCrn_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.workflowId_ = workflowId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.getDefaultInstance()) return this;
+        if (!other.getDatalakeName().isEmpty()) {
+          datalakeName_ = other.datalakeName_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getDatalakeCrn().isEmpty()) {
+          datalakeCrn_ = other.datalakeCrn_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getWorkflowId().isEmpty()) {
+          workflowId_ = other.workflowId_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                datalakeCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                status_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                workflowId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalakeName_ = "";
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
+       */
+      public java.lang.String getDatalakeName() {
+        java.lang.Object ref = datalakeName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalakeName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeNameBytes() {
+        java.lang.Object ref = datalakeName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalakeName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalakeName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalakeName() {
+        datalakeName_ = getDefaultInstance().getDatalakeName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalakeName_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object datalakeCrn_ = "";
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeCrn = 2;</code>
+       * @return The datalakeCrn.
+       */
+      public java.lang.String getDatalakeCrn() {
+        java.lang.Object ref = datalakeCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalakeCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeCrn = 2;</code>
+       * @return The bytes for datalakeCrn.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeCrnBytes() {
+        java.lang.Object ref = datalakeCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalakeCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeCrn = 2;</code>
+       * @param value The datalakeCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalakeCrn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeCrn = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalakeCrn() {
+        datalakeCrn_ = getDefaultInstance().getDatalakeCrn();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalakeCrn = 2;</code>
+       * @param value The bytes for datalakeCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalakeCrn_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * Status of the upgrade operation
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return The status.
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the upgrade operation
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return The bytes for status.
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the upgrade operation
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the upgrade operation
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        status_ = getDefaultInstance().getStatus();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the upgrade operation
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object workflowId_ = "";
+      /**
+       * <pre>
+       * Workflow ID for the upgrade action
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       * @return The workflowId.
+       */
+      public java.lang.String getWorkflowId() {
+        java.lang.Object ref = workflowId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          workflowId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Workflow ID for the upgrade action
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       * @return The bytes for workflowId.
+       */
+      public com.google.protobuf.ByteString
+          getWorkflowIdBytes() {
+        java.lang.Object ref = workflowId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          workflowId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Workflow ID for the upgrade action
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       * @param value The workflowId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWorkflowId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        workflowId_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Workflow ID for the upgrade action
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearWorkflowId() {
+        workflowId_ = getDefaultInstance().getWorkflowId();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Workflow ID for the upgrade action
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       * @param value The bytes for workflowId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWorkflowIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        workflowId_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.UpgradeDatalakeResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.UpgradeDatalakeResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<UpgradeDatalakeResponse>
+        PARSER = new com.google.protobuf.AbstractParser<UpgradeDatalakeResponse>() {
+      @java.lang.Override
+      public UpgradeDatalakeResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<UpgradeDatalakeResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UpgradeDatalakeResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SyncIDBrokerMappingsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.SyncIDBrokerMappingsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    java.lang.String getAccountID();
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    com.google.protobuf.ByteString
+        getAccountIDBytes();
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    int getActorMappingsCount();
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    boolean containsActorMappings(
+        java.lang.String key);
+    /**
+     * Use {@link #getActorMappingsMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getActorMappings();
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getActorMappingsMap();
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    /* nullable */
+java.lang.String getActorMappingsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    java.lang.String getActorMappingsOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    int getGroupMappingsCount();
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    boolean containsGroupMappings(
+        java.lang.String key);
+    /**
+     * Use {@link #getGroupMappingsMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getGroupMappings();
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getGroupMappingsMap();
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    /* nullable */
+java.lang.String getGroupMappingsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    java.lang.String getGroupMappingsOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * Request object for sync IDBroker mappings
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.SyncIDBrokerMappingsRequest}
+   */
+  public static final class SyncIDBrokerMappingsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.SyncIDBrokerMappingsRequest)
+      SyncIDBrokerMappingsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SyncIDBrokerMappingsRequest.newBuilder() to construct.
+    private SyncIDBrokerMappingsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SyncIDBrokerMappingsRequest() {
+      accountID_ = "";
+      datalake_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SyncIDBrokerMappingsRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+        int number) {
+      switch (number) {
+        case 4:
+          return internalGetActorMappings();
+        case 5:
+          return internalGetGroupMappings();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.Builder.class);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accountID_ = "";
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountID() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIDBytes() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalake_ = "";
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACTORMAPPINGS_FIELD_NUMBER = 4;
+    private static final class ActorMappingsDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_ActorMappingsEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> actorMappings_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetActorMappings() {
+      if (actorMappings_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ActorMappingsDefaultEntryHolder.defaultEntry);
+      }
+      return actorMappings_;
+    }
+    public int getActorMappingsCount() {
+      return internalGetActorMappings().getMap().size();
+    }
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    @java.lang.Override
+    public boolean containsActorMappings(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetActorMappings().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getActorMappingsMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getActorMappings() {
+      return getActorMappingsMap();
+    }
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getActorMappingsMap() {
+      return internalGetActorMappings().getMap();
+    }
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getActorMappingsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetActorMappings().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Mappings for a specific actor
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getActorMappingsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetActorMappings().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int GROUPMAPPINGS_FIELD_NUMBER = 5;
+    private static final class GroupMappingsDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_GroupMappingsEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    @SuppressWarnings("serial")
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> groupMappings_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetGroupMappings() {
+      if (groupMappings_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            GroupMappingsDefaultEntryHolder.defaultEntry);
+      }
+      return groupMappings_;
+    }
+    public int getGroupMappingsCount() {
+      return internalGetGroupMappings().getMap().size();
+    }
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    @java.lang.Override
+    public boolean containsGroupMappings(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetGroupMappings().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getGroupMappingsMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getGroupMappings() {
+      return getGroupMappingsMap();
+    }
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    @java.lang.Override
+    public java.util.Map<java.lang.String, java.lang.String> getGroupMappingsMap() {
+      return internalGetGroupMappings().getMap();
+    }
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    @java.lang.Override
+    public /* nullable */
+java.lang.String getGroupMappingsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetGroupMappings().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Mappings for a group
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+     */
+    @java.lang.Override
+    public java.lang.String getGroupMappingsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetGroupMappings().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountID_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, datalake_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetActorMappings(),
+          ActorMappingsDefaultEntryHolder.defaultEntry,
+          4);
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetGroupMappings(),
+          GroupMappingsDefaultEntryHolder.defaultEntry,
+          5);
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountID_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, datalake_);
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetActorMappings().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        actorMappings__ = ActorMappingsDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(4, actorMappings__);
+      }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetGroupMappings().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        groupMappings__ = GroupMappingsDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(5, groupMappings__);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest) obj;
+
+      if (!getAccountID()
+          .equals(other.getAccountID())) return false;
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!internalGetActorMappings().equals(
+          other.internalGetActorMappings())) return false;
+      if (!internalGetGroupMappings().equals(
+          other.internalGetGroupMappings())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountID().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      if (!internalGetActorMappings().getMap().isEmpty()) {
+        hash = (37 * hash) + ACTORMAPPINGS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetActorMappings().hashCode();
+      }
+      if (!internalGetGroupMappings().getMap().isEmpty()) {
+        hash = (37 * hash) + GROUPMAPPINGS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetGroupMappings().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for sync IDBroker mappings
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.SyncIDBrokerMappingsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.SyncIDBrokerMappingsRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor;
+      }
+
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 4:
+            return internalGetActorMappings();
+          case 5:
+            return internalGetGroupMappings();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapFieldReflectionAccessor internalGetMutableMapFieldReflection(
+          int number) {
+        switch (number) {
+          case 4:
+            return internalGetMutableActorMappings();
+          case 5:
+            return internalGetMutableGroupMappings();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        accountID_ = "";
+        datalake_ = "";
+        internalGetMutableActorMappings().clear();
+        internalGetMutableGroupMappings().clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.accountID_ = accountID_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.datalake_ = datalake_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.actorMappings_ = internalGetActorMappings();
+          result.actorMappings_.makeImmutable();
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.groupMappings_ = internalGetGroupMappings();
+          result.groupMappings_.makeImmutable();
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.getDefaultInstance()) return this;
+        if (!other.getAccountID().isEmpty()) {
+          accountID_ = other.accountID_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        internalGetMutableActorMappings().mergeFrom(
+            other.internalGetActorMappings());
+        bitField0_ |= 0x00000004;
+        internalGetMutableGroupMappings().mergeFrom(
+            other.internalGetGroupMappings());
+        bitField0_ |= 0x00000008;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 18: {
+                accountID_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 18
+              case 26: {
+                datalake_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 26
+              case 34: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                actorMappings__ = input.readMessage(
+                    ActorMappingsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableActorMappings().getMutableMap().put(
+                    actorMappings__.getKey(), actorMappings__.getValue());
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 34
+              case 42: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                groupMappings__ = input.readMessage(
+                    GroupMappingsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableGroupMappings().getMutableMap().put(
+                    groupMappings__.getKey(), groupMappings__.getValue());
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object accountID_ = "";
+      /**
+       * <code>string accountID = 2;</code>
+       * @return The accountID.
+       */
+      public java.lang.String getAccountID() {
+        java.lang.Object ref = accountID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @return The bytes for accountID.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIDBytes() {
+        java.lang.Object ref = accountID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @param value The accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountID(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accountID_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountID() {
+        accountID_ = getDefaultInstance().getAccountID();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @param value The bytes for accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accountID_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalake_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        datalake_ = getDefaultInstance().getDatalake();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalake_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> actorMappings_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetActorMappings() {
+        if (actorMappings_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              ActorMappingsDefaultEntryHolder.defaultEntry);
+        }
+        return actorMappings_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetMutableActorMappings() {
+        if (actorMappings_ == null) {
+          actorMappings_ = com.google.protobuf.MapField.newMapField(
+              ActorMappingsDefaultEntryHolder.defaultEntry);
+        }
+        if (!actorMappings_.isMutable()) {
+          actorMappings_ = actorMappings_.copy();
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return actorMappings_;
+      }
+      public int getActorMappingsCount() {
+        return internalGetActorMappings().getMap().size();
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      @java.lang.Override
+      public boolean containsActorMappings(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetActorMappings().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getActorMappingsMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getActorMappings() {
+        return getActorMappingsMap();
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, java.lang.String> getActorMappingsMap() {
+        return internalGetActorMappings().getMap();
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+java.lang.String getActorMappingsOrDefault(
+          java.lang.String key,
+          /* nullable */
+java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetActorMappings().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      @java.lang.Override
+      public java.lang.String getActorMappingsOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetActorMappings().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+      public Builder clearActorMappings() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        internalGetMutableActorMappings().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      public Builder removeActorMappings(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableActorMappings().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+          getMutableActorMappings() {
+        bitField0_ |= 0x00000004;
+        return internalGetMutableActorMappings().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      public Builder putActorMappings(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableActorMappings().getMutableMap()
+            .put(key, value);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <pre>
+       * Mappings for a specific actor
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; actorMappings = 4;</code>
+       */
+      public Builder putAllActorMappings(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableActorMappings().getMutableMap()
+            .putAll(values);
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> groupMappings_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetGroupMappings() {
+        if (groupMappings_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              GroupMappingsDefaultEntryHolder.defaultEntry);
+        }
+        return groupMappings_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+          internalGetMutableGroupMappings() {
+        if (groupMappings_ == null) {
+          groupMappings_ = com.google.protobuf.MapField.newMapField(
+              GroupMappingsDefaultEntryHolder.defaultEntry);
+        }
+        if (!groupMappings_.isMutable()) {
+          groupMappings_ = groupMappings_.copy();
+        }
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return groupMappings_;
+      }
+      public int getGroupMappingsCount() {
+        return internalGetGroupMappings().getMap().size();
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      @java.lang.Override
+      public boolean containsGroupMappings(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetGroupMappings().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getGroupMappingsMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getGroupMappings() {
+        return getGroupMappingsMap();
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      @java.lang.Override
+      public java.util.Map<java.lang.String, java.lang.String> getGroupMappingsMap() {
+        return internalGetGroupMappings().getMap();
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      @java.lang.Override
+      public /* nullable */
+java.lang.String getGroupMappingsOrDefault(
+          java.lang.String key,
+          /* nullable */
+java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetGroupMappings().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      @java.lang.Override
+      public java.lang.String getGroupMappingsOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetGroupMappings().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+      public Builder clearGroupMappings() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        internalGetMutableGroupMappings().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      public Builder removeGroupMappings(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableGroupMappings().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+          getMutableGroupMappings() {
+        bitField0_ |= 0x00000008;
+        return internalGetMutableGroupMappings().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      public Builder putGroupMappings(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) { throw new NullPointerException("map value"); }
+        internalGetMutableGroupMappings().getMutableMap()
+            .put(key, value);
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <pre>
+       * Mappings for a group
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; groupMappings = 5;</code>
+       */
+      public Builder putAllGroupMappings(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableGroupMappings().getMutableMap()
+            .putAll(values);
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.SyncIDBrokerMappingsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.SyncIDBrokerMappingsRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SyncIDBrokerMappingsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<SyncIDBrokerMappingsRequest>() {
+      @java.lang.Override
+      public SyncIDBrokerMappingsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<SyncIDBrokerMappingsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SyncIDBrokerMappingsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SyncIDBrokerMappingsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.SyncIDBrokerMappingsResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+  }
+  /**
+   * <pre>
+   * Response object for sync IDBroker mappings
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.SyncIDBrokerMappingsResponse}
+   */
+  public static final class SyncIDBrokerMappingsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.SyncIDBrokerMappingsResponse)
+      SyncIDBrokerMappingsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SyncIDBrokerMappingsResponse.newBuilder() to construct.
+    private SyncIDBrokerMappingsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SyncIDBrokerMappingsResponse() {
+      status_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SyncIDBrokerMappingsResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.Builder.class);
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object status_ = "";
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse) obj;
+
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for sync IDBroker mappings
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.SyncIDBrokerMappingsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.SyncIDBrokerMappingsResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        status_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_SyncIDBrokerMappingsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.status_ = status_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.getDefaultInstance()) return this;
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                status_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return The status.
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return The bytes for status.
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        status_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        status_ = getDefaultInstance().getStatus();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        status_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.SyncIDBrokerMappingsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.SyncIDBrokerMappingsResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SyncIDBrokerMappingsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<SyncIDBrokerMappingsResponse>() {
+      @java.lang.Override
+      public SyncIDBrokerMappingsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<SyncIDBrokerMappingsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SyncIDBrokerMappingsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface BackupRestoreDatalakeRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.BackupRestoreDatalakeRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Location of where backup/restore the data to/from
+     * </pre>
+     *
+     * <code>string backupLocation = 2;</code>
+     * @return The backupLocation.
+     */
+    java.lang.String getBackupLocation();
+    /**
+     * <pre>
+     * Location of where backup/restore the data to/from
+     * </pre>
+     *
+     * <code>string backupLocation = 2;</code>
+     * @return The bytes for backupLocation.
+     */
+    com.google.protobuf.ByteString
+        getBackupLocationBytes();
+
+    /**
+     * <pre>
+     * If close connections of the database during backup/restore
+     * </pre>
+     *
+     * <code>bool closeDbConnections = 3;</code>
+     * @return The closeDbConnections.
+     */
+    boolean getCloseDbConnections();
+
+    /**
+     * <pre>
+     * Backup or restore
+     * </pre>
+     *
+     * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+     * @return The enum numeric value on the wire for type.
+     */
+    int getTypeValue();
+    /**
+     * <pre>
+     * Backup or restore
+     * </pre>
+     *
+     * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+     * @return The type.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value getType();
+
+    /**
+     * <pre>
+     * Backup ID or restore ID
+     * </pre>
+     *
+     * <code>string operationId = 5;</code>
+     * @return The operationId.
+     */
+    java.lang.String getOperationId();
+    /**
+     * <pre>
+     * Backup ID or restore ID
+     * </pre>
+     *
+     * <code>string operationId = 5;</code>
+     * @return The bytes for operationId.
+     */
+    com.google.protobuf.ByteString
+        getOperationIdBytes();
+
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 6;</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 6;</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+  }
+  /**
+   * Protobuf type {@code cdlcrud.BackupRestoreDatalakeRequest}
+   */
+  public static final class BackupRestoreDatalakeRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.BackupRestoreDatalakeRequest)
+      BackupRestoreDatalakeRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use BackupRestoreDatalakeRequest.newBuilder() to construct.
+    private BackupRestoreDatalakeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private BackupRestoreDatalakeRequest() {
+      datalake_ = "";
+      backupLocation_ = "";
+      type_ = 0;
+      operationId_ = "";
+      accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupRestoreDatalakeRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.Builder.class);
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalake_ = "";
+    /**
+     * <pre>
+     * name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int BACKUPLOCATION_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object backupLocation_ = "";
+    /**
+     * <pre>
+     * Location of where backup/restore the data to/from
+     * </pre>
+     *
+     * <code>string backupLocation = 2;</code>
+     * @return The backupLocation.
+     */
+    @java.lang.Override
+    public java.lang.String getBackupLocation() {
+      java.lang.Object ref = backupLocation_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        backupLocation_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Location of where backup/restore the data to/from
+     * </pre>
+     *
+     * <code>string backupLocation = 2;</code>
+     * @return The bytes for backupLocation.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getBackupLocationBytes() {
+      java.lang.Object ref = backupLocation_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        backupLocation_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLOSEDBCONNECTIONS_FIELD_NUMBER = 3;
+    private boolean closeDbConnections_ = false;
+    /**
+     * <pre>
+     * If close connections of the database during backup/restore
+     * </pre>
+     *
+     * <code>bool closeDbConnections = 3;</code>
+     * @return The closeDbConnections.
+     */
+    @java.lang.Override
+    public boolean getCloseDbConnections() {
+      return closeDbConnections_;
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 4;
+    private int type_ = 0;
+    /**
+     * <pre>
+     * Backup or restore
+     * </pre>
+     *
+     * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+     * @return The enum numeric value on the wire for type.
+     */
+    @java.lang.Override public int getTypeValue() {
+      return type_;
+    }
+    /**
+     * <pre>
+     * Backup or restore
+     * </pre>
+     *
+     * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+     * @return The type.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value getType() {
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value.forNumber(type_);
+      return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int OPERATIONID_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object operationId_ = "";
+    /**
+     * <pre>
+     * Backup ID or restore ID
+     * </pre>
+     *
+     * <code>string operationId = 5;</code>
+     * @return The operationId.
+     */
+    @java.lang.Override
+    public java.lang.String getOperationId() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        operationId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Backup ID or restore ID
+     * </pre>
+     *
+     * <code>string operationId = 5;</code>
+     * @return The bytes for operationId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getOperationIdBytes() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        operationId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accountId_ = "";
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 6;</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 6;</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, backupLocation_);
+      }
+      if (closeDbConnections_ != false) {
+        output.writeBool(3, closeDbConnections_);
+      }
+      if (type_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value.BACKUP.getNumber()) {
+        output.writeEnum(4, type_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, operationId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, accountId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, backupLocation_);
+      }
+      if (closeDbConnections_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, closeDbConnections_);
+      }
+      if (type_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value.BACKUP.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, type_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, operationId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, accountId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (getCloseDbConnections()
+          != other.getCloseDbConnections()) return false;
+      if (type_ != other.type_) return false;
+      if (!getOperationId()
+          .equals(other.getOperationId())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (37 * hash) + BACKUPLOCATION_FIELD_NUMBER;
+      hash = (53 * hash) + getBackupLocation().hashCode();
+      hash = (37 * hash) + CLOSEDBCONNECTIONS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCloseDbConnections());
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + type_;
+      hash = (37 * hash) + OPERATIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getOperationId().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code cdlcrud.BackupRestoreDatalakeRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.BackupRestoreDatalakeRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalake_ = "";
+        backupLocation_ = "";
+        closeDbConnections_ = false;
+        type_ = 0;
+        operationId_ = "";
+        accountId_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalake_ = datalake_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.backupLocation_ = backupLocation_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.closeDbConnections_ = closeDbConnections_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.type_ = type_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.operationId_ = operationId_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.accountId_ = accountId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getBackupLocation().isEmpty()) {
+          backupLocation_ = other.backupLocation_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (other.getCloseDbConnections() != false) {
+          setCloseDbConnections(other.getCloseDbConnections());
+        }
+        if (other.type_ != 0) {
+          setTypeValue(other.getTypeValue());
+        }
+        if (!other.getOperationId().isEmpty()) {
+          operationId_ = other.operationId_;
+          bitField0_ |= 0x00000010;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                backupLocation_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                closeDbConnections_ = input.readBool();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 32: {
+                type_ = input.readEnum();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 32
+              case 42: {
+                operationId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 42
+              case 50: {
+                accountId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        datalake_ = getDefaultInstance().getDatalake();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object backupLocation_ = "";
+      /**
+       * <pre>
+       * Location of where backup/restore the data to/from
+       * </pre>
+       *
+       * <code>string backupLocation = 2;</code>
+       * @return The backupLocation.
+       */
+      public java.lang.String getBackupLocation() {
+        java.lang.Object ref = backupLocation_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          backupLocation_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Location of where backup/restore the data to/from
+       * </pre>
+       *
+       * <code>string backupLocation = 2;</code>
+       * @return The bytes for backupLocation.
+       */
+      public com.google.protobuf.ByteString
+          getBackupLocationBytes() {
+        java.lang.Object ref = backupLocation_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          backupLocation_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Location of where backup/restore the data to/from
+       * </pre>
+       *
+       * <code>string backupLocation = 2;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBackupLocation(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        backupLocation_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Location of where backup/restore the data to/from
+       * </pre>
+       *
+       * <code>string backupLocation = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBackupLocation() {
+        backupLocation_ = getDefaultInstance().getBackupLocation();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Location of where backup/restore the data to/from
+       * </pre>
+       *
+       * <code>string backupLocation = 2;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBackupLocationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        backupLocation_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private boolean closeDbConnections_ ;
+      /**
+       * <pre>
+       * If close connections of the database during backup/restore
+       * </pre>
+       *
+       * <code>bool closeDbConnections = 3;</code>
+       * @return The closeDbConnections.
+       */
+      @java.lang.Override
+      public boolean getCloseDbConnections() {
+        return closeDbConnections_;
+      }
+      /**
+       * <pre>
+       * If close connections of the database during backup/restore
+       * </pre>
+       *
+       * <code>bool closeDbConnections = 3;</code>
+       * @param value The closeDbConnections to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCloseDbConnections(boolean value) {
+
+        closeDbConnections_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * If close connections of the database during backup/restore
+       * </pre>
+       *
+       * <code>bool closeDbConnections = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCloseDbConnections() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        closeDbConnections_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int type_ = 0;
+      /**
+       * <pre>
+       * Backup or restore
+       * </pre>
+       *
+       * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+       * @return The enum numeric value on the wire for type.
+       */
+      @java.lang.Override public int getTypeValue() {
+        return type_;
+      }
+      /**
+       * <pre>
+       * Backup or restore
+       * </pre>
+       *
+       * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTypeValue(int value) {
+        type_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Backup or restore
+       * </pre>
+       *
+       * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+       * @return The type.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value getType() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value.forNumber(type_);
+        return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Backup or restore
+       * </pre>
+       *
+       * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setType(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000008;
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Backup or restore
+       * </pre>
+       *
+       * <code>.cdlcrud.BackupRestoreType.Value type = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object operationId_ = "";
+      /**
+       * <pre>
+       * Backup ID or restore ID
+       * </pre>
+       *
+       * <code>string operationId = 5;</code>
+       * @return The operationId.
+       */
+      public java.lang.String getOperationId() {
+        java.lang.Object ref = operationId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          operationId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Backup ID or restore ID
+       * </pre>
+       *
+       * <code>string operationId = 5;</code>
+       * @return The bytes for operationId.
+       */
+      public com.google.protobuf.ByteString
+          getOperationIdBytes() {
+        java.lang.Object ref = operationId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          operationId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Backup ID or restore ID
+       * </pre>
+       *
+       * <code>string operationId = 5;</code>
+       * @param value The operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        operationId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Backup ID or restore ID
+       * </pre>
+       *
+       * <code>string operationId = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOperationId() {
+        operationId_ = getDefaultInstance().getOperationId();
+        bitField0_ = (bitField0_ & ~0x00000010);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Backup ID or restore ID
+       * </pre>
+       *
+       * <code>string operationId = 5;</code>
+       * @param value The bytes for operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        operationId_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 6;</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 6;</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 6;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accountId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        accountId_ = getDefaultInstance().getAccountId();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 6;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accountId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.BackupRestoreDatalakeRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.BackupRestoreDatalakeRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<BackupRestoreDatalakeRequest>
+        PARSER = new com.google.protobuf.AbstractParser<BackupRestoreDatalakeRequest>() {
+      @java.lang.Override
+      public BackupRestoreDatalakeRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<BackupRestoreDatalakeRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BackupRestoreDatalakeRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface BackupRestoreDatalakeResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.BackupRestoreDatalakeResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string operationId = 1;</code>
+     * @return The operationId.
+     */
+    java.lang.String getOperationId();
+    /**
+     * <code>string operationId = 1;</code>
+     * @return The bytes for operationId.
+     */
+    com.google.protobuf.ByteString
+        getOperationIdBytes();
+  }
+  /**
+   * Protobuf type {@code cdlcrud.BackupRestoreDatalakeResponse}
+   */
+  public static final class BackupRestoreDatalakeResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.BackupRestoreDatalakeResponse)
+      BackupRestoreDatalakeResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use BackupRestoreDatalakeResponse.newBuilder() to construct.
+    private BackupRestoreDatalakeResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private BackupRestoreDatalakeResponse() {
+      operationId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupRestoreDatalakeResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.Builder.class);
+    }
+
+    public static final int OPERATIONID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object operationId_ = "";
+    /**
+     * <code>string operationId = 1;</code>
+     * @return The operationId.
+     */
+    @java.lang.Override
+    public java.lang.String getOperationId() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        operationId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string operationId = 1;</code>
+     * @return The bytes for operationId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getOperationIdBytes() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        operationId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, operationId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, operationId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse) obj;
+
+      if (!getOperationId()
+          .equals(other.getOperationId())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPERATIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getOperationId().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code cdlcrud.BackupRestoreDatalakeResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.BackupRestoreDatalakeResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        operationId_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.operationId_ = operationId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.getDefaultInstance()) return this;
+        if (!other.getOperationId().isEmpty()) {
+          operationId_ = other.operationId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                operationId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object operationId_ = "";
+      /**
+       * <code>string operationId = 1;</code>
+       * @return The operationId.
+       */
+      public java.lang.String getOperationId() {
+        java.lang.Object ref = operationId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          operationId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string operationId = 1;</code>
+       * @return The bytes for operationId.
+       */
+      public com.google.protobuf.ByteString
+          getOperationIdBytes() {
+        java.lang.Object ref = operationId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          operationId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string operationId = 1;</code>
+       * @param value The operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        operationId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string operationId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOperationId() {
+        operationId_ = getDefaultInstance().getOperationId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string operationId = 1;</code>
+       * @param value The bytes for operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        operationId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.BackupRestoreDatalakeResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.BackupRestoreDatalakeResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<BackupRestoreDatalakeResponse>
+        PARSER = new com.google.protobuf.AbstractParser<BackupRestoreDatalakeResponse>() {
+      @java.lang.Override
+      public BackupRestoreDatalakeResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<BackupRestoreDatalakeResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BackupRestoreDatalakeResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface BackupRestoreTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.BackupRestoreType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code cdlcrud.BackupRestoreType}
+   */
+  public static final class BackupRestoreType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.BackupRestoreType)
+      BackupRestoreTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use BackupRestoreType.newBuilder() to construct.
+    private BackupRestoreType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private BackupRestoreType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupRestoreType();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code cdlcrud.BackupRestoreType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>BACKUP = 0;</code>
+       */
+      BACKUP(0),
+      /**
+       * <code>RESTORE = 1;</code>
+       */
+      RESTORE(1),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>BACKUP = 0;</code>
+       */
+      public static final int BACKUP_VALUE = 0;
+      /**
+       * <code>RESTORE = 1;</code>
+       */
+      public static final int RESTORE_VALUE = 1;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return BACKUP;
+          case 1: return RESTORE;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:cdlcrud.BackupRestoreType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code cdlcrud.BackupRestoreType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.BackupRestoreType)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_BackupRestoreType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.BackupRestoreType)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.BackupRestoreType)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<BackupRestoreType>
+        PARSER = new com.google.protobuf.AbstractParser<BackupRestoreType>() {
+      @java.lang.Override
+      public BackupRestoreType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<BackupRestoreType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BackupRestoreType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DatalakeOperationStatusRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.DatalakeOperationStatusRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+
+    /**
+     * <pre>
+     * ID of the operation
+     * </pre>
+     *
+     * <code>string operationId = 2;</code>
+     * @return The operationId.
+     */
+    java.lang.String getOperationId();
+    /**
+     * <pre>
+     * ID of the operation
+     * </pre>
+     *
+     * <code>string operationId = 2;</code>
+     * @return The bytes for operationId.
+     */
+    com.google.protobuf.ByteString
+        getOperationIdBytes();
+
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+  }
+  /**
+   * <pre>
+   * Get datalake operation status request
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.DatalakeOperationStatusRequest}
+   */
+  public static final class DatalakeOperationStatusRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.DatalakeOperationStatusRequest)
+      DatalakeOperationStatusRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatalakeOperationStatusRequest.newBuilder() to construct.
+    private DatalakeOperationStatusRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatalakeOperationStatusRequest() {
+      datalake_ = "";
+      operationId_ = "";
+      accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeOperationStatusRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.Builder.class);
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalake_ = "";
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OPERATIONID_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object operationId_ = "";
+    /**
+     * <pre>
+     * ID of the operation
+     * </pre>
+     *
+     * <code>string operationId = 2;</code>
+     * @return The operationId.
+     */
+    @java.lang.Override
+    public java.lang.String getOperationId() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        operationId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * ID of the operation
+     * </pre>
+     *
+     * <code>string operationId = 2;</code>
+     * @return The bytes for operationId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getOperationIdBytes() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        operationId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object accountId_ = "";
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account Id
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, operationId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, operationId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!getOperationId()
+          .equals(other.getOperationId())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (37 * hash) + OPERATIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getOperationId().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Get datalake operation status request
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.DatalakeOperationStatusRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.DatalakeOperationStatusRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalake_ = "";
+        operationId_ = "";
+        accountId_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalake_ = datalake_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.operationId_ = operationId_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.accountId_ = accountId_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getOperationId().isEmpty()) {
+          operationId_ = other.operationId_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                operationId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        datalake_ = getDefaultInstance().getDatalake();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object operationId_ = "";
+      /**
+       * <pre>
+       * ID of the operation
+       * </pre>
+       *
+       * <code>string operationId = 2;</code>
+       * @return The operationId.
+       */
+      public java.lang.String getOperationId() {
+        java.lang.Object ref = operationId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          operationId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * ID of the operation
+       * </pre>
+       *
+       * <code>string operationId = 2;</code>
+       * @return The bytes for operationId.
+       */
+      public com.google.protobuf.ByteString
+          getOperationIdBytes() {
+        java.lang.Object ref = operationId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          operationId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * ID of the operation
+       * </pre>
+       *
+       * <code>string operationId = 2;</code>
+       * @param value The operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        operationId_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * ID of the operation
+       * </pre>
+       *
+       * <code>string operationId = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOperationId() {
+        operationId_ = getDefaultInstance().getOperationId();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * ID of the operation
+       * </pre>
+       *
+       * <code>string operationId = 2;</code>
+       * @param value The bytes for operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        operationId_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        accountId_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        accountId_ = getDefaultInstance().getAccountId();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account Id
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        accountId_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.DatalakeOperationStatusRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.DatalakeOperationStatusRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatalakeOperationStatusRequest>
+        PARSER = new com.google.protobuf.AbstractParser<DatalakeOperationStatusRequest>() {
+      @java.lang.Override
+      public DatalakeOperationStatusRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatalakeOperationStatusRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatalakeOperationStatusRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DatalakeOperationStatusResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.DatalakeOperationStatusResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Status of the Datalake operation
+     * </pre>
+     *
+     * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    int getStatusValue();
+    /**
+     * <pre>
+     * Status of the Datalake operation
+     * </pre>
+     *
+     * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+     * @return The status.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value getStatus();
+
+    /**
+     * <pre>
+     * Status reason of the operation
+     * </pre>
+     *
+     * <code>string statusReason = 2;</code>
+     * @return The statusReason.
+     */
+    java.lang.String getStatusReason();
+    /**
+     * <pre>
+     * Status reason of the operation
+     * </pre>
+     *
+     * <code>string statusReason = 2;</code>
+     * @return The bytes for statusReason.
+     */
+    com.google.protobuf.ByteString
+        getStatusReasonBytes();
+  }
+  /**
+   * <pre>
+   * Get datalake operation status response
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.DatalakeOperationStatusResponse}
+   */
+  public static final class DatalakeOperationStatusResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.DatalakeOperationStatusResponse)
+      DatalakeOperationStatusResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatalakeOperationStatusResponse.newBuilder() to construct.
+    private DatalakeOperationStatusResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatalakeOperationStatusResponse() {
+      status_ = 0;
+      statusReason_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeOperationStatusResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.Builder.class);
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private int status_ = 0;
+    /**
+     * <pre>
+     * Status of the Datalake operation
+     * </pre>
+     *
+     * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    @java.lang.Override public int getStatusValue() {
+      return status_;
+    }
+    /**
+     * <pre>
+     * Status of the Datalake operation
+     * </pre>
+     *
+     * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+     * @return The status.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value getStatus() {
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value.forNumber(status_);
+      return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int STATUSREASON_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object statusReason_ = "";
+    /**
+     * <pre>
+     * Status reason of the operation
+     * </pre>
+     *
+     * <code>string statusReason = 2;</code>
+     * @return The statusReason.
+     */
+    @java.lang.Override
+    public java.lang.String getStatusReason() {
+      java.lang.Object ref = statusReason_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        statusReason_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status reason of the operation
+     * </pre>
+     *
+     * <code>string statusReason = 2;</code>
+     * @return The bytes for statusReason.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusReasonBytes() {
+      java.lang.Object ref = statusReason_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        statusReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (status_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value.IN_PROGRESS.getNumber()) {
+        output.writeEnum(1, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, statusReason_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (status_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value.IN_PROGRESS.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, statusReason_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse) obj;
+
+      if (status_ != other.status_) return false;
+      if (!getStatusReason()
+          .equals(other.getStatusReason())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + status_;
+      hash = (37 * hash) + STATUSREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getStatusReason().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Get datalake operation status response
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.DatalakeOperationStatusResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.DatalakeOperationStatusResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        status_ = 0;
+        statusReason_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DatalakeOperationStatusResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.statusReason_ = statusReason_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.getDefaultInstance()) return this;
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
+        }
+        if (!other.getStatusReason().isEmpty()) {
+          statusReason_ = other.statusReason_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                status_ = input.readEnum();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                statusReason_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int status_ = 0;
+      /**
+       * <pre>
+       * Status of the Datalake operation
+       * </pre>
+       *
+       * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+       * @return The enum numeric value on the wire for status.
+       */
+      @java.lang.Override public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake operation
+       * </pre>
+       *
+       * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusValue(int value) {
+        status_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake operation
+       * </pre>
+       *
+       * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+       * @return The status.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value getStatus() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value.forNumber(status_);
+        return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake operation
+       * </pre>
+       *
+       * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.OperationStatusType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
+        status_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake operation
+       * </pre>
+       *
+       * <code>.cdlcrud.OperationStatusType.Value status = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object statusReason_ = "";
+      /**
+       * <pre>
+       * Status reason of the operation
+       * </pre>
+       *
+       * <code>string statusReason = 2;</code>
+       * @return The statusReason.
+       */
+      public java.lang.String getStatusReason() {
+        java.lang.Object ref = statusReason_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          statusReason_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the operation
+       * </pre>
+       *
+       * <code>string statusReason = 2;</code>
+       * @return The bytes for statusReason.
+       */
+      public com.google.protobuf.ByteString
+          getStatusReasonBytes() {
+        java.lang.Object ref = statusReason_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          statusReason_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the operation
+       * </pre>
+       *
+       * <code>string statusReason = 2;</code>
+       * @param value The statusReason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusReason(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        statusReason_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the operation
+       * </pre>
+       *
+       * <code>string statusReason = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatusReason() {
+        statusReason_ = getDefaultInstance().getStatusReason();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the operation
+       * </pre>
+       *
+       * <code>string statusReason = 2;</code>
+       * @param value The bytes for statusReason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusReasonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        statusReason_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.DatalakeOperationStatusResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.DatalakeOperationStatusResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatalakeOperationStatusResponse>
+        PARSER = new com.google.protobuf.AbstractParser<DatalakeOperationStatusResponse>() {
+      @java.lang.Override
+      public DatalakeOperationStatusResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatalakeOperationStatusResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatalakeOperationStatusResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface StopDatalakeRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.StopDatalakeRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+  }
+  /**
+   * <pre>
+   * Request object for Stop datalake
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.StopDatalakeRequest}
+   */
+  public static final class StopDatalakeRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.StopDatalakeRequest)
+      StopDatalakeRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StopDatalakeRequest.newBuilder() to construct.
+    private StopDatalakeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StopDatalakeRequest() {
+      datalake_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StopDatalakeRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.Builder.class);
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalake_ = "";
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for Stop datalake
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.StopDatalakeRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.StopDatalakeRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalake_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalake_ = datalake_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        datalake_ = getDefaultInstance().getDatalake();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.StopDatalakeRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.StopDatalakeRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StopDatalakeRequest>
+        PARSER = new com.google.protobuf.AbstractParser<StopDatalakeRequest>() {
+      @java.lang.Override
+      public StopDatalakeRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<StopDatalakeRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StopDatalakeRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface StopDatalakeResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.StopDatalakeResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The crn.
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The bytes for crn.
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The status.
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The bytes for status.
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+  }
+  /**
+   * <pre>
+   * Response object for Stop datalake
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.StopDatalakeResponse}
+   */
+  public static final class StopDatalakeResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.StopDatalakeResponse)
+      StopDatalakeResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StopDatalakeResponse.newBuilder() to construct.
+    private StopDatalakeResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StopDatalakeResponse() {
+      crn_ = "";
+      name_ = "";
+      status_ = "";
+      environmentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StopDatalakeResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.Builder.class);
+    }
+
+    public static final int CRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object crn_ = "";
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The crn.
+     */
+    @java.lang.Override
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The bytes for crn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object status_ = "";
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object environmentCrn_ = "";
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, environmentCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, environmentCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse) obj;
+
+      if (!getCrn()
+          .equals(other.getCrn())) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for Stop datalake
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.StopDatalakeResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.StopDatalakeResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        crn_ = "";
+        name_ = "";
+        status_ = "";
+        environmentCrn_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StopDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.crn_ = crn_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.environmentCrn_ = environmentCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.getDefaultInstance()) return this;
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                crn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                status_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                environmentCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @return The crn.
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @return The bytes for crn.
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @param value The crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        crn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCrn() {
+        crn_ = getDefaultInstance().getCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @param value The bytes for crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        crn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return The status.
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return The bytes for status.
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        status_ = getDefaultInstance().getStatus();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.StopDatalakeResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.StopDatalakeResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StopDatalakeResponse>
+        PARSER = new com.google.protobuf.AbstractParser<StopDatalakeResponse>() {
+      @java.lang.Override
+      public StopDatalakeResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<StopDatalakeResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StopDatalakeResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface StartDatalakeRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.StartDatalakeRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+  }
+  /**
+   * <pre>
+   * Request object for Start datalake
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.StartDatalakeRequest}
+   */
+  public static final class StartDatalakeRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.StartDatalakeRequest)
+      StartDatalakeRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StartDatalakeRequest.newBuilder() to construct.
+    private StartDatalakeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StartDatalakeRequest() {
+      datalake_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StartDatalakeRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.Builder.class);
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object datalake_ = "";
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for Start datalake
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.StartDatalakeRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.StartDatalakeRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        datalake_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.datalake_ = datalake_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        datalake_ = getDefaultInstance().getDatalake();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        datalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.StartDatalakeRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.StartDatalakeRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StartDatalakeRequest>
+        PARSER = new com.google.protobuf.AbstractParser<StartDatalakeRequest>() {
+      @java.lang.Override
+      public StartDatalakeRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<StartDatalakeRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StartDatalakeRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface StartDatalakeResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.StartDatalakeResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The crn.
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The bytes for crn.
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The status.
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The bytes for status.
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+  }
+  /**
+   * <pre>
+   * Response object for Start datalake
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.StartDatalakeResponse}
+   */
+  public static final class StartDatalakeResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.StartDatalakeResponse)
+      StartDatalakeResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use StartDatalakeResponse.newBuilder() to construct.
+    private StartDatalakeResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private StartDatalakeResponse() {
+      crn_ = "";
+      name_ = "";
+      status_ = "";
+      environmentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StartDatalakeResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.Builder.class);
+    }
+
+    public static final int CRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object crn_ = "";
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The crn.
+     */
+    @java.lang.Override
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * CRN of the Datalake
+     * </pre>
+     *
+     * <code>string crn = 1;</code>
+     * @return The bytes for crn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the Datalake
+     * </pre>
+     *
+     * <code>string name = 2;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object status_ = "";
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the Datalake
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object environmentCrn_ = "";
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, environmentCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, crn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, environmentCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse) obj;
+
+      if (!getCrn()
+          .equals(other.getCrn())) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for Start datalake
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.StartDatalakeResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.StartDatalakeResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        crn_ = "";
+        name_ = "";
+        status_ = "";
+        environmentCrn_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_StartDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.crn_ = crn_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.status_ = status_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.environmentCrn_ = environmentCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.getDefaultInstance()) return this;
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                crn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                status_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              case 34: {
+                environmentCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @return The crn.
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @return The bytes for crn.
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @param value The crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        crn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCrn() {
+        crn_ = getDefaultInstance().getCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * CRN of the Datalake
+       * </pre>
+       *
+       * <code>string crn = 1;</code>
+       * @param value The bytes for crn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        crn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Datalake
+       * </pre>
+       *
+       * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return The status.
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return The bytes for status.
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        status_ = getDefaultInstance().getStatus();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the Datalake
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        status_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.StartDatalakeResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.StartDatalakeResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<StartDatalakeResponse>
+        PARSER = new com.google.protobuf.AbstractParser<StartDatalakeResponse>() {
+      @java.lang.Override
+      public StartDatalakeResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<StartDatalakeResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<StartDatalakeResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CloudPlatformTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.CloudPlatformType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Cloud Platform of the Data Lake
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.CloudPlatformType}
+   */
+  public static final class CloudPlatformType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.CloudPlatformType)
+      CloudPlatformTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CloudPlatformType.newBuilder() to construct.
+    private CloudPlatformType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CloudPlatformType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CloudPlatformType();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CloudPlatformType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CloudPlatformType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code cdlcrud.CloudPlatformType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>AWS = 0;</code>
+       */
+      AWS(0),
+      /**
+       * <code>AWS_GOV = 1;</code>
+       */
+      AWS_GOV(1),
+      /**
+       * <code>AZURE = 2;</code>
+       */
+      AZURE(2),
+      /**
+       * <code>YARN = 3;</code>
+       */
+      YARN(3),
+      /**
+       * <code>MOCK = 4;</code>
+       */
+      MOCK(4),
+      /**
+       * <code>GCP = 5;</code>
+       */
+      GCP(5),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>AWS = 0;</code>
+       */
+      public static final int AWS_VALUE = 0;
+      /**
+       * <code>AWS_GOV = 1;</code>
+       */
+      public static final int AWS_GOV_VALUE = 1;
+      /**
+       * <code>AZURE = 2;</code>
+       */
+      public static final int AZURE_VALUE = 2;
+      /**
+       * <code>YARN = 3;</code>
+       */
+      public static final int YARN_VALUE = 3;
+      /**
+       * <code>MOCK = 4;</code>
+       */
+      public static final int MOCK_VALUE = 4;
+      /**
+       * <code>GCP = 5;</code>
+       */
+      public static final int GCP_VALUE = 5;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return AWS;
+          case 1: return AWS_GOV;
+          case 2: return AZURE;
+          case 3: return YARN;
+          case 4: return MOCK;
+          case 5: return GCP;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:cdlcrud.CloudPlatformType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Cloud Platform of the Data Lake
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.CloudPlatformType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.CloudPlatformType)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CloudPlatformType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CloudPlatformType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CloudPlatformType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.CloudPlatformType)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.CloudPlatformType)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CloudPlatformType>
+        PARSER = new com.google.protobuf.AbstractParser<CloudPlatformType>() {
+      @java.lang.Override
+      public CloudPlatformType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CloudPlatformType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CloudPlatformType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CloudPlatformType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdlcrud_DatabaseAvailabilityType_descriptor;
   private static final 
@@ -39210,6 +54961,11 @@ java.lang.String defaultValue) {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdlcrud_StatusType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_OperationStatusType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_OperationStatusType_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdlcrud_InstanceGroup_descriptor;
   private static final 
@@ -39265,6 +55021,11 @@ java.lang.String defaultValue) {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdlcrud_CreateDatalakeRequest_TagsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CreateDatalakeRequest_ConfigurationOverridesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CreateDatalakeRequest_ConfigurationOverridesEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdlcrud_CreateDatalakeResponse_descriptor;
   private static final 
@@ -39380,6 +55141,91 @@ java.lang.String defaultValue) {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdlcrud_ListDatalakesResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_UpgradeDatalakeRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_UpgradeDatalakeRequest_CustomConfigOverridesEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_UpgradeDatalakeRequest_CustomConfigOverridesEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_UpgradeDatalakeResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_UpgradeDatalakeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_SyncIDBrokerMappingsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_ActorMappingsEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_SyncIDBrokerMappingsRequest_ActorMappingsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_GroupMappingsEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_SyncIDBrokerMappingsRequest_GroupMappingsEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_SyncIDBrokerMappingsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_SyncIDBrokerMappingsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_BackupRestoreDatalakeRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_BackupRestoreDatalakeRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_BackupRestoreDatalakeResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_BackupRestoreDatalakeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_BackupRestoreType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_BackupRestoreType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_DatalakeOperationStatusRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_DatalakeOperationStatusRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_DatalakeOperationStatusResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_DatalakeOperationStatusResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_StopDatalakeRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_StopDatalakeRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_StopDatalakeResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_StopDatalakeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_StartDatalakeRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_StartDatalakeRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_StartDatalakeResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_StartDatalakeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CloudPlatformType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CloudPlatformType_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -39390,146 +55236,218 @@ java.lang.String defaultValue) {
   static {
     java.lang.String[] descriptorData = {
       "\n\rcdlcrud.proto\022\007cdlcrud\032\rversion.proto\032" +
-      "\roptions.proto\032\017resources.proto\"L\n\030Datab" +
-      "aseAvailabilityType\"0\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\010\n\004NONE\020\001\022\n\n\006NON_HA\020\002\022\006\n\002HA\020\003\"\374\001\n\nStatus" +
-      "Type\"\355\001\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001" +
-      "\022\020\n\014PROVISIONING\020\002\022\017\n\013PROVISIONED\020\003\022\027\n\023P" +
-      "ROVISIONING_FAILED\020\004\022\013\n\007RUNNING\020\005\022\013\n\007STO" +
-      "PPED\020\006\022\r\n\tUPGRADING\020\007\022\014\n\010DELETING\020\010\022\013\n\007D" +
-      "ELETED\020\t\022\021\n\rDELETE_FAILED\020\n\022\013\n\007UNKNOWN\020\013" +
-      "\022\031\n\025LIMITED_FUNCTIONALITY\020\014\022\017\n\013UNAVAILAB" +
-      "LE\020\r\"C\n\rInstanceGroup\022\014\n\004name\030\001 \001(\t\022$\n\ti" +
-      "nstances\030\002 \003(\0132\021.cdlcrud.Instance\"\235\001\n\010In" +
-      "stance\022\n\n\002id\030\001 \001(\t\022\r\n\005state\030\002 \001(\t\022\025\n\rdis" +
-      "coveryFQDN\030\003 \001(\t\022\021\n\tprivateIP\030\004 \001(\t\022\020\n\010p" +
-      "ublicIP\030\005 \001(\t\022\016\n\006rackID\030\006 \001(\t\022\020\n\010subnetI" +
-      "D\030\007 \001(\t\022\030\n\020availabilityZone\030\010 \001(\t\"k\n\010End" +
-      "point\022\023\n\013serviceName\030\001 \001(\t\022\022\n\nserviceURL" +
-      "\030\002 \001(\t\022\023\n\013displayName\030\003 \001(\t\022\023\n\013knoxServi" +
-      "ce\030\004 \001(\t\022\014\n\004mode\030\005 \001(\t\"n\n\013NetworkInfo\022\026\n" +
-      "\016securityGroups\030\001 \003(\t\022\026\n\016virtualNetwork\030" +
-      "\002 \001(\t\022\017\n\007subnets\030\003 \003(\t\022\036\n\026existingVirtua" +
-      "lNetwork\030\004 \001(\010\"\231\002\n\014DatabaseInfo\022\013\n\003crn\030\001" +
-      " \001(\t\022\024\n\014databaseName\030\002 \001(\t\022\025\n\007created\030\003 " +
-      "\001(\003B\004\260\265\030\001\022\026\n\016sslModeEnabled\030\004 \001(\010\022A\n\020ava" +
-      "ilabilityType\030\005 \001(\0162\'.cdlcrud.DatabaseAv" +
-      "ailabilityType.Value\022\014\n\004host\030\007 \001(\t\022\014\n\004po" +
-      "rt\030\010 \001(\r\022\030\n\020secretEnginePath\030\t \001(\t\022\036\n\026co" +
-      "nnectionUsernamePath\030\n \001(\t\022\036\n\026connection" +
-      "PasswordPath\030\013 \001(\t\"\237\001\n\014EndpointInfo\022\014\n\004n" +
-      "ame\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022-\n\016serviceCon" +
-      "figs\030\003 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030\001\022,\n\rend" +
-      "pointHosts\030\004 \003(\0132\025.cdlcrud.EndpointHost\022" +
-      "\023\n\013serviceType\030\005 \001(\t\"$\n\006Config\022\013\n\003key\030\001 " +
-      "\001(\t\022\r\n\005value\030\002 \001(\t\"/\n\016ProductVersion\022\014\n\004" +
-      "name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\"]\n\014EndpointH" +
-      "ost\022\013\n\003uri\030\001 \001(\t\0222\n\023endPointHostConfigs\030" +
-      "\002 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030\001\022\014\n\004type\030\003 \001" +
-      "(\t\"\305\004\n\025CreateDatalakeRequest\022\024\n\014datalake" +
-      "Name\030\001 \001(\t\022\027\n\017environmentName\030\002 \001(\t\022N\n\030d" +
-      "atabaseAvailabilityType\030\003 \001(\0162\'.cdlcrud." +
-      "DatabaseAvailabilityType.ValueH\000\210\001\001\0226\n\004t" +
-      "ags\030\004 \003(\0132(.cdlcrud.CreateDatalakeReques" +
-      "t.TagsEntry\022\"\n\025databaseEngineVersion\030\005 \001" +
-      "(\tH\001\210\001\001\022\034\n\017enableRangerRaz\030\006 \001(\010H\002\210\001\001\022\032\n" +
-      "\renableMultiAz\030\007 \001(\010H\003\210\001\001\022\036\n\026clouderaRun" +
-      "timeVersion\030\010 \001(\t\022\023\n\006layout\030\t \001(\tH\004\210\001\001\0228" +
-      "\n\020awsConfiguration\030\n \001(\0132\031.cdlcrud.AwsCo" +
-      "nfigurationH\005\210\001\001\032+\n\tTagsEntry\022\013\n\003key\030\001 \001" +
-      "(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\033\n\031_databaseAvaila" +
-      "bilityTypeB\030\n\026_databaseEngineVersionB\022\n\020" +
-      "_enableRangerRazB\020\n\016_enableMultiAzB\t\n\007_l" +
-      "ayoutB\023\n\021_awsConfiguration\"\247\002\n\026CreateDat" +
-      "alakeResponse\022\013\n\003crn\030\001 \001(\t\022\016\n\006status\030\002 \001" +
-      "(\t\022\024\n\014datalakeName\030\003 \001(\t\022\026\n\016environmentC" +
-      "rn\030\004 \001(\t\022\026\n\016creationDateMs\030\005 \001(\004\022\024\n\014stat" +
-      "usReason\030\006 \001(\t\022\027\n\017enableRangerRaz\030\007 \001(\010\022" +
-      "\025\n\renableMultiAz\030\010 \001(\010\0227\n\004tags\030\t \003(\0132).c" +
-      "dlcrud.CreateDatalakeResponse.TagsEntry\032" +
-      "+\n\tTagsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
-      ":\0028\001\")\n\025DeleteDatalakeRequest\022\020\n\010datalak" +
-      "e\030\001 \001(\t\"5\n\026DeleteDatalakeResponse\022\013\n\003crn" +
-      "\030\001 \001(\t\022\016\n\006status\030\002 \001(\t\">\n\027DescribeDatala" +
-      "keRequest\022\020\n\010datalake\030\001 \001(\t\022\021\n\taccountID" +
-      "\030\002 \001(\t\"\217\005\n\030DescribeDatalakeResponse\022\013\n\003c" +
-      "rn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022)\n\006status\030\003 \001(\0162\031" +
-      ".cdlcrud.StatusType.Value\022\r\n\005shape\030\004 \001(\t" +
-      "\022\026\n\016environmentCrn\030\005 \001(\t\022\025\n\rcloudPlatfor" +
-      "m\030\006 \001(\t\022.\n\016instanceGroups\030\007 \003(\0132\026.cdlcru" +
-      "d.InstanceGroup\022$\n\tendpoints\030\010 \003(\0132\021.cdl" +
-      "crud.Endpoint\022%\n\007network\030\t \001(\0132\024.cdlcrud" +
-      ".NetworkInfo\022\021\n\taccountID\030\n \001(\t\022\026\n\016runti" +
-      "meVersion\030\013 \001(\t\0229\n\004tags\030\014 \003(\0132+.cdlcrud." +
-      "DescribeDatalakeResponse.TagsEntry\022\025\n\007cr" +
-      "eated\030\r \001(\003B\004\260\265\030\001\022\017\n\007deleted\030\016 \001(\t\022\030\n\020ra" +
-      "ngerRazEnabled\030\017 \001(\010\022.\n\017databaseDetails\030" +
-      "\020 \001(\0132\025.cdlcrud.DatabaseInfo\022\024\n\014statusRe" +
-      "ason\030\021 \003(\t\022\026\n\016multiAzEnabled\030\022 \001(\010\022\016\n\006re" +
-      "gion\030\023 \001(\t\022/\n\016productVersion\030\024 \001(\0132\027.cdl" +
-      "crud.ProductVersion\032+\n\tTagsEntry\022\013\n\003key\030" +
-      "\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"O\n\023FindDatalake" +
+      "\roptions.proto\032\017resources.proto\032\022sdxsvcc" +
+      "ommon.proto\"L\n\030DatabaseAvailabilityType\"" +
+      "0\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004NONE\020\001\022\n\n\006NON_HA\020" +
+      "\002\022\006\n\002HA\020\003\"\241\002\n\nStatusType\"\222\002\n\005Value\022\t\n\005UN" +
+      "SET\020\000\022\r\n\tREQUESTED\020\001\022\020\n\014PROVISIONING\020\002\022\017" +
+      "\n\013PROVISIONED\020\003\022\027\n\023PROVISIONING_FAILED\020\004" +
+      "\022\013\n\007RUNNING\020\005\022\013\n\007STOPPED\020\006\022\r\n\tUPGRADING\020" +
+      "\007\022\014\n\010DELETING\020\010\022\013\n\007DELETED\020\t\022\021\n\rDELETE_F" +
+      "AILED\020\n\022\013\n\007UNKNOWN\020\013\022\031\n\025LIMITED_FUNCTION" +
+      "ALITY\020\014\022\017\n\013UNAVAILABLE\020\r\022\021\n\rBACKING_UP_D" +
+      "B\020\016\022\020\n\014RESTORING_DB\020\017\"J\n\023OperationStatus" +
+      "Type\"3\n\005Value\022\017\n\013IN_PROGRESS\020\000\022\n\n\006FAILED" +
+      "\020\001\022\r\n\tSUCCEEDED\020\002\"C\n\rInstanceGroup\022\014\n\004na" +
+      "me\030\001 \001(\t\022$\n\tinstances\030\002 \003(\0132\021.cdlcrud.In" +
+      "stance\"\235\001\n\010Instance\022\n\n\002id\030\001 \001(\t\022\r\n\005state" +
+      "\030\002 \001(\t\022\025\n\rdiscoveryFQDN\030\003 \001(\t\022\021\n\tprivate" +
+      "IP\030\004 \001(\t\022\020\n\010publicIP\030\005 \001(\t\022\016\n\006rackID\030\006 \001" +
+      "(\t\022\020\n\010subnetID\030\007 \001(\t\022\030\n\020availabilityZone" +
+      "\030\010 \001(\t\"k\n\010Endpoint\022\023\n\013serviceName\030\001 \001(\t\022" +
+      "\022\n\nserviceURL\030\002 \001(\t\022\023\n\013displayName\030\003 \001(\t" +
+      "\022\023\n\013knoxService\030\004 \001(\t\022\014\n\004mode\030\005 \001(\t\"n\n\013N" +
+      "etworkInfo\022\026\n\016securityGroups\030\001 \003(\t\022\026\n\016vi" +
+      "rtualNetwork\030\002 \001(\t\022\017\n\007subnets\030\003 \003(\t\022\036\n\026e" +
+      "xistingVirtualNetwork\030\004 \001(\010\"\231\002\n\014Database" +
+      "Info\022\013\n\003crn\030\001 \001(\t\022\024\n\014databaseName\030\002 \001(\t\022" +
+      "\025\n\007created\030\003 \001(\003B\004\260\265\030\001\022\026\n\016sslModeEnabled" +
+      "\030\004 \001(\010\022A\n\020availabilityType\030\005 \001(\0162\'.cdlcr" +
+      "ud.DatabaseAvailabilityType.Value\022\014\n\004hos" +
+      "t\030\007 \001(\t\022\014\n\004port\030\010 \001(\r\022\030\n\020secretEnginePat" +
+      "h\030\t \001(\t\022\036\n\026connectionUsernamePath\030\n \001(\t\022" +
+      "\036\n\026connectionPasswordPath\030\013 \001(\t\"\237\001\n\014Endp" +
+      "ointInfo\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022" +
+      "-\n\016serviceConfigs\030\003 \003(\0132\017.cdlcrud.Config" +
+      "B\004\200\265\030\001\022,\n\rendpointHosts\030\004 \003(\0132\025.cdlcrud." +
+      "EndpointHost\022\023\n\013serviceType\030\005 \001(\t\"$\n\006Con" +
+      "fig\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"/\n\016Produ" +
+      "ctVersion\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t" +
+      "\"]\n\014EndpointHost\022\013\n\003uri\030\001 \001(\t\0222\n\023endPoin" +
+      "tHostConfigs\030\002 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030" +
+      "\001\022\014\n\004type\030\003 \001(\t\"\261\007\n\025CreateDatalakeReques" +
+      "t\022\024\n\014datalakeName\030\001 \001(\t\022\027\n\017environmentNa" +
+      "me\030\002 \001(\t\022N\n\030databaseAvailabilityType\030\003 \001" +
+      "(\0162\'.cdlcrud.DatabaseAvailabilityType.Va" +
+      "lueH\000\210\001\001\0226\n\004tags\030\004 \003(\0132(.cdlcrud.CreateD" +
+      "atalakeRequest.TagsEntry\022\"\n\025databaseEngi" +
+      "neVersion\030\005 \001(\tH\001\210\001\001\022\034\n\017enableRangerRaz\030" +
+      "\006 \001(\010H\002\210\001\001\022\032\n\renableMultiAz\030\007 \001(\010H\003\210\001\001\022\036" +
+      "\n\026clouderaRuntimeVersion\030\010 \001(\t\022\023\n\006layout" +
+      "\030\t \001(\tH\004\210\001\001\0228\n\020awsConfiguration\030\n \001(\0132\031." +
+      "cdlcrud.AwsConfigurationH\005\210\001\001\022@\n\017service" +
+      "Override\030\013 \003(\0132\'.sdxsvccommon.Deployment" +
+      "VersionOverride\022Z\n\026configurationOverride" +
+      "s\030\014 \003(\0132:.cdlcrud.CreateDatalakeRequest." +
+      "ConfigurationOverridesEntry\022%\n\030externalL" +
+      "iftieClusterCrn\030\r \001(\tH\006\210\001\001\0227\n\rcloudPlatf" +
+      "orm\030\016 \001(\0162 .cdlcrud.CloudPlatformType.Va" +
+      "lue\022\020\n\010profiles\030\017 \003(\t\032+\n\tTagsEntry\022\013\n\003ke" +
+      "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032=\n\033Configurat" +
+      "ionOverridesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030" +
+      "\002 \001(\t:\0028\001B\033\n\031_databaseAvailabilityTypeB\030" +
+      "\n\026_databaseEngineVersionB\022\n\020_enableRange" +
+      "rRazB\020\n\016_enableMultiAzB\t\n\007_layoutB\023\n\021_aw" +
+      "sConfigurationB\033\n\031_externalLiftieCluster" +
+      "Crn\"\247\002\n\026CreateDatalakeResponse\022\013\n\003crn\030\001 " +
+      "\001(\t\022\016\n\006status\030\002 \001(\t\022\024\n\014datalakeName\030\003 \001(" +
+      "\t\022\026\n\016environmentCrn\030\004 \001(\t\022\026\n\016creationDat" +
+      "eMs\030\005 \001(\004\022\024\n\014statusReason\030\006 \001(\t\022\027\n\017enabl" +
+      "eRangerRaz\030\007 \001(\010\022\025\n\renableMultiAz\030\010 \001(\010\022" +
+      "7\n\004tags\030\t \003(\0132).cdlcrud.CreateDatalakeRe" +
+      "sponse.TagsEntry\032+\n\tTagsEntry\022\013\n\003key\030\001 \001" +
+      "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"8\n\025DeleteDatalakeR" +
+      "equest\022\020\n\010datalake\030\001 \001(\t\022\r\n\005force\030\002 \001(\010\"" +
+      "5\n\026DeleteDatalakeResponse\022\013\n\003crn\030\001 \001(\t\022\016" +
+      "\n\006status\030\002 \001(\t\">\n\027DescribeDatalakeReques" +
+      "t\022\020\n\010datalake\030\001 \001(\t\022\021\n\taccountID\030\002 \001(\t\"\363" +
+      "\005\n\030DescribeDatalakeResponse\022\013\n\003crn\030\001 \001(\t" +
+      "\022\014\n\004name\030\002 \001(\t\022)\n\006status\030\003 \001(\0162\031.cdlcrud" +
+      ".StatusType.Value\022\r\n\005shape\030\004 \001(\t\022\026\n\016envi" +
+      "ronmentCrn\030\005 \001(\t\022\025\n\rcloudPlatform\030\006 \001(\t\022" +
+      ".\n\016instanceGroups\030\007 \003(\0132\026.cdlcrud.Instan" +
+      "ceGroup\022$\n\tendpoints\030\010 \003(\0132\021.cdlcrud.End" +
+      "point\022%\n\007network\030\t \001(\0132\024.cdlcrud.Network" +
+      "Info\022\021\n\taccountID\030\n \001(\t\022\026\n\016runtimeVersio" +
+      "n\030\013 \001(\t\0229\n\004tags\030\014 \003(\0132+.cdlcrud.Describe" +
+      "DatalakeResponse.TagsEntry\022\025\n\007created\030\r " +
+      "\001(\003B\004\260\265\030\001\022\017\n\007deleted\030\016 \001(\t\022\030\n\020rangerRazE" +
+      "nabled\030\017 \001(\010\022.\n\017databaseDetails\030\020 \001(\0132\025." +
+      "cdlcrud.DatabaseInfo\022\024\n\014statusReason\030\021 \003" +
+      "(\t\022\026\n\016multiAzEnabled\030\022 \001(\010\022\016\n\006region\030\023 \001" +
+      "(\t\022/\n\016productVersion\030\024 \001(\0132\027.cdlcrud.Pro" +
+      "ductVersion\022\027\n\017environmentName\030\025 \001(\t\022\017\n\007" +
+      "cluster\030\026 \001(\t\022\026\n\016credentialName\030\027 \001(\t\022 \n" +
+      "\030cloudStorageBaseLocation\030\030 \001(\t\032+\n\tTagsE" +
+      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"O\n\023" +
+      "FindDatalakeRequest\022\020\n\010datalake\030\001 \001(\t\022\021\n" +
+      "\taccountID\030\002 \001(\t\022\023\n\013environment\030\003 \001(\t\"\264\001" +
+      "\n\020DatalakeResponse\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030" +
+      "\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\026\n\016environmentCrn\030" +
+      "\004 \001(\t\022\025\n\007created\030\005 \001(\003B\004\260\265\030\001\022\024\n\014statusRe" +
+      "ason\030\006 \001(\t\022\030\n\020rangerRazEnabled\030\007 \001(\010\022\026\n\016" +
+      "multiAzEnabled\030\010 \001(\010\">\n\027DescribeServices" +
       "Request\022\020\n\010datalake\030\001 \001(\t\022\021\n\taccountID\030\002" +
-      " \001(\t\022\023\n\013environment\030\003 \001(\t\"\264\001\n\020DatalakeRe" +
-      "sponse\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\016\n\006sta" +
-      "tus\030\003 \001(\t\022\026\n\016environmentCrn\030\004 \001(\t\022\025\n\007cre" +
-      "ated\030\005 \001(\003B\004\260\265\030\001\022\024\n\014statusReason\030\006 \001(\t\022\030" +
-      "\n\020rangerRazEnabled\030\007 \001(\010\022\026\n\016multiAzEnabl" +
-      "ed\030\010 \001(\010\">\n\027DescribeServicesRequest\022\020\n\010d" +
-      "atalake\030\001 \001(\t\022\021\n\taccountID\030\002 \001(\t\"\230\001\n\030Des" +
-      "cribeServicesResponse\022\014\n\004name\030\001 \001(\t\022\013\n\003c" +
-      "rn\030\002 \001(\t\022(\n\tendpoints\030\003 \003(\0132\025.cdlcrud.En" +
-      "dpointInfo\022&\n\007configs\030\004 \003(\0132\017.cdlcrud.Co" +
-      "nfigB\004\200\265\030\001\022\017\n\007version\030\005 \001(\t\"1\n\020AwsConfig" +
-      "uration\022\035\n\025storageBucketLocation\030\001 \001(\t\"\324" +
-      "\001\n!CollectDatalakeDiagnosticsRequest\022\020\n\010" +
-      "datalake\030\001 \001(\t\022/\n\013destination\030\002 \001(\0162\032.cd" +
-      "lcrud.Destination.Value\022\030\n\013description\030\003" +
-      " \001(\tH\000\210\001\001\022\022\n\ncaseNumber\030\004 \001(\t\022\027\n\tstartDa" +
-      "te\030\005 \001(\003B\004\260\265\030\001\022\025\n\007endDate\030\006 \001(\003B\004\260\265\030\001B\016\n" +
-      "\014_description\".\n\013Destination\"\037\n\005Value\022\t\n" +
-      "\005UNSET\020\000\022\013\n\007SUPPORT\020\001\"Y\n\"CollectDatalake" +
-      "DiagnosticsResponse\0223\n\013diagnostics\030\001 \001(\013" +
-      "2\036.cdlcrud.DiagnosticsCollection\"\200\001\n\025Dia" +
-      "gnosticsCollection\022\024\n\014collectionId\030\001 \001(\t" +
-      "\022\025\n\007created\030\002 \001(\003B\004\260\265\030\001\022:\n\006status\030\003 \001(\0162" +
-      "*.cdlcrud.DiagnosticsCollectionStatus.Va" +
-      "lue\"\\\n\033DiagnosticsCollectionStatus\"=\n\005Va" +
-      "lue\022\013\n\007RUNNING\020\000\022\n\n\006FAILED\020\001\022\014\n\010FINISHED" +
-      "\020\002\022\r\n\tCANCELLED\020\003\"\206\001\n\036ListDatalakeDiagno" +
-      "sticsRequest\022\020\n\010datalake\030\001 \001(\t\022\034\n\tstartD" +
-      "ate\030\002 \001(\003B\004\260\265\030\001H\000\210\001\001\022\032\n\007endDate\030\003 \001(\003B\004\260" +
-      "\265\030\001H\001\210\001\001B\014\n\n_startDateB\n\n\010_endDate\"V\n\037Li" +
-      "stDatalakeDiagnosticsResponse\0223\n\013diagnos" +
-      "tics\030\001 \003(\0132\036.cdlcrud.DiagnosticsCollecti" +
-      "on\"4\n CancelDatalakeDiagnosticsRequest\022\020" +
-      "\n\010datalake\030\001 \001(\t\"#\n!CancelDatalakeDiagno" +
-      "sticsResponse\"P\n\024ListDatalakesRequest\022\023\n" +
-      "\013environment\030\001 \001(\t\022\021\n\taccountID\030\002 \001(\t\022\020\n" +
-      "\010datalake\030\003 \001(\t\"L\n\025ListDatalakesResponse" +
-      "\0223\n\020datalakeResponse\030\001 \003(\0132\031.cdlcrud.Dat" +
-      "alakeResponse2\345\006\n\007CdlCrud\022S\n\016CreateDatal" +
-      "ake\022\036.cdlcrud.CreateDatalakeRequest\032\037.cd" +
-      "lcrud.CreateDatalakeResponse\"\000\022S\n\016Delete" +
-      "Datalake\022\036.cdlcrud.DeleteDatalakeRequest" +
-      "\032\037.cdlcrud.DeleteDatalakeResponse\"\000\022Y\n\020D" +
-      "escribeDatalake\022 .cdlcrud.DescribeDatala" +
-      "keRequest\032!.cdlcrud.DescribeDatalakeResp" +
-      "onse\"\000\022I\n\014FindDatalake\022\034.cdlcrud.FindDat" +
-      "alakeRequest\032\031.cdlcrud.DatalakeResponse\"" +
-      "\000\022Y\n\020DescribeServices\022 .cdlcrud.Describe" +
-      "ServicesRequest\032!.cdlcrud.DescribeServic" +
-      "esResponse\"\000\022w\n\032CollectDatalakeDiagnosti" +
-      "cs\022*.cdlcrud.CollectDatalakeDiagnosticsR" +
-      "equest\032+.cdlcrud.CollectDatalakeDiagnost" +
-      "icsResponse\"\000\022n\n\027ListDatalakeDiagnostics" +
-      "\022\'.cdlcrud.ListDatalakeDiagnosticsReques" +
-      "t\032(.cdlcrud.ListDatalakeDiagnosticsRespo" +
-      "nse\"\000\022t\n\031CancelDatalakeDiagnostics\022).cdl" +
-      "crud.CancelDatalakeDiagnosticsRequest\032*." +
-      "cdlcrud.CancelDatalakeDiagnosticsRespons" +
-      "e\"\000\022P\n\rListDatalakes\022\035.cdlcrud.ListDatal" +
-      "akesRequest\032\036.cdlcrud.ListDatalakesRespo" +
+      " \001(\t\"\230\001\n\030DescribeServicesResponse\022\014\n\004nam" +
+      "e\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022(\n\tendpoints\030\003 \003(\0132" +
+      "\025.cdlcrud.EndpointInfo\022&\n\007configs\030\004 \003(\0132" +
+      "\017.cdlcrud.ConfigB\004\200\265\030\001\022\017\n\007version\030\005 \001(\t\"" +
+      "R\n\020AwsConfiguration\022\035\n\025storageBucketLoca" +
+      "tion\030\001 \001(\t\022\037\n\027idbrokerInstanceProfile\030\002 " +
+      "\001(\t\"\324\001\n!CollectDatalakeDiagnosticsReques" +
+      "t\022\020\n\010datalake\030\001 \001(\t\022/\n\013destination\030\002 \001(\016" +
+      "2\032.cdlcrud.Destination.Value\022\030\n\013descript" +
+      "ion\030\003 \001(\tH\000\210\001\001\022\022\n\ncaseNumber\030\004 \001(\t\022\027\n\tst" +
+      "artDate\030\005 \001(\003B\004\260\265\030\001\022\025\n\007endDate\030\006 \001(\003B\004\260\265" +
+      "\030\001B\016\n\014_description\".\n\013Destination\"\037\n\005Val" +
+      "ue\022\t\n\005UNSET\020\000\022\013\n\007SUPPORT\020\001\"Y\n\"CollectDat" +
+      "alakeDiagnosticsResponse\0223\n\013diagnostics\030" +
+      "\001 \001(\0132\036.cdlcrud.DiagnosticsCollection\"\200\001" +
+      "\n\025DiagnosticsCollection\022\024\n\014collectionId\030" +
+      "\001 \001(\t\022\025\n\007created\030\002 \001(\003B\004\260\265\030\001\022:\n\006status\030\003" +
+      " \001(\0162*.cdlcrud.DiagnosticsCollectionStat" +
+      "us.Value\"\\\n\033DiagnosticsCollectionStatus\"" +
+      "=\n\005Value\022\013\n\007RUNNING\020\000\022\n\n\006FAILED\020\001\022\014\n\010FIN" +
+      "ISHED\020\002\022\r\n\tCANCELLED\020\003\"\206\001\n\036ListDatalakeD" +
+      "iagnosticsRequest\022\020\n\010datalake\030\001 \001(\t\022\034\n\ts" +
+      "tartDate\030\002 \001(\003B\004\260\265\030\001H\000\210\001\001\022\032\n\007endDate\030\003 \001" +
+      "(\003B\004\260\265\030\001H\001\210\001\001B\014\n\n_startDateB\n\n\010_endDate\"" +
+      "V\n\037ListDatalakeDiagnosticsResponse\0223\n\013di" +
+      "agnostics\030\001 \003(\0132\036.cdlcrud.DiagnosticsCol" +
+      "lection\"4\n CancelDatalakeDiagnosticsRequ" +
+      "est\022\020\n\010datalake\030\001 \001(\t\"#\n!CancelDatalakeD" +
+      "iagnosticsResponse\"P\n\024ListDatalakesReque" +
+      "st\022\023\n\013environment\030\001 \001(\t\022\021\n\taccountID\030\002 \001" +
+      "(\t\022\020\n\010datalake\030\003 \001(\t\"L\n\025ListDatalakesRes" +
+      "ponse\0223\n\020datalakeResponse\030\001 \003(\0132\031.cdlcru" +
+      "d.DatalakeResponse\"\265\002\n\026UpgradeDatalakeRe" +
+      "quest\022\020\n\010datalake\030\001 \001(\t\022#\n\026clouderaRunti" +
+      "meVersion\030\002 \001(\tH\000\210\001\001\022Y\n\025customConfigOver" +
+      "rides\030\003 \003(\0132:.cdlcrud.UpgradeDatalakeReq" +
+      "uest.CustomConfigOverridesEntry\022\034\n\017skipF" +
+      "ullUpgrade\030\004 \001(\010H\001\210\001\001\032<\n\032CustomConfigOve" +
+      "rridesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:" +
+      "\0028\001B\031\n\027_clouderaRuntimeVersionB\022\n\020_skipF" +
+      "ullUpgrade\"h\n\027UpgradeDatalakeResponse\022\024\n" +
+      "\014datalakeName\030\001 \001(\t\022\023\n\013datalakeCrn\030\002 \001(\t" +
+      "\022\016\n\006status\030\003 \001(\t\022\022\n\nworkflowId\030\004 \001(\t\"\316\002\n" +
+      "\033SyncIDBrokerMappingsRequest\022\021\n\taccountI" +
+      "D\030\002 \001(\t\022\020\n\010datalake\030\003 \001(\t\022N\n\ractorMappin" +
+      "gs\030\004 \003(\01327.cdlcrud.SyncIDBrokerMappingsR" +
+      "equest.ActorMappingsEntry\022N\n\rgroupMappin" +
+      "gs\030\005 \003(\01327.cdlcrud.SyncIDBrokerMappingsR" +
+      "equest.GroupMappingsEntry\0324\n\022ActorMappin" +
+      "gsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032" +
+      "4\n\022GroupMappingsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005va" +
+      "lue\030\002 \001(\t:\0028\001\".\n\034SyncIDBrokerMappingsRes" +
+      "ponse\022\016\n\006status\030\001 \001(\t\"\274\001\n\034BackupRestoreD" +
+      "atalakeRequest\022\020\n\010datalake\030\001 \001(\t\022\026\n\016back" +
+      "upLocation\030\002 \001(\t\022\032\n\022closeDbConnections\030\003" +
+      " \001(\010\022.\n\004type\030\004 \001(\0162 .cdlcrud.BackupResto" +
+      "reType.Value\022\023\n\013operationId\030\005 \001(\t\022\021\n\tacc" +
+      "ountId\030\006 \001(\t\"4\n\035BackupRestoreDatalakeRes" +
+      "ponse\022\023\n\013operationId\030\001 \001(\t\"5\n\021BackupRest" +
+      "oreType\" \n\005Value\022\n\n\006BACKUP\020\000\022\013\n\007RESTORE\020" +
+      "\001\"Z\n\036DatalakeOperationStatusRequest\022\020\n\010d" +
+      "atalake\030\001 \001(\t\022\023\n\013operationId\030\002 \001(\t\022\021\n\tac" +
+      "countId\030\003 \001(\t\"k\n\037DatalakeOperationStatus" +
+      "Response\0222\n\006status\030\001 \001(\0162\".cdlcrud.Opera" +
+      "tionStatusType.Value\022\024\n\014statusReason\030\002 \001" +
+      "(\t\"\'\n\023StopDatalakeRequest\022\020\n\010datalake\030\001 " +
+      "\001(\t\"Y\n\024StopDatalakeResponse\022\013\n\003crn\030\001 \001(\t" +
+      "\022\014\n\004name\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\026\n\016enviro" +
+      "nmentCrn\030\004 \001(\t\"(\n\024StartDatalakeRequest\022\020" +
+      "\n\010datalake\030\001 \001(\t\"Z\n\025StartDatalakeRespons" +
+      "e\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\016\n\006status\030\003" +
+      " \001(\t\022\026\n\016environmentCrn\030\004 \001(\t\"Z\n\021CloudPla" +
+      "tformType\"E\n\005Value\022\007\n\003AWS\020\000\022\013\n\007AWS_GOV\020\001" +
+      "\022\t\n\005AZURE\020\002\022\010\n\004YARN\020\003\022\010\n\004MOCK\020\004\022\007\n\003GCP\020\005" +
+      "2\242\013\n\007CdlCrud\022S\n\016CreateDatalake\022\036.cdlcrud" +
+      ".CreateDatalakeRequest\032\037.cdlcrud.CreateD" +
+      "atalakeResponse\"\000\022S\n\016DeleteDatalake\022\036.cd" +
+      "lcrud.DeleteDatalakeRequest\032\037.cdlcrud.De" +
+      "leteDatalakeResponse\"\000\022Y\n\020DescribeDatala" +
+      "ke\022 .cdlcrud.DescribeDatalakeRequest\032!.c" +
+      "dlcrud.DescribeDatalakeResponse\"\000\022I\n\014Fin" +
+      "dDatalake\022\034.cdlcrud.FindDatalakeRequest\032" +
+      "\031.cdlcrud.DatalakeResponse\"\000\022Y\n\020Describe" +
+      "Services\022 .cdlcrud.DescribeServicesReque" +
+      "st\032!.cdlcrud.DescribeServicesResponse\"\000\022" +
+      "w\n\032CollectDatalakeDiagnostics\022*.cdlcrud." +
+      "CollectDatalakeDiagnosticsRequest\032+.cdlc" +
+      "rud.CollectDatalakeDiagnosticsResponse\"\000" +
+      "\022n\n\027ListDatalakeDiagnostics\022\'.cdlcrud.Li" +
+      "stDatalakeDiagnosticsRequest\032(.cdlcrud.L" +
+      "istDatalakeDiagnosticsResponse\"\000\022t\n\031Canc" +
+      "elDatalakeDiagnostics\022).cdlcrud.CancelDa" +
+      "talakeDiagnosticsRequest\032*.cdlcrud.Cance" +
+      "lDatalakeDiagnosticsResponse\"\000\022P\n\rListDa" +
+      "talakes\022\035.cdlcrud.ListDatalakesRequest\032\036" +
+      ".cdlcrud.ListDatalakesResponse\"\000\022V\n\017Upgr" +
+      "adeDatalake\022\037.cdlcrud.UpgradeDatalakeReq" +
+      "uest\032 .cdlcrud.UpgradeDatalakeResponse\"\000" +
+      "\022e\n\024SyncIDBrokerMappings\022$.cdlcrud.SyncI" +
+      "DBrokerMappingsRequest\032%.cdlcrud.SyncIDB" +
+      "rokerMappingsResponse\"\000\022h\n\025backupRestore" +
+      "Datalake\022%.cdlcrud.BackupRestoreDatalake" +
+      "Request\032&.cdlcrud.BackupRestoreDatalakeR" +
+      "esponse\"\000\022q\n\032getDatalakeOperationStatus\022" +
+      "\'.cdlcrud.DatalakeOperationStatusRequest" +
+      "\032(.cdlcrud.DatalakeOperationStatusRespon" +
+      "se\"\000\022M\n\014StopDatalake\022\034.cdlcrud.StopDatal" +
+      "akeRequest\032\035.cdlcrud.StopDatalakeRespons" +
+      "e\"\000\022P\n\rStartDatalake\022\035.cdlcrud.StartData" +
+      "lakeRequest\032\036.cdlcrud.StartDatalakeRespo" +
       "nse\"\000B8\n(com.cloudera.thunderhead.servic" +
       "e.cdlcrudB\014CdlCrudProtob\006proto3"
     };
@@ -39539,6 +55457,7 @@ java.lang.String defaultValue) {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.common.resources.Resources.getDescriptor(),
+          com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.getDescriptor(),
         });
     internal_static_cdlcrud_DatabaseAvailabilityType_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -39552,74 +55471,86 @@ java.lang.String defaultValue) {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_StatusType_descriptor,
         new java.lang.String[] { });
-    internal_static_cdlcrud_InstanceGroup_descriptor =
+    internal_static_cdlcrud_OperationStatusType_descriptor =
       getDescriptor().getMessageTypes().get(2);
+    internal_static_cdlcrud_OperationStatusType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_OperationStatusType_descriptor,
+        new java.lang.String[] { });
+    internal_static_cdlcrud_InstanceGroup_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_cdlcrud_InstanceGroup_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_InstanceGroup_descriptor,
         new java.lang.String[] { "Name", "Instances", });
     internal_static_cdlcrud_Instance_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_cdlcrud_Instance_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_Instance_descriptor,
         new java.lang.String[] { "Id", "State", "DiscoveryFQDN", "PrivateIP", "PublicIP", "RackID", "SubnetID", "AvailabilityZone", });
     internal_static_cdlcrud_Endpoint_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_cdlcrud_Endpoint_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_Endpoint_descriptor,
         new java.lang.String[] { "ServiceName", "ServiceURL", "DisplayName", "KnoxService", "Mode", });
     internal_static_cdlcrud_NetworkInfo_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_cdlcrud_NetworkInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_NetworkInfo_descriptor,
         new java.lang.String[] { "SecurityGroups", "VirtualNetwork", "Subnets", "ExistingVirtualNetwork", });
     internal_static_cdlcrud_DatabaseInfo_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_cdlcrud_DatabaseInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DatabaseInfo_descriptor,
         new java.lang.String[] { "Crn", "DatabaseName", "Created", "SslModeEnabled", "AvailabilityType", "Host", "Port", "SecretEnginePath", "ConnectionUsernamePath", "ConnectionPasswordPath", });
     internal_static_cdlcrud_EndpointInfo_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_cdlcrud_EndpointInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_EndpointInfo_descriptor,
         new java.lang.String[] { "Name", "Version", "ServiceConfigs", "EndpointHosts", "ServiceType", });
     internal_static_cdlcrud_Config_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_cdlcrud_Config_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_Config_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_ProductVersion_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_cdlcrud_ProductVersion_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_ProductVersion_descriptor,
         new java.lang.String[] { "Name", "Version", });
     internal_static_cdlcrud_EndpointHost_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_cdlcrud_EndpointHost_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_EndpointHost_descriptor,
         new java.lang.String[] { "Uri", "EndPointHostConfigs", "Type", });
     internal_static_cdlcrud_CreateDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_cdlcrud_CreateDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CreateDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "EnvironmentName", "DatabaseAvailabilityType", "Tags", "DatabaseEngineVersion", "EnableRangerRaz", "EnableMultiAz", "ClouderaRuntimeVersion", "Layout", "AwsConfiguration", });
+        new java.lang.String[] { "DatalakeName", "EnvironmentName", "DatabaseAvailabilityType", "Tags", "DatabaseEngineVersion", "EnableRangerRaz", "EnableMultiAz", "ClouderaRuntimeVersion", "Layout", "AwsConfiguration", "ServiceOverride", "ConfigurationOverrides", "ExternalLiftieClusterCrn", "CloudPlatform", "Profiles", });
     internal_static_cdlcrud_CreateDatalakeRequest_TagsEntry_descriptor =
       internal_static_cdlcrud_CreateDatalakeRequest_descriptor.getNestedTypes().get(0);
     internal_static_cdlcrud_CreateDatalakeRequest_TagsEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CreateDatalakeRequest_TagsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
+    internal_static_cdlcrud_CreateDatalakeRequest_ConfigurationOverridesEntry_descriptor =
+      internal_static_cdlcrud_CreateDatalakeRequest_descriptor.getNestedTypes().get(1);
+    internal_static_cdlcrud_CreateDatalakeRequest_ConfigurationOverridesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CreateDatalakeRequest_ConfigurationOverridesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_CreateDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_cdlcrud_CreateDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CreateDatalakeResponse_descriptor,
@@ -39631,29 +55562,29 @@ java.lang.String defaultValue) {
         internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_DeleteDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_cdlcrud_DeleteDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DeleteDatalakeRequest_descriptor,
-        new java.lang.String[] { "Datalake", });
+        new java.lang.String[] { "Datalake", "Force", });
     internal_static_cdlcrud_DeleteDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_cdlcrud_DeleteDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DeleteDatalakeResponse_descriptor,
         new java.lang.String[] { "Crn", "Status", });
     internal_static_cdlcrud_DescribeDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_cdlcrud_DescribeDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeDatalakeRequest_descriptor,
         new java.lang.String[] { "Datalake", "AccountID", });
     internal_static_cdlcrud_DescribeDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_cdlcrud_DescribeDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeDatalakeResponse_descriptor,
-        new java.lang.String[] { "Crn", "Name", "Status", "Shape", "EnvironmentCrn", "CloudPlatform", "InstanceGroups", "Endpoints", "Network", "AccountID", "RuntimeVersion", "Tags", "Created", "Deleted", "RangerRazEnabled", "DatabaseDetails", "StatusReason", "MultiAzEnabled", "Region", "ProductVersion", });
+        new java.lang.String[] { "Crn", "Name", "Status", "Shape", "EnvironmentCrn", "CloudPlatform", "InstanceGroups", "Endpoints", "Network", "AccountID", "RuntimeVersion", "Tags", "Created", "Deleted", "RangerRazEnabled", "DatabaseDetails", "StatusReason", "MultiAzEnabled", "Region", "ProductVersion", "EnvironmentName", "Cluster", "CredentialName", "CloudStorageBaseLocation", });
     internal_static_cdlcrud_DescribeDatalakeResponse_TagsEntry_descriptor =
       internal_static_cdlcrud_DescribeDatalakeResponse_descriptor.getNestedTypes().get(0);
     internal_static_cdlcrud_DescribeDatalakeResponse_TagsEntry_fieldAccessorTable = new
@@ -39661,101 +55592,203 @@ java.lang.String defaultValue) {
         internal_static_cdlcrud_DescribeDatalakeResponse_TagsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_FindDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_cdlcrud_FindDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_FindDatalakeRequest_descriptor,
         new java.lang.String[] { "Datalake", "AccountID", "Environment", });
     internal_static_cdlcrud_DatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_cdlcrud_DatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DatalakeResponse_descriptor,
         new java.lang.String[] { "Crn", "Name", "Status", "EnvironmentCrn", "Created", "StatusReason", "RangerRazEnabled", "MultiAzEnabled", });
     internal_static_cdlcrud_DescribeServicesRequest_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_cdlcrud_DescribeServicesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeServicesRequest_descriptor,
         new java.lang.String[] { "Datalake", "AccountID", });
     internal_static_cdlcrud_DescribeServicesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_cdlcrud_DescribeServicesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeServicesResponse_descriptor,
         new java.lang.String[] { "Name", "Crn", "Endpoints", "Configs", "Version", });
     internal_static_cdlcrud_AwsConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_cdlcrud_AwsConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_AwsConfiguration_descriptor,
-        new java.lang.String[] { "StorageBucketLocation", });
+        new java.lang.String[] { "StorageBucketLocation", "IdbrokerInstanceProfile", });
     internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor,
         new java.lang.String[] { "Datalake", "Destination", "Description", "CaseNumber", "StartDate", "EndDate", });
     internal_static_cdlcrud_Destination_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_cdlcrud_Destination_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_Destination_descriptor,
         new java.lang.String[] { });
     internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor,
         new java.lang.String[] { "Diagnostics", });
     internal_static_cdlcrud_DiagnosticsCollection_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_cdlcrud_DiagnosticsCollection_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DiagnosticsCollection_descriptor,
         new java.lang.String[] { "CollectionId", "Created", "Status", });
     internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_cdlcrud_DiagnosticsCollectionStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor,
         new java.lang.String[] { });
     internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor,
         new java.lang.String[] { "Datalake", "StartDate", "EndDate", });
     internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor,
         new java.lang.String[] { "Diagnostics", });
     internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor,
         new java.lang.String[] { "Datalake", });
     internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor,
         new java.lang.String[] { });
     internal_static_cdlcrud_ListDatalakesRequest_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_cdlcrud_ListDatalakesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_ListDatalakesRequest_descriptor,
         new java.lang.String[] { "Environment", "AccountID", "Datalake", });
     internal_static_cdlcrud_ListDatalakesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_cdlcrud_ListDatalakesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_ListDatalakesResponse_descriptor,
         new java.lang.String[] { "DatalakeResponse", });
+    internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(34);
+    internal_static_cdlcrud_UpgradeDatalakeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor,
+        new java.lang.String[] { "Datalake", "ClouderaRuntimeVersion", "CustomConfigOverrides", "SkipFullUpgrade", });
+    internal_static_cdlcrud_UpgradeDatalakeRequest_CustomConfigOverridesEntry_descriptor =
+      internal_static_cdlcrud_UpgradeDatalakeRequest_descriptor.getNestedTypes().get(0);
+    internal_static_cdlcrud_UpgradeDatalakeRequest_CustomConfigOverridesEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_UpgradeDatalakeRequest_CustomConfigOverridesEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_cdlcrud_UpgradeDatalakeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(35);
+    internal_static_cdlcrud_UpgradeDatalakeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_UpgradeDatalakeResponse_descriptor,
+        new java.lang.String[] { "DatalakeName", "DatalakeCrn", "Status", "WorkflowId", });
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(36);
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor,
+        new java.lang.String[] { "AccountID", "Datalake", "ActorMappings", "GroupMappings", });
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_ActorMappingsEntry_descriptor =
+      internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor.getNestedTypes().get(0);
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_ActorMappingsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_SyncIDBrokerMappingsRequest_ActorMappingsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_GroupMappingsEntry_descriptor =
+      internal_static_cdlcrud_SyncIDBrokerMappingsRequest_descriptor.getNestedTypes().get(1);
+    internal_static_cdlcrud_SyncIDBrokerMappingsRequest_GroupMappingsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_SyncIDBrokerMappingsRequest_GroupMappingsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_cdlcrud_SyncIDBrokerMappingsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(37);
+    internal_static_cdlcrud_SyncIDBrokerMappingsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_SyncIDBrokerMappingsResponse_descriptor,
+        new java.lang.String[] { "Status", });
+    internal_static_cdlcrud_BackupRestoreDatalakeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(38);
+    internal_static_cdlcrud_BackupRestoreDatalakeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_BackupRestoreDatalakeRequest_descriptor,
+        new java.lang.String[] { "Datalake", "BackupLocation", "CloseDbConnections", "Type", "OperationId", "AccountId", });
+    internal_static_cdlcrud_BackupRestoreDatalakeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(39);
+    internal_static_cdlcrud_BackupRestoreDatalakeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_BackupRestoreDatalakeResponse_descriptor,
+        new java.lang.String[] { "OperationId", });
+    internal_static_cdlcrud_BackupRestoreType_descriptor =
+      getDescriptor().getMessageTypes().get(40);
+    internal_static_cdlcrud_BackupRestoreType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_BackupRestoreType_descriptor,
+        new java.lang.String[] { });
+    internal_static_cdlcrud_DatalakeOperationStatusRequest_descriptor =
+      getDescriptor().getMessageTypes().get(41);
+    internal_static_cdlcrud_DatalakeOperationStatusRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_DatalakeOperationStatusRequest_descriptor,
+        new java.lang.String[] { "Datalake", "OperationId", "AccountId", });
+    internal_static_cdlcrud_DatalakeOperationStatusResponse_descriptor =
+      getDescriptor().getMessageTypes().get(42);
+    internal_static_cdlcrud_DatalakeOperationStatusResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_DatalakeOperationStatusResponse_descriptor,
+        new java.lang.String[] { "Status", "StatusReason", });
+    internal_static_cdlcrud_StopDatalakeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(43);
+    internal_static_cdlcrud_StopDatalakeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_StopDatalakeRequest_descriptor,
+        new java.lang.String[] { "Datalake", });
+    internal_static_cdlcrud_StopDatalakeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(44);
+    internal_static_cdlcrud_StopDatalakeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_StopDatalakeResponse_descriptor,
+        new java.lang.String[] { "Crn", "Name", "Status", "EnvironmentCrn", });
+    internal_static_cdlcrud_StartDatalakeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(45);
+    internal_static_cdlcrud_StartDatalakeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_StartDatalakeRequest_descriptor,
+        new java.lang.String[] { "Datalake", });
+    internal_static_cdlcrud_StartDatalakeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(46);
+    internal_static_cdlcrud_StartDatalakeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_StartDatalakeResponse_descriptor,
+        new java.lang.String[] { "Crn", "Name", "Status", "EnvironmentCrn", });
+    internal_static_cdlcrud_CloudPlatformType_descriptor =
+      getDescriptor().getMessageTypes().get(47);
+    internal_static_cdlcrud_CloudPlatformType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CloudPlatformType_descriptor,
+        new java.lang.String[] { });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.datetime);
@@ -39765,6 +55798,7 @@ java.lang.String defaultValue) {
     com.cloudera.thunderhead.service.common.version.Version.getDescriptor();
     com.cloudera.thunderhead.service.common.options.Options.getDescriptor();
     com.cloudera.thunderhead.service.common.resources.Resources.getDescriptor();
+    com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

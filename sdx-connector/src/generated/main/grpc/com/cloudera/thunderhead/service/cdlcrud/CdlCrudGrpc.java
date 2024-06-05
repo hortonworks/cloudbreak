@@ -298,6 +298,192 @@ public final class CdlCrudGrpc {
     return getListDatalakesMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse> getUpgradeDatalakeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpgradeDatalake",
+      requestType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse> getUpgradeDatalakeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse> getUpgradeDatalakeMethod;
+    if ((getUpgradeDatalakeMethod = CdlCrudGrpc.getUpgradeDatalakeMethod) == null) {
+      synchronized (CdlCrudGrpc.class) {
+        if ((getUpgradeDatalakeMethod = CdlCrudGrpc.getUpgradeDatalakeMethod) == null) {
+          CdlCrudGrpc.getUpgradeDatalakeMethod = getUpgradeDatalakeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpgradeDatalake"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CdlCrudMethodDescriptorSupplier("UpgradeDatalake"))
+              .build();
+        }
+      }
+    }
+    return getUpgradeDatalakeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse> getSyncIDBrokerMappingsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SyncIDBrokerMappings",
+      requestType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.class,
+      responseType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse> getSyncIDBrokerMappingsMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse> getSyncIDBrokerMappingsMethod;
+    if ((getSyncIDBrokerMappingsMethod = CdlCrudGrpc.getSyncIDBrokerMappingsMethod) == null) {
+      synchronized (CdlCrudGrpc.class) {
+        if ((getSyncIDBrokerMappingsMethod = CdlCrudGrpc.getSyncIDBrokerMappingsMethod) == null) {
+          CdlCrudGrpc.getSyncIDBrokerMappingsMethod = getSyncIDBrokerMappingsMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SyncIDBrokerMappings"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CdlCrudMethodDescriptorSupplier("SyncIDBrokerMappings"))
+              .build();
+        }
+      }
+    }
+    return getSyncIDBrokerMappingsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse> getBackupRestoreDatalakeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "backupRestoreDatalake",
+      requestType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse> getBackupRestoreDatalakeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse> getBackupRestoreDatalakeMethod;
+    if ((getBackupRestoreDatalakeMethod = CdlCrudGrpc.getBackupRestoreDatalakeMethod) == null) {
+      synchronized (CdlCrudGrpc.class) {
+        if ((getBackupRestoreDatalakeMethod = CdlCrudGrpc.getBackupRestoreDatalakeMethod) == null) {
+          CdlCrudGrpc.getBackupRestoreDatalakeMethod = getBackupRestoreDatalakeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "backupRestoreDatalake"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CdlCrudMethodDescriptorSupplier("backupRestoreDatalake"))
+              .build();
+        }
+      }
+    }
+    return getBackupRestoreDatalakeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse> getGetDatalakeOperationStatusMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "getDatalakeOperationStatus",
+      requestType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.class,
+      responseType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse> getGetDatalakeOperationStatusMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse> getGetDatalakeOperationStatusMethod;
+    if ((getGetDatalakeOperationStatusMethod = CdlCrudGrpc.getGetDatalakeOperationStatusMethod) == null) {
+      synchronized (CdlCrudGrpc.class) {
+        if ((getGetDatalakeOperationStatusMethod = CdlCrudGrpc.getGetDatalakeOperationStatusMethod) == null) {
+          CdlCrudGrpc.getGetDatalakeOperationStatusMethod = getGetDatalakeOperationStatusMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "getDatalakeOperationStatus"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CdlCrudMethodDescriptorSupplier("getDatalakeOperationStatus"))
+              .build();
+        }
+      }
+    }
+    return getGetDatalakeOperationStatusMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse> getStopDatalakeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "StopDatalake",
+      requestType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse> getStopDatalakeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse> getStopDatalakeMethod;
+    if ((getStopDatalakeMethod = CdlCrudGrpc.getStopDatalakeMethod) == null) {
+      synchronized (CdlCrudGrpc.class) {
+        if ((getStopDatalakeMethod = CdlCrudGrpc.getStopDatalakeMethod) == null) {
+          CdlCrudGrpc.getStopDatalakeMethod = getStopDatalakeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "StopDatalake"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CdlCrudMethodDescriptorSupplier("StopDatalake"))
+              .build();
+        }
+      }
+    }
+    return getStopDatalakeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse> getStartDatalakeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "StartDatalake",
+      requestType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest,
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse> getStartDatalakeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse> getStartDatalakeMethod;
+    if ((getStartDatalakeMethod = CdlCrudGrpc.getStartDatalakeMethod) == null) {
+      synchronized (CdlCrudGrpc.class) {
+        if ((getStartDatalakeMethod = CdlCrudGrpc.getStartDatalakeMethod) == null) {
+          CdlCrudGrpc.getStartDatalakeMethod = getStartDatalakeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "StartDatalake"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new CdlCrudMethodDescriptorSupplier("StartDatalake"))
+              .build();
+        }
+      }
+    }
+    return getStartDatalakeMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -439,6 +625,66 @@ public final class CdlCrudGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDatalakesMethod(), responseObserver);
     }
+
+    /**
+     * <pre>
+     * Upgrades specified Datalake to a later version of its layout
+     * </pre>
+     */
+    default void upgradeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpgradeDatalakeMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Synchronize IBBroker mappings
+     * </pre>
+     */
+    default void syncIDBrokerMappings(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSyncIDBrokerMappingsMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Backup or restore database of a Datalake
+     * </pre>
+     */
+    default void backupRestoreDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getBackupRestoreDatalakeMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get operation status and status reason
+     * </pre>
+     */
+    default void getDatalakeOperationStatus(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetDatalakeOperationStatusMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Stop a datalake
+     * </pre>
+     */
+    default void stopDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getStopDatalakeMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Start a datalake which is in Stopped state
+     * </pre>
+     */
+    default void startDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getStartDatalakeMethod(), responseObserver);
+    }
   }
 
   /**
@@ -574,6 +820,72 @@ public final class CdlCrudGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getListDatalakesMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Upgrades specified Datalake to a later version of its layout
+     * </pre>
+     */
+    public void upgradeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpgradeDatalakeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Synchronize IBBroker mappings
+     * </pre>
+     */
+    public void syncIDBrokerMappings(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSyncIDBrokerMappingsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Backup or restore database of a Datalake
+     * </pre>
+     */
+    public void backupRestoreDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getBackupRestoreDatalakeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get operation status and status reason
+     * </pre>
+     */
+    public void getDatalakeOperationStatus(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetDatalakeOperationStatusMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Stop a datalake
+     * </pre>
+     */
+    public void stopDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getStopDatalakeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Start a datalake which is in Stopped state
+     * </pre>
+     */
+    public void startDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getStartDatalakeMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -684,6 +996,66 @@ public final class CdlCrudGrpc {
     public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse listDatalakes(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getListDatalakesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Upgrades specified Datalake to a later version of its layout
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse upgradeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpgradeDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Synchronize IBBroker mappings
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse syncIDBrokerMappings(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSyncIDBrokerMappingsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Backup or restore database of a Datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse backupRestoreDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getBackupRestoreDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get operation status and status reason
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse getDatalakeOperationStatus(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetDatalakeOperationStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Stop a datalake
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse stopDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getStopDatalakeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Start a datalake which is in Stopped state
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse startDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getStartDatalakeMethod(), getCallOptions(), request);
     }
   }
 
@@ -805,6 +1177,72 @@ public final class CdlCrudGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getListDatalakesMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Upgrades specified Datalake to a later version of its layout
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse> upgradeDatalake(
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpgradeDatalakeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Synchronize IBBroker mappings
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse> syncIDBrokerMappings(
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSyncIDBrokerMappingsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Backup or restore database of a Datalake
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse> backupRestoreDatalake(
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getBackupRestoreDatalakeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get operation status and status reason
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse> getDatalakeOperationStatus(
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetDatalakeOperationStatusMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Stop a datalake
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse> stopDatalake(
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getStopDatalakeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Start a datalake which is in Stopped state
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse> startDatalake(
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getStartDatalakeMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_CREATE_DATALAKE = 0;
@@ -816,6 +1254,12 @@ public final class CdlCrudGrpc {
   private static final int METHODID_LIST_DATALAKE_DIAGNOSTICS = 6;
   private static final int METHODID_CANCEL_DATALAKE_DIAGNOSTICS = 7;
   private static final int METHODID_LIST_DATALAKES = 8;
+  private static final int METHODID_UPGRADE_DATALAKE = 9;
+  private static final int METHODID_SYNC_IDBROKER_MAPPINGS = 10;
+  private static final int METHODID_BACKUP_RESTORE_DATALAKE = 11;
+  private static final int METHODID_GET_DATALAKE_OPERATION_STATUS = 12;
+  private static final int METHODID_STOP_DATALAKE = 13;
+  private static final int METHODID_START_DATALAKE = 14;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -869,6 +1313,30 @@ public final class CdlCrudGrpc {
         case METHODID_LIST_DATALAKES:
           serviceImpl.listDatalakes((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse>) responseObserver);
+          break;
+        case METHODID_UPGRADE_DATALAKE:
+          serviceImpl.upgradeDatalake((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse>) responseObserver);
+          break;
+        case METHODID_SYNC_IDBROKER_MAPPINGS:
+          serviceImpl.syncIDBrokerMappings((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse>) responseObserver);
+          break;
+        case METHODID_BACKUP_RESTORE_DATALAKE:
+          serviceImpl.backupRestoreDatalake((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse>) responseObserver);
+          break;
+        case METHODID_GET_DATALAKE_OPERATION_STATUS:
+          serviceImpl.getDatalakeOperationStatus((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse>) responseObserver);
+          break;
+        case METHODID_STOP_DATALAKE:
+          serviceImpl.stopDatalake((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse>) responseObserver);
+          break;
+        case METHODID_START_DATALAKE:
+          serviceImpl.startDatalake((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -951,6 +1419,48 @@ public final class CdlCrudGrpc {
               com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest,
               com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse>(
                 service, METHODID_LIST_DATALAKES)))
+        .addMethod(
+          getUpgradeDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.UpgradeDatalakeResponse>(
+                service, METHODID_UPGRADE_DATALAKE)))
+        .addMethod(
+          getSyncIDBrokerMappingsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.SyncIDBrokerMappingsResponse>(
+                service, METHODID_SYNC_IDBROKER_MAPPINGS)))
+        .addMethod(
+          getBackupRestoreDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.BackupRestoreDatalakeResponse>(
+                service, METHODID_BACKUP_RESTORE_DATALAKE)))
+        .addMethod(
+          getGetDatalakeOperationStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeOperationStatusResponse>(
+                service, METHODID_GET_DATALAKE_OPERATION_STATUS)))
+        .addMethod(
+          getStopDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StopDatalakeResponse>(
+                service, METHODID_STOP_DATALAKE)))
+        .addMethod(
+          getStartDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.StartDatalakeResponse>(
+                service, METHODID_START_DATALAKE)))
         .build();
   }
 
@@ -1008,6 +1518,12 @@ public final class CdlCrudGrpc {
               .addMethod(getListDatalakeDiagnosticsMethod())
               .addMethod(getCancelDatalakeDiagnosticsMethod())
               .addMethod(getListDatalakesMethod())
+              .addMethod(getUpgradeDatalakeMethod())
+              .addMethod(getSyncIDBrokerMappingsMethod())
+              .addMethod(getBackupRestoreDatalakeMethod())
+              .addMethod(getGetDatalakeOperationStatusMethod())
+              .addMethod(getStopDatalakeMethod())
+              .addMethod(getStartDatalakeMethod())
               .build();
         }
       }

@@ -8,6 +8,7 @@ option java_outer_classname = "CdlCrudProto";
 import "version.proto";
 import "options.proto";
 import "resources.proto";
+import "sdxsvccommon.proto";
 
 // For future compatibility, all rpcs must take a request and return a response
 // even if there is initially no content for these messages.
@@ -48,7 +49,32 @@ service CdlCrud {
   // List all Datalakes of an environment or datalake
   rpc ListDatalakes (ListDatalakesRequest)
       returns (ListDatalakesResponse) {}
+
+  // Upgrades specified Datalake to a later version of its layout
+  rpc UpgradeDatalake (UpgradeDatalakeRequest)
+      returns (UpgradeDatalakeResponse) {}
+
+  // Synchronize IBBroker mappings
+  rpc SyncIDBrokerMappings (SyncIDBrokerMappingsRequest)
+      returns (SyncIDBrokerMappingsResponse) {}
+
+  // Backup or restore database of a Datalake
+  rpc backupRestoreDatalake(BackupRestoreDatalakeRequest)
+      returns (BackupRestoreDatalakeResponse) {}
+
+  // Get operation status and status reason
+  rpc getDatalakeOperationStatus(DatalakeOperationStatusRequest)
+      returns (DatalakeOperationStatusResponse) {}
+
+  // Stop a datalake
+  rpc StopDatalake (StopDatalakeRequest)
+      returns (StopDatalakeResponse) {}
+
+  // Start a datalake which is in Stopped state
+  rpc StartDatalake (StartDatalakeRequest)
+      returns (StartDatalakeResponse) {}
 }
+
 // Database availability type
 message DatabaseAvailabilityType {
   enum Value {
@@ -82,6 +108,17 @@ message StatusType {
     LIMITED_FUNCTIONALITY = 12;
     // datalake is unavailable due to hardware or network failure or core services unhealthy
     UNAVAILABLE = 13;
+    BACKING_UP_DB = 14;
+    RESTORING_DB = 15;
+  }
+}
+
+// Status of the Datalake Operation
+message OperationStatusType {
+  enum Value {
+    IN_PROGRESS = 0;
+    FAILED = 1;
+    SUCCEEDED = 2;
   }
 }
 
@@ -224,6 +261,16 @@ message CreateDatalakeRequest {
   optional string layout = 9;
   // Configurations specfic for AWS
   optional AwsConfiguration awsConfiguration = 10;
+  // Requested service versions for creation.
+  repeated sdxsvccommon.DeploymentVersionOverride serviceOverride = 11;
+  // Requested Configuration Overrides
+  map<string, string> configurationOverrides = 12;
+  // Crn of the external liftie cluster to use for creation
+  optional string externalLiftieClusterCrn = 13;
+  // The type of Cloud Platform
+  CloudPlatformType.Value cloudPlatform = 14;
+  // The profiles to be used for the Cluster
+  repeated string profiles = 15;
 }
 
 // Create Datalake response
@@ -252,6 +299,8 @@ message CreateDatalakeResponse {
 message DeleteDatalakeRequest {
   // Name or CRN of the Datalake
   string datalake = 1;
+  // Force deletion or not
+  bool force = 2;
 }
 
 // Delete Datalake response
@@ -312,6 +361,14 @@ message DescribeDatalakeResponse {
   string region = 19;
   // Product Version
   ProductVersion productVersion = 20;
+  // Environment Name
+  string environmentName = 21;
+  // Liftie Cluster id
+  string cluster = 22;
+  // Credentials used to create the cdl
+  string credentialName = 23;
+  // Path to the storage location
+  string cloudStorageBaseLocation = 24;
 }
 
 // Find Datalake Request
@@ -368,6 +425,8 @@ message DescribeServicesResponse {
 message AwsConfiguration {
   // AWS bucket path
   string storageBucketLocation = 1;
+  //IDBroker instance profile
+  string idbrokerInstanceProfile = 2;
 }
 
 message CollectDatalakeDiagnosticsRequest {
@@ -458,4 +517,137 @@ message ListDatalakesRequest {
 // Response object for listing datalakes
 message ListDatalakesResponse {
   repeated DatalakeResponse datalakeResponse = 1;
+}
+
+// Upgrade Datalake Request
+message UpgradeDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+  // Optional runtime version to upgrade services to
+  optional string clouderaRuntimeVersion = 2;
+  // Optional config overrides to apply with upgrade
+  map<string, string> customConfigOverrides = 3;
+  // Whether to skip the full upgrade and just apply custom config overrides or not
+  optional bool skipFullUpgrade = 4;
+}
+
+// Upgrade Datalake Response
+message UpgradeDatalakeResponse {
+  // Name of the Datalake
+  string datalakeName = 1;
+  // CRN of the Datalake
+  string datalakeCrn = 2;
+  // Status of the upgrade operation
+  string status = 3;
+  // Workflow ID for the upgrade action
+  string workflowId = 4;
+}
+
+// Request object for sync IDBroker mappings
+message SyncIDBrokerMappingsRequest {
+  string accountID = 2;
+  // Name or CRN of the Datalake
+  string datalake = 3;
+  // Mappings for a specific actor
+  map<string, string> actorMappings = 4;
+  // Mappings for a group
+  map<string, string> groupMappings = 5;
+}
+
+// Response object for sync IDBroker mappings
+message SyncIDBrokerMappingsResponse {
+  // Status of the Datalake
+  string status = 1;
+}
+
+message BackupRestoreDatalakeRequest {
+  // name or CRN of the Datalake
+  string datalake = 1;
+  // Location of where backup/restore the data to/from
+  string backupLocation = 2;
+  // If close connections of the database during backup/restore
+  bool closeDbConnections = 3;
+  // Backup or restore
+  BackupRestoreType.Value type = 4;
+  // Backup ID or restore ID
+  string operationId = 5;
+  // Account Id
+  string accountId = 6;
+}
+
+message BackupRestoreDatalakeResponse {
+  string operationId = 1;
+}
+
+message BackupRestoreType {
+  enum Value {
+    BACKUP = 0;
+    RESTORE = 1;
+  }
+}
+
+// Get datalake operation status request
+message DatalakeOperationStatusRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+  // ID of the operation
+  string operationId = 2;
+  // Account Id
+  string accountId = 3;
+}
+
+// Get datalake operation status response
+message DatalakeOperationStatusResponse {
+  // Status of the Datalake operation
+  OperationStatusType.Value status = 1;
+  // Status reason of the operation
+  string statusReason = 2;
+}
+
+// Request object for Stop datalake
+message StopDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Response object for Stop datalake
+message StopDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Name of the Datalake
+  string name = 2;
+  // Status of the Datalake
+  string status = 3;
+  // Environment CRN of the Datalake
+  string environmentCrn = 4;
+}
+
+// Request object for Start datalake
+message StartDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Response object for Start datalake
+message StartDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Name of the Datalake
+  string name = 2;
+  // Status of the Datalake
+  string status = 3;
+  // Environment CRN of the Datalake
+  string environmentCrn = 4;
+}
+
+// Cloud Platform of the Data Lake
+message CloudPlatformType {
+  enum Value {
+    AWS = 0;
+    AWS_GOV = 1;
+    AZURE = 2;
+    YARN = 3;
+    MOCK = 4;
+    GCP = 5;
+  }
 }
