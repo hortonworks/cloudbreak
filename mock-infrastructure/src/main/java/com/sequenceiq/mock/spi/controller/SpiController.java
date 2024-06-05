@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -70,6 +71,11 @@ public class SpiController {
     @PostMapping("/enable_add_instance")
     public void enableAddInstance(@PathVariable("mock_uuid") String mockuuid) {
         spiStoreService.enableAddInstance(mockuuid);
+    }
+
+    @PostMapping("/new_instance_failure")
+    public void setNewInstanceFailure(@PathVariable("mock_uuid") String mockuuid, @RequestParam("failedInstanceCount") Integer failedInstanceCount) {
+        spiStoreService.setNewInstanceFailure(mockuuid, failedInstanceCount);
     }
 
     @DeleteMapping("/terminate")

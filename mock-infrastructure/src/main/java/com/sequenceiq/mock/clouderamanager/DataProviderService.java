@@ -3,6 +3,7 @@ package com.sequenceiq.mock.clouderamanager;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -61,8 +62,10 @@ public class DataProviderService {
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostRefList apiHostList = new ApiHostRefList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
-            ApiHostRef apiHost = getApiHostRef(mockUuid, cloudVmMetaDataStatus);
-            apiHostList.addItemsItem(apiHost);
+            if (!isFailedVm(cloudVmMetaDataStatus)) {
+                ApiHostRef apiHost = getApiHostRef(mockUuid, cloudVmMetaDataStatus);
+                apiHostList.addItemsItem(apiHost);
+            }
         }
         return apiHostList;
     }
@@ -71,15 +74,21 @@ public class DataProviderService {
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostList apiHostList = new ApiHostList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
-            ApiHost apiHost = getApiHost(mockUuid, cloudVmMetaDataStatus);
-            apiHostList.addItemsItem(apiHost);
+            if (!isFailedVm(cloudVmMetaDataStatus)) {
+                ApiHost apiHost = getApiHost(mockUuid, cloudVmMetaDataStatus);
+                apiHostList.addItemsItem(apiHost);
+            }
         }
         return apiHostList;
     }
 
     public ApiHostRef getApiHostRef(String mockUuid, String hostId) {
         CloudVmMetaDataStatus cloudVmMetaDataStatus = spiService.getByInstanceId(mockUuid, hostId);
-        return getApiHostRef(mockUuid, cloudVmMetaDataStatus);
+        if (isFailedVm(cloudVmMetaDataStatus)) {
+            return null;
+        } else {
+            return getApiHostRef(mockUuid, cloudVmMetaDataStatus);
+        }
     }
 
     public ApiHostRef getApiHostRef(String mockUuid, CloudVmMetaDataStatus cloudVmMetaDataStatus) {
@@ -99,15 +108,21 @@ public class DataProviderService {
 
     public ApiHost getApiHost(String mockUuid, String hostId) {
         CloudVmMetaDataStatus cloudVmMetaDataStatus = spiService.getByInstanceId(mockUuid, hostId);
-        return getApiHost(mockUuid, cloudVmMetaDataStatus);
+        if (isFailedVm(cloudVmMetaDataStatus)) {
+            return null;
+        } else {
+            return getApiHost(mockUuid, cloudVmMetaDataStatus);
+        }
     }
 
     public ApiHostList readHosts(String mockUuid) {
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostList apiHostList = new ApiHostList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
-            ApiHost apiHost = getApiHost(mockUuid, cloudVmMetaDataStatus);
-            apiHostList.addItemsItem(apiHost);
+            if (!isFailedVm(cloudVmMetaDataStatus)) {
+                ApiHost apiHost = getApiHost(mockUuid, cloudVmMetaDataStatus);
+                apiHostList.addItemsItem(apiHost);
+            }
         }
         return apiHostList;
     }
@@ -173,5 +188,10 @@ public class DataProviderService {
                         .type(s.getServiceType())
                         .displayName(s.getDisplayName())).collect(Collectors.toList());
         return new ApiServiceList().items(services);
+    }
+
+    private boolean isFailedVm(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
+        return Set.of(InstanceStatus.FAILED, InstanceStatus.TERMINATED,
+                InstanceStatus.TERMINATED_BY_PROVIDER).contains(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus());
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.DELETED;
+import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.UPDATED;
 import static com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType.ROOT;
 import static java.util.Collections.emptyList;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
@@ -168,12 +170,12 @@ public class MockResourceConnector implements ResourceConnector {
     private List<CloudResourceStatus> newTerminateDatabaseServerImpl(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
         mockUrlFactory.get(authenticatedContext, "/db").delete();
-        return  emptyList();
+        return emptyList();
     }
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-        UpdateType type, Optional<String> groupName) {
+            UpdateType type, Optional<String> groupName) {
         List<CloudResourceStatus> cloudResourceStatuses = resources.stream().map(r -> {
                     Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
                             .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));
@@ -239,27 +241,35 @@ public class MockResourceConnector implements ResourceConnector {
         List<CloudResource> cloudResources = new ArrayList<>();
         for (CloudVmInstanceStatus cloudVmInstanceStatus : resize) {
             CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
+            CommonStatus commonStatus = CommonStatus.CREATED;
+            if (InstanceStatus.FAILED.equals(cloudVmInstanceStatus.getStatus())) {
+                commonStatus = CommonStatus.FAILED;
+            }
+            ResourceStatus resourceStatus = CREATED;
+            if (InstanceStatus.FAILED.equals(cloudVmInstanceStatus.getStatus())) {
+                resourceStatus = FAILED;
+            }
             CloudResource instanceResource = generateResource("cloudinstance" + cloudInstance.getTemplate().getPrivateId(), cloudInstance,
-                    cloudInstance.getInstanceId(), ResourceType.MOCK_INSTANCE);
+                    cloudInstance.getInstanceId(), ResourceType.MOCK_INSTANCE, commonStatus);
             cloudResources.add(instanceResource);
             List<Volume> volumes = cloudInstance.getTemplate().getVolumes();
             for (int i = 0; i < volumes.size(); i++) {
                 UUID uuid = UUID.randomUUID();
                 CloudResource volumeResource = generateResource("cloudvolume" + uuid, cloudInstance, cloudInstance.getInstanceId(),
-                        ResourceType.MOCK_VOLUME);
+                        ResourceType.MOCK_VOLUME, commonStatus);
                 cloudResources.add(volumeResource);
-                ret.add(new CloudResourceStatus(volumeResource, CREATED, cloudInstance.getTemplate().getPrivateId()));
+                ret.add(new CloudResourceStatus(volumeResource, resourceStatus, cloudInstance.getTemplate().getPrivateId()));
             }
-            ret.add(new CloudResourceStatus(instanceResource, CREATED, cloudInstance.getTemplate().getPrivateId()));
+            ret.add(new CloudResourceStatus(instanceResource, resourceStatus, cloudInstance.getTemplate().getPrivateId()));
         }
         resourceNotifier.notifyAllocations(cloudResources, cloudContext);
         return ret;
     }
 
-    private CloudResource generateResource(String name, CloudInstance cloudInstance, String instanceId, ResourceType type) {
+    private CloudResource generateResource(String name, CloudInstance cloudInstance, String instanceId, ResourceType type, CommonStatus commonStatus) {
         CloudResource resource = CloudResource.builder()
                 .withType(type)
-                .withStatus(CommonStatus.CREATED)
+                .withStatus(commonStatus)
                 .withGroup(cloudInstance.getTemplate().getGroupName())
                 .withName(name)
                 .withInstanceId(instanceId)

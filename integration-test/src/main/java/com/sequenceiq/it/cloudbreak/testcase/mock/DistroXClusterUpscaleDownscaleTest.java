@@ -1,9 +1,11 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -11,6 +13,7 @@ import jakarta.ws.rs.BadRequestException;
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -25,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
 
 public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerTest {
@@ -99,6 +103,46 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         }
 
         currentContext
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running DistroX cluster",
+            when = "a scale is called where multiple instances fail on provider side",
+            then = "the cluster should become available")
+    public void testScaleUpWithNodeFailure(MockedTestContext testContext, ITestContext testNgContext) {
+        DistroXStartStopTestParameters params = new DistroXStartStopTestParameters(testNgContext.getCurrentXmlTest().getAllParameters());
+        String stack = resourcePropertyProvider().getName();
+        createDatalake(testContext);
+        testContext
+                .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
+                .given(DIX_IMG_KEY, DistroXImageTestDto.class)
+                .withImageCatalog()
+                .withImageId(IMAGE_CATALOG_ID)
+                .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
+                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
+                .withValidateBlueprint(false)
+                .withClouderaManager(CM_FOR_DISTRO_X)
+                .given(stack, DistroXTestDto.class)
+                .withCluster(CLUSTER_KEY)
+                .withName(stack)
+                .withImageSettings(DIX_IMG_KEY)
+                .withNetwork(DIX_NET_KEY)
+                .when(distroXClient.create(), key(stack))
+                .await(STACK_AVAILABLE, key(stack))
+                .setNewInstanceFailure(5)
+                .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
+                .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
+                .then(assertInstanceCount(params.getHostgroup(), UPPER_NODE_COUNT - 5))
+                .setNewInstanceFailure(3)
+                .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
+                .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
+                .then(assertInstanceCount(params.getHostgroup(), UPPER_NODE_COUNT - 3))
+                .setNewInstanceFailure(0)
+                .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
+                .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
+                .then(assertInstanceCount(params.getHostgroup(), UPPER_NODE_COUNT))
                 .validate();
     }
 
@@ -196,6 +240,19 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
+    }
+
+    private static Assertion<DistroXTestDto, CloudbreakClient> assertInstanceCount(String hostGroup, int instanceCount) {
+        return (tc, testDto, client) -> {
+            assertEquals(client.getDefaultClient().distroXV1Endpoint().getByName(testDto.getName(), new HashSet<>())
+                    .getInstanceGroups()
+                    .stream()
+                    .filter(instanceGroup -> hostGroup.equals(instanceGroup.getName()))
+                    .findFirst()
+                    .get()
+                    .getMetadata().size(), instanceCount);
+            return testDto;
+        };
     }
 }
 

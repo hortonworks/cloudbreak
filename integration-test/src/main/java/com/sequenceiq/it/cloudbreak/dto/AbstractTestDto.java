@@ -371,6 +371,13 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return (T) this;
     }
 
+    public T setNewInstanceFailure(int failedInstanceCount) {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.POST, "/" + crn + "/spi/new_instance_failure", Map.of(), null, r -> r,
+                w -> w.queryParam("failedInstanceCount", failedInstanceCount));
+        return (T) this;
+    }
+
     public T setSaltRunFailure(String command) {
         String crn = getCrn();
         executeQuery.executeMethod(HttpMethod.POST, "/{mock_uuid}/saltapi/run/{run_arg}/failure", Map.of(), null, r -> r,

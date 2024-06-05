@@ -103,6 +103,12 @@ public class SpiStoreService {
         spiDto.setAddInstanceDisabled(false);
     }
 
+    public void setNewInstanceFailure(String mockUuid, Integer failedInstanceCount) {
+        LOGGER.info("Enable add instance for uuid: {}", mockUuid);
+        SpiDto spiDto = read(mockUuid);
+        spiDto.setFailedScalingInstanceCount(failedInstanceCount);
+    }
+
     public void terminate(String mockUuid) {
         LOGGER.info("Terminate {}", mockUuid);
         spiDtoMap.remove(mockUuid);

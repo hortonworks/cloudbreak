@@ -44,30 +44,33 @@ public class DefaultModelService {
     public List<CloudVmMetaDataStatus> createInstances(String name, SpiDto spiDto, List<Group> groups) {
         List<CloudVmMetaDataStatus> ret = new ArrayList<>();
         String prefix = "192";
-        for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
-            List<Group> existedGroups = spiDto.getCloudStack().getGroups();
-            Group group = groups.get(groupIndex);
-            Optional<Group> existedGroupOpt = existedGroups.stream().filter(g -> group.getName().equals(g.getName())).findFirst();
+        int failureCounter = spiDto.getFailedScalingInstanceCount();
+        for (Group group : groups) {
+            List<Group> existingGroups = spiDto.getCloudStack().getGroups();
+            Optional<Group> existedGroupOpt = existingGroups.stream().filter(g -> group.getName().equals(g.getName())).findFirst();
             if (existedGroupOpt.isEmpty()) {
                 throw new NotFoundException("Cannot find group with name: " + group.getName());
             }
             Group existedGroup = existedGroupOpt.get();
-            int indexOfExistedGroup = existedGroups.indexOf(existedGroup);
+            int indexOfExistedGroup = existingGroups.indexOf(existedGroup);
             for (int instanceIndex = 0; instanceIndex < group.getInstances().size(); instanceIndex++) {
                 CloudInstance cloudInstance = group.getInstances().get(instanceIndex);
                 String address = generateAddress(prefix, spiDto, indexOfExistedGroup, ret);
                 String instanceId = String.format("instance-%s", address + "-" + UUID.randomUUID());
+                boolean instanceShouldFail = failureCounter > 0;
                 CloudInstance cloudInstanceWithId = new CloudInstance(
                         instanceId,
-                        getTemplateCreated(cloudInstance),
+                        getTemplateCreated(cloudInstance, instanceShouldFail),
                         cloudInstance.getAuthentication(),
                         cloudInstance.getSubnetId(),
                         cloudInstance.getAvailabilityZone());
-                CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);
+                CloudVmInstanceStatus cloudVmInstanceStatus =
+                        new CloudVmInstanceStatus(cloudInstanceWithId, instanceShouldFail ? InstanceStatus.FAILED : InstanceStatus.STARTED);
                 String publicIp = mockInfrastructureHost + ":10090/" + name;
                 CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, publicIp, SSH_PORT, "MOCK");
                 CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
                 ret.add(cloudVmMetaDataStatus);
+                failureCounter--;
             }
         }
         return ret;
@@ -96,9 +99,10 @@ public class DefaultModelService {
                 .anyMatch(vm -> vm.getMetaData().getPrivateIp().equals(address));
     }
 
-    private InstanceTemplate getTemplateCreated(CloudInstance cloudInstance) {
+    private InstanceTemplate getTemplateCreated(CloudInstance cloudInstance, boolean instanceShouldFail) {
         InstanceTemplate template = cloudInstance.getTemplate();
-        return new InstanceTemplate(template.getFlavor(), template.getGroupName(), template.getPrivateId(), template.getVolumes(), InstanceStatus.CREATED,
+        return new InstanceTemplate(template.getFlavor(), template.getGroupName(), template.getPrivateId(), template.getVolumes(),
+                instanceShouldFail ? InstanceStatus.FAILED : InstanceStatus.CREATED,
                 template.getParameters(), template.getTemplateId(), template.getImageId(), template.getTemporaryStorage(), template.getTemporaryStorageCount());
     }
 }

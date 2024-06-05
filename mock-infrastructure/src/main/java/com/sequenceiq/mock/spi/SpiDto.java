@@ -2,6 +2,8 @@ package com.sequenceiq.mock.spi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -14,12 +16,16 @@ public class SpiDto {
 
     private List<CloudVmMetaDataStatus> vmMetaDataStatuses;
 
-    private boolean addInstanceDisabled;
+    private AtomicBoolean addInstanceDisabled;
+
+    private AtomicInteger failedScalingInstanceCount;
 
     public SpiDto(String mockuuid, CloudStack cloudStack) {
         this.cloudStack = cloudStack;
         this.mockuuid = mockuuid;
         this.vmMetaDataStatuses = new ArrayList<>();
+        this.addInstanceDisabled = new AtomicBoolean(false);
+        this.failedScalingInstanceCount = new AtomicInteger(0);
     }
 
     public List<CloudVmMetaDataStatus> getVmMetaDataStatuses() {
@@ -35,11 +41,18 @@ public class SpiDto {
     }
 
     public boolean isAddInstanceDisabled() {
-        return addInstanceDisabled;
+        return addInstanceDisabled.get();
     }
 
     public void setAddInstanceDisabled(boolean addInstanceDisabled) {
-        this.addInstanceDisabled = addInstanceDisabled;
+        this.addInstanceDisabled.set(addInstanceDisabled);
     }
 
+    public void setFailedScalingInstanceCount(int failedScalingInstanceCount) {
+        this.failedScalingInstanceCount.set(failedScalingInstanceCount);
+    }
+
+    public int getFailedScalingInstanceCount() {
+        return failedScalingInstanceCount.get();
+    }
 }
