@@ -6,11 +6,13 @@ import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.NO_PROXY_HOSTS
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.PROTOCOL;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.SERVER_HOST;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.SERVER_PORT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,65 +33,55 @@ class ProxyConfigToProxyResponseConverterTest {
     @Mock
     private StringToSecretResponseConverter stringToSecretResponseConverter;
 
+    @BeforeEach
+    void setUp() {
+        lenient().when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
+        lenient().when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
+    }
+
     @Test
     void testConvertCrn() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(ProxyTestSource.RESCRN, convertSourceProxyConfig().getCrn());
+        assertEquals(ProxyTestSource.RESCRN, convertSourceProxyConfig().getCrn());
     }
 
     @Test
     void testConvertCreator() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(ProxyTestSource.CREATOR, convertSourceProxyConfig().getCreator());
+        assertEquals(ProxyTestSource.CREATOR, convertSourceProxyConfig().getCreator());
     }
 
     @Test
     void testConvertDescription() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(DESCRIPTION, convertSourceProxyConfig().getDescription());
+        assertEquals(DESCRIPTION, convertSourceProxyConfig().getDescription());
     }
 
     @Test
     void testConvertHost() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(SERVER_HOST, convertSourceProxyConfig().getHost());
+        assertEquals(SERVER_HOST, convertSourceProxyConfig().getHost());
     }
 
     @Test
     void testConvertProtocol() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(PROTOCOL, convertSourceProxyConfig().getProtocol());
+        assertEquals(PROTOCOL, convertSourceProxyConfig().getProtocol());
     }
 
     @Test
     void testConvertName() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(NAME, convertSourceProxyConfig().getName());
+        assertEquals(NAME, convertSourceProxyConfig().getName());
     }
 
     @Test
     void testConvertPort() {
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.USERNAME_SECRET);
-        when(stringToSecretResponseConverter.convert(any())).thenReturn(ProxyTestSource.PASSWORD_SECRET);
-
-        Assertions.assertEquals(SERVER_PORT, convertSourceProxyConfig().getPort());
+        assertEquals(SERVER_PORT, convertSourceProxyConfig().getPort());
     }
 
     @Test
     void testConvertNoProxyHosts() {
-        Assertions.assertEquals(NO_PROXY_HOSTS, convertSourceProxyConfig().getNoProxyHosts());
+        assertEquals(NO_PROXY_HOSTS, convertSourceProxyConfig().getNoProxyHosts());
+    }
+
+    @Test
+    void testConvertInboundProxyCidr() {
+        assertEquals(ProxyTestSource.INBOUND_PROXY_CIDR, convertSourceProxyConfig().getInboundProxyCidr());
     }
 
     @Test
@@ -97,13 +89,12 @@ class ProxyConfigToProxyResponseConverterTest {
         when(stringToSecretResponseConverter.convert(ProxyTestSource.USERNAME)).thenReturn(ProxyTestSource.USERNAME_SECRET);
         when(stringToSecretResponseConverter.convert(ProxyTestSource.PASSWORD)).thenReturn(ProxyTestSource.PASSWORD_SECRET);
         ProxyResponse result = convertEncodedProxyConfig();
-        Assertions.assertEquals(ProxyTestSource.USERNAME, result.getUserName().getSecretPath());
-        Assertions.assertEquals(ProxyTestSource.PASSWORD, result.getPassword().getSecretPath());
+        assertEquals(ProxyTestSource.USERNAME, result.getUserName().getSecretPath());
+        assertEquals(ProxyTestSource.PASSWORD, result.getPassword().getSecretPath());
     }
 
     public ProxyResponse convertSourceProxyConfig() {
         ProxyConfig testSource = ProxyTestSource.getProxyConfig();
-
         return underTest.convert(testSource);
     }
 

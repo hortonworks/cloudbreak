@@ -66,6 +66,7 @@ public class NetworkDtoToResponseConverter {
                         .withNoOutboundLoadBalancer(p.isNoOutboundLoadBalancer())
                         .withAvailabilityZones(p.getAvailabilityZones())
                         .withFlexibleServerSubnetIds(p.getFlexibleServerSubnetIds())
+                        .withUsePublicDnsForPrivateAks(p.isUsePublicDnsForPrivateAks())
                         .build()))
                 .withGcp(getIfNotNull(network.getGcp(), p -> EnvironmentNetworkGcpParams.EnvironmentNetworkGcpParamsBuilder
                         .anEnvironmentNetworkGcpParamsBuilder()

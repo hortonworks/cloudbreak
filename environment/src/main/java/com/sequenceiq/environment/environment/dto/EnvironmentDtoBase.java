@@ -94,6 +94,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String creatorClient = "No Info";
 
+    private String environmentVersion;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -189,15 +191,15 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         return network;
     }
 
+    public void setNetwork(NetworkDto network) {
+        this.network = network;
+    }
+
     public EnvironmentFeatures getEnvironmentTelemetryFeatures() {
         if (telemetry != null) {
             return telemetry.getFeatures();
         }
         return null;
-    }
-
-    public void setNetwork(NetworkDto network) {
-        this.network = network;
     }
 
     @Override
@@ -416,6 +418,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.creatorClient = creatorClient;
     }
 
+    public String getEnvironmentVersion() {
+        return environmentVersion;
+    }
+
+    public void setEnvironmentVersion(String environmentVersion) {
+        this.environmentVersion = environmentVersion;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDtoBase{" +
@@ -503,6 +513,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private EnvironmentDataServices dataServices;
 
         private boolean enableSecretEncryption;
+
+        private String environmentVersion;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -682,6 +694,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withEnvironmentVersion(String environmentVersion) {
+            this.environmentVersion = environmentVersion;
+            return (B) this;
+        }
+
         protected void build(T environmentDto) {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
@@ -717,6 +734,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setDataServices(dataServices);
             environmentDto.setEnableSecretEncryption(enableSecretEncryption);
             environmentDto.setCreatorClient(creatorClient);
+            environmentDto.setEnvironmentVersion(environmentVersion);
         }
 
         public abstract T build();

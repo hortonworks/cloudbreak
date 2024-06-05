@@ -28,6 +28,7 @@ public class ProxyConfigToProxyResponseConverter {
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
         response.setNoProxyHosts(source.getNoProxyHosts());
+        response.setInboundProxyCidr(source.getInboundProxyCidr());
         return response;
     }
 
@@ -41,6 +42,7 @@ public class ProxyConfigToProxyResponseConverter {
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
         response.setNoProxyHosts(source.getNoProxyHosts());
+        response.setInboundProxyCidr(source.getInboundProxyCidr());
         return response;
     }
 }

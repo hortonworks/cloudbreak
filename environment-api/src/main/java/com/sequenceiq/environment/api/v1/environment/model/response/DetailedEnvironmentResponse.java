@@ -156,6 +156,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private ExternalizedComputeClusterResponse externalizedComputeCluster;
 
+        private String environmentVersion;
+
         private Builder() {
         }
 
@@ -364,6 +366,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnvironmentVersion(String environmentVersion) {
+            this.environmentVersion = environmentVersion;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -406,6 +413,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setDataServices(dataServices);
             detailedEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
             detailedEnvironmentResponse.setExternalizedComputeCluster(externalizedComputeCluster);
+            detailedEnvironmentResponse.setEnvironmentVersion(environmentVersion);
             return detailedEnvironmentResponse;
         }
     }

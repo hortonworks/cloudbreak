@@ -8,6 +8,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -162,6 +163,9 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     @Column(nullable = false, name = "enable_secret_encryption")
     private boolean enableSecretEncryption;
+
+    @Embedded
+    private DefaultComputeCluster defaultComputeCluster;
 
     public ProxyConfigView getProxyConfig() {
         return proxyConfig;
@@ -526,6 +530,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     public void setEnableSecretEncryption(boolean enableSecretEncryption) {
         this.enableSecretEncryption = enableSecretEncryption;
+    }
+
+    public DefaultComputeCluster getDefaultComputeCluster() {
+        return defaultComputeCluster;
+    }
+
+    public void setDefaultComputeCluster(DefaultComputeCluster defaultComputeCluster) {
+        this.defaultComputeCluster = defaultComputeCluster;
     }
 
     @Override

@@ -92,7 +92,8 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentDeletionType(environmentView.getDeletionType())
                 .withEnvironmentServiceVersion(environmentView.getEnvironmentServiceVersion())
                 .withEnvironmentDomain(environmentView.getDomain())
-                .withEnableSecretEncryption(environmentView.isEnableSecretEncryption());
+                .withEnableSecretEncryption(environmentView.isEnableSecretEncryption())
+                .withEnvironmentVersion(environmentVersion(environmentView.getDefaultComputeCluster()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -139,7 +140,8 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentDomain(environment.getDomain())
                 .withDataServices(environment.getDataServices())
                 .withEnableSecretEncryption(environment.isEnableSecretEncryption())
-                .withCreatorClient(environment.getCreatorClient());
+                .withCreatorClient(environment.getCreatorClient())
+                .withEnvironmentVersion(environmentVersion(environment.getDefaultComputeCluster()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));
@@ -311,6 +313,10 @@ public class EnvironmentDtoConverter {
         builder.withImageOs(freeIpaImageOs);
         builder.withEnableMultiAz(freeIpaEnableMultiAz);
         return builder.build();
+    }
+
+    private String environmentVersion(DefaultComputeCluster defaultComputeCluster) {
+        return defaultComputeCluster != null && defaultComputeCluster.isCreate() ? "v2" : "v1";
     }
 
 }

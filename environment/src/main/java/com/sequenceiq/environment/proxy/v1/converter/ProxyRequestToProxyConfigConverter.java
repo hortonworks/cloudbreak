@@ -21,6 +21,7 @@ public class ProxyRequestToProxyConfigConverter {
             proxyConfig.setPassword(source.getPassword());
         }
         proxyConfig.setNoProxyHosts(source.getNoProxyHosts());
+        proxyConfig.setInboundProxyCidr(source.getInboundProxyCidr());
         return proxyConfig;
     }
 }

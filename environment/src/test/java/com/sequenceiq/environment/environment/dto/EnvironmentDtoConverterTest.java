@@ -200,6 +200,34 @@ class EnvironmentDtoConverterTest {
     }
 
     @Test
+    void testEnvironmentToEnvironmentDtoWhenDefaultComputeClusterIsNull() {
+        Environment source = new Environment();
+        source.setCloudPlatform("AWS");
+        EnvironmentDto environmentDto = underTest.environmentToDto(source);
+        assertEquals("v1", environmentDto.getEnvironmentVersion());
+    }
+
+    @Test
+    void testEnvironmentToEnvironmentDtoWhenDefaultComputeClusterCreateIsFalse() {
+        Environment source = new Environment();
+        source.setCloudPlatform("AWS");
+        source.setDefaultComputeCluster(new DefaultComputeCluster());
+        EnvironmentDto environmentDto = underTest.environmentToDto(source);
+        assertEquals("v1", environmentDto.getEnvironmentVersion());
+    }
+
+    @Test
+    void testEnvironmentToEnvironmentDtoWhenDefaultComputeClusterCreateIsTrue() {
+        Environment source = new Environment();
+        source.setCloudPlatform("AWS");
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        source.setDefaultComputeCluster(defaultComputeCluster);
+        EnvironmentDto environmentDto = underTest.environmentToDto(source);
+        assertEquals("v2", environmentDto.getEnvironmentVersion());
+    }
+
+    @Test
     void environmentViewToViewDtoTestBasic() {
         CredentialView credential = new CredentialView();
         Region region = new Region();
@@ -256,6 +284,9 @@ class EnvironmentDtoConverterTest {
         when(environmentView.getNetwork()).thenReturn(null);
         when(environmentView.getParentEnvironment()).thenReturn(null);
         when(environmentView.isEnableSecretEncryption()).thenReturn(true);
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        when(environmentView.getDefaultComputeCluster()).thenReturn(defaultComputeCluster);
 
         when(authenticationDtoConverter.authenticationToDto(authentication)).thenReturn(authenticationDto);
 
@@ -288,6 +319,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getEnvironmentServiceVersion()).isEqualTo(ENVIRONMENT_SERVICE_VERSION);
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
         assertThat(result.isEnableSecretEncryption()).isTrue();
+        assertThat(result.getEnvironmentVersion()).isEqualTo("v2");
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();
@@ -483,6 +515,9 @@ class EnvironmentDtoConverterTest {
         when(environment.getNetwork()).thenReturn(null);
         when(environment.getParentEnvironment()).thenReturn(null);
         when(environment.isEnableSecretEncryption()).thenReturn(true);
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        when(environment.getDefaultComputeCluster()).thenReturn(defaultComputeCluster);
 
         when(authenticationDtoConverter.authenticationToDto(authentication)).thenReturn(authenticationDto);
         when(environmentRecipeService.getRecipes(ID)).thenReturn(freeipaRecipes);
@@ -516,6 +551,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getEnvironmentServiceVersion()).isEqualTo(ENVIRONMENT_SERVICE_VERSION);
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
         assertThat(result.isEnableSecretEncryption()).isTrue();
+        assertThat(result.getEnvironmentVersion()).isEqualTo("v2");
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();

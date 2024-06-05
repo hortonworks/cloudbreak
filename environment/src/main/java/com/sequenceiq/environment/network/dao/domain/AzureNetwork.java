@@ -27,6 +27,8 @@ public class AzureNetwork extends BaseNetwork {
 
     private boolean noOutboundLoadBalancer;
 
+    private boolean usePublicDnsForPrivateAks;
+
     @Convert(converter = JsonToString.class)
     @Column(name = "zonemetas", columnDefinition = "TEXT")
     private Json zoneMetas;
@@ -100,6 +102,14 @@ public class AzureNetwork extends BaseNetwork {
         this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     }
 
+    public boolean isUsePublicDnsForPrivateAks() {
+        return usePublicDnsForPrivateAks;
+    }
+
+    public void setUsePublicDnsForPrivateAks(boolean usePublicDnsForPrivateAks) {
+        this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
+    }
+
     @Override
     public String toString() {
         return "AzureNetwork{" +
@@ -111,6 +121,7 @@ public class AzureNetwork extends BaseNetwork {
                 ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
                 ", zoneMetas=" + zoneMetas +
                 ", flexibleServerSubnetIds=" + flexibleServerSubnetIds +
+                ", usePublicDnsForPrivateAks=" + usePublicDnsForPrivateAks +
                 "} " + super.toString();
     }
 }

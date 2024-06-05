@@ -116,6 +116,7 @@ class AzureEnvironmentNetworkConverterTest {
                         .withNoPublicIp(true)
                         .withAvailabilityZones(availabilityZones)
                         .withFlexibleServerSubnetIds(flexibleServerSubnetIds)
+                        .withUsePublicDnsForPrivateAks(true)
                         .build())
                 .withName(NETWORK_NAME)
                 .withNetworkCidr(NETWORK_CIDR)
@@ -136,6 +137,7 @@ class AzureEnvironmentNetworkConverterTest {
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
         assertEquals(new Json(availabilityZonesMap), actual.getZoneMetas());
         assertEquals(flexibleServerSubnetIds, actual.getFlexibleServerSubnetIds());
+        assertTrue(actual.isUsePublicDnsForPrivateAks());
         verify(environmentViewConverter).convert(environment);
     }
 
@@ -279,6 +281,7 @@ class AzureEnvironmentNetworkConverterTest {
         AzureParams originalAzureParams = AzureParams.builder()
                 .withDatabasePrivateDnsZoneId("dnszone")
                 .withFlexibleServerSubnetIds(Set.of("subnetid"))
+                .withUsePublicDnsForPrivateAks(true)
                 .build();
         NetworkDto orignalNetworkDto = NetworkDto.builder()
                 .withAzure(originalAzureParams)
@@ -288,6 +291,7 @@ class AzureEnvironmentNetworkConverterTest {
         NetworkDto actualNetworkDto = underTest.extendBuilderWithProviderSpecificParameters(networkDtoBuilder, orignalNetworkDto, newNetworkDto).build();
         assertEquals(originalAzureParams.getDatabasePrivateDnsZoneId(), actualNetworkDto.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(originalAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+        assertEquals(originalAzureParams.isUsePublicDnsForPrivateAks(), actualNetworkDto.getAzure().isUsePublicDnsForPrivateAks());
     }
 
     @Test
@@ -295,6 +299,7 @@ class AzureEnvironmentNetworkConverterTest {
         NetworkDto originalNetworkDto = NetworkDto.builder().withAzure(AzureParams.builder()
                         .withFlexibleServerSubnetIds(Set.of("orignalsubnetid"))
                         .withDatabasePrivateDnsZoneId("originalDnsZone")
+                        .withUsePublicDnsForPrivateAks(true)
                         .build())
                 .build();
         AzureParams newAzureParams = AzureParams.builder()
@@ -308,6 +313,7 @@ class AzureEnvironmentNetworkConverterTest {
         NetworkDto actualNetworkDto = underTest.extendBuilderWithProviderSpecificParameters(networkDtoBuilder, originalNetworkDto, newNetworkDto).build();
         assertEquals(newAzureParams.getDatabasePrivateDnsZoneId(), actualNetworkDto.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(newAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+        assertTrue(actualNetworkDto.getAzure().isUsePublicDnsForPrivateAks());
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {

@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +57,7 @@ public class NetworkRequestToDtoConverter {
                     .withNoOutboundLoadBalancer(isNoOutboundLoadBalancer(network.getAzure()))
                     .withAvailabilityZones(network.getAzure().getAvailabilityZones())
                     .withFlexibleServerSubnetIds(network.getAzure().getFlexibleServerSubnetIds())
+                    .withUsePublicDnsForPrivateAks(BooleanUtils.toBoolean(network.getAzure().getUsePublicDnsForPrivateAks()))
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());

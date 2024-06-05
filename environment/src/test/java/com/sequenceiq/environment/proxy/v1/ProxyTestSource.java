@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.proxy.v1;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -33,6 +35,8 @@ public class ProxyTestSource {
 
     public static final String NO_PROXY_HOSTS = "noproxy.com";
 
+    public static final List<String> INBOUND_PROXY_CIDR = List.of("0.0.0.0/0", "1.1.1.1/1");
+
     static {
         USERNAME_SECRET = new SecretResponse();
         USERNAME_SECRET.setEnginePath("-");
@@ -60,6 +64,7 @@ public class ProxyTestSource {
         testSource.setResourceCrn(RESCRN);
         testSource.setServerPort(SERVER_PORT);
         testSource.setNoProxyHosts(NO_PROXY_HOSTS);
+        testSource.setInboundProxyCidr(INBOUND_PROXY_CIDR);
         return testSource;
     }
 
@@ -73,6 +78,7 @@ public class ProxyTestSource {
         result.setPort(SERVER_PORT);
         result.setProtocol(PROTOCOL);
         result.setNoProxyHosts(NO_PROXY_HOSTS);
+        result.setInboundProxyCidr(INBOUND_PROXY_CIDR);
         return result;
     }
 }

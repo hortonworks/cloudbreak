@@ -137,6 +137,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_SECRET_ENCRYPTION)
     private boolean enableSecretEncryption;
 
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_VERSION)
+    private String environmentVersion;
+
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
@@ -211,16 +214,16 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         return backup;
     }
 
+    public void setBackup(BackupResponse backup) {
+        this.backup = backup;
+    }
+
     public String getBackupLocation() {
         return backup != null ? backup.getStorageLocation() : null;
     }
 
     public String getBackupInstanceProfile() {
         return backup != null ? backup.getInstanceProfile() : null;
-    }
-
-    public void setBackup(BackupResponse backup) {
-        this.backup = backup;
     }
 
     public EnvironmentNetworkResponse getNetwork() {
@@ -464,6 +467,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.enableSecretEncryption = enableSecretEncryption;
     }
 
+    public String getEnvironmentVersion() {
+        return environmentVersion;
+    }
+
+    public void setEnvironmentVersion(String environmentVersion) {
+        this.environmentVersion = environmentVersion;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -503,6 +514,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", environmentDomain='" + environmentDomain + '\'' +
                 ", dataServices=" + dataServices +
                 ", enableSecretEncryption=" + enableSecretEncryption +
+                ", environmentVersion=" + environmentVersion +
                 '}';
     }
 }

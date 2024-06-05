@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrList;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrListAsString;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,7 +25,7 @@ public abstract class SecurityAccessBase implements Serializable {
     @Schema(description = EnvironmentModelDescription.DEFAULT_SECURITY_GROUP)
     private String defaultSecurityGroupId;
 
-    @ValidCidrList
+    @ValidCidrListAsString
     @Size(min = 5, max = 4000, message = "The list of CIDRs must consist of characters between 5 and 4000")
     @Schema(description = EnvironmentModelDescription.SECURITY_CIDR)
     private String cidr;

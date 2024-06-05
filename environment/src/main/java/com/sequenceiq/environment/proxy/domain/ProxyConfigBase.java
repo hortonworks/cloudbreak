@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.proxy.domain;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -10,8 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.SequenceGenerator;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.util.CidrUtil;
 
 @MappedSuperclass
 public class ProxyConfigBase implements Serializable, AuthResource, AccountIdAwareResource {
@@ -55,6 +60,8 @@ public class ProxyConfigBase implements Serializable, AuthResource, AccountIdAwa
     private Long deletionTimestamp = -1L;
 
     private String noProxyHosts;
+
+    private String inboundProxyCidr;
 
     @Override
     public String getAccountId() {
@@ -158,6 +165,22 @@ public class ProxyConfigBase implements Serializable, AuthResource, AccountIdAwa
         this.noProxyHosts = noProxyHosts;
     }
 
+    public List<String> getInboundProxyCidr() {
+        if (StringUtils.isEmpty(inboundProxyCidr)) {
+            return List.of();
+        } else {
+            return CidrUtil.cidrList(inboundProxyCidr);
+        }
+    }
+
+    public void setInboundProxyCidr(List<String> inboundProxyCidr) {
+        if (CollectionUtils.isEmpty(inboundProxyCidr)) {
+            this.inboundProxyCidr = null;
+        } else {
+            this.inboundProxyCidr = StringUtils.join(inboundProxyCidr, ",");
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -190,6 +213,7 @@ public class ProxyConfigBase implements Serializable, AuthResource, AccountIdAwa
                 ", archived=" + archived +
                 ", deletionTimestamp=" + deletionTimestamp +
                 ", noProxyHosts='" + noProxyHosts + '\'' +
+                ", inboundProxyCidr='" + inboundProxyCidr + '\'' +
                 '}';
     }
 }

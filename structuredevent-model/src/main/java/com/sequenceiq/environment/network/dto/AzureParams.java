@@ -24,6 +24,8 @@ public class AzureParams {
 
     private Set<String> flexibleServerSubnetIds;
 
+    private boolean usePublicDnsForPrivateAks;
+
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
@@ -33,6 +35,24 @@ public class AzureParams {
         aksPrivateDnsZoneId = builder.aksPrivateDnsZoneId;
         availabilityZones = builder.availabilityZones;
         flexibleServerSubnetIds = builder.flexibleServerSubnetIds;
+        usePublicDnsForPrivateAks = builder.usePublicDnsForPrivateAks;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder builder(AzureParams azureParams) {
+        return builder()
+                .withNetworkId(azureParams.networkId)
+                .withResourceGroupName(azureParams.resourceGroupName)
+                .withNoPublicIp(azureParams.noPublicIp)
+                .withDatabasePrivateDnsZoneId(azureParams.databasePrivateDnsZoneId)
+                .withAksPrivateDnsZoneId(azureParams.aksPrivateDnsZoneId)
+                .withNoOutboundLoadBalancer(azureParams.noOutboundLoadBalancer)
+                .withAvailabilityZones(azureParams.availabilityZones != null ? Set.copyOf(azureParams.availabilityZones) : null)
+                .withFlexibleServerSubnetIds(azureParams.flexibleServerSubnetIds != null ? Set.copyOf(azureParams.flexibleServerSubnetIds) : null)
+                .withUsePublicDnsForPrivateAks(azureParams.usePublicDnsForPrivateAks);
     }
 
     public String getNetworkId() {
@@ -99,6 +119,14 @@ public class AzureParams {
         this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     }
 
+    public boolean isUsePublicDnsForPrivateAks() {
+        return usePublicDnsForPrivateAks;
+    }
+
+    public void setUsePublicDnsForPrivateAks(boolean usePublicDnsForPrivateAks) {
+        this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
+    }
+
     @Override
     public String toString() {
         return "AzureParams{" +
@@ -110,23 +138,8 @@ public class AzureParams {
                 ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
                 ", availabilityZones=" + availabilityZones +
                 ", flexibleServerSubnetIds=" + flexibleServerSubnetIds +
+                ", usePublicDnsForPrivateAks=" + usePublicDnsForPrivateAks +
                 '}';
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder builder(AzureParams azureParams) {
-        return builder()
-                .withNetworkId(azureParams.networkId)
-                .withResourceGroupName(azureParams.resourceGroupName)
-                .withNoPublicIp(azureParams.noPublicIp)
-                .withDatabasePrivateDnsZoneId(azureParams.databasePrivateDnsZoneId)
-                .withAksPrivateDnsZoneId(azureParams.aksPrivateDnsZoneId)
-                .withNoOutboundLoadBalancer(azureParams.noOutboundLoadBalancer)
-                .withAvailabilityZones(azureParams.availabilityZones != null ? Set.copyOf(azureParams.availabilityZones) : null)
-                .withFlexibleServerSubnetIds(azureParams.flexibleServerSubnetIds != null ? Set.copyOf(azureParams.flexibleServerSubnetIds) : null);
     }
 
     @JsonPOJOBuilder
@@ -146,6 +159,8 @@ public class AzureParams {
         private Set<String> availabilityZones;
 
         private Set<String> flexibleServerSubnetIds;
+
+        private boolean usePublicDnsForPrivateAks;
 
         private Builder() {
         }
@@ -187,6 +202,11 @@ public class AzureParams {
 
         public Builder withFlexibleServerSubnetIds(Set<String> flexibleServerSubnetIds) {
             this.flexibleServerSubnetIds = flexibleServerSubnetIds;
+            return this;
+        }
+
+        public Builder withUsePublicDnsForPrivateAks(boolean usePublicDnsForPrivateAks) {
+            this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
             return this;
         }
 

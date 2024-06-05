@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.proxy.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrList;
 import com.sequenceiq.environment.api.v1.proxy.validation.ValidNoProxyList;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -50,6 +52,10 @@ public abstract class ProxyBase implements Serializable {
     @ValidNoProxyList
     @Schema(description = ProxyConfigDescription.NO_PROXY_HOSTS)
     private String noProxyHosts;
+
+    @ValidCidrList
+    @Schema(description = ProxyConfigDescription.INBOUND_PROXY_CIDR)
+    private List<String> inboundProxyCidr;
 
     public String getName() {
         return name;
@@ -99,6 +105,14 @@ public abstract class ProxyBase implements Serializable {
         this.noProxyHosts = noProxyHosts;
     }
 
+    public List<String> getInboundProxyCidr() {
+        return inboundProxyCidr;
+    }
+
+    public void setInboundProxyCidr(List<String> inboundProxyCidr) {
+        this.inboundProxyCidr = inboundProxyCidr;
+    }
+
     @Override
     public String toString() {
         return "ProxyBase{" +
@@ -108,6 +122,7 @@ public abstract class ProxyBase implements Serializable {
                 ", port=" + port +
                 ", protocol='" + protocol + '\'' +
                 ", noProxyHosts='" + noProxyHosts + '\'' +
+                ", inboundProxyCidr='" + inboundProxyCidr + '\'' +
                 '}';
     }
 }

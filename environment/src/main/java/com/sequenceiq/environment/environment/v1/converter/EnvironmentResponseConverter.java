@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityG
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +55,7 @@ import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseC
 @Component
 public class EnvironmentResponseConverter {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EnvironmentResponseConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentResponseConverter.class);
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
@@ -128,7 +129,8 @@ public class EnvironmentResponseConverter {
                 .withAccountId(environmentDto.getAccountId())
                 .withEnvironmentDomain(environmentDto.getDomain())
                 .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
-                .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption());
+                .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
+                .withEnvironmentVersion(environmentDto.getEnvironmentVersion());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -186,7 +188,8 @@ public class EnvironmentResponseConverter {
                 .withCcmV2TlsType(environmentViewDto.getExperimentalFeatures().getCcmV2TlsType())
                 .withEnvironmentDomain(environmentViewDto.getDomain())
                 .withDataServices(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices()))
-                .withEnableSecretEncryption(environmentViewDto.isEnableSecretEncryption());
+                .withEnableSecretEncryption(environmentViewDto.isEnableSecretEncryption())
+                .withEnvironmentVersion(environmentViewDto.getEnvironmentVersion());
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -224,7 +227,8 @@ public class EnvironmentResponseConverter {
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
                 .withEnvironmentDomain(environmentDto.getDomain())
                 .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
-                .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption());
+                .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
+                .withEnvironmentVersion(environmentDto.getEnvironmentVersion());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

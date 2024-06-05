@@ -66,6 +66,7 @@ class SimpleEnvironmentResponseTest {
                 .withEnvironmentDomain("environmentDomain")
                 .withDataServices(dataServices)
                 .withEnableSecretEncryption(true)
+                .withEnvironmentVersion("v2")
                 .build();
 
         assertThat(response).isNotNull();
@@ -107,6 +108,7 @@ class SimpleEnvironmentResponseTest {
         assertThat(response.getEnvironmentDomain()).isEqualTo("environmentDomain");
         assertThat(response.getDataServices()).isSameAs(dataServices);
         assertThat(response.isEnableSecretEncryption()).isTrue();
+        assertThat(response.getEnvironmentVersion()).isEqualTo("v2");
     }
 
 }

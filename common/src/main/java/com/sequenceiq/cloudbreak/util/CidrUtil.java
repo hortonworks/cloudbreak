@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.util;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,5 +19,9 @@ public class CidrUtil {
 
     public static Set<String> cidrSet(String cidr) {
         return Arrays.asList(Strings.isNullOrEmpty(cidr) ? new String[]{} : cidr.split(",")).stream().collect(Collectors.toSet());
+    }
+
+    public static List<String> cidrList(String cidr) {
+        return Arrays.asList(Strings.isNullOrEmpty(cidr) ? new String[]{} : cidr.split(",")).stream().toList();
     }
 }

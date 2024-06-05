@@ -39,6 +39,7 @@ public class EnvironmentModelDescription {
 
     public static final String AZURE_AVAILABILITY_ZONES = "List of Azure Availability Zones";
     public static final String AZURE_DELEGATED_FLEXIBLE_SERVER_SUBNET_IDS = "List of Azure Delegated Subnet IDs for flexible database server";
+    public static final String AZURE_USE_PUBLIC_DNS_FOR_PRIVATE_AKS = "Instruct Azure to use public DNS for all DNS records in a private cluster";
 
     public static final String AZURE_RESOURCE_GROUP_NAME = "Azure Resource Group Name of the specified network";
     public static final String AZURE_PRIVATE_DNS_ZONE_ID = "Full resource ID of an existing Azure private DNS zone";
@@ -154,6 +155,7 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";
 
+    public static final String ENVIRONMENT_VERSION = "The version of the environment. Default is V1.";
     public static final String CREATE_EXTERNALIZED_COMPUTE_CLUSTER = "Create externalized compute cluster for environment";
     public static final String EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER = "Externalized compute cluster private flag";
     public static final String EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES = "Externalized compute cluster Kubernetes API authorized IP ranges";

@@ -75,6 +75,7 @@ public class NetworkDtoToResponseConverterTest {
         assertEquals(network.getAzure().isNoOutboundLoadBalancer(), actual.getAzure().getNoOutboundLoadBalancer());
         assertEquals(network.getAzure().getAvailabilityZones(), actual.getAzure().getAvailabilityZones());
         assertEquals(network.getAzure().getFlexibleServerSubnetIds(), actual.getAzure().getFlexibleServerSubnetIds());
+        assertEquals(network.getAzure().isUsePublicDnsForPrivateAks(), actual.getAzure().getUsePublicDnsForPrivateAks());
         assertNull(actual.getAws());
         assertNull(actual.getYarn());
         assertNull(actual.getMock());
@@ -170,6 +171,7 @@ public class NetworkDtoToResponseConverterTest {
                 .withNoOutboundLoadBalancer(true)
                 .withAvailabilityZones(Set.of("1", "2"))
                 .withFlexibleServerSubnetIds(Set.of("flex1", "flex2"))
+                .withUsePublicDnsForPrivateAks(true)
                 .build();
     }
 

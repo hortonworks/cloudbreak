@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_OUTBOUND_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.USE_PUBLIC_DNS_FOR_PRIVATE_AKS;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(azureParams.getAvailabilityZones(),
                     azureNetwork.getZoneMetas()));
             azureNetwork.setFlexibleServerSubnetIds(azureParams.getFlexibleServerSubnetIds());
+            azureNetwork.setUsePublicDnsForPrivateAks(azureParams.isUsePublicDnsForPrivateAks());
         }
         return azureNetwork;
     }
@@ -114,6 +116,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withNoOutboundLoadBalancer(azureNetwork.isNoOutboundLoadBalancer())
                                 .withAvailabilityZones(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(azureNetwork.getZoneMetas()))
                                 .withFlexibleServerSubnetIds(azureNetwork.getFlexibleServerSubnetIds())
+                                .withUsePublicDnsForPrivateAks(azureNetwork.isUsePublicDnsForPrivateAks())
                                 .build())
                 .build();
     }
@@ -147,6 +150,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         param.put(DATABASE_PRIVATE_DNS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
         param.put(AKS_PRIVATE_DNS_ZONE_ID, azureNetwork.getAksPrivateDnsZoneId());
         param.put(NO_OUTBOUND_LOAD_BALANCER, azureNetwork.isNoOutboundLoadBalancer());
+        param.put(USE_PUBLIC_DNS_FOR_PRIVATE_AKS, azureNetwork.isUsePublicDnsForPrivateAks());
         return new Network(null, param);
     }
 

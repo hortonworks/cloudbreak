@@ -22,6 +22,10 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
     private ProxyViewResponse proxyConfig;
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public CredentialViewResponse getCredential() {
         return credential;
     }
@@ -36,10 +40,6 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
     public void setProxyConfig(ProxyViewResponse proxyConfig) {
         this.proxyConfig = proxyConfig;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     @Override
@@ -119,6 +119,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private DataServicesResponse dataServices;
 
         private boolean enableSecretEncryption;
+
+        private String environmentVersion;
 
         private Builder() {
         }
@@ -288,6 +290,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnvironmentVersion(String environmentVersion) {
+            this.environmentVersion = environmentVersion;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -322,6 +329,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setEnvironmentDomain(environmentDomain);
             simpleEnvironmentResponse.setDataServices(dataServices);
             simpleEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
+            simpleEnvironmentResponse.setEnvironmentVersion(environmentVersion);
             return simpleEnvironmentResponse;
         }
     }

@@ -2,36 +2,25 @@ package com.sequenceiq.environment.api.v1.environment.validator.cidr;
 
 import static com.sequenceiq.cloudbreak.validation.CidrValidatorHelper.isCidrPatternMatched;
 
+import java.util.List;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import com.google.common.base.CharMatcher;
+import org.apache.commons.collections4.CollectionUtils;
 
-public class CidrListValidator implements ConstraintValidator<ValidCidrList, String> {
+public class CidrListValidator implements ConstraintValidator<ValidCidrList, List<String>> {
+
     @Override
     public void initialize(ValidCidrList constraintAnnotation) {
     }
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext context) {
-        boolean result = true;
-        if (value != null) {
-            String[] cidrs = value.split(",");
-            int numberOfCommas = CharMatcher.is(',').countIn(value);
-            int count = 0;
-            for (String cidr : cidrs) {
-                if (!isCidrPatternMatched(cidr)) {
-                    result = false;
-                }
-                count++;
-            }
-            // more commas then expected
-            if (count != numberOfCommas + 1) {
-                result = false;
-            }
+    public boolean isValid(List<String> cidrs, ConstraintValidatorContext context) {
+        if (CollectionUtils.isEmpty(cidrs)) {
+            return true;
         } else {
-            result = true;
+            return cidrs.stream().allMatch(cidr -> isCidrPatternMatched(cidr));
         }
-        return result;
     }
 }

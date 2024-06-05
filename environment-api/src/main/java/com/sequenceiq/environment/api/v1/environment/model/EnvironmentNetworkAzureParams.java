@@ -46,6 +46,9 @@ public class EnvironmentNetworkAzureParams {
     @Schema(description = EnvironmentModelDescription.AZURE_DELEGATED_FLEXIBLE_SERVER_SUBNET_IDS)
     private Set<String> flexibleServerSubnetIds;
 
+    @Schema(description = EnvironmentModelDescription.AZURE_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
+    private Boolean usePublicDnsForPrivateAks;
+
     public String getNetworkId() {
         return networkId;
     }
@@ -110,6 +113,14 @@ public class EnvironmentNetworkAzureParams {
         this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     }
 
+    public Boolean getUsePublicDnsForPrivateAks() {
+        return usePublicDnsForPrivateAks;
+    }
+
+    public void setUsePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+        this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentNetworkAzureParams{" +
@@ -121,6 +132,7 @@ public class EnvironmentNetworkAzureParams {
                 ", noOutboundLoadBalancer=" + noOutboundLoadBalancer +
                 ", availabilityZones=" + availabilityZones +
                 ", flexibleServerSubnetIds=" + flexibleServerSubnetIds +
+                ", usePublicDnsForPrivateAks=" + usePublicDnsForPrivateAks +
                 '}';
     }
 
@@ -140,6 +152,8 @@ public class EnvironmentNetworkAzureParams {
         private Set<String> availabilityZones;
 
         private Set<String> flexibleServerSubnetIds;
+
+        private Boolean usePublicDnsForPrivateAks;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -188,6 +202,11 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
+        public EnvironmentNetworkAzureParamsBuilder withUsePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+            this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
+            return this;
+        }
+
         public EnvironmentNetworkAzureParams build() {
             EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
             environmentNetworkAzureParams.setNetworkId(networkId);
@@ -198,6 +217,7 @@ public class EnvironmentNetworkAzureParams {
             environmentNetworkAzureParams.setNoOutboundLoadBalancer(noOutboundLoadBalancer);
             environmentNetworkAzureParams.setAvailabilityZones(availabilityZones);
             environmentNetworkAzureParams.setFlexibleServerSubnetIds(flexibleServerSubnetIds);
+            environmentNetworkAzureParams.setUsePublicDnsForPrivateAks(usePublicDnsForPrivateAks);
             return environmentNetworkAzureParams;
         }
     }
