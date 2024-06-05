@@ -24,8 +24,8 @@ import org.testng.xml.XmlInclude;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
-import com.sequenceiq.it.cloudbreak.listener.CustomTestResultReporter;
 import com.sequenceiq.it.cloudbreak.listener.GatekeeperBehaviour;
+import com.sequenceiq.it.cloudbreak.listener.PassedTestsReporter;
 import com.sequenceiq.it.cloudbreak.listener.ReportListener;
 import com.sequenceiq.it.cloudbreak.listener.TestCaseTimeoutListener;
 import com.sequenceiq.it.cloudbreak.listener.TestInvocationListener;
@@ -79,7 +79,7 @@ public class TestNGUtil {
         testng.addListener(new CustomHTMLReporter());
         testng.addListener(new CustomJUnitXMLReporter());
         testng.addListener(new TestCaseTimeoutListener());
-        testng.addListener(new CustomTestResultReporter());
+        testng.addListener(new PassedTestsReporter());
         testng.addListener(new GatekeeperBehaviour());
     }
 
@@ -90,7 +90,7 @@ public class TestNGUtil {
         xmlSuite.setVerbose(2);
         xmlSuite.setListeners(Arrays.asList(TestNgListener.class.getName(), ThreadLocalTestListener.class.getName(),
                 ReportListener.class.getName(), TestInvocationListener.class.getName(), CustomHTMLReporter.class.getName(),
-                CustomJUnitXMLReporter.class.getName(), TestCaseTimeoutListener.class.getName(), CustomTestResultReporter.class.getName(),
+                CustomJUnitXMLReporter.class.getName(), TestCaseTimeoutListener.class.getName(), PassedTestsReporter.class.getName(),
                 GatekeeperBehaviour.class.getName()));
     }
 
