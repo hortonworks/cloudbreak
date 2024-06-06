@@ -58,7 +58,7 @@ public class ProfilerMetricsRdsConfigProvider extends AbstractRdsConfigProvider 
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
         return isRdsConfigNeedForProfilerMetrics(blueprint);
     }
 }

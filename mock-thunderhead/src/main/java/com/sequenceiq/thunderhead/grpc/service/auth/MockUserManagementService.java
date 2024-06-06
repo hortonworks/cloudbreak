@@ -86,6 +86,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_CONTAINERIZED_DATALKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
@@ -539,6 +540,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cm.observability.dmp}")
     private boolean cmObservabilityDmp;
+
+    @Value("${auth.mock.cdl.enabled}")
+    private boolean cdlEnabled;
 
     private Set<String> grantedEntitlements = new HashSet<>();
 
@@ -1006,6 +1010,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (cmObservabilityDmp) {
             builder.addEntitlements(createEntitlement(OBSERVABILITY_DMP));
+        }
+        if (cdlEnabled) {
+            builder.addEntitlements(createEntitlement(ENABLE_CONTAINERIZED_DATALKE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

@@ -1,29 +1,43 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_HOST;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_NAME;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PASSWORD;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PORT;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_USER;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
-import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class SharedServiceConfigProvider {
@@ -38,34 +52,95 @@ public class SharedServiceConfigProvider {
     @Inject
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
-    public Cluster configureCluster(@Nonnull Cluster requestedCluster, User user, Workspace workspace) {
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Inject
+    private ClusterService clusterService;
+
+    public Cluster configureCluster(Cluster requestedCluster) {
         Objects.requireNonNull(requestedCluster);
         Stack stack = requestedCluster.getStack();
-        if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
-            Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
-            if (datalakeStack != null) {
-                List<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterIdAndStatusInAndTypeIn(datalakeStack.getCluster().getId(),
-                        Set.of(ResourceStatus.USER_MANAGED, ResourceStatus.DEFAULT),
-                        Set.of(DatabaseType.HIVE));
-                setupRds(requestedCluster, rdsConfigs);
-                setupStoragePath(requestedCluster, datalakeStack);
+        if (StackType.WORKLOAD.equals(stack.getType())) {
+            Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
+            if (sdxBasicView.isPresent()) {
+                Crn datalakeCrn = Crn.safeFromString(sdxBasicView.get().crn());
+                switch (CrnResourceDescriptor.getByCrnString(datalakeCrn.toString())) {
+                    case DATALAKE -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView);
+                    case SDX_SAAS_INSTANCE -> setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
+                    default -> LOGGER.info("Data Lake CRN is not recognized, skipping setup regarding shared filesystem and RDS!");
+                }
             }
         }
         return requestedCluster;
     }
 
-    private void setupRds(Cluster requestedCluster, List<RdsConfigWithoutCluster> rdsConfigs) {
+    private void configureClusterByPaasDatalake(Cluster requestedCluster, Stack stack, Optional<SdxBasicView> sdxBasicView) {
+        Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+        if (datalakeStack != null) {
+            requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeStack));
+            setupHmsRdsByPaasDatalakeStack(datalakeStack, requestedCluster);
+        } else {
+            setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
+        }
+    }
+
+    private void setupHmsRdsByPaasDatalakeStack(Stack datalakeStack, Cluster requestCluster) {
+        List<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterIdAndStatusInAndTypeIn(datalakeStack.getCluster().getId(),
+                Set.of(ResourceStatus.USER_MANAGED, ResourceStatus.DEFAULT),
+                Set.of(DatabaseType.HIVE));
+        setRdsConfigsForCluster(requestCluster, rdsConfigs);
+    }
+
+    private void setRdsConfigsForCluster(Cluster requestedCluster, List<RdsConfigWithoutCluster> rdsConfigs) {
         if (requestedCluster.getRdsConfigs().isEmpty() && rdsConfigs != null) {
             RDSConfig rdsConfig = new RDSConfig();
-            rdsConfig.setId(rdsConfigs.get(0).getId());
+            rdsConfig.setId(rdsConfigs.getFirst().getId());
             Set<RDSConfig> rdsConfigSet = new HashSet<>(requestedCluster.getRdsConfigs());
             rdsConfigSet.add(rdsConfig);
             requestedCluster.setRdsConfigs(rdsConfigSet);
         }
     }
 
-    private void setupStoragePath(Cluster requestedCluster, Stack datalakeStack) {
-        FileSystem fileSystem = remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeStack);
-        requestedCluster.setFileSystem(fileSystem);
+    private void setupHmsRdsByRemoteDataContext(StackDtoDelegate stack, Cluster requestedCluster, SdxBasicView sdxBasicView) {
+        String databaseType = DatabaseType.HIVE.name();
+        Map<String, String> configuration = platformAwareSdxConnector.getHmsServiceConfig(sdxBasicView.crn());
+        if (MapUtils.isNotEmpty(configuration)) {
+            String host = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_HOST);
+            String port = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_PORT);
+            String dbName = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_NAME);
+            String connectionUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbName);
+            Optional<RdsConfigWithoutCluster> rdsConfigWithoutCluster = rdsConfigWithoutClusterService.findByConnectionUrlAndType(connectionUrl, databaseType);
+            if (rdsConfigWithoutCluster.isPresent()) {
+                setRdsConfigsForCluster(requestedCluster, List.of(rdsConfigWithoutCluster.get()));
+            } else {
+                // we should reach this point only in case of CDL
+                String user = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_USER);
+                String password = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_PASSWORD);
+                RDSConfig config = new RDSConfig();
+                config.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());
+                config.setConnectionURL(connectionUrl);
+                config.setConnectionPassword(password);
+                config.setStatus(ResourceStatus.DEFAULT);
+                config.setConnectionUserName(user);
+                config.setName(String.format("%s_%s_%s", stack.getName(), stack.getId(), dbName));
+                config.setType(databaseType);
+                config.setClusters(Set.of(requestedCluster));
+                config.setWorkspace(stack.getWorkspace());
+                config.setStackVersion(stack.getStackVersion());
+                config.setSslMode(RdsSslMode.DISABLED);
+                config.setCreationDate(System.nanoTime());
+                config.setDatabaseEngine(DatabaseVendor.POSTGRES);
+                config.setStackVersion(stack.getStackVersion());
+                clusterService.saveRdsConfig(config);
+                LOGGER.info("created RDSConfig for service: {}", databaseType);
+                requestedCluster.getRdsConfigs().add(config);
+            }
+        }
+    }
+
+    private String getHmsServiceConfigValue(Map<String, String> configuration, String key) {
+        return Optional.ofNullable(configuration.get(key))
+                .orElseThrow(() -> new NoSuchElementException(String.format("%s is not found in remote data context!", key)));
     }
 }

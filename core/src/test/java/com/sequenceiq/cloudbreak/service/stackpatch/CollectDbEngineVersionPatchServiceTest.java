@@ -160,7 +160,7 @@ class CollectDbEngineVersionPatchServiceTest {
         when(externalDbVersionCollector.collectDbVersion(DB_CRN)).thenReturn(dbVersionResult);
         doThrow(new NotFoundException("nope")).when(sdxClientService).updateDatabaseEngineVersion(STACK_CRN, DB_VERSION);
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, STACK_CRN_2, null, null, false, 1L, null)));
+                Optional.of(new SdxBasicView(null, STACK_CRN_2, null, false, 1L, null)));
 
         boolean result = underTest.doApply(stack);
 

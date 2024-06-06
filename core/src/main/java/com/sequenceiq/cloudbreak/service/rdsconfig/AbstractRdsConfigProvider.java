@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -20,7 +19,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
@@ -31,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
-import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -80,7 +77,7 @@ public abstract class AbstractRdsConfigProvider {
      * @return salt pillar configuration information for this provider's database
      */
     public Map<String, Object> createServicePillarConfigMapIfNeeded(StackDto stackDto) {
-        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway(), isContainerizedDatalake(stackDto.getEnvironmentCrn()))) {
+        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
             RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
@@ -96,7 +93,7 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     public Map<String, Object> createServicePillarConfigMapForRotation(StackDto stackDto) {
-        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway(), isContainerizedDatalake(stackDto.getEnvironmentCrn()))) {
+        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
             RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
             RotationSecret databaseUser = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionUserNamePath());
             RotationSecret databasePassword = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionPasswordPath());
@@ -147,7 +144,7 @@ public abstract class AbstractRdsConfigProvider {
      * this provider's database
      */
     public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
-        if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway(), isContainerizedDatalake(stack.getEnvironmentCrn()))
+        if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
             if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
@@ -174,7 +171,7 @@ public abstract class AbstractRdsConfigProvider {
 
     public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(StackDtoDelegate stackDto) {
         ClusterView cluster = stackDto.getCluster();
-        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway(), isContainerizedDatalake(stackDto.getEnvironmentCrn()))
+        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
             StackView stack = stackDto.getStack();
@@ -245,14 +242,6 @@ public abstract class AbstractRdsConfigProvider {
 
     protected abstract String getPillarKey();
 
-    protected abstract boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway, boolean cdl);
-
-    private boolean isContainerizedDatalake(String environmentCrn) {
-        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn).map(SdxBasicView::crn);
-        if (sdxCrnOptional.isEmpty()) {
-            return false;
-        }
-        return sdxCrnOptional.filter(crn -> Crn.ResourceType.INSTANCE.equals(Crn.safeFromString(crn).getResourceType())).isPresent();
-    }
+    protected abstract boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway);
 
 }

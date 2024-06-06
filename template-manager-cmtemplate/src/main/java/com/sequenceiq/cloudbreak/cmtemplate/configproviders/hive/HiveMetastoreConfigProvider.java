@@ -7,6 +7,12 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_HOST;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_NAME;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PASSWORD;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PORT;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_TYPE;
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_USER;
 import static com.sequenceiq.cloudbreak.template.views.DatabaseType.EXTERNAL_DATABASE;
 
 import java.util.ArrayList;
@@ -34,24 +40,6 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
 public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
-
-    @VisibleForTesting
-    static final String HIVE_METASTORE_DATABASE_HOST = "hive_metastore_database_host";
-
-    @VisibleForTesting
-    static final String HIVE_METASTORE_DATABASE_NAME = "hive_metastore_database_name";
-
-    @VisibleForTesting
-    static final String HIVE_METASTORE_DATABASE_PASSWORD = "hive_metastore_database_password";
-
-    @VisibleForTesting
-    static final String HIVE_METASTORE_DATABASE_PORT = "hive_metastore_database_port";
-
-    @VisibleForTesting
-    static final String HIVE_METASTORE_DATABASE_TYPE = "hive_metastore_database_type";
-
-    @VisibleForTesting
-    static final String HIVE_METASTORE_DATABASE_USER = "hive_metastore_database_user";
 
     @VisibleForTesting
     static final String HIVE_COMPACTOR_INITIATOR_ON = "hive_compactor_initiator_on";

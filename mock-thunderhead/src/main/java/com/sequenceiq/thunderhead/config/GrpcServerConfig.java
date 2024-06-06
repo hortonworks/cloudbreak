@@ -12,6 +12,7 @@ import com.sequenceiq.thunderhead.grpc.service.auth.MockAuthorizationService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockPersonalResourceViewService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockUserManagementService;
 import com.sequenceiq.thunderhead.grpc.service.authdistributor.MockAuthDistributorService;
+import com.sequenceiq.thunderhead.grpc.service.cdl.MockCdlService;
 import com.sequenceiq.thunderhead.grpc.service.datalakedr.MockDatalakeDrService;
 import com.sequenceiq.thunderhead.grpc.service.metering.MockMeteringService;
 import com.sequenceiq.thunderhead.grpc.service.pem.MockPublicEndpointManagementService;
@@ -51,6 +52,9 @@ public class GrpcServerConfig {
     @Inject
     private MockMeteringService mockMeteringService;
 
+    @Inject
+    private MockCdlService mockCdlService;
+
     @Value("${grpc.server.port:8982}")
     private int grpcServerPort;
 
@@ -69,7 +73,8 @@ public class GrpcServerConfig {
                 mockServiceDiscoveryService.bindService(),
                 mockAuthDistributorService.bindService(),
                 mockMeteringService.bindService(),
-                mockRemoteClusterService.bindService());
+                mockRemoteClusterService.bindService(),
+                mockCdlService.bindService());
     }
 
     @Bean

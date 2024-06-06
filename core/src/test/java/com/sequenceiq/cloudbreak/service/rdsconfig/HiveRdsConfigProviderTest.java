@@ -40,13 +40,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 @ExtendWith(MockitoExtension.class)
 public class HiveRdsConfigProviderTest {
 
-    private static final String STACK_NAME = "test-stack";
-
-    private static final String HIVE = "HIVE";
-
-    private static final Crn ENVIRONMENT_CRN =
-        Crn.safeFromString("crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:2903f097-dae6-4129-b4ba-b283dfd63138");
-
     private static final Crn CDL_CRN =
         Crn.safeFromString("crn:cdp:sdxsvc:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:instance:ab79a335-70cc-4c06-90af-ea74efe02636");
 
@@ -94,12 +87,11 @@ public class HiveRdsConfigProviderTest {
     @Test
     void testCreateRdsConfigIfNeededCdlCrn() {
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, null, false, 1L, null)));
+                Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, false, 1L, null)));
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.getId()).thenReturn(1L);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(stackDto.getEnvironmentCrn()).thenReturn("environment-crn");
         Blueprint blueprint = mock(Blueprint.class);
         when(stackDto.getBlueprint()).thenReturn(blueprint);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
@@ -109,7 +101,6 @@ public class HiveRdsConfigProviderTest {
 
     @Test
     void testCreateRdsConfigIfNeededPaasCrn() {
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.empty());
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> {
             RDSConfig rdsConfig = i.getArgument(1, RDSConfig.class);
             rdsConfig.setId(1L);
@@ -119,7 +110,6 @@ public class HiveRdsConfigProviderTest {
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.getId()).thenReturn(1L);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(stackDto.getEnvironmentCrn()).thenReturn("environment-crn");
         Blueprint blueprint = mock(Blueprint.class);
         when(stackDto.getBlueprint()).thenReturn(blueprint);
         StackView stackView = mock(StackView.class);

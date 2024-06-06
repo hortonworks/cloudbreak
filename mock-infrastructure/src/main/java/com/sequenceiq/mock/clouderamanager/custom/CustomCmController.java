@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.sequenceiq.cloudbreak.sdx.RdcConstants;
 import com.sequenceiq.mock.clouderamanager.ResponseCreatorComponent;
+import com.sequenceiq.mock.swagger.model.ApiEndPoint;
+import com.sequenceiq.mock.swagger.model.ApiMapEntry;
 import com.sequenceiq.mock.swagger.model.ApiRemoteDataContext;
 
 @Controller
@@ -25,7 +28,16 @@ public class CustomCmController {
             method = RequestMethod.GET)
     public ResponseEntity<ApiRemoteDataContext> getRemoteContextByCluster(@PathVariable("mockUuid") String mockUuid,
             @PathVariable("clusterName") String clusterName) {
-        return responseCreatorComponent.exec(new ApiRemoteDataContext());
+        ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
+        ApiEndPoint hmsApiEndpoint = new ApiEndPoint();
+        hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_HOST, "mock_database"));
+        hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PORT, "5432"));
+        hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_NAME, "hive"));
+        hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_USER, "hive"));
+        hmsApiEndpoint.addServiceConfigsItem(apiMapEntry(RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PASSWORD, "pass"));
+        hmsApiEndpoint.setName("hive");
+        apiRemoteDataContext.addEndPointsItem(hmsApiEndpoint);
+        return responseCreatorComponent.exec(apiRemoteDataContext);
     }
 
     @RequestMapping(value = "/cdp/remoteContext",
@@ -33,6 +45,13 @@ public class CustomCmController {
             consumes = { "application/json" },
             method = RequestMethod.POST)
     public ResponseEntity<ApiRemoteDataContext> postRemoteContext(@PathVariable("mockUuid") String mockUuid, @Valid @RequestBody ApiRemoteDataContext body) {
-        return responseCreatorComponent.exec(new ApiRemoteDataContext());
+        return responseCreatorComponent.exec(body);
+    }
+
+    private ApiMapEntry apiMapEntry(String key, String value) {
+        ApiMapEntry apiMapEntry = new ApiMapEntry();
+        apiMapEntry.setKey(key);
+        apiMapEntry.setValue(value);
+        return apiMapEntry;
     }
 }

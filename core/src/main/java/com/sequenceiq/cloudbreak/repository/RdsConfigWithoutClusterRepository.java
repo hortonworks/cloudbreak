@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.transaction.Transactional;
@@ -81,4 +82,12 @@ public interface RdsConfigWithoutClusterRepository extends CrudRepository<RDSCon
             "AND r.name in :names " +
             "AND r.status = 'USER_MANAGED'")
     Set<RdsConfigWithoutCluster> findAllByNamesAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT DISTINCT " + PROJECTION +
+            "FROM RDSConfig r " +
+            "WHERE r.connectionURL = :connectionUrl " +
+            "AND r.type = :type " +
+            "ORDER BY id DESC " +
+            "LIMIT 1")
+    Optional<RdsConfigWithoutCluster> findByConnectionUrlAndType(@Param("connectionUrl") String connectionUrl, @Param("type") String type);
 }

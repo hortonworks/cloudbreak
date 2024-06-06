@@ -77,13 +77,13 @@ class ClusterDecoratorTest {
     void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
         Cluster expectedClusterInstance = new Cluster();
         Blueprint blueprint = getBlueprint();
-        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
+        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class)))
                 .thenReturn(expectedClusterInstance);
         when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
         Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
 
         assertEquals(expectedClusterInstance, result);
-        verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(User.class), any(Workspace.class));
+        verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class));
     }
 
     private Blueprint getBlueprint() {

@@ -124,7 +124,7 @@ class DistroXUpgradeResponseFilterServiceTest {
         ImageInfoV4Response candidate3 = createImage(2L, "7.2.17", CENTOS7);
         List<ImageInfoV4Response> candidates = List.of(candidate1, candidate2, candidate3);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(
-                new SdxBasicView(null, null, "7.2.16", null, false, 1L, null)));
+                new SdxBasicView(null, null, "7.2.16", false, 1L, null)));
 
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.16", candidates));
 
@@ -140,7 +140,7 @@ class DistroXUpgradeResponseFilterServiceTest {
         ImageInfoV4Response candidate3 = createImage(2L, "7.2.17", CENTOS7);
         List<ImageInfoV4Response> candidates = List.of(candidate1, candidate2, candidate3);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(
-                new SdxBasicView(null, null, "7.2.15", null, false, 1L, null)));
+                new SdxBasicView(null, null, "7.2.15", false, 1L, null)));
 
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.15", candidates));
 

@@ -34,7 +34,7 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
 
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
-        return remoteDataContextSupplier.map(rdxSupplier -> rdxSupplier.getPaasSdxRemoteDataContext(crn))
+        return remoteDataContextSupplier.map(rdcSupplier -> rdcSupplier.getPaasSdxRemoteDataContext(crn))
                 .orElseThrow(() -> new CloudbreakServiceException("Cannot provide remote data context!"));
     }
 
@@ -55,7 +55,6 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
                             sdx.getName(),
                             sdx.getCrn(),
                             sdx.getRuntime(),
-                            sdx.getEnvironmentCrn(),
                             sdx.getRangerRazEnabled(),
                             sdx.getCreated(),
                             sdx.getDatabaseServerCrn())

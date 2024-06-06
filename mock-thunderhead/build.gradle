@@ -68,6 +68,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
+    implementation group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataJpaFrameworkVersion
     implementation group: 'org.springframework', name: 'spring-context-support', version: springFrameworkVersion
     implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: springSecurityJwtVersion
     implementation group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
@@ -77,6 +78,7 @@ dependencies {
     implementation group: 'org.openapitools',           name: 'jackson-databind-nullable', version: jacksonDatabindNullable
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.12.5'
+    implementation group: 'com.h2database', name: 'h2', version: h2databaseVersion
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion

@@ -16,9 +16,10 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartResult;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -38,13 +39,13 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
     private EventBus eventBus;
 
     @Inject
-    private DatalakeService datalakeService;
-
-    @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private ClusterServicesRestartService clusterServicesRestartService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Override
     public String selector() {
@@ -57,12 +58,12 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
         ClusterServicesRestartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
+            Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
-            if ((datalakeStack.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, datalakeStack.get()))
+            if ((sdxBasicView.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()))
                     || request.isDatahubRefreshNeeded()) {
                 LOGGER.info("Deploying client config and restarting services");
-                clusterServicesRestartService.refreshClusterOnRestart(stack, datalakeStack.get(), blueprintProcessor);
+                clusterServicesRestartService.refreshClusterOnRestart(stack, sdxBasicView.get(), blueprintProcessor);
             } else {
                 LOGGER.info("Restarting services");
                 apiConnectors.getConnector(stack).clusterModificationService().restartClusterServices();

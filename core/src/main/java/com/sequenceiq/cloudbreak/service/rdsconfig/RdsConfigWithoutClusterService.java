@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,5 +52,9 @@ public class RdsConfigWithoutClusterService {
 
     public void saveRdsConfigWithoutCluster(RDSConfig rdsConfig) {
         rdsConfigWithoutClusterRepository.save(rdsConfig);
+    }
+
+    public Optional<RdsConfigWithoutCluster> findByConnectionUrlAndType(String connectionUrl, String type) {
+        return rdsConfigWithoutClusterRepository.findByConnectionUrlAndType(connectionUrl, type);
     }
 }

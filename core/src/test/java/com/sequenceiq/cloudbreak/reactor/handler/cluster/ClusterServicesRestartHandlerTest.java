@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -14,9 +15,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -28,13 +30,15 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartRequest;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 
-public class CusterServicesRestartHandlerTest {
+@ExtendWith(MockitoExtension.class)
+public class ClusterServicesRestartHandlerTest {
 
     @Mock
     private ClusterApiConnectors apiConnectors;
@@ -46,7 +50,7 @@ public class CusterServicesRestartHandlerTest {
     private EventBus eventBus;
 
     @Mock
-    private DatalakeService datalakeService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Mock
     private ClusterApi connector;
@@ -67,18 +71,18 @@ public class CusterServicesRestartHandlerTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ClusterServicesRestartHandler();
-        MockitoAnnotations.openMocks(this);
         mockTemplateComponents();
+        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
+                new SdxBasicView("name", "crn", null, true, 1L, null)));
 
         stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform("AWS");
+        stack.setEnvironmentCrn("env");
         Cluster cluster = new Cluster();
         cluster.setBlueprint(new Blueprint());
         stack.setCluster(cluster);
 
-        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(stack));
         when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
 
     }

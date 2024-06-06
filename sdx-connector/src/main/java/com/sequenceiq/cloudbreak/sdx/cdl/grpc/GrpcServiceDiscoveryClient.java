@@ -1,10 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.cdl.grpc;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -13,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
-import com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -67,28 +63,6 @@ public class GrpcServiceDiscoveryClient {
                     });
         }
         return objectMapper.writeValueAsString(apiRemoteDataContext);
-    }
-
-    public Map<String, String> getServiceConfiguration(String sdxCrn, String name) {
-        ServiceDiscoveryClient serviceDiscoveryClient = makeClient();
-        ServiceDiscoveryProto.ApiRemoteDataContext remoteDataContext = serviceDiscoveryClient.getRemoteDataContext(sdxCrn);
-        if (Objects.nonNull(remoteDataContext)) {
-            Optional<ServiceDiscoveryProto.ApiEndPoint> apiEndpoint = remoteDataContext
-                    .getEndPointsList()
-                    .stream()
-                    .filter(endpoint -> endpoint.getName().equalsIgnoreCase(name))
-                    .findFirst();
-            if (apiEndpoint.isEmpty()) {
-                return Collections.emptyMap();
-            }
-            return apiEndpoint
-                    .map(apiEndPoint -> apiEndPoint.getServiceConfigsList()
-                            .stream()
-                            .collect(Collectors.toMap(ServiceDiscoveryProto.ApiMapEntry::getKey, ServiceDiscoveryProto.ApiMapEntry::getValue)))
-                    .orElse(Collections.emptyMap());
-
-        }
-        return Collections.emptyMap();
     }
 
     public ServiceDiscoveryClient makeClient() {

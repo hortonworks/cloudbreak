@@ -430,7 +430,7 @@ public class DistroXUpgradeRetrievalComponentTest {
     }
 
     private Optional<SdxBasicView> createSdxBasicView() {
-        return Optional.of(new SdxBasicView(CLUSTER_NAME, null, null, null, false, null, null));
+        return Optional.of(new SdxBasicView(CLUSTER_NAME, null, null, false, null, null));
     }
 
     @TestConfiguration

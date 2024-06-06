@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.paas;
 
+import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_HOST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,6 +12,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,6 +23,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.api.swagger.model.ApiEndPoint;
+import com.cloudera.api.swagger.model.ApiMapEntry;
+import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -51,7 +59,7 @@ public class PaasSdxDescribeServiceTest {
     void testGetPaasSdxLocally() throws IllegalAccessException {
         LocalPaasSdxService mockLocalSdxService = mock(LocalPaasSdxService.class);
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.of(mockLocalSdxService), true);
-        when(mockLocalSdxService.getSdxBasicView(anyString())).thenReturn(Optional.of(new SdxBasicView(null, "crn", null, null, false, 1L, null)));
+        when(mockLocalSdxService.getSdxBasicView(anyString())).thenReturn(Optional.of(new SdxBasicView(null, "crn", null, false, 1L, null)));
 
         underTest.getSdxByEnvironmentCrn("envCrn");
 
@@ -67,6 +75,44 @@ public class PaasSdxDescribeServiceTest {
         underTest.getSdxByEnvironmentCrn("envCrn");
 
         verify(sdxEndpoint).getByEnvCrn(anyString());
+    }
+
+    @Test
+    void testGetHmsConfigIfEmpty() throws IllegalAccessException, JsonProcessingException {
+        PaasRemoteDataContextSupplier rdcSupplier = mock(PaasRemoteDataContextSupplier.class);
+        FieldUtils.writeField(underTest, "remoteDataContextSupplier", Optional.of(rdcSupplier), true);
+        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.empty());
+
+        assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
+
+        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.of(new ObjectMapper().writeValueAsString(new ApiRemoteDataContext())));
+
+        assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
+
+        ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
+        ApiEndPoint apiEndPoint = new ApiEndPoint();
+        apiEndPoint.setName("hive");
+        apiRemoteDataContext.setEndPoints(List.of(apiEndPoint));
+        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.of(new ObjectMapper().writeValueAsString(apiRemoteDataContext)));
+
+        assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
+    }
+
+    @Test
+    void testGetHmsConfig() throws IllegalAccessException, JsonProcessingException {
+        PaasRemoteDataContextSupplier rdcSupplier = mock(PaasRemoteDataContextSupplier.class);
+        FieldUtils.writeField(underTest, "remoteDataContextSupplier", Optional.of(rdcSupplier), true);
+        ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
+        ApiEndPoint apiEndPoint = new ApiEndPoint();
+        apiEndPoint.setName("hive");
+        ApiMapEntry apiMapEntry = new ApiMapEntry();
+        apiMapEntry.setKey(HIVE_METASTORE_DATABASE_HOST);
+        apiMapEntry.setValue("host");
+        apiEndPoint.setServiceConfigs(List.of(apiMapEntry));
+        apiRemoteDataContext.setEndPoints(List.of(apiEndPoint));
+        when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.of(new ObjectMapper().writeValueAsString(apiRemoteDataContext)));
+
+        assertEquals(Map.of(HIVE_METASTORE_DATABASE_HOST, "host"), underTest.getHmsServiceConfig(PAAS_CRN));
     }
 
     private SdxClusterResponse getSdxClusterResponse() {

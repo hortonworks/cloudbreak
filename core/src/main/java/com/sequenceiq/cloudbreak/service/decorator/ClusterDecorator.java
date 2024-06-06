@@ -55,7 +55,7 @@ public class ClusterDecorator {
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         setupEmbeddedDatabase(cluster, stack);
-        cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
+        cluster = sharedServiceConfigProvider.configureCluster(cluster);
         return cluster;
     }
 

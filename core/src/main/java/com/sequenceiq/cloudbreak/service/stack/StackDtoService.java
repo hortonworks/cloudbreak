@@ -372,7 +372,6 @@ public class StackDtoService implements LocalPaasSdxService {
                         stackDto.getResourceName(),
                         stackDto.getResourceCrn(),
                         runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null),
-                        stackDto.getEnvironmentCrn(),
                         stackDto.getCluster().isRangerRazEnabled(),
                         stackDto.getCluster().getCreationFinished(),
                         stackDto.getCluster().getDatabaseServerCrn()));

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.sdx.cdl.service;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -75,7 +74,6 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
                         detailedCdl.getName(),
                         detailedCdl.getCrn(),
                         detailedCdl.getShape(),
-                        detailedCdl.getEnvironmentCrn(),
                         detailedCdl.getRangerRazEnabled(),
                         detailedCdl.getCreated(),
                         detailedCdl.getDatabaseDetails().getCrn());
@@ -92,13 +90,5 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
     @Override
     public boolean isSdxClusterHA(String environmentCrn) {
         throw new UnsupportedOperationException("Currently we cannot decide if a SDX CDL cluster is HA or not.");
-    }
-
-    public Map<String, String> getServiceConfiguration(String sdxCrn, String name) {
-        if (isEnabled(sdxCrn)) {
-            LOGGER.info("Service configuration fetch for {}, in sdx {}", name, sdxCrn);
-            return grpcServiceDiscoveryClient.getServiceConfiguration(sdxCrn, name);
-        }
-        return Collections.emptyMap();
     }
 }

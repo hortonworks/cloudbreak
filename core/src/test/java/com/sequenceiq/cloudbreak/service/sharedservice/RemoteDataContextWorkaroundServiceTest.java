@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.RANGER;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -47,39 +46,6 @@ public class RemoteDataContextWorkaroundServiceTest {
 
     @InjectMocks
     private RemoteDataContextWorkaroundService underTest;
-
-    @Test
-    public void testRdsConfigsWhenHivePresentedShouldReturnWithHiveConfigs() {
-        Set<RDSConfig> rdsConfigs = underTest
-                .prepareRdsConfigs(
-                        mockRequestedCluster(mockRds(HIVE), mockRds(RANGER)),
-                        new HashSet<>(Set.of(mockRds(HIVE, true))));
-
-        Assert.assertEquals(2, rdsConfigs.size());
-        Assert.assertTrue(get(rdsConfigs, HIVE).getStatus().equals(ResourceStatus.DEFAULT));
-    }
-
-    @Test
-    public void testRdsConfigsWhenHiveNotPresentedShouldReturnWithHiveConfigs() {
-        Set<RDSConfig> rdsConfigs = underTest
-                .prepareRdsConfigs(
-                        mockRequestedCluster(mockRds(RANGER)),
-                        new HashSet<>(Set.of(mockRds(HIVE, true))));
-
-        Assert.assertEquals(2, rdsConfigs.size());
-        Assert.assertTrue(get(rdsConfigs, HIVE).getStatus().equals(ResourceStatus.DEFAULT));
-    }
-
-    @Test
-    public void testRdsConfigsWhenHiveNotInDatalakeShouldReturnWithDistroXHiveConfigs() {
-        Set<RDSConfig> rdsConfigs = underTest
-                .prepareRdsConfigs(
-                        mockRequestedCluster(mockRds(RANGER), mockRds(HIVE)),
-                        new HashSet<>());
-
-        Assert.assertEquals(2, rdsConfigs.size());
-        Assert.assertTrue(get(rdsConfigs, HIVE).getStatus().equals(ResourceStatus.USER_MANAGED));
-    }
 
     @Test
     public void testFileSystemWhenHivePathPresentedInDistroXButSdxDoesNotContainsItShouldReturnWithDistroXConfigs() throws IOException {

@@ -58,7 +58,7 @@ public class DbStoreService {
                         ResourceStatus.CREATED),
                 new CloudResourceStatus(CloudResource.builder()
                         .withType(ResourceType.RDS_PORT)
-                        .withName("8989")
+                        .withName("5432")
                         .withStatus(CommonStatus.CREATED)
                         .withParameters(Map.of())
                         .build(),

@@ -53,7 +53,7 @@ public class StreamsMessagingManagerRdsConfigProvider extends AbstractRdsConfigP
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
         return blueprintProcessor.doesCMComponentExistsInBlueprint("STREAMS_MESSAGING_MANAGER_SERVER");
     }

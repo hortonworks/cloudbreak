@@ -15,7 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Table;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -23,10 +26,11 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.RdsSettingsMigra
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -35,9 +39,6 @@ public class ClusterStartHandlerService {
 
     @Inject
     private ClusterApiConnectors apiConnectors;
-
-    @Inject
-    private DatalakeService datalakeService;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -54,26 +55,34 @@ public class ClusterStartHandlerService {
     @Inject
     private RdsSettingsMigrationService rdsSettingsMigrationService;
 
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
     public void startCluster(Stack stack, CmTemplateProcessor blueprintProcessor, boolean datahubRefreshNeeded) throws Exception {
-        Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
-        if (datalakeStack.isPresent() && (clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, datalakeStack.get())
-                || datahubRefreshNeeded)) {
-            clusterServicesRestartService.refreshClusterOnStart(stack, datalakeStack.get(), blueprintProcessor);
-        } else {
-            startAndRefreshSharedRdsConfigIfNeeded(stack, datalakeStack);
+        Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
+        if (sdxBasicView.isPresent() && CrnResourceDescriptor.DATALAKE.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.get().crn()))) {
+            // let's update config only in case of VM form factor for now
+            if (clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()) || datahubRefreshNeeded) {
+                // refresh DH after DL resize
+                clusterServicesRestartService.refreshClusterOnStart(stack, sdxBasicView.get(), blueprintProcessor);
+            } else {
+                // refresh DH after flexible server upgrade
+                startAndRefreshSharedRdsConfigIfNeeded(stack);
+            }
         }
     }
 
-    private void startAndRefreshSharedRdsConfigIfNeeded(Stack stack, Optional<Stack> datalakeStack) throws Exception {
+    private void startAndRefreshSharedRdsConfigIfNeeded(Stack stack) throws Exception {
         LOGGER.info("Starting cluster manager and its agents on {} cluster", stack.getName());
         apiConnectors.getConnector(stack).startClusterManagerAndAgents();
-        if (datalakeStack.isPresent()) {
+        if (StackType.WORKLOAD.equals(stack.getType())) {
             refreshSharedRdsConfigIfNeeded(stack);
         }
         LOGGER.info("Starting services on {} cluster", stack.getName());
         apiConnectors.getConnector(stack).startCluster(true);
     }
 
+    // if this logic is needed for CDL, remote data context should be used to compare current config of DH and CDL
     private void refreshSharedRdsConfigIfNeeded(Stack stack) {
         try {
             Predicate<RDSConfig> cmServicePredicate = this::isClouderaManagerService;

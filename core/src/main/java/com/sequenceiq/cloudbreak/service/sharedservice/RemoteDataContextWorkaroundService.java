@@ -1,25 +1,16 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -28,39 +19,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 @Service
 public class RemoteDataContextWorkaroundService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteDataContextWorkaroundService.class);
-
     @Inject
     private MissingResourceNameGenerator nameGenerator;
-
-    public Set<RDSConfig> prepareRdsConfigs(Cluster requestedCluster, Set<RDSConfig> rdsConfigs) {
-        Set<RDSConfig> rdsConfigsWithoutHive = requestedCluster.getRdsConfigs();
-        Set<RDSConfig> hiveDbfromSdx = rdsConfigs
-                .stream()
-                .filter(this::isActiveHiveMetastoreDatabase)
-                .collect(toSet());
-        if (isHivePresentedInSdx(hiveDbfromSdx)) {
-            rdsConfigsWithoutHive = requestedCluster.getRdsConfigs()
-                    .stream()
-                    .filter(rdsConfig -> !isHiveMetastoreDatabase(rdsConfig))
-                    .collect(toSet());
-        }
-        rdsConfigsWithoutHive.addAll(hiveDbfromSdx);
-        return rdsConfigsWithoutHive;
-    }
-
-    private boolean isHivePresentedInSdx(Set<RDSConfig> rdsConfigs) {
-        return !rdsConfigs.isEmpty();
-    }
-
-    private boolean isActiveHiveMetastoreDatabase(RDSConfig rdsConfig) {
-        ResourceStatus status = rdsConfig.getStatus();
-        return (DEFAULT.equals(status) || USER_MANAGED.equals(status)) && isHiveMetastoreDatabase(rdsConfig);
-    }
-
-    private boolean isHiveMetastoreDatabase(RDSConfig rdsConfig) {
-        return DatabaseType.HIVE.name().equals(rdsConfig.getType());
-    }
 
     public FileSystem prepareFilesytem(Cluster requestedCluster, Stack datalakeStack) {
         prepareFilesystemIfNotPresentedButSdxHasIt(requestedCluster, datalakeStack);
