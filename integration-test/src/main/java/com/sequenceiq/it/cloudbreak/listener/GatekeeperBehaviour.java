@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.listener;
 
 import java.util.Objects;
 
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
 import org.testng.ISuiteResult;
@@ -21,7 +22,7 @@ public class GatekeeperBehaviour extends CheckedListener implements IInvokedMeth
         if (!isThisSuiteListener(testResult)) {
             return;
         }
-        if (hasFailedGatekeeperTest(testResult)) {
+        if (!AbstractTestNGSpringContextTests.class.equals(method.getTestMethod().getRealClass()) && hasFailedGatekeeperTest(testResult)) {
             throw new GatekeeperException(SKIP_MESSAGE);
         }
     }
@@ -37,7 +38,7 @@ public class GatekeeperBehaviour extends CheckedListener implements IInvokedMeth
 
     private boolean hasFailedGatekeeperTest(ISuiteResult suiteResult) {
         ITestContext testContext = suiteResult.getTestContext();
-        return !testContext.getFailedTests().getAllResults().isEmpty()
+        return !(testContext.getFailedTests().getAllResults().isEmpty() && testContext.getSkippedTests().getAllResults().isEmpty())
                 && Objects.equals(testContext.getCurrentXmlTest().getParameter(IS_GATEKEEPER), TRUE);
     }
 }
