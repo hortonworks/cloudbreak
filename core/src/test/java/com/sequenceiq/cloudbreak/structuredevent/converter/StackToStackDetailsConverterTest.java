@@ -36,6 +36,9 @@ import com.sequenceiq.common.api.type.Tunnel;
 
 @ExtendWith(MockitoExtension.class)
 public class StackToStackDetailsConverterTest {
+
+    private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
@@ -79,7 +82,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionExternalDB() {
         // GIVEN
         Stack stack = createStack();
-        stack.getCluster().setDatabaseServerCrn("TEST_CRN");
+        stack.getCluster().setDatabaseServerCrn(DB_SERVER_CRN);
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
@@ -196,7 +199,7 @@ public class StackToStackDetailsConverterTest {
         when(stack.isDatalake()).thenReturn(true);
         when(stack.getStatus()).thenReturn(Status.AVAILABLE);
         Cluster cluster = new Cluster();
-        cluster.setDatabaseServerCrn("dbservercrn");
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         Database database = new Database();
         database.setExternalDatabaseEngineVersion("14");
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);

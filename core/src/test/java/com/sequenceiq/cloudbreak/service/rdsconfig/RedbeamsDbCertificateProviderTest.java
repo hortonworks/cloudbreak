@@ -31,6 +31,10 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfi
 @ExtendWith(MockitoExtension.class)
 class RedbeamsDbCertificateProviderTest {
 
+    private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
+    private static final String DB_SERVER_CRN_2 = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c9-aaf0-4bf3-b872-5613ce496ac3";
+
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
@@ -58,15 +62,14 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterSdxAndRdsConfiguredButItsSslConfigIsNullShouldReturnWithEmptyResult() {
-        String dbServerCrn = "adbservercrn";
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(new DatabaseServerV4Response());
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(new DatabaseServerV4Response());
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -76,9 +79,8 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterSdxAndRdsConfiguredWithoutSSL() {
-        String dbServerCrn = "adbservercrn";
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -86,7 +88,7 @@ class RedbeamsDbCertificateProviderTest {
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(new SslConfigV4Response());
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -96,9 +98,8 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterSdxAndRdsConfiguredWithSSLButNoCerts() {
-        String dbServerCrn = "adbservercrn";
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -108,21 +109,20 @@ class RedbeamsDbCertificateProviderTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         SslConfigV4Response sslConfig = getSslConfigV4ResponseWithCertificate(Set.of());
         databaseServerV4Response.setSslConfig(sslConfig);
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
 
         IllegalStateException illegalStateException = Assertions.assertThrows(IllegalStateException.class, () -> underTest.getRelatedSslCerts(stack));
 
         assertThat(illegalStateException)
-                .hasMessage("External DB SSL enforcement is enabled for cluster(crn:'stackCrn') and remote database('adbservercrn')," +
+                .hasMessage("External DB SSL enforcement is enabled for cluster(crn:'stackCrn') and remote database('" + DB_SERVER_CRN + "')," +
                 "but no certificates have been returned!");
     }
 
     @Test
     void getRelatedSslCertsWhenTheClusterSdxAndRdsConfiguredWithSSL() {
-        String dbServerCrn = "adbservercrn";
         String certificateA = "certificate-A";
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -131,7 +131,7 @@ class RedbeamsDbCertificateProviderTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         SslConfigV4Response sslConfig = getSslConfigV4ResponseWithCertificate(Set.of(certificateA));
         databaseServerV4Response.setSslConfig(sslConfig);
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -143,10 +143,9 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterDistroXAndRdsConfiguredAndThereIsNoRelatedSdx() {
-        String dbServerCrn = "adbservercrn";
         String certificateA = "certificate-A";
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -154,7 +153,7 @@ class RedbeamsDbCertificateProviderTest {
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -166,11 +165,10 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterDistroXAndRdsConfiguredAndRelatedSdxDoesNotHaveRdsConfigured() {
-        String dbServerCrn = "adbservercrn";
         String certificateA = "certificate-A";
 
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -181,7 +179,7 @@ class RedbeamsDbCertificateProviderTest {
                 Optional.of(new SdxBasicView(null, null, null, null, false, 1L, null)));
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -193,7 +191,6 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterDistroXAndNoRdsConfiguredButRelatedSdxHasRdsConfigured() {
-        String dbServerCrnB = "dbservercrn-B";
         String certificateB = "certificate-B";
 
         Cluster cluster = TestUtil.cluster();
@@ -205,10 +202,10 @@ class RedbeamsDbCertificateProviderTest {
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, DB_SERVER_CRN)));
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
         databaseServerV4ResponseB.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateB)));
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4ResponseB);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -220,12 +217,10 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterDistroXAndRdsConfiguredButRelatedSdxRdsHasNoSSLConfigured() {
-        String dbServerCrn = "dbservercrn-A";
-        String dbServerCrnB = "dbservercrn-B";
         String certificateA = "certificate-A";
 
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -233,15 +228,15 @@ class RedbeamsDbCertificateProviderTest {
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, DB_SERVER_CRN_2)));
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
         SslConfigV4Response sslConfig = new SslConfigV4Response();
         sslConfig.setSslMode(SslMode.DISABLED);
         databaseServerV4ResponseB.setSslConfig(sslConfig);
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN_2)).thenReturn(databaseServerV4ResponseB);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 
@@ -253,13 +248,11 @@ class RedbeamsDbCertificateProviderTest {
 
     @Test
     void getRelatedSslCertsWhenTheClusterDistroXAndRdsConfiguredAndRelatedSdxHasRdsConfigured() {
-        String dbServerCrn = "dbservercrn-A";
-        String dbServerCrnB = "dbservercrn-B";
         String certificateA = "certificate-A";
         String certificateB = "certificate-B";
 
         Cluster cluster = TestUtil.cluster();
-        cluster.setDatabaseServerCrn(dbServerCrn);
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         StackDto stack = mock(StackDto.class);
         when(stack.getCluster()).thenReturn(cluster);
         StackView stackView = mock(StackView.class);
@@ -267,13 +260,13 @@ class RedbeamsDbCertificateProviderTest {
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, DB_SERVER_CRN_2)));
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
         databaseServerV4ResponseB.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateB)));
-        when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
+        when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN_2)).thenReturn(databaseServerV4ResponseB);
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
 

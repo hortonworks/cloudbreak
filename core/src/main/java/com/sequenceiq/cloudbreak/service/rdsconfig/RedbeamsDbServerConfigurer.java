@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -85,7 +86,8 @@ public class RedbeamsDbServerConfigurer {
     }
 
     public static boolean isRemoteDatabaseRequested(String dbServerCrn) {
-        return StringUtils.isNotEmpty(dbServerCrn);
+        return StringUtils.isNotEmpty(dbServerCrn) && Crn.isCrn(dbServerCrn) &&
+                Crn.ResourceType.DATABASE_SERVER.equals(Crn.safeFromString(dbServerCrn).getResourceType());
     }
 
     public DatabaseServerV4Response getDatabaseServer(String serverCrn) {
