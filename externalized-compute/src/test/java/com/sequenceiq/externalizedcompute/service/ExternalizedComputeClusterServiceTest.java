@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -39,6 +42,7 @@ import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
+import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalizedComputeClusterServiceTest {
@@ -47,6 +51,9 @@ class ExternalizedComputeClusterServiceTest {
 
     @Spy
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
@@ -74,6 +81,9 @@ class ExternalizedComputeClusterServiceTest {
 
     @Mock
     private ExternalizedComputeClusterFlowManager externalizedComputeClusterFlowManager;
+
+    @Mock
+    private LiftieGrpcClient liftieGrpcClient;
 
     @InjectMocks
     private ExternalizedComputeClusterService clusterService;
@@ -150,6 +160,28 @@ class ExternalizedComputeClusterServiceTest {
 
         String liftieClusterCrn = clusterService.getLiftieClusterCrn(cluster);
         assertEquals("crn:cdp:compute:us-west-1:account:cluster:liftie1", liftieClusterCrn);
+    }
+
+    @Test
+    public void testDeleteLiftieClusterCrn() {
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        String envCrn = "envCrn";
+        cluster.setEnvironmentCrn(envCrn);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByIdAndDeletedIsNull(1L)).thenReturn(Optional.of(cluster));
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        String internalCrn = "internalCrn";
+        when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+        clusterService.initiateDelete(1L);
+
+        verify(liftieGrpcClient).deleteCluster("crn:cdp:compute:us-west-1:account:cluster:liftie1", internalCrn, envCrn);
     }
 
 }

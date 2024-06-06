@@ -34,9 +34,9 @@ public class LiftieGrpcClient {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public DeleteClusterResponse deleteCluster(String liftieCrn, String actorCrn) {
+    public DeleteClusterResponse deleteCluster(String liftieCrn, String actorCrn, String envCrn) {
         LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
-        return liftieServiceClient.deleteCluster(DeleteClusterRequest.newBuilder().setClusterCrn(liftieCrn).build());
+        return liftieServiceClient.deleteCluster(DeleteClusterRequest.newBuilder().setClusterCrn(liftieCrn).build(), envCrn);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))

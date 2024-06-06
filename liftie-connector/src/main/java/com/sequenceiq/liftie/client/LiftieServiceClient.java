@@ -37,8 +37,16 @@ public class LiftieServiceClient {
         return newStub().createCluster(createClusterRequest);
     }
 
-    public DeleteClusterResponse deleteCluster(DeleteClusterRequest deleteClusterRequest) {
-        return newStub().deleteCluster(deleteClusterRequest);
+    public DeleteClusterResponse deleteCluster(DeleteClusterRequest deleteClusterRequest, String envCrn) {
+        return newStubWithEnvCrnHeader(envCrn).deleteCluster(deleteClusterRequest);
+    }
+
+    private LiftiePublicBlockingStub newStubWithEnvCrnHeader(String envCrn) {
+        return LiftiePublicGrpc.newBlockingStub(channel)
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(liftieGrpcConfig.getGrpcTimeoutSec()),
+                        new EnvCrnMetadataInterceptor(MDCBuilder.getOrGenerateRequestId(), actorCrn, envCrn),
+                        new CallingServiceNameInterceptor(liftieGrpcConfig.getCallingServiceName()));
     }
 
     private LiftiePublicBlockingStub newStub() {

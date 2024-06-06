@@ -41,7 +41,7 @@ public class ExternalizedComputeClusterDeleteActions {
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
                 externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
                         "Cluster delete initiated");
-                externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId(), context.getActorCrn());
+                externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.event(), payload);
             }
 

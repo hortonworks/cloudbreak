@@ -146,13 +146,15 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         }
     }
 
-    public void initiateDelete(Long id, String actorCrn) {
+    public void initiateDelete(Long id) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(id);
         LOGGER.info("Initiate delete for: {}", externalizedComputeCluster.getName());
         try {
             if (externalizedComputeCluster.getLiftieName() != null) {
                 DeleteClusterResponse deleteClusterResponse =
-                        liftieGrpcClient.deleteCluster(getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                        liftieGrpcClient.deleteCluster(getLiftieClusterCrn(externalizedComputeCluster),
+                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                                externalizedComputeCluster.getEnvironmentCrn());
                 LOGGER.info("Liftie delete response: {}", deleteClusterResponse);
             }
         } catch (Exception e) {

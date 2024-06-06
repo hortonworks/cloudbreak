@@ -74,13 +74,17 @@ public class AltusMetadataInterceptor implements ClientInterceptor {
             public void start(
                     Listener<S> responseListener,
                     Metadata headers) {
-                Metadata metadata = new Metadata();
-                metadata.put(REQUEST_ID_METADATA_KEY, requestId);
-                metadata.put(ACTOR_CRN_METADATA_KEY, actorCrn);
-                headers.merge(metadata);
+                headers.merge(getMetadata());
                 super.start(responseListener, headers);
             }
         };
+    }
+
+    protected Metadata getMetadata() {
+        Metadata metadata = new Metadata();
+        metadata.put(REQUEST_ID_METADATA_KEY, requestId);
+        metadata.put(ACTOR_CRN_METADATA_KEY, actorCrn);
+        return metadata;
     }
 
 }
