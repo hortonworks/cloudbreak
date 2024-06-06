@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.CreateCloudSecretReq
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.DeleteCloudSecretRequest;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretRequest;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretResourceAccessRequest;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -57,6 +59,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBas
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -112,6 +115,9 @@ class UserdataSecretsServiceTest {
 
     @Mock
     private ResourceService resourceService;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
 
     @Mock
     private StackEncryptionService stackEncryptionService;
@@ -316,6 +322,30 @@ class UserdataSecretsServiceTest {
         assertThat(instanceMetaDataCaptor.getValue()).hasSameElementsAs(instanceMetaDatas);
     }
 
+    @Test
+    void testdeleteUserdataSecretsForStack() {
+        Stack stack = createStack();
+        List<InstanceMetaData> instanceMetaDatas = getInstanceMetaDatas();
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceMetaData(Set.copyOf(instanceMetaDatas));
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_SECRETSMANAGER_SECRET, STACK_ID))
+                .thenReturn(getCloudResources());
+
+        underTest.deleteUserdataSecretsForStack(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
+
+        verify(secretConnector, times(NODE_COUNT)).deleteCloudSecret(deleteCloudSecretRequestCaptor.capture());
+        List<DeleteCloudSecretRequest> deleteCloudSecretRequests = deleteCloudSecretRequestCaptor.getAllValues();
+        for (int i = 0; i < NODE_COUNT; i++) {
+            DeleteCloudSecretRequest request = deleteCloudSecretRequests.get(i);
+            assertEquals(CLOUD_CONTEXT, request.cloudContext());
+            assertEquals(CLOUD_CREDENTIAL, request.cloudCredential());
+            assertEquals("secret-" + i, request.cloudResources().getFirst().getName());
+        }
+        verify(instanceMetaDataService, times(1)).saveAll(instanceMetaDataCaptor.capture());
+        assertThat(instanceMetaDataCaptor.getValue()).hasSameElementsAs(instanceMetaDatas);
+    }
+
     private static List<Resource> getResources() {
         return IntStream.range(0, NODE_COUNT)
                 .boxed()
@@ -326,6 +356,17 @@ class UserdataSecretsServiceTest {
                     r.setResourceName("secret-" + i);
                     return r;
                 })
+                .toList();
+    }
+
+    private static List<CloudResource> getCloudResources() {
+        return IntStream.range(0, NODE_COUNT)
+                .boxed()
+                .map(i -> CloudResource.builder()
+                        .withName("secret-" + i)
+                        .withStatus(CommonStatus.CREATED)
+                        .withType(ResourceType.AWS_SECRETSMANAGER_SECRET)
+                        .build())
                 .toList();
     }
 

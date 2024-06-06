@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.CreateCloudSecretReq
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.DeleteCloudSecretRequest;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretRequest;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretResourceAccessRequest;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -56,6 +57,9 @@ public class UserdataSecretsService {
 
     @Inject
     private ResourceService resourceService;
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
 
     @Inject
     private StackEncryptionService stackEncryptionService;
@@ -176,6 +180,28 @@ public class UserdataSecretsService {
                         .withCloudResources(List.of(cloudResource));
                 secretConnector.deleteCloudSecret(deleteRequestBuilder.build());
             }
+        }
+    }
+
+    public void deleteUserdataSecretsForStack(Stack stack, CloudContext cloudContext, CloudCredential cloudCredential) {
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        SecretConnector secretConnector = cloudConnector.secretConnector();
+        List<InstanceMetaData> instances = stack.getAllInstanceMetaDataList();
+        LOGGER.info("Removing all associations between instances and userdata secrets for stack [{}]...", stack.getName());
+        instances.forEach(imd -> imd.setUserdataSecretResourceId(null));
+        instanceMetaDataService.saveAll(instances);
+
+        List<CloudResource> secretCloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED,
+                ResourceType.AWS_SECRETSMANAGER_SECRET, stack.getId());
+        DeleteCloudSecretRequest.Builder deleteRequestBuilder = DeleteCloudSecretRequest.builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential);
+        for (CloudResource cloudResource : secretCloudResources) {
+            LOGGER.info("Deleting secret resource [{}]...", cloudResource.getName());
+            deleteRequestBuilder
+                    .withSecretName(cloudResource.getName())
+                    .withCloudResources(List.of(cloudResource));
+            secretConnector.deleteCloudSecret(deleteRequestBuilder.build());
         }
     }
 

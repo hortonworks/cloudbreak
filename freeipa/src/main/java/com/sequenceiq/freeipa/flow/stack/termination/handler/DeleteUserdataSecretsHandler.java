@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.termination.handler;
 
-import java.util.List;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,7 +14,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.secret.DeleteUserdataSecretsFailed;
 import com.sequenceiq.freeipa.flow.stack.termination.event.secret.DeleteUserdataSecretsFinished;
@@ -62,15 +59,10 @@ public class DeleteUserdataSecretsHandler extends ExceptionCatcherEventHandler<D
             try {
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
                 LOGGER.info("Deleting userdata secrets for stack [{}]...", stack.getName());
-                List<InstanceMetaData> instanceMetaDatas = stack.getInstanceGroups().stream()
-                        .flatMap(ig -> ig.getAllInstanceMetaData().stream())
-                        .filter(imd -> imd.getUserdataSecretResourceId() != null)
-                        .toList();
-                userdataSecretsService.deleteUserdataSecretsForInstances(instanceMetaDatas, cloudContext, cloudCredential);
+                userdataSecretsService.deleteUserdataSecretsForStack(stack, cloudContext, cloudCredential);
             } catch (RuntimeException e) {
                 if (request.getForced()) {
-                    LOGGER.warn("Failed to delete userdata secrets for stack with id [{}]. Some secret resources might not have been deleted on the provider!",
-                            stackId, e);
+                    LOGGER.warn("Failed to delete userdata secrets for stack. Some secret resources might not have been deleted on the provider!", e);
                 } else {
                     throw e;
                 }

@@ -9,9 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,8 +23,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
-import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.event.secret.DeleteUserdataSecretsFailed;
 import com.sequenceiq.freeipa.flow.stack.termination.event.secret.DeleteUserdataSecretsFinished;
@@ -90,19 +85,13 @@ class DeleteUserdataSecretsHandlerTest {
     @Test
     void testAccept() {
         Stack stack = new Stack();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        InstanceMetaData imd1 = new InstanceMetaData();
-        InstanceMetaData imd2 = new InstanceMetaData();
-        imd1.setUserdataSecretResourceId(1L);
-        instanceGroup.setInstanceMetaData(Set.of(imd1, imd2));
-        stack.setInstanceGroups(Set.of(instanceGroup));
         when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn(ENVIRONMENT_CRN);
         when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(ENVIRONMENT);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
 
         underTest.accept(new Event<>(new DeleteUserdataSecretsRequest(STACK_ID, false, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
 
-        verify(userdataSecretsService).deleteUserdataSecretsForInstances(List.of(imd1), CLOUD_CONTEXT, CLOUD_CREDENTIAL);
+        verify(userdataSecretsService).deleteUserdataSecretsForStack(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(DeleteUserdataSecretsFinished.class)), successEventCaptor.capture());
         DeleteUserdataSecretsFinished result = successEventCaptor.getValue().getData();
         assertEquals(STACK_ID, result.getResourceId());
@@ -129,20 +118,15 @@ class DeleteUserdataSecretsHandlerTest {
     @Test
     void testAcceptWhenForcedAndProviderThrowsException() {
         Stack stack = new Stack();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        InstanceMetaData imd1 = new InstanceMetaData();
-        imd1.setUserdataSecretResourceId(1L);
-        instanceGroup.setInstanceMetaData(Set.of(imd1));
-        stack.setInstanceGroups(Set.of(instanceGroup));
         RuntimeException e = new RuntimeException("unauthorized");
         when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn(ENVIRONMENT_CRN);
         when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(ENVIRONMENT);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        doThrow(e).when(userdataSecretsService).deleteUserdataSecretsForInstances(List.of(imd1), CLOUD_CONTEXT, CLOUD_CREDENTIAL);
+        doThrow(e).when(userdataSecretsService).deleteUserdataSecretsForStack(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
 
         underTest.accept(new Event<>(new DeleteUserdataSecretsRequest(STACK_ID, true, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
 
-        verify(userdataSecretsService).deleteUserdataSecretsForInstances(List.of(imd1), CLOUD_CONTEXT, CLOUD_CREDENTIAL);
+        verify(userdataSecretsService).deleteUserdataSecretsForStack(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(DeleteUserdataSecretsFinished.class)), successEventCaptor.capture());
         DeleteUserdataSecretsFinished result = successEventCaptor.getValue().getData();
         assertEquals(STACK_ID, result.getResourceId());
