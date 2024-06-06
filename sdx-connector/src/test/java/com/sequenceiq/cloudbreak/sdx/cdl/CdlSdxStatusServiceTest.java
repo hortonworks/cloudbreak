@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.sdx.cdl;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -45,7 +47,7 @@ public class CdlSdxStatusServiceTest {
     @Test
     public void testListStatusPairsCrn() {
         setEnabled();
-        CdlCrudProto.DatalakeResponse datalake = getDatalake();
+        CdlCrudProto.DatalakeResponse datalake = getDatalake("RUNNING");
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         when(sdxClient.findDatalake(anyString(), anyString())).thenReturn(datalake);
         assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN))
@@ -57,11 +59,25 @@ public class CdlSdxStatusServiceTest {
         verifyNoMoreInteractions(sdxClient);
     }
 
-    private CdlCrudProto.DatalakeResponse getDatalake() {
+    @Test
+    public void testListStatusPairsCrnWithDeletedAndNonDeletedCDL() {
+        String otherCRN = "otherCRN";
+        setEnabled();
+        CdlCrudProto.DatalakeResponse datalakeNotDeleted = getDatalake("DELETING");
+        CdlCrudProto.DatalakeResponse datalakeDeleted = getDatalake("DELETED");
+        when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
+        when(sdxClient.findDatalake(anyString(), eq(CDL_CRN))).thenReturn(datalakeNotDeleted);
+        when(sdxClient.findDatalake(any(), eq(otherCRN))).thenReturn(datalakeDeleted);
+        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN, otherCRN))
+                .contains(Pair.of(CDL_CRN, CdlCrudProto.StatusType.Value.DELETING))));
+        verify(sdxClient, times(2)).findDatalake(anyString(), anyString());
+    }
+
+    private CdlCrudProto.DatalakeResponse getDatalake(String status) {
         return CdlCrudProto.DatalakeResponse.newBuilder()
                 .setCrn(CDL_CRN)
                 .setName("dl-name")
-                .setStatus("RUNNING")
+                .setStatus(status)
                 .build();
     }
 

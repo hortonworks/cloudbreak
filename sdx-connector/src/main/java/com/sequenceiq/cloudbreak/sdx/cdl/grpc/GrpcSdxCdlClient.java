@@ -46,9 +46,9 @@ public class GrpcSdxCdlClient {
         return datalake.getCrn();
     }
 
-    public String deleteDatalake(String datalakeNameOrCrn) {
+    public String deleteDatalake(String datalakeNameOrCrn, boolean force) {
         SdxCdlClient sdxCdlClient = makeClient();
-        CdlCrudProto.DeleteDatalakeResponse response = sdxCdlClient.deleteDatalake(datalakeNameOrCrn);
+        CdlCrudProto.DeleteDatalakeResponse response = sdxCdlClient.deleteDatalake(datalakeNameOrCrn, force);
         return response.getCrn();
     }
 
@@ -60,5 +60,10 @@ public class GrpcSdxCdlClient {
     public CdlCrudProto.DescribeDatalakeResponse describeDatalake(String datalakeNameOrCrn) {
         SdxCdlClient sdxCdlClient = makeClient();
         return sdxCdlClient.describeDatalake(datalakeNameOrCrn);
+    }
+
+    public CdlCrudProto.ListDatalakesResponse listDatalakes(String environmentNameOrCrn, String datalakeNameOrCrn) {
+        SdxCdlClient sdxCdlClient = makeClient();
+        return sdxCdlClient.listDatalakes(environmentNameOrCrn, datalakeNameOrCrn);
     }
 }

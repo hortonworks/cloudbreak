@@ -40,9 +40,10 @@ public class SdxCdlClient {
         return newStub().createDatalake(request);
     }
 
-    public CdlCrudProto.DeleteDatalakeResponse deleteDatalake(String datalakeNameOrCrn) {
+    public CdlCrudProto.DeleteDatalakeResponse deleteDatalake(String datalakeNameOrCrn, boolean force) {
         CdlCrudProto.DeleteDatalakeRequest request = CdlCrudProto.DeleteDatalakeRequest.newBuilder()
                 .setDatalake(datalakeNameOrCrn)
+                .setForce(force)
                 .build();
         return newStub().deleteDatalake(request);
     }
@@ -62,6 +63,15 @@ public class SdxCdlClient {
                 .setAccountID(ThreadBasedUserCrnProvider.getAccountId())
                 .build();
         return newStub().describeDatalake(request);
+    }
+
+    public CdlCrudProto.ListDatalakesResponse listDatalakes(String environmentNameOrCrn, String datalakeNameOrCrn) {
+        CdlCrudProto.ListDatalakesRequest request = CdlCrudProto.ListDatalakesRequest.newBuilder()
+                .setEnvironment(environmentNameOrCrn)
+                .setDatalake(datalakeNameOrCrn)
+                .setAccountID(ThreadBasedUserCrnProvider.getAccountId())
+                .build();
+        return newStub().listDatalakes(request);
     }
 
 }

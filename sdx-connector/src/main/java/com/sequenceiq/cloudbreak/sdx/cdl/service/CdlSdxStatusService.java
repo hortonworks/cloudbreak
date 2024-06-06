@@ -4,6 +4,7 @@ package com.sequenceiq.cloudbreak.sdx.cdl.service;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -46,7 +47,10 @@ public class CdlSdxStatusService extends AbstractCdlSdxService implements Platfo
                 return Collections.emptySet();
             }
         }
-        return result;
+        return result
+                .stream()
+                .filter(entry -> !"DELETED".equals(entry.getValue()))
+                .collect(Collectors.toSet());
     }
 
     @Override

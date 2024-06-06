@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.cdl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -39,7 +40,7 @@ public class CdlSdxDeleteServiceTest {
         setEnabled();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         underTest.deleteSdx(CDL_CRN, true);
-        verify(sdxClient).deleteDatalake(eq(CDL_CRN));
+        verify(sdxClient).deleteDatalake(eq(CDL_CRN), anyBoolean());
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
         underTest.deleteSdx(CDL_CRN, true);

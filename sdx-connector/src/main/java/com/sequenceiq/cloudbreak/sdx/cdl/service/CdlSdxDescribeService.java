@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.sdx.cdl.service;
 
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -48,11 +49,15 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
     @Override
     public Set<String> listSdxCrns(String environmentCrn) {
         if (isEnabled(environmentCrn)) {
+            Set<String> sdxCrns = new HashSet<>();
             try {
-                CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, "");
-                return Set.of(datalake.getCrn());
+                CdlCrudProto.ListDatalakesResponse datalakes = grpcClient.listDatalakes(environmentCrn, "");
+                for (CdlCrudProto.DatalakeResponse datalakeResponse : datalakes.getDatalakeResponseList()) {
+                    sdxCrns.add(datalakeResponse.getCrn());
+                }
+                return sdxCrns;
             } catch (RuntimeException exception) {
-                LOGGER.info("CDL not found for environment. CRN: {}. Exception: {}",
+                LOGGER.info("Failed at listing CDL. CRN: {}. Exception: {}",
                         environmentCrn, exception.getMessage());
                 return Collections.emptySet();
             }
