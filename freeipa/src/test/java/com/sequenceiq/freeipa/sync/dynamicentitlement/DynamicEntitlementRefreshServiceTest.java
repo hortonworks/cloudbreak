@@ -30,8 +30,11 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
@@ -40,6 +43,8 @@ import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
 class DynamicEntitlementRefreshServiceTest {
 
     private static final Long STACK_ID = 1L;
+
+    private static final String OPERATION_ID = "1";
 
     private static final String STACK_CRN = "crn:cdp:datalake:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:datalake:f551c9f0-e837-4c61-9623-b8fe596757c4";
 
@@ -76,9 +81,14 @@ class DynamicEntitlementRefreshServiceTest {
     @Mock
     private Features features;
 
+    @Mock
+    private Operation operation;
+
     @BeforeEach
     void setup() {
         lenient().when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Set.of("CDP_CENTRAL_COMPUTE_MONITORING"));
+        lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
+        lenient().when(operation.getOperationId()).thenReturn(OPERATION_ID);
     }
 
     @Test
@@ -203,6 +213,34 @@ class DynamicEntitlementRefreshServiceTest {
 
         verify(monitoring, never()).setEnabled(any());
         verify(telemetryConfigService).storeTelemetry(eq(STACK_ID), eq(telemetry));
+    }
+
+    @Test
+    void testChangeClusterConfigurationEntitlementsNotChanged() {
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stack.getEnvironmentCrn()).thenReturn("envCrn");
+        when(stack.getTelemetry()).thenReturn(telemetry);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE)));
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        underTest.changeClusterConfigurationIfEntitlementsChanged(stack);
+
+        verify(operationService).failOperation(any(), eq(OPERATION_ID), any());
+    }
+
+    @Test
+    void testChangeClusterConfigurationEntitlementsChanged() {
+        when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
+        when(stack.getTelemetry()).thenReturn(telemetry);
+        when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.FALSE));
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stack.getEnvironmentCrn()).thenReturn("envCrn");
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
+        underTest.changeClusterConfigurationIfEntitlementsChanged(stack);
+
+        verify(operationService, never()).failOperation(any(), any(), any());
+        verify(freeIpaFlowManager).notify(eq(FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT), any());
     }
 
 }

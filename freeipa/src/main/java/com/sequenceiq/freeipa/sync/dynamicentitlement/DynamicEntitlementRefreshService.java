@@ -152,9 +152,8 @@ public class DynamicEntitlementRefreshService {
     }
 
     private Operation triggerEntitlementChangedOperation(Operation operation, Stack stack) {
-        try {
-            Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlements(stack);
-            validateEntitlementChangedOperation(stack, changedEntitlements);
+        Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlements(stack);
+        if (areEntitlementsChanged(changedEntitlements)) {
             Boolean saltRefreshNeeded = saltRefreshNeeded(changedEntitlements);
             LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, saltRefreshNeeded);
             String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
@@ -162,20 +161,16 @@ public class DynamicEntitlementRefreshService {
                     stack.getId(), changedEntitlements, saltRefreshNeeded);
             flowManager.notify(selector, triggerEvent);
             return operation;
-        } catch (Exception e) {
-            String message = "Couldn't start refresh entitlement params flow.";
-            LOGGER.error(message, e);
-            return operationService.failOperation(stack.getAccountId(), operation.getOperationId(),
-                    message + " " + e.getMessage());
+        } else {
+            String message = String.format("Couldn't start refresh entitlement params flow." +
+                    " Watched entitlements didn't change for stack: '%s'.", stack.getResourceCrn());
+            LOGGER.debug(message);
+            return operationService.failOperation(stack.getAccountId(), operation.getOperationId(), message);
         }
     }
 
-    private void validateEntitlementChangedOperation(Stack stack, Map<String, Boolean> changedEntitlements) {
-        if (changedEntitlements == null || changedEntitlements.isEmpty()) {
-            String message = String.format("Watched entitlements didn't change for stack: '%s'.", stack.getResourceCrn());
-            LOGGER.debug(message);
-            throw new DynamicEntitlementRefreshValidationException(message);
-        }
+    private boolean areEntitlementsChanged(Map<String, Boolean> changedEntitlements) {
+        return changedEntitlements != null && !changedEntitlements.isEmpty();
     }
 
     public void setupDynamicEntitlementsForProvision(String resourceCrn, Telemetry telemetry) {
