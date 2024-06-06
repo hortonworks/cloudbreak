@@ -74,6 +74,8 @@ class AbstractRdsConfigProviderTest {
 
     private static final String ROTATION_OLD_PASS = "oldpass";
 
+    private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
     @Mock
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
@@ -189,7 +191,7 @@ class AbstractRdsConfigProviderTest {
         StackDto stackDto = mock(StackDto.class);
         Cluster testCluster = TestUtil.cluster();
         testCluster.setId(CLUSTER_ID);
-        testCluster.setDatabaseServerCrn("TEST_CRN");
+        testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
         when(stackDto.getCluster()).thenReturn(testCluster);
         when(stackDto.getStack()).thenReturn(testStack);
         when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));

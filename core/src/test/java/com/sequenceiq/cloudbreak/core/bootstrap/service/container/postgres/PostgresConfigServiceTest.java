@@ -57,6 +57,8 @@ class PostgresConfigServiceTest {
 
     private static final Long CLUSTER_ID = 123L;
 
+    private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
     @Mock
     private RdsConfigProviderFactory rdsConfigProviderFactory;
 
@@ -178,13 +180,13 @@ class PostgresConfigServiceTest {
         return new Object[][]{
                 // sslEnabledForStack, cloudProvider, externalDbServerCrn
                 {false, "GCP", null},
-                {false, "GCP", "crn"},
+                {false, "GCP", DB_SERVER_CRN},
                 {true, "GCP", null},
-                {true, "GCP", "crn"},
+                {true, "GCP", DB_SERVER_CRN},
                 {false, "AWS", null},
-                {false, "AWS", "crn"},
+                {false, "AWS", DB_SERVER_CRN},
                 {true, "AWS", null},
-                {true, "AWS", "crn"}
+                {true, "AWS", DB_SERVER_CRN}
         };
     }
 
@@ -198,7 +200,6 @@ class PostgresConfigServiceTest {
         rootCerts.add("cert2");
         Cluster cluster = new Cluster();
         cluster.setDbSslRootCertBundle(null);
-        cluster.setDatabaseServerCrn("crn");
         cluster.setId(CLUSTER_ID);
         cluster.setDatabaseServerCrn(externalDbServerCrn);
         when(stack.getCluster()).thenReturn(cluster);
@@ -243,7 +244,7 @@ class PostgresConfigServiceTest {
         cluster.setDbSslRootCertBundle("cert1");
         cluster.setDatabaseServerCrn("crn");
         cluster.setId(CLUSTER_ID);
-        cluster.setDatabaseServerCrn("crn");
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
@@ -312,12 +313,11 @@ class PostgresConfigServiceTest {
         rootCerts.add("cert2");
         Cluster cluster = new Cluster();
         cluster.setDbSslRootCertBundle(null);
-        cluster.setDatabaseServerCrn("crn");
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         cluster.setId(CLUSTER_ID);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
-        cluster.setDatabaseServerCrn("crn");
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(cmRepoDetailsAvailable ? generateCmRepo(() -> cmVersion) : null);
@@ -364,12 +364,11 @@ class PostgresConfigServiceTest {
         Cluster cluster = new Cluster();
         cluster.setDbSslEnabled(true);
         cluster.setDbSslRootCertBundle("cert1");
-        cluster.setDatabaseServerCrn("crn");
+        cluster.setDatabaseServerCrn(DB_SERVER_CRN);
         cluster.setId(CLUSTER_ID);
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
-        cluster.setDatabaseServerCrn("crn");
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(true);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(cmRepoDetailsAvailable ? generateCmRepo(() -> cmVersion) : null);

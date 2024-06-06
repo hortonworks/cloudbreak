@@ -51,9 +51,9 @@ class DatabaseSslServiceTest {
 
     private static final String CERT_EMBEDDED = "certEmbedded";
 
-    private static final String DATABASE_SERVER_CRN = "databaseServerCrn";
+    private static final String DATABASE_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
 
-    private static final String DATABASE_SERVER_CRN_DATALAKE = "databaseServerCrnDatalake";
+    private static final String DATABASE_SERVER_CRN_DATALAKE = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
 
     private static final Long CLUSTER_ID = 12L;
 

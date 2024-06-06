@@ -133,6 +133,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     private static final String SAAS_DATALAKE_CRN = "crn:cdp:sdxsvc:us-west-1:cloudera:instance:f22e7f31-a98d-424d-917a-a62a36cb3c9e";
 
+    private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
 
@@ -275,7 +277,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn())).thenReturn(
-                Optional.of(new SdxBasicView(null, SAAS_DATALAKE_CRN, null, TEST_ENVIRONMENT_CRN, true, 1L, "externaldbcrn")));
+                Optional.of(new SdxBasicView(null, SAAS_DATALAKE_CRN, null, TEST_ENVIRONMENT_CRN, true, 1L, DB_SERVER_CRN)));
     }
 
     @Test
@@ -450,6 +452,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Test
     public void testMockDatalakeView() {
         when(source.getType()).thenReturn(StackType.WORKLOAD);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setDatabaseServerCrn(DB_SERVER_CRN);
+        when(source.getCluster()).thenReturn(clusterV4Request);
         TemplatePreparationObject result = underTest.convert(source);
 
         DatalakeView datalakeView = result.getDatalakeView().get();

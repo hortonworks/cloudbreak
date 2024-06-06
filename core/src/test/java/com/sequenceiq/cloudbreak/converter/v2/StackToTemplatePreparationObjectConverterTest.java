@@ -144,6 +144,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
 
+    private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
     @InjectMocks
     private StackToTemplatePreparationObjectConverter underTest;
 
@@ -558,7 +560,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         SdxBasicView mockSdx = mock(SdxBasicView.class);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(mockSdx));
         when(mockSdx.crn()).thenReturn("sdxcrn");
-        when(mockSdx.dbServerCrn()).thenReturn("sdxdbcrn");
+        when(mockSdx.dbServerCrn()).thenReturn(DB_SERVER_CRN);
         when(mockSdx.razEnabled()).thenReturn(false);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
