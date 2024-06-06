@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -54,6 +55,9 @@ class UpscaleCreateUserdataSecretsHandlerTest {
 
     @Mock
     private UserdataSecretsService userdataSecretsService;
+
+    @Mock
+    private EncryptionKeyService encryptionKeyService;
 
     @InjectMocks
     private UpscaleCreateUserdataSecretsHandler underTest;
@@ -84,13 +88,16 @@ class UpscaleCreateUserdataSecretsHandlerTest {
     void testAccept() {
         Stack stack = new Stack();
         List<Long> resourceIds = new ArrayList<>(NUMBER_OF_SECRETS);
+        List<String> resourceReferences = new ArrayList<>(NUMBER_OF_SECRETS);
         List<Resource> resources = IntStream.range(0, NUMBER_OF_SECRETS)
                 .boxed()
                 .map(i -> {
                     Resource resource = new Resource();
                     long resourceId = i;
                     resource.setId(resourceId);
+                    resource.setResourceReference("secret-" + i);
                     resourceIds.add(resourceId);
+                    resourceReferences.add("secret-" + i);
                     return resource;
                 })
                 .toList();
@@ -101,6 +108,7 @@ class UpscaleCreateUserdataSecretsHandlerTest {
 
         verify(stackService).getStackById(STACK_ID);
         verify(userdataSecretsService).createUserdataSecrets(stack, resourceIds, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
+        verify(encryptionKeyService).updateCloudSecretManagerEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, resourceReferences, List.of());
         verify(eventBus).notify(eq(EventSelectorUtil.selector(UpscaleCreateUserdataSecretsSuccess.class)), successEventCaptor.capture());
         UpscaleCreateUserdataSecretsSuccess result = successEventCaptor.getValue().getData();
         assertEquals(STACK_ID, result.getResourceId());

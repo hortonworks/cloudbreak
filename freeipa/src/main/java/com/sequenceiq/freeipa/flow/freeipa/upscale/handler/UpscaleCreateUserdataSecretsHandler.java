@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -21,6 +23,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -34,6 +37,9 @@ public class UpscaleCreateUserdataSecretsHandler extends ExceptionCatcherEventHa
 
     @Inject
     private UserdataSecretsService userdataSecretsService;
+
+    @Inject
+    private EncryptionKeyService encryptionKeyService;
 
     @Override
     public String selector() {
@@ -49,15 +55,23 @@ public class UpscaleCreateUserdataSecretsHandler extends ExceptionCatcherEventHa
     @Override
     protected Selectable doAccept(HandlerEvent<UpscaleCreateUserdataSecretsRequest> event) {
         UpscaleCreateUserdataSecretsRequest request = event.getData();
+        CloudContext cloudContext = request.getCloudContext();
+        CloudCredential cloudCredential = request.getCloudCredential();
         Long stackId = request.getResourceId();
         List<Long> createdSecretResourceIds = new ArrayList<>();
         List<Long> instancePrivateIds = request.getInstancePrivateIds();
+
         if (!instancePrivateIds.isEmpty()) {
             LOGGER.info("Creating userdata secret resources for private ids [{}]...", instancePrivateIds);
             Stack stack = stackService.getStackById(stackId);
             List<Resource> newSecretResources = userdataSecretsService.createUserdataSecrets(stack, instancePrivateIds, request.getCloudContext(),
                     request.getCloudCredential());
-            createdSecretResourceIds.addAll(newSecretResources.stream().map(Resource::getId).toList());
+            List<String> secretResourceReferences = new ArrayList<>();
+            newSecretResources.forEach(resource -> {
+                createdSecretResourceIds.add(resource.getId());
+                secretResourceReferences.add(resource.getResourceReference());
+            });
+            encryptionKeyService.updateCloudSecretManagerEncryptionKeyAccess(stack, cloudContext, cloudCredential, secretResourceReferences, List.of());
         }
         return new UpscaleCreateUserdataSecretsSuccess(stackId, createdSecretResourceIds);
     }

@@ -25,6 +25,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserData
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -48,6 +49,9 @@ public class CreateUserDataHandler extends ExceptionCatcherEventHandler<CreateUs
 
     @Inject
     private UserdataSecretsService userdataSecretsService;
+
+    @Inject
+    private EncryptionKeyService encryptionKeyService;
 
     @Override
     public String selector() {
@@ -80,6 +84,8 @@ public class CreateUserDataHandler extends ExceptionCatcherEventHandler<CreateUs
                 List<Resource> secretResources = userdataSecretsService.createUserdataSecrets(stack,
                         instanceMetaDatas.stream().map(InstanceMetaData::getPrivateId).toList(), cloudContext, cloudCredential);
                 userdataSecretsService.assignSecretsToInstances(stack, secretResources, instanceMetaDatas);
+                encryptionKeyService.updateCloudSecretManagerEncryptionKeyAccess(stack, cloudContext, cloudCredential,
+                        secretResources.stream().map(Resource::getResourceReference).toList(), List.of());
             } else {
                 LOGGER.debug("Skipping creating userdata secrets because secret encryption is disabled.");
             }

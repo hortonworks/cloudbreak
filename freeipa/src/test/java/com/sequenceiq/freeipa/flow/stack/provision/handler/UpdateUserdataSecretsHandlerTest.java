@@ -2,8 +2,11 @@ package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +35,9 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdata
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -46,12 +52,6 @@ class UpdateUserdataSecretsHandlerTest {
 
     private static final CredentialResponse CREDENTIAL = new CredentialResponse();
 
-    private static final DetailedEnvironmentResponse ENVIRONMENT = DetailedEnvironmentResponse.builder()
-            .withCrn("environmentCrn")
-            .withEnableSecretEncryption(true)
-            .withCredential(CREDENTIAL)
-            .build();
-
     @Mock
     private EventBus eventBus;
 
@@ -63,6 +63,15 @@ class UpdateUserdataSecretsHandlerTest {
 
     @Mock
     private UserdataSecretsService userdataSecretsService;
+
+    @Mock
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Mock
+    private CloudInformationDecorator cloudInformationDecorator;
+
+    @Mock
+    private EncryptionKeyService encryptionKeyService;
 
     @InjectMocks
     private UpdateUserdataSecretsHandler underTest;
@@ -90,7 +99,11 @@ class UpdateUserdataSecretsHandlerTest {
 
     @Test
     void testAccept() {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCredential(CREDENTIAL);
+        environment.setEnableSecretEncryption(true);
         Stack stack = new Stack();
+        stack.setId(STACK_ID);
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData imd1 = new InstanceMetaData();
         InstanceMetaData imd2 = new InstanceMetaData();
@@ -98,14 +111,33 @@ class UpdateUserdataSecretsHandlerTest {
         instanceGroup.setInstanceMetaData(Set.of(imd1, imd2));
         stack.setInstanceGroups(Set.of(instanceGroup));
         when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn("environmentCrn");
-        when(cachedEnvironmentClientService.getByCrn("environmentCrn")).thenReturn(ENVIRONMENT);
+        when(cachedEnvironmentClientService.getByCrn("environmentCrn")).thenReturn(environment);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
+        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(stack, imd1)).thenReturn("secretArn");
 
         underTest.accept(new Event<>(new UpdateUserdataSecretsRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
 
+        verify(encryptionKeyService).updateLuksEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of("secretArn"), List.of());
         verify(userdataSecretsService).updateUserdataSecrets(stack, List.of(imd1), CREDENTIAL, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(UpdateUserdataSecretsSuccess.class)), successEventCaptor.capture());
         assertEquals(STACK_ID, successEventCaptor.getValue().getData().getResourceId());
+    }
+
+    @Test
+    void testAcceptSecretEncryptionNotEnabled() {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn("environmentCrn");
+        when(cachedEnvironmentClientService.getByCrn("environmentCrn")).thenReturn(environment);
+
+        underTest.accept(new Event<>(new UpdateUserdataSecretsRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
+
+        verify(stackService, never()).getByIdWithListsInTransaction(anyLong());
+        verify(cloudInformationDecoratorProvider, never()).getForStack(any());
+        verify(encryptionKeyService, never()).updateLuksEncryptionKeyAccess(any(), any(), any(), anyList(), anyList());
+        verify(userdataSecretsService, never()).updateUserdataSecrets(any(), anyList(), any(), any(), any());
     }
 
     @Test

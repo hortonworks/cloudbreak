@@ -10,12 +10,14 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,10 +30,15 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsSuccess;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -51,6 +58,18 @@ class RemoveUserdataSecretsHandlerTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Mock
+    private CloudInformationDecorator cloudInformationDecorator;
+
+    @Mock
+    private ResourceService resourceService;
+
+    @Mock
+    private EncryptionKeyService encryptionKeyService;
 
     @Mock
     private UserdataSecretsService userdataSecretsService;
@@ -95,11 +114,20 @@ class RemoveUserdataSecretsHandlerTest {
                 flatMap(Set::stream)
                 .collect(Collectors.toSet()));
         stack.setInstanceGroups(Set.of(instanceGroup));
+        List<Resource> secretResources = getResources(2);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
+        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(eq(stack), ArgumentMatchers.argThat(correctInstances::contains)))
+                .thenReturn("secretArn");
+        when(resourceService.findAllByResourceId(ArgumentMatchers.argThat(iterable -> StreamSupport.stream(iterable.spliterator(), false)
+                .toList().containsAll(List.of(0L, 1L))))).thenReturn(secretResources);
 
         underTest.accept(new Event<>(new RemoveUserdataSecretsRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of("fqdn-0", "fqdn-1"))));
 
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(encryptionKeyService).updateCloudSecretManagerEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of(),
+                List.of("secret-0", "secret-1"));
+        verify(encryptionKeyService).updateLuksEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of(), List.of("secretArn", "secretArn"));
         verify(userdataSecretsService).deleteUserdataSecretsForInstances(instanceMetaDataListCaptor.capture(), eq(CLOUD_CONTEXT), eq(CLOUD_CREDENTIAL));
         verify(eventBus).notify(eq(EventSelectorUtil.selector(RemoveUserdataSecretsSuccess.class)), successEventCaptor.capture());
         assertEquals(STACK_ID, successEventCaptor.getValue().getData().getResourceId());
@@ -107,12 +135,12 @@ class RemoveUserdataSecretsHandlerTest {
     }
 
     private static Set<InstanceMetaData> getInstances(int count, boolean withSecretId, boolean withValidFqdn) {
-        return IntStream.range(0, count)
+        return LongStream.range(0, count)
                 .boxed()
                 .map(i -> {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     if (withSecretId) {
-                        instanceMetaData.setUserdataSecretResourceId(Long.valueOf(i));
+                        instanceMetaData.setUserdataSecretResourceId(i);
                     }
                     if (withValidFqdn) {
                         instanceMetaData.setDiscoveryFQDN("fqdn-" + i);
@@ -122,6 +150,18 @@ class RemoveUserdataSecretsHandlerTest {
                     return instanceMetaData;
                 })
                 .collect(Collectors.toSet());
+    }
+
+    private static List<Resource> getResources(int count) {
+        return LongStream.range(0, count)
+                .boxed()
+                .map(i -> {
+                    Resource resource = new Resource();
+                    resource.setId(i);
+                    resource.setResourceReference("secret-" + i);
+                    return resource;
+                })
+                .toList();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.provision.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -22,6 +23,9 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdata
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -39,6 +43,12 @@ public class UpdateUserdataSecretsHandler extends ExceptionCatcherEventHandler<U
     @Inject
     private UserdataSecretsService userdataSecretsService;
 
+    @Inject
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Inject
+    private EncryptionKeyService encryptionKeyService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpdateUserdataSecretsRequest.class);
@@ -55,14 +65,23 @@ public class UpdateUserdataSecretsHandler extends ExceptionCatcherEventHandler<U
         Long stackId = event.getData().getResourceId();
         CloudContext cloudContext = event.getData().getCloudContext();
         CloudCredential cloudCredential = event.getData().getCloudCredential();
+
         String environmentCrn = stackService.getEnvironmentCrnByStackId(stackId);
         DetailedEnvironmentResponse environment = cachedEnvironmentClientService.getByCrn(environmentCrn);
         if (environment.isEnableSecretEncryption()) {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            List<InstanceMetaData> instanceMetaDatas = stack.getInstanceGroups().stream()
+            CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
+            List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
+            List<String> newAuthorizedClients = new ArrayList<>();
+            stack.getInstanceGroups().stream()
                     .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
                     .filter(imd -> imd.getUserdataSecretResourceId() != null)
-                    .toList();
+                    .forEach(imd -> {
+                        instanceMetaDatas.add(imd);
+                        newAuthorizedClients.add(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(stack, imd));
+                    });
+            encryptionKeyService.updateLuksEncryptionKeyAccess(stack, cloudContext, cloudCredential, newAuthorizedClients, List.of());
+            LOGGER.info("Updating userdata secrets of stach [{}]...", stack.getName());
             userdataSecretsService.updateUserdataSecrets(stack, instanceMetaDatas, environment.getCredential(), cloudContext, cloudCredential);
         } else {
             LOGGER.debug("Skipping updating userdata secrets because secret encryption is disabled.");

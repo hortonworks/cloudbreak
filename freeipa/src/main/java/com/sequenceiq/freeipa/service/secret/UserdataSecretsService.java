@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.secret;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
-import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyType;
 import com.sequenceiq.cloudbreak.cloud.model.secret.CloudSecret;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.CreateCloudSecretRequest;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.DeleteCloudSecretRequest;
@@ -40,10 +38,10 @@ import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-
-import software.amazon.awssdk.arns.Arn;
 
 @Component
 public class UserdataSecretsService {
@@ -72,6 +70,9 @@ public class UserdataSecretsService {
 
     @Inject
     private UserdataSecretsUtil userdataSecretsUtil;
+
+    @Inject
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
 
     public List<Resource> createUserdataSecrets(Stack stack, List<Long> privateIds, CloudContext cloudContext, CloudCredential cloudCredential) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
@@ -118,6 +119,7 @@ public class UserdataSecretsService {
             CloudContext cloudContext, CloudCredential cloudCredential) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         SecretConnector secretConnector = cloudConnector.secretConnector();
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
         String userdata = stack.getImage().getUserdataWrapper();
         Optional<String> userdataSecretsSectionOptional = Optional.of(userdataSecretsUtil.getSecretsSection(userdata));
         Map<InstanceMetaData, Optional<Resource>> associations = getAssociations(instances);
@@ -125,7 +127,7 @@ public class UserdataSecretsService {
         UpdateCloudSecretResourceAccessRequest.Builder updatePolicyRequestBuilder = UpdateCloudSecretResourceAccessRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withCryptographicPrincipals(buildCryptographicPrincipalsList(stack, credentialResponse));
+                .withCryptographicPrincipals(cloudInformationDecorator.getUserdataSecretCryptographicPrincipals(stack, credentialResponse));
         UpdateCloudSecretRequest.Builder updateRequestBuilder = UpdateCloudSecretRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
@@ -139,7 +141,8 @@ public class UserdataSecretsService {
                 CloudResource cloudResource = resourceToCloudResourceConverter.convert(secretResourceOptional.get());
                 updatePolicyRequestBuilder
                         .withCloudResource(cloudResource)
-                        .withCryptographicAuthorizedClients(buildCryptographicAuthorizedClientsList(stack, instanceMetaData.getInstanceId()));
+                        .withCryptographicAuthorizedClients(cloudInformationDecorator.getUserdataSecretCryptographicAuthorizedClients(stack,
+                                instanceMetaData.getInstanceId()));
                 secretConnector.updateCloudSecretResourceAccess(updatePolicyRequestBuilder.build());
                 updateRequestBuilder
                         .withCloudResource(cloudResource);
@@ -230,9 +233,10 @@ public class UserdataSecretsService {
 
     private Optional<EncryptionKeySource> getEncryptionKeySource(Stack stack, SecretConnector secretConnector) {
         StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stack.getId());
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
         if (stackEncryption.getEncryptionKeyCloudSecretManager() != null) {
             return Optional.of(EncryptionKeySource.builder()
-                    .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
+                    .withKeyType(cloudInformationDecorator.getUserdataSecretEncryptionKeyType())
                     .withKeyValue(stackEncryption.getEncryptionKeyCloudSecretManager())
                     .build());
         } else {
@@ -240,41 +244,4 @@ public class UserdataSecretsService {
         }
     }
 
-    private static List<String> buildCryptographicPrincipalsList(Stack stack, CredentialResponse credentialResponse) {
-        return switch (stack.getCloudPlatform()) {
-            case "AWS" -> {
-                String instanceProfileArn = stack.getTelemetry().getLogging().getS3().getInstanceProfile();
-                String crossAccountRoleArn = credentialResponse.getAws().getRoleBased().getRoleArn();
-                yield List.of(instanceProfileArn, crossAccountRoleArn);
-            }
-            default -> Collections.emptyList();
-        };
-    }
-
-    private static List<String> buildCryptographicAuthorizedClientsList(Stack stack, String instanceId) {
-        return switch (stack.getCloudPlatform()) {
-            case "AWS" -> {
-                String instanceProfileArn = stack.getTelemetry().getLogging().getS3().getInstanceProfile();
-                Arn arn = Arn.fromString(instanceProfileArn);
-                if (arn.accountId().isPresent()) {
-                    yield List.of(buildAwsEc2InstanceArn(arn.partition(), stack.getRegion(), arn.accountId().get(), instanceId));
-                } else {
-                    LOGGER.warn("Cannot determine AWS account ID from Logging instance profile ARN '{}'", instanceProfileArn);
-                    yield Collections.emptyList();
-                }
-            }
-            default -> Collections.emptyList();
-        };
-    }
-
-    private static String buildAwsEc2InstanceArn(String partition, String region, String accountId, String instanceId) {
-        return Arn.builder()
-                .partition(partition)
-                .service("ec2")
-                .region(region)
-                .accountId(accountId)
-                .resource("instance/" + instanceId)
-                .build()
-                .toString();
-    }
 }

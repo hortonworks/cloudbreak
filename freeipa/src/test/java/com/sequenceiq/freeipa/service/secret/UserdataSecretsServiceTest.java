@@ -65,6 +65,8 @@ import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -82,8 +84,6 @@ class UserdataSecretsServiceTest {
     private static final String STACK_NAME = "stackName";
 
     private static final String STACK_CRN = "stackCrn";
-
-    private static final String ENV_CRN = "env_crn";
 
     private static final String INSTANCE_PROFILE_ARN = "arn:aws-us-gov:iam::111111111111:instance-profile/example-instance-profile";
 
@@ -137,6 +137,12 @@ class UserdataSecretsServiceTest {
     @Mock
     private SecretConnector secretConnector;
 
+    @Mock
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Mock
+    private CloudInformationDecorator cloudInformationDecorator;
+
     @InjectMocks
     private UserdataSecretsService underTest;
 
@@ -163,6 +169,8 @@ class UserdataSecretsServiceTest {
         lenient().when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         lenient().when(cloudConnector.secretConnector()).thenReturn(secretConnector);
         lenient().when(secretConnector.getDefaultEncryptionKeySource()).thenReturn(DEFAULT_ENCRYPTION_KEY_SOURCE);
+        lenient().when(cloudInformationDecoratorProvider.getForStack(any())).thenReturn(cloudInformationDecorator);
+        lenient().when(cloudInformationDecorator.getUserdataSecretEncryptionKeyType()).thenReturn(EncryptionKeyType.AWS_KMS_KEY_ARN);
     }
 
     @ValueSource(booleans = {true, false})
@@ -258,6 +266,12 @@ class UserdataSecretsServiceTest {
         when(userdataSecretsUtil.getSecretsSection(USERDATA)).thenReturn("only_secrets");
         when(resourceService.findAllByResourceId(anyList())).thenReturn(getResources());
         when(stackEncryptionService.getStackEncryption(STACK_ID)).thenReturn(stackEncryption);
+        when(cloudInformationDecorator.getUserdataSecretCryptographicPrincipals(stack, credentialResponse))
+                .thenReturn(List.of(INSTANCE_PROFILE_ARN, CROSS_ACCOUNT_ROLE_ARN));
+        for (int i = 0; i < NODE_COUNT; i++) {
+            when(cloudInformationDecorator.getUserdataSecretCryptographicAuthorizedClients(stack, "instance-" + i))
+                    .thenReturn(List.of("arn:aws-us-gov:ec2:region:111111111111:instance/instance-" + i));
+        }
 
         underTest.updateUserdataSecrets(stack, instanceMetaDatas, credentialResponse, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
 
@@ -390,7 +404,7 @@ class UserdataSecretsServiceTest {
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME);
         stack.setResourceCrn(STACK_CRN);
-        stack.setEnvironmentCrn(ENV_CRN);
+        stack.setEnvironmentCrn("env_crn");
         stack.setCloudPlatform("AWS");
         stack.setRegion("region");
         ImageEntity imageEntity = new ImageEntity();

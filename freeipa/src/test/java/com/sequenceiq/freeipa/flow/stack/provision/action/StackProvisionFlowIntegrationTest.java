@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
@@ -91,8 +92,10 @@ import com.sequenceiq.freeipa.flow.stack.provision.handler.ImageFallbackHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.UpdateUserdataSecretsHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
+import com.sequenceiq.freeipa.service.StackEncryptionService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
@@ -340,5 +343,14 @@ class StackProvisionFlowIntegrationTest {
 
         @MockBean
         private UserdataSecretsService userdataSecretsService;
+
+        @MockBean
+        private StackEncryptionService stackEncryptionService;
+
+        @MockBean
+        private ResourceRetriever resourceRetriever;
+
+        @MockBean
+        private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
     }
 }

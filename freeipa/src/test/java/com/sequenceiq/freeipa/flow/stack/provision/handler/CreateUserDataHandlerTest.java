@@ -3,8 +3,10 @@ package com.sequenceiq.freeipa.flow.stack.provision.handler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +37,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserData
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -42,20 +45,11 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 @ExtendWith(MockitoExtension.class)
 class CreateUserDataHandlerTest {
 
-    private static final String STACK_NAME = "stackName";
-
-    private static final String STACK_CRN = "stackCrn";
-
     private static final long STACK_ID = 1L;
 
     private static final CloudContext CLOUD_CONTEXT = CloudContext.Builder.builder().build();
 
     private static final CloudCredential CLOUD_CREDENTIAL = new CloudCredential();
-
-    private static final DetailedEnvironmentResponse ENVIRONMENT = DetailedEnvironmentResponse.builder()
-            .withCrn("environmentCrn")
-            .withEnableSecretEncryption(true)
-            .build();
 
     @Mock
     private EventBus eventBus;
@@ -74,6 +68,9 @@ class CreateUserDataHandlerTest {
 
     @Mock
     private UserdataSecretsService userdataSecretsService;
+
+    @Mock
+    private EncryptionKeyService encryptionKeyService;
 
     @InjectMocks
     private CreateUserDataHandler underTest;
@@ -101,9 +98,10 @@ class CreateUserDataHandlerTest {
 
     @Test
     void testAccept() throws TransactionService.TransactionExecutionException {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setEnableSecretEncryption(true);
         Stack stack = new Stack();
-        stack.setName(STACK_NAME);
-        stack.setResourceCrn(STACK_CRN);
+        stack.setId(STACK_ID);
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData imd1 = new InstanceMetaData();
         InstanceMetaData imd2 = new InstanceMetaData();
@@ -112,11 +110,10 @@ class CreateUserDataHandlerTest {
         instanceGroup.setInstanceMetaData(Set.of(imd1, imd2));
         stack.setInstanceGroups(Set.of(instanceGroup));
         Resource r = new Resource();
-        r.setResourceName(STACK_CRN + "userdata-secret-1");
-        r.setId(1L);
+        r.setResourceReference("secretArn");
         List<Resource> secretResources = List.of(r);
         when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn("environmentCrn");
-        when(cachedEnvironmentClientService.getByCrn("environmentCrn")).thenReturn(ENVIRONMENT);
+        when(cachedEnvironmentClientService.getByCrn("environmentCrn")).thenReturn(environment);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(userdataSecretsService.createUserdataSecrets(any(), anyList(), any(), any())).thenReturn(secretResources);
 
@@ -126,8 +123,25 @@ class CreateUserDataHandlerTest {
         verify(userDataService).createUserData(STACK_ID);
         verify(userdataSecretsService).createUserdataSecrets(stack, List.of(2L), CLOUD_CONTEXT, CLOUD_CREDENTIAL);
         verify(userdataSecretsService).assignSecretsToInstances(stack, List.of(r), List.of(imd2));
+        verify(encryptionKeyService).updateCloudSecretManagerEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of("secretArn"), List.of());
         verify(eventBus).notify(eq(EventSelectorUtil.selector(CreateUserDataSuccess.class)), successEventCaptor.capture());
         assertEquals(STACK_ID, successEventCaptor.getValue().getData().getResourceId());
+    }
+
+    @Test
+    void testAcceptSecretEncryptionNotEnabled() {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        when(stackService.getEnvironmentCrnByStackId(STACK_ID)).thenReturn("environmentCrn");
+        when(cachedEnvironmentClientService.getByCrn("environmentCrn")).thenReturn(environment);
+
+        underTest.accept(new Event<>(new CreateUserDataRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
+
+        verify(stackService, never()).getByIdWithListsInTransaction(anyLong());
+        verify(userdataSecretsService, never()).createUserdataSecrets(any(), anyList(), any(), any());
+        verify(userdataSecretsService, never()).assignSecretsToInstances(any(), anyList(), anyList());
+        verify(encryptionKeyService, never()).updateLuksEncryptionKeyAccess(any(), any(), any(), anyList(), anyList());
     }
 
     @Test

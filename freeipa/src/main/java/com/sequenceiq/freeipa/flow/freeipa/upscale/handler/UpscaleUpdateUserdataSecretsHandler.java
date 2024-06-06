@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -22,6 +25,9 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -39,6 +45,12 @@ public class UpscaleUpdateUserdataSecretsHandler extends ExceptionCatcherEventHa
     @Inject
     private UserdataSecretsService userdataSecretsService;
 
+    @Inject
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Inject
+    private EncryptionKeyService encryptionKeyService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpscaleUpdateUserdataSecretsRequest.class);
@@ -53,14 +65,24 @@ public class UpscaleUpdateUserdataSecretsHandler extends ExceptionCatcherEventHa
     @Override
     protected Selectable doAccept(HandlerEvent<UpscaleUpdateUserdataSecretsRequest> event) {
         UpscaleUpdateUserdataSecretsRequest request = event.getData();
+        CloudContext cloudContext = request.getCloudContext();
+        CloudCredential cloudCredential = request.getCloudCredential();
         Long stackId = request.getResourceId();
         List<Long> newInstanceIds = request.getNewInstanceIds();
+
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
         DetailedEnvironmentResponse environment = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
-        List<InstanceMetaData> newInstanceMetadas = stack.getInstanceGroups().stream()
+        List<InstanceMetaData> newInstanceMetadas = new ArrayList<>();
+        List<String> newAuthorizedClients = new ArrayList<>();
+        stack.getInstanceGroups().stream()
                 .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
                 .filter(imd -> imd.getUserdataSecretResourceId() != null && newInstanceIds.contains(imd.getId()))
-                .toList();
+                .forEach(imd -> {
+                    newInstanceMetadas.add(imd);
+                    newAuthorizedClients.add(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(stack, imd));
+                });
+        encryptionKeyService.updateLuksEncryptionKeyAccess(stack, cloudContext, cloudCredential, newAuthorizedClients, List.of());
         LOGGER.info("Updating userdata secrets of instances [{}]...", newInstanceMetadas);
         userdataSecretsService.updateUserdataSecrets(stack, newInstanceMetadas, environment.getCredential(), request.getCloudContext(),
                 request.getCloudCredential());

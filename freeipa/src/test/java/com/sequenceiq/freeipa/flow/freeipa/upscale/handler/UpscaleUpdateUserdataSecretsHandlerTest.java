@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,6 +38,9 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
+import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -70,6 +74,15 @@ class UpscaleUpdateUserdataSecretsHandlerTest {
 
     @Mock
     private UserdataSecretsService userdataSecretsService;
+
+    @Mock
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Mock
+    private CloudInformationDecorator cloudInformationDecorator;
+
+    @Mock
+    private EncryptionKeyService encryptionKeyService;
 
     @InjectMocks
     private UpscaleUpdateUserdataSecretsHandler underTest;
@@ -111,12 +124,16 @@ class UpscaleUpdateUserdataSecretsHandlerTest {
                 .collect(Collectors.toSet()));
         stack.setInstanceGroups(Set.of(instanceGroup));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
         when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(ENVIRONMENT);
+        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(eq(stack), ArgumentMatchers.argThat((correctInstances::contains))))
+                .thenReturn("secretArn");
 
         underTest.accept(new Event<>(new UpscaleUpdateUserdataSecretsRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL, Arrays.asList(0L, 1L))));
 
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(cachedEnvironmentClientService).getByCrn(ENVIRONMENT_CRN);
+        verify(encryptionKeyService).updateLuksEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of("secretArn", "secretArn"), List.of());
         verify(userdataSecretsService)
                 .updateUserdataSecrets(eq(stack), instanceMetaDataListCaptor.capture(), eq(CREDENTIAL_RESPONSE), eq(CLOUD_CONTEXT), eq(CLOUD_CREDENTIAL));
         verify(eventBus).notify(eq(EventSelectorUtil.selector(UpscaleUpdateUserdataSecretsSuccess.class)), successEventCaptor.capture());
