@@ -36,6 +36,10 @@ public class RedbeamsDbServerConfigurerTest {
 
     private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
 
+    private static final String FAKE_DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:cluster:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
+    private static final String FAKE_DB_SERVER_CRN_2 = "crn:cdp:redbeams:us-west-1:default:fake:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
+
     private static final String DB_HOST = "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com";
 
     private static final String DB_USER = "cmuser";
@@ -144,6 +148,12 @@ public class RedbeamsDbServerConfigurerTest {
     @Test
     public void isRemoteDatabaseNeededWhenDbServerCrnIsPresent() {
         assertThat(underTest.isRemoteDatabaseRequested(DB_SERVER_CRN)).isTrue();
+    }
+
+    @Test
+    public void isRemoteDatabaseNeededWhenDbServerCrnIsPresentButInvalid() {
+        assertThat(underTest.isRemoteDatabaseRequested(FAKE_DB_SERVER_CRN)).isFalse();
+        assertThat(underTest.isRemoteDatabaseRequested(FAKE_DB_SERVER_CRN_2)).isFalse();
     }
 
     @Test
