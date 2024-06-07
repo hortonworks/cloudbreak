@@ -68,6 +68,9 @@ public class ImageValidatorE2ETestUtil {
     @Value("${integrationtest.imageValidation.type:}")
     private ImageValidationType imageValidationType;
 
+    @Value("${integrationtest.imageValidation.runAdditionalTests:false}")
+    private boolean runAdditionalTests;
+
     public void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -201,23 +204,27 @@ public class ImageValidatorE2ETestUtil {
             case FREEIPA -> {
                 addTestCaseIfNotAlreadyPassed(basicTests, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
 
-                XmlTest additionalTests = testNGUtil.createTest(suite, "Additional FreeIPA tests", false);
-                addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
-                addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
-                addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddUsersToEnvironment");
-                addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddGroupsToEnvironment");
-                addTestCaseIfNotAlreadyPassed(additionalTests, FreeIpaUpgradeTests.class, "testHAFreeIpaInstanceUpgrade");
-                addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnEnvironment");
+                if (runAdditionalTests) {
+                    XmlTest additionalTests = testNGUtil.createTest(suite, "Additional FreeIPA tests", false);
+                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddUsersToEnvironment");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddGroupsToEnvironment");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, FreeIpaUpgradeTests.class, "testHAFreeIpaInstanceUpgrade");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnEnvironment");
+                }
             }
             case PREWARM -> {
                 addTestCaseIfNotAlreadyPassed(basicTests, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
 
-                XmlTest additionalTests = testNGUtil.createTest(suite, "Additional runtime tests", false);
-                addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
-                addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
-                addTestCaseIfNotAlreadyPassed(additionalTests, ForceJavaVersionE2ETest.class, "testClusterProvisionWithForcedJavaVersion");
-                addTestCaseIfNotAlreadyPassed(additionalTests, SdxUpgradeTests.class, "testSDXUpgrade");
-                addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnFreeIpaSdxDistrox");
+                if (runAdditionalTests) {
+                    XmlTest additionalTests = testNGUtil.createTest(suite, "Additional runtime tests", false);
+                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, ForceJavaVersionE2ETest.class, "testClusterProvisionWithForcedJavaVersion");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, SdxUpgradeTests.class, "testSDXUpgrade");
+                    addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnFreeIpaSdxDistrox");
+                }
             }
             default -> throw new IllegalStateException("Unknown image validation type: " + imageValidationType);
         }
