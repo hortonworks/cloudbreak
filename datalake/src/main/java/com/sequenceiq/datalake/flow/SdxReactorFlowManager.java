@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_TRIGGERED;
+import static com.sequenceiq.datalake.flow.certrotation.RotateCertificateStateSelectors.ROTATE_CERTIFICATE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_EVENT;
@@ -57,6 +58,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
+import com.sequenceiq.datalake.flow.certrotation.event.RotateCertificateStackEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleSdxEvent;
@@ -293,6 +295,14 @@ public class SdxReactorFlowManager {
         LOGGER.info("Trigger CCM Upgrade on Datalake for: {}", cluster);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         UpgradeCcmStackEvent event = new UpgradeCcmStackEvent(UPGRADE_CCM_UPGRADE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
+        return notify(event.selector(), event, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerDatabaseCertificateRotation(SdxCluster cluster) {
+        LOGGER.info("Trigger Certificate Rotation on Datalake for: {}", cluster);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        RotateCertificateStackEvent event =
+                new RotateCertificateStackEvent(ROTATE_CERTIFICATE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(event.selector(), event, cluster.getClusterName());
     }
 
