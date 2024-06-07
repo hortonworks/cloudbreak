@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import com.sequenceiq.cloudbreak.core.flow2.restart.DisableOnGCPRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
@@ -10,7 +9,7 @@ public enum StackUpscaleState implements FlowState {
     UPSCALE_FAILED_STATE,
     UPDATE_DOMAIN_DNS_RESOLVER_STATE,
     UPSCALE_PREVALIDATION_STATE,
-    ADD_INSTANCES_STATE(DisableOnGCPRestartAction.class),
+    ADD_INSTANCES_STATE,
     ADD_INSTANCES_FINISHED_STATE,
     UPSCALE_IMAGE_FALLBACK_STATE,
     EXTEND_METADATA_STATE,

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.restart.DisableOnGCPRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAction;
 import com.sequenceiq.flow.core.FlowState;
@@ -17,7 +16,7 @@ public enum StackCreationState implements FlowState {
     IMAGESETUP_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),
     CREATE_CREDENTIAL_STATE,
-    START_PROVISIONING_STATE(null, DisableOnGCPRestartAction.class),
+    START_PROVISIONING_STATE(null),
     IMAGE_FALLBACK_STATE,
     PROVISION_LOAD_BALANCER_STATE,
     PROVISIONING_FINISHED_STATE,
