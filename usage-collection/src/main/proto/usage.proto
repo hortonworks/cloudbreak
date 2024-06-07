@@ -2214,6 +2214,9 @@ message CDPClusterStatus {
     ENTITLEMENT_SYNC_FINISHED = 71;
     // The status when a dynamic entitlement sync operation is failed.
     ENTITLEMENT_SYNC_FAILED = 72;
+
+    // The status when the datalake resize validation failed
+    DATALAKE_RESIZE_VALIDATION_FAILED = 73;
   }
 }
 
