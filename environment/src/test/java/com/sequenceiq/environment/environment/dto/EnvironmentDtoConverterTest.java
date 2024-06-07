@@ -134,8 +134,6 @@ class EnvironmentDtoConverterTest {
 
     private static final String KUBE_API_AUTHORIZED_IP_RANGES = "0.0.0.0/0";
 
-    private static final String LOAD_BALANCER_AUTHORIZED_IP_RANGES = "1.1.1.1/1";
-
     private static final String OUTBOUND_TYPE = "udr";
 
     @Mock
@@ -706,7 +704,6 @@ class EnvironmentDtoConverterTest {
                         .withPrivateCluster(true)
                         .withOutboundType(OUTBOUND_TYPE)
                         .withKubeApiAuthorizedIpRanges(Set.of(KUBE_API_AUTHORIZED_IP_RANGES))
-                        .withLoadBalancerAuthorizationIpRanges(Set.of(LOAD_BALANCER_AUTHORIZED_IP_RANGES))
                         .build())
                 .build();
 
@@ -743,7 +740,6 @@ class EnvironmentDtoConverterTest {
         assertThat(defaultComputeCluster.isPrivateCluster()).isTrue();
         assertThat(defaultComputeCluster.getOutboundType()).isEqualTo(OUTBOUND_TYPE);
         assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEqualTo(Set.of(KUBE_API_AUTHORIZED_IP_RANGES));
-        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isEqualTo(Set.of(LOAD_BALANCER_AUTHORIZED_IP_RANGES));
 
         EnvironmentTelemetry resultTelemetry = result.getTelemetry();
         assertThat(resultTelemetry).isNotNull();
@@ -818,7 +814,6 @@ class EnvironmentDtoConverterTest {
         assertThat(defaultComputeCluster.isPrivateCluster()).isFalse();
         assertThat(defaultComputeCluster.getOutboundType()).isNull();
         assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEmpty();
-        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isEmpty();
     }
 
     @Test

@@ -195,7 +195,6 @@ class EnvironmentApiConverterTest {
         assertTrue(externalizedComputeCluster.isPrivateCluster());
         assertEquals(OUTBOUND_TYPE, externalizedComputeCluster.getOutboundType());
         assertEquals(Set.of(KUBE_API_AUTHORIZED_IP_RANGES), externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
-        assertEquals(Set.of(SECURITY_ACCESS_CIDR), externalizedComputeCluster.getLoadBalancerAuthorizationIpRanges());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());

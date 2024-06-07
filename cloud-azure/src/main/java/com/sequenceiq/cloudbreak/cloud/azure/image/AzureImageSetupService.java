@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudImageFallbackException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -148,27 +149,9 @@ public class AzureImageSetupService {
                 LOGGER.info("Custom image with name {} does not exist in the target resource group {}, checking VHD!",
                         azureImageInfo.getImageName(), imageResourceGroupName);
 
-                createResourceGroupIfNotExists(client, resourceGroupName, region, stack);
-                createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
-                azureStorageAccountService.createStorageAccount(ac, client, imageResourceGroupName, imageStorageName, region, stack);
-                azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
+                createRequiredCloudObjects(ac, stack, region, client, resourceGroupName, imageResourceGroupName, imageStorageName);
                 if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName())) {
-                    try {
-                        LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
-                        client.copyImageBlobInStorageContainer(
-                                imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
-                    } catch (CloudConnectorException e) {
-                        LOGGER.warn("Something happened during start image copy.", e);
-                        if (StringUtils.isNotBlank(validationResult.getValidationErrorMessage())) {
-                            String errorMessage = String.format(" VHD is copied over as a fallback mechanism as you seem to have Azure Marketplace image " +
-                                            "but its terms are not yet accepted and CDP_AZURE_IMAGE_MARKETPLACE_ONLY is not granted " +
-                                            "so we tried to pre-validate the deployment, " +
-                                            "but it failed with the following error, please correct it and try again: %s",
-                                    validationResult.getValidationErrorMessage());
-                            throw new CloudConnectorException(e.getMessage() + errorMessage);
-                        }
-                        throw e;
-                    }
+                    performCopy(image, client, imageStorageName, imageResourceGroupName, azureImageInfo, validationResult);
                 } else {
                     LOGGER.info("The image already exists in the storage account.");
                 }
@@ -180,6 +163,35 @@ public class AzureImageSetupService {
                     }
                 }
             }
+        }
+    }
+
+    private void createRequiredCloudObjects(AuthenticatedContext ac, CloudStack stack, String region, AzureClient client, String resourceGroupName,
+            String imageResourceGroupName, String imageStorageName) {
+        createResourceGroupIfNotExists(client, resourceGroupName, region, stack);
+        createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
+        azureStorageAccountService.createStorageAccount(ac, client, imageResourceGroupName, imageStorageName, region, stack);
+        azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
+    }
+
+    private void performCopy(Image image, AzureClient client, String imageStorageName, String imageResourceGroupName, AzureImageInfo azureImageInfo,
+            MarketplaceValidationResult validationResult) {
+        try {
+            LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
+            client.copyImageBlobInStorageContainer(
+                    imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
+        } catch (CloudConnectorException e) {
+            LOGGER.warn("Something happened during start image copy.", e);
+            ValidationResult whatIfResult = validationResult.getValidationResult();
+            if (whatIfResult != null && whatIfResult.hasErrorOrWarning()) {
+                String errorMessage = String.format(" VHD is copied over as a fallback mechanism as you seem to have Azure Marketplace image " +
+                                "but its terms are not yet accepted and CDP_AZURE_IMAGE_MARKETPLACE_ONLY is not granted " +
+                                "so we tried to pre-validate the deployment, " +
+                                "but it failed with the following error, please correct it and try again: %s",
+                        whatIfResult.getFormattedErrors());
+                throw new CloudConnectorException(e.getMessage() + errorMessage);
+            }
+            throw e;
         }
     }
 
