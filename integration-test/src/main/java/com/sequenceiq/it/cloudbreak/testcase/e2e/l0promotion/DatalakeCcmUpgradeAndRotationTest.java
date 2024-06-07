@@ -135,7 +135,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                 .then((tc, testDto, client) -> {
                     Map<String, Boolean> serviceStatusesByName = Map.of(
                             "ccm-tunnel@GATEWAY", ccmVersion.useCcmV1(),
-                            "ccm-tunnel@KNOX", ccmVersion.useCcmV1(),
+                            "ccm-tunnel@KNOX", false,
                             "jumpgate-agent", ccmVersion.useCcmV2OrJumpgate()
                     );
                     return sshJUtil.checkSystemctlServiceStatus(testDto, testDto.getEnvironmentCrn(), client, serviceStatusesByName);
