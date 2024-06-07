@@ -21,10 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -226,24 +230,27 @@ class AzureMarketplaceValidatorServiceTest {
         verifyNoMoreInteractions(azureTemplateDeploymentService, entitlementService);
     }
 
-    @Test
-    void validateMarketplaceImageShouldHandleFallbackOnValidationErrors() {
+    @ParameterizedTest
+    @MethodSource("fallbackCombinationProvider")
+    void validateMarketplaceImageShouldHandleFallbackOnValidationErrors(boolean hasFallbackImage, String errorCode,
+            boolean fallbackRequired, boolean skipVhdCopy) {
         // Given
         Image image = mock(Image.class);
         CloudStack cloudStack = mock(CloudStack.class);
+        String fallbackImage = hasFallbackImage ? "fallbackImage" : null;
 
         when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
         when(azureImageTermsSignerService.getImageTermStatus(any(), any(), any())).thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
         when(azureTemplateDeploymentService.runWhatIfAnalysis(any(), any(), any())).thenReturn(Optional.of(
-                getMarketplaceManagementError(MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode())));
+                getMarketplaceManagementError(errorCode)));
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(anyString())).thenReturn(false);
 
         // When
         MarketplaceValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> azureMarketplaceValidatorService.validateMarketplaceImage(image,
-                PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, "fallbackTarget", mock(AzureClient.class), cloudStack, ac));
+                PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImage, mock(AzureClient.class), cloudStack, ac));
 
-        assertTrue(result.isFallbackRequired());
-        assertFalse(result.isSkipVhdCopy());
+        assertEquals(fallbackRequired, result.isFallbackRequired());
+        assertEquals(skipVhdCopy, result.isSkipVhdCopy());
         verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
         verify(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
         verify(entitlementService).azureOnlyMarketplaceImagesEnabled(anyString());
@@ -268,8 +275,8 @@ class AzureMarketplaceValidatorServiceTest {
         MarketplaceValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> azureMarketplaceValidatorService.validateMarketplaceImage(image,
                 PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, "fallbackTarget", mock(AzureClient.class), cloudStack, ac));
 
-        assertTrue(result.isFallbackRequired());
-        assertFalse(result.isSkipVhdCopy());
+        assertFalse(result.isFallbackRequired());
+        assertTrue(result.isSkipVhdCopy());
         verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
         verify(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
         verify(entitlementService).azureOnlyMarketplaceImagesEnabled(anyString());
@@ -335,5 +342,14 @@ class AzureMarketplaceValidatorServiceTest {
         details.add(AzureTestUtils.managementError("MarketplacePurchaseEligibilityFailed", "message"));
         AzureTestUtils.setDetails(managementError, details);
         return managementError;
+    }
+
+    private static Stream<Arguments> fallbackCombinationProvider() {
+        return Stream.of(
+                // hasFallbackImage, errorCode, fallbackRequired, skipVhdCopy
+                Arguments.of(true, MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode(), true, false),
+                Arguments.of(false, MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode(), false, true),
+                Arguments.of(true, "randomCode", false, true),
+                Arguments.of(false, "randomCode", false, true));
     }
 }

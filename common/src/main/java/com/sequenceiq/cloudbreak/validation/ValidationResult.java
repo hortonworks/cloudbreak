@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Supplier;
@@ -32,12 +33,12 @@ public class ValidationResult {
         this.errors = new ArrayList<>(errors);
         this.warnings = new ArrayList<>(warnings);
         this.prefix = prefix;
-        if (!StringUtils.isEmpty(prefix)) {
-            formattedErrors = prefix + ": \n";
-            formattedWarnings = prefix + ": \n";
-        }
         formattedErrors = formatNumberedList(this.errors);
         formattedWarnings = formatNumberedList(this.warnings);
+        if (!StringUtils.isEmpty(prefix)) {
+            formattedErrors = prefix + ": \n" + formattedErrors;
+            formattedWarnings = prefix + ": \n" + formattedWarnings;
+        }
     }
 
     private String formatNumberedList(List<String> issues) {
@@ -51,12 +52,16 @@ public class ValidationResult {
     }
 
     public ValidationResult merge(ValidationResult other) {
-        State mergeState = state == ERROR || other.state == ERROR ? ERROR : VALID;
-        SortedSet<String> mergedError = new TreeSet<>(this.errors);
-        mergedError.addAll(other.errors);
-        SortedSet<String> mergedWarning = new TreeSet<>(this.warnings);
-        mergedError.addAll(other.warnings);
-        return new ValidationResult(mergeState, mergedError, mergedWarning, other.prefix);
+        if (Objects.nonNull(other)) {
+            State mergeState = state == ERROR || other.state == ERROR ? ERROR : VALID;
+            SortedSet<String> mergedError = new TreeSet<>(this.errors);
+            mergedError.addAll(other.errors);
+            SortedSet<String> mergedWarning = new TreeSet<>(this.warnings);
+            mergedWarning.addAll(other.warnings);
+            return new ValidationResult(mergeState, mergedError, mergedWarning, other.prefix);
+        } else {
+            return this;
+        }
     }
 
     public State getState() {
@@ -87,8 +92,22 @@ public class ValidationResult {
         return !warnings.isEmpty();
     }
 
+    public boolean hasErrorOrWarning() {
+        return hasError() || hasWarning();
+
+    }
+
     public enum State {
         VALID, ERROR
+    }
+
+    @Override
+    public String toString() {
+        return "ValidationResult{" +
+                "state=" + state +
+                ", formattedErrors='" + formattedErrors + '\'' +
+                ", formattedWarnings='" + formattedWarnings + '\'' +
+                '}';
     }
 
     public static ValidationResult empty() {
@@ -110,15 +129,19 @@ public class ValidationResult {
         private String prefix;
 
         public ValidationResultBuilder error(String error) {
-            if (state == VALID) {
-                state = ERROR;
+            if (StringUtils.isNotEmpty(error)) {
+                if (state == VALID) {
+                    state = ERROR;
+                }
+                errors.add(error);
             }
-            errors.add(error);
             return this;
         }
 
         public ValidationResultBuilder warning(String warning) {
-            warnings.add(warning);
+            if (StringUtils.isNotEmpty(warning)) {
+                warnings.add(warning);
+            }
             return this;
         }
 

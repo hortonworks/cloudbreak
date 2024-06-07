@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureImageSetupServiceTest {
@@ -210,7 +211,8 @@ public class AzureImageSetupServiceTest {
     void testCopyVhdImageIfNecessaryWhenExceptionAndValidationResultError() {
         when(armStorage.getImageStorageName(any(), any(), any())).thenReturn("imageStorageName");
         when(azureImageService.findImage(any(), any(), any())).thenReturn(Optional.empty());
-        MarketplaceValidationResult validationResult = new MarketplaceValidationResult(true, "Validation Error");
+        MarketplaceValidationResult validationResult = new MarketplaceValidationResult(true,
+                ValidationResult.builder().error("Validation Error").build(), false);
         when(azureMarketplaceValidatorService.validateMarketplaceImage(image, PrepareImageType.EXECUTED_DURING_PROVISIONING, "imageFallbackTarget",
                 client, stack, ac)).thenReturn(validationResult);
 
@@ -221,6 +223,17 @@ public class AzureImageSetupServiceTest {
         assertEquals("Test exception VHD is copied over as a fallback mechanism as you seem to have Azure Marketplace image but its terms are not yet accepted" +
                 " and CDP_AZURE_IMAGE_MARKETPLACE_ONLY is not granted so we tried to pre-validate the deployment, but it failed with the following error, " +
                 "please correct it and try again: Validation Error", exception.getMessage());
+    }
+
+    @Test
+    void testCopyVhdImageIfNecessaryWhenExceptionAndValidationResultWarning() {
+        MarketplaceValidationResult validationResult = new MarketplaceValidationResult(true,
+                ValidationResult.builder().warning("Validation warning").build(), true);
+        when(azureMarketplaceValidatorService.validateMarketplaceImage(image, PrepareImageType.EXECUTED_DURING_PROVISIONING, "imageFallbackTarget",
+                client, stack, ac)).thenReturn(validationResult);
+
+        underTest.copyVhdImageIfNecessary(ac, stack, image, REGION, client, PrepareImageType.EXECUTED_DURING_PROVISIONING, "imageFallbackTarget");
+        verify(client, never()).copyImageBlobInStorageContainer(any(), any(), any(), any(), any());
     }
 
     private AzureImageInfo getAzureImageInfo() {

@@ -26,9 +26,6 @@ public class DefaultComputeCluster implements Serializable {
     @Column(name = "compute_outbound_type")
     private String outboundType;
 
-    @Column(name = "compute_load_balancer_authorized_ip_ranges")
-    private String loadBalancerAuthorizedIpRanges;
-
     public DefaultComputeCluster() {
     }
 
@@ -72,22 +69,6 @@ public class DefaultComputeCluster implements Serializable {
         this.outboundType = outboundType;
     }
 
-    public Set<String> getLoadBalancerAuthorizedIpRanges() {
-        if (StringUtils.isEmpty(loadBalancerAuthorizedIpRanges)) {
-            return Set.of();
-        } else {
-            return CidrUtil.cidrSet(loadBalancerAuthorizedIpRanges);
-        }
-    }
-
-    public void setLoadBalancerAuthorizedIpRanges(Set<String> loadBalancerAuthorizedIpRanges) {
-        if (CollectionUtils.isEmpty(loadBalancerAuthorizedIpRanges)) {
-            this.loadBalancerAuthorizedIpRanges = null;
-        } else {
-            this.loadBalancerAuthorizedIpRanges = StringUtils.join(loadBalancerAuthorizedIpRanges, ",");
-        }
-    }
-
     @Override
     public String toString() {
         return "DefaultComputeCluster{" +
@@ -95,7 +76,6 @@ public class DefaultComputeCluster implements Serializable {
                 ", privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
-                ", loadBalancerAuthorizedIpRanges='" + loadBalancerAuthorizedIpRanges + '\'' +
                 '}';
     }
 }
