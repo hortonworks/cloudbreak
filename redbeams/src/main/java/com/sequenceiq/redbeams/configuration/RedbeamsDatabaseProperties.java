@@ -37,6 +37,9 @@ public class RedbeamsDatabaseProperties implements DatabaseProperties {
     @Value("${redbeams.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${redbeams.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${redbeams.cert.dir:}/${redbeams.db.env.cert.file:}'}")
     private String certFile;
 
@@ -146,4 +149,8 @@ public class RedbeamsDatabaseProperties implements DatabaseProperties {
         return databaseId;
     }
 
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
+    }
 }

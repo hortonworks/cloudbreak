@@ -37,6 +37,9 @@ public class PeriscopeDatabaseProperties implements DatabaseProperties {
     @Value("${periscope.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${periscope.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${periscope.cert.dir:}/${periscope.db.env.cert.file:}'}")
     private String certFile;
 
@@ -146,4 +149,8 @@ public class PeriscopeDatabaseProperties implements DatabaseProperties {
         return databaseId;
     }
 
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
+    }
 }

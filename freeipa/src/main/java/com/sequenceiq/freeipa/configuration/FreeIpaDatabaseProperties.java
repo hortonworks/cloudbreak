@@ -37,6 +37,9 @@ public class FreeIpaDatabaseProperties implements DatabaseProperties {
     @Value("${freeipa.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${freeipa.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${freeipa.cert.dir:}/${freeipa.db.env.cert.file:}'}")
     private String certFile;
 
@@ -146,4 +149,8 @@ public class FreeIpaDatabaseProperties implements DatabaseProperties {
         return databaseId;
     }
 
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
+    }
 }

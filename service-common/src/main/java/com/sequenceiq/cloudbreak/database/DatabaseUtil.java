@@ -21,6 +21,8 @@ public class DatabaseUtil {
 
     public static final String DEFAULT_SCHEMA_NAME = "public";
 
+    private static final int CONNECTION_MAX_LIFETIME_IN_MINUTES = 13;
+
     private DatabaseUtil() {
     }
 
@@ -54,10 +56,9 @@ public class DatabaseUtil {
         if (nodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
         }
-        config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, databaseProperties.getDatabase(),
-                databaseProperties.getSchemaName()));
-        config.setUsername(databaseProperties.getUser());
-        config.setPassword(databaseProperties.getPassword());
+        String jdbcUrl = String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, databaseProperties.getDatabase(),
+                databaseProperties.getSchemaName());
+        config.setJdbcUrl(jdbcUrl);
         if (poolSizeOverride.isPresent()) {
             config.setMaximumPoolSize(poolSizeOverride.get());
         } else {
@@ -65,8 +66,23 @@ public class DatabaseUtil {
         }
         config.setMinimumIdle(databaseProperties.getMinimumIdle());
         config.setConnectionTimeout(SECONDS.toMillis(databaseProperties.getConnectionTimeout()));
-        config.setIdleTimeout(MINUTES.toMillis(databaseProperties.getIdleTimeout()));
-        return new HikariDataSource(config);
+        long customIdleTimeout = MINUTES.toMillis(databaseProperties.getIdleTimeout());
+        config.setIdleTimeout(customIdleTimeout);
+        config.setUsername(databaseProperties.getUser());
+
+        HikariDataSource hikariDataSource;
+        if (databaseProperties.rdsIamRoleBasedAuthentication()) {
+            long connectionMaxLifeTime = MINUTES.toMillis(CONNECTION_MAX_LIFETIME_IN_MINUTES);
+            long idleTimeout = Math.min(customIdleTimeout, connectionMaxLifeTime);
+            config.setMaxLifetime(connectionMaxLifeTime);
+            config.setIdleTimeout(idleTimeout);
+            hikariDataSource = new RdsIamAuthBasedHikariDataSource(config);
+        } else {
+            config.setPassword(databaseProperties.getPassword());
+            hikariDataSource = new HikariDataSource(config);
+        }
+
+        return hikariDataSource;
     }
 
     public static BatchProperties createBatchProperties(Environment environment) {

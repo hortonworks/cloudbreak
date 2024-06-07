@@ -37,6 +37,9 @@ public class ExternalizedComputeDatabaseProperties implements DatabaseProperties
     @Value("${externalizedcompute.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${externalizedcompute.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${externalizedcompute.cert.dir:}/${externalizedcompute.db.env.cert.file:}'}")
     private String certFile;
 
@@ -146,4 +149,8 @@ public class ExternalizedComputeDatabaseProperties implements DatabaseProperties
         return databaseId;
     }
 
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
+    }
 }

@@ -37,6 +37,9 @@ public class CloudbreakDatabaseProperties implements DatabaseProperties {
     @Value("${cb.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${cb.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${cb.cert.dir:}/${cb.db.env.cert.file:}'}")
     private String certFile;
 
@@ -146,4 +149,8 @@ public class CloudbreakDatabaseProperties implements DatabaseProperties {
         return databaseId;
     }
 
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
+    }
 }

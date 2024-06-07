@@ -15,10 +15,9 @@ jar {
 }
 
 dependencies {
+  implementation project(':common')
 
   api ("io.grpc:grpc-api:$grpcVersion")
-
-  implementation project(':common')
 
   implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: logbackJsonClassicVersion
@@ -44,6 +43,8 @@ dependencies {
   implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: '1.9.22.1'
   implementation group: 'dnsjava',                          name: 'dnsjava',                        version: dnsjavaVersion
   implementation group: 'org.apache.tomcat.embed',          name: 'tomcat-embed-core',              version: tomcatVersion
+  implementation group: 'software.amazon.awssdk',           name: 'rds',                            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',           name: 'sts',                            version: awsSdkVersion
 
   testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: springBootVersion

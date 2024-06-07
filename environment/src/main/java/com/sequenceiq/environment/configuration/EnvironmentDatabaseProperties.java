@@ -38,6 +38,9 @@ public class EnvironmentDatabaseProperties implements DatabaseProperties {
     @Value("${environment.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${environment.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${environment.cert.dir:}/${environment.db.env.cert.file:}'}")
     private String certFile;
 
@@ -145,5 +148,10 @@ public class EnvironmentDatabaseProperties implements DatabaseProperties {
     @Override
     public String getDatabaseId() {
         return databaseId;
+    }
+
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
     }
 }

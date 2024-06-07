@@ -37,6 +37,9 @@ public class DatalakeDatabaseProperties implements DatabaseProperties {
     @Value("${datalake.db.env.ssl:}")
     private boolean ssl;
 
+    @Value("${datalake.db.env.rdsiamrolebasedauthentication:false}")
+    private boolean rdsIamBasedAuthEnabled;
+
     @Value("#{'${datalake.cert.dir:}/${datalake.db.env.cert.file:}'}")
     private String certFile;
 
@@ -146,4 +149,8 @@ public class DatalakeDatabaseProperties implements DatabaseProperties {
         return databaseId;
     }
 
+    @Override
+    public boolean rdsIamRoleBasedAuthentication() {
+        return rdsIamBasedAuthEnabled;
+    }
 }

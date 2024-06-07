@@ -38,4 +38,5 @@ public interface DatabaseProperties {
 
     String getDatabaseId();
 
+    boolean rdsIamRoleBasedAuthentication();
 }
