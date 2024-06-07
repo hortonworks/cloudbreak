@@ -53,11 +53,11 @@ public class AzureNetworkLinkService {
 
     public List<CloudResource> checkOrCreateNetworkLinks(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
             String resourceGroup, Map<String, String> tags,
-            Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone, PrivateDatabaseVariant privateEndpointVariant) {
+            Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone, PrivateDatabaseVariant privateEndpointVariant) {
 
         String networkId = networkView.getNetworkId();
         String networkResourceGroup = networkView.getResourceGroupName();
-        List<AzureManagedPrivateDnsZoneService> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
+        List<AzureManagedPrivateDnsZoneServiceType> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
                 .getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, privateEndpointVariant);
 
         String subscriptionId = azureClient.getCurrentSubscription().subscriptionId();
@@ -119,8 +119,8 @@ public class AzureNetworkLinkService {
     }
 
     private Optional<Deployment> createMissingNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
-            Map<String, String> tags, List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices) {
-        for (AzureManagedPrivateDnsZoneService service : enabledPrivateEndpointServices) {
+            Map<String, String> tags, List<AzureManagedPrivateDnsZoneServiceType> enabledPrivateEndpointServices) {
+        for (AzureManagedPrivateDnsZoneServiceType service : enabledPrivateEndpointServices) {
             AzureListResult<VirtualNetworkLinkInner> networkLinks = azureClient.listNetworkLinksByPrivateDnsZoneName(
                     resourceGroup, service.getDnsZoneName(resourceGroup));
             boolean networkLinkCreated = azureClient.isNetworkLinkCreated(StringUtils.substringAfterLast(azureNetworkId, "/"), networkLinks);

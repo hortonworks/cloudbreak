@@ -1,7 +1,10 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE_FOR_PRIVATE_ENDPOINT;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
 
@@ -16,12 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -139,8 +140,10 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         if (AZURE.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
             List<CloudResource> createdResources = environmentNetworkService.createProviderSpecificNetworkResources(environmentDto, network);
             createdResources.stream()
-                    .filter(cloudResource -> cloudResource.getType() == ResourceType.AZURE_PRIVATE_DNS_ZONE)
-                    .filter(cloudResource -> cloudResource.getReference().endsWith(AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE.getDnsZoneName("")))
+                    .filter(cloudResource -> cloudResource.getType() == AZURE_PRIVATE_DNS_ZONE)
+                    .filter(cloudResource ->
+                            cloudResource.getReference().endsWith(POSTGRES_FLEXIBLE.getDnsZoneName(""))
+                                    || cloudResource.getReference().endsWith(POSTGRES_FLEXIBLE_FOR_PRIVATE_ENDPOINT.getDnsZoneName("")))
                     .findFirst()
                     .ifPresent(cloudResource -> setProviderSpecificNetworkResource(network, cloudResource));
         }

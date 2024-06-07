@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -20,8 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -180,8 +181,8 @@ public class AzureTemplateBuilderDbTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    void testBuildWithPrivateFlexibleParameters(boolean privateSetup) throws IOException {
+    @EnumSource(AzurePostgresAccessType.class)
+    void testBuildWithPrivateFlexibleParameters(AzurePostgresAccessType setup) throws IOException {
         Template template = Optional.ofNullable(factoryBean.getObject())
                 .map(config -> {
                     try {
@@ -192,7 +193,7 @@ public class AzureTemplateBuilderDbTest {
                 }).orElseThrow();
 
         when(azureDatabaseTemplateModelBuilderMap.get(AzureDatabaseType.FLEXIBLE_SERVER)).thenReturn(azureDatabaseTemplateModelBuilder);
-        Pair<Map<String, Object>, DatabaseStack> modelDatabasePair = createFlexibleModel(privateSetup);
+        Pair<Map<String, Object>, DatabaseStack> modelDatabasePair = createFlexibleModel(setup);
         Map<String, Object> model = modelDatabasePair.getLeft();
         DatabaseStack databaseStack = modelDatabasePair.getRight();
         when(azureDatabaseTemplateModelBuilder.buildModel(
@@ -207,16 +208,33 @@ public class AzureTemplateBuilderDbTest {
         JsonNode jsonTree = JsonUtil.readTree(result);
         JsonNode networkParams = jsonTree.findValue("network");
         JsonNode parameters = jsonTree.get("parameters");
-        if (privateSetup) {
+        if (setup == AzurePostgresAccessType.PRIVATE_DELEGATED_SUBNET) {
             assertEquals("Disabled", networkParams.get("publicNetworkAccess").textValue());
+            assertEquals("[if(empty(parameters('flexibleServerDelegatedSubnetId')), json('null'), parameters('flexibleServerDelegatedSubnetId'))]",
+                    networkParams.get("delegatedSubnetResourceId").textValue());
+            assertEquals("[if(empty(parameters('existingDatabasePrivateDnsZoneId')), json('null'), parameters('existingDatabasePrivateDnsZoneId'))]",
+                    networkParams.get("privateDnsZoneArmResourceId").textValue());
             checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "subnetId");
             checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "zoneId");
             checkParameter(parameters.get("encryptionKeyName"), "string", "vaultkey");
             checkParameter(parameters.get("encryptionUserManagedIdentity"), "string", "identity");
+            checkParameter(parameters.get("privateEndpointName"), "String", "pe-b1ca0b4d-to-dbsvr-d5844028-b646-4ecd-a48d-e0b520bfd15f");
+
+        } else if (setup == AzurePostgresAccessType.PRIVATE_ENDPOINT) {
+            assertEquals("Disabled", networkParams.get("publicNetworkAccess").textValue());
+            assertNull(networkParams.get("delegatedSubnetResourceId"));
+            assertNull(networkParams.get("existingDatabasePrivateDnsZoneId"));
+            checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "");
+            checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "zoneId");
+            checkParameter(parameters.get("privateEndpointName"), "String", "pe-b1ca0b4d-to-dbsvr-d5844028-b646-4ecd-a48d-e0b520bfd15f");
+            checkParameter(parameters.get("encryptionKeyName"), "string", "vaultkey");
+            checkParameter(parameters.get("encryptionUserManagedIdentity"), "string", "identity");
+
         } else {
             assertFalse(networkParams.hasNonNull("publicNetworkAccess"));
             checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "");
             checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "");
+            checkParameter(parameters.get("privateEndpointName"), "String", "pe-b1ca0b4d-to-dbsvr-d5844028-b646-4ecd-a48d-e0b520bfd15f");
         }
     }
 
@@ -284,18 +302,31 @@ public class AzureTemplateBuilderDbTest {
                 Map.entry("useSslEnforcement", useSslEnforcement));
     }
 
-    public Pair<Map<String, Object>, DatabaseStack> createFlexibleModel(boolean privateSetup) {
+    public Pair<Map<String, Object>, DatabaseStack> createFlexibleModel(AzurePostgresAccessType privateSetup) {
         Map<String, Object> model = new HashMap<>();
         Network network = new Network(null);
         network.putParameter("subnets", "subnet");
-        if (privateSetup) {
+        model.put("privateEndpointName", "pe-b1ca0b4d-to-dbsvr-d5844028-b646-4ecd-a48d-e0b520bfd15f");
+        model.put("subnetIdForPrivateEndpoint", "subnetId");
+        if (privateSetup == AzurePostgresAccessType.PRIVATE_DELEGATED_SUBNET) {
             network.putParameter("existingDatabasePrivateDnsZoneId", "zoneId");
             network.putParameter("flexibleServerDelegatedSubnetId", "subnetId");
+            model.put("usePrivateEndpoints", false);
+            model.put("useDelegatedSubnet", true);
+            model.put("encryptionKeyName", "vaultkey");
+            model.put("encryptionUserManagedIdentity", "identity");
+            model.put("dataEncryption", true);
+        } else if (privateSetup == AzurePostgresAccessType.PRIVATE_ENDPOINT) {
+            network.putParameter("existingDatabasePrivateDnsZoneId", "zoneId");
+            model.put("usePrivateEndpoints", true);
+            model.put("useDelegatedSubnet", false);
             model.put("encryptionKeyName", "vaultkey");
             model.put("encryptionUserManagedIdentity", "identity");
             model.put("dataEncryption", true);
         } else {
             model.put("dataEncryption", false);
+            model.put("usePrivateEndpoints", false);
+            model.put("useDelegatedSubnet", false);
         }
         Map<String, Object> serverParams = new HashMap<>();
         serverParams.put("geoRedundantBackup", false);

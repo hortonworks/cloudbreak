@@ -134,6 +134,10 @@ public class AzureUtils {
         return shortened.length() <= HOST_GROUP_LENGTH ? shortened : shortened.substring(0, HOST_GROUP_LENGTH);
     }
 
+    public String getResourceName(String resourceId) {
+        return StringUtils.substringAfterLast(resourceId, "/");
+    }
+
     public static void removeBlankSpace(StringBuilder sb) {
         int j = 0;
         for (int i = 0; i < sb.length(); i++) {
@@ -850,10 +854,5 @@ public class AzureUtils {
         String errorMessages = ce.getMessage();
         LOGGER.error(formatString, errorMessages);
         throw new CloudbreakServiceException(exceptionString + errorMessages, ce);
-    }
-
-    private void wrapAndLog(RuntimeException e, String formatString, String exceptionPrefix) {
-        LOGGER.error(formatString, e.getMessage(), e);
-        throw new CloudbreakServiceException(exceptionPrefix + e.getMessage(), e);
     }
 }

@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneServiceType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -24,9 +24,9 @@ public class AzureExistingPrivateDnsZonesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureExistingPrivateDnsZonesService.class);
 
-    Map<AzureManagedPrivateDnsZoneService, String> getExistingManagedZones(NetworkDto networkDto) {
-        Map<AzureManagedPrivateDnsZoneService, String> result = new HashMap<>();
-        AzureManagedPrivateDnsZoneService serviceEnum = getPrivateDnsZoneService(networkDto);
+    Map<AzureManagedPrivateDnsZoneServiceType, String> getExistingManagedZones(NetworkDto networkDto) {
+        Map<AzureManagedPrivateDnsZoneServiceType, String> result = new HashMap<>();
+        AzureManagedPrivateDnsZoneServiceType serviceEnum = getPrivateDnsZoneService(networkDto);
         Optional.ofNullable(networkDto.getAzure())
                 .map(AzureParams::getDatabasePrivateDnsZoneId)
                 .filter(Predicate.not(StringUtils::isEmpty))
@@ -35,20 +35,24 @@ public class AzureExistingPrivateDnsZonesService {
         return result;
     }
 
-    private AzureManagedPrivateDnsZoneService getPrivateDnsZoneService(NetworkDto networkDto) {
+    private AzureManagedPrivateDnsZoneServiceType getPrivateDnsZoneService(NetworkDto networkDto) {
+        // with the introduction of Private Endpoint support for Flexible Server,
+        // there is no way to distinguish private Single and Flexible environment setups
+        // so Flexible Server is the only supported environment level option as Flexible Server entitlement become default entitlement
+
         boolean hasFlexibleServerSubnets = Optional.ofNullable(networkDto.getAzure())
                 .map(AzureParams::getFlexibleServerSubnetIds)
                 .filter(CollectionUtils::isNotEmpty)
                 .isPresent();
 
         return hasFlexibleServerSubnets ?
-                AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE :
-                AzureManagedPrivateDnsZoneService.POSTGRES;
+                AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE :
+                AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE_FOR_PRIVATE_ENDPOINT;
     }
 
     public Map<AzurePrivateDnsZoneDescriptor, String> getExistingManagedZonesAsDescriptors(NetworkDto networkDto) {
         Map<AzurePrivateDnsZoneDescriptor, String> result = new HashMap<>();
-        AzureManagedPrivateDnsZoneService serviceEnum = getPrivateDnsZoneService(networkDto);
+        AzureManagedPrivateDnsZoneServiceType serviceEnum = getPrivateDnsZoneService(networkDto);
         Optional.ofNullable(networkDto.getAzure())
                 .map(AzureParams::getDatabasePrivateDnsZoneId)
                 .filter(Predicate.not(String::isEmpty))
@@ -60,12 +64,12 @@ public class AzureExistingPrivateDnsZonesService {
     public Map<AzurePrivateDnsZoneDescriptor, String> getExistingRegisteredOnlyZonesAsDescriptors(NetworkDto networkDto) {
         Map<AzurePrivateDnsZoneDescriptor, String> result = new HashMap<>();
         Optional.ofNullable(networkDto.getAzure().getAksPrivateDnsZoneId())
-                .ifPresent(aksDnsZone -> result.put(AzureRegisteredPrivateDnsZoneService.AKS, aksDnsZone));
+                .ifPresent(aksDnsZone -> result.put(AzureRegisteredPrivateDnsZoneServiceType.AKS, aksDnsZone));
         LOGGER.debug("Existing registered only private DNS zones: {}", result);
         return result;
     }
 
-    public Set<AzureManagedPrivateDnsZoneService> getServicesWithExistingManagedZones(NetworkDto networkDto) {
+    public Set<AzureManagedPrivateDnsZoneServiceType> getServicesWithExistingManagedZones(NetworkDto networkDto) {
         return getExistingManagedZones(networkDto).keySet();
     }
 

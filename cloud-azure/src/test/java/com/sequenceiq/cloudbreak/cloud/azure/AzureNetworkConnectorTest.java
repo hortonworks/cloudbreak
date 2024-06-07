@@ -178,7 +178,8 @@ public class AzureNetworkConnectorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
+            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
     public void testCreateProviderSpecificNetworkResourcesWhenPrivateEndpoint(PrivateDatabaseVariant variant) {
         NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(variant);
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(request.getCloudContext(), request.getCloudCredential());
@@ -193,7 +194,7 @@ public class AzureNetworkConnectorTest {
                 getNetworkView(),
                 RESOURCE_GROUP,
                 getTags(),
-                Set.of(AzureManagedPrivateDnsZoneService.POSTGRES),
+                Set.of(AzureManagedPrivateDnsZoneServiceType.POSTGRES),
                 variant);
         verify(azureNetworkLinkService).checkOrCreateNetworkLinks(
                 authenticatedContext,
@@ -201,12 +202,13 @@ public class AzureNetworkConnectorTest {
                 getNetworkView(),
                 RESOURCE_GROUP,
                 getTags(),
-                Set.of(AzureManagedPrivateDnsZoneService.POSTGRES),
+                Set.of(AzureManagedPrivateDnsZoneServiceType.POSTGRES),
                 variant);
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.EXCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.EXCLUDE,
+            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE"})
     public void testCreateProviderSpecificNetworkResourcesWhenNotPrivateEndpoint(PrivateDatabaseVariant variant) {
         NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(variant);
 
