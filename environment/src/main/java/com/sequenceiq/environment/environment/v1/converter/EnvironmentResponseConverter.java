@@ -145,7 +145,6 @@ public class EnvironmentResponseConverter {
             return ExternalizedComputeClusterResponse.newBuilder()
                     .withPrivateCluster(externalizedComputeClusterDto.isPrivateCluster())
                     .withKubeApiAuthorizedIpRanges(externalizedComputeClusterDto.getKubeApiAuthorizedIpRanges())
-                    .withLoadBalancerAuthorizedIpRanges(externalizedComputeClusterDto.getLoadBalancerAuthorizationIpRanges())
                     .withOutboundType(externalizedComputeClusterDto.getOutboundType())
                     .build();
         } else {

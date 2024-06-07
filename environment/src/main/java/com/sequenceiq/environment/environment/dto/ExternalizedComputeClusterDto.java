@@ -19,14 +19,11 @@ public class ExternalizedComputeClusterDto {
 
     private String outboundType;
 
-    private Set<String> loadBalancerAuthorizationIpRanges;
-
     private ExternalizedComputeClusterDto(ExternalizedComputeClusterDto.Builder builder) {
         create = builder.create;
         privateCluster = builder.privateCluster;
         kubeApiAuthorizedIpRanges = builder.kubeApiAuthorizedIpRanges;
         outboundType = builder.outboundType;
-        loadBalancerAuthorizationIpRanges = builder.loadBalancerAuthorizationIpRanges;
     }
 
     public static Builder builder() {
@@ -65,14 +62,6 @@ public class ExternalizedComputeClusterDto {
         this.outboundType = outboundType;
     }
 
-    public Set<String> getLoadBalancerAuthorizationIpRanges() {
-        return loadBalancerAuthorizationIpRanges;
-    }
-
-    public void setLoadBalancerAuthorizationIpRanges(Set<String> loadBalancerAuthorizationIpRanges) {
-        this.loadBalancerAuthorizationIpRanges = loadBalancerAuthorizationIpRanges;
-    }
-
     @Override
     public String toString() {
         return "ExternalizedComputeClusterDto{" +
@@ -80,7 +69,6 @@ public class ExternalizedComputeClusterDto {
                 ", privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
-                ", loadBalancerAuthorizationIpRanges='" + loadBalancerAuthorizationIpRanges + '\'' +
                 '}';
     }
 
@@ -94,8 +82,6 @@ public class ExternalizedComputeClusterDto {
         private Set<String> kubeApiAuthorizedIpRanges = new HashSet<>();
 
         private String outboundType;
-
-        private Set<String> loadBalancerAuthorizationIpRanges = new HashSet<>();
 
         private Builder() {
         }
@@ -119,13 +105,6 @@ public class ExternalizedComputeClusterDto {
 
         public ExternalizedComputeClusterDto.Builder withOutboundType(String outboundType) {
             this.outboundType = outboundType;
-            return this;
-        }
-
-        public ExternalizedComputeClusterDto.Builder withLoadBalancerAuthorizationIpRanges(Set<String> loadBalancerAuthorizationIpRanges) {
-            if (CollectionUtils.isNotEmpty(loadBalancerAuthorizationIpRanges)) {
-                this.loadBalancerAuthorizationIpRanges = loadBalancerAuthorizationIpRanges;
-            }
             return this;
         }
 
