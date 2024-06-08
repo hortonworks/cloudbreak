@@ -10,3 +10,19 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 30
+  - package-ecosystem: "gradle" # Daily security-updates only for npm versions on the release branch
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "CB-2.85.0"
+    labels:
+      - "security-update"
+    groups:
+      # Specify a name for the group, which will be used in pull request titles
+      # and branch names
+      security-dependencies:
+        # Define patterns to include dependencies in the group (based on
+        # dependency name)
+        applies-to: security-updates # Applies the group rule to version updates
+        patterns:
+          - "*"
