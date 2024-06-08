@@ -33,6 +33,7 @@ import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public class AbstractFlowConfigurationTest {
@@ -52,6 +53,9 @@ public class AbstractFlowConfigurationTest {
     private FlowEventListener<State, Event> flowEventListener;
 
     @Mock
+    private FlowEventMetricListener<State, Event> flowEventMetricListener;
+
+    @Mock
     private StateMachineListener<State, Event> stateMachineListener;
 
     private Flow flow;
@@ -69,6 +73,9 @@ public class AbstractFlowConfigurationTest {
                         ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
                         ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
                 .willReturn(flowEventListener);
+        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventMetricListener.class),
+                        ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
+                .willReturn(flowEventMetricListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()

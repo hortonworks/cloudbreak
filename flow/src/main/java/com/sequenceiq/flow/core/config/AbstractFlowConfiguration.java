@@ -49,6 +49,7 @@ import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.StateConverterAdapter;
+import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -96,6 +97,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);
         sm.addStateListener(fl);
+
+        FlowEventMetricListener<S, E> flowEventMetricsListener = applicationContext.getBean(FlowEventMetricListener.class,
+                getEdgeConfig().finalState, flowChainType, getClass().getSimpleName());
+        sm.addStateListener(flowEventMetricsListener);
         return flow;
     }
 

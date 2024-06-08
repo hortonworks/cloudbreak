@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
+import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -94,6 +95,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
+import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -332,6 +335,9 @@ class UpgradeCcmFlowIntegrationTest {
     @TestConfiguration
     @Import({
             TransactionService.class,
+            FlowEventMetricListener.class,
+            FlowMetricSender.class,
+            CommonMetricService.class,
             TransactionMetricsService.class,
             CloudbreakMetricService.class,
             Clock.class,

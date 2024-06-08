@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -89,6 +90,8 @@ import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.user.UserPreferences;
 import com.sequenceiq.environment.user.UserPreferencesRepository;
 import com.sequenceiq.environment.user.UserPreferencesService;
+import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
@@ -263,6 +266,9 @@ public class CredentialExperienceTest {
     @Configuration
     @Import({CredentialPrerequisiteService.class,
             CredentialService.class,
+            FlowEventMetricListener.class,
+            FlowMetricSender.class,
+            CommonMetricService.class,
             CredentialNotificationService.class,
             CredentialCreateService.class,
             CredentialUpdateService.class,

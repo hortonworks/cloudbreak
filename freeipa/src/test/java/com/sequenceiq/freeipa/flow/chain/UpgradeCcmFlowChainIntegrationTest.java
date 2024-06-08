@@ -278,6 +278,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     @TestConfiguration
     @Import({
             UpgradeCcmFlowEventChainFactory.class,
+
             UpdateUserDataFlowConfig.class,
             UserDataUpdateActions.class,
             UpdateUserDataHandler.class,

@@ -33,12 +33,15 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.metrics.FlowEventMetricListener;
+import com.sequenceiq.flow.core.metrics.FlowMetricSender;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -315,6 +318,9 @@ class UpgradeCcmFlowIntegrationTest {
     @TestConfiguration
     @Import({
             UpgradeCcmOperationAcceptor.class,
+            FlowEventMetricListener.class,
+            FlowMetricSender.class,
+            CommonMetricService.class,
             UpgradeCcmFlowConfig.class,
             UpgradeCcmActions.class,
             UpgradeCcmCheckPrerequisitesHandler.class,

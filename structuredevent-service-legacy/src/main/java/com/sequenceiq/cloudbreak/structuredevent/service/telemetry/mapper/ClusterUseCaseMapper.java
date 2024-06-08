@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.cloudbreak.structuredevent.util.FlowStateUtil;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.metrics.FlowStateUtil;
 
 @Component
 public class ClusterUseCaseMapper {
@@ -72,7 +72,7 @@ public class ClusterUseCaseMapper {
             return UNSET;
         }
         AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
-        Enum nextFlowState = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow);
+        Enum nextFlowState = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState(), flow.getFlowEvent());
         if (nextFlowState == null) {
             return UNSET;
         }
