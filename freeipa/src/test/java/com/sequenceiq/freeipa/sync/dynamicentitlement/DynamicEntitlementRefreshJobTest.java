@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.sync.dynamicentitlement;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -117,6 +118,15 @@ class DynamicEntitlementRefreshJobTest {
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
         verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
+    }
+
+    @Test
+    void testExecuteWhenFlowIsRunning() {
+        Stack stack = stack(Status.AVAILABLE);
+        when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
+        when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.TRUE);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlements(any());
     }
 
     private Stack stack(Status status) {
