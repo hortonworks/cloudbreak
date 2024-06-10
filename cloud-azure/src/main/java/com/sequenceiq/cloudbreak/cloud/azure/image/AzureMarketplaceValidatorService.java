@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Service
 public class AzureMarketplaceValidatorService {
@@ -70,9 +71,9 @@ public class AzureMarketplaceValidatorService {
             } else if (Boolean.parseBoolean(stack.getParameters().get(ACCEPTANCE_POLICY_PARAMETER))) {
                 azureImageTermsSignerService.sign(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient);
             }
-            String marketplaceEligibilityError = performValidation(client, stack, ac);
-            if (StringUtils.isNotBlank(marketplaceEligibilityError)) {
-                return handleValidationErrors(imageFallbackTarget, marketplaceEligibilityError);
+            ValidationResult marketplaceEligibilityValidationResult = performValidation(client, stack, ac);
+            if (marketplaceEligibilityValidationResult.hasError()) {
+                return handleValidationErrors(imageFallbackTarget, marketplaceEligibilityValidationResult);
             } else {
                 LOGGER.debug("Marketplace image seems to be usable, no need to copy the VHD");
                 return new MarketplaceValidationResult(false, true);
@@ -83,24 +84,32 @@ public class AzureMarketplaceValidatorService {
         }
     }
 
-    private String performValidation(AzureClient client, CloudStack stack, AuthenticatedContext ac) {
+    private ValidationResult performValidation(AzureClient client, CloudStack stack, AuthenticatedContext ac) {
         try {
+
             Optional<ManagementError> error = azureTemplateDeploymentService.runWhatIfAnalysis(client, stack, ac);
-            return error.map(this::getMarketplacePurchaseEligibilityFailedError).orElse(null);
+            ValidationResult validationResult = error.map(this::getMarketplacePurchaseEligibilityFailedError).orElse(ValidationResult.builder().build());
+            LOGGER.debug("Marketplace what-if validation result: {}", validationResult);
+            return validationResult;
         } catch (ManagementException e) {
             // we need to skip errors related missing whatIf permission seamlessly
             if (azureExceptionHandler.isForbidden(e)) {
                 String errorMessage = String.format(MISSING_WHAT_IF_PERMISSION_ERROR + " Message: %s", e.getMessage());
                 LOGGER.info(errorMessage);
-                return errorMessage;
+                return ValidationResult.builder().warning(errorMessage).build();
             }
             throw e;
         }
     }
 
-    private MarketplaceValidationResult handleValidationErrors(String imageFallbackTarget, String marketplaceEligibilityError) {
-        LOGGER.info("Proceeding with image copy for image {} as it will be needed eventually", imageFallbackTarget);
-        return new MarketplaceValidationResult(true, marketplaceEligibilityError);
+    private MarketplaceValidationResult handleValidationErrors(String imageFallbackTarget, ValidationResult validationResult) {
+        if (StringUtils.isNotBlank(imageFallbackTarget)) {
+            LOGGER.info("Proceeding with image copy for image {} as it will be needed eventually", imageFallbackTarget);
+            return new MarketplaceValidationResult(true, validationResult, false);
+        } else {
+            LOGGER.info("Proceeding without image copy as there is no fallback image");
+            return new MarketplaceValidationResult(false, validationResult, true);
+        }
     }
 
     private MarketplaceValidationResult skipValidation(Image image, String message) {
@@ -109,10 +118,11 @@ public class AzureMarketplaceValidatorService {
         return new MarketplaceValidationResult(false, true);
     }
 
-    private String getMarketplacePurchaseEligibilityFailedError(ManagementError managementError) {
+    private ValidationResult getMarketplacePurchaseEligibilityFailedError(ManagementError managementError) {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         return managementError.getCode() != null && managementError.getCode().equals(MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED.getCode()) ?
-                collectErrors(managementError) :
-                null;
+                validationResultBuilder.error(collectErrors(managementError)).build() :
+                validationResultBuilder.warning(managementError.getMessage()).build();
     }
 
     private String collectErrors(ManagementError managementError) {

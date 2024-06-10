@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
-import org.apache.commons.lang3.StringUtils;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 public class MarketplaceValidationResult {
 
@@ -8,18 +8,18 @@ public class MarketplaceValidationResult {
 
     private final boolean skipVhdCopy;
 
-    private final String validationErrorMessage;
+    private final ValidationResult validationResult;
 
-    public MarketplaceValidationResult(boolean fallbackRequired, String validationErrorMessage) {
+    public MarketplaceValidationResult(boolean fallbackRequired, ValidationResult validationResult, boolean skipVhdCopy) {
         this.fallbackRequired = fallbackRequired;
-        this.validationErrorMessage = validationErrorMessage;
-        this.skipVhdCopy = StringUtils.isEmpty(validationErrorMessage);
+        this.validationResult = validationResult;
+        this.skipVhdCopy = skipVhdCopy;
     }
 
     public MarketplaceValidationResult(boolean fallbackRequired, boolean skipVhdCopy) {
         this.fallbackRequired = fallbackRequired;
         this.skipVhdCopy = skipVhdCopy;
-        this.validationErrorMessage = null;
+        this.validationResult = null;
     }
 
     public boolean isFallbackRequired() {
@@ -30,8 +30,8 @@ public class MarketplaceValidationResult {
         return skipVhdCopy;
     }
 
-    public String getValidationErrorMessage() {
-        return validationErrorMessage;
+    public ValidationResult getValidationResult() {
+        return validationResult;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class MarketplaceValidationResult {
         return "MarketplaceValidationResult{" +
                 "fallbackRequired=" + fallbackRequired +
                 ", skipVhdCopy=" + skipVhdCopy +
-                ", validationMessage='" + validationErrorMessage + '\'' +
+                ", validationResult='" + validationResult + '\'' +
                 '}';
     }
 }
