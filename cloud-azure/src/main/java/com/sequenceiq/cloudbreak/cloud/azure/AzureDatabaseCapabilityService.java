@@ -40,10 +40,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 public class AzureDatabaseCapabilityService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseCapabilityService.class);
 
-    @Value("${cb.azure.database.flexible.instanceTypeRegex:}")
+    @Value("${cb.azure.database.flexible.instanceTypeRegex:^Standard_E4d?s.*$}")
     private String instanceTypeRegex;
 
-    @Value("${cb.azure.database.flexible.serverEdition:}")
+    @Value("${cb.azure.database.flexible.serverEdition:MemoryOptimized}")
     private String serverEdition;
 
     @Value("${cb.azure.database.flexible.defaultInstanceType:Standard_E4ds_v4}")
