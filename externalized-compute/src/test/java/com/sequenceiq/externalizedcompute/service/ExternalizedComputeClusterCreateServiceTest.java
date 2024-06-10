@@ -19,11 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonClusterSpec;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterResponse;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -47,16 +44,13 @@ class ExternalizedComputeClusterCreateServiceTest {
     @Mock
     private ExternalizedComputeClusterRepository externalizedComputeClusterRepository;
 
-    @Mock
-    private CrnUserDetailsService crnUserDetailsService;
-
     @InjectMocks
     private ExternalizedComputeClusterCreateService externalizedComputeClusterCreateService;
 
     @Test
     void initiateCreationTest() {
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
-        externalizedComputeCluster.setName("cluser-name");
+        externalizedComputeCluster.setName("cluster-name");
         externalizedComputeCluster.setDefaultCluster(true);
         externalizedComputeCluster.setEnvironmentCrn("envcrn");
         Json tags = new Json(Map.of("label1", "value1"));
@@ -66,8 +60,6 @@ class ExternalizedComputeClusterCreateServiceTest {
         ArgumentCaptor<CreateClusterRequest> commonCreateClusterRequestArgumentCaptor = ArgumentCaptor.forClass(
                 CreateClusterRequest.class);
         when(liftieGrpcClient.createCluster(commonCreateClusterRequestArgumentCaptor.capture(), any())).thenReturn(createClusterResponse);
-        when(crnUserDetailsService.loadUserByUsername(USER_CRN))
-                .thenReturn(new CrnUser("id", USER_CRN, "perdos", "perdos@cloudera.com", "cloudera", "admin"));
         when(externalizedComputeClusterRepository.findById(any())).thenReturn(Optional.of(externalizedComputeCluster));
         DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         EnvironmentNetworkResponse networkResponse = mock(EnvironmentNetworkResponse.class);
@@ -77,14 +69,12 @@ class ExternalizedComputeClusterCreateServiceTest {
         externalizedComputeClusterCreateService.initiateCreation(1L, USER_CRN);
 
         CreateClusterRequest clusterRequest = commonCreateClusterRequestArgumentCaptor.getValue();
-        CommonClusterSpec spec = clusterRequest.getSpec();
-        assertThat(spec.getNetwork().getTopology().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnet1", "subnet2");
-        assertTrue(spec.getDeployments().getLogging().getEnabled());
-        assertEquals(USER_CRN, clusterRequest.getMetadata().getClusterOwner().getCrn());
-        assertEquals("cloudera", clusterRequest.getMetadata().getClusterOwner().getAccountId());
-        assertEquals("envcrn", clusterRequest.getMetadata().getEnvironmentCrn());
-        assertThat(clusterRequest.getMetadata().getLabels()).containsEntry("label1", "value1");
+        assertEquals("envcrn", clusterRequest.getEnvironment());
+        assertEquals("cluster-name", clusterRequest.getName());
+        assertEquals("Common compute cluster", clusterRequest.getDescription());
+        assertThat(clusterRequest.getTagsMap()).containsEntry("label1", "value1");
         assertTrue(clusterRequest.getIsDefault());
+        assertThat(clusterRequest.getNetwork().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnet1", "subnet2");
 
         ArgumentCaptor<ExternalizedComputeCluster> externalizedComputeClusterArgumentCaptor = ArgumentCaptor.forClass(ExternalizedComputeCluster.class);
         verify(externalizedComputeClusterRepository, times(1)).save(externalizedComputeClusterArgumentCaptor.capture());
