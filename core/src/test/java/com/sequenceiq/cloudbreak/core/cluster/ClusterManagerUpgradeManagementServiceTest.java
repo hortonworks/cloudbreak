@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
@@ -70,6 +72,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
     @Mock
+    private ClusterSetupService clusterSetupService;
+
+    @Mock
     private ClouderaManagerRepo clouderaManagerRepo;
 
     @InjectMocks
@@ -86,9 +91,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
         return Stream.of(
                 Arguments.of(CM_VERSION, CM_VERSION, false, false, 1),
                 Arguments.of(CM_VERSION, CM_VERSION, true, false, 1),
-                Arguments.of(CM_VERSION_WITH_P, CM_VERSION, false, true, 2),
+                Arguments.of(CM_VERSION_WITH_P, CM_VERSION, false, true, 3),
                 Arguments.of(CM_VERSION_WITH_P, CM_VERSION, true, false, 1),
-                Arguments.of(CM_VERSION, CM_VERSION_WITH_P, false, true, 2),
+                Arguments.of(CM_VERSION, CM_VERSION_WITH_P, false, true, 3),
                 Arguments.of(CM_VERSION_WITH_P, CM_VERSION_WITH_P, true, false, 1)
         );
     }
@@ -101,6 +106,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.empty());
         lenient().when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        lenient().when(clusterApi.clusterSetupService()).thenReturn(clusterSetupService);
     }
 
     @ParameterizedTest
@@ -150,8 +156,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);
-        verify(clusterApiConnectors).getConnector(stackDto);
+        verify(clusterApiConnectors, times(2)).getConnector(stackDto);
         verify(clusterApi).startClusterManagerAndAgents();
+        verify(clusterSetupService, atLeast(1)).updateConfig();
         verifyNoInteractions(clusterUpgradeService, clusterManagerUpgradeService);
     }
 }
