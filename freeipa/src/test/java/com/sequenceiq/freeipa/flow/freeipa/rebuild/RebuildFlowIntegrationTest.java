@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,10 +54,15 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientCallable;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -107,6 +113,10 @@ import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaCloudStorageValidationService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
@@ -235,12 +245,28 @@ class RebuildFlowIntegrationTest {
     @MockBean
     private StackStatusCheckerJob stackStatusCheckerJob;
 
+    @MockBean
+    private CleanupService cleanupService;
+
+    @MockBean
+    private FreeIpaClientFactory freeIpaClientFactory;
+
+    @MockBean
+    private FreeIpaClientRetryService retryService;
+
+    @Inject
+    private FreeIpaService freeIpaService;
+
     @BeforeEach
-    public void setup() {
+    public void setup() throws FreeIpaClientException {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setTunnel(CLUSTER_PROXY);
         InstanceGroup ig = new InstanceGroup();
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        instanceMetaData.setDiscoveryFQDN("ipaserver0.example.com");
+        ig.setInstanceMetaData(Set.of(instanceMetaData));
         stack.setInstanceGroups(Set.of(ig));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         CloudConnector cloudConnector = mock(CloudConnector.class);
@@ -258,6 +284,13 @@ class RebuildFlowIntegrationTest {
         when(stackToCloudStackConverter.buildInstance(eq(stack), any(InstanceMetaData.class), eq(ig), any(), any(), any()))
                 .thenReturn(mock(CloudInstance.class));
         when(cloudConnector.instances()).thenReturn(mock(InstanceConnector.class));
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(mock(FreeIpaClient.class));
+        lenient().doAnswer(invocation -> invocation.getArgument(0, FreeIpaClientCallable.class).run())
+                .when(retryService).retryWhenRetryableWithValue(any(FreeIpaClientCallable.class));
+        when(instanceMetaDataToCloudInstanceConverter.convert(instanceMetaData)).thenReturn(mock(CloudInstance.class));
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain("example.com");
+        when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa);
     }
 
     @Test
