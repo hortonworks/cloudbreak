@@ -270,7 +270,7 @@ public class DatalakeRestoreActions {
                 String restoreId = (String) variables.get(RESTORE_ID);
                 int fullDrMaxDurationInMin = variables.get(FULLDR_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(FULLDR_MAX_DURATION_IN_MIN) : 0;
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                if (!variables.containsKey(VALIDATION_ONLY) && !(Boolean) variables.get(VALIDATION_ONLY)) {
+                if (variables.getOrDefault(VALIDATION_ONLY, false).equals(Boolean.FALSE)) {
                     SdxDatabaseRestoreStatusResponse restoreStatusResponse =
                         sdxBackupRestoreService.getDatabaseRestoreStatus(sdxCluster, operationId);
                     if (restoreStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {

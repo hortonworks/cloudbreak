@@ -1,10 +1,10 @@
 package com.sequenceiq.datalake.flow.dr.restore;
 
-
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -13,10 +13,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,14 +30,19 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
+import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
+import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -89,6 +97,12 @@ public class DatalakeRestoreActionsTest {
 
     @Mock
     private FlowChainLogService flowChainLogService;
+
+    @Mock
+    private SdxStatusService sdxStatusService;
+
+    @Mock
+    private SdxMetricService metricService;
 
     @Test
     public void testRestoreWithNoFlowChain() throws Exception {
@@ -217,6 +231,36 @@ public class DatalakeRestoreActionsTest {
             captor.capture());
         boolean captorValue = captor.getValue();
         assertTrue(captorValue);
+    }
+
+    static Object[][] testValidationOnly() {
+        return new Object[][]{
+                {true, DatalakeStatusEnum.DATALAKE_RESTORE_VALIDATION_INPROGRESS, ResourceEvent.DATALAKE_RESTORE_VALIDATION_IN_PROGRESS},
+                {false, DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS, ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS},
+                {null, DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS, ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS}
+        };
+    }
+
+    @ParameterizedTest(name = "validationOnly={0}, datalakeStatusEnum={1}, event={2}")
+    @MethodSource("testValidationOnly")
+    public void testDatalakeRestoreInProgressEvents(Boolean validationOnly, DatalakeStatusEnum datalakeStatusEnum, ResourceEvent event)
+            throws Exception {
+        AbstractAction action = (AbstractAction) underTest.datalakeRestoreInProgress();
+
+        initActionPrivateFields(action);
+        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
+        SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID), mock(SdxEvent.class));
+
+
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put("OPERATION-ID", "123-123");
+        if (validationOnly != null) {
+            variables.put("VALIDATION_ONLY", validationOnly);
+        }
+
+        testSupport.doExecute(context, mock(SdxEvent.class), variables);
+
+        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(eq(datalakeStatusEnum), eq(event), anyString(), anyLong());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
