@@ -1,9 +1,10 @@
 package com.sequenceiq.mock.clouderamanager;
 
+import static com.sequenceiq.mock.service.CloudInstanceUtil.isFailedVm;
+
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.mock.service.FailureService;
 import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.spi.SpiStoreService;
@@ -50,6 +52,9 @@ public class DataProviderService {
     @Inject
     private HostNameService hostNameService;
 
+    @Inject
+    private FailureService failureService;
+
     public ApiCommand getSuccessfulApiCommand(Integer id) {
         ApiCommand result = new ApiCommand();
         result.setId(id);
@@ -59,6 +64,7 @@ public class DataProviderService {
     }
 
     public ApiHostRefList getHostRefList(String mockUuid) {
+        failureService.applyScheduledFailure(mockUuid, FailureService.CM_READ_HOSTS);
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostRefList apiHostList = new ApiHostRefList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
@@ -71,6 +77,7 @@ public class DataProviderService {
     }
 
     public ApiHostList getHostList(String mockUuid) {
+        failureService.applyScheduledFailure(mockUuid, FailureService.CM_READ_HOSTS);
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostList apiHostList = new ApiHostList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
@@ -116,6 +123,7 @@ public class DataProviderService {
     }
 
     public ApiHostList readHosts(String mockUuid) {
+        failureService.applyScheduledFailure(mockUuid, FailureService.CM_READ_HOSTS);
         List<CloudVmMetaDataStatus> metadata = spiStoreService.getMetadata(mockUuid);
         ApiHostList apiHostList = new ApiHostList();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : metadata) {
@@ -188,10 +196,5 @@ public class DataProviderService {
                         .type(s.getServiceType())
                         .displayName(s.getDisplayName())).collect(Collectors.toList());
         return new ApiServiceList().items(services);
-    }
-
-    private boolean isFailedVm(CloudVmMetaDataStatus cloudVmMetaDataStatus) {
-        return Set.of(InstanceStatus.FAILED, InstanceStatus.TERMINATED,
-                InstanceStatus.TERMINATED_BY_PROVIDER).contains(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus());
     }
 }

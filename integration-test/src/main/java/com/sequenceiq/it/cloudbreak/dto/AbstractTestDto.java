@@ -381,15 +381,26 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public T setSaltRunFailure(String command) {
         String crn = getCrn();
-        executeQuery.executeMethod(HttpMethod.POST, "/{mock_uuid}/saltapi/run/{run_arg}/failure", Map.of(), null, r -> r,
-                w -> w.resolveTemplate("mock_uuid", crn).resolveTemplate("run_arg", command));
+        executeQuery.executeMethod(HttpMethod.POST, "/{mock_uuid}/failure/salt_run", Map.of(), null, r -> r,
+                w -> w.resolveTemplate("mock_uuid", crn).queryParam("run_arg", command));
+        return (T) this;
+    }
+
+    public T scheduleFailureOnCommand(String command, String group, int allNodeCount, int failedNodeCount) {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.POST, "/{mock_uuid}/failure", Map.of(), null, r -> r,
+                w -> w.resolveTemplate("mock_uuid", crn)
+                        .queryParam("run_arg", command)
+                        .queryParam("group", group)
+                        .queryParam("all_node_count", allNodeCount)
+                        .queryParam("failed_node_count", failedNodeCount));
         return (T) this;
     }
 
     public T deleteSaltRunFailure(String command) {
         String crn = getCrn();
-        executeQuery.executeMethod(HttpMethod.DELETE, "/{mock_uuid}/saltapi/run/{run_arg}/failure", Map.of(), null, r -> r,
-                w -> w.resolveTemplate("mock_uuid", crn).resolveTemplate("run_arg", command));
+        executeQuery.executeMethod(HttpMethod.DELETE, "/{mock_uuid}/failure/salt_run", Map.of(), null, r -> r,
+                w -> w.resolveTemplate("mock_uuid", crn).queryParam("run_arg", command));
         return (T) this;
     }
 

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.mock.salt.SaltResponse;
+import com.sequenceiq.mock.service.FailureService;
 import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 
@@ -27,13 +28,13 @@ public class SaltUtilSyncAllSaltResponse implements SaltResponse {
     @Inject
     private HostNameService hostNameService;
 
+    @Inject
+    private FailureService failureService;
+
     @Override
     public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
-        ApplyResponse applyResponse = new ApplyResponse();
-        List<Map<String, JsonNode>> responseList = new ArrayList<>();
-
+        failureService.applyScheduledFailure(mockUuid, cmd());
         Map<String, JsonNode> hostMap = new HashMap<>();
-
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : spiStoreService.getMetadata(mockUuid)) {
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
@@ -42,8 +43,9 @@ public class SaltUtilSyncAllSaltResponse implements SaltResponse {
             }
         }
 
+        List<Map<String, JsonNode>> responseList = new ArrayList<>();
         responseList.add(hostMap);
-
+        ApplyResponse applyResponse = new ApplyResponse();
         applyResponse.setResult(responseList);
         return applyResponse;
     }

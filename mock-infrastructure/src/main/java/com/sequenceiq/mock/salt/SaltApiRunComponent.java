@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -18,6 +17,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.mock.service.FailureService;
 
 @Component
 public class SaltApiRunComponent {
@@ -30,9 +31,10 @@ public class SaltApiRunComponent {
     @Inject
     private SaltStoreService saltStoreService;
 
-    private final Map<String, SaltResponse> saltResponsesMap = new ConcurrentHashMap<>();
+    @Inject
+    private FailureService failureService;
 
-    private final Map<String, Set<String>> runFailures = new ConcurrentHashMap<>();
+    private final Map<String, SaltResponse> saltResponsesMap = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void setup() {
@@ -44,7 +46,7 @@ public class SaltApiRunComponent {
         List<String> fun = params.get("fun");
         List<String> arg = params.get("arg");
         if (CollectionUtils.isNotEmpty(arg) && arg.size() == 1) {
-            Set<String> configuredFailures = runFailures.get(mockUuid);
+            Set<String> configuredFailures = failureService.getCommandFailures(mockUuid);
             if (CollectionUtils.isNotEmpty(configuredFailures)) {
                 if (configuredFailures.contains(arg.get(0))) {
                     String message = String.format("Salt run %s is configured to fail.", arg.get(0));
@@ -63,18 +65,6 @@ public class SaltApiRunComponent {
         }
         LOGGER.error("no response for this SALT RUN request: " + body);
         throw new IllegalStateException("no response for this SALT RUN request: " + body);
-    }
-
-    public void setFailure(String mockUuid, String runArg) {
-        runFailures.computeIfAbsent(mockUuid, k -> new ConcurrentSkipListSet<>());
-        runFailures.get(mockUuid).add(runArg);
-    }
-
-    public void deleteFailure(String mockUuid, String runArg) {
-        Set<String> runArgs = runFailures.get(mockUuid);
-        if (runArgs != null) {
-            runArgs.remove(runArg);
-        }
     }
 
     private void storeIfEnabled(String mockUuid, Map<String, List<String>> params, Object response) {

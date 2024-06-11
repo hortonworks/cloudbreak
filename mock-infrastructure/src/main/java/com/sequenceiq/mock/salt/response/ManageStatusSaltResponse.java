@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.mock.salt.SaltResponse;
+import com.sequenceiq.mock.service.FailureService;
 import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 
@@ -24,6 +25,9 @@ public class ManageStatusSaltResponse implements SaltResponse {
 
     @Inject
     private HostNameService hostNameService;
+
+    @Inject
+    private FailureService failureService;
 
     @Override
     public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
@@ -37,6 +41,7 @@ public class ManageStatusSaltResponse implements SaltResponse {
         minionStatusList.add(minionStatus);
         minionStatusSaltResponse.setResult(minionStatusList);
 
+        failureService.applyScheduledFailure(mockUuid, cmd());
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : spiStoreService.getMetadata(mockUuid)) {
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();

@@ -141,6 +141,11 @@ public class SpiController {
         return cloudVmInstanceStatuses;
     }
 
+    @GetMapping("/cloud_instance_statuses")
+    public List<CloudVmMetaDataStatus> cloudVmStatuses(@PathVariable("mock_uuid") String mockuuid) {
+        return spiService.collectVmMetaDataStatuses(mockuuid);
+    }
+
     @PostMapping("/cloud_metadata_statuses")
     public List<CloudVmMetaDataStatus> cloudMetadataStatuses(@PathVariable("mock_uuid") String mockuuid, @RequestBody List<CloudInstance> cloudInstances) {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();

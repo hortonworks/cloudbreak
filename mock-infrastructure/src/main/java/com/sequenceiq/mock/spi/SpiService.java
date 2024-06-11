@@ -50,6 +50,11 @@ public class SpiService {
         return collectVmMetaDataStatuses(cloudInstances, spiDto);
     }
 
+    public List<CloudVmMetaDataStatus> collectVmMetaDataStatuses(String mockUuid) {
+        SpiDto spiDto = spiStoreService.read(mockUuid);
+        return spiDto.getVmMetaDataStatuses();
+    }
+
     private List<CloudVmMetaDataStatus> collectVmMetaDataStatuses(List<CloudInstance> cloudInstances, SpiDto read) {
         List<CloudVmMetaDataStatus> vmToStart;
         if (CollectionUtils.isEmpty(cloudInstances)) {

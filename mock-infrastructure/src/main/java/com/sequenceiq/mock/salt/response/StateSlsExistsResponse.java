@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SlsExistsSaltResponse;
 import com.sequenceiq.mock.salt.SaltResponse;
+import com.sequenceiq.mock.service.FailureService;
 import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 
@@ -24,10 +25,13 @@ public class StateSlsExistsResponse implements SaltResponse {
     @Inject
     private HostNameService hostNameService;
 
+    @Inject
+    private FailureService failureService;
+
     @Override
     public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
+        failureService.applyScheduledFailure(mockUuid, cmd());
         List<String> targets = params.get("tgt");
-        SlsExistsSaltResponse response = new SlsExistsSaltResponse();
         Map<String, Boolean> nodesResponse = new HashMap<>();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : spiStoreService.getMetadata(mockUuid)) {
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
@@ -39,6 +43,7 @@ public class StateSlsExistsResponse implements SaltResponse {
             }
         }
 
+        SlsExistsSaltResponse response = new SlsExistsSaltResponse();
         response.setResult(List.of(nodesResponse));
         return response;
     }

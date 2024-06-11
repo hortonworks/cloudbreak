@@ -148,6 +148,42 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
+            given = "there is a running DistroX cluster",
+            when = "a scale is called where multiple cm agens fail",
+            then = "the cluster should become available and additional scale should work")
+    public void testScaleUpWithCmAgentFailure(MockedTestContext testContext, ITestContext testNgContext) {
+        DistroXStartStopTestParameters params = new DistroXStartStopTestParameters(testNgContext.getCurrentXmlTest().getAllParameters());
+        String stack = resourcePropertyProvider().getName();
+        createDatalake(testContext);
+        testContext
+                .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
+                .given(DIX_IMG_KEY, DistroXImageTestDto.class)
+                .withImageCatalog()
+                .withImageId(IMAGE_CATALOG_ID)
+                .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
+                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
+                .withValidateBlueprint(false)
+                .withClouderaManager(CM_FOR_DISTRO_X)
+                .given(stack, DistroXTestDto.class)
+                .withCluster(CLUSTER_KEY)
+                .withName(stack)
+                .withImageSettings(DIX_IMG_KEY)
+                .withNetwork(DIX_NET_KEY)
+                .when(distroXClient.create(), key(stack))
+                .await(STACK_AVAILABLE, key(stack))
+                .scheduleFailureOnCommand("CM_READ_HOSTS", "worker", 10, 5)
+                .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
+                .await(STACK_AVAILABLE, key(stack))
+                .scheduleFailureOnCommand("CM_READ_HOSTS", "worker", 0, 0)
+                .when(distroXClient.scale(params.getHostgroup(), 3))
+                .await(STACK_AVAILABLE, key(stack))
+                .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
+                .await(STACK_AVAILABLE, key(stack))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
             given = "there is a running DistroX cluster with 300 instances in worker group with 5 volumes per instance",
             when = "up- and downscale is called 3 times",
             then = "the cluster should be available")
