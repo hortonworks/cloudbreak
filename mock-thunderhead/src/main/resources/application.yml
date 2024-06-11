@@ -18,6 +18,7 @@ auth:
       rebuild.enable: true
       batch.call.enable: true
       privileged.user.enable: true
+      loadbalancer.enable: false
     cloudstoragevalidation.enable:
       global: true
       aws: true

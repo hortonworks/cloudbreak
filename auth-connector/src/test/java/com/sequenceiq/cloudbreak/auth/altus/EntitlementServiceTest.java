@@ -57,6 +57,9 @@ class EntitlementServiceTest {
                 {"CDP_FREEIPA_REBUILD", (EntitlementCheckFunction) EntitlementService::isFreeIpaRebuildEnabled, false},
                 {"CDP_FREEIPA_REBUILD", (EntitlementCheckFunction) EntitlementService::isFreeIpaRebuildEnabled, true},
 
+                {"CDP_FREEIPA_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::isFreeIpaLoadBalancerEnabled, false},
+                {"CDP_FREEIPA_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::isFreeIpaLoadBalancerEnabled, true},
+
                 {"CLOUDERA_INTERNAL_ACCOUNT", (EntitlementCheckFunction) EntitlementService::internalTenant, false},
                 {"CLOUDERA_INTERNAL_ACCOUNT", (EntitlementCheckFunction) EntitlementService::internalTenant, true},
 
