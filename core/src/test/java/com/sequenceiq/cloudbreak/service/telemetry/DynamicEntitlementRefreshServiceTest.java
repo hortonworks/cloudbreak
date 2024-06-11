@@ -75,7 +75,7 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testSaltRefreshNotNeeded() {
-        Boolean result = underTest.saltRefreshNeeded(Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE));
+        Boolean result = underTest.saltRefreshNeeded(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE));
         assertFalse(result);
     }
 
@@ -190,9 +190,9 @@ class DynamicEntitlementRefreshServiceTest {
     @Test
     void testStoreChangedEntitlementsInTelemetryMonitoringNotChanged() {
         when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
-        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE)));
+        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE)));
         FeatureSetting monitoring = mock(FeatureSetting.class);
-        underTest.storeChangedEntitlementsInTelemetry(STACK_ID, Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE));
+        underTest.storeChangedEntitlementsInTelemetry(STACK_ID, Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE));
 
         verify(monitoring, never()).setEnabled(any());
         verify(componentConfigProviderService).replaceTelemetryComponent(eq(STACK_ID), eq(telemetry));

@@ -207,9 +207,9 @@ class DynamicEntitlementRefreshServiceTest {
     void testStoreChangedEntitlementsInTelemetryMonitoringNotChanged() {
         when(stack.getTelemetry()).thenReturn(telemetry);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE)));
+        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE)));
         FeatureSetting monitoring = mock(FeatureSetting.class);
-        underTest.storeChangedEntitlementsInTelemetry(stack, Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE));
+        underTest.storeChangedEntitlementsInTelemetry(stack, Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE));
 
         verify(monitoring, never()).setEnabled(any());
         verify(telemetryConfigService).storeTelemetry(eq(STACK_ID), eq(telemetry));
@@ -221,7 +221,7 @@ class DynamicEntitlementRefreshServiceTest {
         when(stack.getEnvironmentCrn()).thenReturn("envCrn");
         when(stack.getTelemetry()).thenReturn(telemetry);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CB_AUTHZ_POWER_USERS.name(), Boolean.TRUE)));
+        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE)));
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
         underTest.changeClusterConfigurationIfEntitlementsChanged(stack);
 
