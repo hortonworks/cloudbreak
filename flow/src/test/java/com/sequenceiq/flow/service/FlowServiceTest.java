@@ -1,6 +1,8 @@
 package com.sequenceiq.flow.service;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -51,6 +54,8 @@ import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 public class FlowServiceTest {
 
     private static final Pageable PAGEABLE = PageRequest.of(0, 50);
+
+    private static final Long STACK_ID = 1L;
 
     private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
 
@@ -82,12 +87,38 @@ public class FlowServiceTest {
     private FlowLogConverter flowLogConverter;
 
     @InjectMocks
+    @Spy
     private FlowService underTest;
+
+    @Mock
+    private FlowCheckResponse flowCheckResponse;
 
     @BeforeEach
     void setup() {
         lenient().when(flowLogConverter.convert(any())).thenReturn(new FlowLogResponse());
         lenient().when(failHandledEvents.contains(FAIL_HANDLED_NEXT_EVENT)).thenReturn(true);
+    }
+
+    @Test
+    void testPreviousFlowFailedFailed() {
+        when(underTest.getFlowChainStateSafe(List.of(STACK_ID), FLOW_CHAIN_ID)).thenReturn(flowCheckResponse);
+        when(flowCheckResponse.getHasActiveFlow()).thenReturn(false);
+        when(flowCheckResponse.getLatestFlowFinalizedAndFailed()).thenReturn(true);
+
+        boolean result = underTest.isPreviousFlowFailed(STACK_ID, FLOW_CHAIN_ID);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testPreviousFlowFailedSuccess() {
+        when(underTest.getFlowChainStateSafe(List.of(STACK_ID), FLOW_CHAIN_ID)).thenReturn(flowCheckResponse);
+        when(flowCheckResponse.getHasActiveFlow()).thenReturn(false);
+        when(flowCheckResponse.getLatestFlowFinalizedAndFailed()).thenReturn(false);
+
+        boolean result = underTest.isPreviousFlowFailed(STACK_ID, FLOW_CHAIN_ID);
+
+        assertFalse(result);
     }
 
     @Test

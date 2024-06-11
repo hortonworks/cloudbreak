@@ -7,6 +7,7 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -30,10 +31,17 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.service.FlowService;
 
 @DisallowConcurrentExecution
 @Component
 public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
+
+    static final String FLOW_CHAIN_ID = "flowChainId";
+
+    static final String ERROR_COUNT = "errorCount";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicEntitlementRefreshJob.class);
 
@@ -58,6 +66,9 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     @Inject
     private ImageService imageService;
 
+    @Inject
+    private FlowService flowService;
+
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         StackDto stack = stackDtoService.getById(getLocalIdAsLong());
@@ -77,10 +88,13 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
         } else {
             LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}.", stack.getResourceCrn());
             try {
-                ThreadBasedUserCrnProvider.doAs(
+                FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(
                         internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                                 stack.getAccountId()).toString(),
                         () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
+                if (FlowType.NOT_TRIGGERED != flowIdentifier.getType()) {
+                    rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), flowIdentifier.getPollableId());
+                }
             } catch (FlowsAlreadyRunningException e) {
                 LOGGER.info("DynamicEntitlementRefreshJob cannot run because another flow is running: {}", e.getMessage());
             }
@@ -111,6 +125,40 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.warn("Image not found: {}", e.getMessage());
         }
         return false;
+    }
+
+    private void rescheduleIfPreviousFlowChainFailed(StackDto stack, JobDetail jobDetail, String flowChainId) {
+        int errorCountFromJob = getErrorCountFromJob(jobDetail);
+        String flowChainIdFromJob = jobDetail.getJobDataMap().getString(FLOW_CHAIN_ID);
+        boolean previousFlowChainFailed = flowService.isPreviousFlowFailed(stack.getId(), flowChainIdFromJob);
+        int errorCount = calculateNewErrorCount(errorCountFromJob, previousFlowChainFailed);
+        addNewParametersToJobDetail(jobDetail, flowChainId, errorCount);
+        jobService.reScheduleWithBackoff(stack.getId(), jobDetail, errorCount);
+    }
+
+    private int calculateNewErrorCount(int errorCountFromJob, boolean previousOperationFailed) {
+        if (previousOperationFailed) {
+            return errorCountFromJob + 1;
+        }
+        return 0;
+    }
+
+    private void addNewParametersToJobDetail(JobDetail jobDetail, String operationId, int errorCount) {
+        jobDetail.getJobDataMap().put(FLOW_CHAIN_ID, operationId);
+        jobDetail.getJobDataMap().putAsString(ERROR_COUNT, errorCount);
+    }
+
+    private int getErrorCountFromJob(JobDetail jobDetail) {
+        int result = 0;
+        String errorCount = jobDetail.getJobDataMap().getString(ERROR_COUNT);
+        if (errorCount != null) {
+            try {
+                result = Integer.parseInt(errorCount);
+            } catch (NumberFormatException e) {
+                result = 0;
+            }
+        }
+        return result;
     }
 
     private boolean anyInstanceStopped(StackDto stack) {

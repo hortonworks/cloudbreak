@@ -69,6 +69,14 @@ public class FlowService {
     @Inject
     private FlowLogConverter flowLogConverter;
 
+    public boolean isPreviousFlowFailed(Long stackId, String flowChainId) {
+        if (flowChainId != null) {
+            FlowCheckResponse flowCheckResponse = getFlowChainStateSafe(List.of(stackId), flowChainId);
+            return !flowCheckResponse.getHasActiveFlow() && flowCheckResponse.getLatestFlowFinalizedAndFailed();
+        }
+        return false;
+    }
+
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
         Optional<FlowLog> lastFlowLog = flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(flowId);

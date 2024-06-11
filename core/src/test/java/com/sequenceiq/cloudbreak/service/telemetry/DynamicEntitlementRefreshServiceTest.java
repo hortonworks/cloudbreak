@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.service.FlowService;
 
 @ExtendWith(MockitoExtension.class)
 class DynamicEntitlementRefreshServiceTest {
@@ -45,6 +47,8 @@ class DynamicEntitlementRefreshServiceTest {
     private static final String STACK_CRN = "crn:cdp:datalake:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:datalake:f551c9f0-e837-4c61-9623-b8fe596757c4";
 
     private static final String USER = "user";
+
+    private static final String FLOW_CHAIN_ID = "flowChainId";
 
     @Mock
     private EntitlementService entitlementService;
@@ -60,6 +64,9 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private FlowService flowService;
 
     @InjectMocks
     private DynamicEntitlementRefreshService underTest;
@@ -79,8 +86,13 @@ class DynamicEntitlementRefreshServiceTest {
     @Mock
     private ClusterView clusterView;
 
+    @Mock
+    private FlowCheckResponse flowCheckResponse;
+
     @BeforeEach
     void setup() {
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
+        lenient().when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         lenient().when(dynamicEntitlementRefreshConfig.getCbEntitlements()).thenReturn(List.of("CDP_CENTRAL_COMPUTE_MONITORING"));
         lenient().when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Set.of("CDP_CENTRAL_COMPUTE_MONITORING"));
         lenient().when(monitoringConfiguration.getClouderaManagerExporter()).thenReturn(exporterConfiguration);
@@ -90,13 +102,13 @@ class DynamicEntitlementRefreshServiceTest {
         lenient().when(stackDto.getCluster()).thenReturn(clusterView);
         lenient().when(clusterView.getCloudbreakClusterManagerMonitoringUser()).thenReturn(USER);
         lenient().when(clusterView.getId()).thenReturn(STACK_ID);
+        lenient().when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
     }
 
     @Test
     void testHandleLegacyConfigurationsGenerateMonitoringUser() {
         when(clusterView.getCloudbreakClusterManagerMonitoringUser()).thenReturn(null);
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -134,7 +146,6 @@ class DynamicEntitlementRefreshServiceTest {
     void testGetChangedWatchedEntitlementsNotChanged() {
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -148,7 +159,6 @@ class DynamicEntitlementRefreshServiceTest {
     void testGetChangedWatchedEntitlementsEmptyTelemetry() {
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         //telemetry component is empty
         when(telemetry.getDynamicEntitlements()).thenReturn(null);
 
@@ -162,7 +172,6 @@ class DynamicEntitlementRefreshServiceTest {
     void testGetChangedWatchedEntitlementsNoRightEntitlementInTelemetry() {
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         //telemetry component is empty
         Map<String, Boolean> dynamicEntitlements = new HashMap<>();
         dynamicEntitlements.put("RANDOM_ENTITLEMENT", Boolean.FALSE);
@@ -178,7 +187,6 @@ class DynamicEntitlementRefreshServiceTest {
     void testGetChangedWatchedEntitlementsChanged() {
         //monitoring disabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(Collections.emptyList());
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -193,7 +201,6 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring disabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(Collections.emptyList());
         when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Collections.emptySet());
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -204,7 +211,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testStoreChangedEntitlementsInTelemetry() {
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE)));
         when(telemetry.getFeatures()).thenReturn(features);
         FeatureSetting monitoring = mock(FeatureSetting.class);
@@ -219,7 +225,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testStoreChangedEntitlementsInTelemetryMonitoringNotChanged() {
-        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
         when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE)));
         FeatureSetting monitoring = mock(FeatureSetting.class);
         underTest.storeChangedEntitlementsInTelemetry(STACK_ID, Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE));
@@ -227,5 +232,6 @@ class DynamicEntitlementRefreshServiceTest {
         verify(monitoring, never()).setEnabled(any());
         verify(componentConfigProviderService).replaceTelemetryComponent(eq(STACK_ID), eq(telemetry));
     }
+
 }
 

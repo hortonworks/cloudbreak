@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.service.FlowService;
 
 @Service
 public class DynamicEntitlementRefreshService {
@@ -57,6 +58,9 @@ public class DynamicEntitlementRefreshService {
 
     @Inject
     private MonitoringConfiguration monitoringConfiguration;
+
+    @Inject
+    private FlowService flowService;
 
     public Map<String, Boolean> getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
         handleLegacyConfigurations(stack);

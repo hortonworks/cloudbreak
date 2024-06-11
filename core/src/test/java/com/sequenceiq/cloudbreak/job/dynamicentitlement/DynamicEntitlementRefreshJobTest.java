@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -42,6 +43,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.service.FlowService;
 
 @ExtendWith(MockitoExtension.class)
 class DynamicEntitlementRefreshJobTest {
@@ -52,6 +56,8 @@ class DynamicEntitlementRefreshJobTest {
     private static final String INTERNAL_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     private static final String MODIFIED_INTERNAL_CRN = "crn:cdp:iam:us-west-1:account-id:user:__internal__actor__";
+
+    private static final String FLOW_CHAIN_ID = "flowChainId";
 
     @Mock
     private StackDtoService stackDtoService;
@@ -83,6 +89,12 @@ class DynamicEntitlementRefreshJobTest {
     @Mock
     private ImageService imageService;
 
+    @Mock
+    private FlowIdentifier flowIdentifier;
+
+    @Mock
+    private FlowService flowService;
+
     @InjectMocks
     private DynamicEntitlementRefreshJob underTest;
 
@@ -98,6 +110,10 @@ class DynamicEntitlementRefreshJobTest {
         Image image = mock(Image.class);
         lenient().when(image.getPackageVersions()).thenReturn(Map.of(ImagePackageVersion.CDP_PROMETHEUS.getKey(), "2.36.2"));
         lenient().when(imageService.getImage(eq(LOCAL_ID))).thenReturn(image);
+        lenient().when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(any()))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID));
+        lenient().when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
+        lenient().when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap());
     }
 
     @Test
@@ -112,6 +128,42 @@ class DynamicEntitlementRefreshJobTest {
         verify(stack, never()).getInstanceGroupDtos();
         verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
+    }
+
+    @Test
+    void testExecuteWhenClusterRunningAndRescheduleLastFailed() throws JobExecutionException {
+        StackDto stack = stack(Status.AVAILABLE);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(DynamicEntitlementRefreshJob.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
+        jobDataMap.putAsString(DynamicEntitlementRefreshJob.ERROR_COUNT, 4);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        when(flowService.isPreviousFlowFailed(LOCAL_ID, FLOW_CHAIN_ID)).thenReturn(true);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshJobService).reScheduleWithBackoff(eq(LOCAL_ID), any(), eq(5));
+    }
+
+    @Test
+    void testExecuteWhenClusterRunningAndRescheduleLastSuccess() throws JobExecutionException {
+        StackDto stack = stack(Status.AVAILABLE);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(DynamicEntitlementRefreshJob.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
+        jobDataMap.putAsString(DynamicEntitlementRefreshJob.ERROR_COUNT, 4);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        when(flowService.isPreviousFlowFailed(LOCAL_ID, FLOW_CHAIN_ID)).thenReturn(false);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshJobService).reScheduleWithBackoff(eq(LOCAL_ID), any(), eq(0));
     }
 
     @Test

@@ -31,6 +31,8 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
 
     private static final String TRIGGER_GROUP = "dynamic-entitlement-triggers";
 
+    private static final int MAX_ERROR_COUNT = 11;
+
     @Qualifier("DynamicEntitlementRefreshTransactionalScheduler")
     @Inject
     private TransactionalScheduler scheduler;
@@ -58,7 +60,12 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
         schedule(resourceAdapter.getJobResource().getLocalId(), jobDetail, trigger);
     }
 
-    public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
+    public void reScheduleWithBackoff(Long id, JobDetail jobDetail, int errorCount) {
+        Trigger trigger = buildJobTriggerWithBackoff(jobDetail, errorCount, id);
+        schedule(id.toString(), jobDetail, trigger);
+    }
+
+    public void schedule(String id, JobDetail jobDetail, Trigger trigger) {
         if (properties.isDynamicEntitlementEnabled()) {
             try {
                 JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
@@ -123,6 +130,34 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithRemainingCount())
                 .build();
+    }
+
+    private Trigger buildJobTriggerWithBackoff(JobDetail jobDetail, int errorCount, Long stackId) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
+                .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
+                .withDescription("Trigger checking dynamic entitlements.")
+                .startAt(backoffFirstStart(errorCount, stackId))
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInMinutes(properties.getIntervalInMinutes())
+                        .repeatForever()
+                        .withMisfireHandlingInstructionNextWithRemainingCount())
+                .build();
+    }
+
+    private Date backoffFirstStart(int errorCount, Long stackId) {
+        if (errorCount == 0) {
+            LOGGER.debug("DynamicEntitlementRefreshJob will be rescheduled in {} minutes for stack {}.", properties.getIntervalInMinutes(), stackId);
+            return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(properties.getIntervalInMinutes())));
+        } else {
+            int count = Math.min(errorCount, MAX_ERROR_COUNT);
+            // backoff strategy, delay = 2^(errorcount+1) + original interval
+            int exponentialBackOffInMinutes = (2 << count) + properties.getIntervalInMinutes();
+            LOGGER.debug("DynamicEntitlementRefreshJob will be rescheduled in {} minutes for stack {}.", exponentialBackOffInMinutes, stackId);
+            return Date.from(ZonedDateTime.now().toInstant()
+                    .plus(Duration.ofMinutes(exponentialBackOffInMinutes)));
+        }
     }
 
     private Date delayedFirstStart() {
