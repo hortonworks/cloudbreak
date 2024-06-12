@@ -737,13 +737,12 @@ public class ClusterHostServiceRunner {
         ServiceLocationMap serviceLocations = clusterApiConnectors.getConnector(stackDto.getCluster()).getServiceLocations();
         String cmVersion = clouderaManagerRepo.getVersion();
         String resourceCrn = stackDto.getStack().getResourceCrn();
-        boolean disableAutoBundleCollection = entitlementService.cmAutoBundleCollectionDisabled(Crn.safeFromString(resourceCrn).getAccountId());
         return Map.of("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", Map.of(
                         "settings", Map.of(
                                 "heartbeat_interval", cmHeartbeatInterval,
                                 "missed_heartbeat_interval", cmMissedHeartbeatInterval,
-                                "disable_auto_bundle_collection", disableAutoBundleCollection,
+                                "disable_auto_bundle_collection", true,
                                 "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
                                 "cloud_provider_setup_supported", isCloudProviderSetupSupported(stackDto, cmVersion),
                                 "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),

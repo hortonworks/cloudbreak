@@ -374,7 +374,6 @@ class ClusterHostServiceRunnerTest {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
-        when(entitlementService.cmAutoBundleCollectionDisabled(anyString())).thenReturn(Boolean.TRUE);
         ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
         Set<String> serviceLocations = new HashSet<String>();
@@ -386,8 +385,8 @@ class ClusterHostServiceRunnerTest {
         when(serviceLocationMap.getAllVolumePath()).thenReturn(serviceLocations);
         when(gatewayConfig.getPrivateAddress()).thenReturn("privateAddress");
         Map<String, SaltPillarProperties> clouderaManagerSettings = underTest.createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, gatewayConfig);
-        boolean cloudProviderSetupSupported = extractCloudPlatformSupported(clouderaManagerSettings);
-        assertEquals(cloudProviderSetupSupported, Boolean.TRUE);
+        assertEquals(Boolean.TRUE, extractCloudPlatformSupported(clouderaManagerSettings));
+        assertEquals(Boolean.TRUE, extractCmBundleCollection(clouderaManagerSettings));
     }
 
     @Test
@@ -398,7 +397,6 @@ class ClusterHostServiceRunnerTest {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.YARN.name());
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
-        when(entitlementService.cmAutoBundleCollectionDisabled(anyString())).thenReturn(Boolean.TRUE);
         ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
         Set<String> serviceLocations = new HashSet<String>();
@@ -419,6 +417,13 @@ class ClusterHostServiceRunnerTest {
         Map<String, Object> clouderaManager = (Map<String, Object>) saltPillarProperties.getProperties().get("cloudera-manager");
         Map<Object, Object> settings = (Map<Object, Object>) clouderaManager.get("settings");
         return (boolean) settings.get("cloud_provider_setup_supported");
+    }
+
+    private boolean extractCmBundleCollection(Map<String, SaltPillarProperties> clouderaManagerSettings) {
+        SaltPillarProperties saltPillarProperties = clouderaManagerSettings.get("cloudera-manager-settings");
+        Map<String, Object> clouderaManager = (Map<String, Object>) saltPillarProperties.getProperties().get("cloudera-manager");
+        Map<Object, Object> settings = (Map<Object, Object>) clouderaManager.get("settings");
+        return (boolean) settings.get("disable_auto_bundle_collection");
     }
 
     @Test
