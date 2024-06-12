@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -25,7 +26,6 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -107,7 +107,7 @@ public class ImageValidatorE2ETestUtil {
                 Polling.waitPeriodly(IMAGE_WAIT_SLEEP_TIME_IN_SECONDS, TimeUnit.SECONDS)
                         .stopAfterDelay(imageWaitTimeoutInMinutes, TimeUnit.MINUTES)
                         .stopIfException(true)
-                        .run(() -> containsImageAttempt(testContext, imageUuid));
+                        .run(() -> containsImageAttempt(testContext));
             } catch (PollerStoppedException e) {
                 String message = String.format("%s image is missing from the '%s' catalog.", imageUuid, testContext.get(ImageCatalogTestDto.class).getName());
                 throw new TestFailException(message, e);
@@ -119,13 +119,16 @@ public class ImageValidatorE2ETestUtil {
         return imageValidationType == ImageValidationType.FREEIPA;
     }
 
-    private <T extends ImageV4Response> AttemptResult<Void> containsImageAttempt(TestContext testContext, String imageUuid) {
+    private AttemptResult<ImageV4Response> containsImageAttempt(TestContext testContext) {
         ImagesV4Response imagesV4Response = getImages(testContext);
-        List<ImageBasicInfoV4Response> images = new LinkedList<>();
+        List<ImageV4Response> images = new LinkedList<>();
         images.addAll(imagesV4Response.getBaseImages());
         images.addAll(imagesV4Response.getCdhImages());
-        return images.stream().anyMatch(img -> img.getUuid().equalsIgnoreCase(imageUuid))
-                ? AttemptResults.justFinish()
+        Optional<ImageV4Response> image = images.stream()
+                .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
+                .findFirst();
+        return image.isPresent()
+                ? AttemptResults.finishWith(image.get())
                 : AttemptResults.justContinue();
     }
 
@@ -147,6 +150,10 @@ public class ImageValidatorE2ETestUtil {
         return isFreeIpaImageValidation()
                 ? commonCloudProperties.getImageValidation().getFreeIpaImageUuid()
                 : commonCloudProperties.getImageValidation().getImageUuid();
+    }
+
+    public ImageV4Response getImage(TestContext testContext) {
+        return containsImageAttempt(testContext).getResult();
     }
 
     private void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {

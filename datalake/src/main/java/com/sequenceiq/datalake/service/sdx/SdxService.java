@@ -1365,9 +1365,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private void validateImageRequest(SdxClusterRequest sdxClusterRequest, ImageSettingsV4Request imageSettingsV4Request) {
         boolean hasImageId = imageSettingsV4Request != null && StringUtils.isNotBlank(imageSettingsV4Request.getId());
-        if (hasImageId && StringUtils.isNotBlank(sdxClusterRequest.getRuntime())) {
-            throw new BadRequestException("Runtime version and image id can not be set simultaneously.");
-        }
         if (hasImageId && StringUtils.isNotBlank(imageSettingsV4Request.getOs())) {
             throw new BadRequestException("Image request can not have both image id and os parameters set.");
         }

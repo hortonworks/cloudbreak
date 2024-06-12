@@ -140,12 +140,6 @@ public class ImageService {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageCatalogPlatform platform = platformStringTransformer.getPlatformStringForImageCatalog(platformString, variant);
         String clusterVersion = getClusterVersion(blueprint);
-        Set<String> operatingSystems;
-        try {
-            operatingSystems = getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform);
-        } catch (Exception ex) {
-            throw new CloudbreakImageCatalogException(ex);
-        }
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
             LOGGER.debug("Image id {} is specified for the stack.", imageSettings.getId());
 
@@ -153,7 +147,7 @@ public class ImageService {
                 imageSettings.setCatalog(CDP_DEFAULT_CATALOG_NAME);
             }
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
-            validateBaseImageOs(image, operatingSystems);
+            validateBaseImageOs(workspaceId, image, clusterVersion, platform);
             return checkIfBasePermitted(image, baseImageEnabled);
         } else if (useBaseImage && !baseImageEnabled) {
             throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
@@ -166,7 +160,7 @@ public class ImageService {
                 Set.of(platform),
                 null,
                 baseImageEnabled,
-                operatingSystems,
+                getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform),
                 selectBaseImage ? null : clusterVersion);
         LOGGER.info("Image id is not specified for the stack.");
         if (selectBaseImage) {
@@ -178,11 +172,16 @@ public class ImageService {
         }
     }
 
-    private void validateBaseImageOs(StatedImage statedImage, Set<String> operatingSystems) throws CloudbreakImageCatalogException {
+    private void validateBaseImageOs(Long workspaceId, StatedImage statedImage, String clusterVersion, ImageCatalogPlatform platform)
+            throws CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = statedImage.getImage();
-        if (!image.isPrewarmed() && !operatingSystems.contains(image.getOs())) {
-            throw new CloudbreakImageCatalogException(String.format("The OS of the selected base image (%s) is not compatible with the runtime version. "
-                    + "Please select another image with the following OS: %s", image.getUuid(), operatingSystems));
+        if (!image.isPrewarmed()) {
+            Set<String> operatingSystems = getSupportedOperatingSystems(workspaceId, statedImage, clusterVersion, platform);
+            if (!operatingSystems.contains(image.getOs())) {
+                String message = String.format("The %s OS of the selected base image (%s) is not compatible with the runtime version %s.",
+                        image.getOs(), image.getUuid(), clusterVersion);
+                throw new CloudbreakImageCatalogException(message);
+            }
         }
     }
 
@@ -207,19 +206,35 @@ public class ImageService {
         return image;
     }
 
+    private Set<String> getSupportedOperatingSystems(Long workspaceId, StatedImage image, String clusterVersion, ImageCatalogPlatform platform)
+            throws CloudbreakImageCatalogException {
+        String imageCatalogName = image.getImageCatalogName();
+        String os = image.getImage().getOs();
+        return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+    }
+
     private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, ImageCatalogPlatform platform)
-            throws Exception {
+            throws CloudbreakImageCatalogException {
         String imageCatalogName = imageSettings != null ? imageSettings.getCatalog() : null;
         String os = imageSettings != null ? imageSettings.getOs() : null;
-        Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
-        if (StringUtils.isNotEmpty(os)) {
-            if (operatingSystems.isEmpty()) {
-                operatingSystems = Collections.singleton(os);
-            } else {
-                operatingSystems = operatingSystems.stream().filter(o -> o.equalsIgnoreCase(os)).collect(Collectors.toSet());
+        return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+    }
+
+    private Set<String> getSupportedOperationSystems(Long workspaceId, String clusterVersion, ImageCatalogPlatform platform, String os, String imageCatalogName)
+            throws CloudbreakImageCatalogException {
+        try {
+            Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+            if (StringUtils.isNotEmpty(os)) {
+                if (operatingSystems.isEmpty()) {
+                    operatingSystems = Collections.singleton(os);
+                } else {
+                    operatingSystems = operatingSystems.stream().filter(o -> o.equalsIgnoreCase(os)).collect(Collectors.toSet());
+                }
             }
+            return operatingSystems;
+        } catch (Exception ex) {
+            throw new CloudbreakImageCatalogException(ex);
         }
-        return operatingSystems;
     }
     //CHECKSTYLE:ON
 

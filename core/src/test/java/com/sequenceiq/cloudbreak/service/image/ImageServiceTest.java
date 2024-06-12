@@ -279,10 +279,12 @@ public class ImageServiceTest {
     @Test
     public void testGivenBaseImageIdAndTheOSIsNotSupportedByTheTemplateShouldReturnError() throws Exception {
         imageSettingsV4Request.setOs(null);
-        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM, null, IMAGE_CATALOG_NAME))
-                .thenReturn(Set.of("redhat7"));
+        StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
+        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM,
+                image.getImage().getOs(), image.getImageCatalogName()))
+                .thenReturn(Set.of("redhat8"));
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
-                .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
+                .thenReturn(image);
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
@@ -290,12 +292,11 @@ public class ImageServiceTest {
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
-                        false,
-                        false,
+                        true,
+                        true,
                         TestUtil.user(USER_ID, USER_ID_STRING),
-                        image -> true));
-        assertEquals("The OS of the selected base image (uuid) is not compatible with the runtime version. "
-                + "Please select another image with the following OS: [redhat7]", exception.getMessage());
+                        img -> true));
+        assertEquals("The centos7 OS of the selected base image (uuid) is not compatible with the runtime version 7.1.0.", exception.getMessage());
     }
 
     @Test

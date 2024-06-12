@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -35,6 +36,8 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
+
+    private static final String LATEST_CENTOS7_RUNTIME_VERSION = "7.2.17";
 
     private String sdxInternalKey;
 
@@ -68,6 +71,10 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
 
+        String runtimeVersion = OsType.CENTOS7.getOs().equals(imageValidatorE2ETestUtil.getImage(testContext).getOs())
+                ? LATEST_CENTOS7_RUNTIME_VERSION
+                : commonClusterManagerProperties().getRuntimeVersion();
+
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .given(imageSettings, ImageSettingsTestDto.class)
@@ -75,15 +82,16 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
                     .withImageId(commonCloudProperties().getImageValidation().getImageUuid())
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                .withBlueprintName(commonClusterManagerProperties().getInternalSdxBlueprintName())
-                .withValidateBlueprint(Boolean.FALSE)
-                .withClouderaManager(clouderaManager)
+                    .withBlueprintName(commonClusterManagerProperties().getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion))
+                    .withValidateBlueprint(Boolean.FALSE)
+                    .withClouderaManager(clouderaManager)
                 .given(masterInstanceGroup, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1)
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
-                .withEmptyNetwork()
-                .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                    .withEmptyNetwork()
+                    .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternalKey, SdxInternalTestDto.class)
+                    .withRuntimeVersion(runtimeVersion)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withStackRequest(key(cluster), key(stack))
                     .withoutDatabase()
