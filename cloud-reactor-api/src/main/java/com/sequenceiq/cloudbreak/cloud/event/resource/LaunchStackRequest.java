@@ -23,7 +23,7 @@ public class LaunchStackRequest extends CloudStackRequest<LaunchStackResult> {
     }
 
     public LaunchStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, AdjustmentType adjustmentType,
-            long threshold, Optional<String> fallbackImage) {
+            Long threshold, Optional<String> fallbackImage) {
         super(cloudContext, cloudCredential, cloudStack);
         this.adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(adjustmentType, threshold);
         this.fallbackImage = fallbackImage;

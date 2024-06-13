@@ -329,8 +329,8 @@ public class StackUpscaleService {
         }
     }
 
-    public void fireImageFallbackFlowMessage(Long stackId) {
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_IMAGE_FALLBACK);
+    public void fireImageFallbackFlowMessage(Long stackId, String notificationMessage) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_IMAGE_FALLBACK, notificationMessage);
     }
 
     public InstanceStoreMetadata getInstanceStorageInfo(AuthenticatedContext ac, String instanceType, CloudConnector connector)

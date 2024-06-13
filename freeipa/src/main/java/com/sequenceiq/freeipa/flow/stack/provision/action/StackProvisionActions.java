@@ -61,7 +61,6 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.encryption.GenerateEncr
 import com.sequenceiq.freeipa.flow.stack.provision.event.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
-import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.LaunchStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsRequest;
@@ -229,21 +228,17 @@ public class StackProvisionActions {
 
     @Bean(name = "IMAGE_FALLBACK_STATE")
     public Action<?, ?> imageFallbackAction() {
-        return new AbstractStackProvisionAction<>(StackEvent.class) {
+        return new AbstractStackProvisionAction<>(LaunchStackResult.class) {
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
                 if ((Boolean) variables.getOrDefault(IMAGE_FALLBACK_STARTED, Boolean.FALSE)) {
                     LOGGER.warn("Image fallback already happened at least once! Failing flow to avoid infinite loop!");
                     sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!")));
                 } else {
+                    stackProvisionService.stackCreationImageFallbackRequired(context.getStack(), payload.getNotificationMessage());
                     sendEvent(context, new StackEvent(IMAGE_FALLBACK_START_EVENT.event(), payload.getResourceId()));
                 }
-            }
-
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
-                payloadConverters.add(new LaunchStackResultToStackEventConverter());
             }
         };
     }

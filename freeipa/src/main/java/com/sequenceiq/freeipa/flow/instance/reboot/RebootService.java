@@ -27,20 +27,20 @@ public class RebootService {
 
     public void startInstanceReboot(RebootContext context) {
         Stack stack = context.getStack();
-        stackUpdater.updateStackStatus(stack.getId(), REPAIR_IN_PROGRESS, "Starting to reboot instances");
+        stackUpdater.updateStackStatus(stack, REPAIR_IN_PROGRESS, "Starting to reboot instances");
         instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.REBOOTING);
     }
 
     public void handleInstanceRebootError(RebootContext context) {
         Stack stack = context.getStack();
-        stackUpdater.updateStackStatus(stack.getId(), REPAIR_FAILED, "Rebooting instances failed");
+        stackUpdater.updateStackStatus(stack, REPAIR_FAILED, "Rebooting instances failed");
         instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.FAILED);
         LOGGER.error("Reboot failed for instances: {}", context.getInstanceIds());
     }
 
     public void waitForAvailableStatus(RebootContext context) {
         Stack stack = context.getStack();
-        stackUpdater.updateStackStatus(stack.getId(), REPAIR_IN_PROGRESS, "Waiting for FreeIpa to be available");
+        stackUpdater.updateStackStatus(stack, REPAIR_IN_PROGRESS, "Waiting for FreeIpa to be available");
         instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.REBOOTING);
     }
 

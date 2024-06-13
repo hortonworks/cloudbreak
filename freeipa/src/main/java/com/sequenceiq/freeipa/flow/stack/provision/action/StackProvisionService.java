@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,12 +127,19 @@ public class StackProvisionService {
     }
 
     public void registerClusterProxy(StackContext context) {
-        stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.REGISTERING_WITH_CLUSTER_PROXY,
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.REGISTERING_WITH_CLUSTER_PROXY,
                 "Registering stack with cluster proxy.");
     }
 
     public void stackCreationFinished(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
+        stackUpdater.updateStackStatus(stack, DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
+    }
+
+    public void stackCreationImageFallbackRequired(Stack stack, String notificationMessage) {
+        if (StringUtils.isNotEmpty(notificationMessage)) {
+            stackUpdater.updateStackStatus(stack, DetailedStackStatus.CREATING_INFRASTRUCTURE,
+                    "Image fallback required due to error: " + notificationMessage);
+        }
     }
 
     public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
@@ -142,7 +150,7 @@ public class StackProvisionService {
         } else {
             if (!stack.isStackInDeletionPhase()) {
                 handleFailure();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.PROVISION_FAILED, errorReason);
             }
         }
     }
@@ -190,6 +198,6 @@ public class StackProvisionService {
     }
 
     public void prepareImage(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
+        stackUpdater.updateStackStatus(stack, DetailedStackStatus.IMAGE_SETUP, "Image setup");
     }
 }

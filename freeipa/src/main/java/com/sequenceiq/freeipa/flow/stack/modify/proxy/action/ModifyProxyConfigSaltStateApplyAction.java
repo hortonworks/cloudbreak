@@ -33,7 +33,7 @@ public class ModifyProxyConfigSaltStateApplyAction extends ModifyProxyConfigActi
         setChainedAction(variables, payload.isChained());
         setFinalChain(variables, payload.isFinalChain());
         setOperationId(variables, payload.getOperationId());
-        stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.MODIFY_PROXY_CONFIG_IN_PROGRESS,
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.MODIFY_PROXY_CONFIG_IN_PROGRESS,
                 "Applying modified proxy config salt state");
         sendEvent(context);
     }

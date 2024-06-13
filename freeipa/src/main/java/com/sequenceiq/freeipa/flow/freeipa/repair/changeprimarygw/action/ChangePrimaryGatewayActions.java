@@ -68,7 +68,7 @@ public class ChangePrimaryGatewayActions {
                 setInstanceIds(variables, payload.getRepairInstanceIds());
                 setFinalChain(variables, payload.getFinalChain());
                 LOGGER.info("Starting to change the primary gateway {}", payload);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Starting to change the primary gateway");
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Starting to change the primary gateway");
                 sendEvent(context, CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -80,7 +80,7 @@ public class ChangePrimaryGatewayActions {
             @Override
             protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Selecting the primary gateway");
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Selecting the primary gateway");
 
                 List<String> repairInstanceIds = getInstanceIds(variables);
                 ChangePrimaryGatewaySelectionRequest request = new ChangePrimaryGatewaySelectionRequest(stack.getId(), repairInstanceIds);
@@ -98,7 +98,7 @@ public class ChangePrimaryGatewayActions {
             @Override
             protected void doExecute(ChangePrimaryGatewayContext context, ChangePrimaryGatewaySelectionSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Changing the primary gateway metadata");
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Changing the primary gateway metadata");
 
                 try {
                     changePrimaryGatewayService.changePrimaryGatewayMetadata(stack, payload.getFormerPrimaryGatewayInstanceId(),
@@ -120,7 +120,7 @@ public class ChangePrimaryGatewayActions {
             @Override
             protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS,
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS,
                         "Changing the primary gateway cluster proxy registration");
 
                 List<String> repairInstanceIds = getInstanceIds(variables);
@@ -151,7 +151,7 @@ public class ChangePrimaryGatewayActions {
 
                 Selectable request;
                 if (isFinalChain(variables)) {
-                    stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Checking the health");
+                    stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Checking the health");
                     request = new HealthCheckRequest(stack.getId(), false);
                 } else {
                     LOGGER.debug("Repair in progress, skipping the health check");
@@ -179,7 +179,7 @@ public class ChangePrimaryGatewayActions {
                     successDetails.getAdditionalDetails().put("UpscaleHosts", getUpscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
                 } else {
-                    stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Finished changing the primary gateway");
+                    stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Finished changing the primary gateway");
                 }
 
                 sendEvent(context, CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
@@ -215,7 +215,7 @@ public class ChangePrimaryGatewayActions {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
                 String errorReason = getErrorReason(payload.getException());
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.REPAIR_FAILED, errorReason);
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.REPAIR_FAILED, errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 LOGGER.info("Enabling the status checker for stack ID {} after failing repairing", stack.getId());
                 enableStatusChecker(stack, "Failed to repair FreeIPA");

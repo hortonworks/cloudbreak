@@ -195,7 +195,7 @@ public class InstanceMetaDataService {
     }
 
     public void updateInstanceStatusOnUpscaleFailure(Set<InstanceMetaData> notDeletedInstanceMetaDataSet) {
-        LOGGER.debug("Updating instance metadata status after failed upscale. Available instance metadatas: {}", notDeletedInstanceMetaDataSet);
+        LOGGER.debug("Updating instance metadata status after failed upscale. Available instance metadata: {}", notDeletedInstanceMetaDataSet);
         Set<InstanceMetaData> instancesToUpdate = new HashSet<>();
         notDeletedInstanceMetaDataSet.forEach(im -> {
             if (StringUtils.isBlank(im.getInstanceId())) {

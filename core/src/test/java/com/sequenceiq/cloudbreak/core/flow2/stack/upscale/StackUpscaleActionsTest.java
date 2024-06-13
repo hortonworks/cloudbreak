@@ -315,7 +315,6 @@ class StackUpscaleActionsTest {
         when(cloudStackConverter.convert(stackDto)).thenReturn(convertedCloudStack);
         when(cloudContext.getId()).thenReturn(STACK_ID);
 
-
         new AbstractActionTestSupport<>(getAddInstancesAction()).doExecute(context, payload, createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(), NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT, repair));
 

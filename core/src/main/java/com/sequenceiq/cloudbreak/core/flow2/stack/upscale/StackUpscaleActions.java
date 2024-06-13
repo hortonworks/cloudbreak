@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackUpscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -228,10 +229,11 @@ public class StackUpscaleActions {
 
     @Bean(name = "UPSCALE_IMAGE_FALLBACK_STATE")
     public Action<?, ?> imageFallbackAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(UpscaleStackImageFallbackResult.class) {
+
             @Override
-            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
-                stackUpscaleService.fireImageFallbackFlowMessage(context.getStackId());
+            protected void doExecute(StackCreationContext context, UpscaleStackImageFallbackResult payload, Map<Object, Object> variables) {
+                stackUpscaleService.fireImageFallbackFlowMessage(context.getStackId(), payload.getNotificationMessage());
                 sendEvent(context);
             }
 
@@ -240,10 +242,6 @@ public class StackUpscaleActions {
                 return new ImageFallbackRequest(context.getStackId(), context.getCloudContext());
             }
 
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
-                payloadConverters.add(new UpscaleStackImageFallbackResultToStackEventConverter());
-            }
         };
     }
 

@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -46,10 +48,10 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.LaunchStackResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.SetupResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
@@ -71,6 +73,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncr
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
+import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
@@ -87,8 +90,13 @@ import com.sequenceiq.flow.core.PayloadConverter;
 @Configuration
 public class StackCreationActions {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationActions.class);
+
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private ImageFallbackService imageFallbackService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -243,6 +251,7 @@ public class StackCreationActions {
     @Bean(name = "START_PROVISIONING_STATE")
     public Action<?, ?> startProvisioningAction() {
         return new AbstractStackCreationAction<>(CreateCredentialResult.class) {
+
             @Override
             protected void doExecute(StackCreationContext context, CreateCredentialResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -252,30 +261,40 @@ public class StackCreationActions {
             protected Selectable createRequest(StackCreationContext context) {
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 CloudStack cloudStack = cloudStackConverter.convert(stack);
+                String fallbackImageName = getFallbackImageName(cloudStack, stack);
+
                 FailurePolicy policy = Optional.ofNullable(stack.getFailurePolicy()).orElse(new FailurePolicy());
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack,
-                        policy.getAdjustmentType(), policy.getThreshold());
+                        policy.getAdjustmentType(), policy.getThreshold(), Optional.ofNullable(fallbackImageName));
+            }
+
+            private String getFallbackImageName(CloudStack cloudStack, StackDto stack) {
+                try {
+                    Image image = cloudStack.getImage();
+                    return imageFallbackService.getFallbackImageName(stack.getStack(), image);
+                } catch (CloudbreakImageNotFoundException e) {
+                    LOGGER.info("Fallback image could not be determined due to exception {}," +
+                            " we should continue execution", e.getMessage());
+                    return null;
+                } catch (CloudbreakImageCatalogException e) {
+                    throw new CloudbreakServiceException(e);
+                }
             }
         };
     }
 
     @Bean(name = "IMAGE_FALLBACK_STATE")
     public Action<?, ?> imageFallbackAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(LaunchStackResult.class) {
             @Override
-            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
-                stackCreationService.fireImageFallbackFlowMessage(context.getStackId());
+            protected void doExecute(StackCreationContext context, LaunchStackResult payload, Map<Object, Object> variables) {
+                stackCreationService.fireImageFallbackFlowMessage(context.getStackId(), payload.getNotificationMessage());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
                 return new ImageFallbackRequest(context.getStackId(), context.getCloudContext());
-            }
-
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
-                payloadConverters.add(new LaunchStackResultToStackEventConverter());
             }
         };
     }

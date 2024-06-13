@@ -72,7 +72,7 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             LOGGER.debug("Launching the stack successfully finished for {}", cloudContext);
         } catch (CloudImageException e) {
             if (request.getFallbackImage().isPresent()) {
-                LaunchStackResult result = new LaunchStackResult(request.getResourceId(), List.of());
+                LaunchStackResult result = new LaunchStackResult(request.getResourceId(), List.of(), e.getMessage());
                 request.getResult().onNext(result);
                 eventBus.notify("IMAGEFALLBACK", new Event<>(launchStackRequestEvent.getHeaders(), result));
                 LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext);

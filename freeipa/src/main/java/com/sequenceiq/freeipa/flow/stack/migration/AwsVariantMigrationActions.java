@@ -109,14 +109,13 @@ public class AwsVariantMigrationActions {
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 String errorReason = payload.getException().getMessage();
-                Long stackId = payload.getResourceId();
                 Stack stack = context.getStack();
                 String environmentCrn = stack.getEnvironmentCrn();
                 String message = String.format("Aws variant migration failed: %s", errorReason);
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPGRADE_FAILED, "AWS variant migration failed. " + errorReason);
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, "AWS variant migration failed. " + errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 metricService.incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stack, payload.getException());
                 failFlow(context, payload);

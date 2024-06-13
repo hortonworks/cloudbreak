@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -154,7 +153,7 @@ class RepairInstancesServiceTest {
         Operation operation = createOperation();
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
         when(operationToOperationStatusConverter.convert(operation)).thenReturn(operationStatus);
-        when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
+        when(stackUpdater.updateStackStatus(any(Stack.class), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(false);
@@ -167,7 +166,7 @@ class RepairInstancesServiceTest {
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
         assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
     @Test
@@ -186,7 +185,7 @@ class RepairInstancesServiceTest {
         when(operationService.failOperation(ACCOUNT_ID, operation.getOperationId(), "Couldn't start Freeipa repair flow: bumm"))
                 .thenReturn(failedOp);
         when(operationToOperationStatusConverter.convert(failedOp)).thenReturn(operationStatus);
-        when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
+        when(stackUpdater.updateStackStatus(any(Stack.class), any(), any())).thenReturn(stack);
         ArgumentCaptor acAcceptable = ArgumentCaptor.forClass(Acceptable.class);
         when(flowManager.notify(eq("REPAIR_TRIGGER_EVENT"), (Acceptable) acAcceptable.capture())).thenThrow(new RuntimeException("bumm"));
 
@@ -198,7 +197,7 @@ class RepairInstancesServiceTest {
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
         assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
     @Test
@@ -226,7 +225,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
+        when(stackUpdater.updateStackStatus(any(Stack.class), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);
@@ -239,7 +238,7 @@ class RepairInstancesServiceTest {
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
         assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
     @Test
@@ -253,7 +252,7 @@ class RepairInstancesServiceTest {
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
+        when(stackUpdater.updateStackStatus(any(Stack.class), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -264,7 +263,7 @@ class RepairInstancesServiceTest {
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
         assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
     @Test
@@ -320,7 +319,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
+        when(stackUpdater.updateStackStatus(any(Stack.class), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);
@@ -333,7 +332,7 @@ class RepairInstancesServiceTest {
         assertTrue(acAcceptable.getValue() instanceof RepairEvent);
         RepairEvent repairEvent = (RepairEvent) acAcceptable.getValue();
         assertEquals(instanceIds, repairEvent.getRepairInstanceIds());
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
+        verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.REPAIR_REQUESTED), any());
     }
 
     @Test

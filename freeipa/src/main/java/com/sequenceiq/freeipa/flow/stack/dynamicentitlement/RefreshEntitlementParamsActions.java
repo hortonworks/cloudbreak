@@ -73,14 +73,13 @@ public class RefreshEntitlementParamsActions {
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 String errorReason = payload.getException().getMessage();
-                Long stackId = payload.getResourceId();
                 Stack stack = context.getStack();
                 String environmentCrn = stack.getEnvironmentCrn();
                 String message = String.format("Refresh entitlement based configurations failed: %s", errorReason);
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPGRADE_FAILED, message);
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, message);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 failFlow(context, payload);
                 sendEvent(context, RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAIL_HANDLED_EVENT.event(), payload);

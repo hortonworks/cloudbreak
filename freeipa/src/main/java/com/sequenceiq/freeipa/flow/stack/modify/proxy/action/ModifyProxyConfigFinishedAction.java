@@ -36,7 +36,7 @@ public class ModifyProxyConfigFinishedAction extends ModifyProxyConfigAction<Sta
     @Override
     protected void doExecute(ModifyProxyConfigContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
         LOGGER.info("Finished modify proxy config state");
-        stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE,
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AVAILABLE,
                 "Successfully updated proxy config settings on all instances");
         LOGGER.debug("Complete operation with id: [{}]", getOperationId(variables));
         SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());

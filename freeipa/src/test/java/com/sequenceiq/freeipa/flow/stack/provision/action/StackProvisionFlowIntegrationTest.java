@@ -240,7 +240,7 @@ class StackProvisionFlowIntegrationTest {
 
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.PROVISION_FAILED, "Image fallback started second time!");
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.PROVISION_FAILED, "Image fallback started second time!");
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
         verifyNoInteractions(tlsSetupService, metadataSetupService);
     }
@@ -282,7 +282,7 @@ class StackProvisionFlowIntegrationTest {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
         assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
-        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.STACK_PROVISIONED, "Stack provisioned.");
     }
 
     private FlowIdentifier triggerFlow() {

@@ -30,7 +30,7 @@ public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpda
 
     @Override
     protected void doExecute(StackContext context, SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
-        stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.SALT_STATE_UPDATE_IN_PROGRESS, "Salt state update in progress");
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.SALT_STATE_UPDATE_IN_PROGRESS, "Salt state update in progress");
         setOperationId(variables, payload.getOperationId());
         setChainedAction(variables, payload.isChained());
         setFinalChain(variables, payload.isFinalChain());

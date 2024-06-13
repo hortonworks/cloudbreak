@@ -82,12 +82,12 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeI
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.ImageFallbackSuccessToUpscaleCreateUserdataSecretsSuccessConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackImageFallbackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsRequest;
@@ -195,7 +195,7 @@ public class FreeIpaUpscaleActions {
                 setFinalChain(variables, payload.isFinalChain());
                 setInstanceIds(variables, payload.getInstanceIds());
                 LOGGER.info("Starting upscale {}", payload);
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting upscale");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting upscale");
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -238,7 +238,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, UpscaleCreateUserdataSecretsSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Adding instances");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Adding instances");
 
                 List<CloudInstance> newInstances = buildNewInstances(context.getStack(), getInstanceCountByGroup(variables));
                 LOGGER.debug("Freeipa upscale new instances: {}", newInstances);
@@ -310,21 +310,21 @@ public class FreeIpaUpscaleActions {
 
     @Bean(name = "FREEIPA_UPSCALE_IMAGE_FALLBACK_STATE")
     public Action<?, ?> imageFallbackAction() {
-        return new AbstractStackProvisionAction<>(StackEvent.class) {
+        return new AbstractUpscaleAction<>(UpscaleStackImageFallbackResult.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, UpscaleStackImageFallbackResult payload, Map<Object, Object> variables) {
                 if ((Boolean) variables.getOrDefault(IMAGE_FALLBACK_STARTED, Boolean.FALSE)) {
                     LOGGER.warn("Image fallback already happened at least once! Failing flow to avoid infinite loop!");
                     sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!")));
                 } else {
-                    instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(context.getStack().getNotDeletedInstanceMetaDataSet());
+                    Stack stack = context.getStack();
+                    instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
+                    String notificationMessage = payload.getNotificationMessage();
+                    stackUpdater.updateStackStatus(stack, getInProgressStatus(variables),
+                            StringUtils.isEmpty(notificationMessage) ? "Image fallback initiated" : notificationMessage);
+
                     sendEvent(context, new StackEvent(IMAGE_FALLBACK_START_EVENT.event(), payload.getResourceId()));
                 }
-            }
-
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
-                payloadConverters.add(new UpscaleStackResultToStackEventConverter());
             }
         };
     }
@@ -355,7 +355,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, UpscaleStackResult payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Validating new instances");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Validating new instances");
                 try {
                     instanceValidationService.finishAddInstances(context, payload);
                     sendEvent(context, UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
@@ -378,7 +378,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Extending metadata");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Extending metadata");
 
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(stack);
                 List<Resource> resources = resourceService.findAllByStackId(stack.getId());
@@ -407,7 +407,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Saving metadata");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Saving metadata");
                 List<String> instanceIds = payload.getResults().stream()
                         .map(CloudVmMetaDataStatus::getCloudVmInstanceStatus)
                         .map(CloudVmInstanceStatus::getCloudInstance)
@@ -448,7 +448,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Setting up TLS");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Setting up TLS");
 
                 StackEvent event;
                 try {
@@ -483,7 +483,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Update cluster proxy registration before bootstrap");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Update cluster proxy registration before bootstrap");
                 List<String> instanceIds = getInstanceIds(variables);
                 Set<InstanceMetaData> newInstances = instanceMetaDataService.getByInstanceIds(stack.getId(), instanceIds);
                 boolean allNewInstanceHasFqdn = newInstances.stream().allMatch(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()));
@@ -500,7 +500,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Bootstrapping machines");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Bootstrapping machines");
                 BootstrapMachinesRequest request = new BootstrapMachinesRequest(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -526,7 +526,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Recording hostnames");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Recording hostnames");
                 List<String> instanceIds = getInstanceIds(variables);
                 List<String> hosts = stack.getNotDeletedInstanceMetaDataList().stream()
                         .filter(instanceMetaData -> instanceIds.contains(instanceMetaData.getInstanceId()))
@@ -544,7 +544,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Configuring the orchestrator");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Configuring the orchestrator");
                 OrchestratorConfigRequest request = new OrchestratorConfigRequest(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -557,7 +557,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Validating cloud storage");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Validating cloud storage");
                 ValidateCloudStorageRequest request = new ValidateCloudStorageRequest(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -570,7 +570,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Installing FreeIPA");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Installing FreeIPA");
                 InstallFreeIpaServicesRequest request = new InstallFreeIpaServicesRequest(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -583,7 +583,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Update cluster proxy registration after bootstrap");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Update cluster proxy registration after bootstrap");
                 ClusterProxyUpdateRegistrationRequest request = new ClusterProxyUpdateRegistrationRequest(stack.getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -596,7 +596,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, ClusterProxyUpdateRegistrationSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "FreeIPA Post Installation");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "FreeIPA Post Installation");
                 PostInstallFreeIpaRequest request = new PostInstallFreeIpaRequest(stack.getId(), false);
                 sendEvent(context, request.selector(), request);
             }
@@ -609,7 +609,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Upscale update metadata");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Upscale update metadata");
                 if (!isRepair(variables)) {
                     int nodeCount = getInstanceCountByGroup(variables);
                     for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
@@ -641,7 +641,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating kerberos nameserver config");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Updating kerberos nameserver config");
                 try {
                     kerberosConfigUpdateService.updateNameservers(stack.getId());
                     sendEvent(context, UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
@@ -669,7 +669,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating environment stack config");
+                stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Updating environment stack config");
                 try {
                     ThreadBasedUserCrnProvider.doAsInternalActor(
                             regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -708,7 +708,7 @@ public class FreeIpaUpscaleActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getUpscaleCompleteStatus(variables), "Upscale complete");
+                stackUpdater.updateStackStatus(stack, getUpscaleCompleteStatus(variables), "Upscale complete");
                 if (!isChainedAction(variables)) {
                     environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getAllInstanceMetaDataList().size());
                 }
@@ -754,7 +754,7 @@ public class FreeIpaUpscaleActions {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
                 String errorReason = getErrorReason(payload.getException());
-                stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
+                stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
                 enableStatusChecker(stack, "Failed upscaling FreeIPA");

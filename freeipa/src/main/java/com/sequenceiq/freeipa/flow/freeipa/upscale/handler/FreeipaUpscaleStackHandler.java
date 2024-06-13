@@ -56,7 +56,8 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
             LOGGER.debug("Upscale successfully finished for {}, and the result is: {}", cloudContext, result);
         } catch (CloudImageException e) {
             if (request.getFallbackImage().isPresent()) {
-                UpscaleStackImageFallbackResult result = new UpscaleStackImageFallbackResult(request.getResourceId(), ResourceStatus.FAILED, List.of());
+                UpscaleStackImageFallbackResult result = new UpscaleStackImageFallbackResult(
+                        request.getResourceId(), ResourceStatus.FAILED, List.of(), e.getMessage());
                 request.getResult().onNext(result);
                 eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
                 LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext, e);

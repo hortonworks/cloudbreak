@@ -64,7 +64,7 @@ public class FreeIpaProvisionActions {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES, "Bootstrapping machines");
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.BOOTSTRAPPING_MACHINES, "Bootstrapping machines");
                 sendEvent(context);
             }
 
@@ -97,7 +97,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.CONFIGURING_ORCHESTRATOR, "Configuring the orchestrator");
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.CONFIGURING_ORCHESTRATOR, "Configuring the orchestrator");
                 sendEvent(context);
             }
 
@@ -114,7 +114,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, OrchestratorConfigSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.VALIDATING_CLOUD_STORAGE, "Validating cloud storage");
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.VALIDATING_CLOUD_STORAGE, "Validating cloud storage");
                 sendEvent(context);
             }
 
@@ -131,7 +131,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STARTING_FREEIPA_SERVICES, "Starting FreeIPA services");
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.STARTING_FREEIPA_SERVICES, "Starting FreeIPA services");
                 sendEvent(context);
             }
 
@@ -147,7 +147,7 @@ public class FreeIpaProvisionActions {
         return new AbstractStackProvisionAction<>(InstallFreeIpaServicesSuccess.class) {
             @Override
             protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) throws Exception {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.UPDATE_CLUSTER_PROXY_REGISTRATION,
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_CLUSTER_PROXY_REGISTRATION,
                         "Updating cluster proxy registration.");
                 sendEvent(context);
             }
@@ -165,7 +165,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, ClusterProxyUpdateRegistrationSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.POSTINSTALL_FREEIPA_CONFIGURATION,
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.POSTINSTALL_FREEIPA_CONFIGURATION,
                         "Performing FreeIPA post-install configuration");
                 sendEvent(context);
             }
@@ -199,7 +199,7 @@ public class FreeIpaProvisionActions {
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
                 freeipaJobService.schedule(context.getStack().getId());
                 dynamicEntitlementRefreshJobService.schedule(context.getStack().getId());
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 synchronizeUsersViaWiam(context.getStack());
                 sendEvent(context);
             }
@@ -232,7 +232,7 @@ public class FreeIpaProvisionActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 String errorReason = getErrorReason(payload.getException());
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
+                stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.PROVISION_FAILED, errorReason);
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }

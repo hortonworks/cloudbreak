@@ -72,7 +72,7 @@ class ModifyProxyConfigFinishedActionTest extends ActionTest {
 
         underTest.doExecute(context, stackEvent, variables);
 
-        verify(stackUpdater).updateStackStatus(stackEvent.getResourceId(), DetailedStackStatus.AVAILABLE,
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.AVAILABLE,
                 "Successfully updated proxy config settings on all instances");
         SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());
         verify(operationService, completeOperation ? times(1) : never()).completeOperation(ACCOUNT_ID, OPERATION_ID, Set.of(successDetails), Set.of());

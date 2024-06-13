@@ -119,8 +119,9 @@ public class FreeIpaVerticalScaleActions {
 
             @Override
             protected void doExecute(StackContext context, FreeIpaVerticalScaleResult payload, Map<Object, Object> variables) {
-                freeIPAVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStack().getId(), payload.getFreeIPAVerticalScaleRequest());
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STOPPED, "Vertical scale complete");
+                Long stackId = context.getStack().getId();
+                freeIPAVerticalScaleService.updateTemplateWithVerticalScaleInformation(stackId, payload.getFreeIPAVerticalScaleRequest());
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STOPPED, "Vertical scale complete");
                 sendEvent(context, FINALIZED_EVENT.event(), payload);
             }
         };
@@ -148,7 +149,7 @@ public class FreeIpaVerticalScaleActions {
                 String errorReason = getErrorReason(payload.getException());
                 String message = "Vertical scale failed with [" + payload.getFailedPhase() + "]. " + errorReason;
                 LOGGER.debug(message);
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.VERTICAL_SCALE_FAILED, message);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.VERTICAL_SCALE_FAILED, message);
                 if (isOperationIdSet(variables)) {
                     operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
                 }

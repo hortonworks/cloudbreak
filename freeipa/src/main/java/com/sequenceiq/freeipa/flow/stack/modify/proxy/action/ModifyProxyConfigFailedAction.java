@@ -47,7 +47,7 @@ public class ModifyProxyConfigFailedAction extends ModifyProxyConfigAction<Stack
     @Override
     protected void doExecute(ModifyProxyConfigContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
         LOGGER.info("Failed modify proxy config state", payload.getException());
-        stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.MODIFY_PROXY_CONFIG_FAILED, getErrorReason(payload.getException()));
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.MODIFY_PROXY_CONFIG_FAILED, getErrorReason(payload.getException()));
         LOGGER.debug("Failing operation with id: [{}]", getOperationId(variables));
         operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());
         sendEvent(context);

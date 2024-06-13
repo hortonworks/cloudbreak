@@ -315,7 +315,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.UPSCALE_FAILED, "Image fallback started second time!");
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPSCALE_FAILED, "Image fallback started second time!");
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
         verifyNoInteractions(tlsSetupService, metadataSetupService);
         verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID), eq("Upscale failed during Image fallback"), any(), any());
@@ -336,6 +336,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
         flowFinishedSuccessfully();
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
         verify(operationService).completeOperation(eq(stack.getAccountId()), eq(OPERATION_ID), any(), any());
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPSCALE_IN_PROGRESS, "MP image failure");
     }
 
     @Test
@@ -367,7 +368,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
         assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
-        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.UPSCALE_COMPLETED, "Upscale complete");
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.UPSCALE_COMPLETED, "Upscale complete");
     }
 
     private FlowIdentifier triggerFlow() {

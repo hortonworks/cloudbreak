@@ -43,7 +43,7 @@ public class StackStopService {
         Stack stack = context.getStack();
         stackStartStopService.validateResourceResults(context.getCloudContext(),
                 stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Stack infrastructure stopped successfully.");
+        stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOPPED, "Stack infrastructure stopped successfully.");
         instanceUpdater.updateStatuses(stack, InstanceStatus.STOPPED);
     }
 

@@ -275,7 +275,7 @@ public class UpgradeCcmService {
             registerClusterProxy(payload.getResourceId());
         }
         String statusReason = "Upgrade CCM failed: " + payload.getException().getMessage();
-        stackUpdater.updateStackStatus(payload.getResourceId(), detailedStatus, statusReason);
+        stackUpdater.updateStackStatus(context.getStack(), detailedStatus, statusReason);
     }
 
     private void pushSaltStatesClearPillars(Long stackId) throws CloudbreakOrchestratorException {

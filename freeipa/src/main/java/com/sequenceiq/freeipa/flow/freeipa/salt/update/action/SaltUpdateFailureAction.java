@@ -32,7 +32,7 @@ public class SaltUpdateFailureAction extends AbstractStackFailureAction<SaltUpda
     @Override
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
         LOGGER.error("Salt state update failed", payload.getException());
-        stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.SALT_STATE_UPDATE_FAILED,
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.SALT_STATE_UPDATE_FAILED,
                 "Salt update failed with: " + payload.getException().getMessage());
         if (isOperationIdSet(variables)) {
             operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());

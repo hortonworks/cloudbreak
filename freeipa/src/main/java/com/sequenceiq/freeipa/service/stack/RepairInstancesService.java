@@ -198,7 +198,7 @@ public class RepairInstancesService {
 
         Operation operation = operationService.startOperation(accountId, OperationType.REPAIR, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Repair requested");
+            stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_REQUESTED, "Repair requested");
             try {
                 flowManager.notify(FlowChainTriggers.REPAIR_TRIGGER_EVENT, new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, stack.getId(),
                         operation.getOperationId(), nodeCount, new ArrayList<>(instancesToRepair.keySet()), additionalTerminatedInstanceIds));
@@ -275,7 +275,7 @@ public class RepairInstancesService {
 
         Operation operation = operationService.startOperation(accountId, OperationType.REBOOT, Set.of(stack.getEnvironmentCrn()), Collections.emptySet());
         if (operation.getStatus() == OperationState.RUNNING) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Reboot requested");
+            stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_REQUESTED, "Reboot requested");
             try {
                 flowManager.notify(REBOOT_EVENT.event(), new RebootInstanceEvent(REBOOT_EVENT.event(), stack.getId(),
                         new ArrayList<>(instancesToReboot.keySet()), operation.getOperationId()));

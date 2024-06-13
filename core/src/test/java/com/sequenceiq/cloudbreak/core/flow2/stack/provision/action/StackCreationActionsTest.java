@@ -5,9 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -32,10 +39,12 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
+import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -65,6 +74,9 @@ class StackCreationActionsTest {
 
     @Mock
     private ImageService imageService;
+
+    @Mock
+    private ImageFallbackService imageFallbackService;
 
     @Mock
     private StackToCloudStackConverter cloudStackConverter;
@@ -217,4 +229,33 @@ class StackCreationActionsTest {
         verifyStackEvent((StackEvent) result);
     }
 
+    @Test
+    public void testRetrievesFallbackImageNameWhenAvailable() throws Exception {
+        StackCreationContext context = stackCreationContext();
+
+        StackDto stackDto = mock(StackDto.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        Image image = mock(Image.class);
+
+        when(stackDtoService.getById(123L)).thenReturn(stackDto);
+        when(cloudStackConverter.convert(stackDto)).thenReturn(cloudStack);
+        when(cloudStack.getImage()).thenReturn(image);
+
+        when(imageFallbackService.getFallbackImageName(any(), any())).thenReturn("fallbackImage");
+
+        ArgumentCaptor<LaunchStackRequest> stackEventCaptor = ArgumentCaptor.forClass(LaunchStackRequest.class);
+        AbstractActionTestSupport<StackCreationState, StackCreationEvent, StackCreationContext,
+                CreateCredentialResult> testSupport =
+                new AbstractActionTestSupport<>(initAction(underTest::startProvisioningAction));
+
+        testSupport.doExecute(context, new CreateCredentialResult(STACK_ID), Map.of());
+
+        verify(imageFallbackService).getFallbackImageName(any(), any());
+        verifyEvent(stackEventCaptor, "LAUNCHSTACKREQUEST");
+
+        LaunchStackRequest launchStackRequest = stackEventCaptor.getValue();
+        assertThat(launchStackRequest).isNotNull();
+        assertThat(launchStackRequest.getFallbackImage()).isEqualTo(Optional.of("fallbackImage"));
+        assertThat(launchStackRequest.getSelector()).isEqualTo("LAUNCHSTACKREQUEST");
+    }
 }

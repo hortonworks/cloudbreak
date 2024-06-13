@@ -138,7 +138,7 @@ public class UpgradeService {
         imageSettingsRequest.setCatalog(Optional.ofNullable(selectedImage.getCatalog()).orElse(selectedImage.getCatalogName()));
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
                 operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant,
-                verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.get(0), instancesOnOldImage);
+                verticalScaleRequests.isEmpty() ? null : verticalScaleRequests.getFirst(), instancesOnOldImage);
         LOGGER.info("Trigger upgrade flow with event: {}", upgradeEvent);
         try {
             FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);

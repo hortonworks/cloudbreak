@@ -63,7 +63,7 @@ class ModifyProxyConfigSaltStateApplyActionTest extends ActionTest {
         assertThat(underTest.isChainedAction(variables)).isTrue();
         assertThat(underTest.isFinalChain(variables)).isFalse();
         assertThat(underTest.getOperationId(variables)).isEqualTo(OPERATION_ID);
-        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.MODIFY_PROXY_CONFIG_IN_PROGRESS,
+        verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.MODIFY_PROXY_CONFIG_IN_PROGRESS,
                 "Applying modified proxy config salt state");
         assertThat(variables).containsEntry(OperationAwareAction.OPERATION_ID, OPERATION_ID);
         verifySendEvent();

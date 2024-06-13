@@ -139,4 +139,5 @@ public class CloudStorageLocationValidator {
                 .withObjectStorageType(objectStorageType)
                 .build();
     }
+
 }

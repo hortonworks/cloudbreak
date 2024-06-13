@@ -92,7 +92,7 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
                 .then((tc, dto, client) -> {
                     String environmentCrn = tc.get(EnvironmentTestDto.class).getCrn();
                     DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
-                    String instanceType = freeIpaResponse.getInstanceGroups().get(0).getInstanceTemplate().getInstanceType();
+                    String instanceType = freeIpaResponse.getInstanceGroups().getFirst().getInstanceTemplate().getInstanceType();
                     if (!instanceType.equals(xlargeInstanceType)) {
                         throw new TestFailException("Vertical scaled instance type should be the same, freeipa instance type " + instanceType);
                     }

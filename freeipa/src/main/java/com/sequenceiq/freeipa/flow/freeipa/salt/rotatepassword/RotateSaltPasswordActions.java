@@ -46,7 +46,7 @@ public class RotateSaltPasswordActions {
             @Override
             protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordRequest payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for freeipa stack {}", context.getStack().getResourceCrn());
-                stackUpdater.updateStackStatus(payload.getResourceId(), SALT_STATE_UPDATE_IN_PROGRESS, "Rotating SaltStack user password");
+                stackUpdater.updateStackStatus(context.getStack(), SALT_STATE_UPDATE_IN_PROGRESS, "Rotating SaltStack user password");
                 sendEvent(context);
             }
 
@@ -75,7 +75,7 @@ public class RotateSaltPasswordActions {
                         statusReason += ": " + previousStatusReason;
                     }
                 }
-                stackUpdater.updateStackStatus(payload.getResourceId(), context.getPreviousStackStatus().getDetailedStackStatus(), statusReason);
+                stackUpdater.updateStackStatus(context.getStack(), context.getPreviousStackStatus().getDetailedStackStatus(), statusReason);
                 rotateSaltPasswordService.sendSuccessUsageReport(context.getStack().getResourceCrn(), context.getReason());
                 sendEvent(context);
             }
@@ -95,7 +95,7 @@ public class RotateSaltPasswordActions {
             protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables)
                     throws Exception {
                 LOGGER.warn("Rotating salt password for freeipa stack {} failed", context.getStack().getResourceCrn());
-                stackUpdater.updateStackStatus(payload.getResourceId(), SALT_STATE_UPDATE_FAILED, "Failed to rotate SaltStack user password");
+                stackUpdater.updateStackStatus(context.getStack(), SALT_STATE_UPDATE_FAILED, "Failed to rotate SaltStack user password");
                 rotateSaltPasswordService.sendFailureUsageReport(context.getStack().getResourceCrn(), context.getReason(), payload.getException().getMessage());
                 sendEvent(context);
             }

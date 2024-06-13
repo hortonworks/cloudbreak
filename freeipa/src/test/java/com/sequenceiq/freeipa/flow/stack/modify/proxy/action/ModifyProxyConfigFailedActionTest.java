@@ -83,7 +83,7 @@ class ModifyProxyConfigFailedActionTest extends ActionTest {
         underTest.doExecute(context, stackFailureEvent, VARIABLES);
 
         verify(stackUpdater)
-                .updateStackStatus(stackFailureEvent.getResourceId(), DetailedStackStatus.MODIFY_PROXY_CONFIG_FAILED, exception.getMessage());
+                .updateStackStatus(stack, DetailedStackStatus.MODIFY_PROXY_CONFIG_FAILED, exception.getMessage());
         verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID, exception.getMessage());
         verifySendEvent();
     }
