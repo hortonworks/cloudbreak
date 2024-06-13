@@ -104,6 +104,7 @@ dependencies {
     implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonVersion
     implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                                   version: okhttpVersion
     implementation     group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',                  version: jerseyCoreVersion
+    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                        version: jerseyMicrometerVersion
     implementation     group: 'org.openapitools',          name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
 
     implementation(group: 'net.minidev', name: 'json-smart') {

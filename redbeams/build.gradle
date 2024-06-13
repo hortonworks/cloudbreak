@@ -62,6 +62,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
   implementation     group: 'org.springframework.security', name: 'spring-security-web',               version: springSecurityVersion
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: jerseyMicrometerVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {

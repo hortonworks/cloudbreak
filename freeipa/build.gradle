@@ -99,6 +99,7 @@ dependencies {
   constraints {
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
+    implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',              version: jerseyMicrometerVersion
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
