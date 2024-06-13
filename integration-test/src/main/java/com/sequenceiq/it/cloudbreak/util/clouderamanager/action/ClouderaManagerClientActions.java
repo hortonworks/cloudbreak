@@ -65,7 +65,8 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
     }
 
     private void checkConfig(String serverIp, String name, TestContext testContext, Map<String, String> expectedConfig) {
-        ApiClient apiClient = getCmApiClient(serverIp, name, V_43, testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabledDirect(serverIp, name, V_43,
+                testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
         // CHECKSTYLE:OFF
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(apiClient);
         // CHECKSTYLE:ON
