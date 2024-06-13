@@ -71,7 +71,7 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
 
-        String runtimeVersion = OsType.CENTOS7.getOs().equals(imageValidatorE2ETestUtil.getImage(testContext).getOs())
+        String runtimeVersion = OsType.CENTOS7.getOs().equals(imageValidatorE2ETestUtil.getImage(testContext).get().getOs())
                 ? LATEST_CENTOS7_RUNTIME_VERSION
                 : commonClusterManagerProperties().getRuntimeVersion();
 

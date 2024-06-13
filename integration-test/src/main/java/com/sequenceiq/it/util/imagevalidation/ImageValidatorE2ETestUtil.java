@@ -115,18 +115,26 @@ public class ImageValidatorE2ETestUtil {
         }
     }
 
+    public boolean isImageValidation() {
+        return imageValidationType != null;
+    }
+
     private boolean isFreeIpaImageValidation() {
         return imageValidationType == ImageValidationType.FREEIPA;
     }
 
-    private AttemptResult<ImageV4Response> containsImageAttempt(TestContext testContext) {
+    public Optional<ImageV4Response> getImage(TestContext testContext) {
         ImagesV4Response imagesV4Response = getImages(testContext);
         List<ImageV4Response> images = new LinkedList<>();
         images.addAll(imagesV4Response.getBaseImages());
         images.addAll(imagesV4Response.getCdhImages());
-        Optional<ImageV4Response> image = images.stream()
+        return images.stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
                 .findFirst();
+    }
+
+    private AttemptResult<ImageV4Response> containsImageAttempt(TestContext testContext) {
+        Optional<ImageV4Response> image = getImage(testContext);
         return image.isPresent()
                 ? AttemptResults.finishWith(image.get())
                 : AttemptResults.justContinue();
@@ -135,6 +143,7 @@ public class ImageValidatorE2ETestUtil {
     private ImagesV4Response getImages(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
+                    .withName(getImageCatalogName())
                 .when(imageCatalogTestClient.getV4WithAllImages())
                 .validate();
         return testContext.get(ImageCatalogTestDto.class).getResponse().getImages();
@@ -150,10 +159,6 @@ public class ImageValidatorE2ETestUtil {
         return isFreeIpaImageValidation()
                 ? commonCloudProperties.getImageValidation().getFreeIpaImageUuid()
                 : commonCloudProperties.getImageValidation().getImageUuid();
-    }
-
-    public ImageV4Response getImage(TestContext testContext) {
-        return containsImageAttempt(testContext).getResult();
     }
 
     private void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
@@ -185,10 +190,7 @@ public class ImageValidatorE2ETestUtil {
                 .filter(img -> img.getCreated() < imageUnderValidation.getCreated())
                 .filter(img -> Objects.equals(imageUnderValidation.getImageSetsByProvider().keySet(), img.getImageSetsByProvider().keySet()))
                 .filter(img -> Objects.equals(imageUnderValidation.getOs(), img.getOs()))
-                .filter(img -> Objects.equals(
-                        imageUnderValidation.getPackageVersions().get("cm-build-number"), img.getPackageVersions().get("cm-build-number")))
-                .filter(img -> Objects.equals(
-                        imageUnderValidation.getPackageVersions().get("cdh-build-number"), img.getPackageVersions().get("cdh-build-number")))
+                .filter(img -> Objects.equals(imageUnderValidation.getVersion(), img.getVersion()))
                 .max(Comparator.comparing(ImageV4Response::getCreated))
                 .orElse(null);
     }

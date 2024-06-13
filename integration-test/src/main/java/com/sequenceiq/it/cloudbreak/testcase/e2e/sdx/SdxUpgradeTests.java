@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitFor
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -13,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
@@ -20,10 +23,12 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -47,6 +52,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     @Inject
     private SdxUpgradeDatabaseTestUtil sdxUpgradeDatabaseTestUtil;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
@@ -58,11 +66,11 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
-        testContext
-                .given(SdxTestDto.class)
-                    .withCloudStorage()
-                    .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
-                    .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()))
+        SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
+        setupRuntimeParameters(testContext, sdxTestDto);
+        sdxTestDto
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -95,6 +103,32 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         sdxDatabaseRequest.setDatabaseEngineVersion(cloudProvider.getEmbeddedDbUpgradeSourceVersion());
         return sdxDatabaseRequest;
+    }
+
+    private void setupRuntimeParameters(TestContext testContext, SdxTestDto sdxTestDto) {
+        if (imageValidatorE2ETestUtil.isImageValidation()) {
+            Optional<ImageV4Response> imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext);
+            String imageUnderValidationVersion = imageUnderValidation.get().getVersion();
+            String os = imageUnderValidation.get().getOs();
+            if (OsType.RHEL8.getOs().equalsIgnoreCase(os) && "7.2.17".equals(imageUnderValidationVersion)) {
+                // RHEL8 was introduced with 7.2.17, meaning we can not upgrade from a previous version but have to get the latest image with same runtime
+                ImageV4Response latestImageWithSameRuntime = imageValidatorE2ETestUtil.getLatestImageWithSameRuntimeAsImageUnderValidation(testContext);
+                if (latestImageWithSameRuntime == null) {
+                    throw new TestFailException("No other image found with version " + imageUnderValidationVersion);
+                }
+                sdxTestDto.withImage(imageValidatorE2ETestUtil.getImageCatalogName(), latestImageWithSameRuntime.getUuid());
+            } else {
+                String runtimeVersion = commonClusterManagerProperties.getUpgrade().getMatrix().get(imageUnderValidationVersion);
+                if (runtimeVersion == null) {
+                    throw new TestFailException("Upgrade matrix entry is not defined for image version " + imageUnderValidationVersion);
+                }
+                sdxTestDto
+                        .withOs(os)
+                        .withRuntimeVersion(runtimeVersion);
+            }
+        } else {
+            sdxTestDto.withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion());
+        }
     }
 
     @Test(dataProvider = TEST_CONTEXT)

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -140,6 +142,8 @@ public class CommonClusterManagerProperties {
     }
 
     public static class UpgradeProperties {
+        private Map<String, String> matrix;
+
         private String currentHARuntimeVersion;
 
         private String currentRuntimeVersion;
@@ -155,6 +159,14 @@ public class CommonClusterManagerProperties {
         private String distroXUpgrade3rdPartyCurrentVersion;
 
         private String distroXUpgrade3rdPartyTargetVersion;
+
+        public Map<String, String> getMatrix() {
+            return matrix;
+        }
+
+        public void setMatrix(Map<String, String> matrix) {
+            this.matrix = matrix;
+        }
 
         public String getCurrentHARuntimeVersion() {
             return currentHARuntimeVersion;

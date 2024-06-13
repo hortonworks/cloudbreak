@@ -98,6 +98,11 @@ integrationtest:
   cloudProvider: MOCK
   runtimeVersion: 7.2.18
   upgrade:
+    matrix:
+      7.2.16: 7.2.15
+      7.2.17: 7.2.16
+      7.2.18: 7.2.17
+      7.3.0: 7.2.18
     currentHARuntimeVersion: 7.2.16
     currentRuntimeVersion: 7.2.16
     targetRuntimeVersion: 7.2.17

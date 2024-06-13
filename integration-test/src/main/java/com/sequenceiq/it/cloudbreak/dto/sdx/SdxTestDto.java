@@ -420,6 +420,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return this;
     }
 
+    public SdxTestDto withOs(String os) {
+        if (Strings.isNotNullAndNotEmpty(os)) {
+            ImageSettingsV4Request imageRequest = new ImageSettingsV4Request();
+            imageRequest.setOs(os);
+            getRequest().setImage(imageRequest);
+        }
+        return this;
+    }
+
     @Override
     public Clue investigate() {
         if (getResponse() == null || getResponse().getCrn() == null) {
