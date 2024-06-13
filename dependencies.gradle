@@ -11,7 +11,7 @@ ext {
   quartzVersion = '2.5.0-rc1'
   springBootVersion = '3.3.0'
   springDataJpaFrameworkVersion = '3.2.3'
-  springFrameworkVersion = '6.1.6'
+  springFrameworkVersion = '6.1.9'
   springRetryVersion = '2.0.5'
   springSecurityJwtVersion = '1.1.1.RELEASE'
   springSecurityVersion = '6.2.4'
