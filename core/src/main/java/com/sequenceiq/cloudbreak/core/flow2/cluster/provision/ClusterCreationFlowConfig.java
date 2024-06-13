@@ -64,8 +64,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SUPPRESS_WARNINGS_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_CLOUD_STORAGE_FAILED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_CLOUD_STORAGE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_LICENCE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_LICENCE_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT;
@@ -139,13 +137,13 @@ public class ClusterCreationFlowConfig extends StackStatusFinalizerAbstractFlowC
                     .event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
             .from(COLLECTING_HOST_METADATA_STATE)
-                    .to(VALIDATE_CLOUD_STORAGE_STATE)
+                    .to(SETUP_RECOVERY_STATE)
                     .event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
             .from(VALIDATE_CLOUD_STORAGE_STATE)
                     .to(SETUP_RECOVERY_STATE)
-                    .event(VALIDATE_CLOUD_STORAGE_FINISHED_EVENT)
-                    .failureEvent(VALIDATE_CLOUD_STORAGE_FAILED_EVENT)
+                    .event(HOST_METADATASETUP_FINISHED_EVENT)
+                    .noFailureEvent()
             .from(SETUP_RECOVERY_STATE)
                     .to(CLEANUP_FREEIPA_STATE)
                     .event(SETUP_RECOVERY_CONFIG_FINISHED_EVENT)

@@ -8,9 +8,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.CloudStorageValidationService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageSuccess;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -30,14 +29,7 @@ public class CloudStorageVmValidationHandler implements EventHandler<ValidateClo
 
     @Override
     public void accept(Event<ValidateCloudStorageRequest> event) {
-        Long stackId = event.getData().getResourceId();
-        Selectable response;
-        try {
-            cloudStorageValidationService.validateCloudStorage(stackId);
-            response = new ValidateCloudStorageSuccess(stackId);
-        } catch (Exception e) {
-            response = new ValidateCloudStorageFailed(stackId, e);
-        }
+        Selectable response = new HostMetadataSetupSuccess(event.getData().getResourceId());
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 }

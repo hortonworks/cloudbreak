@@ -92,7 +92,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoverySu
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
@@ -105,6 +104,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobAdapter;
 import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class ClusterCreationActions {
@@ -219,10 +219,15 @@ public class ClusterCreationActions {
 
     @Bean(name = "SETUP_RECOVERY_STATE")
     public Action<?, ?> setupRecoveryAction() {
-        return new AbstractStackCreationAction<>(ValidateCloudStorageSuccess.class) {
+        return new AbstractStackCreationAction<>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(StackCreationContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackCreationContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<HostMetadataSetupSuccess>> payloadConverters) {
+                super.initPayloadConverterMap(payloadConverters);
             }
 
             @Override
