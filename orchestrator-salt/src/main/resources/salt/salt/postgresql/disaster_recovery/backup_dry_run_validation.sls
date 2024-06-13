@@ -27,7 +27,7 @@ add_root_role_to_database:
 
 backup_restore_dry_run:
   cmd.run:
-    - name: /opt/salt/scripts/backup_dry_run_validation.sh {{object_storage_url}} "" "" "postgres" {{database_name}} {{raz_enabled}}
+    - name: /opt/salt/scripts/backup_dry_run_validation.sh {{object_storage_url}} "" "" "" {{database_name}} {{raz_enabled}}
     - require:
         - cmd: add_root_role_to_database
 {% endif %}

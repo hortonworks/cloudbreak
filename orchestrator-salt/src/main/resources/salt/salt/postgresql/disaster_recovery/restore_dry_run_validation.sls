@@ -12,7 +12,7 @@ include:
 {% if 'None' != configure_remote_db %}
 backup_restore_dry_run:
   cmd.run:
-    - name: /opt/salt/scripts/restore_dry_runJ_validation.sh {{object_storage_url}} {{remote_db_url}} {{remote_db_port}} {{remote_admin}} {{database_name}}
+    - name: /opt/salt/scripts/restore_dry_run_validation.sh {{object_storage_url}} {{remote_db_url}} {{remote_db_port}} {{remote_admin}} {{database_name}} {{raz_enabled}}
     - require:
         - sls: postgresql.disaster_recovery
 
@@ -27,7 +27,7 @@ add_root_role_to_database:
 
 backup_restore_dry_run:
   cmd.run:
-    - name: /opt/salt/scripts/restore_dry_run_validation.sh {{object_storage_url}} "localhost" "5432" "postgres" {{database_name}}
+    - name: /opt/salt/scripts/restore_dry_run_validation.sh {{object_storage_url}} "" "" "" {{database_name}} {{raz_enabled}}
     - require:
         - cmd: add_root_role_to_database
 {% endif %}

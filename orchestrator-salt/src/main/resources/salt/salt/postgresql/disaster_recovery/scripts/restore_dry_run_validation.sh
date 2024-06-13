@@ -6,7 +6,7 @@
 set -o nounset
 set -o pipefail
 
-LOGFILE=/var/log/dl_postgres_dry_run.log
+LOGFILE=/var/log/dl_postgres_dry_run_restore.log
 
 echo "Logs are at ${LOGFILE}"
 
@@ -32,7 +32,7 @@ RAZ_ENABLED="$5"
 SERVICE=""
 FAILED=0
 
-BACKUPS_DIR="/var/tmp/postgres_dry_run"
+BACKUPS_DIR="/var/tmp/postgres_dry_run_restore"
 
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
@@ -72,25 +72,27 @@ is_database_exists() {
 }
 
 make_dir() {
-  if ! hdfs --loglevel FATAL dfs -mkdir -p "${BACKUP_LOCATION::-1}" >/dev/null 2>&1; then
+  if ! hdfs --loglevel FATAL dfs -mkdir -p "${OBJECT_STORE_PATH}" >>${LOGFILE} 2>&1; then
+    doLog $1
+    ((FAILED++))
+  fi
+}
+
+move_from_local() {
+  if ! hdfs --loglevel FATAL dfs -moveFromLocal -f "$LOCAL_TESTFILE_LOCATION" "$REMOTE_TESTFILE_LOCATION" >>${LOGFILE} 2>&1; then
     doLog $1
     ((FAILED++))
   fi
 }
 
 copy_to_local() {
-  if ! hdfs --loglevel FATAL dfs -moveFromLocal -f "$TESTFILE_LOCATION" "$OBJECT_STORE_PATH" >/dev/null 2>&1; then
+  if ! hdfs --loglevel FATAL dfs -copyToLocal -f "$REMOTE_TESTFILE_LOCATION" "$LOCAL_RESTORE_TESTFILE_LOCATION" >>${LOGFILE} 2>&1; then
     doLog $1
     ((FAILED++))
   fi
 }
 
 execute_run() {
-  doLog "INFO backup dir:" "$BACKUPS_DIR"
-  mkdir -p "$BACKUPS_DIR"
-  TESTFILE_LOCATION="$BACKUPS_DIR"/dry-run.txt
-  touch "$TESTFILE_LOCATION"
-  doLog "INFO testFile location" $TESTFILE_LOCATION
   doLog "INFO Validate Database connection, and the database existence"
 
   is_database_exists "hive"
@@ -109,25 +111,44 @@ execute_run() {
     doLog "INFO database for $SERVICE exist"
   fi
 
-  OBJECT_STORE_PATH="${BACKUP_LOCATION::-1}"dry-run.txt
-  doLog "INFO objectStore path" $OBJECT_STORE_PATH
-  doLog "INFO testfile location" $TESTFILE_LOCATION
+  doLog "INFO backup dir:" "$BACKUPS_DIR"
+  mkdir -p "$BACKUPS_DIR"
+  OBJECT_STORE_PATH=${BACKUP_LOCATION::-1}
+  LOCAL_TESTFILE_LOCATION="${BACKUPS_DIR}"/dry-run.txt
+  REMOTE_TESTFILE_LOCATION="${OBJECT_STORE_PATH}"dry-run.txt
+  LOCAL_RESTORE_TESTFILE_LOCATION="${BACKUPS_DIR}"/dry-run-restore.txt
+  touch "${LOCAL_TESTFILE_LOCATION}"
+  doLog "INFO Object storage path" ${OBJECT_STORE_PATH}
+  doLog "INFO testFile backup location" ${LOCAL_TESTFILE_LOCATION}
+  doLog "INFO testFile remote location" ${REMOTE_TESTFILE_LOCATION}
+  doLog "INFO testFile local restore location" ${LOCAL_RESTORE_TESTFILE_LOCATION}
 
   export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
 
-  HIVE_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hive*" | head -n 1)
-  KNOX_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*knox-KNOX_GATEWAY*" | head -n 1)
+  ATLAS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*atlas-ATLAS_SERVER*" | head -n 1)
+  HDFS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hdfs*" | head -n 1)
 
+  ATLAS_KEYTAB
   if [[ $RAZ_ENABLED ]]; then
-    kinit_as knox "$KNOX_KEYTAB"
+    kinit_as atlas "$ATLAS_KEYTAB"
+    doLog "INFO Try moveFromLocal via HDFS"
+    make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Ranger Raz Role"
+    move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Ranger Raz Role"
     doLog "INFO Try copyToLocal via HDFS"
     copy_to_local "ERROR Failed to copyToLocal from the backup location please check the permissions on the backup location for the Ranger Raz Role"
   else
     ## IDBroker
-    kinit_as hive "$HIVE_KEYTAB"
+    kinit_as atlas "$ATLAS_KEYTAB"
+    doLog "INFO Try moveFromLocal via HDFS"
+    make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Ranger Audit Role"
+    move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Ranger Audit Role"
     doLog "INFO Try copyToLocal via HDFS"
     copy_to_local "ERROR Failed to copyToLocal from the backup location please check the permissions on the backup location for the Ranger Audit Role"
-    kinit_as knox "$KNOX_KEYTAB"
+
+    kinit_as hdfs "$HDFS_KEYTAB"
+    doLog "INFO Try copyToLocal via HDFS"
+    make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Datalake Admin Role"
+    move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Datalake Admin Role"
     doLog "INFO Try copyToLocal via HDFS"
     copy_to_local "ERROR Failed to copyToLocal from the backup location please check the permissions on the backup location for the Datalake Admin Role"
   fi
@@ -137,6 +158,7 @@ execute_run() {
 doLog "INFO Initiating dry-run"
 execute_run
 if [ "$FAILED" -gt 0 ]; then
+  doLog "ERROR The dry-run validation failed"
   exit 1
 fi
 doLog "INFO Completed dry-run."
