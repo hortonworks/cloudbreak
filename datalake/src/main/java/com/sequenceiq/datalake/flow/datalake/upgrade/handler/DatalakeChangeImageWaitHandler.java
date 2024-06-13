@@ -32,7 +32,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
     @Value("${sdx.stack.change.image.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.change.image.duration_min:60}")
+    @Value("${sdx.stack.change.image.duration_min:120}")
     private int durationInMinutes;
 
     @Inject
