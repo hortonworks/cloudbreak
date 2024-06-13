@@ -264,7 +264,8 @@ public class StackToTemplatePreparationObjectConverter {
                     .withSharedServiceConfigs(datalakeService.createSharedServiceConfigsView(source.getCluster().getPassword(), source.getType(),
                             source.getEnvironmentCrn()))
                     .withStackType(source.getType())
-                    .withVirtualGroupView(virtualGroupRequest);
+                    .withVirtualGroupView(virtualGroupRequest)
+                    .withEnableSecretEncryption(environment.isEnableSecretEncryption());
 
             transactionService.required(() -> {
                 builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()), getEphemeralVolumeWhichMustBeProvisioned());

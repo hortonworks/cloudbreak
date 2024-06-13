@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -104,6 +106,17 @@ class TemplatePreparationObjectTest {
 
         assertNotNull(result);
         assertEquals(stackType, result.getStackType());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(booleans = {true, false})
+    void testBuilderWithEnableSecretEncryption(boolean enableSecretEncryption) {
+        TemplatePreparationObject.Builder builder = TemplatePreparationObject.Builder.builder();
+
+        TemplatePreparationObject result = builder.withEnableSecretEncryption(enableSecretEncryption).build();
+
+        assertNotNull(result);
+        assertEquals(enableSecretEncryption, result.isEnableSecretEncryption());
     }
 
 }

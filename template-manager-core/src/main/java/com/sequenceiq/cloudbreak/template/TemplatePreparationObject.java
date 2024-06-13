@@ -96,6 +96,8 @@ public class TemplatePreparationObject {
 
     private final Map<String, String> servicePrincipals;
 
+    private final boolean enableSecretEncryption;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         platformVariant = builder.platformVariant;
@@ -125,6 +127,7 @@ public class TemplatePreparationObject {
         datalakeView = builder.datalakeView;
         idBroker = builder.idBroker;
         servicePrincipals = builder.servicePrincipals;
+        enableSecretEncryption = builder.enableSecretEncryption;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -238,6 +241,10 @@ public class TemplatePreparationObject {
         return servicePrincipals;
     }
 
+    public boolean isEnableSecretEncryption() {
+        return enableSecretEncryption;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -289,6 +296,8 @@ public class TemplatePreparationObject {
         private IdBroker idBroker;
 
         private Map<String, String> servicePrincipals;
+
+        private boolean enableSecretEncryption;
 
         public static Builder builder() {
             return new Builder();
@@ -496,6 +505,11 @@ public class TemplatePreparationObject {
 
         public Builder withServicePrincipals(Map<String, String> servicePrincipals) {
             this.servicePrincipals = servicePrincipals;
+            return this;
+        }
+
+        public Builder withEnableSecretEncryption(boolean enableSecretEncryption) {
+            this.enableSecretEncryption = enableSecretEncryption;
             return this;
         }
 

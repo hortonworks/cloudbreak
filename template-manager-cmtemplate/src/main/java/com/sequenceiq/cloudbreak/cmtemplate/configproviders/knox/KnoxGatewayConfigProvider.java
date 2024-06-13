@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_16;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_9;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxDatabaseSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
@@ -14,6 +15,9 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -32,6 +36,8 @@ import com.sequenceiq.cloudbreak.template.views.GatewayView;
 
 @Component
 public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implements BaseKnoxConfigProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KnoxGatewayConfigProvider.class);
 
     private static final String KNOX_MASTER_SECRET = "gateway_master_secret";
 
@@ -83,6 +89,16 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
 
     private static final String GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT_TRUE = "true";
 
+    private static final String GATEWAY_SECURITY_DIR = "gateway_security_dir";
+
+    private static final String IDBROKER_SECURITY_DIR = "idbroker_security_dir";
+
+    @Value("${cb.knox.gateway.security.dir:}")
+    private String knoxGatewaySecurityDir;
+
+    @Value("${cb.knox.idbroker.security.dir:}")
+    private String knoxIdBrokerSecurityDir;
+
     @Inject
     private VirtualGroupService virtualGroupService;
 
@@ -124,18 +140,24 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
                 && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
             config.add(config(GATEWAY_SERVICE_TOKENSTATE_IMPL, "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"));
         }
+        if (isSecretEncryptionSupported(source)) {
+            config.add(config(GATEWAY_SECURITY_DIR, knoxGatewaySecurityDir));
+        }
         return config;
     }
 
     private List<ApiClusterTemplateConfig> getIDBrokerConfigs(TemplatePreparationObject source, String adminGroup) {
+        List<ApiClusterTemplateConfig> idBrokerConfigs = new ArrayList<>();
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
-        return List.of(
-                config(IDBROKER_MASTER_SECRET, source.getIdBroker().getMasterSecret()),
-                config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup),
-                config(IDBROKER_SIGNING_KEYSTORE_NAME, generalClusterConfigs.isGovCloud() ? SIGNING_BCFKS : SIGNING_JKS),
-                config(IDBROKER_SIGNING_KEYSTORE_TYPE, generalClusterConfigs.isGovCloud() ? BCFKS : JKS),
-                config(IDBROKER_SIGNING_KEY_ALIAS, SIGNING_IDENTITY)
-        );
+        idBrokerConfigs.add(config(IDBROKER_MASTER_SECRET, source.getIdBroker().getMasterSecret()));
+        idBrokerConfigs.add(config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup));
+        idBrokerConfigs.add(config(IDBROKER_SIGNING_KEYSTORE_NAME, generalClusterConfigs.isGovCloud() ? SIGNING_BCFKS : SIGNING_JKS));
+        idBrokerConfigs.add(config(IDBROKER_SIGNING_KEYSTORE_TYPE, generalClusterConfigs.isGovCloud() ? BCFKS : JKS));
+        idBrokerConfigs.add(config(IDBROKER_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
+        if (isSecretEncryptionSupported(source)) {
+            idBrokerConfigs.add(config(IDBROKER_SECURITY_DIR, knoxIdBrokerSecurityDir));
+        }
+        return idBrokerConfigs;
     }
 
     @Override
@@ -193,4 +215,12 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider implem
         return false;
     }
 
+    private boolean isSecretEncryptionSupported(TemplatePreparationObject source) {
+        String cdhVersion = source.getBlueprintView().getProcessor().getVersion().orElse("");
+        if (source.isEnableSecretEncryption() && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_16)) {
+            LOGGER.info("Secret Encryption is supported");
+            return true;
+        }
+        return false;
+    }
 }

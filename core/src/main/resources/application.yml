@@ -604,6 +604,8 @@ cb:
     port: 9443
   knox:
     port: 8443
+    gateway.security.dir: /mnt/cdp-luks/var/lib/knox/gateway/data/security
+    idbroker.security.dir: /mnt/cdp-luks/var/lib/knox/idbroker/data/security
   http:
     retryableStatusCodes: 403,408,425,429,502,503,504,509
   https:

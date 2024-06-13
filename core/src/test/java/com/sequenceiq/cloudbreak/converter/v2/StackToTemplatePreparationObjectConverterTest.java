@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -378,6 +380,25 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getGatewayView()).isNull();
+        assertFalse(result.isEnableSecretEncryption());
+    }
+
+    @Test
+    public void testConvertWhenSecretEncryptionIsEnabled() {
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
+        DetailedEnvironmentResponse environmentResponse = DetailedEnvironmentResponse.builder()
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCredential(new CredentialResponse())
+                .withAdminGroupName(ADMIN_GROUP_NAME)
+                .withCrn(TestConstants.CRN)
+                .withEnableSecretEncryption(true)
+                .build();
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertTrue(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -398,6 +419,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
         verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -419,6 +441,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
         verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -440,6 +463,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
         verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -457,6 +481,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(result.getFileSystemConfigurationView().isPresent()).isFalse();
         verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem,
                 stackMock, resourceType -> Collections.EMPTY_LIST, new Json(""), new ConfigQueryEntries());
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -514,6 +539,7 @@ public class StackToTemplatePreparationObjectConverterTest {
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
         verify(expected, times(1)).getLocations();
         verify(storageLocationViews, times(1)).add(eq(backupLocationView));
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -526,6 +552,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getLdapConfig().isPresent()).isTrue();
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -536,6 +563,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getLdapConfig().isPresent()).isFalse();
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -547,6 +575,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getBlueprintView()).isSameAs(expected);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -571,6 +600,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertEquals(result.getDatalakeView().get().isRazEnabled(), false);
         assertEquals(result.getDatalakeView().get().getDatabaseType(), DatabaseType.EXTERNAL_DATABASE);
         verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -581,6 +611,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCustomConfigurationsView()).isEmpty();
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -597,6 +628,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(result.getCustomConfigurationsView()).isPresent();
         assertThat(result.getCustomConfigurationsView()).isEqualTo(Optional.of(expected));
         verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -615,6 +647,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result.getSharedServiceConfigs().isPresent()).isTrue();
         assertThat(result.getSharedServiceConfigs().get()).isEqualTo(expected);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -629,6 +662,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCustomInputs()).isEqualTo(customInputs);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -642,6 +676,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCustomInputs().isEmpty()).isTrue();
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -664,6 +699,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
         assertThat(result.getPlatformVariant()).isEqualTo(TEST_PLATFORM_VARIANT);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -679,6 +715,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(accountMappingView).isNotNull();
         assertThat(accountMappingView.getGroupMappings()).isEqualTo(MOCK_GROUP_MAPPINGS);
         assertThat(accountMappingView.getUserMappings()).isEqualTo(MOCK_USER_MAPPINGS);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -692,6 +729,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         AccountMappingView accountMappingView = result.getAccountMappingView();
         assertThat(accountMappingView).isNull();
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -714,6 +752,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(accountMappingView).isNotNull();
         assertThat(accountMappingView.getGroupMappings()).isEqualTo(GROUP_MAPPINGS);
         assertThat(accountMappingView.getUserMappings()).isEqualTo(USER_MAPPINGS);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -726,6 +765,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertThat(result.getPlacementView().isPresent()).isTrue();
         assertThat(result.getPlacementView().get().getRegion()).isEqualTo(REGION);
         assertThat(result.getPlacementView().get().getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -744,6 +784,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result.getGeneralClusterConfigs().getClusterManagerIp()).isEqualTo("10.0.0.1");
         verify(gatewayConfigService, times(1)).getPrimaryGatewayIp(any(Stack.class));
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -755,6 +796,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getRdsSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     @Test
@@ -767,6 +809,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertEquals(lbUrl, result.getGeneralClusterConfigs().getLoadBalancerGatewayFqdn().get());
+        assertFalse(result.isEnableSecretEncryption());
     }
 
     private BlueprintView getBlueprintView() {
