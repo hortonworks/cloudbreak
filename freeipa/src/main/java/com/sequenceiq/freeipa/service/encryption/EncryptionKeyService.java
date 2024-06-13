@@ -94,25 +94,26 @@ public class EncryptionKeyService {
                     .withTags(tags);
             EncryptionResources encryptionResources = getEncryptionResources(stack);
             String luksKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_LUKS, stack), populateStackInformation(KEY_DESC_LUKS, stack),
-                    loggerInstanceProfile, encryptionKeyBuilder, encryptionResources);
+                    List.of(loggerInstanceProfile), encryptionKeyBuilder, encryptionResources);
             String cloudSecretManagerKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_CLOUD_SECRET_MANAGER, stack),
-                    populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), crossAccountRole, encryptionKeyBuilder, encryptionResources);
+                    populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), List.of(crossAccountRole, loggerInstanceProfile), encryptionKeyBuilder,
+                    encryptionResources);
             StackEncryption stackEncryption = new StackEncryption(stack.getId());
             stackEncryption.setAccountId(stack.getAccountId());
             stackEncryption.setEncryptionKeyLuks(luksKmsKey);
             stackEncryption.setEncryptionKeyCloudSecretManager(cloudSecretManagerKmsKey);
             stackEncryptionService.save(stackEncryption);
         } else {
-            LOGGER.info("Secret Encryption is not enable for Stack Id {} so encryption keys will not be generated", stackId);
+            LOGGER.info("Secret Encryption is not enable for Stack ID {} so encryption keys will not be generated", stackId);
         }
     }
 
-    private String generateEncryptionKey(String keyName, String keyDescription, String principalId, EncryptionKeyCreationRequest.Builder encryptionKeyBuilder,
-            EncryptionResources encryptionResources) {
+    private String generateEncryptionKey(String keyName, String keyDescription, List<String> cryptographicPrincipals,
+            EncryptionKeyCreationRequest.Builder encryptionKeyBuilder, EncryptionResources encryptionResources) {
         EncryptionKeyCreationRequest encryptionKeyCreationRequest = encryptionKeyBuilder
                 .withKeyName(keyName)
                 .withDescription(keyDescription)
-                .withCryptographicPrincipals(List.of(principalId))
+                .withCryptographicPrincipals(cryptographicPrincipals)
                 .build();
         CloudEncryptionKey cloudEncryptionKey = encryptionResources.createEncryptionKey(encryptionKeyCreationRequest);
         return cloudEncryptionKey.getName();

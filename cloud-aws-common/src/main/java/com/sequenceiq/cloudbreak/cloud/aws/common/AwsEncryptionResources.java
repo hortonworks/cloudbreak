@@ -230,6 +230,7 @@ public class AwsEncryptionResources implements EncryptionResources {
                         .addPrincipal(IamPrincipalType.AWS, credentialRoleArn)
                         .addAction("kms:GetKeyPolicy")
                         .addAction("kms:PutKeyPolicy")
+                        .addAction("kms:ScheduleKeyDeletion")
                         .addResource(IamResource.ALL)
                         .build())
                 .addStatement(IamStatement.builder()

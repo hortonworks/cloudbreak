@@ -5,8 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +82,7 @@ public class EncryptionKeyService {
     @Inject
     private List<CloudInformationDecorator> cloudInformationDecorators;
 
-    private Map<CloudPlatformVariant, CloudInformationDecorator> cloudInformationDecoratorMap = new HashMap<>();
+    private final Map<CloudPlatformVariant, CloudInformationDecorator> cloudInformationDecoratorMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -104,7 +104,9 @@ public class EncryptionKeyService {
             }
             String credentialPrincipal = cloudInformationDecorator.getCredentialPrincipal(environment, stack).orElseThrow(() ->
                     getCloudBreakServiceException(stack.getName(), "Credential principal not found"));
-            List<String> principalIds = principalsForLuksKey(stack, environment, cloudInformationDecorator);
+            List<String> cryptographicPrincipalsForLuksKey = getCryptographicPrincipalsForLuksKey(stack, environment, cloudInformationDecorator);
+            List<String> cryptographicPrincipalsForCloudSecretManagerKey = getCryptographicPrincipalsForCloudSecretManagerKey(credentialPrincipal,
+                    cryptographicPrincipalsForLuksKey);
             Map<String, String> tags = getTags(stack);
             List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, stack.getId());
             ExtendedCloudCredential extendedCloudCredential = getExtendedCloudCredential(environment);
@@ -115,26 +117,27 @@ public class EncryptionKeyService {
                     .withTags(tags);
             EncryptionResources encryptionResources = getEncryptionResources(stack);
             String luksKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_LUKS, stack), populateStackInformation(KEY_DESC_LUKS, stack),
-                    principalIds, encryptionKeyBuilder, encryptionResources);
+                    cryptographicPrincipalsForLuksKey, encryptionKeyBuilder, encryptionResources);
             String cloudSecretManagerKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_CLOUD_SECRET_MANAGER, stack),
-                    populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), List.of(credentialPrincipal), encryptionKeyBuilder, encryptionResources);
+                    populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), cryptographicPrincipalsForCloudSecretManagerKey, encryptionKeyBuilder,
+                    encryptionResources);
             StackEncryption stackEncryption = new StackEncryption(stack.getId());
             stackEncryption.setAccountId(stack.getTenantName());
             stackEncryption.setEncryptionKeyLuks(luksKmsKey);
             stackEncryption.setEncryptionKeyCloudSecretManager(cloudSecretManagerKmsKey);
             stackEncryptionService.save(stackEncryption);
         } else {
-            LOGGER.info("Secret Encryption is not enabled for Stack Id {} so encryption keys will not be generated", stackId);
+            LOGGER.info("Secret Encryption is not enabled for Stack ID {} so encryption keys will not be generated", stackId);
         }
     }
 
-    private String generateEncryptionKey(String keyName, String keyDescription, List<String> principalIds,
+    private String generateEncryptionKey(String keyName, String keyDescription, List<String> cryptographicPrincipals,
             EncryptionKeyCreationRequest.Builder encryptionKeyBuilder,
             EncryptionResources encryptionResources) {
         EncryptionKeyCreationRequest encryptionKeyCreationRequest = encryptionKeyBuilder
                 .withKeyName(keyName)
                 .withDescription(keyDescription)
-                .withCryptographicPrincipals(principalIds)
+                .withCryptographicPrincipals(cryptographicPrincipals)
                 .build();
         CloudEncryptionKey cloudEncryptionKey = encryptionResources.createEncryptionKey(encryptionKeyCreationRequest);
         return cloudEncryptionKey.getName();
@@ -195,7 +198,8 @@ public class EncryptionKeyService {
                 Variant.variant(stack.getPlatformVariant()));
     }
 
-    private List<String> principalsForLuksKey(Stack stack, DetailedEnvironmentResponse environment, CloudInformationDecorator cloudInformationDecorator) {
+    private List<String> getCryptographicPrincipalsForLuksKey(Stack stack, DetailedEnvironmentResponse environment,
+            CloudInformationDecorator cloudInformationDecorator) {
         List<String> principalIds;
         if (stack.getType() == StackType.DATALAKE) {
             principalIds = cloudInformationDecorator.getCloudIdentities(environment, stack);
@@ -209,4 +213,12 @@ public class EncryptionKeyService {
         }
         return principalIds;
     }
+
+    private List<String> getCryptographicPrincipalsForCloudSecretManagerKey(String credentialPrincipal, List<String> cryptographicPrincipalsForLuksKey) {
+        List<String> cryptographicPrincipalsForCloudSecretManagerKey = new ArrayList<>();
+        cryptographicPrincipalsForCloudSecretManagerKey.add(credentialPrincipal);
+        cryptographicPrincipalsForCloudSecretManagerKey.addAll(cryptographicPrincipalsForLuksKey);
+        return cryptographicPrincipalsForCloudSecretManagerKey;
+    }
+
 }

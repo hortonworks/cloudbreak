@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -240,10 +241,10 @@ public class EncryptionKeyServiceTest {
         verify(encryptionResources, times(2)).createEncryptionKey(resultCaptor.capture());
         List<EncryptionKeyCreationRequest> values = resultCaptor.getAllValues();
         assertEquals(2, values.size());
-        assertEquals(true, values.stream().map(EncryptionKeyCreationRequest::keyName)
-                .anyMatch(keyName -> KEY_NAME_LUKS.equals(keyName)));
-        assertEquals(true, values.stream().map(EncryptionKeyCreationRequest::keyName)
-                .anyMatch(keyName -> KEY_NAME_SECRET_MANAGER.equals(keyName)));
+        assertTrue(values.stream().map(EncryptionKeyCreationRequest::keyName)
+                .anyMatch(KEY_NAME_LUKS::equals));
+        assertTrue(values.stream().map(EncryptionKeyCreationRequest::keyName)
+                .anyMatch(KEY_NAME_SECRET_MANAGER::equals));
         verifyEncryptionKeyCreationRequest(values.get(0), List.of(cloudResource));
         verifyEncryptionKeyCreationRequest(values.get(1), List.of(cloudResource));
     }
@@ -282,13 +283,15 @@ public class EncryptionKeyServiceTest {
     }
 
     private void verifyEncryptionKeyCreationRequest(EncryptionKeyCreationRequest encryptionKeyCreationRequest, List<CloudResource> cloudResources) {
+        boolean luksKey = isLuksKey(encryptionKeyCreationRequest.keyName());
+        String expectedDescription = luksKey ? KEY_DESC_LUKS : KEY_DESC_SECRET_MANAGER;
+        List<String> expectedCryptographicPrincipals = luksKey ? List.of(LOGGER_INSTANCE_PROFILE) : List.of(CROSS_ACCOUNT_ROLE, LOGGER_INSTANCE_PROFILE);
         assertEquals(extendedCloudCredential, encryptionKeyCreationRequest.cloudCredential());
         assertEquals(cloudResources, encryptionKeyCreationRequest.cloudResources());
         assertEquals(location(region(REGION), availabilityZone(AVAILABILITY_ZONE)), encryptionKeyCreationRequest.cloudContext().getLocation());
         assertEquals(encryptionKeyCreationRequest.tags(), expectedTags());
-        assertEquals(isLuksKey(encryptionKeyCreationRequest.keyName()) ? KEY_DESC_LUKS : KEY_DESC_SECRET_MANAGER, encryptionKeyCreationRequest.description());
-        assertEquals(List.of(isLuksKey(encryptionKeyCreationRequest.keyName()) ? LOGGER_INSTANCE_PROFILE : CROSS_ACCOUNT_ROLE),
-                encryptionKeyCreationRequest.cryptographicPrincipals());
+        assertEquals(expectedDescription, encryptionKeyCreationRequest.description());
+        assertEquals(expectedCryptographicPrincipals, encryptionKeyCreationRequest.cryptographicPrincipals());
     }
 
     private boolean isLuksKey(String keyName) {

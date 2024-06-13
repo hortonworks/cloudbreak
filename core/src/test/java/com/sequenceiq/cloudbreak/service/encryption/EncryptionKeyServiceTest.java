@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -98,7 +99,11 @@ public class EncryptionKeyServiceTest {
 
     private static final Map<String, String> DEFAULT_TAGS = Map.of("defaultTag", "defaultTagValue");
 
-    private static final List<String> CLOUD_IDENTITIES = List.of("idbroker", "logger");
+    private static final String CLOUD_IDENTITY_IDBROKER = "idbroker";
+
+    private static final String CLOUD_IDENTITY_LOGGER = "logger";
+
+    private static final List<String> CLOUD_IDENTITIES = List.of(CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER);
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -280,9 +285,9 @@ public class EncryptionKeyServiceTest {
         verify(encryptionResources, times(2)).createEncryptionKey(resultCaptor.capture());
         List<EncryptionKeyCreationRequest> values = resultCaptor.getAllValues();
         assertEquals(2, values.size());
-        assertEquals(true, values.stream().map(EncryptionKeyCreationRequest::keyName)
+        assertTrue(values.stream().map(EncryptionKeyCreationRequest::keyName)
                 .anyMatch(keyName -> populateStackInformation(KEY_NAME_LUKS, stackType).equals(keyName)));
-        assertEquals(true, values.stream().map(EncryptionKeyCreationRequest::keyName)
+        assertTrue(values.stream().map(EncryptionKeyCreationRequest::keyName)
                 .anyMatch(keyName -> populateStackInformation(KEY_NAME_SECRET_MANAGER, stackType).equals(keyName)));
         verifyEncryptionKeyCreationRequest(values.get(0), List.of(cloudResource), stackType);
         verifyEncryptionKeyCreationRequest(values.get(1), List.of(cloudResource), stackType);
@@ -306,14 +311,15 @@ public class EncryptionKeyServiceTest {
             StackType stackType) {
         boolean luksKey = isLuksKey(encryptionKeyCreationRequest.keyName());
         String expectedDescription = populateStackInformation(luksKey ? KEY_DESC_LUKS : KEY_DESC_SECRET_MANAGER, stackType);
-        List<String> expectedPrincipalIds = luksKey ? (stackType == DATALAKE ? CLOUD_IDENTITIES : List.of(LOGGER_INSTANCE_PROFILE)) :
-                List.of(CROSS_ACCOUNT_ROLE);
+        List<String> expectedCryptographicPrincipals = luksKey ? (stackType == DATALAKE ? CLOUD_IDENTITIES : List.of(LOGGER_INSTANCE_PROFILE)) :
+                (stackType == DATALAKE ? List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER) :
+                        List.of(CROSS_ACCOUNT_ROLE, LOGGER_INSTANCE_PROFILE));
         assertEquals(extendedCloudCredential, encryptionKeyCreationRequest.cloudCredential());
         assertEquals(cloudResources, encryptionKeyCreationRequest.cloudResources());
         assertEquals(location(region(REGION), availabilityZone(AVAILABILITY_ZONE)), encryptionKeyCreationRequest.cloudContext().getLocation());
         assertEquals(encryptionKeyCreationRequest.tags(), expectedTags());
         assertEquals(expectedDescription, encryptionKeyCreationRequest.description());
-        assertEquals(expectedPrincipalIds, encryptionKeyCreationRequest.cryptographicPrincipals());
+        assertEquals(expectedCryptographicPrincipals, encryptionKeyCreationRequest.cryptographicPrincipals());
     }
 
     private boolean isLuksKey(String keyName) {
