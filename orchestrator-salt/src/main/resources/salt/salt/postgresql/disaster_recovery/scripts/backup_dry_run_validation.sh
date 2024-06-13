@@ -6,7 +6,7 @@
 set -o nounset
 set -o pipefail
 
-LOGFILE=/var/log/dl_postgres_dry_run.log
+LOGFILE=/var/log/dl_postgres_dry_run_backup.log
 
 echo "Logs are at ${LOGFILE}"
 
@@ -72,14 +72,14 @@ is_database_exists() {
 }
 
 make_dir() {
-  if ! hdfs --loglevel FATAL dfs -mkdir -p "${BACKUP_LOCATION::-1}" >/dev/null 2>&1; then
+  if ! hdfs --loglevel FATAL dfs -mkdir -p "${BACKUP_LOCATION::-1}" >>${LOGFILE} 2>&1; then
     doLog $1
     ((FAILED++))
   fi
 }
 
 move_from_local() {
-  if ! hdfs --loglevel FATAL dfs -moveFromLocal -f "$TESTFILE_LOCATION" "$OBJECT_STORE_PATH" >/dev/null 2>&1; then
+  if ! hdfs --loglevel FATAL dfs -moveFromLocal -f "$TESTFILE_LOCATION" "$OBJECT_STORE_PATH" >>${LOGFILE} 2>&1; then
     doLog $1
     ((FAILED++))
   fi
@@ -115,21 +115,22 @@ execute_run() {
 
   export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
 
-  HIVE_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hive*" | head -n 1)
-  KNOX_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*knox-KNOX_GATEWAY*" | head -n 1)
+  ATLAS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*atlas-ATLAS_SERVER*" | head -n 1)
+  HDFS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hdfs*" | head -n 1)
 
   if [[ $RAZ_ENABLED ]]; then
-    kinit_as knox "$KNOX_KEYTAB"
+    kinit_as atlas "$ATLAS_KEYTAB"
     doLog "INFO Try moveFromLocal via HDFS"
     make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Ranger Raz Role"
     move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Ranger Raz Role"
   else
     ## IDBroker
-    kinit_as hive "$HIVE_KEYTAB"
+    kinit_as atlas "$ATLAS_KEYTAB"
     doLog "INFO Try moveFromLocal via HDFS"
     make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Ranger Audit Role"
     move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Ranger Audit Role"
-    kinit_as knox "$KNOX_KEYTAB"
+
+    kinit_as hdfs "$HDFS_KEYTAB"
     doLog "INFO Try moveFromLocal via HDFS"
     make_dir "ERROR Failed to make directory on the backup location please check the permissions on the backup location for the Datalake Admin Role"
     move_from_local "ERROR Failed to moveFromLocal from the backup location please check the permissions on the backup location for the Datalake Admin Role"
@@ -140,6 +141,7 @@ execute_run() {
 doLog "INFO Initiating dry-run"
 execute_run
 if [ "$FAILED" -gt 0 ]; then
+  doLog "ERROR The dry-run validation failed"
   exit 1
 fi
 doLog "INFO Completed dry-run."

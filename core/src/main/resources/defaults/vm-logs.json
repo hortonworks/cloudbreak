@@ -398,5 +398,13 @@
   {
     "path": "/var/log/unmount-block-storages-allout.log",
     "label": "unmount_block_storages_allout"
+  },
+  {
+    "path": "/var/log/dl_postgres_dry_run_backup.log",
+    "label": "dl_dry_run_backup"
+  },
+  {
+    "path": "/var/log/dl_postgres_dry_run_restore.log",
+    "label": "dl_dry_run_restore"
   }
 ]

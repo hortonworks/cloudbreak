@@ -66,7 +66,18 @@ export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 errorExit() {
-  limit_incomming_connection $SERVICE -1
+  if [[ -z "$DATABASENAMES" ]]; then
+    limit_incomming_connection "hive" -1
+    limit_incomming_connection "ranger" -1
+    limit_incomming_connection "profiler_agent" -1
+    limit_incomming_connection "profiler_metric" -1
+  else
+    for db in $DATABASENAMES; do
+      doLog "Limiting incomming connections to ${db}."
+      limit_incomming_connection "${db}" -1
+    done
+  fi
+
   if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == /var/tmp/postgres_restore_staging* ]]; then
       rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
       doLog "Removed directory $BACKUPS_DIR"
