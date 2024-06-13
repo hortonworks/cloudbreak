@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsContext;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -71,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerPa
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfigKey;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -585,22 +587,23 @@ class ExternalDatabaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
-    void testIsMigrationNeededDuringUpgrade(DatabaseAvailabilityType dbType, String platform, String current, String target, boolean migrationRequired) {
+    void testIsMigrationNeededDuringUpgrade(boolean externalDb, String platform, String current, String target, boolean migrationRequired) {
         StackView stack = mock(StackView.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(clusterView.hasExternalDatabase()).thenReturn(externalDb);
         Database database = new Database();
         database.setExternalDatabaseEngineVersion(current);
-        database.setExternalDatabaseAvailabilityType(dbType);
         TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
-
+        UpgradeRdsContext upgradeRdsContext = new UpgradeRdsContext(null, stack, clusterView, database, majorVersion);
         when(stack.getCloudPlatform()).thenReturn(platform);
         when(majorVersion.getMajorVersion()).thenReturn(target);
-        boolean actualMigrationNeeded = underTest.isMigrationNeededDuringUpgrade(stack, database, majorVersion);
+        boolean actualMigrationNeeded = underTest.isMigrationNeededDuringUpgrade(upgradeRdsContext);
         assertEquals(actualMigrationNeeded, migrationRequired);
     }
 
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
-    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(DatabaseAvailabilityType dbType, String platform, String current, String target,
+    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(boolean externalDb, String platform, String current, String target,
             boolean migrationRequired, boolean datalake) {
         StackDto stack = mock(StackDto.class);
         TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
@@ -608,6 +611,9 @@ class ExternalDatabaseServiceTest {
         when(stack.getCloudPlatform()).thenReturn(platform);
         when(majorVersion.getMajorVersion()).thenReturn(target);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(current);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(clusterView.hasExternalDatabase()).thenReturn(externalDb);
+        when(stack.getCluster()).thenReturn(clusterView);
         if (migrationRequired) {
             lenient().when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.HA);
             Stack realStack = new Stack();
@@ -641,17 +647,17 @@ class ExternalDatabaseServiceTest {
 
     private static Object[][] dbUpgradeMigrationScenarios() {
         return new Object[][]{
-                // DbType, Platform, currentVersion, targetVersion, migrationRequired, datalake
-                {DatabaseAvailabilityType.NON_HA, "AZURE", "10", "11", false, true},
-                {DatabaseAvailabilityType.NON_HA, "AZURE", "10", "14", true, true},
-                {DatabaseAvailabilityType.NON_HA, "AZURE", "10", "14", true, false},
-                {DatabaseAvailabilityType.NON_HA, "AZURE", "14", "14", false, false},
-                {DatabaseAvailabilityType.NON_HA, "AZURE", "14", "11", false, false},
-                {DatabaseAvailabilityType.NON_HA, "AWS", "10", "11", false, false},
-                {DatabaseAvailabilityType.NON_HA, "AWS", "10", "14", false, false},
-                {DatabaseAvailabilityType.NON_HA, "AWS", "14", "14", false, false},
-                {DatabaseAvailabilityType.NON_HA, "AWS", "14", "11", false, false},
-                {DatabaseAvailabilityType.NONE, "AZURE", "10", "14", false, true},
+                // ExternalDB, Platform, currentVersion, targetVersion, migrationRequired, datalake
+                {true, "AZURE", "10", "11", false, true},
+                {true, "AZURE", "10", "14", true, true},
+                {true, "AZURE", "10", "14", true, false},
+                {true, "AZURE", "14", "14", false, false},
+                {true, "AZURE", "14", "11", false, false},
+                {true, "AWS", "10", "11", false, false},
+                {true, "AWS", "10", "14", false, false},
+                {true, "AWS", "14", "14", false, false},
+                {true, "AWS", "14", "11", false, false},
+                {false, "AZURE", "10", "14", false, true},
         };
     }
 

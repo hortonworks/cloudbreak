@@ -172,6 +172,10 @@ public interface ClusterView extends MdcContextInfoProvider {
         return isNotEmpty(pwd) ? pwd : getCloudbreakAmbariPassword();
     }
 
+    default boolean hasExternalDatabase() {
+        return isNotEmpty(getDatabaseServerCrn());
+    }
+
     @Override
     default String getResourceName() {
         return getName();

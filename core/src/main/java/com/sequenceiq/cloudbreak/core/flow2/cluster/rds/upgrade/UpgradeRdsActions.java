@@ -112,7 +112,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsUpgradeDatabaseServerResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) throws Exception {
-                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion())) {
+                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context)) {
                     upgradeRdsService.migrateDatabaseSettingsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -120,7 +120,7 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion()) ?
+                return externalDatabaseService.isMigrationNeededDuringUpgrade(context) ?
                         new UpgradeRdsMigrateDatabaseSettingsRequest(context.getStackId(), context.getVersion()) :
                         new UpgradeRdsMigrateDatabaseSettingsResponse(context.getStackId(), context.getVersion());
             }
@@ -175,7 +175,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStartCMResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartCMResult payload, Map<Object, Object> variables) {
-                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion())) {
+                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context)) {
                     upgradeRdsService.migrateServicesDatabaseSettingsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -183,7 +183,7 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion()) ?
+                return externalDatabaseService.isMigrationNeededDuringUpgrade(context) ?
                         new UpgradeRdsMigrateServicesDBSettingsRequest(context.getStackId(), context.getVersion()) :
                         new UpgradeRdsMigrateServicesDBSettingsResponse(context.getStackId(), context.getVersion());
             }
@@ -223,8 +223,7 @@ public class UpgradeRdsActions {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsInstallPostgresPackagesResult payload, Map<Object, Object> variables) {
                 Selectable event;
-                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion()) &&
-                        upgradeRdsService.shouldMigrateAttachedDatahubs(context.getStack())) {
+                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context) && upgradeRdsService.shouldMigrateAttachedDatahubs(context.getStack())) {
                     upgradeRdsService.migrateAttachedDatahubs(payload.getResourceId());
                     event = new UpgradeRdsMigrateAttachedDatahubsRequest(context.getStackId(), context.getVersion());
                 } else {

@@ -41,6 +41,7 @@ public class SdxUpgradeDatabaseServerTests extends PreconditionSdxE2ETest {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         sdxDatabaseRequest.setDatabaseEngineVersion(sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion());
+        sdxDatabaseRequest = testContext.getCloudProvider().extendDBRequestWithProviderParams(sdxDatabaseRequest);
 
         TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 

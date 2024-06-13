@@ -16,7 +16,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsContext;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -439,11 +439,11 @@ public class ExternalDatabaseService {
                 .run(() -> databaseObtainerService.obtainAttemptResult(cluster, databaseOperation, databaseCrn, cancellable));
     }
 
-    public boolean isMigrationNeededDuringUpgrade(StackView stack, Database database, TargetMajorVersion majorVersion) {
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
-        boolean externalDb = !ObjectUtils.defaultIfNull(database.getExternalDatabaseAvailabilityType(), DatabaseAvailabilityType.NONE).isEmbedded();
-        Versioned currentVersion = database::getExternalDatabaseEngineVersion;
-        Versioned targetVersion = majorVersion::getMajorVersion;
+    public boolean isMigrationNeededDuringUpgrade(UpgradeRdsContext context) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(context.getStack().getCloudPlatform());
+        boolean externalDb = context.getCluster().hasExternalDatabase();
+        Versioned currentVersion = context.getDatabase()::getExternalDatabaseEngineVersion;
+        Versioned targetVersion = context.getVersion()::getMajorVersion;
         return isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb);
     }
 
@@ -466,7 +466,7 @@ public class ExternalDatabaseService {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;
-        boolean externalDb = !ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE).isEmbedded();
+        boolean externalDb = stack.getCluster().hasExternalDatabase();
 
         if (isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb)) {
             DatabaseAvailabilityType databaseAvailabilityType = fetchDatabaseAvailabilityType(stack);

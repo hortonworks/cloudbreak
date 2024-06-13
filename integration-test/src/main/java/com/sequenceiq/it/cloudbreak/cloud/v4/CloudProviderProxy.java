@@ -56,6 +56,7 @@ import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Component
 public class CloudProviderProxy implements CloudProvider {
@@ -427,6 +428,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return delegate.getStorageOptimizedInstanceType();
+    }
+
+    @Override
+    public SdxDatabaseRequest extendDBRequestWithProviderParams(SdxDatabaseRequest sdxDatabaseRequest) {
+        return delegate.extendDBRequestWithProviderParams(sdxDatabaseRequest);
     }
 
     @Override
