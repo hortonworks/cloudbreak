@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.v4.imagecatalog;
 
 import java.io.IOException;
 
+import jakarta.ws.rs.BadRequestException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +25,16 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
                     client.getDefaultClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
             );
             Log.whenJson(LOGGER, "Imagecatalog created successfully: ", testDto.getRequest());
-        } catch (Exception e) {
-            Log.when(LOGGER, "Cannot create Imagecatalog, fetch existed one: " + testDto.getRequest().getName());
-            testDto.setResponse(
-                    client.getDefaultClient().imageCatalogV4Endpoint()
-                            .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE, Boolean.FALSE));
-            Log.whenJson(LOGGER, "Imagecatalog fetched successfully: ", testDto.getRequest());
+        } catch (BadRequestException e) {
+            if (e.getMessage().contains("already exists")) {
+                Log.when(LOGGER, "Cannot create Imagecatalog, fetch existed one: " + testDto.getRequest().getName());
+                testDto.setResponse(
+                        client.getDefaultClient().imageCatalogV4Endpoint()
+                                .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE, Boolean.FALSE));
+                Log.whenJson(LOGGER, "Imagecatalog fetched successfully: ", testDto.getRequest());
+            } else {
+                throw e;
+            }
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("ImageCatalog could not be created.");
