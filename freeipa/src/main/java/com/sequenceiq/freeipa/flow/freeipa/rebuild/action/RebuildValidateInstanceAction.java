@@ -9,18 +9,11 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.action.FreeIpaUpscaleActions;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 
-/**
- * TODO
- * Validate newly created instance on cloud is OK
- *
- * @see FreeIpaUpscaleActions#validateInstancesAction()
- */
 @Component("RebuildValidateInstanceAction")
 public class RebuildValidateInstanceAction extends AbstractRebuildAction<UpscaleStackResult> {
 

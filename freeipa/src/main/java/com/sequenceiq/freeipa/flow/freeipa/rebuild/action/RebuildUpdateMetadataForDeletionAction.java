@@ -9,17 +9,10 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.action.FreeIpaDownscaleActions;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 
-/**
- * TODO
- * Update instance metadate status
- *
- * @see FreeIpaDownscaleActions#updateMetadataForDeletionRequestAction()
- */
 @Component("RebuildUpdateMetadataForDeletionAction")
 public class RebuildUpdateMetadataForDeletionAction extends AbstractRebuildAction<StackEvent> {
 

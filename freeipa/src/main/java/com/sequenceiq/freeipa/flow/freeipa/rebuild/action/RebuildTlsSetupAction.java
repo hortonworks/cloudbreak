@@ -11,17 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.action.FreeIpaUpscaleActions;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.StackProvisionService;
 
-/**
- * TODO
- * Save extra info from provider regarding instance
- *
- * @see FreeIpaUpscaleActions#tlsSetupAction()
- */
 @Component("RebuildTlsSetupAction")
 public class RebuildTlsSetupAction extends AbstractRebuildAction<StackEvent> {
 

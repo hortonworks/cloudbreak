@@ -24,7 +24,6 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.action.FreeIpaUpscaleActions;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.action.PrivateIdProvider;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
@@ -34,12 +33,6 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
-/**
- * TODO
- * Create new instancemetadata for the instance to be restored and send request to cloud module to create instance
- *
- * @see FreeIpaUpscaleActions#addInstancesAction()
- */
 @Component("RebuildAddInstanceAction")
 public class RebuildAddInstanceAction extends AbstractRebuildAction<StackEvent> {
 

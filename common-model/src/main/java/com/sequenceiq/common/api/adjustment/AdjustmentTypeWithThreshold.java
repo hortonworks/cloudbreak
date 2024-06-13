@@ -1,5 +1,6 @@
 package com.sequenceiq.common.api.adjustment;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -45,4 +46,20 @@ public class AdjustmentTypeWithThreshold {
                 .toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            AdjustmentTypeWithThreshold that = (AdjustmentTypeWithThreshold) o;
+            return adjustmentType == that.adjustmentType && Objects.equals(threshold, that.threshold);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(adjustmentType, threshold);
+    }
 }

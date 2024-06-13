@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,11 +31,15 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.handler.CollectMetadataHandler;
 import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackCollectResourcesHandler;
 import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackHandler;
@@ -46,15 +51,21 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientCallable;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -113,6 +124,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -125,6 +137,7 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
 import com.sequenceiq.freeipa.service.resource.ResourceAttributeUtil;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -254,11 +267,23 @@ class RebuildFlowIntegrationTest {
     @MockBean
     private FreeIpaClientRetryService retryService;
 
+    @MockBean
+    private FreeIpaSafeInstanceHealthDetailsService healthDetailsService;
+
+    @MockBean
+    private KerberosConfigUpdateService kerberosConfigUpdateService;
+
+    @MockBean
+    private EnvironmentEndpoint environmentEndpoint;
+
+    @MockBean
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Inject
     private FreeIpaService freeIpaService;
 
     @BeforeEach
-    public void setup() throws FreeIpaClientException {
+    public void setup() throws FreeIpaClientException, QuotaExceededException {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setTunnel(CLUSTER_PROXY);
@@ -273,6 +298,10 @@ class RebuildFlowIntegrationTest {
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         when(cloudConnector.authentication()).thenReturn(mock(Authenticator.class));
         when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(resourceConnector.upscale(any(), any(), any(), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)))).thenAnswer(inv -> {
+            instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+            return List.of();
+        });
         PollTask<ResourcesStatePollerResult> pollTask = mock(PollTask.class);
         when(statusCheckFactory.newPollResourcesStateTask(any(), any(), anyBoolean())).thenReturn(pollTask);
         when(pollTask.completed(any())).thenReturn(Boolean.TRUE);
@@ -291,6 +320,11 @@ class RebuildFlowIntegrationTest {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("example.com");
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa);
+        NodeHealthDetails healthDetails = new NodeHealthDetails();
+        healthDetails.setStatus(InstanceStatus.CREATED);
+        when(healthDetailsService.getInstanceHealthDetails(stack, instanceMetaData)).thenReturn(healthDetails);
+        when(regionAwareInternalCrnGeneratorFactory.iam())
+                .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1"));
     }
 
     @Test
@@ -378,7 +412,9 @@ class RebuildFlowIntegrationTest {
             ResourceToCloudResourceConverter.class,
             ResourceAttributeUtil.class,
             RebootInstanceHandler.class,
-            HealthCheckHandler.class
+            HealthCheckHandler.class,
+            RebuildValidateHealthHandler.class,
+            WebApplicationExceptionMessageExtractor.class
     })
     static class Config {
 

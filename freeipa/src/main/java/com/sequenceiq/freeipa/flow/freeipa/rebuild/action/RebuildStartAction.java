@@ -11,10 +11,6 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.RebuildEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
-/**
- * TODO
- * Store variables from event which required through the flow, eg FQDN and backup info
- */
 @Component("RebuildStartAction")
 public class RebuildStartAction extends AbstractRebuildAction<RebuildEvent> {
     protected RebuildStartAction() {
