@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -50,22 +48,12 @@ public class FreeIpaCloudStorageValidationService {
     @Inject
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     public void validate(Stack stack) throws CloudbreakOrchestratorException {
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        if (!entitlementService.cloudStorageValidationOnVmEnabled(accountId)) {
-            LOGGER.info("Cloud storage validation on VM entitlement is missing, not validating cloud storage on VM.");
-            return;
-        }
-
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
         List<GatewayConfig> allGateways = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet);
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
         StackBasedExitCriteriaModel exitCriteriaModel = new StackBasedExitCriteriaModel(stack.getId());
         validateCloudStorageBackup(stack, allGateways, allNodes, exitCriteriaModel);
-        validateCloudStorage(stack, allGateways, allNodes, exitCriteriaModel);
     }
 
     private void validateCloudStorageBackup(Stack stack, List<GatewayConfig> allGateways, Set<Node> allNodes, StackBasedExitCriteriaModel exitCriteriaModel) {
