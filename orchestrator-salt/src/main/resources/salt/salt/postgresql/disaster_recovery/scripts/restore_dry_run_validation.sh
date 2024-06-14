@@ -119,7 +119,7 @@ execute_run() {
   KNOX_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*knox-KNOX_GATEWAY*" | head -n 1)
 
   if [[ $RAZ_ENABLED ]]; then
-    kinit_as knox "$HIVE_KEYTAB"
+    kinit_as knox "$KNOX_KEYTAB"
     doLog "INFO Try copyToLocal via HDFS"
     copy_to_local "ERROR Failed to copyToLocal from the backup location please check the permissions on the backup location for the Ranger Raz Role"
   else
