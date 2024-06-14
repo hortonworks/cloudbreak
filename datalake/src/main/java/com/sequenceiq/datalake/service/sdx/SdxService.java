@@ -54,6 +54,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -679,6 +680,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null);
         setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled());
+
+        setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);
         CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
         customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
         stackRequest.setCustomDomain(customDomainSettingsV4Request);
@@ -701,6 +704,26 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
                         sdxClusterResizeRequest.isValidationOnly());
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    private void setRecipesFromStackV4ResponseToStackV4Request(StackV4Response stackV4Response, StackV4Request stackRequest) {
+        Map<String, Set<String>> instanceGroupNameRecipesMap = stackV4Response.getInstanceGroups()
+            .stream()
+            .filter(instanceGroup -> CollectionUtils.isNotEmpty(instanceGroup.getRecipes()))
+            .collect(Collectors.toMap(InstanceGroupV4Response::getName,
+                instanceGroup -> instanceGroup.getRecipes()
+                    .stream()
+                    .map(RecipeV4Base::getName)
+                    .collect(Collectors.toSet())));
+        stackRequest.getInstanceGroups()
+            .stream()
+            .filter(ig -> instanceGroupNameRecipesMap.containsKey(ig.getName()))
+            .forEach(
+                ig -> {
+                    Set<String> recipeNames = instanceGroupNameRecipesMap.get(ig.getName());
+                    ig.setRecipeNames(recipeNames);
+                }
+            );
     }
 
     private void overrideDefaultInstanceStorage(StackV4Request defaultTemplate, List<SdxInstanceGroupDiskRequest> customInstanceGroupDisks,

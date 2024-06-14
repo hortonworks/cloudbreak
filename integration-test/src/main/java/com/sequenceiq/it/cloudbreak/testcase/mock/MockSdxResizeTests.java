@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -10,13 +11,17 @@ import org.testng.annotations.Test;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.resize.SdxResizeTestValidator;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -33,6 +38,12 @@ public class MockSdxResizeTests extends AbstractMockTest {
 
     @Inject
     private SdxUtil sdxUtil;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private RecipeUtil recipeUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -120,5 +131,48 @@ public class MockSdxResizeTests extends AbstractMockTest {
                     return testDto;
                 })
                 .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description()
+    public void testSdxResizeRecipeTestSuccessResize(MockedTestContext testContext) {
+        String sdxName = resourcePropertyProvider().getName();
+        String recipeName = resourcePropertyProvider().getName();
+
+        testContext
+            .given(RecipeTestDto.class)
+            .withName(recipeName)
+            .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+            .withRecipeType(POST_CLOUDERA_MANAGER_START)
+            .when(recipeTestClient.createV4())
+            .given(EnvironmentTestDto.class)
+            .withNetwork()
+            .withCreateFreeIpa(Boolean.FALSE)
+            .withName(resourcePropertyProvider().getEnvironmentName())
+            .withBackup("mock://location/of/the/backup/cancel")
+            .when(getEnvironmentTestClient().create())
+            .await(EnvironmentStatus.AVAILABLE)
+            .given(FreeIpaTestDto.class)
+            .when(freeIpaTestClient.create())
+            .await(Status.AVAILABLE)
+            .given(sdxName, SdxInternalTestDto.class)
+            .withRecipe(recipeName, "master")
+            .when(sdxTestClient.createInternal(), key(sdxName))
+            .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
+            .given(sdxName, SdxInternalTestDto.class)
+            .when(sdxTestClient.resize(), key(sdxName))
+            .await(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
+            .await(SdxClusterStatusResponse.RUNNING, key(sdxName).withWaitForFlow(Boolean.FALSE))
+            .then((tc, testDto, client) -> {
+                if (testDto.getResponse().getStackV4Response().getInstanceGroups()
+                    .stream()
+                    .filter(ig -> ig.getName().equals("master"))
+                    .flatMap(ig -> ig.getRecipes().stream())
+                    .noneMatch(recipe -> recipe.getName().equals(recipeName))) {
+                    throw new TestFailException("Resize recipes copy not worked");
+                }
+                return testDto;
+            })
+            .validate();
     }
 }
