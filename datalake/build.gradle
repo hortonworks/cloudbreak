@@ -81,6 +81,7 @@ dependencies {
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: javaxXmlBindJaxbApiVersion
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',               version: jerseyMicrometerVersion
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: mybatisMigrationVersion
   implementation     group: 'org.postgresql',            name: 'postgresql',                      version: postgreSQLVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
