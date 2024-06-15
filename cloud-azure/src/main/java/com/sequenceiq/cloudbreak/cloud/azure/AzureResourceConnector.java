@@ -238,6 +238,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
+        azureDatabaseResourceService.validateUpgradeDatabaseServer(authenticatedContext);
+    }
+
+    @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) {
         return azureDatabaseResourceService.buildDatabaseResourcesForLaunch(authenticatedContext, stack, persistenceNotifier);
