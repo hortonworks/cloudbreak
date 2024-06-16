@@ -38,11 +38,7 @@ public class AzureFlexibleServerPermissionValidator {
         }
     }
 
-    private AzureDatabaseType getAzureDatabaseType(DatabaseServer databaseServer) {
-        return new AzureDatabaseServerView(databaseServer).getAzureDatabaseType();
-    }
-
-    private void validatePermission(AzureClient client) {
+    public void validatePermission(AzureClient client) {
         Set<RoleDefinition> roleDefinitions = getRoleDefinitions(client);
         Set<String> allowedActions = getAllowedActions(roleDefinitions);
         Set<String> missingPermissions = findMissingPermissions(allowedActions);
@@ -50,6 +46,10 @@ public class AzureFlexibleServerPermissionValidator {
             throw new AzureResourceException(
                     String.format("Permission validation failed because the following actions are missing from your role definition: %s", missingPermissions));
         }
+    }
+
+    private AzureDatabaseType getAzureDatabaseType(DatabaseServer databaseServer) {
+        return new AzureDatabaseServerView(databaseServer).getAzureDatabaseType();
     }
 
     private Set<RoleDefinition> getRoleDefinitions(AzureClient client) {

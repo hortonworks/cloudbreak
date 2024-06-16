@@ -361,6 +361,11 @@ public class AzureDatabaseResourceService {
         return azureDatabaseTemplateProvider.getDBTemplateString(databaseStack);
     }
 
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        azureFlexibleServerPermissionValidator.validatePermission(client);
+    }
+
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
 
