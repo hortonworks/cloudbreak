@@ -47,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public interface CloudProvider {
 
@@ -202,6 +203,10 @@ public interface CloudProvider {
     String getSdxMarketplaceUpgradeImageCatalog();
 
     String getStorageOptimizedInstanceType();
+
+    default SdxDatabaseRequest extendDBRequestWithProviderParams(SdxDatabaseRequest sdxDatabaseRequest) {
+        return sdxDatabaseRequest;
+    }
 
     VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);
 

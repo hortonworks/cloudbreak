@@ -69,6 +69,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
@@ -174,6 +176,12 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return azureProperties.getStorageOptimizedInstance().getType();
+    }
+
+    @Override
+    public SdxDatabaseRequest extendDBRequestWithProviderParams(SdxDatabaseRequest sdxDatabaseRequest) {
+        sdxDatabaseRequest.setSdxDatabaseAzureRequest(new SdxDatabaseAzureRequest());
+        return sdxDatabaseRequest;
     }
 
     public AzureDistroXV1Parameters distroXParameters() {

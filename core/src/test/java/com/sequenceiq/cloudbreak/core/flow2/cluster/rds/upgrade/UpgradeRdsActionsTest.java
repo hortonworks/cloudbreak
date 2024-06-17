@@ -245,11 +245,10 @@ class UpgradeRdsActionsTest {
         when(stack.getId()).thenReturn(STACK_ID);
         ClusterView cluster = mock(ClusterView.class);
         Database database = new Database();
+        UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database, TargetMajorVersion.VERSION_11);
         lenient().when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
         lenient().when(upgradeRdsService.shouldStopStartServices(stack)).thenReturn(shouldStopServices);
-        lenient().when(externalDatabaseService.isMigrationNeededDuringUpgrade(stack, database, TargetMajorVersion.VERSION_11))
-                .thenReturn(shouldMigrateDBSettings);
-        UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database, TargetMajorVersion.VERSION_11);
+        lenient().when(externalDatabaseService.isMigrationNeededDuringUpgrade(context)).thenReturn(shouldMigrateDBSettings);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         Map<Object, Object> variables = new HashMap<>();
