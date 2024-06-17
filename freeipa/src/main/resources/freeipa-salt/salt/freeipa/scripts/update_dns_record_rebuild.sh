@@ -10,7 +10,7 @@ trap cleanup EXIT
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Starting DNS record update for rebuild"
 
-IPA_FDOMAIN=$(domainname).
+IPA_FDOMAIN=$(hostname -d).
 IPA_FQDN=$(hostname -f)
 IPA_SHORT_HOSTNAME=$(echo "$IPA_FQDN" | cut -f1 -d".")
 IPA_IP=$(hostname -i)
