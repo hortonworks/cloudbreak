@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/ubi9/cldr-openjdk-21-runtime-cis:1.20-2-stig-11062024
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi9/cldr-openjdk-21-runtime-cis:1.20-2-stig-13062024
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
 MAINTAINER info@cloudera.com
 
