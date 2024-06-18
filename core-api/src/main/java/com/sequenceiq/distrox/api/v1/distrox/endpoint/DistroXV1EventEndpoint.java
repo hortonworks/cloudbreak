@@ -4,6 +4,9 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -36,8 +39,9 @@ public interface DistroXV1EventEndpoint {
     @Operation(summary = GET_DATAHUB_AUDIT_EVENTS, description = Notes.DATAHUB_AUDIT_EVENTS,
             operationId = "getAuditEvents",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    @Valid
     List<CDPStructuredEvent> getAuditEvents(
             @QueryParam("resourceCrn") @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) String resourceCrn,
-            @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size);
+            @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
+            @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size);
 }
