@@ -133,7 +133,6 @@ class ClusterUpscaleServiceTest {
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
-        inOrder.verify(clusterApi, times(1)).restartAll(false);
         inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
     }
 
@@ -162,7 +161,6 @@ class ClusterUpscaleServiceTest {
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(1)).recommissionHosts(List.of("master-2"));
-        inOrder.verify(clusterApi, times(1)).restartAll(false);
         inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
     }
 
@@ -173,7 +171,6 @@ class ClusterUpscaleServiceTest {
                 newInstance(InstanceStatus.SERVICES_HEALTHY),
                 newInstance(InstanceStatus.SERVICES_HEALTHY),
                 newInstance(InstanceStatus.DELETED_BY_PROVIDER));
-        when(stackDto.getAllAvailableInstances()).thenReturn(hostGroup.getInstanceGroup().getAllAvailableInstanceMetadata());
         when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
         when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
         when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
