@@ -166,6 +166,12 @@ public class ClusterHostServiceRunner {
     @Value("${cb.ccmRevertJob.activationInMinutes}")
     private Integer activationInMinutes;
 
+    @Value("${cb.knox.gateway.security.dir}")
+    private String knoxGatewaySecurityDir;
+
+    @Value("${cb.knox.idbroker.security.dir}")
+    private String knoxIdBrokerSecurityDir;
+
     @Inject
     private HostOrchestrator hostOrchestrator;
 
@@ -508,7 +514,8 @@ public class ClusterHostServiceRunner {
         Map<String, ? extends Serializable> clusterProperties = Map.of(
                 "name", stackDto.getCluster().getName(),
                 "deployedInChildEnvironment", deployedInChildEnvironment,
-                "gov_cloud", stackDto.isOnGovPlatformVariant());
+                "gov_cloud", stackDto.isOnGovPlatformVariant(),
+                "secretEncryptionEnabled", environmentConfigProvider.isSecretEncryptionEnabled(stackDto.getEnvironmentCrn()));
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
         Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
@@ -864,6 +871,7 @@ public class ClusterHostServiceRunner {
                     throw new NotFoundException("Could not get SAML metadata file to set up IdP in KNOXSSO: " + e.getMessage());
                 }
             }
+            gateway.put("knoxGatewaySecurityDir", knoxGatewaySecurityDir);
         } else {
             gateway.put("ssotype", SSOType.NONE);
             LOGGER.debug("Cluster gateway (Knox) is not set. Configure ssotype to 'NONE' for backward compatibility.");
@@ -921,6 +929,7 @@ public class ClusterHostServiceRunner {
             idbroker.put("signcert", clusterIdBroker.getSignCert());
             idbroker.put("signkey", clusterIdBroker.getSignKey());
             idbroker.put("mastersecret", clusterIdBroker.getMasterSecret());
+            idbroker.put("knoxIdBrokerSecurityDir", knoxIdBrokerSecurityDir);
         }
         return new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker));
     }

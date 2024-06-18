@@ -1,4 +1,11 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
+{%- set knoxUser = 'knox' %}
+{%- set knoxGroup = 'knox' %}
+{%- set useKnoxUser = True if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True
+or salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
+{%- set mode = 640 if useKnoxUser == True else 644 %}
+{%- set secretRoot = gateway.knox_gateway_secret_root if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True
+else gateway.knox_data_root ~ '/security' %}
 
 # This file contains the intial config for Knox CSD
 
@@ -75,67 +82,60 @@
 
 {% endfor %}
 
-{{ gateway.knox_data_root }}/security/keystores/signkey.pem:
+{{ secretRoot }}/keystores/signkey.pem:
   file.managed:
     - contents_pillar: gateway:signkey
     - replace: True
     - makedirs: True
-{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
-    - user: knox
-    - group: knox
-    - mode: 640
-{% else %}
-    - mode: 644
+{% if useKnoxUser == True %}
+    - user: {{ knoxUser }}
+    - group: {{ knoxGroup }}
 {% endif %}
+    - mode: {{ mode }}
 
-{{ gateway.knox_data_root }}/security/keystores/signcert.pem:
+
+{{ secretRoot }}/keystores/signcert.pem:
   file.managed:
     - contents_pillar: gateway:signcert
     - replace: True
     - makedirs: True
-{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
-    - user: knox
-    - group: knox
-    - mode: 640
-{% else %}
-    - mode: 644
+{% if useKnoxUser == True %}
+    - user: {{ knoxUser }}
+    - group: {{ knoxGroup }}
 {% endif %}
+    - mode: {{ mode }}
 
   # openssl pkcs12 -export -in cert.pem -inkey key.pem -out signing.p12 -name signing-identity -password pass:admin
   # keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias signing-identity
 
 knox-create-sign-pkcs12:
   cmd.run:
-    - name: cd {{ gateway.knox_data_root }}/security/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
-    - creates: {{ gateway.knox_data_root }}/security/keystores/signing.p12
+    - name: cd {{ secretRoot }}/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
+    - creates: {{ secretRoot }}/keystores/signing.p12
     - output_loglevel: quiet
 
-{{ gateway.knox_data_root }}/security/keystores/signing.p12:
+{{ secretRoot }}/keystores/signing.p12:
   file.managed:
-{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
-    - user: knox
-    - group: knox
-    - mode: 640
-{% else %}
-    - mode: 644
+{% if useKnoxUser == True %}
+    - user: {{ knoxUser }}
+    - group: {{ knoxGroup }}
 {% endif %}
+    - mode: {{ mode }}
     - replace: True
 
 knox-create-sign-{{ gateway.keystore_type }}:
   cmd.run:
-    - name: cd {{ gateway.knox_data_root }}/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.{{ gateway.keystore_type }} -deststoretype {{ gateway.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
-    - creates: {{ gateway.knox_data_root }}/security/keystores/signing.{{ gateway.keystore_type }}
+    - name: cd {{ secretRoot }}/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.{{ gateway.keystore_type }} -deststoretype {{ gateway.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
+    - creates: {{ secretRoot }}/keystores/signing.{{ gateway.keystore_type }}
     - output_loglevel: quiet
 
-{{ gateway.knox_data_root }}/security/keystores/signing.{{ gateway.keystore_type }}:
+{{ secretRoot }}/keystores/signing.{{ gateway.keystore_type }}:
   file.managed:
-{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
-    - user: knox
-    - group: knox
-    - mode: 640
-{% else %}
-    - mode: 644
+{% if useKnoxUser == True %}
+    - user: {{ knoxUser }}
+    - group: {{ knoxGroup }}
 {% endif %}
+    - mode: {{ mode }}
     - replace: True
 
 {% if salt['pillar.get']('gateway:saml') %}

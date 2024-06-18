@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.Nameserve
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -129,6 +130,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -142,11 +144,17 @@ class ClusterHostServiceRunnerTest {
 
     private static final Map<String, SaltPillarProperties> PAYWALL_PROPERTIES = Map.of("paywall", new SaltPillarProperties("paywall_path", Map.of()));
 
-    private static final String ENV_CRN = "envCrn";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:default:environment:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
 
     private static final String STACK_NAME = "stackName";
 
     private static final Long STACK_ID = 123L;
+
+    private static final Long CLUSTER_ID = 123L;
+
+    private static final String KNOX_GATEWAY_SECURITY_DIR = "knoxGatewaySecurityDir";
+
+    private static final String KNOX_IDBROKER_SECURITY_DIR = "knoxIdBrokerSecurityDir";
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -299,6 +307,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(stack.getName()).thenReturn(STACK_NAME);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
+        lenient().when(stack.getBlueprint()).thenReturn(mock(Blueprint.class));
         lenient().when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(stackView.getName()).thenReturn(STACK_NAME);
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
@@ -480,6 +489,7 @@ class ClusterHostServiceRunnerTest {
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+        verifySecretEncryption(false, saltConfig.getValue());
     }
 
     @Test
@@ -536,6 +546,7 @@ class ClusterHostServiceRunnerTest {
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+        verifySecretEncryption(false, saltConfig.getValue());
     }
 
     @Test
@@ -569,6 +580,7 @@ class ClusterHostServiceRunnerTest {
         assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+        verifySecretEncryption(false, saltConfig.getValue());
     }
 
     @Test
@@ -707,6 +719,14 @@ class ClusterHostServiceRunnerTest {
 
     private Map<String, Object> getGatewayProperties(SaltConfig saltConfig) {
         return (Map<String, Object>) saltConfig.getServicePillarConfig().get("gateway").getProperties().get("gateway");
+    }
+
+    private Map<String, Object> getClusterProperties(SaltConfig saltConfig) {
+        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("metadata").getProperties().get("cluster");
+    }
+
+    private Map<String, Object> getIDBrokerProperties(SaltConfig saltConfig) {
+        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("idbroker").getProperties().get("idbroker");
     }
 
     @Test
@@ -880,6 +900,31 @@ class ClusterHostServiceRunnerTest {
         assertEquals(2L, exitCriteriaModel.getClusterId().get());
     }
 
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testKnoxSecurityConfigToRunClusterServices() throws CloudbreakOrchestratorException {
+        setupMocksForRunClusterServices();
+        GatewayView clusterGateway = mock(GatewayView.class);
+        when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        when(environmentConfigProvider.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(idBrokerService.getByCluster(CLUSTER_ID)).thenReturn(mock(IdBroker.class));
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+
+        verifySecretEncryption(true, saltConfig.getValue());
+
+        String knoxGatewaySecurityDir = (String) getGatewayProperties(saltConfig.getValue()).get("knoxGatewaySecurityDir");
+        assertEquals(KNOX_GATEWAY_SECURITY_DIR, knoxGatewaySecurityDir);
+
+        String knoxIdBrokerSecurityDir = (String) getIDBrokerProperties(saltConfig.getValue()).get("knoxIdBrokerSecurityDir");
+        assertEquals(KNOX_IDBROKER_SECURITY_DIR, knoxIdBrokerSecurityDir);
+    }
+
     private void setupMocksForRunClusterServices() {
         when(umsClient.getAccountDetails(any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(stackView.getTunnel()).thenReturn(Tunnel.DIRECT);
@@ -926,6 +971,8 @@ class ClusterHostServiceRunnerTest {
         when(clusterPreCreationApi.getServiceLocations()).thenReturn(serviceLocationMap);
         ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "1");
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
+        ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", KNOX_GATEWAY_SECURITY_DIR);
+        ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", KNOX_IDBROKER_SECURITY_DIR);
 
         TemplatePreparationObject templatePreparationObject = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView())
@@ -978,5 +1025,10 @@ class ClusterHostServiceRunnerTest {
         List<InstanceMetadataView> instanceMetaDataSet = new ArrayList<>();
         instanceMetaDataSet.add(createInstanceMetadata("fqdn1", instanceGroup, "0.0.0.0"));
         when(stack.getAliveInstancesInInstanceGroup(anyString())).thenReturn(instanceMetaDataSet);
+    }
+
+    private void verifySecretEncryption(boolean expectedValue, SaltConfig saltConfig) {
+        boolean secretEncryptionEnabled = (Boolean) getClusterProperties(saltConfig).get("secretEncryptionEnabled");
+        assertEquals(expectedValue, secretEncryptionEnabled);
     }
 }

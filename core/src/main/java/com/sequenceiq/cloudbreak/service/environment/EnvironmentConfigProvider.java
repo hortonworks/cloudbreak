@@ -22,6 +22,11 @@ public class EnvironmentConfigProvider {
         return StringUtils.isNoneEmpty(environment.getParentEnvironmentCrn());
     }
 
+    public boolean isSecretEncryptionEnabled(String environmentCrn) {
+        DetailedEnvironmentResponse environment = getEnvironmentByCrn(environmentCrn);
+        return environment.isEnableSecretEncryption();
+    }
+
     public String getParentEnvironmentCrn(String environmentCrn) {
             String result = environmentCrn;
             DetailedEnvironmentResponse environmentResponse = getEnvironmentByCrn(environmentCrn);
