@@ -19,7 +19,7 @@ public class RebuildValidateCloudStorageAction extends AbstractRebuildAction<Orc
 
     @Override
     protected void doExecute(StackContext context, OrchestratorConfigSuccess payload, Map<Object, Object> variables) throws Exception {
-        stackUpdater().updateStackStatus(payload.getResourceId(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Validating cloud storage");
         ValidateCloudStorageRequest request = new ValidateCloudStorageRequest(payload.getResourceId());
         sendEvent(context, request);
     }

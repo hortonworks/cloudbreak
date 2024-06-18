@@ -1,14 +1,22 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild;
 
+import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.UPDATED;
 import static com.sequenceiq.common.api.type.Tunnel.CLUSTER_PROXY;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.REBUILD_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.CREATED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -21,6 +29,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockReset;
@@ -39,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.handler.CollectMetadataHandler;
 import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackCollectResourcesHandler;
@@ -47,13 +58,21 @@ import com.sequenceiq.cloudbreak.cloud.handler.RebootInstanceHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -63,12 +82,14 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientCallable;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.IpaServer;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -115,8 +136,10 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.FreeIpaRestoreHandler
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.RebuildValidateHealthHandler;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.ValidateBackupHandler;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.action.PrivateIdProvider;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.FreeipaUpscaleStackHandler;
 import com.sequenceiq.freeipa.flow.stack.HealthCheckHandler;
+import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.provision.action.StackProvisionService;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrationHandler;
 import com.sequenceiq.freeipa.flow.stack.start.FreeIpaServiceStartService;
@@ -158,6 +181,8 @@ class RebuildFlowIntegrationTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
     private static final long STACK_ID = 1L;
+
+    private static final String ENVIRONMENT_CRN = "ENVIRONMENT_CRN";
 
     @Inject
     private FlowRegister flowRegister;
@@ -282,13 +307,39 @@ class RebuildFlowIntegrationTest {
     @Inject
     private FreeIpaService freeIpaService;
 
+    private Stack stack;
+
+    @Mock
+    private AuthenticatedContext ac;
+
+    @Mock
+    private CloudInstance cloudInstance;
+
+    @Mock
+    private CloudStack cloudStack;
+
+    private InstanceMetaData instanceMetaData;
+
+    @Mock
+    private MetadataCollector metadataCollector;
+
+    @Mock
+    private GatewayConfig gatewayConfig;
+
+    @Mock
+    private InstanceConnector instanceConnector;
+
+    @Mock
+    private FreeIpaClient freeIpaClient;
+
     @BeforeEach
-    public void setup() throws FreeIpaClientException, QuotaExceededException {
-        Stack stack = new Stack();
+    public void setup() throws FreeIpaClientException, QuotaExceededException, CloudbreakOrchestratorException {
+        stack = new Stack();
         stack.setId(STACK_ID);
         stack.setTunnel(CLUSTER_PROXY);
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         InstanceGroup ig = new InstanceGroup();
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         instanceMetaData.setDiscoveryFQDN("ipaserver0.example.com");
         ig.setInstanceMetaData(Set.of(instanceMetaData));
@@ -296,7 +347,9 @@ class RebuildFlowIntegrationTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        when(cloudConnector.authentication()).thenReturn(mock(Authenticator.class));
+        Authenticator authenticator = mock(Authenticator.class);
+        when(authenticator.authenticate(any(), any())).thenReturn(ac);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(resourceConnector.upscale(any(), any(), any(), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)))).thenAnswer(inv -> {
             instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -305,18 +358,17 @@ class RebuildFlowIntegrationTest {
         PollTask<ResourcesStatePollerResult> pollTask = mock(PollTask.class);
         when(statusCheckFactory.newPollResourcesStateTask(any(), any(), anyBoolean())).thenReturn(pollTask);
         when(pollTask.completed(any())).thenReturn(Boolean.TRUE);
-        when(cloudConnector.metadata()).thenReturn(mock(MetadataCollector.class));
-        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(new InstanceMetaData()));
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(cloudConnector.metadata()).thenReturn(metadataCollector);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(instanceMetaData));
         when(gatewayConfig.getHostname()).thenReturn("ipaserver0.example.com");
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         when(stackToCloudStackConverter.buildInstance(eq(stack), any(InstanceMetaData.class), eq(ig), any(), any(), any()))
                 .thenReturn(mock(CloudInstance.class));
-        when(cloudConnector.instances()).thenReturn(mock(InstanceConnector.class));
-        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(mock(FreeIpaClient.class));
+        when(cloudConnector.instances()).thenReturn(instanceConnector);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         lenient().doAnswer(invocation -> invocation.getArgument(0, FreeIpaClientCallable.class).run())
                 .when(retryService).retryWhenRetryableWithValue(any(FreeIpaClientCallable.class));
-        when(instanceMetaDataToCloudInstanceConverter.convert(instanceMetaData)).thenReturn(mock(CloudInstance.class));
+        when(instanceMetaDataToCloudInstanceConverter.convert(instanceMetaData)).thenReturn(cloudInstance);
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("example.com");
         when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa);
@@ -325,11 +377,514 @@ class RebuildFlowIntegrationTest {
         when(healthDetailsService.getInstanceHealthDetails(stack, instanceMetaData)).thenReturn(healthDetails);
         when(regionAwareInternalCrnGeneratorFactory.iam())
                 .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1"));
+        when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
+        when(cloudInstance.getInstanceId()).thenReturn("instance-id");
     }
 
     @Test
-    public void testRebuildWhenSuccessful() {
+    public void testRebuildWhenSuccessful() throws Exception {
+        List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
+        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
+        Stack updatedStack = new Stack();
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
+        CloudStack updatedCloudStack = mock(CloudStack.class);
+        when(stackToCloudStackConverter.convert(updatedStack)).thenReturn(updatedCloudStack);
+        CloudVmMetaDataStatus metaDataStatus = new CloudVmMetaDataStatus(new CloudVmInstanceStatus(cloudInstance,
+                com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED), new CloudInstanceMetaData("1.2.3.4", "1.2.3.5"));
+        when(metadataCollector.collect(eq(ac), eq(cloudResources), eq(List.of()), eq(List.of()))).thenReturn(List.of(metaDataStatus));
+        IpaServer ipaServerCurrent = new IpaServer();
+        ipaServerCurrent.setCn("ipaserver0.example.com");
+        IpaServer ipaServerOldReplica = new IpaServer();
+        ipaServerOldReplica.setCn("ipaserver1.example.com");
+        when(freeIpaClient.findAllServers()).thenReturn(Set.of(ipaServerCurrent, ipaServerOldReplica));
+        NodeHealthDetails healthDetails = new NodeHealthDetails();
+        healthDetails.setStatus(InstanceStatus.CREATED);
+        when(healthDetailsService.getInstanceHealthDetails(stack, instanceMetaData)).thenReturn(healthDetails);
+
         testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA rebuild requested");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating metadata for deletion request");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Collecting resources");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Decommissioning instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Finished removing instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Create new instance");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating new instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Extending metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Saving metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Setting up TLS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Bootstrapping machines");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Installing FreeIPA");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Restoring FreeIPA from backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Rebooting FreeIPA instance after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Waiting for FreeIPA to be available");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Cleanup FreeIPA after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA Post Installation");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validate FreeIPA health");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating kerberos nameserver config");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating clusters' configuration");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.AVAILABLE, "Rebuild finished");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(terminationService).requestDeletion(STACK_ID, null);
+        verify(resourceConnector).collectResourcesToRemove(eq(ac), eq(cloudStack), eq(cloudResources), eq(List.of(cloudInstance)));
+        verify(resourceConnector).downscale(ac, cloudStack, cloudResources, List.of(cloudInstance), List.of());
+        verify(terminationService).terminateMetaDataInstances(stack, null);
+        ArgumentCaptor<InstanceMetaData> imCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataService).save(imCaptor.capture());
+        InstanceMetaData imCaptured = imCaptor.getValue();
+        assertEquals(instanceMetaData, imCaptured);
+        List<CloudInstance> newCloudInstances = instancesCaptor.getValue();
+        assertEquals(1, newCloudInstances.size());
+        verify(resourceConnector).upscale(eq(ac), eq(updatedCloudStack), eq(cloudResources), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)));
+        ArgumentCaptor<StackContext> stackContextCaptor = ArgumentCaptor.forClass(StackContext.class);
+        ArgumentCaptor<UpscaleStackResult> upscaleStackResultCaptor = ArgumentCaptor.forClass(UpscaleStackResult.class);
+        verify(instanceValidationService).finishAddInstances(stackContextCaptor.capture(), upscaleStackResultCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        UpscaleStackResult upscaleStackResult = upscaleStackResultCaptor.getValue();
+        assertEquals(UPDATED, upscaleStackResult.getResourceStatus());
+        assertEquals(STACK_ID, upscaleStackResult.getResourceId());
+        assertTrue(upscaleStackResult.getResults().isEmpty());
+        verify(metadataSetupService).saveInstanceMetaData(eq(stack), eq(List.of(metaDataStatus)), eq(CREATED));
+        verify(stackProvisionService).setupTls(stackContextCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        verify(clusterProxyService).registerFreeIpa(STACK_ID);
+        verify(bootstrapService).bootstrap(STACK_ID);
+        verify(orchestrationConfigService).configureOrchestrator(STACK_ID);
+        verify(storageValidationService).validate(stack);
+        ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsCaptor = ArgumentCaptor.forClass(OrchestratorStateParams.class);
+        verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
+        assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
+        verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
+        verify(stackStatusCheckerJob).syncAStack(stack, true);
+        verify(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
+        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
+        verify(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
+        verify(kerberosConfigUpdateService).updateNameservers(STACK_ID);
+        verify(environmentEndpoint).updateConfigsInEnvironmentByCrn(ENVIRONMENT_CRN);
+    }
+
+    @Test
+    public void testHealthValidateFails() throws Exception {
+        List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
+        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
+        Stack updatedStack = new Stack();
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
+        CloudStack updatedCloudStack = mock(CloudStack.class);
+        when(stackToCloudStackConverter.convert(updatedStack)).thenReturn(updatedCloudStack);
+        CloudVmMetaDataStatus metaDataStatus = new CloudVmMetaDataStatus(new CloudVmInstanceStatus(cloudInstance,
+                com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED), new CloudInstanceMetaData("1.2.3.4", "1.2.3.5"));
+        when(metadataCollector.collect(eq(ac), eq(cloudResources), eq(List.of()), eq(List.of()))).thenReturn(List.of(metaDataStatus));
+        IpaServer ipaServerCurrent = new IpaServer();
+        ipaServerCurrent.setCn("ipaserver0.example.com");
+        IpaServer ipaServerOldReplica = new IpaServer();
+        ipaServerOldReplica.setCn("ipaserver1.example.com");
+        when(freeIpaClient.findAllServers()).thenReturn(Set.of(ipaServerCurrent, ipaServerOldReplica));
+        NodeHealthDetails healthDetails = new NodeHealthDetails();
+        healthDetails.setStatus(InstanceStatus.FAILED);
+        when(healthDetailsService.getInstanceHealthDetails(stack, instanceMetaData)).thenReturn(healthDetails);
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA rebuild requested");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating metadata for deletion request");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Collecting resources");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Decommissioning instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Finished removing instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Create new instance");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating new instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Extending metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Saving metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Setting up TLS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Bootstrapping machines");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Installing FreeIPA");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Restoring FreeIPA from backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Rebooting FreeIPA instance after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Waiting for FreeIPA to be available");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Cleanup FreeIPA after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA Post Installation");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validate FreeIPA health");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED,
+                "Failed to rebuild FreeIPA: Instance(s) healthcheck failed: [NodeHealthDetails{issues=null, status=FAILED, name='null', instanceId='null'}]");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(terminationService).requestDeletion(STACK_ID, null);
+        verify(resourceConnector).collectResourcesToRemove(eq(ac), eq(cloudStack), eq(cloudResources), eq(List.of(cloudInstance)));
+        verify(resourceConnector).downscale(ac, cloudStack, cloudResources, List.of(cloudInstance), List.of());
+        verify(terminationService).terminateMetaDataInstances(stack, null);
+        ArgumentCaptor<InstanceMetaData> imCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataService).save(imCaptor.capture());
+        InstanceMetaData imCaptured = imCaptor.getValue();
+        assertEquals(instanceMetaData, imCaptured);
+        List<CloudInstance> newCloudInstances = instancesCaptor.getValue();
+        assertEquals(1, newCloudInstances.size());
+        verify(resourceConnector).upscale(eq(ac), eq(updatedCloudStack), eq(cloudResources), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)));
+        ArgumentCaptor<StackContext> stackContextCaptor = ArgumentCaptor.forClass(StackContext.class);
+        ArgumentCaptor<UpscaleStackResult> upscaleStackResultCaptor = ArgumentCaptor.forClass(UpscaleStackResult.class);
+        verify(instanceValidationService).finishAddInstances(stackContextCaptor.capture(), upscaleStackResultCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        UpscaleStackResult upscaleStackResult = upscaleStackResultCaptor.getValue();
+        assertEquals(UPDATED, upscaleStackResult.getResourceStatus());
+        assertEquals(STACK_ID, upscaleStackResult.getResourceId());
+        assertTrue(upscaleStackResult.getResults().isEmpty());
+        verify(metadataSetupService).saveInstanceMetaData(eq(stack), eq(List.of(metaDataStatus)), eq(CREATED));
+        verify(stackProvisionService).setupTls(stackContextCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        verify(clusterProxyService).registerFreeIpa(STACK_ID);
+        verify(bootstrapService).bootstrap(STACK_ID);
+        verify(orchestrationConfigService).configureOrchestrator(STACK_ID);
+        verify(storageValidationService).validate(stack);
+        ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsCaptor = ArgumentCaptor.forClass(OrchestratorStateParams.class);
+        verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
+        assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
+        verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
+        verify(stackStatusCheckerJob).syncAStack(stack, true);
+        verify(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
+        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
+        verify(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
+        verifyNoInteractions(kerberosConfigUpdateService);
+        verifyNoInteractions(environmentEndpoint);
+    }
+
+    @Test
+    public void testPostInstallFails() throws Exception {
+        List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
+        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
+        Stack updatedStack = new Stack();
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
+        CloudStack updatedCloudStack = mock(CloudStack.class);
+        when(stackToCloudStackConverter.convert(updatedStack)).thenReturn(updatedCloudStack);
+        CloudVmMetaDataStatus metaDataStatus = new CloudVmMetaDataStatus(new CloudVmInstanceStatus(cloudInstance,
+                com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED), new CloudInstanceMetaData("1.2.3.4", "1.2.3.5"));
+        when(metadataCollector.collect(eq(ac), eq(cloudResources), eq(List.of()), eq(List.of()))).thenReturn(List.of(metaDataStatus));
+        IpaServer ipaServerCurrent = new IpaServer();
+        ipaServerCurrent.setCn("ipaserver0.example.com");
+        IpaServer ipaServerOldReplica = new IpaServer();
+        ipaServerOldReplica.setCn("ipaserver1.example.com");
+        when(freeIpaClient.findAllServers()).thenReturn(Set.of(ipaServerCurrent, ipaServerOldReplica));
+        doThrow(new Exception("postinstall failure")).when(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA rebuild requested");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating metadata for deletion request");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Collecting resources");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Decommissioning instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Finished removing instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Create new instance");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating new instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Extending metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Saving metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Setting up TLS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Bootstrapping machines");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Installing FreeIPA");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Restoring FreeIPA from backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Rebooting FreeIPA instance after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Waiting for FreeIPA to be available");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Cleanup FreeIPA after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA Post Installation");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED, "Failed to rebuild FreeIPA: postinstall failure");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(terminationService).requestDeletion(STACK_ID, null);
+        verify(resourceConnector).collectResourcesToRemove(eq(ac), eq(cloudStack), eq(cloudResources), eq(List.of(cloudInstance)));
+        verify(resourceConnector).downscale(ac, cloudStack, cloudResources, List.of(cloudInstance), List.of());
+        verify(terminationService).terminateMetaDataInstances(stack, null);
+        ArgumentCaptor<InstanceMetaData> imCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataService).save(imCaptor.capture());
+        InstanceMetaData imCaptured = imCaptor.getValue();
+        assertEquals(instanceMetaData, imCaptured);
+        List<CloudInstance> newCloudInstances = instancesCaptor.getValue();
+        assertEquals(1, newCloudInstances.size());
+        verify(resourceConnector).upscale(eq(ac), eq(updatedCloudStack), eq(cloudResources), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)));
+        ArgumentCaptor<StackContext> stackContextCaptor = ArgumentCaptor.forClass(StackContext.class);
+        ArgumentCaptor<UpscaleStackResult> upscaleStackResultCaptor = ArgumentCaptor.forClass(UpscaleStackResult.class);
+        verify(instanceValidationService).finishAddInstances(stackContextCaptor.capture(), upscaleStackResultCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        UpscaleStackResult upscaleStackResult = upscaleStackResultCaptor.getValue();
+        assertEquals(UPDATED, upscaleStackResult.getResourceStatus());
+        assertEquals(STACK_ID, upscaleStackResult.getResourceId());
+        assertTrue(upscaleStackResult.getResults().isEmpty());
+        verify(metadataSetupService).saveInstanceMetaData(eq(stack), eq(List.of(metaDataStatus)), eq(CREATED));
+        verify(stackProvisionService).setupTls(stackContextCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        verify(clusterProxyService).registerFreeIpa(STACK_ID);
+        verify(bootstrapService).bootstrap(STACK_ID);
+        verify(orchestrationConfigService).configureOrchestrator(STACK_ID);
+        verify(storageValidationService).validate(stack);
+        ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsCaptor = ArgumentCaptor.forClass(OrchestratorStateParams.class);
+        verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
+        assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
+        verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
+        verify(stackStatusCheckerJob).syncAStack(stack, true);
+        verify(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
+        verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
+        verifyNoInteractions(kerberosConfigUpdateService);
+        verifyNoInteractions(environmentEndpoint);
+    }
+
+    @Test
+    public void testCleanupFails() throws Exception {
+        List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
+        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
+        Stack updatedStack = new Stack();
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
+        CloudStack updatedCloudStack = mock(CloudStack.class);
+        when(stackToCloudStackConverter.convert(updatedStack)).thenReturn(updatedCloudStack);
+        CloudVmMetaDataStatus metaDataStatus = new CloudVmMetaDataStatus(new CloudVmInstanceStatus(cloudInstance,
+                com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED), new CloudInstanceMetaData("1.2.3.4", "1.2.3.5"));
+        when(metadataCollector.collect(eq(ac), eq(cloudResources), eq(List.of()), eq(List.of()))).thenReturn(List.of(metaDataStatus));
+        IpaServer ipaServerCurrent = new IpaServer();
+        ipaServerCurrent.setCn("ipaserver0.example.com");
+        IpaServer ipaServerOldReplica = new IpaServer();
+        ipaServerOldReplica.setCn("ipaserver1.example.com");
+        when(freeIpaClient.findAllServers()).thenReturn(Set.of(ipaServerCurrent, ipaServerOldReplica));
+        doThrow(new FreeIpaClientException("cleanup failure")).when(cleanupService).removeServers(STACK_ID, Set.of("ipaserver1.example.com"));
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA rebuild requested");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating metadata for deletion request");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Collecting resources");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Decommissioning instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Finished removing instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Create new instance");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating new instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Extending metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Saving metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Setting up TLS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Bootstrapping machines");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Installing FreeIPA");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Restoring FreeIPA from backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Rebooting FreeIPA instance after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Waiting for FreeIPA to be available");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Cleanup FreeIPA after restore");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED, "Failed to rebuild FreeIPA: cleanup failure");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(terminationService).requestDeletion(STACK_ID, null);
+        verify(resourceConnector).collectResourcesToRemove(eq(ac), eq(cloudStack), eq(cloudResources), eq(List.of(cloudInstance)));
+        verify(resourceConnector).downscale(ac, cloudStack, cloudResources, List.of(cloudInstance), List.of());
+        verify(terminationService).terminateMetaDataInstances(stack, null);
+        ArgumentCaptor<InstanceMetaData> imCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataService).save(imCaptor.capture());
+        InstanceMetaData imCaptured = imCaptor.getValue();
+        assertEquals(instanceMetaData, imCaptured);
+        List<CloudInstance> newCloudInstances = instancesCaptor.getValue();
+        assertEquals(1, newCloudInstances.size());
+        verify(resourceConnector).upscale(eq(ac), eq(updatedCloudStack), eq(cloudResources), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)));
+        ArgumentCaptor<StackContext> stackContextCaptor = ArgumentCaptor.forClass(StackContext.class);
+        ArgumentCaptor<UpscaleStackResult> upscaleStackResultCaptor = ArgumentCaptor.forClass(UpscaleStackResult.class);
+        verify(instanceValidationService).finishAddInstances(stackContextCaptor.capture(), upscaleStackResultCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        UpscaleStackResult upscaleStackResult = upscaleStackResultCaptor.getValue();
+        assertEquals(UPDATED, upscaleStackResult.getResourceStatus());
+        assertEquals(STACK_ID, upscaleStackResult.getResourceId());
+        assertTrue(upscaleStackResult.getResults().isEmpty());
+        verify(metadataSetupService).saveInstanceMetaData(eq(stack), eq(List.of(metaDataStatus)), eq(CREATED));
+        verify(stackProvisionService).setupTls(stackContextCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        verify(clusterProxyService).registerFreeIpa(STACK_ID);
+        verify(bootstrapService).bootstrap(STACK_ID);
+        verify(orchestrationConfigService).configureOrchestrator(STACK_ID);
+        verify(storageValidationService).validate(stack);
+        ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsCaptor = ArgumentCaptor.forClass(OrchestratorStateParams.class);
+        verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
+        assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verify(instanceConnector).reboot(ac, List.of(), List.of(cloudInstance));
+        verify(freeIpaServiceStartService).pollFreeIpaHealth(stack);
+        verify(stackStatusCheckerJob).syncAStack(stack, true);
+        verifyNoInteractions(freeIpaPostInstallService);
+        verifyNoInteractions(kerberosConfigUpdateService);
+        verifyNoInteractions(environmentEndpoint);
+    }
+
+    @Test
+    public void testRestoreFails() throws Exception {
+        List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
+        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
+        Stack updatedStack = new Stack();
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
+        CloudStack updatedCloudStack = mock(CloudStack.class);
+        when(stackToCloudStackConverter.convert(updatedStack)).thenReturn(updatedCloudStack);
+        CloudVmMetaDataStatus metaDataStatus = new CloudVmMetaDataStatus(new CloudVmInstanceStatus(cloudInstance,
+                com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED), new CloudInstanceMetaData("1.2.3.4", "1.2.3.5"));
+        when(metadataCollector.collect(eq(ac), eq(cloudResources), eq(List.of()), eq(List.of()))).thenReturn(List.of(metaDataStatus));
+        IpaServer ipaServerCurrent = new IpaServer();
+        ipaServerCurrent.setCn("ipaserver0.example.com");
+        IpaServer ipaServerOldReplica = new IpaServer();
+        ipaServerOldReplica.setCn("ipaserver1.example.com");
+        when(freeIpaClient.findAllServers()).thenReturn(Set.of(ipaServerCurrent, ipaServerOldReplica));
+        doNothing().doThrow(new CloudbreakOrchestratorFailedException("restore failed"))
+                .when(hostOrchestrator).runOrchestratorState(any(OrchestratorStateParams.class));
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA rebuild requested");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating metadata for deletion request");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Collecting resources");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Decommissioning instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Finished removing instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Create new instance");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating new instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Extending metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Saving metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Setting up TLS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Bootstrapping machines");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Installing FreeIPA");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED, "Failed to rebuild FreeIPA: restore failed");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(terminationService).requestDeletion(STACK_ID, null);
+        verify(resourceConnector).collectResourcesToRemove(eq(ac), eq(cloudStack), eq(cloudResources), eq(List.of(cloudInstance)));
+        verify(resourceConnector).downscale(ac, cloudStack, cloudResources, List.of(cloudInstance), List.of());
+        verify(terminationService).terminateMetaDataInstances(stack, null);
+        ArgumentCaptor<InstanceMetaData> imCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataService).save(imCaptor.capture());
+        InstanceMetaData imCaptured = imCaptor.getValue();
+        assertEquals(instanceMetaData, imCaptured);
+        List<CloudInstance> newCloudInstances = instancesCaptor.getValue();
+        assertEquals(1, newCloudInstances.size());
+        verify(resourceConnector).upscale(eq(ac), eq(updatedCloudStack), eq(cloudResources), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)));
+        ArgumentCaptor<StackContext> stackContextCaptor = ArgumentCaptor.forClass(StackContext.class);
+        ArgumentCaptor<UpscaleStackResult> upscaleStackResultCaptor = ArgumentCaptor.forClass(UpscaleStackResult.class);
+        verify(instanceValidationService).finishAddInstances(stackContextCaptor.capture(), upscaleStackResultCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        UpscaleStackResult upscaleStackResult = upscaleStackResultCaptor.getValue();
+        assertEquals(UPDATED, upscaleStackResult.getResourceStatus());
+        assertEquals(STACK_ID, upscaleStackResult.getResourceId());
+        assertTrue(upscaleStackResult.getResults().isEmpty());
+        verify(metadataSetupService).saveInstanceMetaData(eq(stack), eq(List.of(metaDataStatus)), eq(CREATED));
+        verify(stackProvisionService).setupTls(stackContextCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        verify(clusterProxyService).registerFreeIpa(STACK_ID);
+        verify(bootstrapService).bootstrap(STACK_ID);
+        verify(orchestrationConfigService).configureOrchestrator(STACK_ID);
+        verify(storageValidationService).validate(stack);
+        ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsCaptor = ArgumentCaptor.forClass(OrchestratorStateParams.class);
+        verify(hostOrchestrator, times(2)).runOrchestratorState(orchestratorStateParamsCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
+        assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
+        verify(freeIpaInstallService).installFreeIpa(STACK_ID);
+        verifyNoInteractions(freeIpaPostInstallService, kerberosConfigUpdateService, environmentEndpoint, cleanupService, instanceConnector,
+                freeIpaServiceStartService, stackStatusCheckerJob);
+    }
+
+    @Test
+    public void testBackupValidationFails() throws Exception {
+        List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
+        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
+        Stack updatedStack = new Stack();
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
+        CloudStack updatedCloudStack = mock(CloudStack.class);
+        when(stackToCloudStackConverter.convert(updatedStack)).thenReturn(updatedCloudStack);
+        CloudVmMetaDataStatus metaDataStatus = new CloudVmMetaDataStatus(new CloudVmInstanceStatus(cloudInstance,
+                com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED), new CloudInstanceMetaData("1.2.3.4", "1.2.3.5"));
+        when(metadataCollector.collect(eq(ac), eq(cloudResources), eq(List.of()), eq(List.of()))).thenReturn(List.of(metaDataStatus));
+        IpaServer ipaServerCurrent = new IpaServer();
+        ipaServerCurrent.setCn("ipaserver0.example.com");
+        IpaServer ipaServerOldReplica = new IpaServer();
+        ipaServerOldReplica.setCn("ipaserver1.example.com");
+        when(freeIpaClient.findAllServers()).thenReturn(Set.of(ipaServerCurrent, ipaServerOldReplica));
+        doThrow(new CloudbreakOrchestratorFailedException("backup dl and validate failed"))
+                .when(hostOrchestrator).runOrchestratorState(any(OrchestratorStateParams.class));
+
+        testFlow();
+
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "FreeIPA rebuild requested");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Updating metadata for deletion request");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Collecting resources");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Decommissioning instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Finished removing instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Create new instance");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating new instances");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Extending metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Saving metadata");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Setting up TLS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Bootstrapping machines");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED,
+                "Failed to rebuild FreeIPA: backup dl and validate failed");
+        stackStatusVerify.verifyNoMoreInteractions();
+
+        verify(terminationService).requestDeletion(STACK_ID, null);
+        verify(resourceConnector).collectResourcesToRemove(eq(ac), eq(cloudStack), eq(cloudResources), eq(List.of(cloudInstance)));
+        verify(resourceConnector).downscale(ac, cloudStack, cloudResources, List.of(cloudInstance), List.of());
+        verify(terminationService).terminateMetaDataInstances(stack, null);
+        ArgumentCaptor<InstanceMetaData> imCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
+        verify(instanceMetaDataService).save(imCaptor.capture());
+        InstanceMetaData imCaptured = imCaptor.getValue();
+        assertEquals(instanceMetaData, imCaptured);
+        List<CloudInstance> newCloudInstances = instancesCaptor.getValue();
+        assertEquals(1, newCloudInstances.size());
+        verify(resourceConnector).upscale(eq(ac), eq(updatedCloudStack), eq(cloudResources), eq(new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L)));
+        ArgumentCaptor<StackContext> stackContextCaptor = ArgumentCaptor.forClass(StackContext.class);
+        ArgumentCaptor<UpscaleStackResult> upscaleStackResultCaptor = ArgumentCaptor.forClass(UpscaleStackResult.class);
+        verify(instanceValidationService).finishAddInstances(stackContextCaptor.capture(), upscaleStackResultCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        UpscaleStackResult upscaleStackResult = upscaleStackResultCaptor.getValue();
+        assertEquals(UPDATED, upscaleStackResult.getResourceStatus());
+        assertEquals(STACK_ID, upscaleStackResult.getResourceId());
+        assertTrue(upscaleStackResult.getResults().isEmpty());
+        verify(metadataSetupService).saveInstanceMetaData(eq(stack), eq(List.of(metaDataStatus)), eq(CREATED));
+        verify(stackProvisionService).setupTls(stackContextCaptor.capture());
+        assertEquals(stack, stackContextCaptor.getValue().getStack());
+        verify(clusterProxyService).registerFreeIpa(STACK_ID);
+        verify(bootstrapService).bootstrap(STACK_ID);
+        verify(orchestrationConfigService).configureOrchestrator(STACK_ID);
+        verify(storageValidationService).validate(stack);
+        ArgumentCaptor<OrchestratorStateParams> orchestratorStateParamsCaptor = ArgumentCaptor.forClass(OrchestratorStateParams.class);
+        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsCaptor.capture());
+        OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsCaptor.getValue();
+        assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
+        verifyNoInteractions(freeIpaPostInstallService, kerberosConfigUpdateService, environmentEndpoint, cleanupService, instanceConnector,
+                freeIpaServiceStartService, stackStatusCheckerJob, freeIpaInstallService);
     }
 
     private void testFlow() {

@@ -19,7 +19,7 @@ public class RebuildOrchestratorConfigAction extends AbstractRebuildAction<Boots
 
     @Override
     protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) throws Exception {
-        stackUpdater().updateStackStatus(payload.getResourceId(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Configuring the orchestrator");
+        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Configuring the orchestrator");
         OrchestratorConfigRequest request = new OrchestratorConfigRequest(payload.getResourceId());
         sendEvent(context, request);
     }
