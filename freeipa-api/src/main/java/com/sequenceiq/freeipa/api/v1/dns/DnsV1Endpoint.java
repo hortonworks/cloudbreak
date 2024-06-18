@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -28,9 +29,11 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsPtrRecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
+import com.sequenceiq.freeipa.api.v1.dns.model.DeleteDnsPtrRecordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -145,4 +148,20 @@ public interface DnsV1Endpoint {
     void deleteDnsCnameRecord(@QueryParam("environment") @NotEmpty String environmentCrn,
             @QueryParam("dnsZone") @Pattern(regexp = DNS_ZONE_PATTERN, message = DNS_ZONE_MSG) String dnsZone,
             @QueryParam("cname") @NotEmpty @Pattern(regexp = DNS_CNAME_PATTERN, message = DNS_CNAME_MSG) String cname);
+
+    @POST
+    @Path("record/ptr")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DnsOperationDescriptions.ADD_DNS_PTR_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addDnsPtrRecordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void addDnsPtrRecord(@Valid @NotNull AddDnsPtrRecordRequest request);
+
+    @DELETE
+    @Path("record/ptr")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DnsOperationDescriptions.DELETE_DNS_PTR_RECORD, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "deleteDnsPtrRecordV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void deleteDnsPtrRecord(@Valid @NotNull @BeanParam DeleteDnsPtrRecordRequest deleteDnsPtrRecordRequest);
 }

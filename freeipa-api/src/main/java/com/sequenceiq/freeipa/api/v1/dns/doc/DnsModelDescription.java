@@ -5,6 +5,8 @@ public final class DnsModelDescription {
 
     public static final String HOSTNAME = "Hostname name without the domain. eg. 'ipaserver' from 'ipaserver.cloudera.site'";
 
+    public static final String FQDN = "Fully qualified domain name eg. 'ipaserver.cloudera.site'";
+
     public static final String IP = "The IP address of the host the A record should point to. Only IPv4";
 
     public static final String DNS_ZONE = "It's the domain. Eg if your FQDN is ipaserver.cloudera.site, it's 'cloudera.site'. "

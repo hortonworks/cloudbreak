@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsPtrRecordRequest;
+import com.sequenceiq.freeipa.api.v1.dns.model.DeleteDnsPtrRecordRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
@@ -222,5 +224,13 @@ public class DnsRecordService {
         ignoreNotFoundException(() -> freeIpaAndClient.getClient().deleteDnsRecord(record, zone),
                 "A record in zone [{}] with name [{}] not found", zone, record);
         LOGGER.info("Deleted record or record missing with name [{}] in zone [{}]", record, zone);
+    }
+
+    public void addDnsPtrRecord(AddDnsPtrRecordRequest addDnsPtrRecordRequest) {
+        LOGGER.debug("addDnsPtrRecord: {}", addDnsPtrRecordRequest);
+    }
+
+    public void deleteDnsPtrRecord(DeleteDnsPtrRecordRequest deleteDnsPtrRecordRequest) {
+        LOGGER.debug("deleteDnsPtrRecord: {}", deleteDnsPtrRecordRequest);
     }
 }

@@ -11,10 +11,14 @@ public final class DnsOperationDescriptions {
             + "If zone not specified default zone will be used.";
     public static final String ADD_DNS_A_RECORD = "Creates a DNS A record with the value in the defined zone if zone exists. If zone not specified "
             + "default zone will be used. Reverse pointer is created if requested and reverse zone exists.";
+    public static final String ADD_DNS_PTR_RECORD = "Creates a DNS PTR record with the value in the defined reverse zone if zone exists. "
+            + "If zone not specified the zone will be used which fits the most for the given ip.";
 
     public static final String DELETE_DNS_A_RECORD = "Deletes the A record in DNS Zone and tries to delete PTR if exists.";
 
     public static final String DELETE_DNS_CNAME_RECORD = "Deletes the CNAME record in DNS Zone.";
+
+    public static final String DELETE_DNS_PTR_RECORD = "Deletes the PTR record in Reverse DNS Zone.";
 
     private DnsOperationDescriptions() {
     }
