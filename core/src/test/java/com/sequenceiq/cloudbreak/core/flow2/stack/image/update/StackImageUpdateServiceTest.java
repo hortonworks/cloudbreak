@@ -98,7 +98,7 @@ public class StackImageUpdateServiceTest {
 
         image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, null);
         statedImage = StatedImage.statedImage(image, "url", "name");
         lenient().when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.ok());
         lenient().when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anyList())).thenReturn(CheckResult.ok());
@@ -185,7 +185,7 @@ public class StackImageUpdateServiceTest {
         stack.setPlatformVariant("AWS_GOV_NATIVE");
         image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS_GOV", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, null);
         statedImage = StatedImage.statedImage(image, "url", "name");
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",

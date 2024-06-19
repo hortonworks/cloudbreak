@@ -19,7 +19,7 @@ public class CurrentImageUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CurrentImageUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 1;
+    private static final int ORDER_NUMBER = 2;
 
     @Inject
     private CurrentImageUsageCondition currentImageUsageCondition;

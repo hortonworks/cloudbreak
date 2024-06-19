@@ -46,6 +46,8 @@ public class Image {
 
     private static final String ADVERTISED = "advertised";
 
+    private static final String TAGS = "tags";
+
     private final String date;
 
     private final Long created;
@@ -84,6 +86,8 @@ public class Image {
 
     private final String sourceImageId;
 
+    private final Map<String, String> tags;
+
     @JsonCreator
     public Image(
             @JsonProperty(value = DATE, required = true) String date,
@@ -103,7 +107,8 @@ public class Image {
             @JsonProperty(BUILD_NUMBER) String cmBuildNumber,
             @JsonProperty(ADVERTISED) boolean advertised,
             @JsonProperty("baseParcelUrl") String baseParcelUrl,
-            @JsonProperty("sourceImageId") String sourceImageId) {
+            @JsonProperty("sourceImageId") String sourceImageId,
+            @JsonProperty(TAGS) Map<String, String> tags) {
         this.date = date;
         this.created = created;
         this.published = published;
@@ -122,6 +127,7 @@ public class Image {
         this.advertised = advertised;
         this.baseParcelUrl = baseParcelUrl;
         this.sourceImageId = sourceImageId;
+        this.tags = tags == null ? new HashMap<>() : tags;
     }
 
     public Image(Image that, Map<String, Map<String, String>> imageSetsByProvider) {
@@ -143,6 +149,7 @@ public class Image {
         this.advertised = that.advertised;
         this.baseParcelUrl = that.baseParcelUrl;
         this.sourceImageId = that.sourceImageId;
+        this.tags = that.tags == null ? new HashMap<>() : that.tags;
     }
 
     @JsonProperty(DATE)
@@ -243,6 +250,11 @@ public class Image {
         return advertised;
     }
 
+    @JsonProperty(TAGS)
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
     @JsonIgnore
     public String getBaseParcelUrl() {
         return baseParcelUrl;
@@ -324,6 +336,9 @@ public class Image {
         if (!Objects.equals(baseParcelUrl, image.baseParcelUrl)) {
             return false;
         }
+        if (!Objects.equals(tags, image.tags)) {
+            return false;
+        }
         return Objects.equals(sourceImageId, image.sourceImageId);
     }
 
@@ -347,7 +362,8 @@ public class Image {
                 sourceImageId,
                 stackDetails,
                 uuid,
-                version);
+                version,
+                tags);
     }
 
     public String shortOsDescriptionFormat() {

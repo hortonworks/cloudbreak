@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.conf.UpgradeImageFilterConfig;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
@@ -76,6 +77,9 @@ public class UpgradeImageFilterConfigTest {
 
         @MockBean
         private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+
+        @MockBean
+        private ImageUtil imageUtil;
 
     }
 }

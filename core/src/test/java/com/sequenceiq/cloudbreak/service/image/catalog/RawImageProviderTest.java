@@ -94,7 +94,7 @@ public class RawImageProviderTest {
 
     private Image createImage(String imageId, String cloudPlatform) {
         return new Image(null, null, null, null, null, imageId, null, null, Map.of(cloudPlatform, Collections.emptyMap()), null, null, null, null, null, null,
-                false,  null, null);
+                false, null, null, null);
     }
 
 }

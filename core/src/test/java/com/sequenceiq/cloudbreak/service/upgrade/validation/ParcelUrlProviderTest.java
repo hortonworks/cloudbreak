@@ -130,7 +130,7 @@ public class ParcelUrlProviderTest {
         return new Image(null, null, null, null, null, IMAGE_ID, null, Map.of(OS_TYPE, "http://cm/yum"), null,
                 new ImageStackDetails(null, stackRepoDetails, null),
                 OS_TYPE, Map.of(CM.getKey(), "7.2.4", CM_BUILD_NUMBER.getKey(), "14450219"), createPreWarmParcels(), createPreWarmCsdUrls(), null, false, null,
-                null);
+                null, null);
     }
 
     private List<String> createPreWarmCsdUrls() {

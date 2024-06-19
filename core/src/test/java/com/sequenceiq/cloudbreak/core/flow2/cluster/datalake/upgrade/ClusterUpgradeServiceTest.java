@@ -91,14 +91,14 @@ public class ClusterUpgradeServiceTest {
         return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), new ImageStackDetails(V_7_0_2, null, stackBuildNumber), OS_TYPE,
                 createPackageVersions(cmBuildNumber, stackBuildNumber),
-                null, null, cmBuildNumber, true, null, null);
+                null, null, cmBuildNumber, true, null, null, null);
     }
 
     private static Image createImage(String cmBuildNumber) {
         return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(cmBuildNumber, ""),
-                null, null, cmBuildNumber, true, null, null);
+                null, null, cmBuildNumber, true, null, null, null);
     }
 
     private static Map<String, String> createPackageVersions(String cmBuildNumber, String stackBuildNumber) {

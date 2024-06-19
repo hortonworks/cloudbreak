@@ -20,7 +20,7 @@ public class ImageCreationBasedUpgradeImageFilter implements UpgradeImageFilter 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCreationBasedUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 6;
+    private static final int ORDER_NUMBER = 7;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {

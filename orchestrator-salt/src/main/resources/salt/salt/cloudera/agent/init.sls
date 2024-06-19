@@ -2,6 +2,7 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- set manager_server_fqdn = salt['pillar.get']('hosts')[metadata.server_address]['fqdn'] %}
 {%- set internal_loadbalancer_san = salt['pillar.get']('cloudera-manager:communication:internal_loadbalancer_san') %}
+{%- set cpuarch = salt['grains.get']('cpuarch') %}
 
 install-cloudera-manager-agent:
   pkg.installed:
@@ -30,7 +31,8 @@ install-cloudera-manager-agent:
 # 2. RedHat 7 + Python 2 (customer specific)
 # 3. RedHat 8 + Python 3.8
 # 4. CentOS 8 + Python 3.8
-{%- if not salt['pkg.version']('python-psycopg2')
+{%- if cpuarch != 'aarch64'
+   and not salt['pkg.version']('python-psycopg2')
    and not salt['pkg.version']('python2-psycopg2')
    and not salt['pkg.version']('python38-psycopg2')
    and not salt['pkg.version']('rh-python38-python-psycopg2')

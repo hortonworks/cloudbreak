@@ -15,7 +15,7 @@ public class CloudPlatformBasedUpgradeImageFilter implements UpgradeImageFilter 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudPlatformBasedUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 2;
+    private static final int ORDER_NUMBER = 3;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {

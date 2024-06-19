@@ -6,7 +6,7 @@ import java.util.List;
 
 public class DistroxEnabledInstanceTypes {
 
-    private static final String ENABLED_TYPES =
+    public static final String ENABLED_TYPES =
             "h1.2xlarge,h1.4xlarge,h1.8xlarge," +
             "x1e.2xlarge," +
 
@@ -56,6 +56,8 @@ public class DistroxEnabledInstanceTypes {
             "r7iz.xlarge,r7iz.2xlarge,r7iz.4xlarge,r7iz.8xlarge,r7iz.12xlarge,r7iz.16xlarge,r7iz.32xlarge," +
             "c7i.xlarge,c7i.2xlarge,c7i.4xlarge,c7i.8xlarge,c7i.12xlarge,c7i.16xlarge,c7i.24xlarge,c7i.48xlarge," +
             "c7a.xlarge,c7a.2xlarge,c7a.4xlarge,c7a.8xlarge,c7a.12xlarge,c7a.16xlarge,c7a.24xlarge,c7a.32xlarge,c7a.48xlarge,";
+
+    public static final String AWS_ENABLED_ARM_TYPES = "r7gd.2xlarge";
 
     public static final List<String> AWS_ENABLED_TYPES_LIST = new ArrayList<String>(Arrays.asList(ENABLED_TYPES.trim().split(",")));
 

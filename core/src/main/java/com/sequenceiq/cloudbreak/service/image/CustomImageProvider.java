@@ -43,7 +43,8 @@ public class CustomImageProvider {
                 image.getCmBuildNumber(),
                 image.isAdvertised(),
                 customImage.getBaseParcelUrl(),
-                customImage.getCustomizedImageId());
+                customImage.getCustomizedImageId(),
+                image.getTags());
         return StatedImage.statedImage(result, imageCatalogUrl, catalogName);
     }
 

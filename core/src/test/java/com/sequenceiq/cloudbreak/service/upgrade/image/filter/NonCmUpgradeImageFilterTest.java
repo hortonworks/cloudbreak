@@ -55,7 +55,7 @@ class NonCmUpgradeImageFilterTest {
 
     private Image createImage(String imageId, Map<String, String> packageVersions) {
         return new Image(null, null, null, null, null, imageId, null, null, null, null, null, packageVersions, null, null, null,
-                false, null, null);
+                false, null, null, null);
     }
 
     private ImageFilterResult createImageFilterResult(List<Image> images) {

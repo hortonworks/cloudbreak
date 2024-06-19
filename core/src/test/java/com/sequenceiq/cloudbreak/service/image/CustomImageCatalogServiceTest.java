@@ -244,7 +244,6 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getSourceImageByImageType(customImage)).thenThrow(new CloudbreakImageCatalogException(""));
 
 
-
         assertThrows(NotFoundException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, customImage));
     }
 
@@ -441,6 +440,6 @@ public class CustomImageCatalogServiceTest {
     }
 
     private Image createTestImage() {
-        return new Image(null, null, null, null, null, CUSTOMIZED_IMAGE_ID, null, null, null, null, null, null, null, null, null, true, null, null);
+        return new Image(null, null, null, null, null, CUSTOMIZED_IMAGE_ID, null, null, null, null, null, null, null, null, null, true, null, null, null);
     }
 }

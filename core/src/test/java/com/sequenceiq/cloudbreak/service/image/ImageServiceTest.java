@@ -629,7 +629,7 @@ public class ImageServiceTest {
     @Test
     public void testGetSupportedImdsIfPkgVersionMissing() {
         Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
-                Map.of(), List.of(), List.of(), null, false, null, null);
+                Map.of(), List.of(), List.of(), null, false, null, null, null);
 
         Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("AWS", StatedImage.statedImage(image, null, null));
         assertTrue(supportedImdsVersion.isPresent());
@@ -639,7 +639,7 @@ public class ImageServiceTest {
     @Test
     public void testGetSupportedImds() {
         Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
-                Map.of("imds", "v2"), List.of(), List.of(), null, false, null, null);
+                Map.of("imds", "v2"), List.of(), List.of(), null, false, null, null, null);
 
         Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("AWS", StatedImage.statedImage(image, null, null));
         assertTrue(supportedImdsVersion.isPresent());

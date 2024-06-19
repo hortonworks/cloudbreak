@@ -108,7 +108,7 @@ public class CsdLocationFilterTest {
     }
 
     private Image createImage(List<String> preWarmCsd) {
-        return new Image(null, null, null, null, null, null, null, null, null, null, null, null, null, preWarmCsd, null, true, null, null);
+        return new Image(null, null, null, null, null, null, null, null, null, null, null, null, null, preWarmCsd, null, true, null, null, null);
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {

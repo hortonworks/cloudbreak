@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM_TYPES;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
@@ -432,7 +433,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResponse,
-        List<Subnet> awsSubnets, ExtendedCloudCredential cloudCredential) {
+            List<Subnet> awsSubnets, ExtendedCloudCredential cloudCredential) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
             boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(
@@ -650,16 +651,18 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, false);
+        return getCloudVmTypes(cloudCredential, false, region, filters, enabledInstanceTypeFilter, false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
         if (restrictInstanceTypes) {
-            return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter, true);
+            return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters,
+                    enabledDistroxInstanceTypeFilter.or(vm -> dataHubArmEnabled && AWS_ENABLED_ARM_TYPES.equals(vm.value())), true);
         } else {
-            return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, true);
+            return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, enabledInstanceTypeFilter, true);
         }
     }
 
@@ -678,7 +681,7 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
+    private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, boolean dataHubArmEnabled, Region region, Map<String, String> filters,
             Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -696,10 +699,11 @@ public class AwsPlatformResources implements PlatformResources {
 
             Set<VmType> awsInstances = new HashSet<>();
             for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
+                String[] processorArchitectures = dataHubArmEnabled ? new String[] {"x86_64", "arm64"} : new String[] {"x86_64"};
                 DescribeInstanceTypesRequest request = DescribeInstanceTypesRequest.builder()
                         .filters(Filter.builder()
                                 .name("processor-info.supported-architecture")
-                                .values("x86_64")
+                                .values(processorArchitectures)
                                 .build())
                         .instanceTypes(getInstanceTypes(instanceTypes, actualSegment))
                         .build();

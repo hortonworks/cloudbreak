@@ -52,6 +52,6 @@ public class ImageTestUtil {
         }
         return new Image("imageDate", System.currentTimeMillis(), System.currentTimeMillis(), "imageDesc", "centos7", uuid, stackVersion,
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, "myBaseUrl", "sourceId");
+                Collections.emptyList(), Collections.emptyList(), "1", true, "myBaseUrl", "sourceId", null);
     }
 }

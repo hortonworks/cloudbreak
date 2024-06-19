@@ -27,7 +27,7 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuntimeDependencyBasedUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 10;
+    private static final int ORDER_NUMBER = 11;
 
     @Inject
     private PythonVersionBasedRuntimeVersionValidator pythonVersionBasedRuntimeVersionValidator;

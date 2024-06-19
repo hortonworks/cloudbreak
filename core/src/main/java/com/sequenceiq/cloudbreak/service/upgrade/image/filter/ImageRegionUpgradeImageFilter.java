@@ -21,7 +21,7 @@ public class ImageRegionUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageRegionUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 3;
+    private static final int ORDER_NUMBER = 4;
 
     @Inject
     private ImageService imageService;

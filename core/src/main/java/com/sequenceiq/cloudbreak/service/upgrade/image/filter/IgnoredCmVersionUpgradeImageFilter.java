@@ -18,7 +18,7 @@ public class IgnoredCmVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final String IGNORED_CM_VERSION = "7.x.0";
 
-    private static final int ORDER_NUMBER = 5;
+    private static final int ORDER_NUMBER = 6;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {

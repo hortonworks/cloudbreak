@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
@@ -108,6 +109,9 @@ public class UpgradeService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private ImageUtil imageUtil;
 
     public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(String accountId, NameOrCrn nameOrCrn, User user) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
@@ -333,7 +337,7 @@ public class UpgradeService {
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, StackView stack) {
-        return packageVersionFilter(image.getPackageVersions()).and(parcelFilter(stack));
+        return packageVersionFilter(image.getPackageVersions()).and(parcelFilter(stack)).and(i -> !imageUtil.isArm64Image(i));
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {

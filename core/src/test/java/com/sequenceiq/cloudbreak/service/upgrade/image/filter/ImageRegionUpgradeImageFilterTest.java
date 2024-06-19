@@ -80,7 +80,7 @@ class ImageRegionUpgradeImageFilterTest {
 
     private Image createImage(String imageId) {
         return new Image(null, null, null, null, null, imageId, null, null, null, null, null, null, null, null, null,
-                false, null, null);
+                false, null, null, null);
     }
 
     private ImageFilterResult createImageFilterResult(Image... images) {

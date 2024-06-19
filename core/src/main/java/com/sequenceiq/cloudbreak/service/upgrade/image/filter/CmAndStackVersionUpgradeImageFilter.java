@@ -21,7 +21,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmAndStackVersionUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 7;
+    private static final int ORDER_NUMBER = 8;
 
     @Inject
     private LockedComponentChecker lockedComponentChecker;

@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -76,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
@@ -178,6 +180,12 @@ public class StackCreatorService {
 
     @Inject
     private RecipeValidatorService recipeValidatorService;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private ImageUtil imageUtil;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
@@ -425,6 +433,7 @@ public class StackCreatorService {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
             LOGGER.info("The stack with name {} has base images enabled: {} and should use base images: {}",
                     stackName, baseImageEnabled, shouldUseBaseCMImage);
+            boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(ThreadBasedUserCrnProvider.getAccountId());
             StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(user.getUserCrn(), () -> {
                 try {
                     restRequestThreadLocalService.setCloudbreakUser(cbUser);
@@ -437,7 +446,8 @@ public class StackCreatorService {
                             shouldUseBaseCMImage,
                             baseImageEnabled,
                             user,
-                            image -> true);
+                            image -> !imageUtil.isArm64Image(image) || (dataHubArmEnabled && StackType.WORKLOAD.equals(stackRequest.getType()) &&
+                                    CloudPlatform.AWS.equalsIgnoreCase(platformString)));
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new RuntimeException(e);
                 }

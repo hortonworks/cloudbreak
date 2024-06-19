@@ -55,7 +55,7 @@ class IgnoredCmVersionUpgradeImageFilterTest {
 
     private Image createImage(String imageId, String cmVersion) {
         return new Image(null, null, null, null, null, imageId, null, null, null, null, null, Map.of(ImagePackageVersion.CM.getKey(), cmVersion), null, null,
-                null, false, null, null);
+                null, false, null, null, null);
     }
 
     private ImageFilterResult createImageFilterResult(List<Image> images) {

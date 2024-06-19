@@ -283,7 +283,7 @@ public class VersionBasedImageCatalogServiceTest {
     }
 
     private Image createImage(String imageId) {
-        return new Image(null, null, null, null, null, imageId, null, null, null, null, null, null, null, null, null, true, null, null);
+        return new Image(null, null, null, null, null, imageId, null, null, null, null, null, null, null, null, null, true, null, null, null);
     }
 
     private Versions createCbVersions() {

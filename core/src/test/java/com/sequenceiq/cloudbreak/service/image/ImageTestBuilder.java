@@ -46,6 +46,8 @@ public class ImageTestBuilder {
 
     private String sourceImageId;
 
+    private Map<String, String> tags;
+
     public static ImageTestBuilder builder() {
         return new ImageTestBuilder();
     }
@@ -145,6 +147,11 @@ public class ImageTestBuilder {
         return this;
     }
 
+    public ImageTestBuilder withTags(Map<String, String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
     public Image build() {
         return new Image(
                 date,
@@ -164,7 +171,8 @@ public class ImageTestBuilder {
                 cmBuildNumber,
                 advertised,
                 baseParcelUrl,
-                sourceImageId
+                sourceImageId,
+                tags
         );
     }
 }

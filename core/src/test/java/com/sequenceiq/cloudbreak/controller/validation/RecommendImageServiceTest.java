@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -50,6 +52,9 @@ public class RecommendImageServiceTest {
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private ImageUtil imageUtil;
 
     @Test
     public void testRecommendImage() throws Exception {
@@ -87,7 +92,8 @@ public class RecommendImageServiceTest {
                         "",
                         true,
                         "",
-                        "");
+                        "",
+                        new HashMap<>());
         when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(statedImage);
         when(statedImage.getImage()).thenReturn(catalogImage);
 

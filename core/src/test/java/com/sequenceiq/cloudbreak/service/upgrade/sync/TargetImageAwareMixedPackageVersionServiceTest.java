@@ -165,7 +165,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createTargetImage() {
         Map<String, String> packageVersions = Map.of(CM.getKey(), CM_VERSION, ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER);
         return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, null, null, null, null, null, null, null,
-                packageVersions, null, Collections.emptyList(), null, false, null, null);
+                packageVersions, null, Collections.emptyList(), null, false, null, null, null);
     }
 
     private Set<ParcelInfo> createParcelInfo(Map<String, String> parcels) {

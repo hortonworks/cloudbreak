@@ -114,6 +114,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
@@ -126,6 +127,9 @@ public class EntitlementService {
 
     @Inject
     private GrpcUmsClient umsClient;
+
+    @Value("${cb.datahub.arm.enabled:false}")
+    private boolean dataHubArmEnabled;
 
     public boolean isEntitledFor(String accountId, Entitlement entitledFor) {
         return isEntitlementRegistered(accountId, entitledFor);
@@ -525,6 +529,10 @@ public class EntitlementService {
 
     public boolean isObservabilityDmpEnabled(String accountId) {
         return isEntitlementRegistered(accountId, OBSERVABILITY_DMP);
+    }
+
+    public boolean isDataHubArmEnabled(String accountId) {
+        return dataHubArmEnabled;
     }
 
     public List<String> getEntitlements(String accountId) {

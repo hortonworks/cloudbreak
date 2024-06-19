@@ -208,6 +208,6 @@ class AzureImageFilterTest {
 
         return new Image("", System.currentTimeMillis(), System.currentTimeMillis(), "", "redhat7", uuid, "",
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, "redhat7", Collections.emptyMap(),
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, new HashMap<>());
     }
 }

@@ -72,7 +72,8 @@ public class GenerateImageCatalogService {
                 source.getCmBuildNumber(),
                 true,
                 source.getBaseParcelUrl(),
-                source.getSourceImageId()
+                source.getSourceImageId(),
+                source.getTags()
         );
     }
 }

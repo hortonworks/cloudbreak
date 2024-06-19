@@ -89,14 +89,14 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
 
         Image image = new Image(TEST_DATE, TEST_CREATED, TEST_PUBLISHED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, repo, imageSetsByProvider,
                 stackDetails, TEST_OS_TYPE, packageVersions, preWarmParcels, preWarmCsd, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL,
-                TEST_SOURCE_IMAGE_ID);
+                TEST_SOURCE_IMAGE_ID, null);
         image.setDefaultImage(true);
         return image;
     }
 
     private static Image getTestImageWithoutCollections() {
         Image image = new Image(TEST_DATE, TEST_CREATED, TEST_PUBLISHED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, null, null, null,
-                TEST_OS_TYPE, null, null, null, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL, TEST_SOURCE_IMAGE_ID);
+                TEST_OS_TYPE, null, null, null, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL, TEST_SOURCE_IMAGE_ID, null);
         image.setDefaultImage(true);
         return image;
     }

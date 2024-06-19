@@ -25,6 +25,7 @@ public class ImageToCoreImageConverter {
                 null,
                 source.isAdvertised(),
                 null,
+                null,
                 null);
         return coreImage;
     }

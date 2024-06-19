@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -41,13 +42,17 @@ public class RecommendImageService {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
+    @Inject
+    private ImageUtil imageUtil;
+
     public Image recommendImage(Long workspaceId, CloudbreakUser cloudbreakUser, ImageSettingsV4Request imageSettings, String region, String platform,
             String blueprintName, CloudPlatformVariant cloudPlatform) {
         Blueprint blueprint = determineBlueprint(workspaceId, blueprintName);
         User user = userService.getOrCreate(cloudbreakUser);
         try {
             StatedImage statedImage =
-                    imageService.determineImageFromCatalog(workspaceId, imageSettings, platform, null, blueprint, false, false, user, image -> true);
+                    imageService.determineImageFromCatalog(workspaceId, imageSettings, platform, null, blueprint, false, false, user,
+                            image -> !imageUtil.isArm64Image(image));
             LOGGER.debug("Determined stated image from catalog: {}", statedImage);
             ImageCatalogPlatform imageCatalogPlatform =
                     platformStringTransformer.getPlatformStringForImageCatalog(cloudPlatform.getPlatform().getValue(), cloudPlatform.getVariant().getValue());

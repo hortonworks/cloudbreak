@@ -1,3 +1,5 @@
+{% set cpuarch = salt['grains.get']('cpuarch') %}
+
 base:
   '*':
     - pkg-mgr-proxy
@@ -7,9 +9,13 @@ base:
     - tags
     - recipes.runner
     - telemetry
+    {% if cpuarch != 'aarch64' %}
     - fluent
+    {% endif %}
     - monitoring
+    {% if cpuarch != 'aarch64' %}
     - metering
+    {% endif %}
     - logrotate
     - ntp
     - postgresql.root-certs
