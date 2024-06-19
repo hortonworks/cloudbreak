@@ -175,6 +175,28 @@ class MeteringInstanceCheckerServiceTest {
         verify(mismatchedInstanceHandlerService, never()).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
     }
 
+    @Test
+    void checkInstanceTypesWithProviderShouldNotThrowExceptionWhenAwsAuthenticationFailed() throws IOException, CloudbreakOrchestratorFailedException {
+        StackDto stack = mock(StackDto.class);
+        InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        prepareStackMocks(stack, instanceGroup, "large");
+        prepeareProviderMocks(stack, metadataCollector);
+        when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
+        when(metadataCollector.collectInstanceTypes(any(), anyList())).thenThrow(new RuntimeException("user is not authorized to perform X"));
+
+        underTest.checkInstanceTypes(stack);
+
+        verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
+        verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
+        verify(cloudContextProvider, times(1)).getCloudContext(eq(stack));
+        verify(credentialClientService, times(1)).getCloudCredential(any());
+        verify(cloudPlatformConnectors, times(1)).get(any());
+        verify(metadataCollector, times(1)).collectInstanceTypes(any(), eq(List.of("instanceId1", "instanceId2")));
+        verify(instanceGroup, never()).getTemplate();
+        verify(mismatchedInstanceHandlerService, never()).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
+    }
+
     private void prepeareProviderMocks(StackDto stack, MetadataCollector metadataCollector) {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         Authenticator authenticator = mock(Authenticator.class);

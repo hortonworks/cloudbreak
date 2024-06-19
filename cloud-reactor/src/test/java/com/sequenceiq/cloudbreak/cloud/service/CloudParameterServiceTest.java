@@ -106,4 +106,28 @@ class CloudParameterServiceTest {
                 new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
                         "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
     }
+
+    @Test
+    void getDatabaseCapabilitiesFailsWithProviderAuthenticationFailedException() {
+        doAnswer(invocation -> {
+            Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("reason", new ProviderAuthenticationFailedException("error"), 1L));
+            return null;
+        }).when(eventBus).notify(anyString(), any(Event.class));
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseCapabilities(
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
+    }
+
+    @Test
+    void getDatabaseCapabilitiesFailsWithAwsAuthException() {
+        doAnswer(invocation -> {
+            Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("reason", new RuntimeException("user is not authorized to perform X"), 1L));
+            return null;
+        }).when(eventBus).notify(anyString(), any(Event.class));
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseCapabilities(
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
+    }
 }

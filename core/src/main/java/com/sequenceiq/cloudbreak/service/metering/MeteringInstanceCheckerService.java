@@ -38,6 +38,8 @@ public class MeteringInstanceCheckerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MeteringInstanceCheckerService.class);
 
+    private static final String AWS_AUTH_ERROR_MESSAGE = "is not authorized to perform";
+
     private static final String META_DATA = "meta-data";
 
     private static final String INSTANCE_TYPE = "instance-type";
@@ -72,7 +74,13 @@ public class MeteringInstanceCheckerService {
             try {
                 checkInstanceTypesOnProvider(stack);
             } catch (ProviderAuthenticationFailedException ex) {
-                LOGGER.warn("Checking instance types on provider failed: {}", ex.getMessage());
+                LOGGER.warn("Checking instance types on provider failed due to auth failure: {}", ex.getMessage());
+            } catch (Exception ex) {
+                if (ex.getMessage() != null && ex.getMessage().contains(AWS_AUTH_ERROR_MESSAGE)) {
+                    LOGGER.warn("Checking instance types on provider failed due to auth failure: {}", ex.getMessage());
+                } else {
+                    throw ex;
+                }
             }
         }
     }

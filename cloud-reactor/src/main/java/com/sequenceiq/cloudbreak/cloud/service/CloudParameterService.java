@@ -69,9 +69,7 @@ public class CloudParameterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudParameterService.class);
 
-    private static final int UNAUTHORIZED = 401;
-
-    private static final int FORBIDDEN = 403;
+    private static final String AWS_AUTH_ERROR_MESSAGE = "is not authorized to perform";
 
     @Inject
     private EventBus eventBus;
@@ -246,7 +244,8 @@ public class CloudParameterService {
         Exception errorDetails = result.getErrorDetails();
         String errorMessage = String.format("Failed to get %s for the cloud provider: %s. %s",
                 responseName, result.getStatusReason(), getCauseMessages(errorDetails));
-        if (errorDetails instanceof ProviderAuthenticationFailedException) {
+        if (errorDetails instanceof ProviderAuthenticationFailedException
+                || (errorDetails.getMessage() != null && errorDetails.getMessage().contains(AWS_AUTH_ERROR_MESSAGE))) {
             return new BadRequestException(errorDetails);
         } else {
             return new GetCloudParameterException(errorMessage, errorDetails);
