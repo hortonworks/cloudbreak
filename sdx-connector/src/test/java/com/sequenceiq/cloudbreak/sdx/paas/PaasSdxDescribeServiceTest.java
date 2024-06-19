@@ -79,8 +79,8 @@ public class PaasSdxDescribeServiceTest {
 
     @Test
     void testGetHmsConfigIfEmpty() throws IllegalAccessException, JsonProcessingException {
-        PaasRemoteDataContextSupplier rdcSupplier = mock(PaasRemoteDataContextSupplier.class);
-        FieldUtils.writeField(underTest, "remoteDataContextSupplier", Optional.of(rdcSupplier), true);
+        LocalPaasRemoteDataContextSupplier rdcSupplier = mock(LocalPaasRemoteDataContextSupplier.class);
+        FieldUtils.writeField(underTest, "localRdcSupplier", Optional.of(rdcSupplier), true);
         when(rdcSupplier.getPaasSdxRemoteDataContext(any())).thenReturn(Optional.empty());
 
         assertEquals(Map.of(), underTest.getHmsServiceConfig(PAAS_CRN));
@@ -100,8 +100,8 @@ public class PaasSdxDescribeServiceTest {
 
     @Test
     void testGetHmsConfig() throws IllegalAccessException, JsonProcessingException {
-        PaasRemoteDataContextSupplier rdcSupplier = mock(PaasRemoteDataContextSupplier.class);
-        FieldUtils.writeField(underTest, "remoteDataContextSupplier", Optional.of(rdcSupplier), true);
+        LocalPaasRemoteDataContextSupplier rdcSupplier = mock(LocalPaasRemoteDataContextSupplier.class);
+        FieldUtils.writeField(underTest, "localRdcSupplier", Optional.of(rdcSupplier), true);
         ApiRemoteDataContext apiRemoteDataContext = new ApiRemoteDataContext();
         ApiEndPoint apiEndPoint = new ApiEndPoint();
         apiEndPoint.setName("hive");

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -60,7 +59,7 @@ public class ClusterStartHandlerService {
 
     public void startCluster(Stack stack, CmTemplateProcessor blueprintProcessor, boolean datahubRefreshNeeded) throws Exception {
         Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
-        if (sdxBasicView.isPresent() && CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.get().crn()))) {
+        if (sdxBasicView.isPresent() && CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(sdxBasicView.get().getCrn())) {
             // let's update config only in case of VM form factor for now
             if (clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()) || datahubRefreshNeeded) {
                 // refresh DH after DL resize

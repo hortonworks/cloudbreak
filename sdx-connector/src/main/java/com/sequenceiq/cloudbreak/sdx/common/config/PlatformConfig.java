@@ -14,6 +14,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 
 @Configuration
@@ -27,6 +28,9 @@ public class PlatformConfig {
 
     @Inject
     private Optional<List<PlatformAwareSdxDescribeService>> platformDependentSdxDescribeServices;
+
+    @Inject
+    private Optional<List<PlatformAwareSdxDhTearDownService>> platformDependentSdxDhTearDownServices;
 
     @Bean
     public Map<TargetPlatform, PlatformAwareSdxStatusService<?>> platformDependentSdxStatusServicesMap() {
@@ -60,6 +64,19 @@ public class PlatformConfig {
             Map<TargetPlatform, PlatformAwareSdxDescribeService> bean = new EnumMap<>(TargetPlatform.class);
             for (PlatformAwareSdxDescribeService platformAwareSdxDescribeService : platformDependentSdxDescribeServices.get()) {
                 bean.put(platformAwareSdxDescribeService.targetPlatform(), platformAwareSdxDescribeService);
+            }
+            return Maps.immutableEnumMap(bean);
+        } else {
+            return Map.of();
+        }
+    }
+
+    @Bean
+    public Map<TargetPlatform, PlatformAwareSdxDhTearDownService> platformDependentSdxDhTearDownServices() {
+        if (platformDependentSdxDhTearDownServices.isPresent()) {
+            Map<TargetPlatform, PlatformAwareSdxDhTearDownService> bean = new EnumMap<>(TargetPlatform.class);
+            for (PlatformAwareSdxDhTearDownService platformAwareSdxDhTearDownService : platformDependentSdxDhTearDownServices.get()) {
+                bean.put(platformAwareSdxDhTearDownService.targetPlatform(), platformAwareSdxDhTearDownService);
             }
             return Maps.immutableEnumMap(bean);
         } else {

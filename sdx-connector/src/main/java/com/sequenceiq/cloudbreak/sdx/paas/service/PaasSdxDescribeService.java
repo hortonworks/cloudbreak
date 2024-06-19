@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
-import com.sequenceiq.cloudbreak.sdx.paas.PaasRemoteDataContextSupplier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
@@ -28,14 +28,14 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
     private SdxEndpoint sdxEndpoint;
 
     @Inject
-    private Optional<PaasRemoteDataContextSupplier> remoteDataContextSupplier;
+    private Optional<LocalPaasRemoteDataContextSupplier> localRdcSupplier;
 
     @Inject
     private Optional<LocalPaasSdxService> localPaasSdxService;
 
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
-        return remoteDataContextSupplier.map(rdcSupplier -> rdcSupplier.getPaasSdxRemoteDataContext(crn))
+        return localRdcSupplier.map(rdcSupplier -> rdcSupplier.getPaasSdxRemoteDataContext(crn))
                 .orElseThrow(() -> new CloudbreakServiceException("Cannot provide remote data context!"));
     }
 

@@ -20,9 +20,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class DatalakeService {
@@ -34,9 +32,6 @@ public class DatalakeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeService.class);
 
     private static final String DEFAULT_RANGER_PORT = "6080";
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
@@ -80,14 +75,6 @@ public class DatalakeService {
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);
-    }
-
-    public Optional<Stack> getDatalakeStackByDatahubStack(StackView datahubStack) {
-        if (!Strings.isNullOrEmpty(datahubStack.getDatalakeCrn())) {
-            return Optional.ofNullable(stackService.getByCrnOrElseNull(datahubStack.getDatalakeCrn()));
-        }
-        LOGGER.info("There is no datalake has been set for the cluster.");
-        return Optional.empty();
     }
 
     public SharedServiceConfigsView createSharedServiceConfigsView(String password, StackType stackType, String environmentCrn) {

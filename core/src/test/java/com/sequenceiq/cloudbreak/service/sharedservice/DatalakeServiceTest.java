@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,13 +38,6 @@ public class DatalakeServiceTest {
 
     @InjectMocks
     private DatalakeService underTest;
-
-    @BeforeEach
-    public void setup() {
-        Stack resultStack = new Stack();
-        resultStack.setName("teststack");
-        lenient().when(stackService.getByCrn(anyString())).thenReturn(resultStack);
-    }
 
     @Test
     public void testPrepareDatalakeRequestWhenDatalakeIsNotNull() {
@@ -103,37 +94,7 @@ public class DatalakeServiceTest {
     }
 
     @Test
-    public void testGetDatalakeStackByDatahubStackWhereDatalakeCrnIsNull() {
-        Stack stack = new Stack();
-        stack.setDatalakeCrn(null);
-        underTest.getDatalakeStackByDatahubStack(stack);
-        verify(stackService, never()).getByCrn("crn");
-    }
-
-    @Test
-    public void testGetDatalakeStackByDatahubStackWhereDatalakeCrnIsNotNull() {
-        Stack resultStack = new Stack();
-        resultStack.setName("teststack");
-        lenient().when(stackService.getByCrnOrElseNull(anyString())).thenReturn(resultStack);
-        Stack stack = new Stack();
-        stack.setDatalakeCrn("crn");
-        Optional<Stack> datalake = underTest.getDatalakeStackByDatahubStack(stack);
-        verify(stackService, times(1)).getByCrnOrElseNull("crn");
-        assert datalake.isPresent();
-    }
-
-    @Test
-    public void testGetDatalakeStackByDatahubStackWhereDatalakeCrnIsNotNullAndDatalakeIsMissing() {
-        Stack stack = new Stack();
-        stack.setDatalakeCrn("crn");
-        Optional<Stack> datalake = underTest.getDatalakeStackByDatahubStack(stack);
-        verify(stackService, times(1)).getByCrnOrElseNull("crn");
-        assert datalake.isEmpty();
-    }
-
-    @Test
     public void testCreateSharedServiceConfigsViewByCrn() {
-
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, "envcrn");
 
         verify(platformAwareSdxConnector, times(1)).getSdxAccessViewByEnvironmentCrn(anyString());
@@ -143,7 +104,6 @@ public class DatalakeServiceTest {
 
     @Test
     public void testCreateSharedServiceConfigsViewFromBlueprintUtilsWhenDatalake() {
-
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.DATALAKE, null);
 
         verify(stackService, times(0)).getByCrnOrElseNull("crn");

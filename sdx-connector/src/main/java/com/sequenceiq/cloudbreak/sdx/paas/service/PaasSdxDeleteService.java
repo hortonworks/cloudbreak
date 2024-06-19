@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
-import com.sequenceiq.cloudbreak.sdx.paas.PaasRemoteDataContextSupplier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -26,7 +26,7 @@ public class PaasSdxDeleteService extends PaasSdxStatusService implements Platfo
     private SdxEndpoint sdxEndpoint;
 
     @Inject
-    private Optional<PaasRemoteDataContextSupplier> remoteDataContextSupplier;
+    private Optional<LocalPaasRemoteDataContextSupplier> localRdcSupplier;
 
     @Inject
     private Optional<LocalPaasSdxService> localPaasSdxService;

@@ -8,18 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -32,16 +28,10 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
     private EventBus eventBus;
 
     @Inject
-    private ClusterApiConnectors clusterApiConnectors;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    @Inject
-    private DatalakeService datalakeService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -53,26 +43,9 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
         DeregisterServicesResult result;
         try {
             LOGGER.info("Received DeregisterServicesRequest event: {}", event.getData());
-            Stack stack = stackService.getByIdWithListsInTransaction(event.getData().getResourceId());
-            ClusterApi clusterApi = clusterApiConnectors.getConnector(stack);
-            Optional<DatalakeDto> datalakeDto = Optional.empty();
-            Optional<Stack> dataLakeOptional = datalakeService.getDatalakeStackByDatahubStack(stack);
-            if (dataLakeOptional.isPresent()) {
-                Stack dataLake = dataLakeOptional.get();
-                HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(dataLake.getId(),
-                        dataLake.getClusterManagerIp(), dataLake.cloudPlatform());
-                datalakeDto = Optional.ofNullable(
-                        DatalakeDto.DatalakeDtoBuilder.aDatalakeDto()
-                                .withGatewayPort(dataLake.getGatewayPort())
-                                .withHttpClientConfig(httpClientConfig)
-                                .withPassword(dataLake.getCluster().getCloudbreakAmbariPassword())
-                                .withUser(dataLake.getCluster().getCloudbreakAmbariUser())
-                                .withName(dataLake.getName())
-                                .withStatus(dataLake.getStatus())
-                                .build()
-                );
-            }
-            clusterApi.clusterSecurityService().deregisterServices(stack.getName(), datalakeDto);
+            StackView stackView = stackDtoService.getStackViewById(event.getData().getStackId());
+            Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());
+            sdxBasicView.ifPresent(sdx -> platformAwareSdxConnector.tearDownDatahub(sdx.crn(), stackView.getResourceCrn()));
             LOGGER.info("Finished disabling Security");
             result = new DeregisterServicesResult(event.getData());
         } catch (Exception e) {

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -123,12 +122,11 @@ public class DatabaseSslService {
         if (StackType.WORKLOAD.equals(stackView.getType())) {
             Optional<SdxBasicView> sdxBasicViewOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());
             if (sdxBasicViewOptional.isPresent()) {
-                SdxBasicView sdxBasicView = sdxBasicViewOptional.get();
-                if (CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.crn()))) {
-                    return isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
-                } else if (CrnResourceDescriptor.CDL.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.crn()))) {
-                    return isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicView);
-                }
+                return switch (CrnResourceDescriptor.getByCrnString(sdxBasicViewOptional.get().crn())) {
+                    case VM_DATALAKE -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
+                    case CDL -> isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicViewOptional.get());
+                    default -> false;
+                };
             }
         } else {
             LOGGER.debug("Stack is not a datahub cluster");

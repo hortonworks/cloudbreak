@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
@@ -38,6 +39,9 @@ public class PlatformAwareSdxConnector {
     @Inject
     private Map<TargetPlatform, PlatformAwareSdxDescribeService> platformDependentSdxDescribeServices;
 
+    @Inject
+    private Map<TargetPlatform, PlatformAwareSdxDhTearDownService> platformDependentSdxDhTearDownServices;
+
     public Optional<String> getRemoteDataContext(String sdxCrn) {
         LOGGER.info("Getting remote data context for SDX {}", sdxCrn);
         return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getRemoteDataContext(sdxCrn);
@@ -45,6 +49,10 @@ public class PlatformAwareSdxConnector {
 
     public Map<String, String> getHmsServiceConfig(String sdxCrn) {
         return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getHmsServiceConfig(sdxCrn);
+    }
+
+    public void tearDownDatahub(String sdxCrn, String datahubCrn) {
+        platformDependentSdxDhTearDownServices.get(TargetPlatform.getByCrn(sdxCrn)).tearDownDataHub(sdxCrn, datahubCrn);
     }
 
     public void delete(String sdxCrn, Boolean force) {

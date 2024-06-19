@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
-import com.sequenceiq.cloudbreak.sdx.paas.PaasRemoteDataContextSupplier;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
-public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
+public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBuilderService.class);
 

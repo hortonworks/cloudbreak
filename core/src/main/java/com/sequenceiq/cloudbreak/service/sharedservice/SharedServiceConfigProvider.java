@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
@@ -64,9 +63,8 @@ public class SharedServiceConfigProvider {
         if (StackType.WORKLOAD.equals(stack.getType())) {
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
             if (sdxBasicView.isPresent()) {
-                Crn datalakeCrn = Crn.safeFromString(sdxBasicView.get().crn());
-                switch (CrnResourceDescriptor.getByCrnString(datalakeCrn.toString())) {
-                    case VM_DATALAKE -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView);
+                switch (CrnResourceDescriptor.getByCrnString(sdxBasicView.get().crn())) {
+                    case VM_DATALAKE -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView.get());
                     case CDL -> setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
                     default -> LOGGER.info("Data Lake CRN is not recognized, skipping setup regarding shared filesystem and RDS!");
                 }
@@ -75,13 +73,13 @@ public class SharedServiceConfigProvider {
         return requestedCluster;
     }
 
-    private void configureClusterByPaasDatalake(Cluster requestedCluster, Stack stack, Optional<SdxBasicView> sdxBasicView) {
+    private void configureClusterByPaasDatalake(Cluster requestedCluster, Stack stack, SdxBasicView sdxBasicView) {
         Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
         if (datalakeStack != null) {
             requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeStack));
             setupHmsRdsByPaasDatalakeStack(datalakeStack, requestedCluster);
         } else {
-            setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
+            setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView);
         }
     }
 
