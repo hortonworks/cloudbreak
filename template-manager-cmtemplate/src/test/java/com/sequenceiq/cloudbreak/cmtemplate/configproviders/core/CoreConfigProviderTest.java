@@ -199,7 +199,10 @@ public class CoreConfigProviderTest {
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
         Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationView = Optional.of(fileSystemConfiguration);
         StorageLocationView storageLocationView = mock(StorageLocationView.class);
+        when(fileSystemConfiguration.getLocations()).thenReturn(List.of(storageLocationView));
+        when(storageLocationView.getProperty()).thenReturn(CORE_DEFAULTFS);
         when(mockTemplateProcessor.getServiceByType(CORE_SETTINGS)).thenReturn(Optional.empty());
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("aGateway", 0, InstanceGroupType.GATEWAY, 1)));
         when(mockTemplateProcessor.getCmVersion()).thenReturn(Optional.of(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0.getVersion()));
 
@@ -244,8 +247,11 @@ public class CoreConfigProviderTest {
         BaseFileSystemConfigurationsView fileSystemConfiguration = mock(BaseFileSystemConfigurationsView.class);
         Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationView = Optional.of(fileSystemConfiguration);
         StorageLocationView storageLocationView = mock(StorageLocationView.class);
+        when(storageLocationView.getProperty()).thenReturn(CORE_DEFAULTFS);
+        when(fileSystemConfiguration.getLocations()).thenReturn(List.of(storageLocationView));
         when(mockTemplateProcessor.getServiceByType(CORE_SETTINGS)).thenReturn(Optional.empty());
         when(templatePreparationObject.getHostgroupViews()).thenReturn(Set.of(new HostgroupView("aGateway", 0, InstanceGroupType.GATEWAY, 1)));
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
         when(mockTemplateProcessor.getCmVersion()).thenReturn(Optional.empty());
 
         Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
