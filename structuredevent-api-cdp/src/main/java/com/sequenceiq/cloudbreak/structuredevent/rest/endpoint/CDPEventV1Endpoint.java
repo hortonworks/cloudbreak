@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructu
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.EventOpDescription.GET_EVENTS_BY_NAME;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.EventOpDescription.GET_EVENTS_ZIP_BY_NAME;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -48,8 +50,8 @@ public interface CDPEventV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Page<CDPEventV1Response> getCloudbreakEventsByResource(
             @PathParam("name") String name,
-            @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size);
+            @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
+            @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size);
 
     @GET
     @Path("{name}/structured")

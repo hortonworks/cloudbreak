@@ -23,6 +23,8 @@ public class StackResponseEventProvider implements ResponseProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackResponseEventProvider.class);
 
+    private static final int MAX_NUMBER_OF_EVENTS_TO_FETCH = 200;
+
     @Inject
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
@@ -30,7 +32,7 @@ public class StackResponseEventProvider implements ResponseProvider {
     public StackV4Response providerEntriesToStackResponse(StackDtoDelegate stack, StackV4Response stackResponse) {
         List<CloudbreakEventV4Response> events = new ArrayList<>();
         List<CloudbreakEventV4Response> cloudbreakEvents = cloudbreakEventsFacade
-                .retrieveEventsByStack(stack.getStack().getId(), stack.getStack().getType(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+                .retrieveEventsByStack(stack.getStack().getId(), stack.getStack().getType(), PageRequest.of(0, MAX_NUMBER_OF_EVENTS_TO_FETCH)).getContent();
         events.addAll(cloudbreakEvents);
         events.addAll(getLegacyStackType(stack.getStack()));
         stackResponse.setCloudbreakEvents(events);
@@ -39,7 +41,7 @@ public class StackResponseEventProvider implements ResponseProvider {
 
     private List<CloudbreakEventV4Response> getLegacyStackType(StackView stack) {
         List<CloudbreakEventV4Response> events = cloudbreakEventsFacade
-                .retrieveEventsByStack(stack.getId(), StackType.LEGACY, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+                .retrieveEventsByStack(stack.getId(), StackType.LEGACY, PageRequest.of(0, MAX_NUMBER_OF_EVENTS_TO_FETCH)).getContent();
         if (events.isEmpty()) {
             LOGGER.info("Cannot find any legacy events for stack: {}, crn: {}", stack.getId(), stack.getResourceCrn());
         } else {

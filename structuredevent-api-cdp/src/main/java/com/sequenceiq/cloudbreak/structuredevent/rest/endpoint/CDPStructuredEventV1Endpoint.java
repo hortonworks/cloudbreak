@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructu
 
 import java.util.List;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
@@ -39,8 +41,8 @@ public interface CDPStructuredEventV1Endpoint {
     List<CDPStructuredEvent> getAuditEvents(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
             @QueryParam("types") List<StructuredEventType> types,
-            @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size);
+            @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
+            @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size);
 
     @GET
     @Path("zip")

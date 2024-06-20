@@ -85,6 +85,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
@@ -373,6 +374,18 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withEnableMultiAz() {
         getRequest().setEnableMultiAz(getCloudProvider().isMultiAZ());
+        return this;
+    }
+
+    public SdxInternalTestDto withRecipe(String name, String hostGroup) {
+        SdxRecipe sdxRecipe = new SdxRecipe();
+        sdxRecipe.setName(name);
+        sdxRecipe.setHostGroup(hostGroup);
+        if (null == getRequest().getRecipes()) {
+            getRequest().setRecipes(Set.of(sdxRecipe));
+        } else {
+            getRequest().getRecipes().add(sdxRecipe);
+        }
         return this;
     }
 
