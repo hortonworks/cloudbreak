@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.events;
 
 import java.util.List;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -48,8 +50,8 @@ public interface EventV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(
             @PathParam("name") String name,
-            @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size,
+            @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
+            @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size,
             @AccountId @QueryParam("accountId") String accountId);
 
     @GET
@@ -60,8 +62,8 @@ public interface EventV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(
             @PathParam("name") String name,
-            @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size,
+            @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
+            @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size,
             @AccountId @QueryParam("accountId") String accountId);
 
     @GET
@@ -72,8 +74,8 @@ public interface EventV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(
             @PathParam("crn") String crn,
-            @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size,
+            @QueryParam("page") @DefaultValue("0") @Min(0) @Max(200) Integer page,
+            @QueryParam("size") @DefaultValue("100") @Min(1) @Max(200) Integer size,
             @QueryParam("onlyAlive") @DefaultValue("true") boolean onlyAlive);
 
     @GET
