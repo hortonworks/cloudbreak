@@ -224,4 +224,176 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest implements
                 .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false))
                 .validate();
     }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running Manowar Environment with synced FreeIPA",
+            when = "add two user groups with admin privileges and with common users to Environment",
+                and = "remove admin privileges from one of the user groups",
+            then = "all the common users should still have admin privileges.")
+    public void testAddMultiGroupsUsersToEnvironment(TestContext testContext) {
+        AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
+        CloudbreakUser userEnvAdminA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_ADMIN_A);
+        CloudbreakUser userEnvCreatorB = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_B);
+        CloudbreakUser userEnvCreatorA = testContext.getTestUsers().getUserByLabel(L0UserKeys.ENV_CREATOR_A);
+        String testMultiGroupAName = "testmultigroupa";
+        String testMultiGroupBName = "testmultigroupb";
+        AtomicReference<String> testMultiGroupACrn = new AtomicReference<>();
+        AtomicReference<String> testMultiGroupBCrn = new AtomicReference<>();
+
+        testContext
+                .given(UmsGroupTestDto.class)
+                .when(umsTestClient.createUserGroup(testMultiGroupAName))
+                .then((tc, dto, client) -> {
+                    testMultiGroupACrn.set(dto.getResponse().getCrn());
+                    return dto;
+                })
+                .then(UserGroupTestAssertion.validateUserGroupPresence(testMultiGroupAName, true))
+                .when(umsTestClient.createUserGroup(testMultiGroupBName))
+                .then((tc, dto, client) -> {
+                    testMultiGroupBCrn.set(dto.getResponse().getCrn());
+                    return dto;
+                })
+                .then(UserGroupTestAssertion.validateUserGroupPresence(testMultiGroupBName, true))
+                .validate();
+
+        useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
+
+        testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .validate();
+
+        testContext
+                .given(UmsTestDto.class)
+                .assignTargetByCrn(testMultiGroupACrn.get())
+                    .withGroupAdmin()
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, true))
+                .assignTargetByCrn(testMultiGroupBCrn.get())
+                    .withGroupAdmin()
+                .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, true))
+                .given(UmsGroupTestDto.class)
+                .when(umsTestClient.addUserToGroup(testMultiGroupAName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.addUserToGroup(testMultiGroupAName, userEnvCreatorB.getCrn()))
+                .when(umsTestClient.addUserToGroup(testMultiGroupBName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.addUserToGroup(testMultiGroupBName, userEnvCreatorB.getCrn()))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, testMultiGroupAName, true))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, testMultiGroupAName, true))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, testMultiGroupBName, true))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, testMultiGroupBName, true))
+                .validate();
+
+        testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .withEnvironmentAdmin()
+                .when(umsTestClient.assignResourceRoleWithGroup(testMultiGroupACrn.get()))
+                    .withEnvironmentAdmin()
+                .when(umsTestClient.assignResourceRoleWithGroup(testMultiGroupBCrn.get()))
+                .then((tc, dto, client) -> {
+                    environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
+                    return dto;
+                })
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.syncAll())
+                .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.findGroups(Set.of(testMultiGroupAName, testMultiGroupBName)))
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(userEnvAdminA.getWorkloadUserName()), true))
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(userEnvCreatorB.getWorkloadUserName()), true))
+                .validate();
+
+        testContext
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .withEnvironmentAdmin()
+                .when(umsTestClient.unassignResourceRoleWithGroup(testMultiGroupBCrn.get()))
+                    .withEnvironmentUser()
+                .when(umsTestClient.assignResourceRoleWithGroup(testMultiGroupBCrn.get()))
+                .then((tc, dto, client) -> {
+                    environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
+                    return dto;
+                })
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.syncAll())
+                .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.findGroups(Set.of(testMultiGroupAName, testMultiGroupBName)))
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(userEnvAdminA.getWorkloadUserName()), true))
+                .then(VirtualGroupTestAssertion.validateUserVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(userEnvCreatorB.getWorkloadUserName()), true))
+                .validate();
+
+        testContext
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .withEnvironmentAdmin()
+                .when(umsTestClient.unassignResourceRoleWithGroup(testMultiGroupACrn.get()))
+                    .withEnvironmentUser()
+                .when(umsTestClient.unassignResourceRoleWithGroup(testMultiGroupBCrn.get()))
+                .then((tc, dto, client) -> {
+                    environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
+                    return dto;
+                })
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.syncAll())
+                .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.findGroups(Set.of(testMultiGroupAName, testMultiGroupBName)))
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(userEnvAdminA.getWorkloadUserName()), false))
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(userEnvCreatorB.getWorkloadUserName()), false))
+                .validate();
+
+        testContext
+                .given(UmsGroupTestDto.class)
+                .when(umsTestClient.removeUserFromGroup(testMultiGroupAName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.removeUserFromGroup(testMultiGroupAName, userEnvCreatorB.getCrn()))
+                .when(umsTestClient.removeUserFromGroup(testMultiGroupBName, userEnvAdminA.getCrn()))
+                .when(umsTestClient.removeUserFromGroup(testMultiGroupBName, userEnvCreatorB.getCrn()))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, testMultiGroupAName, false))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, testMultiGroupAName, false))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, testMultiGroupBName, false))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, testMultiGroupBName, false))
+                .validate();
+
+        testContext
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.syncAll())
+                .await(OperationState.COMPLETED)
+                .given(UmsTestDto.class)
+                .assignTargetByCrn(testMultiGroupACrn.get())
+                    .withGroupAdmin()
+                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false))
+                .assignTargetByCrn(testMultiGroupBCrn.get())
+                    .withGroupAdmin()
+                .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, UmsResourceRole.IAM_GROUP_ADMIN, false))
+                .validate();
+
+        testContext
+                .given(UmsGroupTestDto.class)
+                .when(umsTestClient.deleteUserGroup(testMultiGroupAName))
+                .then(UserGroupTestAssertion.validateUserGroupPresence(testMultiGroupAName, false))
+                .when(umsTestClient.deleteUserGroup(testMultiGroupBName))
+                .then(UserGroupTestAssertion.validateUserGroupPresence(testMultiGroupBName, false))
+                .validate();
+    }
 }

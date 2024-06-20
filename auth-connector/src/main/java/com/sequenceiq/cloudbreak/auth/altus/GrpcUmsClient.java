@@ -187,12 +187,12 @@ public class GrpcUmsClient {
      * Retrieves group list from UMS.
      *
      * @param accountId the account Id
-     * @param groupCrns the groups to list. if null or empty then all groups will be listed
+     * @param groupNameOrCrnList the groups to list. if null or empty then all groups will be listed
      * @return the list of groups associated with this account
      */
-    public List<Group> listGroups(String accountId, List<String> groupCrns) {
+    public List<Group> listGroups(String accountId, List<String> groupNameOrCrnList) {
         LOGGER.trace("Listing group information for account {}.", accountId);
-        List<Group> groups = makeClient().listGroups(accountId, groupCrns);
+        List<Group> groups = makeClient().listGroups(accountId, groupNameOrCrnList);
         LOGGER.trace("{} Groups found for account {}", groups.size(), accountId);
         return groups;
     }

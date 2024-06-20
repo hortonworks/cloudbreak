@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.action.ums.RemoveUserFromGroupAction;
 import com.sequenceiq.it.cloudbreak.action.ums.RevokeEntitlementAction;
 import com.sequenceiq.it.cloudbreak.action.ums.SetWorkloadPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.ums.UnassignResourceRoleAction;
+import com.sequenceiq.it.cloudbreak.action.ums.UnassignResourceRoleGroupAction;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.UmsClient;
@@ -32,6 +33,10 @@ public class UmsTestClient {
 
     public Action<UmsTestDto, UmsClient> assignResourceRoleWithGroup(String groupCrn) {
         return new AssignResourceRoleGroupAction(groupCrn);
+    }
+
+    public Action<UmsTestDto, UmsClient> unassignResourceRoleWithGroup(String groupCrn) {
+        return new UnassignResourceRoleGroupAction(groupCrn);
     }
 
     public Action<UmsTestDto, UmsClient> setWorkloadPassword(String newPassword) {
