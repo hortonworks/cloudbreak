@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import jakarta.inject.Inject;
 
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
@@ -39,27 +41,29 @@ public class ScpDownloadClusterLogsActions {
     @Inject
     private SshJClient sshJClient;
 
-    public void downloadClusterLogs(String environmentCrn, String resourceName, String masterIp, String serviceName) {
-        downloadClusterLogs(environmentCrn, resourceName, masterIp, workingDirectory, serviceName);
+    public void downloadClusterLogs(String environmentCrn, String resourceName, Map<HostGroupType, String> ips, String serviceName) {
+        downloadClusterLogs(environmentCrn, resourceName, ips, workingDirectory, serviceName);
     }
 
-    public void downloadClusterLogs(String environmentCrn, String resourceName, String masterIp,
+    public void downloadClusterLogs(String environmentCrn, String resourceName, Map<HostGroupType, String> ips,
             String workingDirectoryLocation, String serviceName) {
         try {
-            if (!masterIp.isBlank()) {
-                copyLogsToCloudbreak(masterIp, "/var/log/", "var-logs");
-                downloadLogs(masterIp, workingDirectoryLocation, serviceName, "var-logs.tar.gz");
-                if (!StringUtils.equalsIgnoreCase("freeipa", serviceName)) {
-                    copyLogsToCloudbreak(masterIp, "/var/run/cloudera-scm-agent/process/", "cm-logs");
-                    downloadLogs(masterIp, workingDirectoryLocation, serviceName, "cm-logs.tar.gz");
-                }
+            if (!ips.isEmpty()) {
+                ips.forEach((hostGroupType, ip) -> {
+                    copyLogsToCloudbreak(ip, "/var/log/", "var-logs");
+                    downloadLogs(hostGroupType, ip, workingDirectoryLocation, serviceName, "var-logs.tar.gz");
+                    if (!StringUtils.equalsIgnoreCase("freeipa", serviceName)) {
+                        copyLogsToCloudbreak(ip, "/var/run/cloudera-scm-agent/process/", "cm-logs");
+                        downloadLogs(hostGroupType, ip, workingDirectoryLocation, serviceName, "cm-logs.tar.gz");
+                    }
+                });
             } else {
-                Log.warn(LOGGER, format(" Master IP is missing! Cluster log collection is not possible right now for resource: %s ",
+                Log.warn(LOGGER, format(" IPs are missing! Cluster log collection is not possible right now for resource: %s ",
                         resourceName));
             }
         } catch (Exception e) {
-            Log.warn(LOGGER, format(" Error occurred while try to retrieve cluster logs! Instance: %s | Exception: %s ",
-                    masterIp, e.getMessage()));
+            Log.warn(LOGGER, format(" Error occurred while try to retrieve cluster logs! Instances: %s | Exception: %s ",
+                    ips, e.getMessage()));
         }
     }
 
@@ -86,8 +90,8 @@ public class ScpDownloadClusterLogsActions {
         }
     }
 
-    private void downloadLogs(String instanceIp, String workingDirectoryLocation, String serviceName, String logPath) {
-        String destinationPath = String.join("/", workingDirectoryLocation, LOG_FOLDER_NAME, serviceName, instanceIp);
+    private void downloadLogs(HostGroupType hostGroupType, String instanceIp, String workingDirectoryLocation, String serviceName, String logPath) {
+        String destinationPath = String.join("/", workingDirectoryLocation, LOG_FOLDER_NAME, serviceName, hostGroupType.getName() + '-' + instanceIp);
 
         try (FileOutputStream destinationOut = FileUtils.openOutputStream(new File(destinationPath + "/init.log"))) {
             LOGGER.info("[{}] destination path is exist, download can be started!", destinationPath);

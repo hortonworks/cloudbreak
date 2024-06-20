@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
@@ -108,7 +110,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    private String sdxMasterPrivateIp;
+    private final Map<HostGroupType, String> privateIps = new EnumMap<>(HostGroupType.class);
 
     public SdxInternalTestDto(TestContext testContext) {
         super(new SdxInternalClusterRequest(), testContext);
@@ -668,23 +670,26 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
-    public void setMasterPrivateIp(TestContext testContext) {
+    public void setPrivateIps(TestContext testContext) {
         refreshResponse(testContext, testContext.getSdxClient());
-        String hostGroupName = MASTER.getName();
-        InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
-                .findFirst()
-                .orElseThrow(() -> new TestFailException("Cannot find valid instance group with this name: " + hostGroupName));
-        sdxMasterPrivateIp = instanceMetaData.getPrivateIp();
-        if (StringUtils.isNotBlank(sdxMasterPrivateIp)) {
-            LOGGER.info("Found {} private IP for {} host group!", sdxMasterPrivateIp, hostGroupName);
-        } else {
-            LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
+        for (HostGroupType hostGroupType : Set.of(MASTER, IDBROKER)) {
+            String hostGroupName = hostGroupType.getName();
+            InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
+                    .findFirst()
+                    .orElseThrow(() -> new TestFailException("Cannot find valid instance group with this name: " + hostGroupName));
+            String privateIp = instanceMetaData.getPrivateIp();
+            if (StringUtils.isNotBlank(privateIp)) {
+                LOGGER.info("Found {} private IP for {} host group!", privateIp, hostGroupName);
+                privateIps.put(hostGroupType, privateIp);
+            } else {
+                LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
+            }
         }
     }
 
     @Override
-    public String getMasterPrivateIp() {
-        return sdxMasterPrivateIp;
+    public Map<HostGroupType, String> getPrivateIps() {
+        return privateIps;
     }
 
     private void refreshResponse(TestContext testContext, SdxClient client) {

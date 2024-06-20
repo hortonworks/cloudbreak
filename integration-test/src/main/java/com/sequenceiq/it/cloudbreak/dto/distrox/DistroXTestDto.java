@@ -7,6 +7,7 @@ import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STAC
 import static java.lang.String.format;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsIns
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
@@ -91,7 +93,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private CloudPlatform cloudPlatformFromStack;
 
-    private String distroxMasterPrivateIp;
+    private final Map<HostGroupType, String> privateIps = new EnumMap<>(HostGroupType.class);
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -459,23 +461,24 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public void setMasterPrivateIp(TestContext testContext) {
+    public void setPrivateIps(TestContext testContext) {
         refreshResponse(testContext, testContext.getCloudbreakClient());
         String hostGroupName = MASTER.getName();
         InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
                 .findFirst()
                 .orElseThrow(() -> new TestFailException("Cannot find valid instance group with this name: " + hostGroupName));
-        distroxMasterPrivateIp = instanceMetaData.getPrivateIp();
+        String distroxMasterPrivateIp = instanceMetaData.getPrivateIp();
         if (StringUtils.isNotBlank(distroxMasterPrivateIp)) {
             LOGGER.info("Found {} private IP for {} host group!", distroxMasterPrivateIp, hostGroupName);
+            privateIps.put(MASTER, distroxMasterPrivateIp);
         } else {
             LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
         }
     }
 
     @Override
-    public String getMasterPrivateIp() {
-        return distroxMasterPrivateIp;
+    public Map<HostGroupType, String> getPrivateIps() {
+        return privateIps;
     }
 
     private void refreshResponse(TestContext testContext, CloudbreakClient client) {

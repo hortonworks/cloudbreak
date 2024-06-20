@@ -23,6 +23,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -144,12 +145,12 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     @Override
-    public void setMasterPrivateIp(TestContext testContext) {
+    public void setPrivateIps(TestContext testContext) {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 
     @Override
-    public String getMasterPrivateIp() {
+    public Map<HostGroupType, String> getPrivateIps() {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 

@@ -84,7 +84,7 @@ public class FlowUtil {
                 if (CloudPlatform.YARN.equals(testDto.getCloudPlatform())) {
                     Class<? extends CloudbreakTestDto> testDtoClass = testDto.getClass();
                     if (Set.of(SdxInternalTestDto.class, DistroXTestDto.class).contains(testDtoClass)) {
-                        testDto.setMasterPrivateIp(testContext);
+                        testDto.setPrivateIps(testContext);
                     } else {
                         LOGGER.warn("YCloud cluster logs have not been generated to '{}' testDTO (appropriate resources: Data Lake and Data Hub)!",
                                 testDtoClass);
