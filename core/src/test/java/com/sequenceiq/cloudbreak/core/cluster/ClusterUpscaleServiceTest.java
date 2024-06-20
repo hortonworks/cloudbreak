@@ -138,6 +138,35 @@ class ClusterUpscaleServiceTest {
     }
 
     @Test
+    public void testInstallServicesShouldNotCallServiceRestartWhenRollingUpgradeEnabled() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+
+        underTest.installServicesOnNewHosts(createRequest(true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false, true));
+
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
+        inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+        inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
+        verify(clusterApi, times(0)).restartAll(false);
+        verify(clusterApi, times(0)).rollingRestartServices();
+    }
+
+    @Test
     public void testInstallServicesWithRepairAndServiceRestartWhenOneHostIsDecommissioned() throws CloudbreakException {
         HostGroup hostGroup = newHostGroup(
                 "master",
