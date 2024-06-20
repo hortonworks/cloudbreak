@@ -180,7 +180,7 @@ class ReactorFlowManagerTest {
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true, Collections.emptyList(), 0, false);
-        underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null, 0);
+        underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null, 0, false);
         underTest.triggerAutoTlsCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
         underTest.triggerStackLoadBalancerUpdate(STACK_ID);
         underTest.triggerSyncComponentVersionsFromCm(STACK_ID, Set.of());
@@ -335,7 +335,7 @@ class ReactorFlowManagerTest {
         long stackId = 1L;
         int databaseMaxDurationInMin = 20;
         String backupId = UUID.randomUUID().toString();
-        underTest.triggerDatalakeDatabaseRestore(stackId, BACKUP_LOCATION, backupId, databaseMaxDurationInMin);
+        underTest.triggerDatalakeDatabaseRestore(stackId, BACKUP_LOCATION, backupId, databaseMaxDurationInMin, false);
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
         verify(reactorNotifier).notify(eq(stackId), eq("DATABASE_RESTORE_EVENT"), captor.capture());
         DatabaseRestoreTriggerEvent event = (DatabaseRestoreTriggerEvent) captor.getValue();

@@ -39,14 +39,14 @@ public class DatabaseRestoreActions {
 
             @Override
             protected void doExecute(BackupRestoreContext context, DatabaseRestoreTriggerEvent payload, Map<Object, Object> variables) {
-                backupRestoreStatusService.restoreDatabase(context.getStackId(), context.getBackupId());
+                backupRestoreStatusService.restoreDatabase(context.getStackId(), context.getBackupId(), context.isDryRun());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(BackupRestoreContext context) {
                 return new DatabaseRestoreRequest(context.getStackId(), context.getBackupLocation(), context.getBackupId(),
-                        context.getDatabaseMaxDurationInMin());
+                        context.getDatabaseMaxDurationInMin(), context.isDryRun());
             }
 
             @Override
@@ -62,7 +62,7 @@ public class DatabaseRestoreActions {
 
             @Override
             protected void doExecute(BackupRestoreContext context, DatabaseRestoreSuccess payload, Map<Object, Object> variables) {
-                backupRestoreStatusService.restoreDatabaseFinished(context.getStackId());
+                backupRestoreStatusService.restoreDatabaseFinished(context.getStackId(), context.isDryRun());
                 sendEvent(context);
             }
 
@@ -83,12 +83,13 @@ public class DatabaseRestoreActions {
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
                 return BackupRestoreContext.from(flowParameters, payload, null, null, true, payload.getSkipDatabaseNames(),
-                        payload.getDatabaseMaxDurationInMin(), false);
+                        payload.getDatabaseMaxDurationInMin(), payload.isDryRun());
             }
 
             @Override
             protected void doExecute(BackupRestoreContext context, DatabaseRestoreFailedEvent payload, Map<Object, Object> variables) {
-                backupRestoreStatusService.handleDatabaseRestoreFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus());
+                backupRestoreStatusService.handleDatabaseRestoreFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus(),
+                    payload.isDryRun());
                 sendEvent(context, DATABASE_RESTORE_FAIL_HANDLED_EVENT.event(), payload);
             }
         };

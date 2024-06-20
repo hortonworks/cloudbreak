@@ -408,10 +408,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public FlowIdentifier restoreClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
-            int databaseMaxDurationInMin) {
+            int databaseMaxDurationInMin, boolean dryRun) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
         LOGGER.debug("Starting cluster database restore: " + nameOrCrn);
-        return databaseBackupRestoreService.restoreDatabase(workspaceId, nameOrCrn, location, backupId, databaseMaxDurationInMin);
+        return databaseBackupRestoreService.restoreDatabase(workspaceId, nameOrCrn, location, backupId, databaseMaxDurationInMin, dryRun);
     }
 
     @Override

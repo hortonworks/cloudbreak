@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.BackupRestoreEvent
 
 public class DatabaseRestoreTriggerEvent extends BackupRestoreEvent {
 
-    public DatabaseRestoreTriggerEvent(String selector, Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin) {
-        super(selector, stackId, backupLocation, backupId, databaseMaxDurationInMin, false);
+    public DatabaseRestoreTriggerEvent(String selector, Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin, boolean dryRun) {
+        super(selector, stackId, backupLocation, backupId, databaseMaxDurationInMin, dryRun);
     }
 
     @JsonCreator
@@ -23,8 +23,9 @@ public class DatabaseRestoreTriggerEvent extends BackupRestoreEvent {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
-            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin) {
-        super(event, resourceId, accepted, backupLocation, backupId, true, databaseMaxDurationInMin, false);
+            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @JsonProperty("dryRun") boolean dryRun) {
+        super(event, resourceId, accepted, backupLocation, backupId, true, databaseMaxDurationInMin, dryRun);
     }
 
     @Override

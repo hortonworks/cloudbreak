@@ -11,7 +11,8 @@ public class DatabaseRestoreRequest extends BackupRestoreEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
-            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin) {
-        super(stackId, backupLocation, backupId, databaseMaxDurationInMin, false);
+            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @JsonProperty("dryRun") boolean dryRun) {
+        super(stackId, backupLocation, backupId, databaseMaxDurationInMin, dryRun);
     }
 }

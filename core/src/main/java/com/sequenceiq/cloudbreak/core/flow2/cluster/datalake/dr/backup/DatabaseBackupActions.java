@@ -39,7 +39,7 @@ public class DatabaseBackupActions {
 
             @Override
             protected void doExecute(BackupRestoreContext context, DatabaseBackupTriggerEvent payload, Map<Object, Object> variables) {
-                backupRestoreStatusService.backupDatabase(context.getStackId(), context.getBackupId());
+                backupRestoreStatusService.backupDatabase(context.getStackId(), context.getBackupId(), payload.isDryRun());
                 sendEvent(context);
             }
 
@@ -62,7 +62,7 @@ public class DatabaseBackupActions {
 
             @Override
             protected void doExecute(BackupRestoreContext context, DatabaseBackupSuccess payload, Map<Object, Object> variables) {
-                backupRestoreStatusService.backupDatabaseFinished(context.getStackId());
+                backupRestoreStatusService.backupDatabaseFinished(context.getStackId(), payload.isDryRun());
                 sendEvent(context);
             }
 
@@ -88,7 +88,8 @@ public class DatabaseBackupActions {
 
             @Override
             protected void doExecute(BackupRestoreContext context, DatabaseBackupFailedEvent payload, Map<Object, Object> variables) {
-                backupRestoreStatusService.handleDatabaseBackupFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus());
+                backupRestoreStatusService.handleDatabaseBackupFailure(context.getStackId(), payload.getException().getMessage(), payload.getDetailedStatus(),
+                    payload.isDryRun());
                 sendEvent(context, DATABASE_BACKUP_FAIL_HANDLED_EVENT.event(), payload);
             }
         };

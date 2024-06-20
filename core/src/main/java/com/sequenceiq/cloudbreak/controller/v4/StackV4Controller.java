@@ -513,7 +513,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
             @AccountId String accountId, int databaseMaxDurationInMin, boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, databaseMaxDurationInMin);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, databaseMaxDurationInMin, dryRun);
         return new RestoreV4Response(flowIdentifier);
     }
 
@@ -523,7 +523,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public RestoreV4Response restoreDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
             @InitiatorUserCrn String initiatorUserCrn, int databaseMaxDurationInMin, boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, databaseMaxDurationInMin);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, databaseMaxDurationInMin, dryRun);
         return new RestoreV4Response(flowIdentifier);
     }
 
