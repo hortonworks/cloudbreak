@@ -133,6 +133,9 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
+    @Schema(description = ClusterModelDescription.DATABASE_SSL_ENABLED)
+    private boolean dbSSLEnabled;
+
     public Long getId() {
         return id;
     }
@@ -395,5 +398,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setCustomConfigurationsName(String customConfigurationsName) {
         this.customConfigurationsName = customConfigurationsName;
+    }
+
+    public boolean isDbSSLEnabled() {
+        return dbSSLEnabled;
+    }
+
+    public void setDbSSLEnabled(boolean dbSSLEnabled) {
+        this.dbSSLEnabled = dbSSLEnabled;
     }
 }
