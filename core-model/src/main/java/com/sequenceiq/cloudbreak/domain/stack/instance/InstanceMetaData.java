@@ -112,6 +112,9 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
 
     private String variant;
 
+    @Column(name = "userdatasecretresource_id")
+    private Long userdataSecretResourceId;
+
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
@@ -414,6 +417,14 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
         this.variant = variant;
     }
 
+    public Long getUserdataSecretResourceId() {
+        return userdataSecretResourceId;
+    }
+
+    public void setUserdataSecretResourceId(Long userdataSecretResourceId) {
+        this.userdataSecretResourceId = userdataSecretResourceId;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
@@ -430,6 +441,7 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
                 .add("variant='" + variant + "'")
                 .add("subnetId='" + subnetId + "'")
                 .add("availabilityZone='" + availabilityZone + "'")
+                .add("userdataSecretResourceId=" + userdataSecretResourceId)
                 .toString();
     }
 

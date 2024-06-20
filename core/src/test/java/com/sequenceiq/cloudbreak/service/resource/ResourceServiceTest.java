@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.service.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -21,11 +22,11 @@ import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ResourceServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ResourceServiceTest {
 
     @InjectMocks
-    private final ResourceService underTest = new ResourceService();
+    private ResourceService underTest;
 
     @Mock
     private ResourceRepository resourceRepository;
@@ -40,7 +41,7 @@ public class ResourceServiceTest {
         Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 
-        Assert.assertEquals(0L, actual.size());
+        assertEquals(0L, actual.size());
     }
 
     @Test
@@ -60,8 +61,8 @@ public class ResourceServiceTest {
 
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 
-        Assert.assertEquals(1L, actual.size());
-        Assert.assertEquals(cloudResource, actual.get(0).getCloudResource());
-        Assert.assertEquals(ResourceStatus.CREATED, actual.get(0).getStatus());
+        assertEquals(1L, actual.size());
+        assertEquals(cloudResource, actual.getFirst().getCloudResource());
+        assertEquals(ResourceStatus.CREATED, actual.getFirst().getStatus());
     }
 }

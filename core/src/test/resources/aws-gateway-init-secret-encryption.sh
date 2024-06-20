@@ -14,7 +14,7 @@ export IS_GATEWAY=true
 export TMP_SSH_KEY="#NOT_USER_ANYMORE_BUT_KEEP_FOR_BACKWARD_COMPATIBILITY"
 export SSH_USER=cloudbreak
 ###SECRETS-START
-export SALT_BOOT_PASSWORD=encrypted-pass
+export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 export CB_CERT=cert
 export IS_PROXY_ENABLED=false

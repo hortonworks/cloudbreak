@@ -203,7 +203,7 @@ public class UserDataService {
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()),
                     Variant.variant(stack.getPlatformVariant()), cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters,
-                    proxyConfig.orElse(null), environment);
+                    proxyConfig.orElse(null), environment, stackId);
             createOrUpdateUserData(stackId, userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);

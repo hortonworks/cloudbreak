@@ -65,6 +65,8 @@ public interface InstanceMetadataView {
 
     String getServerCert();
 
+    Long getUserdataSecretResourceId();
+
     default String getPublicIpWrapper() {
         if (getPublicIp() == null) {
             return getPrivateIp();

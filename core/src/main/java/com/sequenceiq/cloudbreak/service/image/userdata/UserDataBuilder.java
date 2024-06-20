@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -48,13 +50,17 @@ public class UserDataBuilder {
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
+    @Inject
+    private StackEncryptionService stackEncryptionService;
+
     public Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, Variant variant, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmParameters, ProxyConfig proxyConfig,
-            DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment, Long stackId) {
         Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {
             String userData =
-                    build(type, cloudPlatform, variant, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters, proxyConfig, environment);
+                    build(type, cloudPlatform, variant, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters, proxyConfig, environment,
+                            stackId);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, anonymize(userData));
         }
@@ -63,7 +69,7 @@ public class UserDataBuilder {
 
     private String build(InstanceGroupType type, Platform cloudPlatform, Variant variant, byte[] cbSshKeyDer, String sshUser, PlatformParameters params,
             String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig,
-            DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment, Long stackId) {
         Map<String, Object> model = new HashMap<>();
         model.put("environmentCrn", environment.getCrn());
         model.put("cloudPlatform", cloudPlatform.value());
@@ -78,7 +84,7 @@ public class UserDataBuilder {
         model.put("cbCert", cbCert);
         extendModelWithCcmConnectivity(type, ccmConnectivityParameters, model);
         extendModelWithProxyParams(type, proxyConfig, model);
-        extendModelAndEncryptSecretsIfSecretEncryptionEnabled(cloudPlatform, variant, environment, model);
+        extendModelAndEncryptSecretsIfSecretEncryptionEnabled(environment, stackId, model);
         return build(model);
     }
 
@@ -114,14 +120,11 @@ public class UserDataBuilder {
         }
     }
 
-    private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(Platform platform, Variant variant, DetailedEnvironmentResponse environment,
-            Map<String, Object> model) {
+    private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(DetailedEnvironmentResponse environment, Long stackId, Map<String, Object> model) {
         if (environment.isEnableSecretEncryption()) {
-            //TODO get the KMS key
-            String secretEncryptionKeySource = "";
-
+            StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stackId);
             model.put("secretEncryptionEnabled", Boolean.TRUE);
-            model.put("secretEncryptionKeySource", secretEncryptionKeySource);
+            model.put("secretEncryptionKeySource", stackEncryption.getEncryptionKeyLuks());
         }
     }
 

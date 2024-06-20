@@ -8,6 +8,7 @@ import com.sequenceiq.flow.core.RestartAction;
 public enum StackTerminationState implements FlowState {
     INIT_STATE,
     PRE_TERMINATION_STATE(StackPreTerminationAction.class),
+    DELETE_USERDATA_SECRETS_STATE(DeleteUserdataSecretsAction.class),
     CLUSTER_PROXY_DEREGISTER_STATE(ClusterProxyDeregisterAction.class),
     CCM_KEY_DEREGISTER_STATE(CcmKeyDeregisterAction.class),
     ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE(AttachedVolumeConsumptionCollectionUnschedulingAction.class),

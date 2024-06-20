@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTermin
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTER_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.DELETE_USERDATA_SECRETS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.DELETE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.PRE_TERMINATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.RECOVERY_TERMINATION_EVENT;
@@ -28,6 +30,8 @@ class StackTerminationEventTest {
     private static final Map<StackTerminationEvent, String> ENUM_TO_EVENT_MAP = new EnumMap<>(Map.ofEntries(
             entry(TERMINATION_EVENT, "STACK_TERMINATE_TRIGGER_EVENT"), entry(RECOVERY_TERMINATION_EVENT, "STACK_RECOVERY_TERMINATION_EVENT"),
             entry(PRE_TERMINATION_FAILED_EVENT, "STACKPRETERMINATIONFAILED"), entry(PRE_TERMINATION_FINISHED_EVENT, "STACKPRETERMINATIONSUCCESS"),
+            entry(DELETE_USERDATA_SECRETS_FINISHED_EVENT, "DELETEUSERDATASECRETSFINISHED"),
+            entry(DELETE_USERDATA_SECRETS_FAILED_EVENT, "DELETEUSERDATASECRETSFAILED"),
             entry(CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT, "CLUSTERPROXYDEREGISTERSUCCESS"),
             entry(CLUSTER_PROXY_DEREGISTER_FAILED_EVENT, "CLUSTER_PROXY_DEREGISTER_FAILED_EVENT"),
             entry(CCM_KEY_DEREGISTER_SUCCEEDED_EVENT, "CCMKEYDEREGISTERSUCCESS"), entry(CCM_KEY_DEREGISTER_FAILED_EVENT, "CCM_KEY_DEREGISTER_FAILED_EVENT"),

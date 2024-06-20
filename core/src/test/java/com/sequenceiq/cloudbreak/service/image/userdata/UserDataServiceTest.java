@@ -187,7 +187,7 @@ public class UserDataServiceTest {
         when(ccmUserDataService.fetchAndSaveCcmParameters(stack)).thenReturn(ccmConnectivityParameters);
         when(proxyConfigDtoService.getByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.empty());
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
-        when(userDataBuilder.buildUserData(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(userdataMap);
+        when(userDataBuilder.buildUserData(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(userdataMap);
 
         try (
                 MockedStatic<Base64> base64Mock = mockStatic(Base64.class);
@@ -208,7 +208,8 @@ public class UserDataServiceTest {
                 eq("cbCert"),
                 eq(ccmConnectivityParameters),
                 isNull(),
-                eq(detailedEnvironmentResponse));
+                eq(detailedEnvironmentResponse),
+                eq(STACK_ID));
         verify(userdataRepository, times(1)).save(userdataCaptor.capture());
         Userdata capturedUserData = userdataCaptor.getValue();
         assertEquals("tenant", capturedUserData.getAccountId());

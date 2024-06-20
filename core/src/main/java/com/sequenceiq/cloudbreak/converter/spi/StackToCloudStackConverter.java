@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
@@ -38,6 +39,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -69,6 +71,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -562,6 +565,15 @@ public class StackToCloudStackConverter {
         putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetadataView::getSubnetId));
         putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getInstanceName));
         putIfPresent(params, CloudInstance.FQDN, getIfNotNull(instanceMetaData, InstanceMetadataView::getDiscoveryFQDN));
+        doIfNotNull(getIfNotNull(instanceMetaData, InstanceMetadataView::getUserdataSecretResourceId), resourceId -> {
+            Optional<Resource> userdataSecretResource = resourceService.findById(resourceId);
+            if (userdataSecretResource.isPresent()) {
+                params.put(CloudInstance.USERDATA_SECRET_ID, userdataSecretResource.get().getResourceReference());
+            } else {
+                throw new UserdataSecretsException(String.format("The secret resource with id '%s', associated with instance '%s'," +
+                        " does not exist in the database!", resourceId, instanceMetaData.getInstanceId()));
+            }
+        });
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environment, platform);
         if (environment != null && platform.name().equalsIgnoreCase(CloudPlatform.AZURE.name())) {
             params.put(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, getResourceDiskAttached(template.getAttributes()));

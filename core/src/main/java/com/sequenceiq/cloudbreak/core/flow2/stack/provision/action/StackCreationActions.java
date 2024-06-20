@@ -73,6 +73,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncr
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpdateUserdataSecretsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpdateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -175,7 +177,7 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new CreateUserDataRequest(context.getStackId());
+                return new CreateUserDataRequest(context.getStackId(), context.getCloudContext(), context.getCloudCredential());
             }
         };
     }
@@ -368,7 +370,22 @@ public class StackCreationActions {
             protected void doExecute(StackCreationContext context, CollectLoadBalancerMetadataResult payload, Map<Object, Object> variables) {
                 StackView stack = context.getStack();
                 stackCreationService.setupLoadBalancerMetadata(stack, payload);
-                if (stack.getTunnel().useCcm()) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new UpdateUserdataSecretsRequest(context.getStackId(), context.getCloudContext(), context.getCloudCredential());
+            }
+        };
+    }
+
+    @Bean("UPDATE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> updateUserDataSecretsAction() {
+        return new AbstractStackCreationAction<>(UpdateUserdataSecretsSuccess.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, UpdateUserdataSecretsSuccess payload, Map<Object, Object> variables) throws Exception {
+                if (context.getStack().getTunnel().useCcm()) {
                     GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
                     sendEvent(context, getTlsInfoResult.selector(), getTlsInfoResult);
                 } else {

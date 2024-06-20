@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.TelemetryAgentService;
@@ -63,7 +64,7 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
             LOGGER.info("Pre-termination failed: {}", ex.getMessage(), ex);
         }
 
-        Selectable result = new StackPreTerminationSuccess(stackDto.getStack().getId());
+        Selectable result = new StackPreTerminationSuccess(stackDto.getStack().getId(), request.isForced() ? TerminationType.FORCED : TerminationType.REGULAR);
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
 

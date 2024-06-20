@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.encryption;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -18,7 +19,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,24 +26,27 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -66,8 +69,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class EncryptionKeyServiceTest {
 
     private static final String CROSS_ACCOUNT_ROLE = "cross-account-role";
-
-    private static final String LOGGER_INSTANCE_PROFILE = "logger-instance-profile";
 
     private static final Long STACK_ID = 1L;
 
@@ -104,6 +105,10 @@ public class EncryptionKeyServiceTest {
     private static final String CLOUD_IDENTITY_LOGGER = "logger";
 
     private static final List<String> CLOUD_IDENTITIES = List.of(CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER);
+
+    private static final CloudContext CLOUD_CONTEXT = CloudContext.Builder.builder().build();
+
+    private static final CloudCredential CLOUD_CREDENTIAL = new CloudCredential();
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -151,18 +156,22 @@ public class EncryptionKeyServiceTest {
     private StackEncryptionService stackEncryptionService;
 
     @Mock
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
+
+    @Mock
     private CloudInformationDecorator cloudInformationDecorator;
 
     @InjectMocks
     private EncryptionKeyService underTest;
 
+    @Captor
+    private ArgumentCaptor<UpdateEncryptionKeyResourceAccessRequest> updateResourceAccessCaptor;
+
     @BeforeEach
     public void setUp() throws Exception {
-        when(cloudInformationDecorator.getCredentialPrincipal(environment, stack)).thenReturn(Optional.of(CROSS_ACCOUNT_ROLE));
-        when(cloudInformationDecorator.getCloudIdentities(environment, stack)).thenReturn(CLOUD_IDENTITIES);
-        when(cloudInformationDecorator.getLoggerInstances(environment, stack)).thenReturn(List.of(LOGGER_INSTANCE_PROFILE));
-        ReflectionTestUtils.setField(underTest, "cloudInformationDecoratorMap",
-                Map.of(new CloudPlatformVariant(AwsConstants.AWS_PLATFORM, AwsConstants.AWS_DEFAULT_VARIANT), cloudInformationDecorator));
+        when(cloudInformationDecoratorProvider.get(new CloudPlatformVariant(AwsConstants.AWS_PLATFORM, AwsConstants.AWS_DEFAULT_VARIANT)))
+                .thenReturn(cloudInformationDecorator);
+        when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
         when(environment.isEnableSecretEncryption()).thenReturn(true);
         when(environment.getCredential()).thenReturn(credentialResponse);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
@@ -198,45 +207,8 @@ public class EncryptionKeyServiceTest {
         when(environment.isEnableSecretEncryption()).thenReturn(false);
         underTest.generateEncryptionKeys(STACK_ID);
         verify(environmentClientService).getByCrn(ENVIRONMENT_CRN);
-        verify(credentialConverter, never()).convert(any(CredentialResponse.class));
-        verify(extendedCloudCredentialConverter, never()).convert(any());
-        verify(resourceRetriever, never()).findAllByStatusAndTypeAndStack(any(), any(), any());
-        verify(extendedCloudCredentialConverter, never()).convert(any());
-        verify(encryptionResources, never()).createEncryptionKey(any());
-    }
-
-    @Test
-    void testGenerateEncryptionKeysCredentialPrincipalNotFound() {
-        when(cloudInformationDecorator.getCredentialPrincipal(environment, stack)).thenReturn(Optional.empty());
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.generateEncryptionKeys(STACK_ID));
-        assertEquals("Unable to generate encryption keys for test_name.Credential principal not found", exception.getMessage());
-        verify(environmentClientService).getByCrn(ENVIRONMENT_CRN);
-        verify(credentialConverter, never()).convert(any(CredentialResponse.class));
-        verify(extendedCloudCredentialConverter, never()).convert(any());
-        verify(resourceRetriever, never()).findAllByStatusAndTypeAndStack(any(), any(), any());
-        verify(extendedCloudCredentialConverter, never()).convert(any());
-        verify(encryptionResources, never()).createEncryptionKey(any());
-    }
-
-    @Test
-    void testGenerateEncryptionKeysPrincipalsNotFound() {
-        when(cloudInformationDecorator.getCloudIdentities(environment, stack)).thenReturn(null);
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.generateEncryptionKeys(STACK_ID));
-        assertEquals("Unable to generate encryption keys for test_name.Unable to determine principal Ids", exception.getMessage());
-        verify(environmentClientService).getByCrn(ENVIRONMENT_CRN);
-        verify(credentialConverter, never()).convert(any(CredentialResponse.class));
-        verify(extendedCloudCredentialConverter, never()).convert(any());
-        verify(resourceRetriever, never()).findAllByStatusAndTypeAndStack(any(), any(), any());
-        verify(extendedCloudCredentialConverter, never()).convert(any());
-        verify(encryptionResources, never()).createEncryptionKey(any());
-    }
-
-    @Test
-    void testGenerateEncryptionKeysPrincipalsNotFoundUnsupportedClusterType() {
-        when(stack.getType()).thenReturn(StackType.LEGACY);
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.generateEncryptionKeys(STACK_ID));
-        assertEquals("Unable to generate encryption keys for test_name.Unsupported cluster type: LEGACY", exception.getMessage());
-        verify(environmentClientService).getByCrn(ENVIRONMENT_CRN);
+        verify(cloudInformationDecoratorProvider, never()).get(any());
+        verify(cloudInformationDecorator, never()).getLuksEncryptionKeyCryptographicPrincipals(any(), any());
         verify(credentialConverter, never()).convert(any(CredentialResponse.class));
         verify(extendedCloudCredentialConverter, never()).convert(any());
         verify(resourceRetriever, never()).findAllByStatusAndTypeAndStack(any(), any(), any());
@@ -266,6 +238,17 @@ public class EncryptionKeyServiceTest {
     @EnumSource(value = StackType.class, names = {"WORKLOAD", "DATALAKE"}, mode = EnumSource.Mode.INCLUDE)
     void testGenerateEncryptionKeysSecretSuccess(StackType stackType) {
         when(stack.getType()).thenReturn(stackType);
+        if (stackType == DATALAKE) {
+            when(cloudInformationDecorator.getLuksEncryptionKeyCryptographicPrincipals(environment, stack))
+                    .thenReturn(List.of(CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER));
+            when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment, stack))
+                    .thenReturn(List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER));
+        } else if (stackType == WORKLOAD) {
+            when(cloudInformationDecorator.getLuksEncryptionKeyCryptographicPrincipals(environment, stack))
+                    .thenReturn(List.of(CLOUD_IDENTITY_LOGGER));
+            when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment, stack))
+                    .thenReturn(List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_LOGGER));
+        }
         when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
         underTest.generateEncryptionKeys(STACK_ID);
         verify(environmentClientService).getByCrn(ENVIRONMENT_CRN);
@@ -307,13 +290,57 @@ public class EncryptionKeyServiceTest {
         verify(extendedCloudCredentialConverter, never()).convert(credential);
     }
 
+    @Test
+    void testUpdateCloudSecretManagerEncryptionKeyAccess() {
+        List<String> secretReferencesToAdd = List.of("secret-0", "secret-1", "secret-2", "secret-3");
+        List<String> secretReferencesToRemove = List.of("secret-4", "secret-5", "secret-6", "secret-7");
+        StackEncryption stackEncryption = mock(StackEncryption.class);
+        when(stackEncryption.getEncryptionKeyCloudSecretManager()).thenReturn(KEY_ARN_SECRET_MANAGER);
+        when(stackEncryptionService.getStackEncryption(STACK_ID)).thenReturn(stackEncryption);
+        when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyResourceType()).thenReturn(ResourceType.AWS_KMS_KEY);
+        when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_SECRET_MANAGER), CommonStatus.CREATED, ResourceType.AWS_KMS_KEY,
+                STACK_ID)).thenReturn(List.of(cloudResource));
+
+        underTest.updateCloudSecretManagerEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, secretReferencesToAdd, secretReferencesToRemove);
+
+        verify(encryptionResources).updateEncryptionKeyResourceAccess(updateResourceAccessCaptor.capture());
+        UpdateEncryptionKeyResourceAccessRequest request = updateResourceAccessCaptor.getValue();
+        assertEquals(CLOUD_CONTEXT, request.cloudContext());
+        assertEquals(CLOUD_CREDENTIAL, request.cloudCredential());
+        assertEquals(cloudResource, request.cloudResource());
+        assertEquals(secretReferencesToAdd, request.cryptographicAuthorizedClientsToAdd());
+        assertEquals(secretReferencesToRemove, request.cryptographicAuthorizedClientsToRemove());
+    }
+
+    @Test
+    void testUpdateLuksEncryptionKeyAccess() {
+        List<String> instanceReferencesToAdd = List.of("secret-0", "secret-1", "secret-2", "secret-3");
+        List<String> instanceReferencesToRemove = List.of("secret-4", "secret-5", "secret-6", "secret-7");
+        StackEncryption stackEncryption = mock(StackEncryption.class);
+        when(stackEncryption.getEncryptionKeyLuks()).thenReturn(KEY_ARN_SECRET_MANAGER);
+        when(stackEncryptionService.getStackEncryption(STACK_ID)).thenReturn(stackEncryption);
+        when(cloudInformationDecorator.getLuksEncryptionKeyResourceType()).thenReturn(ResourceType.AWS_KMS_KEY);
+        when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_SECRET_MANAGER), CommonStatus.CREATED, ResourceType.AWS_KMS_KEY,
+                STACK_ID)).thenReturn(List.of(cloudResource));
+
+        underTest.updateLuksEncryptionKeyAccess(stack, CLOUD_CONTEXT, CLOUD_CREDENTIAL, instanceReferencesToAdd, instanceReferencesToRemove);
+
+        verify(encryptionResources).updateEncryptionKeyResourceAccess(updateResourceAccessCaptor.capture());
+        UpdateEncryptionKeyResourceAccessRequest request = updateResourceAccessCaptor.getValue();
+        assertEquals(CLOUD_CONTEXT, request.cloudContext());
+        assertEquals(CLOUD_CREDENTIAL, request.cloudCredential());
+        assertEquals(cloudResource, request.cloudResource());
+        assertEquals(instanceReferencesToAdd, request.cryptographicAuthorizedClientsToAdd());
+        assertEquals(instanceReferencesToRemove, request.cryptographicAuthorizedClientsToRemove());
+    }
+
     private void verifyEncryptionKeyCreationRequest(EncryptionKeyCreationRequest encryptionKeyCreationRequest, List<CloudResource> cloudResources,
             StackType stackType) {
         boolean luksKey = isLuksKey(encryptionKeyCreationRequest.keyName());
         String expectedDescription = populateStackInformation(luksKey ? KEY_DESC_LUKS : KEY_DESC_SECRET_MANAGER, stackType);
-        List<String> expectedCryptographicPrincipals = luksKey ? (stackType == DATALAKE ? CLOUD_IDENTITIES : List.of(LOGGER_INSTANCE_PROFILE)) :
+        List<String> expectedCryptographicPrincipals = luksKey ? (stackType == DATALAKE ? CLOUD_IDENTITIES : List.of(CLOUD_IDENTITY_LOGGER)) :
                 (stackType == DATALAKE ? List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER) :
-                        List.of(CROSS_ACCOUNT_ROLE, LOGGER_INSTANCE_PROFILE));
+                        List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_LOGGER));
         assertEquals(extendedCloudCredential, encryptionKeyCreationRequest.cloudCredential());
         assertEquals(cloudResources, encryptionKeyCreationRequest.cloudResources());
         assertEquals(location(region(REGION), availabilityZone(AVAILABILITY_ZONE)), encryptionKeyCreationRequest.cloudContext().getLocation());

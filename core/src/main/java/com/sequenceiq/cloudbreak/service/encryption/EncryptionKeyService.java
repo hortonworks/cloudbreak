@@ -6,23 +6,20 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -32,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
@@ -80,17 +78,7 @@ public class EncryptionKeyService {
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private List<CloudInformationDecorator> cloudInformationDecorators;
-
-    private final Map<CloudPlatformVariant, CloudInformationDecorator> cloudInformationDecoratorMap = new HashMap<>();
-
-    @PostConstruct
-    public void init() {
-        for (CloudInformationDecorator cloudInformationDecorator : cloudInformationDecorators) {
-            CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(cloudInformationDecorator.platform(), cloudInformationDecorator.variant());
-            cloudInformationDecoratorMap.put(cloudPlatformVariant, cloudInformationDecorator);
-        }
-    }
+    private CloudInformationDecoratorProvider cloudInformationDecoratorProvider;
 
     public void generateEncryptionKeys(Long stackId) {
         Stack stack = stackService.get(stackId);
@@ -98,15 +86,13 @@ public class EncryptionKeyService {
                 LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentCrn());
         if (environment.isEnableSecretEncryption()) {
             CloudPlatformVariant cloudPlatformVariant = getCloudPlatformVariant(stack);
-            CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorMap.get(cloudPlatformVariant);
+            CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.get(cloudPlatformVariant);
             if (cloudInformationDecorator == null) {
                 throw getCloudBreakServiceException(stack.getName(), String.format("Unsupported cloud platform and variant: %s", cloudPlatformVariant));
             }
-            String credentialPrincipal = cloudInformationDecorator.getCredentialPrincipal(environment, stack).orElseThrow(() ->
-                    getCloudBreakServiceException(stack.getName(), "Credential principal not found"));
-            List<String> cryptographicPrincipalsForLuksKey = getCryptographicPrincipalsForLuksKey(stack, environment, cloudInformationDecorator);
-            List<String> cryptographicPrincipalsForCloudSecretManagerKey = getCryptographicPrincipalsForCloudSecretManagerKey(credentialPrincipal,
-                    cryptographicPrincipalsForLuksKey);
+            List<String> luksKeyCryptographicPrincipals = cloudInformationDecorator.getLuksEncryptionKeyCryptographicPrincipals(environment, stack);
+            List<String> cloudSecretManagerKeyCryptographicPrincipals =
+                    cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment, stack);
             Map<String, String> tags = getTags(stack);
             List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, stack.getId());
             ExtendedCloudCredential extendedCloudCredential = getExtendedCloudCredential(environment);
@@ -117,9 +103,9 @@ public class EncryptionKeyService {
                     .withTags(tags);
             EncryptionResources encryptionResources = getEncryptionResources(stack);
             String luksKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_LUKS, stack), populateStackInformation(KEY_DESC_LUKS, stack),
-                    cryptographicPrincipalsForLuksKey, encryptionKeyBuilder, encryptionResources);
+                    luksKeyCryptographicPrincipals, encryptionKeyBuilder, encryptionResources);
             String cloudSecretManagerKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_CLOUD_SECRET_MANAGER, stack),
-                    populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), cryptographicPrincipalsForCloudSecretManagerKey, encryptionKeyBuilder,
+                    populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), cloudSecretManagerKeyCryptographicPrincipals, encryptionKeyBuilder,
                     encryptionResources);
             StackEncryption stackEncryption = new StackEncryption(stack.getId());
             stackEncryption.setAccountId(stack.getTenantName());
@@ -198,27 +184,46 @@ public class EncryptionKeyService {
                 Variant.variant(stack.getPlatformVariant()));
     }
 
-    private List<String> getCryptographicPrincipalsForLuksKey(Stack stack, DetailedEnvironmentResponse environment,
-            CloudInformationDecorator cloudInformationDecorator) {
-        List<String> principalIds;
-        if (stack.getType() == StackType.DATALAKE) {
-            principalIds = cloudInformationDecorator.getCloudIdentities(environment, stack);
-        } else if (stack.getType() == StackType.WORKLOAD) {
-            principalIds = cloudInformationDecorator.getLoggerInstances(environment, stack);
-        } else {
-            throw getCloudBreakServiceException(stack.getName(), String.format("Unsupported cluster type: %s", stack.getType()));
-        }
-        if (CollectionUtils.isEmpty(principalIds)) {
-            throw getCloudBreakServiceException(stack.getName(), "Unable to determine principal Ids");
-        }
-        return principalIds;
+    public void updateCloudSecretManagerEncryptionKeyAccess(Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
+            List<String> secretResourceReferencesToAdd, List<String> secretResourceReferencesToRemove) {
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
+        StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stack.getId());
+        CloudResource cloudSecretManagerKeyCloudResource = resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(
+                List.of(stackEncryption.getEncryptionKeyCloudSecretManager()), CommonStatus.CREATED,
+                cloudInformationDecorator.getCloudSecretManagerEncryptionKeyResourceType(), stack.getId()).getFirst();
+        UpdateEncryptionKeyResourceAccessRequest request = UpdateEncryptionKeyResourceAccessRequest.builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withCloudResource(cloudSecretManagerKeyCloudResource)
+                .withCryptographicAuthorizedClientsToAdd(secretResourceReferencesToAdd)
+                .withCryptographicAuthorizedClientsToRemove(secretResourceReferencesToRemove)
+                .build();
+        updateEncryptionKeyResourceAccess(request);
     }
 
-    private List<String> getCryptographicPrincipalsForCloudSecretManagerKey(String credentialPrincipal, List<String> cryptographicPrincipalsForLuksKey) {
-        List<String> cryptographicPrincipalsForCloudSecretManagerKey = new ArrayList<>();
-        cryptographicPrincipalsForCloudSecretManagerKey.add(credentialPrincipal);
-        cryptographicPrincipalsForCloudSecretManagerKey.addAll(cryptographicPrincipalsForLuksKey);
-        return cryptographicPrincipalsForCloudSecretManagerKey;
+    private void updateEncryptionKeyResourceAccess(UpdateEncryptionKeyResourceAccessRequest request) {
+        CloudPlatformVariant cloudPlatformVariant = request.cloudContext().getPlatformVariant();
+        EncryptionResources encryptionResources = cloudPlatformConnectors.get(cloudPlatformVariant).encryptionResources();
+        if (encryptionResources == null) {
+            throw new CloudbreakServiceException(String.format("Unsupported cloud platform variant: %s", cloudPlatformVariant));
+        }
+        encryptionResources.updateEncryptionKeyResourceAccess(request);
+        LOGGER.info("Successfully updated the resource access of encryption key {}.", request.cloudResource().getName());
     }
 
+    public void updateLuksEncryptionKeyAccess(Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
+            List<String> instanceResourceReferencesToAdd, List<String> instanceResourceReferencesToRemove) {
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
+        StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stack.getId());
+        CloudResource luksKeyCloudResource = resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(stackEncryption.getEncryptionKeyLuks()),
+                CommonStatus.CREATED, cloudInformationDecorator.getLuksEncryptionKeyResourceType(), stack.getId()).getFirst();
+        UpdateEncryptionKeyResourceAccessRequest request = UpdateEncryptionKeyResourceAccessRequest.builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withCloudResource(luksKeyCloudResource)
+                .withCryptographicAuthorizedClientsToAdd(instanceResourceReferencesToAdd)
+                .withCryptographicAuthorizedClientsToRemove(instanceResourceReferencesToRemove)
+                .build();
+        updateEncryptionKeyResourceAccess(request);
+    }
 }

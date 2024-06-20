@@ -124,4 +124,12 @@ public class ResourceService {
     public List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeIn(Long stackId, String instanceGroup, Collection<ResourceType> resourceTypes) {
         return repository.findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(stackId, instanceGroup, resourceTypes);
     }
+
+    public Iterable<Resource> findAllByResourceId(Iterable<Long> resourceIds) {
+        return repository.findAllById(resourceIds);
+    }
+
+    public Optional<Resource> findById(Long id) {
+        return repository.findById(id);
+    }
 }

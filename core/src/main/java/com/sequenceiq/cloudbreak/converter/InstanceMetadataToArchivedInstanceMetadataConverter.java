@@ -35,6 +35,7 @@ public class InstanceMetadataToArchivedInstanceMetadataConverter {
         result.setStatusReason(instanceMetaData.getStatusReason());
         result.setLifeCycle(instanceMetaData.getLifeCycle());
         result.setVariant(instanceMetaData.getVariant());
+        result.setUserdataSecretResourceId(instanceMetaData.getUserdataSecretResourceId());
 
         return result;
     }

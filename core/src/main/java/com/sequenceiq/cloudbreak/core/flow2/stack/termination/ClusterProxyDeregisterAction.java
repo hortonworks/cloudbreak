@@ -9,19 +9,19 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.DeleteUserdataSecretsFinished;
 
 @Component("ClusterProxyDeregisterAction")
-public class ClusterProxyDeregisterAction extends AbstractStackTerminationAction<StackPreTerminationSuccess> {
+public class ClusterProxyDeregisterAction extends AbstractStackTerminationAction<DeleteUserdataSecretsFinished> {
     @Inject
     private ClusterProxyEnablementService clusterProxyEnablementService;
 
     public ClusterProxyDeregisterAction() {
-        super(StackPreTerminationSuccess.class);
+        super(DeleteUserdataSecretsFinished.class);
     }
 
     @Override
-    protected void doExecute(StackTerminationContext context, StackPreTerminationSuccess payload, Map<Object, Object> variables) {
+    protected void doExecute(StackTerminationContext context, DeleteUserdataSecretsFinished payload, Map<Object, Object> variables) {
         if (!context.getTerminationType().isRecovery() && clusterProxyEnablementService.isClusterProxyApplicable(context.getStack().getCloudPlatform())) {
             ClusterProxyDeregisterRequest deregisterRequest = createRequest(context);
             sendEvent(context, deregisterRequest.selector(), deregisterRequest);

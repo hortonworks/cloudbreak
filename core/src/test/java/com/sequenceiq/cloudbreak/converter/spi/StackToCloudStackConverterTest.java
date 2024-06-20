@@ -46,6 +46,7 @@ import org.mockito.quality.Strictness;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -306,6 +307,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getSubnetId()).thenReturn(TEST_STRING_ID);
         when(instanceMetaData.getInstanceName()).thenReturn(TEST_NAME);
         when(instanceMetaData.getTerminationDate()).thenReturn(null);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
@@ -331,7 +333,9 @@ public class StackToCloudStackConverterTest {
     public void testConvertWhenProvidingStackAuthenticationThenItsDataShouldBeStoredInMetaData() {
         StackAuthentication auth = createStackAuthentication();
         List<InstanceMetadataView> notDeletedMetas = new ArrayList<>();
-        notDeletedMetas.add(mock(InstanceMetadataView.class));
+        InstanceMetadataView instanceMetadata = mock(InstanceMetadataView.class);
+        when(instanceMetadata.getUserdataSecretResourceId()).thenReturn(null);
+        notDeletedMetas.add(instanceMetadata);
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         instanceGroups.add(new InstanceGroupDto(instanceGroup, notDeletedMetas));
@@ -358,6 +362,8 @@ public class StackToCloudStackConverterTest {
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         InstanceMetadataView instanceMetadata1 = mock(InstanceMetadataView.class);
         InstanceMetadataView instanceMetadata2 = mock(InstanceMetadataView.class);
+        when(instanceMetadata1.getUserdataSecretResourceId()).thenReturn(null);
+        when(instanceMetadata2.getUserdataSecretResourceId()).thenReturn(null);
         instanceGroups.add(new InstanceGroupDto(instanceGroup, List.of(instanceMetadata1, instanceMetadata2)));
         String groupName = TEST_NAME;
         Template template = mock(Template.class);
@@ -862,10 +868,14 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
         when(instanceMetaData.getShortHostname()).thenReturn(DISCOVERY_NAME);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(1L);
+        Resource secretResource = new Resource();
+        secretResource.setResourceReference("secret-reference");
+        when(resourceService.findById(1L)).thenReturn(Optional.of(secretResource));
 
         Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AWS, null);
 
-        assertThat(result).hasSize(5);
+        assertThat(result).hasSize(6);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_USAGE_PARAMETER);
         assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
@@ -873,12 +883,20 @@ public class StackToCloudStackConverterTest {
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
         assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
         assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
+        assertThat(result.get(CloudInstance.USERDATA_SECRET_ID)).isEqualTo("secret-reference");
+    }
+
+    @Test
+    public void testBuildCloudInstanceParametersWhenSecretResourceDoesNotExist() {
+        assertThrows(UserdataSecretsException.class, () ->
+                underTest.buildCloudInstanceParameters(environment, stack, mock(InstanceMetadataView.class), CloudPlatform.AWS, null));
     }
 
     @Test
     public void testBuildCloudInstanceParametersAWSWithEmptyInstanceMetaData() {
         InstanceMetadataView instanceMetaData = mock(InstanceMetadataView.class);
         when(instanceMetaData.getId()).thenReturn(1L);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AWS, null);
 
@@ -900,6 +918,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
         when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
         when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform("AZURE");
@@ -930,6 +949,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
         when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
         when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform("AZURE");
@@ -961,6 +981,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
         when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
         when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         Resource yarnApplication = new Resource();
         yarnApplication.setResourceName(YARN_APPLICATION_NAME);
@@ -1213,6 +1234,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getSubnetId()).thenReturn(TEST_STRING_ID);
         when(instanceMetaData.getInstanceName()).thenReturn(TEST_NAME);
         when(instanceMetaData.getShortHostname()).thenReturn(fqdnParsedName);
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         InstanceMetadataView terminatedMetaData = mock(InstanceMetadataView.class);
         String terminatedFqdnParsedName = "test1-m-1-20200401095019";
@@ -1222,6 +1244,7 @@ public class StackToCloudStackConverterTest {
         when(terminatedMetaData.getInstanceName()).thenReturn("terminated-" + TEST_NAME);
         when(terminatedMetaData.isDeletedOnProvider()).thenReturn(true);
         when(terminatedMetaData.getShortHostname()).thenReturn(terminatedFqdnParsedName);
+        when(terminatedMetaData.getUserdataSecretResourceId()).thenReturn(null);
         List<InstanceMetadataView> metas = List.of(instanceMetaData, terminatedMetaData);
 
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
@@ -1270,6 +1293,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getSubnetId()).thenReturn(subnetId);
         when(instanceMetaData.getAvailabilityZone()).thenReturn(availabilityZone);
         when(instanceMetaData.getShortHostname()).thenReturn("vm");
+        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(null);
 
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         Template template = mock(Template.class);

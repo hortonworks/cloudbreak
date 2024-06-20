@@ -35,6 +35,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.START_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.TLS_SETUP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.UPDATE_USERDATA_SECRETS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.UPDATE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FINISHED_EVENT;
 import static java.util.Map.entry;
@@ -64,6 +66,8 @@ class StackCreationEventTest {
             entry(COLLECT_METADATA_FAILED_EVENT, "COLLECTMETADATARESULT_ERROR"),
             entry(COLLECT_LOADBALANCER_METADATA_FINISHED_EVENT, "COLLECTLOADBALANCERMETADATARESULT"),
             entry(COLLECT_LOADBALANCER_METADATA_FAILED_EVENT, "COLLECTLOADBALANCERMETADATARESULT_ERROR"),
+            entry(UPDATE_USERDATA_SECRETS_FINISHED_EVENT, "UPDATEUSERDATASECRETSSUCCESS"),
+            entry(UPDATE_USERDATA_SECRETS_FAILED_EVENT, "UPDATEUSERDATASECRETSFAILED"),
             entry(SSHFINGERPRINTS_EVENT, "GETSSHFINGERPRINTSRESULT"), entry(SSHFINGERPRINTS_FAILED_EVENT, "GETSSHFINGERPRINTSRESULT_ERROR"),
             entry(GET_TLS_INFO_FINISHED_EVENT, "GETTLSINFORESULT"),
             entry(GET_TLS_INFO_FAILED_EVENT, "GETTLSINFORESULT_ERROR"), entry(TLS_SETUP_FINISHED_EVENT, "TLS_SETUP_FINISHED_EVENT"),

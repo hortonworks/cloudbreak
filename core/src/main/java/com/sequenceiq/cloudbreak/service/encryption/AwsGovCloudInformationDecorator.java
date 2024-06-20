@@ -7,8 +7,17 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Component
 public class AwsGovCloudInformationDecorator extends AwsCloudInformationDecorator {
+
+    private static final String US_GOV_ARN_PARTITION = "aws-us-gov";
+
+    @Override
+    protected String getArnPartition() {
+        return US_GOV_ARN_PARTITION;
+    }
+
     @Override
     public Variant variant() {
         return AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant();
     }
+
 }

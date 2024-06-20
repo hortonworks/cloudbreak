@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.CCM_KEY_DEREGISTER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.CLUSTER_PROXY_DEREGISTER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.DELETE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.PRE_TERMINATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.TERMINATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.TERMINATION_FINISHED_STATE;
@@ -23,6 +24,7 @@ class StackTerminationStateTest {
 
     private static final Map<StackTerminationState, String> ENUM_TO_ACTION_MAP = new EnumMap<>(Map.ofEntries(
             entry(PRE_TERMINATION_STATE, "com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackPreTerminationAction"),
+            entry(DELETE_USERDATA_SECRETS_STATE, "com.sequenceiq.cloudbreak.core.flow2.stack.termination.DeleteUserdataSecretsAction"),
             entry(CLUSTER_PROXY_DEREGISTER_STATE, "com.sequenceiq.cloudbreak.core.flow2.stack.termination.ClusterProxyDeregisterAction"),
             entry(CCM_KEY_DEREGISTER_STATE, "com.sequenceiq.cloudbreak.core.flow2.stack.termination.CcmKeyDeregisterAction"),
             entry(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE,

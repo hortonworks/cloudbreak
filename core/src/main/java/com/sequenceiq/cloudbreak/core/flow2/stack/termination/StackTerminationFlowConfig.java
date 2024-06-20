@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTermin
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTER_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.DELETE_USERDATA_SECRETS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.DELETE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.PRE_TERMINATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT;
@@ -16,6 +18,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTermin
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.CCM_KEY_DEREGISTER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.CLUSTER_PROXY_DEREGISTER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.DELETE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.PRE_TERMINATION_STATE;
@@ -41,9 +44,13 @@ public class StackTerminationFlowConfig extends StackStatusFinalizerAbstractFlow
                     .event(TERMINATION_EVENT)
                     .noFailureEvent()
 
-                    .from(PRE_TERMINATION_STATE).to(CLUSTER_PROXY_DEREGISTER_STATE)
+                    .from(PRE_TERMINATION_STATE).to(DELETE_USERDATA_SECRETS_STATE)
                     .event(PRE_TERMINATION_FINISHED_EVENT)
                     .failureEvent(PRE_TERMINATION_FAILED_EVENT)
+
+                    .from(DELETE_USERDATA_SECRETS_STATE).to(CLUSTER_PROXY_DEREGISTER_STATE)
+                    .event(DELETE_USERDATA_SECRETS_FINISHED_EVENT)
+                    .failureEvent(DELETE_USERDATA_SECRETS_FAILED_EVENT)
 
                     .from(CLUSTER_PROXY_DEREGISTER_STATE).to(CCM_KEY_DEREGISTER_STATE)
                     .event(CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT)

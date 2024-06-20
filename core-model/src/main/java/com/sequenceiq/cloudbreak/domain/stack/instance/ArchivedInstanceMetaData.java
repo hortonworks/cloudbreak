@@ -88,6 +88,9 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
 
     private String variant;
 
+    @Column(name = "userdatasecretresource_id")
+    private Long userdataSecretResourceId;
+
     public Long getId() {
         return id;
     }
@@ -280,6 +283,14 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
         this.variant = variant;
     }
 
+    public Long getUserdataSecretResourceId() {
+        return userdataSecretResourceId;
+    }
+
+    public void setUserdataSecretResourceId(Long userdataSecretResourceId) {
+        this.userdataSecretResourceId = userdataSecretResourceId;
+    }
+
     public Long getInstanceGroupId() {
         return instanceGroup.getId();
     }
@@ -319,6 +330,7 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
                 ", statusReason='" + statusReason + '\'' +
                 ", lifeCycle=" + lifeCycle +
                 ", variant='" + variant + '\'' +
+                ", userdataSecretResourceId=" + userdataSecretResourceId +
                 '}';
     }
 }
