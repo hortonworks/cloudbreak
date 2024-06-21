@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -619,7 +620,7 @@ public class ClusterOperationService {
                 changedEntitlements, saltRefreshNeeded);
     }
 
-    public FlowIdentifier rotateRdsCertificate(Stack stack) {
+    public FlowIdentifier rotateRdsCertificate(StackView stack) {
         return flowManager.triggerRotateRdsCertificate(stack.getId());
     }
 }

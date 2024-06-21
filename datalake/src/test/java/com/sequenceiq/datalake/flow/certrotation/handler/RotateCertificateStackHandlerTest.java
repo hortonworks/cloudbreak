@@ -125,7 +125,7 @@ class RotateCertificateStackHandlerTest {
 
     private SdxCluster getSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setId(123L);
+        sdxCluster.setId(1L);
         return sdxCluster;
     }
 

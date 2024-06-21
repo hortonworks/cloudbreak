@@ -8,22 +8,27 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackRotateRdsCertificateService {
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackService;
 
     @Inject
     private StackCommonService stackCommonService;
 
-    public StackRotateRdsCertificateV4Response rotateRdsCertificate(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+    public StackRotateRdsCertificateV4Response rotateRdsCertificate(@NotNull NameOrCrn nameOrCrn, String accountId) {
+        StackView stack = stackService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        return getStackRotateRdsCertificateV4Response(stack);
+    }
+
+    private StackRotateRdsCertificateV4Response getStackRotateRdsCertificateV4Response(StackView stack) {
         return new StackRotateRdsCertificateV4Response(RotateRdsCertResponseType.TRIGGERED,
                 stackCommonService.rotateRdsCertificate(stack), null, stack.getResourceCrn());
     }
+
 }

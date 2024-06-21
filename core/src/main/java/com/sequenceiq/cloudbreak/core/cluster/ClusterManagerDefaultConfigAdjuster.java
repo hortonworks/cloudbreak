@@ -108,7 +108,7 @@ public class ClusterManagerDefaultConfigAdjuster {
                 .orElseThrow(() -> new CloudbreakRuntimeException("Couldn't get cloudera manager memory."));
     }
 
-    private void waitForClusterManagerToBecomeAvailable(StackDto stackDto, boolean defaultClusterManagerAuth)
+    public void waitForClusterManagerToBecomeAvailable(StackDto stackDto, boolean defaultClusterManagerAuth)
             throws ClusterClientInitException, CloudbreakException {
         clusterApiConnectors.getConnector(stackDto).waitForServer(defaultClusterManagerAuth);
     }

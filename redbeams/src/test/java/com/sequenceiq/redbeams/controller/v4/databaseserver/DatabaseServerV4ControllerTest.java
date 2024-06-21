@@ -50,6 +50,7 @@ import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsRotateSslService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
@@ -131,6 +132,9 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private UpgradeDatabaseResponseToUpgradeDatabaseServerV4ResponseConverter upgradeDatabaseServerV4ResponseConverter;
+
+    @Mock
+    private RedbeamsRotateSslService redbeamsRotateSslService;
 
     private DatabaseServerConfig server;
 
@@ -349,6 +353,13 @@ public class DatabaseServerV4ControllerTest {
         underTest.stop(SERVER_CRN);
 
         verify(redbeamsStopService).stopDatabaseServer(SERVER_CRN);
+    }
+
+    @Test
+    public void testStopupdateToLatestSslCert() {
+        underTest.updateToLatestSslCert(SERVER_CRN);
+
+        verify(redbeamsRotateSslService).updateToLatestDatabaseServerSslCert(SERVER_CRN);
     }
 
     @Test

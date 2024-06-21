@@ -1,21 +1,27 @@
 package com.sequenceiq.redbeams.controller.v4.support;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.CertificateSwapV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.CertificateSwapV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
+import com.sequenceiq.redbeams.converter.v4.SslCertificateEntryToSslCertificateEntryResponseConverter;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
@@ -29,6 +35,9 @@ public class SupportController implements SupportV4Endpoint {
 
     @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
+
+    @Inject
+    private SslCertificateEntryToSslCertificateEntryResponseConverter sslCertificateEntryToSslCertificateEntryResponseConverter;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATABASE_SERVER)
@@ -48,5 +57,20 @@ public class SupportController implements SupportV4Endpoint {
         databaseServerSslCertificateConfig.modifyMockProviderCertCache(REGION, chosenCerts);
 
         return null;
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public SslCertificateEntryResponse getLatestCertificates(String cloudPlatform, String region) {
+        int maxVersionByCloudPlatformAndRegion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region);
+        Set<SslCertificateEntry> certs = databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(cloudPlatform, region);
+        Optional<SslCertificateEntry> entry = certs.stream().filter(e -> e.version() == maxVersionByCloudPlatformAndRegion).findFirst();
+        if (entry.isPresent()) {
+            return sslCertificateEntryToSslCertificateEntryResponseConverter.convert(entry.get());
+        }
+        throw new BadRequestException(String.format("Could not found latest certificate for %s cloud and %s region.",
+                cloudPlatform,
+                region));
     }
 }

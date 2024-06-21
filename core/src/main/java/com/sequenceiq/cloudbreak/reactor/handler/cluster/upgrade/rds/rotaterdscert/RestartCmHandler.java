@@ -38,7 +38,6 @@ public class RestartCmHandler extends ExceptionCatcherEventHandler<RestartCmRequ
     public Selectable doAccept(HandlerEvent<RestartCmRequest> event) {
         RestartCmRequest request = event.getData();
         Long stackId = request.getResourceId();
-        // TODO: Restart CM
         rotateRdsCertificateService.restartCm(stackId);
         return new RestartCmResult(stackId);
     }

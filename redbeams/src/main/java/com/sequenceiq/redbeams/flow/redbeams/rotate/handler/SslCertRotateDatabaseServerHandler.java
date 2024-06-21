@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.rotate.event.SslCertRotateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.rotate.event.SslCertRotateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.rotate.event.SslCertRotateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.flow.redbeams.rotate.event.SslCertRotateRedbeamsEvent;
 import com.sequenceiq.redbeams.service.rotate.CloudProviderCertRotator;
 
 @Component
@@ -52,12 +52,15 @@ public class SslCertRotateDatabaseServerHandler implements EventHandler<SslCertR
         CloudCredential cloudCredential = request.getCloudCredential();
         DatabaseStack databaseStack = request.getDatabaseStack();
         try {
-            cloudProviderCertRotator.rotate(request.getResourceId(), cloudContext, cloudCredential, databaseStack);
-            RedbeamsEvent success = new SslCertRotateDatabaseServerSuccess(request.getResourceId());
+            cloudProviderCertRotator.rotate(request.getResourceId(), cloudContext, cloudCredential, databaseStack, request.isOnlyCertificateUpdate());
+            SslCertRotateRedbeamsEvent success = new SslCertRotateDatabaseServerSuccess(
+                    request.getResourceId(),
+                    request.isOnlyCertificateUpdate());
             eventBus.notify(success.selector(), new Event<>(event.getHeaders(), success));
             LOGGER.debug("Rotating cert the database server successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            SslCertRotateDatabaseServerFailed failure = new SslCertRotateDatabaseServerFailed(request.getResourceId(), e);
+            SslCertRotateDatabaseServerFailed failure =
+                    new SslCertRotateDatabaseServerFailed(request.getResourceId(), e, request.isOnlyCertificateUpdate());
             LOGGER.warn("Error rotating cert the database server:", e);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }

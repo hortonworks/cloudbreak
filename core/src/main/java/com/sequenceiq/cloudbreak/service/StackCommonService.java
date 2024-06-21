@@ -525,7 +525,7 @@ public class StackCommonService {
         return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
     }
 
-    public FlowIdentifier rotateRdsCertificate(Stack stack) {
+    public FlowIdentifier rotateRdsCertificate(StackView stack) {
         MDCBuilder.buildMdcContext(stack);
         return clusterOperationService.rotateRdsCertificate(stack);
     }

@@ -17,7 +17,10 @@ public enum DatabaseOperation {
             ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FAILED),
 
     UPGRADE(Status::isAvailable, Status.UPGRADE_FAILED::equals,
-            ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED, ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED);
+            ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED, ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED),
+
+    SSL_ROTATED(Status::isAvailable, status -> status.isDeleteInProgressOrCompleted() || Status.SSL_ROTATE_FAILED.equals(status),
+            ResourceEvent.ROTATE_RDS_CERTIFICATE_FINISHED, ResourceEvent.ROTATE_RDS_CERTIFICATE_FAILED),;
 
     private final Function<Status, Boolean> exitCriteria;
 

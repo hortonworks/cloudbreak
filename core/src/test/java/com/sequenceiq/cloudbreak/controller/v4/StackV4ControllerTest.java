@@ -168,8 +168,9 @@ class StackV4ControllerTest {
     void testRotateRdsCertificate() {
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "1");
         StackRotateRdsCertificateV4Response actual = new StackRotateRdsCertificateV4Response(RotateRdsCertResponseType.TRIGGERED, flowId, null, STACK_CRN);
-        when(stackRotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID)).thenReturn(actual);
-        StackRotateRdsCertificateV4Response result = underTest.rotateRdsCertificateByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
+        when(stackRotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID)).thenReturn(actual);
+        StackRotateRdsCertificateV4Response result = doAs(USER_CRN, () ->
+                underTest.rotateRdsCertificateByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN));
         Assertions.assertSame(actual, result);
     }
 }

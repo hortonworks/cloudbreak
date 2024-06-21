@@ -2,11 +2,15 @@ package com.sequenceiq.redbeams.api.endpoint.v4.support;
 
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.Notes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions;
@@ -30,4 +34,16 @@ public interface SupportV4Endpoint {
     CertificateSwapV4Response swapCertificate(
             @Valid @Parameter(description = ModelDescriptions.SUPPORT_CERTIFICATE_REQUEST) CertificateSwapV4Request request
     );
+
+    @GET
+    @Path("internal/get_latest_certificates")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = OperationDescriptions.DatabaseServerOpDescription.CERTIFICATE_LIST,
+            description = Notes.DatabaseServerNotes.CERT_LIST, operationId = "getDatabaseCertificates",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SslCertificateEntryResponse getLatestCertificates(
+            @QueryParam("cloudPlatform") String cloudPlatform,
+            @QueryParam("region") String region);
+
 }

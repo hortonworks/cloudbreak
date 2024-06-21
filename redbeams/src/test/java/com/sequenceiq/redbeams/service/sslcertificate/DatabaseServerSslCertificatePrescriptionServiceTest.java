@@ -99,7 +99,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     void prescribeSslCertificateIfNeededTestWhenNoSsl() throws Exception {
         initDBStack();
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudPlatformConnectors, never()).get(any(CloudPlatformVariant.class));
@@ -117,7 +117,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
             String cloudPlatform) throws Exception {
         initDBStack(cloudPlatform, createSslConfig(sslCertificateType, CERT_ID_1));
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudPlatformConnectors, never()).get(any(CloudPlatformVariant.class));
@@ -135,7 +135,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedNullCertId() throws Exception {
         initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, null));
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudPlatformConnectors, never()).get(any(CloudPlatformVariant.class));
@@ -165,7 +165,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
         when(cloudContext.getLocation()).thenReturn(location);
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudConnector).platformResources();
@@ -183,7 +183,8 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
 
         Exception exceptionResult =
-                assertThrows(Exception.class, () -> underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack));
+                assertThrows(Exception.class, () -> underTest
+                        .prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty()));
 
         assertThat(exceptionResult).isSameAs(e);
 
@@ -204,7 +205,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
         when(cloudContext.getLocation()).thenReturn(location);
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudConnector).platformResources();
@@ -224,7 +225,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
         when(cloudContext.getLocation()).thenReturn(location);
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isEqualTo(CERT_ID_1);
         verify(cloudConnector).platformResources();
@@ -244,7 +245,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
         when(cloudContext.getLocation()).thenReturn(location);
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudConnector).platformResources();
@@ -264,7 +265,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
         when(cloudContext.getLocation()).thenReturn(location);
 
-        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudConnector).platformResources();

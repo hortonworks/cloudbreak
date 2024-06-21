@@ -81,10 +81,14 @@ public final class Notes {
                 "Start a previosly stopped database server.";
         public static final String ROTATE_SSL_CERT =
                 "Rotate the root cert of a database server.";
+        public static final String UPDATE_SSL_CERT =
+                "Update the root cert of a database server.";
         public static final String STOP =
                 "Stop a running database server.";
         public static final String CERT_SWAP =
                 "Changes the certificate on mock provider";
+        public static final String CERT_LIST =
+                "Certificate for provider and region";
         private DatabaseServerNotes() {
         }
     }

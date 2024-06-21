@@ -32,7 +32,7 @@ public class RotateCertificateStackHandler extends ExceptionCatcherEventHandler<
     @Value("${sdx.rotate.certificate.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.rotate.certificate.duration_min:20}")
+    @Value("${sdx.rotate.certificate.duration_min:240}")
     private int durationInMinutes;
 
     @Inject

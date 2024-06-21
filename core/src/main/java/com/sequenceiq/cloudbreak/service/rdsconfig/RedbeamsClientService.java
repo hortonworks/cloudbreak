@@ -23,7 +23,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDat
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 @Service
 public class RedbeamsClientService {
@@ -35,6 +37,9 @@ public class RedbeamsClientService {
 
     @Inject
     private RedBeamsFlowEndpoint redBeamsFlowEndpoint;
+
+    @Inject
+    private SupportV4Endpoint supportV4Endpoint;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -99,6 +104,42 @@ public class RedbeamsClientService {
                     () -> redbeamsServerEndpoint.stop(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to stop DatabaseServer with CRN %s", crn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public FlowIdentifier rotateSslCert(String crn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.rotateSslCert(crn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to rotate certificate DatabaseServer with CRN %s", crn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public SslCertificateEntryResponse getLatestCertificate(String cloudPlatform, String region) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> supportV4Endpoint.getLatestCertificates(cloudPlatform, region));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to get certificate for %s cloudPlatform and %s region.", cloudPlatform, region);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public FlowIdentifier updateToLatestSslCert(String crn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.updateToLatestSslCert(crn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to rotate certificate DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }

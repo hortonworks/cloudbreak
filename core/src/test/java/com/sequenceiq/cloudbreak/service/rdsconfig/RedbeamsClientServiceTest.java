@@ -71,6 +71,22 @@ class RedbeamsClientServiceTest {
     }
 
     @Test
+    void rotateSslCert() {
+        when(redbeamsServerEndpoint.rotateSslCert(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "123"));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        underTest.rotateSslCert("crn");
+    }
+
+    @Test
+    void updateToLatestSslCert() {
+        when(redbeamsServerEndpoint.updateToLatestSslCert(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "123"));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        underTest.updateToLatestSslCert("crn");
+    }
+
+    @Test
     void getByClusterCrnNotFoundIsRethrownAsIs() {
         when(redbeamsServerEndpoint.getByClusterCrn(anyString(), anyString())).thenThrow(new NotFoundException("not found"));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");

@@ -436,17 +436,17 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public RotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
-        return rotateRdsCertificateConverter.convert(rotateRdsCertificateService.rotateRdsCertificate(
-                NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser()));
+        return rotateRdsCertificateConverter.convert(
+                rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(name),
+                ThreadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
-        return rotateRdsCertificateConverter.convert(rotateRdsCertificateService.rotateRdsCertificate(
-                NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser()));
+        return rotateRdsCertificateConverter.convert(
+                rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(crn),
+                ThreadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override

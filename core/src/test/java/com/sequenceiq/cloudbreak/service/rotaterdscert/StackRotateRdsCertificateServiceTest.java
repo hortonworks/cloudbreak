@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.S
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -25,12 +25,12 @@ class StackRotateRdsCertificateServiceTest {
 
     private static final String CRN = "stackCrn";
 
-    private static final Long WORKSPACE_ID = 1L;
+    private static final String ACCOUNT_ID = "1";
 
     private static final FlowIdentifier FLOW_IDENTIFIER = new FlowIdentifier(FlowType.FLOW, "flowId");
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackService;
 
     @Mock
     private StackCommonService stackCommonService;
@@ -41,9 +41,9 @@ class StackRotateRdsCertificateServiceTest {
     @Test
     void testRotateRdsCertificate() {
         Stack stack = TestUtil.stack();
-        when(stackService.getByNameOrCrnInWorkspace(NameOrCrn.ofCrn(CRN), WORKSPACE_ID)).thenReturn(stack);
+        when(stackService.getStackViewByNameOrCrn(NameOrCrn.ofCrn(CRN), ACCOUNT_ID)).thenReturn(stack);
         when(stackCommonService.rotateRdsCertificate(stack)).thenReturn(FLOW_IDENTIFIER);
-            StackRotateRdsCertificateV4Response response = underTest.rotateRdsCertificate(NameOrCrn.ofCrn(CRN), WORKSPACE_ID);
+        StackRotateRdsCertificateV4Response response = underTest.rotateRdsCertificate(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
         verify(stackCommonService).rotateRdsCertificate(stack);
         assertThat(response.getResponseType()).isEqualTo(RotateRdsCertResponseType.TRIGGERED);
         assertThat(response.getResourceCrn()).isEqualTo(stack.getResourceCrn());
