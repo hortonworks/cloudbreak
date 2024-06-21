@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
@@ -51,7 +53,9 @@ public class DistroXV1EventController implements DistroXV1EventEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
     public List<CDPStructuredEvent> getAuditEvents(
-            @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn @TenantAwareParam String resourceCrn, Integer page, Integer size) {
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn @TenantAwareParam String resourceCrn,
+            @Min(0) @Max(200) Integer page,
+            @Min(1) @Max(200) Integer size) {
         LOGGER.info("Get Data Hub audit events for {}, page {}, size {}", resourceCrn, page, size);
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         StackView stackView = Optional.ofNullable(stackService.getViewByCrnInWorkspace(resourceCrn, workspaceId)).orElseThrow(notFound("stack", resourceCrn));

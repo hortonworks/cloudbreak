@@ -105,7 +105,6 @@ class SdxDeleteServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        mockCBCallForDistroXClusters(Sets.newHashSet());
         doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
         underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
@@ -232,24 +231,24 @@ class SdxDeleteServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = Status.class, names = {"AVAILABLE", "BACKUP_IN_PROGRESS", "STOPPED", "BACKUP_FAILED"})
-    void testDeleteDetachedSdxWhenSdxHasAttachedDataHubsShouldThrowBadRequest(Status dhStatus) {
+    void testDeleteDetachedSdxWhenSdxHasAttachedDataHubsShouldInitiateSDXDeletionFlow(Status dhStatus) {
         SdxCluster sdxCluster = getSdxCluster();
         SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
         sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
-        StackViewV4Response stackViewV4Response = new StackViewV4Response();
-        stackViewV4Response.setName("existingDistroXCluster");
-        stackViewV4Response.setStatus(dhStatus);
 
-        mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        doNothing().when(sdxRotationService).cleanupSecretRotationEntries(any());
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true));
-
-        assertEquals("The following Data Hub(s) cluster(s) must be terminated before deletion of SDX cluster: [existingDistroXCluster].",
-                badRequestException.getMessage());
+        underTest.deleteSdx(ACCOUNT_ID, "sdx-cluster-name", true);
+        verify(sdxStatusService, times(0)).getActualStatusForSdx(sdxCluster);
+        verify(distroxService, times(0)).getAttachedDistroXClusters(ENVIRONMENT_CRN);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
     }
 
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {

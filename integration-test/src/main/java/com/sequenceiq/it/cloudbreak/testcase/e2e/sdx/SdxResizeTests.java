@@ -10,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.util.resize.SdxResizeTestUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class SdxResizeTests extends PreconditionSdxE2ETest {
+
     @Inject
     private SdxResizeTestUtil sdxResizeTestUtil;
 
@@ -23,4 +24,5 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
     public void testSDXResize(TestContext testContext) {
         sdxResizeTestUtil.runResizeTest(testContext, resourcePropertyProvider().getName(), getCloudStorageRequest(testContext));
     }
+
 }

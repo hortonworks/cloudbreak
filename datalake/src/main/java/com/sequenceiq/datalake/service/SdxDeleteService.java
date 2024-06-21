@@ -79,7 +79,7 @@ public class SdxDeleteService {
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
         Optional<SdxCluster> detachedCluster = sdxClusterRepository
                 .findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(sdxCluster.getAccountId(), sdxCluster.getEnvCrn());
-        if (forced && detachedCluster.isPresent() && !detachedCluster.get().getCrn().equals(sdxCluster.getCrn())) {
+        if (forced && detachedCluster.isPresent()) {
             return;
         }
 
