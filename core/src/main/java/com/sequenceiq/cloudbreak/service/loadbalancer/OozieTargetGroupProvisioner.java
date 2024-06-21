@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.service.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_11;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static com.sequenceiq.cloudbreak.service.loadbalancer.NetworkLoadBalancerAttributeUtil.getLoadBalancerAttributeIfExists;
+import static com.sequenceiq.cloudbreak.service.loadbalancer.NetworkLoadBalancerAttributeUtil.isSessionStickyForTargetGroup;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,6 +39,13 @@ public class OozieTargetGroupProvisioner {
                 oozieTargetGroup.setType(TargetGroupType.OOZIE);
             }
             oozieTargetGroup.setInstanceGroups(Set.of(oozieInstanceGroup.get()));
+            if (CloudPlatform.AWS.name().equalsIgnoreCase(stack.getCloudPlatform()) && stack.getNetwork() != null) {
+                Optional<Map<String, Object>> loadBalancerAttributes = getLoadBalancerAttributeIfExists(stack.getNetwork().getAttributes());
+                if (loadBalancerAttributes.isPresent()) {
+                    oozieTargetGroup.setUseStickySession(isSessionStickyForTargetGroup(stack.getNetwork().getAttributes()));
+                }
+            }
+
             if (!dryRun) {
                 LOGGER.debug("Adding target group to Oozie HA instance group.");
                 oozieInstanceGroup.get().addTargetGroup(oozieTargetGroup);

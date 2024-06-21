@@ -11,8 +11,10 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -51,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
@@ -82,6 +85,8 @@ class AwsLoadBalancerCommonServiceTest {
 
     private static final String PUBLIC_SUBNET_ID_2 = "anotherPublicSubnetId";
 
+    private boolean targetGroupStickyness;
+
     @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
@@ -90,6 +95,7 @@ class AwsLoadBalancerCommonServiceTest {
 
     @BeforeEach
     public void setup() {
+        targetGroupStickyness = false;
     }
 
     @Test
@@ -250,6 +256,41 @@ class AwsLoadBalancerCommonServiceTest {
     }
 
     @Test
+    void testConvertLoadBalancerCloudLBStikyness() {
+        AwsLoadBalancer existingLoadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
+        when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PUBLIC))).thenReturn(AwsLoadBalancerScheme.INTERNET_FACING);
+        targetGroupStickyness = true;
+
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(LoadBalancerType.PUBLIC);
+
+        AwsLoadBalancer result = underTest.convertLoadBalancer(cloudLoadBalancer, Map.of(INSTANCE_NAME, List.of(INSTANCE_ID)), createNetworkView(PUBLIC_ID_1,
+                        null),
+                List.of(existingLoadBalancer));
+
+        assertNotNull(result);
+        assertFalse(result.getListeners().isEmpty());
+        assertNotNull(result.getListeners().get(0).getTargetGroup());
+        assertTrue(result.getListeners().get(0).getTargetGroup().isStickySessionEnabled());
+    }
+
+    @Test
+    void testConvertLoadBalancerCloudLBNoStikyness() {
+        AwsLoadBalancer existingLoadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
+        when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PUBLIC))).thenReturn(AwsLoadBalancerScheme.INTERNET_FACING);
+
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(LoadBalancerType.PUBLIC);
+
+        AwsLoadBalancer result = underTest.convertLoadBalancer(cloudLoadBalancer, Map.of(INSTANCE_NAME, List.of(INSTANCE_ID)), createNetworkView(PUBLIC_ID_1,
+                        null),
+                List.of(existingLoadBalancer));
+
+        assertNotNull(result);
+        assertFalse(result.getListeners().isEmpty());
+        assertNotNull(result.getListeners().get(0).getTargetGroup());
+        assertFalse(result.getListeners().get(0).getTargetGroup().isStickySessionEnabled());
+    }
+
+    @Test
     void testEnableDeletionProtectionWhenLoadBalancerNotFoundExceptionWasThrown() {
         AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
         when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(LoadBalancerNotFoundException.builder().build());
@@ -347,7 +388,7 @@ class AwsLoadBalancerCommonServiceTest {
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
                 null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap());
-        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
+        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;
     }

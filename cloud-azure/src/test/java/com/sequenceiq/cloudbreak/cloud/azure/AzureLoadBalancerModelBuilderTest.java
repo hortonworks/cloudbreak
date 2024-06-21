@@ -42,6 +42,8 @@ class AzureLoadBalancerModelBuilderTest {
 
     private static final String GATEWAY_PRIVATE_LB_NEEDED_KEY = "gatewayPrivateLbNeeded";
 
+    private static final boolean LOADBALANCER_TARGET_STICKY_SESSION = false;
+
     private AzureLoadBalancerModelBuilder underTest;
 
     @Test
@@ -224,7 +226,7 @@ class AzureLoadBalancerModelBuilderTest {
                 null,
                 createGroupNetwork(),
                 emptyMap());
-        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, sku);
+        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, sku, LOADBALANCER_TARGET_STICKY_SESSION);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         return cloudLoadBalancer;
     }

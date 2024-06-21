@@ -359,7 +359,8 @@ public class StackToCloudStackConverter {
     private List<CloudLoadBalancer> buildLoadBalancers(StackView stack, List<Group> instanceGroups) {
         List<CloudLoadBalancer> cloudLoadBalancers = new ArrayList<>();
         for (LoadBalancer loadBalancer : loadBalancerPersistenceService.findByStackId(stack.getId())) {
-            CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType(), loadBalancer.getSku());
+            boolean stickySessionForLBTargetGroup = false;
+            CloudLoadBalancer temporaryLoadBalancer = new CloudLoadBalancer(loadBalancer.getType(), loadBalancer.getSku(), stickySessionForLBTargetGroup);
             for (TargetGroup targetGroup : targetGroupPersistenceService.findByLoadBalancerId(loadBalancer.getId())) {
                 Set<TargetGroupPortPair> portPairs = targetGroupPortProvider.getTargetGroupPortPairs(targetGroup);
                 Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()
@@ -367,11 +368,14 @@ public class StackToCloudStackConverter {
                         .collect(Collectors.toSet());
 
                 for (TargetGroupPortPair portPair : portPairs) {
-                    cloudLoadBalancer.addPortToTargetGroupMapping(portPair, instanceGroups.stream()
+                    temporaryLoadBalancer.addPortToTargetGroupMapping(portPair, instanceGroups.stream()
                             .filter(ig -> targetInstanceGroupName.contains(ig.getName()))
                             .collect(Collectors.toSet()));
                 }
+                stickySessionForLBTargetGroup = targetGroup.isUseStickySession();
             }
+            CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType(), loadBalancer.getSku(), stickySessionForLBTargetGroup);
+            cloudLoadBalancer.getPortToTargetGroupMapping().putAll(temporaryLoadBalancer.getPortToTargetGroupMapping());
             cloudLoadBalancers.add(cloudLoadBalancer);
         }
         return cloudLoadBalancers;

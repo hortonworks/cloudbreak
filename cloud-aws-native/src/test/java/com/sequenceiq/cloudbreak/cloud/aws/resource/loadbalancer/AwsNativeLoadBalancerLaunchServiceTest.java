@@ -860,6 +860,108 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         assertThat(loadBalancerTypes).containsExactly(existingInternal ? LoadBalancerTypeAttribute.PUBLIC : LoadBalancerTypeAttribute.PRIVATE);
     }
 
+    @ParameterizedTest(name = "existingInternal: {0}")
+    @ValueSource(booleans = {false, true})
+    void testLaunchLoadBalancerResourcesAwsTGNonSticky(boolean existingInternal) {
+        AwsLoadBalancer awsLoadBalancer = getAwsLoadBalancer(existingInternal ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL);
+        awsLoadBalancer.getListeners().forEach(awsListener -> awsListener.getTargetGroup().setStickySessionEnabled(false));
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(awsLoadBalancer));
+        String schemeNew = existingInternal ? EXTERNAL : INTERNAL;
+        String lbNameNew = existingInternal ? LB_NAME_EXTERNAL_NEW : LB_NAME_INTERNAL_NEW;
+        when(resourceNameService.loadBalancer(STACK_NAME, schemeNew)).thenReturn(lbNameNew);
+        when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
+        when(resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
+        LoadBalancer loadBalancer = LoadBalancer.builder()
+                .loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+                .thenReturn(tgNameNew);
+        String tgNameNoHash = existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH;
+        when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);
+        when(resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
+        TargetGroup targetGroup = TargetGroup.builder()
+                .targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResult = CreateTargetGroupResponse.builder()
+                .targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        String listenerName = existingInternal ? TG_NAME_INTERNAL : TG_NAME_EXTERNAL;
+        CloudResource listenerResource = CloudResource.builder()
+                .withName(listenerName)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                .withReference("aListenerArn")
+                .build();
+        when(resourceNameService.trimHash(listenerName)).thenReturn(existingInternal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
+        when(resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
+                .thenReturn(List.of(listenerResource));
+        Listener listener = Listener.builder()
+                .listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResult = CreateListenerResponse.builder()
+                .listeners(listener).build();
+        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, getCloudStack(), persistenceNotifier, loadBalancingClient, true);
+
+        verify(loadBalancingClient, never()).modifyTargetGroupAttributes(any());
+    }
+
+    @ParameterizedTest(name = "existingInternal: {0}")
+    @ValueSource(booleans = {false, true})
+    void testLaunchLoadBalancerResourcesAwsTGSticky(boolean existingInternal) {
+        AwsLoadBalancer awsLoadBalancer = getAwsLoadBalancer(existingInternal ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL);
+        awsLoadBalancer.getListeners().forEach(awsListener -> awsListener.getTargetGroup().setStickySessionEnabled(true));
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(awsLoadBalancer));
+        String schemeNew = existingInternal ? EXTERNAL : INTERNAL;
+        String lbNameNew = existingInternal ? LB_NAME_EXTERNAL_NEW : LB_NAME_INTERNAL_NEW;
+        when(resourceNameService.loadBalancer(STACK_NAME, schemeNew)).thenReturn(lbNameNew);
+        when(resourceNameService.trimHash(lbNameNew)).thenReturn(existingInternal ? LB_NAME_EXTERNAL_NO_HASH : LB_NAME_INTERNAL_NO_HASH);
+        when(resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
+        LoadBalancer loadBalancer = LoadBalancer.builder()
+                .loadBalancerArn("anARN").build();
+        CreateLoadBalancerResponse loadBalancerResult = CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build();
+        when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
+        String tgNameNew = existingInternal ? TG_NAME_EXTERNAL_NEW : TG_NAME_INTERNAL_NEW;
+        when(resourceNameService.loadBalancerTargetGroup(STACK_NAME, schemeNew, USER_FACING_PORT))
+                .thenReturn(tgNameNew);
+        String tgNameNoHash = existingInternal ? TG_NAME_EXTERNAL_NO_HASH : TG_NAME_INTERNAL_NO_HASH;
+        when(resourceNameService.trimHash(tgNameNew)).thenReturn(tgNameNoHash);
+        when(resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, STACK_ID)).thenReturn(List.of());
+        TargetGroup targetGroup = TargetGroup.builder()
+                .targetGroupArn("aTargetGroupArn").build();
+        CreateTargetGroupResponse createTargetGroupResult = CreateTargetGroupResponse.builder()
+                .targetGroups(List.of(targetGroup)).build();
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
+        String listenerName = existingInternal ? TG_NAME_INTERNAL : TG_NAME_EXTERNAL;
+        CloudResource listenerResource = CloudResource.builder()
+                .withName(listenerName)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                .withReference("aListenerArn")
+                .build();
+        when(resourceNameService.trimHash(listenerName)).thenReturn(existingInternal ? TG_NAME_INTERNAL_NO_HASH : TG_NAME_EXTERNAL_NO_HASH);
+        when(resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID))
+                .thenReturn(List.of(listenerResource));
+        Listener listener = Listener.builder()
+                .listenerArn("aListenerArn").build();
+        CreateListenerResponse createListenerResult = CreateListenerResponse.builder()
+                .listeners(listener).build();
+        when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
+        when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
+
+        underTest.launchLoadBalancerResources(authenticatedContext, getCloudStack(), persistenceNotifier, loadBalancingClient, true);
+
+        verify(loadBalancingClient, times(1)).modifyTargetGroupAttributes(any());
+    }
+
     private CloudStack getCloudStack() {
         Network network = new Network(new Subnet("10.0.0.0/16"), Map.of(NetworkConstants.VPC_ID, "vpc-avpcarn"));
         return new CloudStack(List.of(), network, null, Map.of(), Map.of(), null, null, null, null, null, null, null, false, null);

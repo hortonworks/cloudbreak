@@ -21,12 +21,15 @@ public class AwsLoadBalancer {
 
     private boolean listenerConfigSet;
 
+    private boolean useStickySessionForTargetGroup;
+
     public AwsLoadBalancer(AwsLoadBalancerScheme scheme) {
         this.scheme = scheme;
         this.name = getLoadBalancerName(scheme);
         this.listeners = new ArrayList<>();
         this.subnetIds = new HashSet<>();
         this.listenerConfigSet = false;
+        this.useStickySessionForTargetGroup = false;
     }
 
     public AwsLoadBalancerScheme getScheme() {
@@ -44,7 +47,7 @@ public class AwsLoadBalancer {
     }
 
     private AwsListener createListener(int port, int healthCheckPort) {
-        AwsListener listener = new AwsListener(scheme, port, healthCheckPort);
+        AwsListener listener = new AwsListener(scheme, port, healthCheckPort, useStickySessionForTargetGroup);
         listeners.add(listener);
         return listener;
     }
@@ -94,4 +97,13 @@ public class AwsLoadBalancer {
     private static String sanitizeGroupName(String groupName) {
         return groupName.replaceAll("_", "");
     }
+
+    public boolean isUseStickySessionForTargetGroup() {
+        return useStickySessionForTargetGroup;
+    }
+
+    public void setUseStickySessionForTargetGroup(boolean useStickySessionForTargetGroup) {
+        this.useStickySessionForTargetGroup = useStickySessionForTargetGroup;
+    }
+
 }

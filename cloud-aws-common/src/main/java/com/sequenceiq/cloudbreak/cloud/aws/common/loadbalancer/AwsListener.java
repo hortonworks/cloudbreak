@@ -12,10 +12,10 @@ public class AwsListener {
 
     private final String name;
 
-    public AwsListener(AwsLoadBalancerScheme scheme, int port, int healthCheckPort) {
+    public AwsListener(AwsLoadBalancerScheme scheme, int port, int healthCheckPort, boolean stickySessionEnabledForTargetGroup) {
         this.port = port;
         this.name = getListenerName(port, scheme);
-        this.targetGroup = new AwsTargetGroup(scheme, port, healthCheckPort);
+        this.targetGroup = new AwsTargetGroup(scheme, port, healthCheckPort, stickySessionEnabledForTargetGroup);
     }
 
     public int getPort() {

@@ -146,6 +146,8 @@ public class AzureTemplateBuilderTest {
 
     private static final String FIELD_ARM_TEMPLATE_PATH = "armTemplatePath";
 
+    private static final boolean LOADBALANCER_TARGET_STICKY_SESSION = false;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureTemplateBuilderTest.class);
 
     @Mock
@@ -585,7 +587,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
-        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.BASIC);
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.BASIC, LOADBALANCER_TARGET_STICKY_SESSION);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
         loadBalancers.add(loadBalancer);
 
@@ -635,7 +637,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
-        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD);
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD, LOADBALANCER_TARGET_STICKY_SESSION);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
         loadBalancers.add(loadBalancer);
 
@@ -781,7 +783,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
-        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD);
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD, LOADBALANCER_TARGET_STICKY_SESSION);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
         loadBalancers.add(loadBalancer);
 
@@ -916,7 +918,7 @@ public class AzureTemplateBuilderTest {
         groups.add(nonLbGroup);
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
-        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD);
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD, LOADBALANCER_TARGET_STICKY_SESSION);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), Set.of(lbGroup));
         loadBalancers.add(loadBalancer);
 

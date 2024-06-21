@@ -185,6 +185,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
             LOGGER.info("Use the legacy way to configure the global network.");
         }
         NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment), networkConverter::convertToNetworkV4Request);
+
         validateSubnetIds(network, environment);
         return network;
     }

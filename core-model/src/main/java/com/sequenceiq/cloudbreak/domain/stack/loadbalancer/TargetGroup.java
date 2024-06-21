@@ -42,6 +42,9 @@ public class TargetGroup implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json providerConfig;
 
+    @Column(nullable = false, name = "use_sticky_session")
+    private Boolean useStickySession = Boolean.FALSE;
+
     public Long getId() {
         return id;
     }
@@ -87,6 +90,14 @@ public class TargetGroup implements ProvisionEntity {
             return JsonUtil.readValueOpt(providerConfig.getValue(), TargetGroupConfigDbWrapper.class).orElse(null);
         }
         return null;
+    }
+
+    public Boolean isUseStickySession() {
+        return Boolean.TRUE.equals(useStickySession);
+    }
+
+    public void setUseStickySession(Boolean useStickySession) {
+        this.useStickySession = useStickySession;
     }
 
     public void setProviderConfig(TargetGroupConfigDbWrapper cloudConfig) {

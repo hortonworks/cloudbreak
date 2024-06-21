@@ -8,11 +8,16 @@ import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -23,6 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AvailabilitySetNameService;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
@@ -275,7 +282,7 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = StackType.class, names = { "DATALAKE", "WORKLOAD" }, mode = EnumSource.Mode.INCLUDE)
+    @EnumSource(value = StackType.class, names = {"DATALAKE", "WORKLOAD"}, mode = INCLUDE)
     void testCreateLoadBalancersForEndpointGateway(StackType stackType) {
         Stack stack = createAwsStack(stackType, PRIVATE_ID_1);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
@@ -805,6 +812,158 @@ class LoadBalancerConfigServiceTest extends SubnetTest {
                 .findFirst().get();
         assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         checkAvailabilitySetAttributes(loadBalancers);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS"}, mode = EXCLUDE)
+    @DisplayName("When the cloud provider is not AWS but network is filled then the sticky session load balancer target should be set to false")
+    void testStickySessionLBTargetNotAws(CloudPlatform cloudPlatform) {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, cloudPlatform.name(), false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, cloudPlatform.name(), true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        request.setNetwork(new NetworkV4Request());
+
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
+        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
+        when(loadBalancerTypeDeterminer.getType(environment)).thenReturn(LoadBalancerType.PUBLIC);
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+    }
+
+    @ParameterizedTest
+    @EnumSource(CloudPlatform.class)
+    @DisplayName("When network parameter is not set in Stack then the sticky session load balancer target should be set to false")
+    void testStickySessionLBTargetNetworkNotSet(CloudPlatform cloudPlatform) {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, cloudPlatform.name(), false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, cloudPlatform.name(), true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        stack.setNetwork(null);
+
+        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
+        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
+        when(loadBalancerTypeDeterminer.getType(environment)).thenReturn(LoadBalancerType.PUBLIC);
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+    }
+
+    @Test
+    @DisplayName("When the cloud provider is AWS and network is given in request but not loadBalancer is present in the network Attributes, then the sticky " +
+            "session load balancer target should be set to false")
+    void testStickySessionLBTargetLoadBalancerAttrNotGiven() {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, AWS, false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, AWS, true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        stack.getNetwork().setAttributes(new Json("{}"));
+
+        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
+        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
+        when(loadBalancerTypeDeterminer.getType(environment)).thenReturn(LoadBalancerType.PUBLIC);
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+    }
+
+    @Test
+    @DisplayName("When the cloud provider is AWS and network is given along with the loadBalancer attribute but no stickySessionForLoadBalancerTarget set, t" +
+            "hen the sticky session load balancer target should not be set")
+    void testStickySessionLBTargetAwsLoadBalancerEmpty() {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, AWS, false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, AWS, true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        stack.getNetwork().setAttributes(new Json("{\"loadBalancer\": {}}"));
+
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertNull(tg.isUseStickySession()))));
+    }
+
+    @Test
+    @DisplayName("When the cloud provider is AWS and network is given along with the loadBalancer attribute but stickySessionForLoadBalancerTarget set to " +
+            "null, then the sticky session load balancer target should be false")
+    void testStickySessionLBTargetStickySessNull() {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, AWS, false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, AWS, true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        stack.getNetwork().setAttributes(new Json("{\"loadBalancer\": {\"stickySessionForLoadBalancerTarget\": null}}"));
+
+        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
+        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
+        when(loadBalancerTypeDeterminer.getType(environment)).thenReturn(LoadBalancerType.PUBLIC);
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+    }
+
+    @Test
+    @DisplayName("When the cloud provider is AWS and network is given along with the loadBalancer attribute but stickySessionForLoadBalancerTarget set " +
+            "to false, then the sticky session load balancer target should be false")
+    void testStickySessionLBTargetStickySessFalse() {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, AWS, false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, AWS, true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        stack.getNetwork().setAttributes(new Json("{\"loadBalancer\": {\"stickySessionForLoadBalancerTarget\": false}}"));
+
+        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
+        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
+        when(loadBalancerTypeDeterminer.getType(environment)).thenReturn(LoadBalancerType.PUBLIC);
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertFalse(tg.isUseStickySession()))));
+    }
+
+    @Test
+    @DisplayName("When the cloud provider is AWS and network is given along with the loadBalancer attribute but stickySessionForLoadBalancerTarget set " +
+            "to true, then the sticky session load balancer target should be true")
+    void testStickySessionLBTargetStickySessTrue() {
+        Stack stack = createStack(StackType.WORKLOAD, PUBLIC_ID_1, AWS, false);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, AWS, true, Optional.empty());
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(true);
+        stack.getNetwork().setAttributes(new Json("{\"loadBalancer\": {\"stickySessionForLoadBalancerTarget\": true}}"));
+
+        when(loadBalancerEnabler.isLoadBalancerEnabled(any(), any(), any(), anyBoolean())).thenReturn(true);
+        when(knoxGroupDeterminer.getKnoxGatewayGroupNames(stack)).thenReturn(Set.of("master"));
+        when(loadBalancerTypeDeterminer.getType(environment)).thenReturn(LoadBalancerType.PUBLIC);
+        lenient().when(loadBalancerEnabler.isEndpointGatewayEnabled(ACCOUNT_ID, environment.getNetwork())).thenReturn(true);
+        lenient().when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        underTest.createLoadBalancers(stack, environment, request)
+                .forEach(lb -> lb.getTargetGroupSet()
+                        .forEach(tg -> tg.getInstanceGroups().forEach(ig -> assertTrue(tg.isUseStickySession()))));
     }
 
     private Set<LoadBalancer> createLoadBalancers() {

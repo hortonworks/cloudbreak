@@ -120,7 +120,7 @@ public class AwsLoadBalancerCommonService {
     AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, Map<String, List<String>> instanceIdsByGroupName, AwsNetworkView awsNetworkView,
             List<AwsLoadBalancer> awsLoadBalancers) {
         // Check and see if we already have a load balancer whose scheme matches this one.
-        AwsLoadBalancer currentLoadBalancer = null;
+        AwsLoadBalancer currentLoadBalancer;
         LoadBalancerType cloudLbType = cloudLoadBalancer.getType();
         Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLbType, awsNetworkView, cloudLoadBalancer);
         AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(cloudLbType);
@@ -130,6 +130,7 @@ public class AwsLoadBalancerCommonService {
                 .findFirst().orElse(new AwsLoadBalancer(scheme));
 
         currentLoadBalancer.addSubnets(subnetIds);
+        currentLoadBalancer.setUseStickySessionForTargetGroup(cloudLoadBalancer.isStickySession());
         setupLoadBalancer(cloudLoadBalancer, instanceIdsByGroupName, currentLoadBalancer);
 
         return currentLoadBalancer;

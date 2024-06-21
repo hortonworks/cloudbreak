@@ -61,10 +61,12 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTarg
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.IpAddressType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 
 @Service
@@ -82,6 +84,8 @@ public class AwsNativeLoadBalancerLaunchService {
     private static final int HEALTHY_THRESHOLD_COUNT = 2;
 
     private static final int UNHEALTHY_THRESHOLD_COUNT = 2;
+
+    private static final boolean DONT_USE_STICKY_SESSION_FOR_TARGET_GROUP = false;
 
     @Inject
     private AwsLoadBalancerCommonService loadBalancerCommonService;
@@ -125,13 +129,18 @@ public class AwsNativeLoadBalancerLaunchService {
                         creationContext.setTargetGroupName(resourceNameService.loadBalancerTargetGroup(stackName,
                                 awsLoadBalancer.getScheme().resourceName(), targetGroup.getPort()));
                         createTargetGroup(creationContext, awsNetworkView, targetGroup);
+                        if (targetGroup.isStickySessionEnabled()) {
+                            LOGGER.debug("Updating target group '{}' with sticky session attribute", targetGroup.getArn());
+                            updateTargetGroup(creationContext, TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
+                                    targetGroup.getArn());
+                        }
                         createListener(creationContext, listener);
                         registerTarget(loadBalancingClient, stackId, targetGroup);
                     }
                 }
             }
         } catch (Exception ex) {
-            String message = "Load balancer and it's resources could not be created. " + ex.getMessage();
+            String message = "Load balancer and its resources could not be created. " + ex.getMessage();
             LOGGER.warn(message, ex);
             throw new CloudConnectorException(message, ex);
         }
@@ -266,6 +275,15 @@ public class AwsNativeLoadBalancerLaunchService {
         context.setTargetGroupArn(targetGroupArn);
         CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(targetGroupResource, ResourceStatus.CREATED);
         context.addResourceStatus(cloudResourceStatus);
+    }
+
+    private void updateTargetGroup(ResourceCreationContext context, TargetGroupAttribute attribute, String targetGroupArn) {
+        ModifyTargetGroupAttributesRequest modifyRequest = ModifyTargetGroupAttributesRequest.builder()
+                .targetGroupArn(targetGroupArn)
+                .attributes(attribute)
+                .build();
+        context.getLoadBalancingClient().modifyTargetGroupAttributes(modifyRequest);
+        LOGGER.debug("Target group '{}' has been updated with attribute '{}'", targetGroupArn, attribute);
     }
 
     private CreateTargetGroupResponse createOrGetTargetGroup(ResourceCreationContext context, CreateTargetGroupRequest targetGroupRequest) {

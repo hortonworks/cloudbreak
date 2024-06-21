@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.service.loadbalancer.NetworkLoadBalancerAttributeUtil.getLoadBalancerAttributeIfExists;
+import static com.sequenceiq.cloudbreak.service.loadbalancer.NetworkLoadBalancerAttributeUtil.isSessionStickyForTargetGroup;
 import static java.util.Map.entry;
 
 import java.util.Collections;
@@ -348,6 +351,12 @@ public class LoadBalancerConfigService {
             knoxTargetGroup = new TargetGroup();
             knoxTargetGroup.setType(TargetGroupType.KNOX);
             knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
+            if (AWS.equalsIgnoreCase(stack.getCloudPlatform()) &&  stack.getNetwork() != null) {
+                Optional<Map<String, Object>> loadBalancerAttributes = getLoadBalancerAttributeIfExists(stack.getNetwork().getAttributes());
+                if (loadBalancerAttributes.isPresent()) {
+                    knoxTargetGroup.setUseStickySession(isSessionStickyForTargetGroup(stack.getNetwork().getAttributes()));
+                }
+            }
             if (!dryRun) {
                 LOGGER.debug("Adding target group to Knox gateway instances groups.");
                 TargetGroup finalKnoxTargetGroup = knoxTargetGroup;

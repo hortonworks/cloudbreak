@@ -25,6 +25,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTarg
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
 
@@ -66,6 +68,10 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public ModifyLoadBalancerAttributesResponse modifyLoadBalancerAttributes(ModifyLoadBalancerAttributesRequest request) {
         return client.modifyLoadBalancerAttributes(request);
+    }
+
+    public ModifyTargetGroupAttributesResponse modifyTargetGroupAttributes(ModifyTargetGroupAttributesRequest request) {
+        return client.modifyTargetGroupAttributes(request);
     }
 
     public CreateListenerResponse registerListener(CreateListenerRequest request) {

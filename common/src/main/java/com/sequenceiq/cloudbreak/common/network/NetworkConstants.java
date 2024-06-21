@@ -14,6 +14,8 @@ public class NetworkConstants {
 
     public static final String ENDPOINT_GATEWAY_SUBNET_IDS = "endpointGatewaySubnetIds";
 
+    public static final String LOAD_BALANCER = "loadBalancer";
+
     public static final String INTERNET_GATEWAY_ID = "internetGatewayId";
 
     public static final String CLOUD_PLATFORM = "cloudPlatform";

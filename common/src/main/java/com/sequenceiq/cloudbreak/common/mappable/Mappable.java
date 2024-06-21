@@ -51,6 +51,18 @@ public interface Mappable {
         return List.of();
     }
 
+    default <T> T getObject(Map<String, Object> parameters, String key, Class<T> clazz) {
+        Object value = isNull(parameters) ? null : parameters.get(key);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return clazz.cast(value);
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
     default Map<String, Object> defaultMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("cloudPlatform", getCloudPlatform().name());

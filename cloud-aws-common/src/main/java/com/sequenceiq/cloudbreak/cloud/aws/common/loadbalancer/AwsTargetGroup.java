@@ -17,10 +17,13 @@ public class AwsTargetGroup {
 
     private String arn;
 
-    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port, int healthCheckPort) {
+    private boolean stickySessionEnabled;
+
+    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port, int healthCheckPort, boolean stickySessionEnabled) {
         this.port = port;
         this.healthCheckPort = String.valueOf(healthCheckPort);
-        this.name = getTargetGroupName(port, scheme);
+        name = getTargetGroupName(port, scheme);
+        this.stickySessionEnabled = stickySessionEnabled;
     }
 
     public int getPort() {
@@ -54,4 +57,13 @@ public class AwsTargetGroup {
     public static String getTargetGroupName(int port, AwsLoadBalancerScheme scheme) {
         return TARGET_GROUP_NAME_PREFIX + port + scheme.resourceName();
     }
+
+    public boolean isStickySessionEnabled() {
+        return stickySessionEnabled;
+    }
+
+    public void setStickySessionEnabled(boolean stickySessionEnabled) {
+        this.stickySessionEnabled = stickySessionEnabled;
+    }
+
 }
