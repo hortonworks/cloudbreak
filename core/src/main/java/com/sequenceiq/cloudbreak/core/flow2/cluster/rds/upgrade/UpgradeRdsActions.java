@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -57,9 +56,6 @@ public class UpgradeRdsActions {
 
     @Inject
     private ExternalDatabaseService externalDatabaseService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Bean(name = "UPGRADE_RDS_STOP_SERVICES_STATE")
     public Action<?, ?> stopServicesAndCm() {

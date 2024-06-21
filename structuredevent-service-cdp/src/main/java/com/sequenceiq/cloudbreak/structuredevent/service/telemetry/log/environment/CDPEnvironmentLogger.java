@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseMapper;
@@ -24,9 +23,6 @@ public class CDPEnvironmentLogger implements CDPTelemetryEventLogger<CDPEnvironm
 
     @Inject
     private EnvironmentUseCaseMapper environmentUseCaseMapper;
-
-    @Inject
-    private CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter environmentRequestedConverter;
 
     @Inject
     private CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter statusChangedConverter;

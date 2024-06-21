@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -73,9 +72,6 @@ public class ClusterV4RequestToClusterConverter {
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private GatewayV4RequestToGatewayConverter gatewayV4RequestToGatewayConverter;

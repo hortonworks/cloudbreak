@@ -8,9 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubStatusChangedConverter;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatalakeRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatalakeStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.LegacyTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseMapper;
@@ -26,12 +24,6 @@ public class ClusterLogger implements LegacyTelemetryEventLogger {
 
     @Inject
     private ClusterUseCaseMapper clusterUseCaseMapper;
-
-    @Inject
-    private StructuredFlowEventToCDPDatalakeRequestedConverter datalakeRequestedConverter;
-
-    @Inject
-    private StructuredFlowEventToCDPDatahubRequestedConverter datahubRequestedConverter;
 
     @Inject
     private StructuredFlowEventToCDPDatalakeStatusChangedConverter datalakeStatusChangedConverter;

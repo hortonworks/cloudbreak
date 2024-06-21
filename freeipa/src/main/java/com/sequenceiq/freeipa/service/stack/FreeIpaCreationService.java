@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -133,9 +132,6 @@ public class FreeIpaCreationService {
 
     @Value("${info.app.version:}")
     private String appVersion;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();

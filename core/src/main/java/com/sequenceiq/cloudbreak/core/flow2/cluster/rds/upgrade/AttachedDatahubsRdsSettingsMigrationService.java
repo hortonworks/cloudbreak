@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -47,9 +46,6 @@ public class AttachedDatahubsRdsSettingsMigrationService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private RdsSettingsMigrationService rdsSettingsMigrationService;
