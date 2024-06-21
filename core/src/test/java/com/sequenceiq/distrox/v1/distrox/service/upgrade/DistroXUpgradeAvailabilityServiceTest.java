@@ -104,7 +104,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         stack.setId(STACK_ID);
 
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(
-                new SdxBasicView(null, null, null, false, 1L, null)));
+                new SdxBasicView(null, null, null, false, 1L, null, Optional.empty())));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("7.2.0"));
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(
-                new SdxBasicView("dummyCluster", null, null, true, 1L, null)));
+                new SdxBasicView("dummyCluster", null, null, true, 1L, null, Optional.empty())));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
 

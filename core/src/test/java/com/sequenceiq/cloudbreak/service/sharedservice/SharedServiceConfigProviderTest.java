@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -68,20 +69,20 @@ public class SharedServiceConfigProviderTest {
         Cluster cluster = cluster();
         cluster.getStack().setDatalakeCrn(DL_CRN);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, DL_CRN, null, false, 1L, null)));
+                Optional.of(new SdxBasicView(null, DL_CRN, null, false, 1L, null, Optional.of(new SdxFileSystemView(null, null)))));
         Stack dlStack = new Stack();
         Cluster dlCluster = new Cluster();
         dlCluster.setId(1L);
         dlStack.setCluster(dlCluster);
         when(stackService.getByCrn(any())).thenReturn(dlStack);
-        when(remoteDataContextWorkaroundService.prepareFilesytem(any(), any())).thenReturn(new FileSystem());
+        when(remoteDataContextWorkaroundService.prepareFilesystem(any(), any())).thenReturn(new FileSystem());
         RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
         when(rdsConfigWithoutCluster.getId()).thenReturn(1L);
         when(rdsConfigWithoutClusterService.findByClusterIdAndStatusInAndTypeIn(any(), any(), any())).thenReturn(List.of(rdsConfigWithoutCluster));
 
         underTest.configureCluster(cluster);
 
-        verify(remoteDataContextWorkaroundService).prepareFilesytem(any(), any());
+        verify(remoteDataContextWorkaroundService).prepareFilesystem(any(), any());
         verify(platformAwareSdxConnector, never()).getHmsServiceConfig(any());
         assertEquals(cluster.getRdsConfigs().size(), 1);
     }
@@ -90,7 +91,7 @@ public class SharedServiceConfigProviderTest {
     void testConfigureForCdlDatalakeIfHiveRdsConfigNotPresent() {
         Cluster cluster = cluster();
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, CDL_CRN, null, false, 1L, null)));
+                Optional.of(new SdxBasicView(null, CDL_CRN, null, false, 1L, null, Optional.empty())));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
                 HIVE_METASTORE_DATABASE_PORT, "port",
                 HIVE_METASTORE_DATABASE_HOST, "host",
@@ -112,7 +113,7 @@ public class SharedServiceConfigProviderTest {
     void testConfigureForCdlDatalakeIfHiveRdsConfigPresent() {
         Cluster cluster = cluster();
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, CDL_CRN, null, false, 1L, null)));
+                Optional.of(new SdxBasicView(null, CDL_CRN, null, false, 1L, null, Optional.empty())));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
                 HIVE_METASTORE_DATABASE_PORT, "port",
                 HIVE_METASTORE_DATABASE_HOST, "host",

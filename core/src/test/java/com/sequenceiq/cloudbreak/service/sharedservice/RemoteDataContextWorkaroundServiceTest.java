@@ -2,22 +2,24 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -27,13 +29,13 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RemoteDataContextWorkaroundServiceTest {
 
     private static final Random RANDOM = new Random();
@@ -50,27 +52,27 @@ public class RemoteDataContextWorkaroundServiceTest {
     @Test
     public void testFileSystemWhenHivePathPresentedInDistroXButSdxDoesNotContainsItShouldReturnWithDistroXConfigs() throws IOException {
         FileSystem fileSystem = underTest
-                .prepareFilesytem(
-                        mockRequestedCluster(mockStorageLocation(3), mockStorageLocation(4)),
-                        mockStack());
+                .prepareFilesystem(
+                        mockRequestedCluster(mockNonHiveStorageLocation(3), mockNonHiveStorageLocation(4)),
+                        mockSdxFileSystemView());
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
-        Assert.assertEquals(2, locations.size());
-        Assert.assertTrue(hasPropretyWithIndex(locations, 3));
-        Assert.assertTrue(hasPropretyWithIndex(locations, 4));
+        assertEquals(2, locations.size());
+        assertTrue(hasPropretyWithIndex(locations, 3));
+        assertTrue(hasPropretyWithIndex(locations, 4));
     }
 
     @Test
     public void testFileSystemWhenHiveInSdxAndDistroXShouldReturnWithSdxHiveConfigs() throws IOException {
         FileSystem fileSystem = underTest
-                .prepareFilesytem(
-                        mockRequestedCluster(mockStorageLocation(3), mockStorageLocation(4)),
-                        mockStack(mockStorageLocation(1), mockStorageLocation(2)));
+                .prepareFilesystem(
+                        mockRequestedCluster(mockNonHiveStorageLocation(3), mockNonHiveStorageLocation(4)),
+                        mockSdxFileSystemView(mockHiveStorageLocation(1), mockHiveStorageLocation(2)));
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
-        Assert.assertEquals(2, locations.size());
-        Assert.assertTrue(hasPropretyWithIndex(locations, 1));
-        Assert.assertTrue(hasPropretyWithIndex(locations, 2));
+        assertEquals(4, locations.size());
+        assertTrue(hasPropretyWithIndex(locations, 1));
+        assertTrue(hasPropretyWithIndex(locations, 2));
     }
 
     @Test
@@ -78,14 +80,14 @@ public class RemoteDataContextWorkaroundServiceTest {
         when(nameGenerator.generateName(APIResourceType.FILESYSTEM)).thenReturn("appletree");
 
         FileSystem fileSystem = underTest
-                .prepareFilesytem(
+                .prepareFilesystem(
                         mockRequestedCluster(mockRds(HIVE)),
-                        mockStack(mockStorageLocation(1), mockStorageLocation(2)));
+                        mockSdxFileSystemView(mockHiveStorageLocation(1), mockHiveStorageLocation(2)));
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
-        Assert.assertEquals(2, locations.size());
-        Assert.assertTrue(hasPropretyWithIndex(locations, 1));
-        Assert.assertTrue(hasPropretyWithIndex(locations, 2));
+        assertEquals(2, locations.size());
+        assertTrue(hasPropretyWithIndex(locations, 1));
+        assertTrue(hasPropretyWithIndex(locations, 2));
     }
 
     @Test
@@ -93,12 +95,12 @@ public class RemoteDataContextWorkaroundServiceTest {
         when(nameGenerator.generateName(APIResourceType.FILESYSTEM)).thenReturn("appletree");
 
         FileSystem fileSystem = underTest
-                .prepareFilesytem(
+                .prepareFilesystem(
                         mockRequestedCluster(mockRds(HIVE)),
-                        mockStack());
+                        mockSdxFileSystemView());
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
-        Assert.assertEquals(0, locations.size());
+        assertEquals(0, locations.size());
     }
 
     private RDSConfig get(Set<RDSConfig> rdsConfigs, DatabaseType databaseType) {
@@ -141,9 +143,16 @@ public class RemoteDataContextWorkaroundServiceTest {
         return cluster;
     }
 
-    private StorageLocation mockStorageLocation(int index) {
+    private StorageLocation mockHiveStorageLocation(int index) {
         StorageLocation storageLocation = new StorageLocation();
-        storageLocation.setType(CloudStorageCdpService.HIVE_METASTORE_EXTERNAL_WAREHOUSE);
+        storageLocation.setType(Arrays.stream(CloudStorageCdpService.values()).filter(svc -> svc.name().contains("HIVE")).toList().get(index));
+        storageLocation.setValue("hive" + index);
+        return storageLocation;
+    }
+
+    private StorageLocation mockNonHiveStorageLocation(int index) {
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setType(Arrays.stream(CloudStorageCdpService.values()).filter(svc -> !svc.name().contains("HIVE")).toList().get(index));
         storageLocation.setValue("hive" + index);
         return storageLocation;
     }
@@ -162,20 +171,10 @@ public class RemoteDataContextWorkaroundServiceTest {
         return cluster;
     }
 
-    private Stack mockStack(StorageLocation... storageLocations) {
-        Stack stack = new Stack();
-        Cluster cluster = new Cluster();
-        cluster.setRdsConfigs(new HashSet<>());
-        FileSystem fileSystem = new FileSystem();
-        fileSystem.setType(FileSystemType.S3);
-
-        CloudStorage cloudStorage = new CloudStorage();
-        cloudStorage.setLocations(Arrays.asList(storageLocations));
-        fileSystem.setCloudStorage(cloudStorage);
-
-        cluster.setFileSystem(fileSystem);
-        stack.setCluster(cluster);
-        return stack;
+    private SdxFileSystemView mockSdxFileSystemView(StorageLocation... storageLocations) {
+        Map<String, String> locations = Arrays.stream(storageLocations)
+                .collect(Collectors.toMap(location -> location.getType().name(), StorageLocation::getValue));
+        return new SdxFileSystemView(FileSystemType.S3.name(), locations);
     }
 
 }

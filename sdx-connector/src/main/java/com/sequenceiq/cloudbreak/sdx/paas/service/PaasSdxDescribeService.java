@@ -56,7 +56,8 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
                             sdx.getRuntime(),
                             sdx.getRangerRazEnabled(),
                             sdx.getCreated(),
-                            sdx.getDatabaseServerCrn()))
+                            sdx.getDatabaseServerCrn(),
+                            Optional.empty()))
                     .findFirst());
     }
 

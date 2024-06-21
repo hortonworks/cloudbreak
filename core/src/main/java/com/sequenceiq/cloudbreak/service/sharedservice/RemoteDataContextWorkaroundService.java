@@ -13,8 +13,10 @@ import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
+import com.sequenceiq.common.model.CloudStorageCdpService;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Service
 public class RemoteDataContextWorkaroundService {
@@ -22,24 +24,26 @@ public class RemoteDataContextWorkaroundService {
     @Inject
     private MissingResourceNameGenerator nameGenerator;
 
-    public FileSystem prepareFilesytem(Cluster requestedCluster, Stack datalakeStack) {
-        prepareFilesystemIfNotPresentedButSdxHasIt(requestedCluster, datalakeStack);
+    public FileSystem prepareFilesystem(Cluster requestedCluster, SdxFileSystemView sdxFileSystemView) {
+        prepareFilesystemIfNotPresentedButSdxHasIt(requestedCluster, sdxFileSystemView);
         if (hasFilesystem(requestedCluster.getFileSystem())) {
-            FileSystem fileSystem = requestedCluster.getFileSystem();
-            if (hasLocations(fileSystem)) {
-                CloudStorage cloudStorage = fileSystem.getCloudStorage();
-                FileSystem dlFileSystem = datalakeStack.getCluster().getFileSystem();
-                if (hasFilesystem(dlFileSystem)) {
-                    if (hasLocations(dlFileSystem)) {
-                        List<StorageLocation> dlStorageLocations = dlFileSystem.getCloudStorage().getLocations();
-                        List<StorageLocation> hiveRelatedStorageConfigs = getHiveRelatedStorageConfigs(dlStorageLocations);
-                        if (sdxHasHiveStorageConfiguration(hiveRelatedStorageConfigs)) {
-                            List<StorageLocation> storageLocations = getStorageLocationsWithoutHiveRelatedLocations(cloudStorage.getLocations());
-                            storageLocations.addAll(hiveRelatedStorageConfigs);
-                            cloudStorage.setLocations(storageLocations);
-                            fileSystem.setCloudStorage(cloudStorage);
-                        }
-                    }
+            FileSystem datahubFileSystem = requestedCluster.getFileSystem();
+            if (hasLocations(datahubFileSystem)) {
+                CloudStorage datahubCloudStorage = datahubFileSystem.getCloudStorage();
+                List<StorageLocation> hiveRelatedStorageConfigs = sdxFileSystemView.sharedFileSystemLocationsByService().entrySet()
+                        .stream()
+                        .map(entry -> {
+                            StorageLocation location = new StorageLocation();
+                            location.setType(CloudStorageCdpService.valueOf(entry.getKey()));
+                            location.setValue(entry.getValue());
+                            return location;
+                        })
+                        .toList();
+                if (sdxHasHiveStorageConfiguration(hiveRelatedStorageConfigs)) {
+                    List<StorageLocation> storageLocations = getStorageLocationsWithoutHiveRelatedLocations(datahubCloudStorage.getLocations());
+                    storageLocations.addAll(hiveRelatedStorageConfigs);
+                    datahubCloudStorage.setLocations(storageLocations);
+                    datahubFileSystem.setCloudStorage(datahubCloudStorage);
                 }
             }
         }
@@ -70,15 +74,13 @@ public class RemoteDataContextWorkaroundService {
         return fileSystem != null;
     }
 
-    private void prepareFilesystemIfNotPresentedButSdxHasIt(Cluster requestedCluster, Stack stack) {
+    private void prepareFilesystemIfNotPresentedButSdxHasIt(Cluster requestedCluster, SdxFileSystemView sdxFileSystemView) {
         if (requestedCluster.getFileSystem() == null) {
-            if (hasFilesystem(stack.getCluster().getFileSystem())) {
-                FileSystem fileSystem = new FileSystem();
-                fileSystem.setCloudStorage(new CloudStorage());
-                fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
-                fileSystem.setType(stack.getCluster().getFileSystem().getType());
-                requestedCluster.setFileSystem(fileSystem);
-            }
+            FileSystem fileSystem = new FileSystem();
+            fileSystem.setCloudStorage(new CloudStorage());
+            fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
+            fileSystem.setType(FileSystemType.valueOf(sdxFileSystemView.fileSystemType()));
+            requestedCluster.setFileSystem(fileSystem);
         }
     }
 }

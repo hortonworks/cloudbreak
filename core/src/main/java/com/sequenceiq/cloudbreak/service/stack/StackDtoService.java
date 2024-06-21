@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
@@ -383,7 +385,19 @@ public class StackDtoService implements LocalPaasSdxService {
                             runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null),
                             stackDto.getCluster().isRangerRazEnabled(),
                             stackDto.getCluster().getCreationFinished(),
-                            stackDto.getCluster().getDatabaseServerCrn()));
+                            stackDto.getCluster().getDatabaseServerCrn(),
+                            getHiveRelatedFileSystem(stackDto.getCluster())));
+    }
+
+    private Optional<SdxFileSystemView> getHiveRelatedFileSystem(ClusterView datalakeCluster) {
+        FileSystem dlFileSystem = datalakeCluster.getFileSystem();
+        if (dlFileSystem != null && dlFileSystem.getCloudStorage() != null && dlFileSystem.getCloudStorage().getLocations() != null) {
+            Map<String, String> hiveLocations = dlFileSystem.getCloudStorage().getLocations().stream()
+                    .filter(location -> location.getType().name().startsWith("HIVE"))
+                    .collect(Collectors.toMap(location -> location.getType().name(), StorageLocation::getValue));
+            return Optional.of(new SdxFileSystemView(dlFileSystem.getType().name(), hiveLocations));
+        }
+        return Optional.empty();
     }
 
     @Override

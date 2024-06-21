@@ -68,6 +68,8 @@ public class SharedServiceConfigProvider {
                     case CDL -> setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
                     default -> LOGGER.info("Data Lake CRN is not recognized, skipping setup regarding shared filesystem and RDS!");
                 }
+                sdxBasicView.get().fileSystemView().ifPresent(sdxFileSystemView ->
+                        requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesystem(requestedCluster, sdxFileSystemView)));
             }
         }
         return requestedCluster;
@@ -76,7 +78,6 @@ public class SharedServiceConfigProvider {
     private void configureClusterByPaasDatalake(Cluster requestedCluster, Stack stack, SdxBasicView sdxBasicView) {
         Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
         if (datalakeStack != null) {
-            requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesytem(requestedCluster, datalakeStack));
             setupHmsRdsByPaasDatalakeStack(datalakeStack, requestedCluster);
         } else {
             setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView);

@@ -80,7 +80,8 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
                         detailedCdl.getShape(),
                         detailedCdl.getRangerRazEnabled(),
                         detailedCdl.getCreated(),
-                        detailedCdl.getDatabaseDetails().getCrn());
+                        detailedCdl.getDatabaseDetails().getCrn(),
+                        Optional.empty());
                 return Optional.of(sdxBasicView);
             } catch (RuntimeException exception) {
                 LOGGER.info("Exception while fetching CRN for containerized datalake with Environment:{} {}",

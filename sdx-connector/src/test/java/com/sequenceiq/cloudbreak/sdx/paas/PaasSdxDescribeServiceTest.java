@@ -70,7 +70,7 @@ public class PaasSdxDescribeServiceTest {
     void testGetPaasSdxLocally() throws IllegalAccessException {
         LocalPaasSdxService mockLocalSdxService = mock(LocalPaasSdxService.class);
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.of(mockLocalSdxService), true);
-        when(mockLocalSdxService.getSdxBasicView(anyString())).thenReturn(Optional.of(new SdxBasicView(null, "crn", null, false, 1L, null)));
+        when(mockLocalSdxService.getSdxBasicView(anyString())).thenReturn(Optional.of(new SdxBasicView(null, "crn", null, false, 1L, null, Optional.empty())));
 
         underTest.getSdxByEnvironmentCrn("envCrn");
 

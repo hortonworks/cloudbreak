@@ -73,7 +73,7 @@ public class ClusterServicesRestartHandlerTest {
     void setUp() {
         mockTemplateComponents();
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
-                new SdxBasicView("name", "crn", null, true, 1L, null)));
+                new SdxBasicView("name", "crn", null, true, 1L, null, Optional.empty())));
 
         stack = new Stack();
         stack.setId(1L);
