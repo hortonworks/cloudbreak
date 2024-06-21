@@ -185,6 +185,10 @@
               {
                 "name": "hiveserver2_idle_session_timeout",
                 "value": 14400000
+              },
+              {
+                "name": "hive_compactor_worker_threads",
+                "value": 0
               }
             ]
           }
