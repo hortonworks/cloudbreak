@@ -41,9 +41,8 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
 
     @Override
     public Set<String> listSdxCrns(String environmentCrn) {
-        return sdxEndpoint.getByEnvCrn(environmentCrn).stream()
-                .map(SdxClusterResponse::getCrn)
-                .collect(Collectors.toSet());
+        return localPaasSdxService.map(localPaasSdxService -> localPaasSdxService.listSdxCrns(environmentCrn))
+                .orElse(sdxEndpoint.getByEnvCrn(environmentCrn).stream().map(SdxClusterResponse::getCrn).collect(Collectors.toSet()));
     }
 
     @Override

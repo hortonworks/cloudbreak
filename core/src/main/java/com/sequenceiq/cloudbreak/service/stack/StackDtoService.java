@@ -365,6 +365,14 @@ public class StackDtoService implements LocalPaasSdxService {
     }
 
     @Override
+    public Set<String> listSdxCrns(String environmentCrn) {
+        return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
+                .stream()
+                .map(StackDto::getResourceCrn)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public Optional<SdxBasicView> getSdxBasicView(String environmentCrn) {
         return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
                 .stream()

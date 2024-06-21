@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,7 @@ public class PaasSdxStatusServiceTest {
     public void testListStatusPairsCrn() {
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse();
         when(sdxEndpoint.getByEnvCrn(any())).thenReturn(List.of(sdxClusterResponse));
-        assertTrue(underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(PAAS_CRN))
+        assertTrue(underTest.listSdxCrnStatusPair(ENV_CRN)
                 .contains(Pair.of(PAAS_CRN, SdxClusterStatusResponse.RUNNING)));
         verify(sdxEndpoint).getByEnvCrn(any());
     }

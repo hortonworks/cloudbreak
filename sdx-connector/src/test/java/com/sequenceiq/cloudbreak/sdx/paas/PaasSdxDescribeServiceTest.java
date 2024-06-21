@@ -48,7 +48,18 @@ public class PaasSdxDescribeServiceTest {
     private PaasSdxDescribeService underTest;
 
     @Test
-    public void testListCrn() {
+    public void testLocalListCrn() throws IllegalAccessException {
+        LocalPaasSdxService mockLocalSdxService = mock(LocalPaasSdxService.class);
+        FieldUtils.writeField(underTest, "localPaasSdxService", Optional.of(mockLocalSdxService), true);
+        when(mockLocalSdxService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        Set<String> sdxCrns = underTest.listSdxCrns(ENV_CRN);
+        assertTrue(sdxCrns.contains(PAAS_CRN));
+        verify(sdxEndpoint).getByEnvCrn(eq(ENV_CRN));
+    }
+
+    @Test
+    public void testDlServiceListCrn() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
         when(sdxEndpoint.getByEnvCrn(any())).thenReturn(List.of(getSdxClusterResponse()));
         Set<String> sdxCrns = underTest.listSdxCrns(ENV_CRN);
         assertTrue(sdxCrns.contains(PAAS_CRN));

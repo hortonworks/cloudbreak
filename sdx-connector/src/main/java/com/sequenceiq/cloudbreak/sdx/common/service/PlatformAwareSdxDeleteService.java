@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.sdx.common.service;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,9 +12,9 @@ public interface PlatformAwareSdxDeleteService<S> extends PlatformAwareSdxStatus
 
     void deleteSdx(String sdxCrn, Boolean force);
 
-    default Map<String, PollingResult> getPollingResultForDeletion(String environmentCrn, Set<String> sdxCrns) {
+    default Map<String, PollingResult> getPollingResultForDeletion(String environmentCrn) {
         if (isPlatformEntitled(Crn.safeFromString(environmentCrn).getAccountId())) {
-            return listSdxCrnStatusPair(environmentCrn, sdxCrns).stream()
+            return listSdxCrnStatusPair(environmentCrn).stream()
                     .collect(Collectors.toMap(Pair::getLeft, pair -> getDeletePollingResultByStatus(pair.getRight())));
         }
         return Map.of();

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +28,12 @@ public class CdlSdxStatusService extends AbstractCdlSdxService implements Platfo
     private GrpcSdxCdlClient grpcClient;
 
     @Override
-    public Set<Pair<String, CdlCrudProto.StatusType.Value>> listSdxCrnStatusPair(String environmentCrn, Set<String> sdxCrns) {
+    public Set<Pair<String, CdlCrudProto.StatusType.Value>> listSdxCrnStatusPair(String environmentCrn) {
         Set<Pair<String, CdlCrudProto.StatusType.Value>> result = new HashSet<>();
         if (isEnabled(environmentCrn)) {
             try {
-                if (CollectionUtils.isNotEmpty(sdxCrns)) {
-                    sdxCrns.forEach(crn -> {
-                                CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(environmentCrn, crn);
-                                result.add(Pair.of(crn, CdlCrudProto.StatusType.Value.valueOf(response.getStatus())));
-                            }
-                    );
-                } else {
-                    CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(environmentCrn, "");
-                    result.add(Pair.of(response.getCrn(), CdlCrudProto.StatusType.Value.valueOf(response.getStatus())));
-                }
+                CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(environmentCrn, StringUtils.EMPTY);
+                result.add(Pair.of(response.getCrn(), CdlCrudProto.StatusType.Value.valueOf(response.getStatus())));
             } catch (RuntimeException exception) {
                 LOGGER.info("CDL not found for environment. CRN: {}.", environmentCrn);
                 return Collections.emptySet();
@@ -49,7 +41,7 @@ public class CdlSdxStatusService extends AbstractCdlSdxService implements Platfo
         }
         return result
                 .stream()
-                .filter(entry -> !"DELETED".equals(entry.getValue()))
+                .filter(entry -> !CdlCrudProto.StatusType.Value.DELETED.equals(entry.getValue()))
                 .collect(Collectors.toSet());
     }
 

@@ -1,14 +1,12 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -82,57 +80,37 @@ public class PlatformAwareSdxConnectorTest {
     }
 
     @Test
-    public void testSaasDelete() {
+    public void testDelete() {
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
         doNothing().when(cdlSdxDeleteService).deleteSdx(any(), anyBoolean());
-        underTest.delete(SAAS_CRN, false);
-        verify(cdlSdxDeleteService).deleteSdx(anyString(), anyBoolean());
-        verifyNoInteractions(paasSdxDeleteService);
-    }
-
-    @Test
-    public void testPaasDelete() {
         doNothing().when(paasSdxDeleteService).deleteSdx(any(), anyBoolean());
-        underTest.delete(PAAS_CRN, false);
+        underTest.deleteByEnvironment("env", false);
+        verify(cdlSdxDeleteService).deleteSdx(anyString(), anyBoolean());
         verify(paasSdxDeleteService).deleteSdx(anyString(), anyBoolean());
-        verifyNoInteractions(cdlSdxDeleteService);
     }
 
     @Test
     public void testList() {
         when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
         when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
-        assertThrows(IllegalStateException.class, () -> underTest.listSdxCrns("envCrn"));
+        assertTrue(underTest.listSdxCrns("envCrn").contains(PAAS_CRN));
 
         when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
         when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
         assertTrue(underTest.listSdxCrns("envCrn").contains(SAAS_CRN));
 
         when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
-        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
         assertTrue(underTest.listSdxCrns("envCrn").contains(PAAS_CRN));
     }
 
     @Test
-    public void testSaasGetAttemptResult() {
-        when(cdlSdxDeleteService.getPollingResultForDeletion(anyString(), any())).thenReturn(Map.of(SAAS_CRN, PollingResult.IN_PROGRESS));
-        underTest.getAttemptResultForDeletion("envCrn", Set.of(SAAS_CRN));
-        verifyNoInteractions(paasSdxDeleteService);
-        verify(cdlSdxDeleteService).getPollingResultForDeletion(anyString(), any());
-    }
-
-    @Test
-    public void testPaasGetAttemptResult() {
-        when(paasSdxDeleteService.getPollingResultForDeletion(anyString(), any())).thenReturn(Map.of(PAAS_CRN, PollingResult.IN_PROGRESS));
-        underTest.getAttemptResultForDeletion("envCrn", Set.of(PAAS_CRN));
-        verifyNoInteractions(cdlSdxDeleteService);
-        verify(paasSdxDeleteService).getPollingResultForDeletion(anyString(), any());
-    }
-
-    @Test
-    public void testBothGetAttemptResult() {
-        assertThrows(IllegalStateException.class, () ->
-                underTest.getAttemptResultForDeletion("envCrn", Set.of(PAAS_CRN, SAAS_CRN)));
-        verifyNoInteractions(paasSdxDeleteService, paasSdxDeleteService);
+    public void testGetAttemptResult() {
+        when(cdlSdxDeleteService.getPollingResultForDeletion(anyString())).thenReturn(Map.of(SAAS_CRN, PollingResult.IN_PROGRESS));
+        when(paasSdxDeleteService.getPollingResultForDeletion(anyString())).thenReturn(Map.of(PAAS_CRN, PollingResult.IN_PROGRESS));
+        underTest.getAttemptResultForDeletion("envCrn");
+        verify(paasSdxDeleteService).getPollingResultForDeletion(anyString());
+        verify(cdlSdxDeleteService).getPollingResultForDeletion(anyString());
     }
 
     @Test
@@ -150,7 +128,6 @@ public class PlatformAwareSdxConnectorTest {
         when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(
                 Optional.of(new SdxBasicView(null, PAAS_CRN, null, false, 1L, null)));
         when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
-        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
         Optional<SdxBasicView> sdx = underTest.getSdxBasicViewByEnvironmentCrn("envCrn");
         assertEquals(PAAS_CRN, sdx.get().crn());
     }

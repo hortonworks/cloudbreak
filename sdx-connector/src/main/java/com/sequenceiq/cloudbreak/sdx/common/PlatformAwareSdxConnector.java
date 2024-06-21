@@ -1,18 +1,22 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.core.AttemptResult;
-import com.google.common.collect.Sets;
+import com.dyngr.core.AttemptResults;
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
@@ -55,24 +59,26 @@ public class PlatformAwareSdxConnector {
         platformDependentSdxDhTearDownServices.get(TargetPlatform.getByCrn(sdxCrn)).tearDownDataHub(sdxCrn, datahubCrn);
     }
 
-    public void delete(String sdxCrn, Boolean force) {
-        platformDependentSdxDeleteServices.get(TargetPlatform.getByCrn(sdxCrn)).deleteSdx(sdxCrn, force);
+    public void deleteByEnvironment(String environmentCrn, Boolean force) {
+        platformDependentSdxDescribeServices.values().forEach(describeService -> describeService.listSdxCrns(environmentCrn).forEach(crn ->
+                        platformDependentSdxDeleteServices.get(TargetPlatform.getByCrn(crn)).deleteSdx(crn, force)));
     }
 
-    public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn, Set<String> sdxCrns) {
-        PlatformAwareSdxDeleteService<?> platformAwareSdxDeleteService = platformDependentSdxDeleteServices.get(calculatePlatform(sdxCrns));
-        Map<String, PollingResult> pollingResultForDeletion = platformAwareSdxDeleteService.getPollingResultForDeletion(environmentCrn, sdxCrns);
-        return platformAwareSdxDeleteService.getAttemptResultForPolling(pollingResultForDeletion, "SDX deletion is failed for these: %s");
+    public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn) {
+        Map<String, PollingResult> pollingResultForDeletion = platformDependentSdxDeleteServices.values().stream()
+                .map(deleteService -> deleteService.getPollingResultForDeletion(environmentCrn).entrySet())
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return getAttemptResultForPolling(pollingResultForDeletion, "SDX deletion is failed for these: %s");
     }
 
     public Set<String> listSdxCrns(String environmentCrn) {
         LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentCrn);
         Set<String> paasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
-        Set<String> saasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.CDL).listSdxCrns(environmentCrn);
-        if (!paasSdxCrns.isEmpty() && !saasSdxCrns.isEmpty()) {
-            throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
+        if (CollectionUtils.isEmpty(paasSdxCrns)) {
+            return platformDependentSdxDescribeServices.get(TargetPlatform.CDL).listSdxCrns(environmentCrn);
         }
-        return Sets.union(saasSdxCrns, paasSdxCrns);
+        return paasSdxCrns;
     }
 
     public Optional<SdxBasicView> getSdxBasicViewByEnvironmentCrn(String environmentCrn) {
@@ -84,8 +90,7 @@ public class PlatformAwareSdxConnector {
     }
 
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentCrn) {
-        Set<String> sdxCrns = listSdxCrns(environmentCrn);
-        return platformDependentSdxStatusServicesMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, sdxCrns);
+        return platformDependentSdxStatusServicesMap.get(calculatePlatform(environmentCrn)).listSdxCrnStatusCheckPair(environmentCrn);
     }
 
     private TargetPlatform calculatePlatform(String environmentCrn) {
@@ -99,6 +104,22 @@ public class PlatformAwareSdxConnector {
         } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.PAAS;
         }
-        throw new IllegalStateException("Polling for SDX should be happen only for SaaS or PaaS only at the same time.");
+        throw new IllegalStateException("CRNs cannot be recognized based on the list.");
+    }
+
+    private AttemptResult<Object> getAttemptResultForPolling(Map<String, PollingResult> pollingResult, String failedPollingErrorMessageTemplate) {
+        if (!pollingResult.isEmpty()) {
+            Set<String> failedSdxCrns = pollingResult.entrySet().stream()
+                    .filter(entry -> PollingResult.FAILED.equals(entry.getValue()))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+            if (!failedSdxCrns.isEmpty()) {
+                String errorMessage = String.format(failedPollingErrorMessageTemplate, Joiner.on(",").join(failedSdxCrns));
+                LOGGER.info(errorMessage);
+                return AttemptResults.breakFor(new IllegalStateException(errorMessage));
+            }
+            return AttemptResults.justContinue();
+        }
+        return AttemptResults.finishWith(null);
     }
 }

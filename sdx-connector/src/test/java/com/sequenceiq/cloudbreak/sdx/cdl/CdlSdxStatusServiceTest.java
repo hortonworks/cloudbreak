@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.sdx.cdl;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -50,27 +49,36 @@ public class CdlSdxStatusServiceTest {
         CdlCrudProto.DatalakeResponse datalake = getDatalake("RUNNING");
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         when(sdxClient.findDatalake(anyString(), anyString())).thenReturn(datalake);
-        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN))
+        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN)
                 .contains(Pair.of(CDL_CRN, CdlCrudProto.StatusType.Value.RUNNING))));
         verify(sdxClient).findDatalake(anyString(), anyString());
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
-        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN)).isEmpty()));
+        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN).isEmpty()));
         verifyNoMoreInteractions(sdxClient);
     }
 
     @Test
-    public void testListStatusPairsCrnWithDeletedAndNonDeletedCDL() {
-        String otherCRN = "otherCRN";
+    public void testListStatusPairsCrnWithNonDeletedCDL() {
         setEnabled();
         CdlCrudProto.DatalakeResponse datalakeNotDeleted = getDatalake("DELETING");
-        CdlCrudProto.DatalakeResponse datalakeDeleted = getDatalake("DELETED");
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
-        when(sdxClient.findDatalake(anyString(), eq(CDL_CRN))).thenReturn(datalakeNotDeleted);
-        when(sdxClient.findDatalake(any(), eq(otherCRN))).thenReturn(datalakeDeleted);
-        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN, otherCRN))
+        when(sdxClient.findDatalake(anyString(), any())).thenReturn(datalakeNotDeleted);
+        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN)
                 .contains(Pair.of(CDL_CRN, CdlCrudProto.StatusType.Value.DELETING))));
-        verify(sdxClient, times(2)).findDatalake(anyString(), anyString());
+        verify(sdxClient, times(1)).findDatalake(anyString(), anyString());
+    }
+
+    @Test
+    public void testListStatusPairsCrnWithDeletedCDL() {
+        setEnabled();
+        CdlCrudProto.DatalakeResponse datalakeNotDeleted = getDatalake("DELETED");
+        when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
+        when(sdxClient.findDatalake(anyString(), any())).thenReturn(datalakeNotDeleted);
+        Set<Pair<String, CdlCrudProto.StatusType.Value>> pairs = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.listSdxCrnStatusPair(ENV_CRN));
+        assertTrue(pairs.isEmpty());
+        verify(sdxClient, times(1)).findDatalake(anyString(), anyString());
     }
 
     private CdlCrudProto.DatalakeResponse getDatalake(String status) {
