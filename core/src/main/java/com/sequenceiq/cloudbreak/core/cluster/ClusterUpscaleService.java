@@ -98,6 +98,7 @@ public class ClusterUpscaleService {
             List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
             if (request.isRepair()) {
                 recommissionHostsIfNeeded(connector, request.getHostGroupsWithHostNames());
+                restartServicesIfNecessary(request.isRestartServices(), stackDto, connector, request.isRollingRestartEnabled());
                 connector.hostsStartRoles(upscaledHosts);
             }
             clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, candidateAddresses.keySet());
@@ -130,6 +131,17 @@ public class ClusterUpscaleService {
                     instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
                     instanceMetaDataService.save(instanceMetaData);
                 });
+    }
+
+    private void restartServicesIfNecessary(Boolean restartServices, StackDto stackDto, ClusterApi connector, boolean rollingRestartEnabled) {
+        if (shouldRestartServices(restartServices, stackDto) && !rollingRestartEnabled) {
+            LOGGER.info("Trying to restart services");
+            callProperRestartCommand(connector, false);
+        }
+    }
+
+    private boolean shouldRestartServices(Boolean restartServices, StackDto stackDto) {
+        return restartServices && stackDto.getAllAvailableInstances().size() == stackDto.getRunningInstanceMetaDataSet().size();
     }
 
     public void executePostRecipesOnNewHosts(Long stackId, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
