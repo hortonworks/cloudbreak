@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.service.datalake;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,12 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.deregister.DeregisterPrePositionFactory;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -65,6 +64,9 @@ class DataHubTearDownServiceTest {
     @Captor
     private ArgumentCaptor<Optional<DatalakeDto>> argumentCaptor;
 
+    @Mock
+    private DeregisterPrePositionFactory deregisterPrePositionFactory;
+
     @InjectMocks
     private DataHubTearDownService underTest;
 
@@ -76,28 +78,23 @@ class DataHubTearDownServiceTest {
 
         when(stackService.getByCrnWithLists(anyString())).thenReturn(datahub);
         when(stackService.getByCrnOrElseNull(anyString())).thenReturn(getDatalakeStack());
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString(), anyString())).thenReturn(new HttpClientConfig(null));
     }
 
     @Test
     void testAcceptEvent() {
+        when(deregisterPrePositionFactory.datalakeDto(any())).thenReturn(Optional.empty());
+        doNothing().when(clusterSecurityService).deregisterServices(anyString(), any());
         when(clusterApi.clusterSecurityService()).thenReturn(clusterSecurityService);
+        when(deregisterPrePositionFactory.clusterApi(any())).thenReturn(clusterApi);
 
         underTest.tearDownDataHub(DATALAKE_CRN, DATAHUB_CRN);
 
-        verify(clusterSecurityService).deregisterServices(anyString(), argumentCaptor.capture());
-        DatalakeDto result = argumentCaptor.getValue().get();
-
-        assertEquals(result.getName(), TEST_DATALAKE_NAME);
-        assertEquals(result.getUser(), TEST_CM_USER);
-        assertEquals(result.getPassword(), TEST_CM_PASSWORD);
-        assertEquals(result.getGatewayPort(), TEST_GATEWAY_PORT);
+        verify(clusterSecurityService).deregisterServices(anyString(), any());
     }
 
     @Test
     void testAcceptEventThrowsException() {
-        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString(), anyString())).thenThrow(new RuntimeException());
+        when(deregisterPrePositionFactory.clusterApi(any())).thenThrow(new RuntimeException());
 
         assertThrows(RuntimeException.class, () -> underTest.tearDownDataHub(DATALAKE_CRN, DATAHUB_CRN));
 

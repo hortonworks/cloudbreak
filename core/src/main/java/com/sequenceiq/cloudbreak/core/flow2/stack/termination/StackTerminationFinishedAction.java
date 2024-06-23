@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -10,7 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.deregister.DeregisterPrePositionFactory;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.recovery.RecoveryTeardownService;
 
 @Component("StackTerminationFinishedAction")
@@ -24,18 +29,29 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
     @Inject
     private RecoveryTeardownService recoveryTeardownService;
 
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Inject
+    private DeregisterPrePositionFactory deregisterPrePositionFactory;
+
     public StackTerminationFinishedAction() {
         super(TerminateStackResult.class);
     }
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
+        StackDtoDelegate stackDtoDelegate = context.getStack();
         if (context.getTerminationType().isRecovery()) {
             LOGGER.debug("Recovery is in progress, skipping stack termination finalization!");
-            recoveryTeardownService.handleRecoveryTeardownSuccess(context.getStack().getStack(), payload);
+            recoveryTeardownService.handleRecoveryTeardownSuccess(stackDtoDelegate.getStack(), payload);
         } else {
             LOGGER.debug("Termination type is {}, executing stack termination finalization!", context.getTerminationType());
-            stackTerminationService.finishStackTermination(context.getStack().getStack(), context.getTerminationType().isForced(), payload);
+            Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector
+                    .getSdxBasicViewByEnvironmentCrn(stackDtoDelegate.getEnvironmentCrn());
+            sdxBasicView.ifPresent(sdx ->
+                    platformAwareSdxConnector.tearDownDatahub(sdx.crn(), stackDtoDelegate.getResourceCrn()));
+            stackTerminationService.finishStackTermination(stackDtoDelegate.getStack(), context.getTerminationType().isForced(), payload);
         }
         sendEvent(context);
     }

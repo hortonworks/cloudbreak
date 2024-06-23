@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.deregister.ClouderaManagerDeregisterService;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -225,7 +226,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Override
     public void deregisterServices(String clusterName, Optional<DatalakeDto> datalakeDto) {
         try {
-            clouderaManagerDeregisterService.deregisterServices(clientConfig, stack, datalakeDto);
+            clouderaManagerDeregisterService.deregister(clientConfig, stack, datalakeDto);
         } catch (Exception e) {
             LOGGER.warn("Couldn't remove services. It's possible that CM is not started.", e);
         }

@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
@@ -68,5 +71,15 @@ class DeregisterServicesHandlerTest {
         underTest.accept(event);
 
         verify(platformAwareSdxConnector, never()).tearDownDatahub(any(), any());
+    }
+
+    @Test
+    void testAcceptEventThrowsException() {
+        when(stackDtoService.getStackViewById(anyLong())).thenReturn(new Stack());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenThrow(new RuntimeException());
+
+        underTest.accept(event);
+
+        verify(eventBus, times(1)).notify(any(), any(Event.class));
     }
 }
