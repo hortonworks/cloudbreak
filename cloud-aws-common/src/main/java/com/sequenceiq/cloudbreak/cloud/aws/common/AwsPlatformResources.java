@@ -651,18 +651,23 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return getCloudVmTypes(cloudCredential, false, region, filters, enabledInstanceTypeFilter, false);
+        boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
+        return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, getEnabledInstancePredicate(dataHubArmEnabled, false), false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
+        Predicate<VmType> instanceTypeFilter = getEnabledInstancePredicate(dataHubArmEnabled, restrictInstanceTypes);
+        return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, instanceTypeFilter, true);
+    }
+
+    private Predicate<VmType> getEnabledInstancePredicate(boolean dataHubArmEnabled, boolean restrictInstanceTypes) {
         if (restrictInstanceTypes) {
-            return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters,
-                    enabledDistroxInstanceTypeFilter.or(vm -> dataHubArmEnabled && AWS_ENABLED_ARM_TYPES.equals(vm.value())), true);
+            return enabledDistroxInstanceTypeFilter.or(vm -> dataHubArmEnabled && AWS_ENABLED_ARM_TYPES.equals(vm.value()));
         } else {
-            return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, enabledInstanceTypeFilter, true);
+            return enabledInstanceTypeFilter;
         }
     }
 

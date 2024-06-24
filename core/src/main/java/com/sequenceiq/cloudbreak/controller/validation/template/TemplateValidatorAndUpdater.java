@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -101,7 +102,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     public void validate(DetailedEnvironmentResponse environment, Credential credential, InstanceGroup instanceGroup, Stack stack,
-        CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
+            CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
         Template template = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
@@ -125,6 +126,8 @@ public class TemplateValidatorAndUpdater {
                     }
                 }
                 if (vmType == null) {
+                    LOGGER.info("Instance type not found {} at location {}. Available instances: {}", template.getInstanceType(), locationString,
+                            machines.get(locationString).stream().map(StringType::value).toList());
                     validationBuilder.error(getInvalidVmTypeErrorMessage(template.getInstanceType(), platform.value(), stack.getRegion()));
                 }
             }
@@ -235,7 +238,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private void validateVolumeCountInParameterConfig(VolumeParameterConfig config, VolumeTemplate value, VmType vmType,
-            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup,  Stack stack) {
+            ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         // IDBroker does not use data volume, so its volume count should be zero
         // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
         if (!config.possibleNumberValues().isEmpty()) {

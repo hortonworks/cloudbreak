@@ -532,6 +532,9 @@ public class EntitlementService {
     }
 
     public boolean isDataHubArmEnabled(String accountId) {
+        if (dataHubArmEnabled) {
+            LOGGER.info("Data Hub arm64 is enabled.");
+        }
         return dataHubArmEnabled;
     }
 
