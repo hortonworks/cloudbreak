@@ -13,16 +13,17 @@ import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 
 public class ListFlatteningDeserializer<T> extends JsonDeserializer<T> implements ContextualDeserializer {
 
+    private static final BooleanDeserializationProblemHandler BOOLEAN_DESERIALIZATION_PROBLEM_HANDLER = new BooleanDeserializationProblemHandler();
+
     private Class<T> targetClass;
 
     @Override
     public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-
         ObjectCodec oc = p.getCodec();
         JsonNode node = oc.readTree(p);
 
         ObjectMapper mapper = (ObjectMapper) p.getCodec();
-        mapper.addHandler(new BooleanDeserializationProblemHandler());
+        mapper.addHandler(BOOLEAN_DESERIALIZATION_PROBLEM_HANDLER);
 
         if (node.iterator().hasNext()) {
             JsonNode actual = node;
