@@ -47,6 +47,10 @@ class DynamicEntitlementRefreshServiceTest {
 
     private static final String STACK_CRN = "crn:cdp:datalake:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:datalake:f551c9f0-e837-4c61-9623-b8fe596757c4";
 
+    private static final String FLOW_CHAIN_ID = "flowChainId";
+
+    private static final String ACCOUNT_ID = "accountId";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -83,16 +87,18 @@ class DynamicEntitlementRefreshServiceTest {
     @BeforeEach
     void setup() {
         lenient().when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Set.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
+        lenient().when(stack.getId()).thenReturn(STACK_ID);
+        lenient().when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        lenient().when(stack.getTelemetry()).thenReturn(telemetry);
+        lenient().when(stack.getAccountId()).thenReturn("accountId");
         lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
         lenient().when(operation.getOperationId()).thenReturn(OPERATION_ID);
     }
 
     @Test
     void testGetChangedWatchedEntitlementsNotChanged() {
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(stack.getTelemetry()).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -103,11 +109,8 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsEmptyTelemetry() {
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(stack.getTelemetry()).thenReturn(telemetry);
         //telemetry component is empty
         when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>());
 
@@ -119,11 +122,8 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsNoRightEntitlementInTelemetry() {
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(stack.getTelemetry()).thenReturn(telemetry);
         //telemetry component is empty
         Map<String, Boolean> dynamicEntitlements = new HashMap<>();
         dynamicEntitlements.put("RANDOM_ENTITLEMENT", Boolean.FALSE);
@@ -137,10 +137,8 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsChanged() {
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring disabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(Collections.emptyList());
-        when(stack.getTelemetry()).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -152,11 +150,9 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsWatchedEntitlementsEmpty() {
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring disabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(Collections.emptyList());
         when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Collections.emptySet());
-        when(stack.getTelemetry()).thenReturn(telemetry);
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
@@ -167,8 +163,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testStoreChangedEntitlementsInTelemetry() {
-        when(stack.getTelemetry()).thenReturn(telemetry);
-        when(stack.getId()).thenReturn(STACK_ID);
         when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE)));
         when(telemetry.getFeatures()).thenReturn(features);
         FeatureSetting monitoring = mock(FeatureSetting.class);
@@ -183,8 +177,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testStoreChangedEntitlementsInTelemetryMonitoringNotChanged() {
-        when(stack.getTelemetry()).thenReturn(telemetry);
-        when(stack.getId()).thenReturn(STACK_ID);
         when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE)));
         FeatureSetting monitoring = mock(FeatureSetting.class);
         underTest.storeChangedEntitlementsInTelemetry(stack, Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE));
@@ -207,7 +199,6 @@ class DynamicEntitlementRefreshServiceTest {
     @Test
     void testChangeClusterConfigurationEntitlementsChanged() {
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
-        when(stack.getTelemetry()).thenReturn(telemetry);
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.FALSE));
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(stack.getEnvironmentCrn()).thenReturn("envCrn");
@@ -217,6 +208,26 @@ class DynamicEntitlementRefreshServiceTest {
 
         verify(operationService, never()).failOperation(any(), any(), any());
         verify(freeIpaFlowManager).notify(eq(FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT), any());
+    }
+
+    @Test
+    void testPreviousOperationFailedFlowFailed() {
+        when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, OPERATION_ID)).thenReturn(operation);
+        when(operation.getStatus()).thenReturn(OperationState.FAILED);
+
+        boolean result = underTest.previousOperationFailed(stack, OPERATION_ID);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testPreviousOperationSuccess() {
+        when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, OPERATION_ID)).thenReturn(operation);
+        when(operation.getStatus()).thenReturn(OperationState.COMPLETED);
+
+        boolean result = underTest.previousOperationFailed(stack, OPERATION_ID);
+
+        assertFalse(result);
     }
 
 }

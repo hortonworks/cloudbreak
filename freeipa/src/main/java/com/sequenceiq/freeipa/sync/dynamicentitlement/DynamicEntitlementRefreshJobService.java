@@ -30,6 +30,8 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
 
     private static final String TRIGGER_GROUP = "dynamic-entitlement-triggers";
 
+    private static final int MAX_ERROR_COUNT = 11;
+
     @Inject
     private TransactionalScheduler scheduler;
 
@@ -97,6 +99,38 @@ public class DynamicEntitlementRefreshJobService implements JobSchedulerService 
             }
         } catch (Exception e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+        }
+    }
+
+    public void reScheduleWithBackoff(Long id, JobDetail jobDetail, int errorCount) {
+        Trigger trigger = buildJobTriggerWithBackoff(jobDetail, errorCount);
+        schedule(id.toString(), jobDetail, trigger);
+    }
+
+    private Trigger buildJobTriggerWithBackoff(JobDetail jobDetail, int errorCount) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .usingJobData(jobDetail.getJobDataMap())
+                .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
+                .withDescription("Trigger checking dynamic entitlements.")
+                .startAt(backoffFirstStart(errorCount))
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInMinutes(properties.getIntervalInMinutes())
+                        .repeatForever()
+                        .withMisfireHandlingInstructionNextWithRemainingCount())
+                .build();
+    }
+
+    private Date backoffFirstStart(int errorCount) {
+        if (errorCount == 0) {
+            LOGGER.debug("DynamicEntitlementRefreshJob will be rescheduled in {} minutes.", properties.getIntervalInMinutes());
+            return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(properties.getIntervalInMinutes())));
+        } else {
+            int count = Math.min(errorCount, MAX_ERROR_COUNT);
+            // backoff strategy, delay = 2^(errorcount+1) + original interval
+            int exponentialBackOffInMinutes = (2 << count) + properties.getIntervalInMinutes();
+            LOGGER.debug("DynamicEntitlementRefreshJob will be rescheduled in {} minutes.", exponentialBackOffInMinutes);
+            return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(exponentialBackOffInMinutes)));
         }
     }
 

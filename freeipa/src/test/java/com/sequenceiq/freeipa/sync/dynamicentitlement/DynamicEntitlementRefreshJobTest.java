@@ -17,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -28,8 +30,11 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.AvailabilityChecker;
 
@@ -42,6 +47,10 @@ class DynamicEntitlementRefreshJobTest {
     private static final String INTERNAL_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     private static final String MODIFIED_INTERNAL_CRN = "crn:cdp:iam:us-west-1:account-id:user:__internal__actor__";
+
+    private static final String FLOW_CHAIN_ID = "flowChainId";
+
+    private static final String OPERATION_ID = "operationId";
 
     @Mock
     private StackService stackService;
@@ -76,12 +85,26 @@ class DynamicEntitlementRefreshJobTest {
     @Mock
     private AvailabilityChecker availabilityChecker;
 
+    @Mock
+    private OperationService operationService;
+
     @InjectMocks
     private DynamicEntitlementRefreshJob underTest;
+
+    @Mock
+    private Operation operation;
 
     @BeforeEach
     public void setUp() {
         underTest.setLocalId(String.valueOf(LOCAL_ID));
+        lenient().when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
+        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        lenient().when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
+        lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
+        lenient().when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, OPERATION_ID)).thenReturn(operation);
+        lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
+        lenient().when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
+        lenient().when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap());
     }
 
     @Test
@@ -103,12 +126,53 @@ class DynamicEntitlementRefreshJobTest {
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
         when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.TRUE);
+
         underTest.executeTracedJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
         verify(availabilityChecker, never()).isRequiredPackagesInstalled(any(), any());
         verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
+    }
+
+    @Test
+    void testExecuteWhenClusterRunningAndRescheduleLastFailed() throws JobExecutionException {
+        Stack stack = stack(Status.AVAILABLE);
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(DynamicEntitlementRefreshJob.OPERATION_ID, "operationId");
+        jobDataMap.putAsString(DynamicEntitlementRefreshJob.ERROR_COUNT, 4);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
+        when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
+        when(dynamicEntitlementRefreshService.previousOperationFailed(stack, OPERATION_ID)).thenReturn(true);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
+        lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshJobService).reScheduleWithBackoff(eq(LOCAL_ID), any(), eq(5));
+    }
+
+    @Test
+    void testExecuteWhenClusterRunningAndRescheduleLastSuccess() throws JobExecutionException {
+        Stack stack = stack(Status.AVAILABLE);
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(DynamicEntitlementRefreshJob.OPERATION_ID, "operationId");
+        jobDataMap.putAsString(DynamicEntitlementRefreshJob.ERROR_COUNT, 4);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
+        when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
+        when(dynamicEntitlementRefreshService.previousOperationFailed(stack, OPERATION_ID)).thenReturn(false);
+        when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
+        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
+        lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshJobService).reScheduleWithBackoff(eq(LOCAL_ID), any(), eq(0));
     }
 
     @Test
@@ -150,6 +214,7 @@ class DynamicEntitlementRefreshJobTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
         when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.FALSE);
         when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
@@ -169,7 +234,9 @@ class DynamicEntitlementRefreshJobTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
+        when(dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack)).thenReturn(OPERATION_ID);
         lenient().when(availabilityChecker.isRequiredPackagesInstalled(eq(stack), eq(Set.of(ImagePackageVersion.CDP_PROMETHEUS.getKey())))).thenReturn(true);
+
         underTest.executeTracedJob(jobExecutionContext);
         verify(flowLogService, times(1)).isOtherFlowRunning(eq(LOCAL_ID));
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());

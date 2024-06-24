@@ -1,11 +1,14 @@
 package com.sequenceiq.freeipa.sync.dynamicentitlement;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,7 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.AvailabilityChecker;
 
@@ -26,7 +30,15 @@ import com.sequenceiq.freeipa.util.AvailabilityChecker;
 @Component
 public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
 
+    static final String OPERATION_ID = "operationId";
+
+    static final String ERROR_COUNT = "errorCount";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicEntitlementRefreshJob.class);
+
+    private static final int ATTEMPT_NUMBER = 100;
+
+    private static final int SLEEP_TIME = 10;
 
     @Inject
     private StackService stackService;
@@ -51,6 +63,9 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
 
     @Inject
     private AvailabilityChecker availabilityChecker;
+
+    @Inject
+    private OperationService operationService;
 
     @Override
     protected Optional<Object> getMdcContextObject() {
@@ -79,11 +94,61 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
                     () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack));
         } else {
             LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for FreeIPA");
-            ThreadBasedUserCrnProvider.doAs(
+            String operationId = ThreadBasedUserCrnProvider.doAs(
                     internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             stack.getAccountId()).toString(),
                     () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
+            rescheduleIfPreviousFlowChainFailed(stack, context.getJobDetail(), operationId);
         }
+    }
+
+    private void rescheduleIfPreviousFlowChainFailed(Stack stack, JobDetail jobDetail, String operationId) {
+        if (operationId != null) {
+            int errorCountFromJob = getErrorCountFromJob(jobDetail);
+            String operationIdFromJob = jobDetail.getJobDataMap().getString(OPERATION_ID);
+            boolean previousOperationFailed = dynamicEntitlementRefreshService.previousOperationFailed(stack, operationIdFromJob);
+            int errorCount = calculateNewErrorCount(errorCountFromJob, previousOperationFailed);
+            addNewParametersToJobDetail(jobDetail, operationId, errorCount);
+            jobService.reScheduleWithBackoff(stack.getId(), jobDetail, errorCount);
+        }
+    }
+
+    private int calculateNewErrorCount(int errorCountFromJob, boolean previousOperationFailed) {
+        if (previousOperationFailed) {
+            return errorCountFromJob + 1;
+        }
+        return 0;
+    }
+
+    private void addNewParametersToJobDetail(JobDetail jobDetail, String operationId, int errorCount) {
+        jobDetail.getJobDataMap().put(OPERATION_ID, operationId);
+        jobDetail.getJobDataMap().putAsString(ERROR_COUNT, errorCount);
+    }
+
+    private int getErrorCountFromJob(JobDetail jobDetail) {
+        int result = 0;
+        String errorCount = jobDetail.getJobDataMap().getString(ERROR_COUNT);
+        if (errorCount != null) {
+            try {
+                result = Integer.parseInt(errorCount);
+            } catch (NumberFormatException e) {
+                result = 0;
+            }
+        }
+        return result;
+    }
+
+    private void logDynamicEntitlementInfo(Stack stack, Status status) {
+        Map<String, Boolean> changedEntitlements = new HashMap<>();
+        if (config.isDynamicEntitlementEnabled()) {
+            changedEntitlements = ThreadBasedUserCrnProvider.doAs(
+                    internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            stack.getAccountId()).toString(),
+                    () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack));
+        }
+        LOGGER.debug("DynamicEntitlementRefreshJob cannot run info: stack state is {} for stack {}," +
+                        " is DynamicEntitlementRefreshJob enabled: {}, changedEntitlements: {}.",
+                status, stack.getResourceCrn(), config.isDynamicEntitlementEnabled(), changedEntitlements);
     }
 
     private Long getStackId() {

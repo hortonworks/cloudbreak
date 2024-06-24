@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -38,6 +39,8 @@ import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
 public class DynamicEntitlementRefreshService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamicEntitlementRefreshService.class);
+
+    private static final String DIDN_T_CHANGE_MESSAGE = "Watched entitlements didn't change for stack";
 
     @Inject
     private DynamicEntitlementRefreshConfig dynamicEntitlementRefreshConfig;
@@ -64,6 +67,22 @@ public class DynamicEntitlementRefreshService {
         Map<String, Boolean> umsEntitlements = getEntitlementsFromUms(stack.getResourceCrn(), dynamicEntitlementRefreshConfig.getWatchedEntitlements());
         Map<String, Boolean> telemetryEntitlements = getOrCreateEntitlementsFromTelemetry(stack, umsEntitlements);
         return getChangedEntitlements(telemetryEntitlements, umsEntitlements);
+    }
+
+    public Boolean saltRefreshNeeded(Map<String, Boolean> entitlementsChanged) {
+        return entitlementsChanged != null && !entitlementsChanged.isEmpty();
+    }
+
+    public boolean previousOperationFailed(Stack stack, String operationId) {
+        if (operationId != null) {
+            try {
+                Operation operation = operationService.getOperationForAccountIdAndOperationId(stack.getAccountId(), operationId);
+                return OperationState.FAILED == operation.getStatus();
+            } catch (NotFoundException e) {
+                LOGGER.debug("Operation {} not found.", operationId);
+            }
+        }
+        return false;
     }
 
     public void storeChangedEntitlementsInTelemetry(Stack stack, Map<String, Boolean> changedEntitlements) {
@@ -134,7 +153,7 @@ public class DynamicEntitlementRefreshService {
         return result;
     }
 
-    public void changeClusterConfigurationIfEntitlementsChanged(Stack stack) {
+    public String changeClusterConfigurationIfEntitlementsChanged(Stack stack) {
         Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
         if (!changedEntitlements.isEmpty()) {
             LOGGER.info("Start '{}' operation", OperationType.CHANGE_DYNAMIC_ENTITLEMENTS.name());
@@ -149,9 +168,11 @@ public class DynamicEntitlementRefreshService {
             } else {
                 LOGGER.warn("Operation isn't in RUNNING state: {}", operation);
             }
+            return operation.getOperationId();
         } else {
             LOGGER.info("Couldn't start refresh entitlement params flow. Watched entitlements didn't change");
         }
+        return null;
     }
 
     public void setupDynamicEntitlementsForProvision(String resourceCrn, Telemetry telemetry) {
