@@ -1,0 +1,6 @@
+name: "aws-e2e-tests-with-extended-policy"
+tests:
+  - name: "aws_e2e_tests_with_extended_policy"
+    excludedGroups: [ azure_singlerg ]
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMultiSecretRotationAndImdsV2Tests
