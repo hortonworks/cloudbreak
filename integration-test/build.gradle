@@ -134,7 +134,7 @@ dependencies {
   implementation group: 'software.amazon.awssdk',                 name: 's3',                version: awsSdkVersion
   implementation group: 'software.amazon.awssdk',                 name: 'cloudformation',    version: awsSdkVersion
 
-  implementation group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.5'
+  implementation group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.6'
   implementation group: 'com.google.code.gson',          name: 'gson',                           version: gsonVersion
   implementation (group: 'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev20240521-2.0.0'){
     exclude group: 'com.google.guava',  module: 'guava'
