@@ -190,9 +190,12 @@ public class AdvertisedImageProviderTest {
     }
 
     private Image createImage(String uuid, String os, boolean advertised, String... platforms) {
-        return new Image(null, null, null, null, os, uuid, null, null,
-                Arrays.stream(platforms).collect(Collectors.toMap(p -> p, p -> Collections.emptyMap())), null, null, null, null, null, null, advertised,
-                null, null, null);
+        return Image.builder()
+                .withOs(os)
+                .withUuid(uuid)
+                .withImageSetsByProvider(Arrays.stream(platforms).collect(Collectors.toMap(p -> p, p -> Collections.emptyMap())))
+                .withAdvertised(advertised)
+                .build();
     }
 
     private ImageFilter createImageFilter(boolean enableBaseImages) {

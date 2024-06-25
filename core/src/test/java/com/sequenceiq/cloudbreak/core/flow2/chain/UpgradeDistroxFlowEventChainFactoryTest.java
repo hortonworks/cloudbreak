@@ -31,6 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
@@ -52,7 +53,6 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -193,7 +193,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     public void testCreateFlowTriggerEventQueueWhenCentosToRedHadRuntimeUpgradeIsAvailable() {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID))
-                .thenReturn(Optional.of(ImageTestBuilder.builder().withUuid(RH_IMAGE).build()));
+                .thenReturn(Optional.of(Image.builder().withUuid(RH_IMAGE).build()));
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);

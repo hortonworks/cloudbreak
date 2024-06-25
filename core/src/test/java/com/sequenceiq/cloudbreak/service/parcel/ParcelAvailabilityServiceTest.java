@@ -174,7 +174,7 @@ public class ParcelAvailabilityServiceTest {
     }
 
     private Image createImage() {
-        return new Image(null, null, null, null, null, "image-id", null, null, null, null, null, null, null, null, null, true, null, null, null);
+        return Image.builder().withUuid("image-id").build();
     }
 
     private Set<String> createRequiredParcelsSet() {

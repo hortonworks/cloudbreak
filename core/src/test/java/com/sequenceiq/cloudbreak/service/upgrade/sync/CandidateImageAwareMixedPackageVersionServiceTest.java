@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -210,8 +209,11 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createCatalogImage(String imageId, Long created, String cmVersion) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, created, null, null, null, imageId, null, null, null, null, null,
-                Map.of(CM.getKey(), cmVersion, ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER),
-                null, Collections.emptyList(), CM_BUILD_NUMBER, false, null, null, null);
+        return Image.builder()
+                .withCreated(created)
+                .withUuid(imageId)
+                .withPackageVersions(Map.of(CM.getKey(), cmVersion, ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER))
+                .withCmBuildNumber(CM_BUILD_NUMBER)
+                .build();
     }
 }

@@ -75,6 +75,9 @@ public class AdvertisedImageCatalogServiceTest {
     }
 
     private Image createImage(String imageId, boolean advertised) {
-        return new Image(null, null, null, null, null, imageId, null, null, null, null, null, null, null, null, null, advertised, null, null, null);
+        return Image.builder()
+                .withUuid(imageId)
+                .withAdvertised(advertised)
+                .build();
     }
 }

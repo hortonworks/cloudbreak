@@ -48,12 +48,14 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
 
     private static final String TEST_PLATFORM = "aws";
 
+    private static final String ARCHITECTURE = "arm64";
+
     @InjectMocks
     private ImageToImageV4ResponseConverter underTest;
 
     @Override
     public Image createSource() {
-        return getTestImage();
+        return getTestImage(ARCHITECTURE);
     }
 
     @Test
@@ -61,18 +63,32 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
 
         ImageV4Response result = underTest.convert(createSource());
 
-        validateImageV4Response(result, false);
+        validateImageV4Response(result, false, ARCHITECTURE);
     }
 
     @Test
     public void testConvertWithoutCollections() {
 
-        ImageV4Response result = underTest.convert(getTestImageWithoutCollections());
+        ImageV4Response result = underTest.convert(getTestImageWithoutCollections(ARCHITECTURE));
 
-        validateImageV4Response(result, true);
+        validateImageV4Response(result, true, ARCHITECTURE);
     }
 
-    private static Image getTestImage() {
+    @Test
+    public void testNullArchitecture() {
+        ImageV4Response result = underTest.convert(getTestImageWithoutCollections(null));
+
+        validateImageV4Response(result, true, "x86_64");
+    }
+
+    @Test
+    public void testUnknownArchitecture() {
+        ImageV4Response result = underTest.convert(getTestImageWithoutCollections("aarch64"));
+
+        validateImageV4Response(result, true, "unkown");
+    }
+
+    private static Image getTestImage(String architecture) {
 
         Map<String, Map<String, String>> imageSetsByProvider =
                 Collections.singletonMap(TEST_PLATFORM, Collections.singletonMap("eu-west-1", "ami-03f39b6f019026862"));
@@ -87,27 +103,44 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
         List<List<String>> preWarmParcels = List.of(List.of("PROFILER-2.0.3.2.0.3.0", "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/"));
         List<String> preWarmCsd = List.of("http://s3.amazonaws.com/dev.hortonworks.com/DSS/PROFILER-2.0.3.jar");
 
-        Image image = new Image(TEST_DATE, TEST_CREATED, TEST_PUBLISHED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, repo, imageSetsByProvider,
-                stackDetails, TEST_OS_TYPE, packageVersions, preWarmParcels, preWarmCsd, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL,
-                TEST_SOURCE_IMAGE_ID, null);
-        image.setDefaultImage(true);
-        return image;
+        return Image.builder()
+                .copy(getTestImageWithoutCollections(architecture))
+                .withRepo(repo)
+                .withImageSetsByProvider(imageSetsByProvider)
+                .withStackDetails(stackDetails)
+                .withPackageVersions(packageVersions)
+                .withPreWarmParcels(preWarmParcels)
+                .withPreWarmCsd(preWarmCsd)
+                .withArchitecture(architecture)
+                .build();
     }
 
-    private static Image getTestImageWithoutCollections() {
-        Image image = new Image(TEST_DATE, TEST_CREATED, TEST_PUBLISHED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, null, null, null,
-                TEST_OS_TYPE, null, null, null, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL, TEST_SOURCE_IMAGE_ID, null);
-        image.setDefaultImage(true);
-        return image;
+    private static Image getTestImageWithoutCollections(String architecture) {
+        return Image.builder()
+                .withDate(TEST_DATE)
+                .withCreated(TEST_CREATED)
+                .withPublished(TEST_PUBLISHED)
+                .withDescription(TEST_DESCRIPTION)
+                .withOs(TEST_OS)
+                .withArchitecture(architecture)
+                .withUuid(TEST_UUID)
+                .withVersion(TEST_VERSION)
+                .withOsType(TEST_OS_TYPE)
+                .withCmBuildNumber(TEST_CM_BUILD_NUMBER)
+                .withBaseParcelUrl(TEST_BASE_PARCEL_URL)
+                .withSourceImageId(TEST_SOURCE_IMAGE_ID)
+                .withDefaultImage(true)
+                .build();
     }
 
-    private void validateImageV4Response(ImageV4Response response, boolean emptyCollections) {
+    private void validateImageV4Response(ImageV4Response response, boolean emptyCollections, String architecture) {
         assertEquals(TEST_DATE, response.getDate());
         assertEquals(TEST_CREATED, response.getCreated());
         assertEquals(TEST_PUBLISHED, response.getPublished());
         assertEquals(TEST_DESCRIPTION, response.getDescription());
         assertEquals(TEST_OS, response.getOs());
         assertEquals(TEST_OS_TYPE, response.getOsType());
+        assertEquals(architecture, response.getArchitecture());
         assertEquals(TEST_UUID, response.getUuid());
         assertEquals(TEST_VERSION, response.getVersion());
         assertTrue(response.isDefaultImage());

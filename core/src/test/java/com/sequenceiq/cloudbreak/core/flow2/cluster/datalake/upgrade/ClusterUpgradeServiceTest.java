@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 
@@ -88,17 +87,21 @@ public class ClusterUpgradeServiceTest {
     private ClusterUpgradeService underTest;
 
     private static Image createImage(String cmBuildNumber, String stackBuildNumber) {
-        return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
-                Map.of(CLOUD_PLATFORM, Collections.emptyMap()), new ImageStackDetails(V_7_0_2, null, stackBuildNumber), OS_TYPE,
-                createPackageVersions(cmBuildNumber, stackBuildNumber),
-                null, null, cmBuildNumber, true, null, null, null);
+        return Image.builder()
+                .withOs(OS)
+                .withUuid(CURRENT_IMAGE_ID)
+                .withVersion(V_7_0_2)
+                .withImageSetsByProvider(Map.of(CLOUD_PLATFORM, Collections.emptyMap()))
+                .withStackDetails(new ImageStackDetails(V_7_0_2, null, stackBuildNumber))
+                .withOsType(OS_TYPE)
+                .withPackageVersions(createPackageVersions(cmBuildNumber, stackBuildNumber))
+                .withCmBuildNumber(cmBuildNumber)
+                .withAdvertised(true)
+                .build();
     }
 
     private static Image createImage(String cmBuildNumber) {
-        return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
-                Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
-                createPackageVersions(cmBuildNumber, ""),
-                null, null, cmBuildNumber, true, null, null, null);
+        return createImage(cmBuildNumber, "");
     }
 
     private static Map<String, String> createPackageVersions(String cmBuildNumber, String stackBuildNumber) {
@@ -245,7 +248,7 @@ public class ClusterUpgradeServiceTest {
 
     @Test
     void testInitUpgradeClusterWhenRollingUpgradeIsEnabled() {
-        Image image = ImageTestBuilder.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
+        Image image = Image.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
         underTest.initUpgradeCluster(STACK_ID, StatedImage.statedImage(image, null, null), true);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_ROLLING_UPGRADE, V_7_0_2, IMAGE_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_STARTED, "Cluster upgrade has been started.");
@@ -253,7 +256,7 @@ public class ClusterUpgradeServiceTest {
 
     @Test
     void testInitUpgradeClusterWhenRollingUpgradeIsDisabled() {
-        Image image = ImageTestBuilder.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
+        Image image = Image.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
         underTest.initUpgradeCluster(STACK_ID, StatedImage.statedImage(image, null, null), false);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, V_7_0_2, IMAGE_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");

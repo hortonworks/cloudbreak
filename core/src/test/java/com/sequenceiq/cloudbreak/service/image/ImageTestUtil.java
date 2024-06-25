@@ -50,8 +50,17 @@ public class ImageTestUtil {
             StackRepoDetails repoDetails = new StackRepoDetails(stackDetailsMap, Collections.emptyMap());
             stackDetails = new ImageStackDetails(stackVersion, repoDetails, "1");
         }
-        return new Image("imageDate", System.currentTimeMillis(), System.currentTimeMillis(), "imageDesc", "centos7", uuid, stackVersion,
-                Collections.emptyMap(), imageSetsByProvider, stackDetails, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, "myBaseUrl", "sourceId", null);
+        return Image.builder()
+                .withUuid(uuid)
+                .withOs("centos7")
+                .withOsType("centos")
+                .withVersion(stackVersion)
+                .withImageSetsByProvider(imageSetsByProvider)
+                .withStackDetails(stackDetails)
+                .withPackageVersions(packageVersions)
+                .withAdvertised(true)
+                .withBaseParcelUrl("myBaseUrl")
+                .withSourceImageId("sourceId")
+                .build();
     }
 }

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -70,7 +69,7 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
     void createFlowTriggerEventQueueWithHelperImageShouldReturnCorrectQueue() {
         UpgradePreparationChainTriggerEvent event = createEvent();
 
-        Image helperImage = ImageTestBuilder.builder().withUuid(RHEL_UPGRADE_HELPER_IMAGE_ID).build();
+        Image helperImage = Image.builder().withUuid(RHEL_UPGRADE_HELPER_IMAGE_ID).build();
         when(centosToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
                 .thenReturn(Optional.of(helperImage));
 

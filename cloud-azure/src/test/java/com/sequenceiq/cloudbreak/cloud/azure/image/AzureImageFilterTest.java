@@ -206,8 +206,16 @@ class AzureImageFilterTest {
         StackRepoDetails repoDetails = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
         ImageStackDetails stackDetails = new ImageStackDetails("7.2.15", repoDetails, "1");
 
-        return new Image("", System.currentTimeMillis(), System.currentTimeMillis(), "", "redhat7", uuid, "",
-                Collections.emptyMap(), imageSetsByProvider, stackDetails, "redhat7", Collections.emptyMap(),
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, new HashMap<>());
+        return Image.builder()
+                .withUuid(uuid)
+                .withCreated(System.currentTimeMillis())
+                .withPublished(System.currentTimeMillis())
+                .withOs("redhat7")
+                .withOsType("redhat7")
+                .withImageSetsByProvider(imageSetsByProvider)
+                .withStackDetails(stackDetails)
+                .withCmBuildNumber("1")
+                .withAdvertised(true)
+                .build();
     }
 }

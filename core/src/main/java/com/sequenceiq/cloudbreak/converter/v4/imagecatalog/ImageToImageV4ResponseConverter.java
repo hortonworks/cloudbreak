@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 
@@ -18,6 +19,7 @@ public class ImageToImageV4ResponseConverter {
         result.setDescription(source.getDescription());
         result.setOs(source.getOs());
         result.setOsType(source.getOsType());
+        result.setArchitecture(Architecture.fromString(source.getArchitecture()).name().toLowerCase());
         result.setUuid(source.getUuid());
         result.setVersion(source.getVersion());
         result.setDefaultImage(source.isDefaultImage());

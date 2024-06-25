@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -628,19 +627,16 @@ public class ImageServiceTest {
 
     @Test
     public void testGetSupportedImdsIfPkgVersionMissing() {
-        Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
-                Map.of(), List.of(), List.of(), null, false, null, null, null);
-
-        Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("AWS", StatedImage.statedImage(image, null, null));
+        Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("AWS", StatedImage.statedImage(Image.builder().build(), null, null));
         assertTrue(supportedImdsVersion.isPresent());
         assertEquals("v1", supportedImdsVersion.get());
     }
 
     @Test
     public void testGetSupportedImds() {
-        Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
-                Map.of("imds", "v2"), List.of(), List.of(), null, false, null, null, null);
-
+        Image image = Image.builder()
+                .withPackageVersions(Map.of("imds", "v2"))
+                .build();
         Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("AWS", StatedImage.statedImage(image, null, null));
         assertTrue(supportedImdsVersion.isPresent());
         assertEquals("v2", supportedImdsVersion.get());

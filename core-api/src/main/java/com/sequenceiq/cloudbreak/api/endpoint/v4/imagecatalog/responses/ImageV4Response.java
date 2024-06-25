@@ -38,6 +38,9 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     @JsonProperty("osType")
     private String osType;
 
+    @JsonProperty("architecture")
+    private String architecture;
+
     @JsonProperty("version")
     private String version;
 
@@ -123,6 +126,14 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
 
     public void setOsType(String osType) {
         this.osType = osType;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 
     public boolean isDefaultImage() {

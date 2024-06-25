@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 
@@ -116,7 +115,7 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
 
     private Image createImage(String runtimeVersion, boolean containsPython38) {
         Map<String, String> packageVersions = createPackageVersions(runtimeVersion, containsPython38);
-        return ImageTestBuilder.builder().withPackageVersions(packageVersions).build();
+        return Image.builder().withPackageVersions(packageVersions).build();
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createModelImage(String runtimeVersion, boolean containsPython38) {

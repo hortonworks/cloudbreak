@@ -8,10 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -73,27 +70,9 @@ public class RecommendImageServiceTest {
         when(blueprintService.findAllByWorkspaceId(anyLong())).thenReturn(blueprints);
 
         StatedImage statedImage = mock(StatedImage.class);
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage =
-                new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(
-                        "date",
-                        0L,
-                        0L,
-                        "desc",
-                        "os",
-                        "uuid",
-                        "ver",
-                        Map.of(),
-                        Map.of(),
-                        null,
-                        "type",
-                        Map.of(),
-                        List.of(),
-                        List.of(),
-                        "",
-                        true,
-                        "",
-                        "",
-                        new HashMap<>());
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                        .withOs("os")
+                        .build();
         when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(statedImage);
         when(statedImage.getImage()).thenReturn(catalogImage);
 

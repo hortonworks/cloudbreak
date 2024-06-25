@@ -92,9 +92,13 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createImage(Map<String, String> packageVersions) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(DATE, CREATED, null, null, null, IMAGE_ID, null, null,
-                Map.of(CLOUD_PLATFORM, Map.of(REGION, IMAGE_NAME)), null, null,
-                packageVersions, null, null, null, true, null, null, null);
+        return com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .withDate(DATE)
+                .withCreated(CREATED)
+                .withUuid(IMAGE_ID)
+                .withImageSetsByProvider(Map.of(CLOUD_PLATFORM, Map.of(REGION, IMAGE_NAME)))
+                .withPackageVersions(packageVersions)
+                .build();
     }
 
     private Image createModelImage(Map<String, String> packageVersions) {

@@ -440,6 +440,8 @@ public class CustomImageCatalogServiceTest {
     }
 
     private Image createTestImage() {
-        return new Image(null, null, null, null, null, CUSTOMIZED_IMAGE_ID, null, null, null, null, null, null, null, null, null, true, null, null, null);
+        return Image.builder()
+                .withUuid(CUSTOMIZED_IMAGE_ID)
+                .build();
     }
 }

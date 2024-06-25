@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,21 +21,28 @@ class ImageUtilTest {
 
     @Test
     public void testArm64ImageReturnsTrue() {
-        when(image.getTags()).thenReturn(Map.of("platform", "arm64"));
+        when(image.getArchitecture()).thenReturn("arm64");
 
         assertTrue(underTest.isArm64Image(image));
     }
 
     @Test
     public void testX86ImageReturnsTrue() {
-        when(image.getTags()).thenReturn(Map.of("platform", "x86-64"));
+        when(image.getArchitecture()).thenReturn("x86-64");
 
         assertFalse(underTest.isArm64Image(image));
     }
 
     @Test
-    public void testMissingPlatformTagReturnsFalse() {
-        when(image.getTags()).thenReturn(Map.of());
+    public void testMissingArchitectureReturnsFalse() {
+        when(image.getArchitecture()).thenReturn(null);
+
+        assertFalse(underTest.isArm64Image(image));
+    }
+
+    @Test
+    public void testEmptyArchitectureReturnsFalse() {
+        when(image.getArchitecture()).thenReturn("");
 
         assertFalse(underTest.isArm64Image(image));
     }

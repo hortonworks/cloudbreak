@@ -156,14 +156,17 @@ public class ClouderaManagerProductTransformerTest {
     }
 
     private Image createImage(List<String> preWarmParcels, List<String> preWarmCsdList, OsType osType) {
-        return new Image(null, null, null, null, null, null, null, null, null,
-                new ImageStackDetails(null, createStackRepoDetails(osType), null),
-                osType.getOsType(),
-                null, List.of(preWarmParcels), preWarmCsdList, null, false, null, null, null);
+        return Image.builder()
+                .withStackDetails(new ImageStackDetails(null, createStackRepoDetails(osType), null))
+                .withOsType(osType.getOsType())
+                .withPreWarmParcels(List.of(preWarmParcels))
+                .withPreWarmCsd(preWarmCsdList)
+                .withAdvertised(false)
+                .build();
     }
 
     private Image createBaseImage(OsType osType) {
-        return new Image(null, null, null, null, null, null, null, null, null, null, osType.getOsType(), null, null, null, null, false, null, null, null);
+        return Image.builder().withOsType(osType.getOsType()).build();
     }
 
     private StackRepoDetails createStackRepoDetails(OsType osType) {

@@ -4,12 +4,13 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 @Component
 public class ImageUtil {
 
     public boolean isArm64Image(Image image) {
-        return !Objects.isNull(image) && !Objects.isNull(image.getTags()) && "arm64".equals(image.getTags().get("platform"));
+        return !Objects.isNull(image) && Architecture.fromString(image.getArchitecture()) == Architecture.ARM64;
     }
 }

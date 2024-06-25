@@ -1058,9 +1058,9 @@ public class ImageCatalogServiceTest {
     }
 
     private Image getImage() {
-        return new Image(null, null, null, null, null, "Test uuid",
-                null, null, null, null, null, null,
-                null, null, null, true, null, null, null);
+        return Image.builder()
+                .withUuid("Test uuid")
+                .build();
     }
 
     private CustomImage getCustomImage(ImageType imageType, String customizedImageId, String baseParcelUrl) {

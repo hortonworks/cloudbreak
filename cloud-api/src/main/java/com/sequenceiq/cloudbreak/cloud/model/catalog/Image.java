@@ -24,6 +24,8 @@ public class Image {
 
     private static final String OS = "os";
 
+    private static final String ARCHITECTURE = "architecture";
+
     private static final String UUID = "uuid";
 
     private static final String VERSION = "version";
@@ -59,6 +61,8 @@ public class Image {
     private final String os;
 
     private final String osType;
+
+    private final String architecture;
 
     private final String uuid;
 
@@ -108,6 +112,7 @@ public class Image {
             @JsonProperty(ADVERTISED) boolean advertised,
             @JsonProperty("baseParcelUrl") String baseParcelUrl,
             @JsonProperty("sourceImageId") String sourceImageId,
+            @JsonProperty(ARCHITECTURE) String architecture,
             @JsonProperty(TAGS) Map<String, String> tags) {
         this.date = date;
         this.created = created;
@@ -127,29 +132,8 @@ public class Image {
         this.advertised = advertised;
         this.baseParcelUrl = baseParcelUrl;
         this.sourceImageId = sourceImageId;
+        this.architecture = architecture;
         this.tags = tags == null ? new HashMap<>() : tags;
-    }
-
-    public Image(Image that, Map<String, Map<String, String>> imageSetsByProvider) {
-        this.date = that.date;
-        this.created = that.created;
-        this.published = that.published;
-        this.description = that.description;
-        this.os = that.os;
-        this.uuid = that.uuid;
-        this.version = that.version;
-        this.repo = (that.repo == null) ? Collections.emptyMap() : that.repo;
-        this.imageSetsByProvider = imageSetsByProvider;
-        this.stackDetails = that.stackDetails;
-        this.osType = that.osType;
-        this.packageVersions = that.packageVersions;
-        this.preWarmParcels = (that.preWarmParcels == null) ? Collections.emptyList() : that.preWarmParcels;
-        this.preWarmCsd = (that.preWarmCsd == null) ? Collections.emptyList() : that.preWarmCsd;
-        this.cmBuildNumber = that.cmBuildNumber;
-        this.advertised = that.advertised;
-        this.baseParcelUrl = that.baseParcelUrl;
-        this.sourceImageId = that.sourceImageId;
-        this.tags = that.tags == null ? new HashMap<>() : that.tags;
     }
 
     @JsonProperty(DATE)
@@ -195,6 +179,11 @@ public class Image {
     @JsonProperty(OS_TYPE)
     public String getOsType() {
         return osType;
+    }
+
+    @JsonProperty(ARCHITECTURE)
+    public String getArchitecture() {
+        return architecture;
     }
 
     public void setDefaultImage(boolean defaultImage) {
@@ -306,6 +295,9 @@ public class Image {
         if (!Objects.equals(osType, image.osType)) {
             return false;
         }
+        if (!Objects.equals(architecture, image.architecture)) {
+            return false;
+        }
         if (!Objects.equals(uuid, image.uuid)) {
             return false;
         }
@@ -354,6 +346,7 @@ public class Image {
                 imageSetsByProvider,
                 os,
                 osType,
+                architecture,
                 packageVersions,
                 preWarmCsd,
                 preWarmParcels,
@@ -370,6 +363,196 @@ public class Image {
         return "Image{"
                 + "uuid='" + uuid + '\''
                 + ", os='" + os + '\''
+                + ", architecture='" + architecture + '\''
                 + '}';
+    }
+
+    public static ImageBuilder builder() {
+        return new ImageBuilder();
+    }
+
+    public static final class ImageBuilder {
+
+        private boolean advertised;
+
+        private String architecture;
+
+        private String baseParcelUrl;
+
+        private String cmBuildNumber;
+
+        private Long created;
+
+        private String date;
+
+        private boolean defaultImage;
+
+        private String description;
+
+        private Map<String, Map<String, String>> imageSetsByProvider;
+
+        private String os;
+
+        private String osType;
+
+        private Map<String, String> packageVersions;
+
+        private List<String> preWarmCsd;
+
+        private List<List<String>> preWarmParcels;
+
+        private Long published;
+
+        private Map<String, String> repo;
+
+        private String sourceImageId;
+
+        private ImageStackDetails stackDetails;
+
+        private Map<String, String> tags;
+
+        private String uuid;
+
+        private String version;
+
+        private ImageBuilder() {
+        }
+
+        public ImageBuilder withAdvertised(boolean advertised) {
+            this.advertised = advertised;
+            return this;
+        }
+
+        public ImageBuilder withArchitecture(String architecture) {
+            this.architecture = architecture;
+            return this;
+        }
+
+        public ImageBuilder withBaseParcelUrl(String baseParcelUrl) {
+            this.baseParcelUrl = baseParcelUrl;
+            return this;
+        }
+
+        public ImageBuilder withCmBuildNumber(String cmBuildNumber) {
+            this.cmBuildNumber = cmBuildNumber;
+            return this;
+        }
+
+        public ImageBuilder withCreated(Long created) {
+            this.created = created;
+            return this;
+        }
+
+        public ImageBuilder withDate(String date) {
+            this.date = date;
+            return this;
+        }
+
+        public ImageBuilder withDefaultImage(boolean defaultImage) {
+            this.defaultImage = defaultImage;
+            return this;
+        }
+
+        public ImageBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public ImageBuilder withImageSetsByProvider(Map<String, Map<String, String>> imageSetsByProvider) {
+            this.imageSetsByProvider = imageSetsByProvider;
+            return this;
+        }
+
+        public ImageBuilder withOs(String os) {
+            this.os = os;
+            return this;
+        }
+
+        public ImageBuilder withOsType(String osType) {
+            this.osType = osType;
+            return this;
+        }
+
+        public ImageBuilder withPackageVersions(Map<String, String> packageVersions) {
+            this.packageVersions = packageVersions;
+            return this;
+        }
+
+        public ImageBuilder withPreWarmCsd(List<String> preWarmCsd) {
+            this.preWarmCsd = preWarmCsd;
+            return this;
+        }
+
+        public ImageBuilder withPreWarmParcels(List<List<String>> preWarmParcels) {
+            this.preWarmParcels = preWarmParcels;
+            return this;
+        }
+
+        public ImageBuilder withPublished(Long published) {
+            this.published = published;
+            return this;
+        }
+
+        public ImageBuilder withRepo(Map<String, String> repo) {
+            this.repo = repo;
+            return this;
+        }
+
+        public ImageBuilder withSourceImageId(String sourceImageId) {
+            this.sourceImageId = sourceImageId;
+            return this;
+        }
+
+        public ImageBuilder withStackDetails(ImageStackDetails stackDetails) {
+            this.stackDetails = stackDetails;
+            return this;
+        }
+
+        public ImageBuilder withTags(Map<String, String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        public ImageBuilder withUuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        public ImageBuilder withVersion(String version) {
+            this.version = version;
+            return this;
+        }
+
+        public ImageBuilder copy(Image image) {
+            advertised = image.isAdvertised();
+            architecture = image.getArchitecture();
+            baseParcelUrl = image.getBaseParcelUrl();
+            cmBuildNumber = image.getCmBuildNumber();
+            created = image.getCreated();
+            date = image.getDate();
+            defaultImage = image.isDefaultImage();
+            description = image.getDescription();
+            imageSetsByProvider = image.getImageSetsByProvider();
+            os = image.getOs();
+            osType = image.getOsType();
+            packageVersions = image.getPackageVersions();
+            preWarmCsd = image.getPreWarmCsd();
+            preWarmParcels = image.getPreWarmParcels();
+            published = image.getPublished();
+            repo = image.getRepo();
+            sourceImageId = image.getSourceImageId();
+            stackDetails = image.getStackDetails();
+            tags = image.getTags();
+            uuid = image.getUuid();
+            version = image.getVersion();
+            return this;
+        }
+
+        public Image build() {
+            Image image = new Image(date, created, published, description, os, uuid, version, repo, imageSetsByProvider, stackDetails, osType, packageVersions,
+                    preWarmParcels, preWarmCsd, cmBuildNumber, advertised, baseParcelUrl, sourceImageId, architecture, tags);
+            image.setDefaultImage(defaultImage);
+            return image;
+        }
     }
 }

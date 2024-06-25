@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
@@ -78,7 +77,7 @@ class PythonVersionValidatorTest {
     @Test
     void testValidateShouldThrowValidationExceptionWhenTheUpgradeIsNotPermittedForTheTargetImage() {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image targetImage = ImageTestBuilder.builder().withUuid("targetImage").build();
+        Image targetImage = Image.builder().withUuid("targetImage").build();
 
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, currentImage, targetImage)).thenReturn(false);
 
@@ -88,7 +87,7 @@ class PythonVersionValidatorTest {
     @Test
     void testValidateShouldNotThrowValidationExceptionWhenTheUpgradeIsPermittedForTheTargetImage() {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Image targetImage = ImageTestBuilder.builder().withUuid("targetImage").build();
+        Image targetImage = Image.builder().withUuid("targetImage").build();
 
         when(pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, CDH_IMAGES, currentImage, targetImage)).thenReturn(true);
 

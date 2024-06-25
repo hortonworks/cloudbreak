@@ -62,7 +62,7 @@ class CurrentImagePackageProviderTest {
     }
 
     private Image createImage(String imageId, boolean containsPackage) {
-        return ImageTestBuilder.builder()
+        return Image.builder()
                 .withUuid(imageId)
                 .withPackageVersions(containsPackage ? Map.of(REQUIRED_PACKAGE.getKey(), "3.8") : Collections.emptyMap())
                 .build();

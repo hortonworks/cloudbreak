@@ -54,26 +54,9 @@ public class GenerateImageCatalogService {
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image copyCatalogImageAndSetAdvertisedFlag(
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image source) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(
-                source.getDate(),
-                source.getCreated(),
-                source.getPublished(),
-                source.getDescription(),
-                source.getOs(),
-                source.getUuid(),
-                source.getVersion(),
-                source.getRepo(),
-                source.getImageSetsByProvider(),
-                source.getStackDetails(),
-                source.getOsType(),
-                source.getPackageVersions(),
-                source.getPreWarmParcels(),
-                source.getPreWarmCsd(),
-                source.getCmBuildNumber(),
-                true,
-                source.getBaseParcelUrl(),
-                source.getSourceImageId(),
-                source.getTags()
-        );
+        return com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
+                .copy(source)
+                .withAdvertised(true)
+                .build();
     }
 }

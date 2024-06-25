@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -64,8 +63,8 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
     @Test
     void testFilterShouldReturnTheImagesWithTheCorrectPythonVersion() throws CloudbreakImageCatalogException {
-        Image image1 = ImageTestBuilder.builder().withUuid("image1").build();
-        Image image2 = ImageTestBuilder.builder().withUuid("image2").build();
+        Image image1 = Image.builder().withUuid("image1").build();
+        Image image2 = Image.builder().withUuid("image2").build();
         ImageFilterParams imageFilterParams = createImageFilterParams();
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
@@ -86,8 +85,8 @@ class RuntimeDependencyBasedUpgradeImageFilterTest {
 
     @Test
     void testFilterShouldReturnErrorMessageWhenThereAreNoCorrectImageLeft() throws CloudbreakImageCatalogException {
-        Image image1 = ImageTestBuilder.builder().withUuid("image1").build();
-        Image image2 = ImageTestBuilder.builder().withUuid("image2").build();
+        Image image1 = Image.builder().withUuid("image1").build();
+        Image image2 = Image.builder().withUuid("image2").build();
         ImageFilterParams imageFilterParams = createImageFilterParams();
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);

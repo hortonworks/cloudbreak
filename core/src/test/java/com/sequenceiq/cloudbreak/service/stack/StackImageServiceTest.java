@@ -307,9 +307,11 @@ public class StackImageServiceTest {
     }
 
     private Image anImage(String imageId) {
-        return new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", imageId, "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, null);
+        return Image.builder()
+                .withUuid(imageId)
+                .withImageSetsByProvider(Collections.singletonMap("AWS", Collections.emptyMap()))
+                .withPackageVersions(packageVersions)
+                .build();
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image anImageComponent() {

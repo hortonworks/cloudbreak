@@ -94,9 +94,13 @@ public class MaintenanceModeValidationServiceTest {
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         stack.setWorkspace(workspace);
 
-        image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, null);
+        image = Image.builder()
+                .withOs("centos7")
+                .withUuid("uuid")
+                .withImageSetsByProvider(Collections.singletonMap("AWS", Collections.emptyMap()))
+                .withPackageVersions(packageVersions)
+                .withAdvertised(true)
+                .build();
 
         statedImage = StatedImage.statedImage(image, "url", "name");
         warnings = new ArrayList<Warning>();

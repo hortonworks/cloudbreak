@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -127,10 +126,14 @@ public class ParcelUrlProviderTest {
     }
 
     private Image createImage(StackRepoDetails stackRepoDetails) {
-        return new Image(null, null, null, null, null, IMAGE_ID, null, Map.of(OS_TYPE, "http://cm/yum"), null,
-                new ImageStackDetails(null, stackRepoDetails, null),
-                OS_TYPE, Map.of(CM.getKey(), "7.2.4", CM_BUILD_NUMBER.getKey(), "14450219"), createPreWarmParcels(), createPreWarmCsdUrls(), null, false, null,
-                null, null);
+        return Image.builder()
+                .withUuid(IMAGE_ID)
+                .withRepo(Map.of(OS_TYPE, "http://cm/yum"))
+                .withOsType(OS_TYPE)
+                .withPackageVersions(Map.of(CM.getKey(), "7.2.4", CM_BUILD_NUMBER.getKey(), "14450219"))
+                .withPreWarmParcels(createPreWarmParcels())
+                .withPreWarmCsd(createPreWarmCsdUrls())
+                .build();
     }
 
     private List<String> createPreWarmCsdUrls() {

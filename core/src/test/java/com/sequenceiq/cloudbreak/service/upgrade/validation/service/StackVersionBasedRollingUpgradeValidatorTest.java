@@ -23,10 +23,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
@@ -169,7 +169,7 @@ class StackVersionBasedRollingUpgradeValidatorTest {
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled, String currentRuntimeVersion, String targetRuntimeVersion) {
         return new ServiceUpgradeValidationRequest(stackDto, false, rollingUpgradeEnabled,
                 new UpgradeImageInfo(ModelImageTestBuilder.builder().withPackageVersions(Map.of(STACK.getKey(), currentRuntimeVersion)).build(),
-                        StatedImage.statedImage(ImageTestBuilder.builder().withVersion(targetRuntimeVersion).build(), null, null)), false);
+                        StatedImage.statedImage(Image.builder().withVersion(targetRuntimeVersion).build(), null, null)), false);
     }
 
     private ClouderaManagerProduct createCdhProduct(String cdhVersion) {

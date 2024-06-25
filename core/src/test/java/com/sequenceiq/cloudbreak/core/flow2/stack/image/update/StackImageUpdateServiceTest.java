@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
@@ -96,9 +95,13 @@ public class StackImageUpdateServiceTest {
         stack.setPlatformVariant("AWS_NATIVE");
         stack.setWorkspace(workspace);
 
-        image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, null);
+        image = Image.builder()
+                .withOs("centos7")
+                .withOsType("centos")
+                .withImageSetsByProvider(Collections.singletonMap("AWS", Collections.emptyMap()))
+                .withPackageVersions(packageVersions)
+                .withAdvertised(true)
+                .build();
         statedImage = StatedImage.statedImage(image, "url", "name");
         lenient().when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.ok());
         lenient().when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anyList())).thenReturn(CheckResult.ok());
@@ -147,7 +150,7 @@ public class StackImageUpdateServiceTest {
     @Test
     public void testGetNewImageIfOsVersionsMatchShouldNotThrowExceptionWhenCentOSToRedhatOSUpgradePermitted()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        StatedImage targetStatedImage = StatedImage.statedImage(ImageTestBuilder.builder()
+        StatedImage targetStatedImage = StatedImage.statedImage(Image.builder()
                         .withOs(OsType.RHEL8.getOs())
                         .withOsType(OsType.RHEL8.getOsType())
                         .withImageSetsByProvider(image.getImageSetsByProvider())
@@ -183,9 +186,10 @@ public class StackImageUpdateServiceTest {
     @Test
     public void testGetNewImageIfCloudPlatformAwsGov() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         stack.setPlatformVariant("AWS_GOV_NATIVE");
-        image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
-                Collections.singletonMap("AWS_GOV", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true, null, null, null);
+        image = Image.builder()
+                .copy(image)
+                .withImageSetsByProvider(Collections.singletonMap("AWS_GOV", Collections.emptyMap()))
+                .build();
         statedImage = StatedImage.statedImage(image, "url", "name");
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",

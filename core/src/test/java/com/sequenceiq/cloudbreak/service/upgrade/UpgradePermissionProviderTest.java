@@ -240,7 +240,7 @@ public class UpgradePermissionProviderTest {
 
     private Image createImage(String version, String buildNumber) {
         Map<String, String> packageVersions = createPackageVersions(version, buildNumber);
-        return new Image(null, null, null, null, null, null, null, null, null, null, null, packageVersions, null, null, null, true, null, null, null);
+        return Image.builder().withPackageVersions(packageVersions).build();
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage(String version, String buildNumber) {

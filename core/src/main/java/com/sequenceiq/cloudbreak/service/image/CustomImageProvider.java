@@ -26,25 +26,25 @@ public class CustomImageProvider {
     public StatedImage mergeSourceImageAndCustomImageProperties(
             StatedImage statedImage, CustomImage customImage, String imageCatalogUrl, String catalogName) {
         Image image = statedImage.getImage();
-        Image result = new Image(image.getDate(),
-                customImage.getCreated(),
-                customImage.getCreated(),
-                customImage.getDescription(),
-                image.getOs(),
-                customImage.getName(),
-                image.getVersion(),
-                getRepoWithCustomBaseUrl(image.getRepo(), customImage.getBaseParcelUrl()),
-                getImageSetsByProvider(image.getImageSetsByProvider(), customImage.getVmImage()),
-                getStackDetailsWithCustomBaseUrl(image.getStackDetails(), customImage.getBaseParcelUrl()),
-                image.getOsType(),
-                image.getPackageVersions(),
-                getPreWarmParcelsWithCustomBaseUrl(image.getPreWarmParcels(), customImage.getBaseParcelUrl()),
-                getPreWarmCsdWithCustomBaseUrl(image.getPreWarmCsd(), customImage.getBaseParcelUrl()),
-                image.getCmBuildNumber(),
-                image.isAdvertised(),
-                customImage.getBaseParcelUrl(),
-                customImage.getCustomizedImageId(),
-                image.getTags());
+        Image result = Image.builder()
+                .withDate(image.getDate())
+                .withCreated(customImage.getCreated())
+                .withPublished(customImage.getCreated())
+                .withDescription(customImage.getDescription())
+                .withOs(image.getOs())
+                .withUuid(customImage.getName())
+                .withVersion(image.getVersion())
+                .withRepo(getRepoWithCustomBaseUrl(image.getRepo(), customImage.getBaseParcelUrl()))
+                .withImageSetsByProvider(getImageSetsByProvider(image.getImageSetsByProvider(), customImage.getVmImage()))
+                .withStackDetails(getStackDetailsWithCustomBaseUrl(image.getStackDetails(), customImage.getBaseParcelUrl()))
+                .withPreWarmParcels(getPreWarmParcelsWithCustomBaseUrl(image.getPreWarmParcels(), customImage.getBaseParcelUrl()))
+                .withPreWarmCsd(getPreWarmCsdWithCustomBaseUrl(image.getPreWarmCsd(), customImage.getBaseParcelUrl()))
+                .withCmBuildNumber(image.getCmBuildNumber())
+                .withAdvertised(image.isAdvertised())
+                .withBaseParcelUrl(customImage.getBaseParcelUrl())
+                .withSourceImageId(customImage.getCustomizedImageId())
+                .withTags(image.getTags())
+                .build();
         return StatedImage.statedImage(result, imageCatalogUrl, catalogName);
     }
 

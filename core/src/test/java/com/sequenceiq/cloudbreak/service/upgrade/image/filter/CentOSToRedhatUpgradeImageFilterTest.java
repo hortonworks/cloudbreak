@@ -163,8 +163,11 @@ class CentosToRedHatUpgradeImageFilterTest {
     }
 
     private Image catalogImage(String os, String osType, String version) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(
-                null, imageCreationTimeSequence.getAndIncrement(), null, null, os, null, version, null, null, null, osType, null, null, null, null, false, null,
-                null, null);
+        return Image.builder()
+                .withCreated(imageCreationTimeSequence.getAndIncrement())
+                .withOs(os)
+                .withOsType(osType)
+                .withVersion(version)
+                .build();
     }
 }

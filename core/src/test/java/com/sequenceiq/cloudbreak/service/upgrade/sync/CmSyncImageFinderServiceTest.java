@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
@@ -160,7 +159,7 @@ class CmSyncImageFinderServiceTest {
     }
 
     private Image createImage(String imageId, String cmVersion, String cdhVersion, Long created, Map<String, String> preWarmParcels) {
-        Image image = ImageTestBuilder.builder()
+        Image image = Image.builder()
                 .withUuid(imageId)
                 .withCreated(created)
                 .withPackageVersions(createPackageVersions(cmVersion))

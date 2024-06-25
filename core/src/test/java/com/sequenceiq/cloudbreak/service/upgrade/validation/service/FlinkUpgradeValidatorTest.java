@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 
@@ -120,6 +120,6 @@ public class FlinkUpgradeValidatorTest {
 
     private ServiceUpgradeValidationRequest createRequest(String stackVersion) {
         return new ServiceUpgradeValidationRequest(stack, false, true,
-                new UpgradeImageInfo(null, StatedImage.statedImage(ImageTestBuilder.builder().withVersion(stackVersion).build(), null, null)), false);
+                new UpgradeImageInfo(null, StatedImage.statedImage(Image.builder().withVersion(stackVersion).build(), null, null)), false);
     }
 }

@@ -87,7 +87,10 @@ public class AzureImageFilter implements ImageFilter {
                 .filter(i -> i.getValue().containsKey(MARKETPLACE_REGION))
                 .collect(Collectors.toMap(Map.Entry::getKey, i -> Map.of(MARKETPLACE_REGION, i.getValue().get(MARKETPLACE_REGION))));
 
-        return new Image(image, filteredMap);
+        return Image.builder()
+                .copy(image)
+                .withImageSetsByProvider(filteredMap)
+                .build();
     }
 
     private Image removeMarketplaceRegions(Image image) {
@@ -95,7 +98,10 @@ public class AzureImageFilter implements ImageFilter {
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> computeRegionMapWithoutMarketplace(entry.getValue())));
 
-        return new Image(image, filteredMap);
+        return Image.builder()
+                .copy(image)
+                .withImageSetsByProvider(filteredMap)
+                .build();
     }
 
     private Map<String, String> computeRegionMapWithoutMarketplace(Map<String, String> regionToImageNameMap) {

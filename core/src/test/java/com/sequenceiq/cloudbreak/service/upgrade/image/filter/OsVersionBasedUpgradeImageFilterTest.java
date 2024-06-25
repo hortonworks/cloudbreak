@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -83,7 +82,7 @@ class OsVersionBasedUpgradeImageFilterTest {
     }
 
     private Image createImage(String imageId, String os, String osType) {
-        return ImageTestBuilder.builder().withUuid(imageId).withOs(os).withOsType(osType).build();
+        return Image.builder().withUuid(imageId).withOs(os).withOsType(osType).build();
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
