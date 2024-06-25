@@ -11,7 +11,6 @@ import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.sdx.cdl.config.SdxCdlChannelConfig;
 
 @Service
 public class GrpcSdxCdlClient {
@@ -23,15 +22,13 @@ public class GrpcSdxCdlClient {
     private ManagedChannelWrapper channelWrapper;
 
     @Inject
-    private SdxCdlChannelConfig sdxCdlChannelConfig;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public static GrpcSdxCdlClient createClient(ManagedChannelWrapper wrapper, SdxCdlChannelConfig config) {
+    public static GrpcSdxCdlClient createClient(ManagedChannelWrapper wrapper, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         GrpcSdxCdlClient client = new GrpcSdxCdlClient();
         client.channelWrapper = Preconditions.checkNotNull(wrapper, "channelWrapper should not be null.");
-        client.sdxCdlChannelConfig = Preconditions.checkNotNull(config, "sdxCdlChannelConfig should not be null");
+        client.regionAwareInternalCrnGeneratorFactory = Preconditions.checkNotNull(regionAwareInternalCrnGeneratorFactory,
+                "regionAwareInternalCrnGeneratorFactory should not be null");
         return client;
     }
 

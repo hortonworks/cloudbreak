@@ -48,8 +48,7 @@ class DeregisterServicesHandlerTest {
 
     @Test
     void testAcceptEvent() {
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
-                Optional.of(new SdxBasicView(null, "sdxCrn", null, false, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(SdxBasicView.builder().withCrn("sdxCrn").build()));
         StackView stack = mock(StackView.class);
         when(stackDtoService.getStackViewById(any())).thenReturn(stack);
         when(stack.getResourceCrn()).thenReturn("dhCrn");

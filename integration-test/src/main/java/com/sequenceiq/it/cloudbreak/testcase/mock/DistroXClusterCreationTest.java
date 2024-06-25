@@ -18,17 +18,20 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
@@ -50,8 +53,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     private static final String IMAGE_CATALOG_ID = "f6e778fc-7f17-4535-9021-515351df3691";
-
-    private static final String MOCK_HOSTNAME = "mock_database";
 
     private static final String CM_FOR_DISTRO_X = "cm4dstrx";
 
@@ -87,6 +88,9 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
 
     @Inject
     private ServerProperties serverProperties;
+
+    @Inject
+    private RedbeamsDatabaseServerTestClient redbeamsDatabaseServerTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -268,12 +272,17 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class).withEnvironment(envKey)
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .await(Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
+                .given(RedbeamsDatabaseServerTestDto.class)
+                .when(redbeamsDatabaseServerTestClient.describeByClusterCrn(
+                        testContext.get(envKey, EnvironmentTestDto.class).getResponse().getCrn(),
+                        testContext.get(sdxInternal, SdxInternalTestDto.class).getCrn()
+                ))
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
                 .withImageCatalog()
@@ -292,7 +301,8 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
                 .enableVerification()
                 .await(STACK_AVAILABLE)
-                .mockCm().cmImportClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 2).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(
+                        testContext.given(RedbeamsDatabaseServerTestDto.class).getResponse().getHost(), 2).verify()
                 .validate();
     }
 

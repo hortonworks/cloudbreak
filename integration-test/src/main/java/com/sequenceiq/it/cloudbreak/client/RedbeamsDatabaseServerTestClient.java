@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerDeleteAction;
+import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerDescribeByClusterCrnAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.database.RedbeamsDatabaseServerUpgradeAction;
@@ -32,5 +33,9 @@ public class RedbeamsDatabaseServerTestClient {
 
     public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> upgrade() {
         return new RedbeamsDatabaseServerUpgradeAction();
+    }
+
+    public Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> describeByClusterCrn(String environmentCrn, String clusterCrn) {
+        return new RedbeamsDatabaseServerDescribeByClusterCrnAction(environmentCrn, clusterCrn);
     }
 }

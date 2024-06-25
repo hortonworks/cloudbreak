@@ -69,7 +69,7 @@ public class SharedServiceConfigProviderTest {
         Cluster cluster = cluster();
         cluster.getStack().setDatalakeCrn(DL_CRN);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, DL_CRN, null, false, 1L, null, Optional.of(new SdxFileSystemView(null, null)))));
+                Optional.of(SdxBasicView.builder().withCrn(DL_CRN).withFileSystemView(new SdxFileSystemView(null, null)).build()));
         Stack dlStack = new Stack();
         Cluster dlCluster = new Cluster();
         dlCluster.setId(1L);
@@ -90,8 +90,7 @@ public class SharedServiceConfigProviderTest {
     @Test
     void testConfigureForCdlDatalakeIfHiveRdsConfigNotPresent() {
         Cluster cluster = cluster();
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, CDL_CRN, null, false, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(CDL_CRN).build()));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
                 HIVE_METASTORE_DATABASE_PORT, "port",
                 HIVE_METASTORE_DATABASE_HOST, "host",
@@ -112,8 +111,7 @@ public class SharedServiceConfigProviderTest {
     @Test
     void testConfigureForCdlDatalakeIfHiveRdsConfigPresent() {
         Cluster cluster = cluster();
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, CDL_CRN, null, false, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(CDL_CRN).build()));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
                 HIVE_METASTORE_DATABASE_PORT, "port",
                 HIVE_METASTORE_DATABASE_HOST, "host",

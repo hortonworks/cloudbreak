@@ -43,8 +43,8 @@ public class DatalakeServiceTest {
     public void testPrepareDatalakeRequestWhenDatalakeIsNotNull() {
         Stack source = new Stack();
         source.setEnvironmentCrn("envCrn");
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
-                new SdxBasicView("name", "crn", null, true, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
+                Optional.of(SdxBasicView.builder().withCrn("crn").withName("name").build()));
         StackV4Request stackRequest = new StackV4Request();
         underTest.prepareDatalakeRequest(source, stackRequest);
         verify(platformAwareSdxConnector, times(1)).getSdxBasicViewByEnvironmentCrn(eq("envCrn"));
@@ -63,8 +63,8 @@ public class DatalakeServiceTest {
 
     @Test
     public void testAddSharedServiceResponse() {
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
-                new SdxBasicView("name", "crn", null, true, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
+                Optional.of(SdxBasicView.builder().withCrn("crn").withName("name").build()));
         StackV4Response x = new StackV4Response();
         x.setEnvironmentCrn("envCrn");
         underTest.addSharedServiceResponse(x);

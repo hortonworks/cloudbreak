@@ -260,7 +260,8 @@ public class DistroXUpgradeRetrievalComponentTest {
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
         when(stackService.getByNameOrCrnInWorkspace(any(), any())).thenReturn(stack);
         when(stackDtoService.getById(STACK_ID)).thenReturn(mockStackDto);
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(createSdxBasicView());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(SdxBasicView.builder().withName(CLUSTER_NAME).build()));
         when(imageCatalogService.getAllCdhImages(any(), any(), any(), any())).thenReturn(imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM));
         when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38)).thenReturn(true);
         when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
@@ -427,10 +428,6 @@ public class DistroXUpgradeRetrievalComponentTest {
         DistroXUpgradeV1Request request = new DistroXUpgradeV1Request();
         request.setShowAvailableImages(showAvailableImages);
         return request;
-    }
-
-    private Optional<SdxBasicView> createSdxBasicView() {
-        return Optional.of(new SdxBasicView(CLUSTER_NAME, null, null, false, null, null, Optional.empty()));
     }
 
     @TestConfiguration

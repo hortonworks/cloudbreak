@@ -379,18 +379,18 @@ public class StackDtoService implements LocalPaasSdxService {
         return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
                 .stream()
                 .findFirst()
-                .map(stackDto -> new SdxBasicView(
-                            stackDto.getResourceName(),
-                            stackDto.getResourceCrn(),
-                            runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null),
-                            stackDto.getCluster().isRangerRazEnabled(),
-                            stackDto.getCluster().getCreationFinished(),
-                            stackDto.getCluster().getDatabaseServerCrn(),
-                            getHiveRelatedFileSystem(stackDto.getCluster())));
+                .map(stackDto -> SdxBasicView.builder()
+                        .withName(stackDto.getResourceName())
+                        .withCrn(stackDto.getResourceCrn())
+                        .withRuntime(runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null))
+                        .withRazEnabled(stackDto.getCluster().isRangerRazEnabled())
+                        .withCreated(stackDto.getCluster().getCreationFinished())
+                        .withDbServerCrn(stackDto.getCluster().getDatabaseServerCrn())
+                        .withFileSystemView(getHiveRelatedFileSystem(stackDto.getCluster().getFileSystem()))
+                        .build());
     }
 
-    private Optional<SdxFileSystemView> getHiveRelatedFileSystem(ClusterView datalakeCluster) {
-        FileSystem dlFileSystem = datalakeCluster.getFileSystem();
+    private Optional<SdxFileSystemView> getHiveRelatedFileSystem(FileSystem dlFileSystem) {
         if (dlFileSystem != null && dlFileSystem.getCloudStorage() != null && dlFileSystem.getCloudStorage().getLocations() != null) {
             Map<String, String> hiveLocations = dlFileSystem.getCloudStorage().getLocations().stream()
                     .filter(location -> location.getType().name().startsWith("HIVE"))

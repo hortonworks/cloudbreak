@@ -16,4 +16,77 @@ public record SdxBasicView(
     public Crn getCrn() {
         return Crn.safeFromString(crn());
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private String name;
+
+        private String crn;
+
+        private String runtime;
+
+        private boolean razEnabled;
+
+        private Long created;
+
+        private String dbServerCrn;
+
+        private Optional<SdxFileSystemView> fileSystemView = Optional.empty();
+
+        private Builder() {
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withCrn(String crn) {
+            this.crn = crn;
+            return this;
+        }
+
+        public Builder withRuntime(String runtime) {
+            this.runtime = runtime;
+            return this;
+        }
+
+        public Builder withRazEnabled() {
+            this.razEnabled = true;
+            return this;
+        }
+
+        public Builder withRazEnabled(boolean razEnabled) {
+            this.razEnabled = razEnabled;
+            return this;
+        }
+
+        public Builder withCreated(Long created) {
+            this.created = created;
+            return this;
+        }
+
+        public Builder withDbServerCrn(String dbServerCrn) {
+            this.dbServerCrn = dbServerCrn;
+            return this;
+        }
+
+        public Builder withFileSystemView(SdxFileSystemView fileSystemView) {
+            this.fileSystemView = Optional.ofNullable(fileSystemView);
+            return this;
+        }
+
+        public Builder withFileSystemView(Optional<SdxFileSystemView> fileSystemView) {
+            this.fileSystemView = fileSystemView;
+            return this;
+        }
+
+        public SdxBasicView build() {
+            return new SdxBasicView(this.name, this.crn, this.runtime, this.razEnabled, this.created,
+                    this.dbServerCrn, this.fileSystemView);
+        }
+    }
 }

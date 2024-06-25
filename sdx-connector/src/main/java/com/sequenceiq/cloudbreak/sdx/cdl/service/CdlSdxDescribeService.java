@@ -74,15 +74,14 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
             try {
                 CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, StringUtils.EMPTY);
                 CdlCrudProto.DescribeDatalakeResponse detailedCdl = grpcClient.describeDatalake(datalake.getCrn());
-                SdxBasicView sdxBasicView = new SdxBasicView(
-                        detailedCdl.getName(),
-                        detailedCdl.getCrn(),
-                        detailedCdl.getShape(),
-                        detailedCdl.getRangerRazEnabled(),
-                        detailedCdl.getCreated(),
-                        detailedCdl.getDatabaseDetails().getCrn(),
-                        Optional.empty());
-                return Optional.of(sdxBasicView);
+                return Optional.of(SdxBasicView.builder()
+                        .withName(detailedCdl.getName())
+                        .withCrn(detailedCdl.getCrn())
+                        .withRuntime(detailedCdl.getRuntimeVersion())
+                        .withRazEnabled(detailedCdl.getRangerRazEnabled())
+                        .withCreated(detailedCdl.getCreated())
+                        .withDbServerCrn(detailedCdl.getDatabaseDetails().getCrn())
+                        .build());
             } catch (RuntimeException exception) {
                 LOGGER.info("Exception while fetching CRN for containerized datalake with Environment:{} {}",
                     environmentCrn, exception.getMessage());

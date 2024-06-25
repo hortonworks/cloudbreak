@@ -111,7 +111,7 @@ class DatabaseSslServiceTest {
         lenient().when(stackDto.getDatabase()).thenReturn(database);
         lenient().when(clusterView.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN);
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, DATALAKE_CRN, null, false, 1L, null, Optional.empty())));
+                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
     }
 
     @Test

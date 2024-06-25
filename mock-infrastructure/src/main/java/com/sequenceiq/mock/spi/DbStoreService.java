@@ -44,14 +44,14 @@ public class DbStoreService {
         return List.of(
                 new CloudResourceStatus(CloudResource.builder()
                         .withType(ResourceType.MOCK_DATABASE)
-                        .withName("mock database")
+                        .withName(databaseStack.getDatabaseServer().getServerId())
                         .withStatus(CommonStatus.CREATED)
                         .withParameters(Map.of())
                         .build(),
                         ResourceStatus.CREATED),
                 new CloudResourceStatus(CloudResource.builder()
                         .withType(ResourceType.RDS_HOSTNAME)
-                        .withName("mock_database")
+                        .withName(databaseStack.getDatabaseServer().getServerId() + ".mock.com")
                         .withStatus(CommonStatus.CREATED)
                         .withParameters(Map.of())
                         .build(),

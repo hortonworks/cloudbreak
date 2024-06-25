@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -12,13 +13,13 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractRedbeamsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
 @Prototype
 public class RedbeamsDatabaseServerTestDto
-        extends AbstractRedbeamsTestDto<AllocateDatabaseServerV4Request, DatabaseServerStatusV4Response, RedbeamsDatabaseServerTestDto>
+        extends AbstractRedbeamsTestDto<AllocateDatabaseServerV4Request, DatabaseServerV4Response, RedbeamsDatabaseServerTestDto>
         implements Searchable {
 
     public RedbeamsDatabaseServerTestDto(TestContext testContext) {
@@ -31,11 +32,15 @@ public class RedbeamsDatabaseServerTestDto
         if (testContext == null) {
             throw new IllegalStateException("Cannot create valid instance, test context is not available");
         }
-        String environmentCrn = testContext.get(EnvironmentTestDto.class).getResponse().getCrn();
-        return withName(getResourcePropertyProvider().getName())
+        DetailedEnvironmentResponse environmentResponse = testContext.get(EnvironmentTestDto.class).getResponse();
+        RedbeamsDatabaseServerTestDto redbeamsDatabaseServerTestDto = withName(getResourcePropertyProvider().getName())
                 .withPlatform()
-                .withDatabaseServer()
-                .withEnvironmentCrn(environmentCrn);
+                .withDatabaseServer();
+        if (environmentResponse != null) {
+            String environmentCrn = environmentResponse.getCrn();
+            redbeamsDatabaseServerTestDto = redbeamsDatabaseServerTestDto.withEnvironmentCrn(environmentCrn);
+        }
+        return redbeamsDatabaseServerTestDto;
     }
 
     public RedbeamsDatabaseServerTestDto withRequest(AllocateDatabaseServerV4Request request) {
@@ -90,6 +95,6 @@ public class RedbeamsDatabaseServerTestDto
 
     @Override
     public String getCrn() {
-        return getResponse().getResourceCrn();
+        return getResponse().getCrn();
     }
 }

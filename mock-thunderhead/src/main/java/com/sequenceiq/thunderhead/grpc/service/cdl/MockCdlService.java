@@ -1,6 +1,7 @@
 package com.sequenceiq.thunderhead.grpc.service.cdl;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 
@@ -40,16 +41,19 @@ public class MockCdlService extends CdlCrudGrpc.CdlCrudImplBase {
     public void createDatalake(CdlCrudProto.CreateDatalakeRequest request, StreamObserver<CdlCrudProto.CreateDatalakeResponse> responseObserver) {
         // request only contains environment name, not crn, so as a hack, we can use name field to define env crn
         Crn envCrn = Crn.safeFromString(request.getEnvironmentName());
-        Crn crn = regionAwareCrnGenerator.generateCrn(CrnResourceDescriptor.CDL, envCrn.getResource(), envCrn.getAccountId());
-        Optional<Cdl> cdlByCrn = cdlRespository.findByCrn(crn.toString());
-        if (cdlByCrn.isEmpty()) {
+        Optional<Cdl> cdlByEnvCrn = cdlRespository.findByEnvironmentCrn(envCrn.toString());
+        Crn cdlCrn;
+        if (cdlByEnvCrn.isEmpty()) {
+            cdlCrn = regionAwareCrnGenerator.generateCrn(CrnResourceDescriptor.CDL, UUID.randomUUID().toString(), envCrn.getAccountId());
             Cdl cdl = new Cdl();
-            cdl.setCrn(crn.toString());
+            cdl.setCrn(cdlCrn.toString());
             cdl.setEnvironmentCrn(envCrn.toString());
             cdlRespository.save(cdl);
+        } else {
+            cdlCrn = Crn.safeFromString(cdlByEnvCrn.get().getCrn());
         }
         responseObserver.onNext(CdlCrudProto.CreateDatalakeResponse.newBuilder()
-                .setCrn(crn.toString())
+                .setCrn(cdlCrn.toString())
                 .setEnvironmentCrn(envCrn.toString())
                 .setStatus(CdlCrudProto.StatusType.Value.RUNNING.name())
                 .setDatalakeName(CDL_NAME)

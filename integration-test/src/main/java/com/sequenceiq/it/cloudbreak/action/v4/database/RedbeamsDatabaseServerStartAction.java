@@ -18,7 +18,7 @@ public class RedbeamsDatabaseServerStartAction implements Action<RedbeamsDatabas
         Log.as(LOGGER, " Database server stop request:\n");
         client.getDefaultClient()
                 .databaseServerV4Endpoint()
-                .start(testDto.getResponse().getResourceCrn());
+                .start(testDto.getResponse().getCrn());
 
         return testDto;
     }

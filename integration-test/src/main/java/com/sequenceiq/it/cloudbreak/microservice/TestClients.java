@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.collections.Maps;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -88,22 +89,23 @@ public class TestClients {
             SdxClient sdxClient = createSdxClient(cloudbreakUser);
             ExternalizedComputeClusterClient externalizedComputeClusterClient = createExternalizedComputeClusterClient(cloudbreakUser);
             UmsClient umsClient = createUmsClient();
+            CdlClient cdlClient = createCdlClient();
             AuthDistributorClient authDistributorClient = createAuthDistributorClient();
             RedbeamsClient redbeamsClient = createRedbeamsClient(cloudbreakUser);
             PeriscopeClient periscopeClient = createPeriscopeClient(cloudbreakUser);
             RemoteEnvironmentClient remoteEnvironmentClient = createRemoteEnvironmentClient(cloudbreakUser);
-            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
-                    CloudbreakClient.class, cloudbreakClient,
-                    FreeIpaClient.class, freeIpaClient,
-                    EnvironmentClient.class, environmentClient,
-                    SdxClient.class, sdxClient,
-                    RedbeamsClient.class, redbeamsClient,
-                    ExternalizedComputeClusterClient.class, externalizedComputeClusterClient,
-                    UmsClient.class, umsClient,
-                    AuthDistributorClient.class, authDistributorClient,
-                    PeriscopeClient.class, periscopeClient,
-                    RemoteEnvironmentClient.class, remoteEnvironmentClient
-            );
+            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Maps.newHashMap();
+            clientMap.put(CloudbreakClient.class, cloudbreakClient);
+            clientMap.put(FreeIpaClient.class, freeIpaClient);
+            clientMap.put(EnvironmentClient.class, environmentClient);
+            clientMap.put(SdxClient.class, sdxClient);
+            clientMap.put(RedbeamsClient.class, redbeamsClient);
+            clientMap.put(ExternalizedComputeClusterClient.class, externalizedComputeClusterClient);
+            clientMap.put(UmsClient.class, umsClient);
+            clientMap.put(CdlClient.class, cdlClient);
+            clientMap.put(AuthDistributorClient.class, authDistributorClient);
+            clientMap.put(PeriscopeClient.class, periscopeClient);
+            clientMap.put(RemoteEnvironmentClient.class, remoteEnvironmentClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
             LOGGER.info(" Microservice clients have been initialized successfully for account: \nDisplay name: {} \nAccess key: {} \nSecret key: {} " +
                             "\nCrn: {} \nAdmin: {}", cloudbreakUser.getDisplayName(), cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey(),
@@ -150,6 +152,10 @@ public class TestClients {
 
     private UmsClient createUmsClient() {
         return new UmsClient(serverProperties.getUmsHost(), serverProperties.getUmsPort(), regionAwareInternalCrnGeneratorFactory);
+    }
+
+    private CdlClient createCdlClient() {
+        return new CdlClient(serverProperties.getCdlHost(), serverProperties.getCdlPort(), regionAwareInternalCrnGeneratorFactory);
     }
 
     private synchronized AuthDistributorClient createAuthDistributorClient() {

@@ -50,14 +50,14 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
         return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxBasicView(environmentCrn)).or(() ->
                 sdxEndpoint.getByEnvCrn(environmentCrn)
                     .stream()
-                    .map(sdx -> new SdxBasicView(
-                            sdx.getName(),
-                            sdx.getCrn(),
-                            sdx.getRuntime(),
-                            sdx.getRangerRazEnabled(),
-                            sdx.getCreated(),
-                            sdx.getDatabaseServerCrn(),
-                            Optional.empty()))
+                    .map(sdx -> SdxBasicView.builder()
+                            .withName(sdx.getName())
+                            .withCrn(sdx.getCrn())
+                            .withRuntime(sdx.getRuntime())
+                            .withRazEnabled(sdx.getRangerRazEnabled())
+                            .withCreated(sdx.getCreated())
+                            .withDbServerCrn(sdx.getDatabaseServerCrn())
+                            .build())
                     .findFirst());
     }
 

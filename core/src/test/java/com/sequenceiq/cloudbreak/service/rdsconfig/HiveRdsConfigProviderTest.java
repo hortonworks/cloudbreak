@@ -87,7 +87,7 @@ public class HiveRdsConfigProviderTest {
     @Test
     void testCreateRdsConfigIfNeededCdlCrn() {
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, false, 1L, null, Optional.empty())));
+                Optional.of(SdxBasicView.builder().withCrn(CDL_CRN.toString()).build()));
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.getId()).thenReturn(1L);

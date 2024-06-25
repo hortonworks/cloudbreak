@@ -103,8 +103,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         stack.setId(STACK_ID);
 
-        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(
-                new SdxBasicView(null, null, null, false, 1L, null, Optional.empty())));
+        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(
+                Optional.of(SdxBasicView.builder().withName("name").build()));
     }
 
     @Test
@@ -130,12 +130,12 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("7.2.0"));
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(
-                new SdxBasicView("dummyCluster", null, null, true, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(
+                Optional.of(SdxBasicView.builder().withName("name").withRazEnabled().build()));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
 
-        assertEquals("Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [dummyCluster] cluster, because runtime version is [7.2.0].",
+        assertEquals("Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [name] cluster, because runtime version is [7.2.0].",
                 exception.getMessage());
     }
 

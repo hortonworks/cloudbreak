@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 
 public class RedbeamsDatabaseServerCreateAction implements Action<RedbeamsDatabaseServerTestDto, RedbeamsClient> {
 
@@ -16,12 +17,10 @@ public class RedbeamsDatabaseServerCreateAction implements Action<RedbeamsDataba
     @Override
     public RedbeamsDatabaseServerTestDto action(TestContext testContext, RedbeamsDatabaseServerTestDto testDto, RedbeamsClient client) throws Exception {
         Log.whenJson(LOGGER, " Database register request:\n", testDto.getRequest());
-        testDto.setResponse(
-                client.getDefaultClient()
-                        .databaseServerV4Endpoint()
-                        .create(testDto.getRequest()));
+        DatabaseServerStatusV4Response statusV4Response = client.getDefaultClient().databaseServerV4Endpoint().create(testDto.getRequest());
+        testDto.setResponse(client.getDefaultClient().databaseServerV4Endpoint().getByCrn(statusV4Response.getResourceCrn()));
         Log.whenJson(LOGGER, " Database registered successfully:\n", testDto.getResponse());
-        Log.when(LOGGER, String.format(" CRN: %s", testDto.getResponse().getResourceCrn()));
+        Log.when(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
 
         return testDto;
     }

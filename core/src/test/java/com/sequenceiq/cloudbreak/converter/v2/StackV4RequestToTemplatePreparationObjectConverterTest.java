@@ -277,7 +277,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn())).thenReturn(
-                Optional.of(new SdxBasicView(null, SAAS_DATALAKE_CRN, null, true, 1L, DB_SERVER_CRN, Optional.empty())));
+                Optional.of(SdxBasicView.builder().withRazEnabled().withCrn(SAAS_DATALAKE_CRN).withDbServerCrn(DB_SERVER_CRN).build()));
     }
 
     @Test

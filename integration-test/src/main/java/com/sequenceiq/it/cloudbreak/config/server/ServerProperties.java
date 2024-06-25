@@ -94,6 +94,12 @@ public class ServerProperties {
     @Value("${integrationtest.ums.port:8982}")
     private int umsPort;
 
+    @Value("${integrationtest.cdl.host:localhost}")
+    private String cdlHost;
+
+    @Value("${integrationtest.cdl.port:8982}")
+    private int cdlPort;
+
     @Value("${integrationtest.authdistributor.host:localhost}")
     private String authDistributorHost;
 
@@ -237,6 +243,14 @@ public class ServerProperties {
 
     public int getUmsPort() {
         return umsPort;
+    }
+
+    public String getCdlHost() {
+        return cdlHost;
+    }
+
+    public int getCdlPort() {
+        return cdlPort;
     }
 
     public String getAuthDistributorHost() {

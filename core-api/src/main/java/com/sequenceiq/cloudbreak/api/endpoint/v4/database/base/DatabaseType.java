@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database.base;
 
 public enum DatabaseType {
     HIVE,
+    @Deprecated
     CDL_HIVE,
     RANGER,
     @Deprecated

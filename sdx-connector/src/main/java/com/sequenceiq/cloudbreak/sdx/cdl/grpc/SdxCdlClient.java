@@ -35,7 +35,7 @@ public class SdxCdlClient {
         CdlCrudProto.CreateDatalakeRequest request = CdlCrudProto.CreateDatalakeRequest.newBuilder()
                 .setDatalakeName(datalakeName)
                 .setEnvironmentName(environmentCrn)
-                .setDatabaseAvailabilityType(CdlCrudProto.DatabaseAvailabilityType.Value.valueOf(type.toLowerCase()))
+                .setDatabaseAvailabilityType(CdlCrudProto.DatabaseAvailabilityType.Value.valueOf(type.toUpperCase()))
                 .build();
         return newStub().createDatalake(request);
     }

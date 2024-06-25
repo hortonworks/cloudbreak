@@ -20,7 +20,7 @@ public class RedbeamsDatabaseServerDeleteAction implements Action<RedbeamsDataba
         //can't set response because it's not the same type
         DatabaseServerV4Response response = client.getDefaultClient()
                 .databaseServerV4Endpoint()
-                .deleteByCrn(testDto.getResponse().getResourceCrn(), false);
+                .deleteByCrn(testDto.getResponse().getCrn(), false);
         Log.whenJson(LOGGER, " Database deleted successfully:\n", response);
         Log.when(LOGGER, String.format(" CRN: %s", response.getCrn()));
 

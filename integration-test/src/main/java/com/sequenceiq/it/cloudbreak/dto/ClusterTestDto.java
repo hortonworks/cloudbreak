@@ -54,7 +54,7 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
 
     public ClusterTestDto withExternalDatabaseCrn() {
         RedbeamsDatabaseServerTestDto database = getTestContext().get(RedbeamsDatabaseServerTestDto.class);
-        getRequest().setDatabaseServerCrn(database.getResponse().getResourceCrn());
+        getRequest().setDatabaseServerCrn(database.getResponse().getCrn());
         return this;
     }
 

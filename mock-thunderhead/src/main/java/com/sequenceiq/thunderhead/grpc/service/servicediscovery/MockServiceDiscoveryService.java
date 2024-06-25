@@ -29,8 +29,6 @@ public class MockServiceDiscoveryService extends ServiceDiscoveryGrpc.ServiceDis
 
     private static final String CDL_ENDPOINT_ID = "cdl";
 
-    private static final String DB_TYPE = "CDL_HIVE";
-
     private static final String HIVE_SERVICE_TYPE = "HIVE";
 
     @Inject
@@ -47,7 +45,7 @@ public class MockServiceDiscoveryService extends ServiceDiscoveryGrpc.ServiceDis
                             .setClusterVersion(CLUSTER_VERSION)
                             .setEndPointId(CDL_ENDPOINT_ID)
                             .addEndPoints(ServiceDiscoveryProto.ApiEndPoint.newBuilder()
-                                    .setName(DB_TYPE)
+                                    .setName(HIVE_SERVICE_TYPE.toLowerCase())
                                     .addServiceConfigs(mapEntry(HIVE_METASTORE_DATABASE_PORT, HIVE_DB_PORT))
                                     .addServiceConfigs(mapEntry(HIVE_METASTORE_DATABASE_HOST, cdl.getHmsDatabaseHost()))
                                     .addServiceConfigs(mapEntry(HIVE_METASTORE_DATABASE_NAME, cdl.getHmsDatabaseName()))

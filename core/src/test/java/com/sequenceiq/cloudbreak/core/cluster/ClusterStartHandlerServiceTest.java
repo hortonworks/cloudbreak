@@ -101,7 +101,7 @@ class ClusterStartHandlerServiceTest {
     @Test
     void testRefreshClusterOnStart() throws Exception {
         // GIVEN
-        SdxBasicView sdxBasicView = new SdxBasicView("name", DATALAKE_CRN, null, true, 1L, null, Optional.empty());
+        SdxBasicView sdxBasicView = SdxBasicView.builder().withCrn(DATALAKE_CRN).build();
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(sdxBasicView));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(true);
         // WHEN
@@ -113,8 +113,8 @@ class ClusterStartHandlerServiceTest {
     @Test
     void testStartClusterWithSharedRdsConfigRefresh() throws Exception {
         // GIVEN
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
-                new SdxBasicView("name", DATALAKE_CRN, null, true, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
+                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         Set<RDSConfig> rdsConfigs = Set.of(new RDSConfig());
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
@@ -131,8 +131,8 @@ class ClusterStartHandlerServiceTest {
     @Test
     void testStartClusterWithSharedRdsConfigRefreshAndException() throws Exception {
         // GIVEN
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
-                new SdxBasicView("name", DATALAKE_CRN, null, true, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
+                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         Set<RDSConfig> rdsConfigs = Set.of(new RDSConfig());
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
@@ -150,8 +150,8 @@ class ClusterStartHandlerServiceTest {
     @Test
     void testStartClusterWithoutSharedRdsConfigRefresh() throws Exception {
         // GIVEN
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(
-                new SdxBasicView("name", DATALAKE_CRN, null, true, 1L, null, Optional.empty())));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
+                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(Set.of());
         // WHEN

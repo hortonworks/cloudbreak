@@ -195,7 +195,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         lenient().when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         lenient().when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(new SdxBasicView(null, "crn", null, false, 1L, null, Optional.empty())));
+                Optional.of(SdxBasicView.builder().withCrn("crn").build()));
         lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
         lenient().when(databaseRequestToDatabaseConverter.convert(any(DetailedEnvironmentResponse.class), any(CloudPlatform.class), isNull()))
                 .thenReturn(new Database());
