@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx.database;
 
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.datalake.service.TagUtil.getTags;
+import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -211,14 +212,23 @@ public class DatabaseService {
         req.setTags(getTags(sdxCluster.getTags()));
         req.setClusterCrn(sdxCluster.getCrn());
 
+        Map<String, Object> attributes = sdxCluster.getSdxDatabase().getAttributes() != null ?
+                sdxCluster.getSdxDatabase().getAttributes().getMap() :
+                new HashMap<>();
+        boolean previousDBSSLEnabled = true;
+        if (attributes.containsKey(DATABASE_SSL_ENABLED) && attributes.get(DATABASE_SSL_ENABLED) instanceof Boolean) {
+            previousDBSSLEnabled = (boolean) attributes.get(DATABASE_SSL_ENABLED);
+        }
+
         String runtime = sdxCluster.getRuntime();
-        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
+        if (previousDBSSLEnabled && platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
             sslConfigV4Request.setSslMode(SslMode.ENABLED);
             req.setSslConfig(sslConfigV4Request);
         } else {
-            LOGGER.info("Skipping external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
+            LOGGER.info("Skipping external DB SSL enforcement for cloud platform {}, runtime version {}, and previous DB SSL enabled = {}",
+                    cloudPlatform, runtime, previousDBSSLEnabled);
         }
 
         return req;
@@ -325,7 +335,7 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn, PollingConfig pollingConfig,
             SdxDatabaseOperation sdxDatabaseOperation, boolean cancellable) {
-        DatabaseServerStatusV4Response response = Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+        return Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
@@ -355,7 +365,6 @@ public class DatabaseService {
                         return AttemptResults.finishWith(null);
                     }
                 });
-        return response;
     }
 
     public OperationView getOperationProgressStatus(String databaseCrn, boolean detailed) {
