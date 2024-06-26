@@ -11,9 +11,7 @@ base:
     - telemetry
     {% if cpuarch != 'aarch64' %}
     - fluent
-    {% endif %}
     - monitoring
-    {% if cpuarch != 'aarch64' %}
     - metering
     {% endif %}
     - logrotate
