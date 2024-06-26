@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -121,9 +122,17 @@ public class StackImageUpdateServiceTest {
 
     @Test
     public void testGetNewImageIfVersionsMatch() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos7")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
@@ -135,9 +144,17 @@ public class StackImageUpdateServiceTest {
 
     @Test
     public void testGetNewImageIfOsVersionsMatchFail() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos6")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
@@ -156,9 +173,17 @@ public class StackImageUpdateServiceTest {
                         .withImageSetsByProvider(image.getImageSetsByProvider())
                         .withStackDetails(image.getStackDetails()).build(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName());
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "redhat7",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos7")
+                .withOsType("redhat7")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(targetStatedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
@@ -171,9 +196,17 @@ public class StackImageUpdateServiceTest {
     @Test
     public void testGetNewImageIfCloudPlatformMatchFail() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         stack.setCloudPlatform("GCP");
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos7")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("GCP"));
@@ -191,9 +224,17 @@ public class StackImageUpdateServiceTest {
                 .withImageSetsByProvider(Collections.singletonMap("AWS_GOV", Collections.emptyMap()))
                 .build();
         statedImage = StatedImage.statedImage(image, "url", "name");
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos7")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("aws_gov"));
@@ -207,9 +248,17 @@ public class StackImageUpdateServiceTest {
 
     @Test
     public void testIsValidImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos7")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
@@ -222,9 +271,17 @@ public class StackImageUpdateServiceTest {
 
     @Test
     public void testIsValidImageFalse() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos6")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
@@ -237,9 +294,17 @@ public class StackImageUpdateServiceTest {
 
     @Test
     public void testPackageVersionCheckerFailedThenResultShouldBeSkipped() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("centos7")
+                .withOsType("centos")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
 
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
         cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
@@ -258,9 +323,17 @@ public class StackImageUpdateServiceTest {
 
     @Test
     public void testOsCheckFailedThenResultShouldNotBeSkipped() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "redhat7", "redhat",
-                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imageOldName")
+                .withImageId("uuid2")
+                .withOs("redhat7")
+                .withOsType("redhat")
+                .withArchitecture(Architecture.X86_64.getName())
+                .withPackageVersions(packageVersions)
+                .withImageCatalogUrl(statedImage.getImageCatalogUrl())
+                .withImageCatalogName(statedImage.getImageCatalogName())
+                .build();
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = imageInComponent1;
 
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
         cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);

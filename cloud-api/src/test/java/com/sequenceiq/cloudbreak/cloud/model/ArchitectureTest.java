@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -9,32 +12,62 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ArchitectureTest {
 
     @Test
-    void testNull() {
-        Architecture result = Architecture.fromString(null);
-        Assertions.assertEquals(Architecture.X86_64, result);
+    void testFallbackNull() {
+        Architecture result = Architecture.fromStringWithFallback(null);
+        assertEquals(Architecture.X86_64, result);
     }
 
     @Test
-    void testEmpty() {
-        Architecture result = Architecture.fromString("");
-        Assertions.assertEquals(Architecture.X86_64, result);
+    void testValidationNull() {
+        Architecture result = Architecture.fromStringWithValidation(null);
+        assertNull(result);
     }
 
     @Test
-    void testX8664() {
-        Architecture result = Architecture.fromString("x86_64");
-        Assertions.assertEquals(Architecture.X86_64, result);
+    void testFallbackEmpty() {
+        Architecture result = Architecture.fromStringWithFallback("");
+        assertEquals(Architecture.X86_64, result);
     }
 
     @Test
-    void testArm64() {
-        Architecture result = Architecture.fromString("arm64");
-        Assertions.assertEquals(Architecture.ARM64, result);
+    void testValidationEmpty() {
+        Architecture result = Architecture.fromStringWithValidation("");
+        assertNull(result);
     }
 
     @Test
-    void testUnknown() {
-        Architecture result = Architecture.fromString("aarch64");
-        Assertions.assertEquals(Architecture.UNKOWN, result);
+    void testFallbackX8664() {
+        Architecture result = Architecture.fromStringWithFallback("x86_64");
+        assertEquals(Architecture.X86_64, result);
+    }
+
+    @Test
+    void testValidationX8664() {
+        Architecture result = Architecture.fromStringWithValidation("x86_64");
+        assertEquals(Architecture.X86_64, result);
+    }
+
+    @Test
+    void testFallbackArm64() {
+        Architecture result = Architecture.fromStringWithFallback("arm64");
+        assertEquals(Architecture.ARM64, result);
+    }
+
+    @Test
+    void testValidationArm64() {
+        Architecture result = Architecture.fromStringWithValidation("arm64");
+        assertEquals(Architecture.ARM64, result);
+    }
+
+    @Test
+    void testFallbackUnknown() {
+        Architecture result = Architecture.fromStringWithFallback("aarch64");
+        assertEquals(Architecture.UNKOWN, result);
+    }
+
+    @Test
+    void testValidationUnknown() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Architecture.fromStringWithValidation("aarch64"));
+        assertEquals("Architecture 'aarch64' is not supported", exception.getMessage());
     }
 }

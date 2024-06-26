@@ -33,8 +33,9 @@ public class CurrentImageRetrieverService {
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage = imageCatalogService.getImage(stack.getWorkspace().getId(), imageCatalogUrl,
                     imageCatalogName, imageId).getImage();
             LOGGER.debug("Using the catalog image to create the model of the current image.");
-            return new Image(currentImage.getImageName(), currentImage.getUserdata(), catalogImage.getOs(), catalogImage.getOsType(), imageCatalogUrl,
-                    imageCatalogName, imageId, catalogImage.getPackageVersions(), catalogImage.getDate(), catalogImage.getCreated());
+            return new Image(currentImage.getImageName(), currentImage.getUserdata(), catalogImage.getOs(), catalogImage.getOsType(),
+                    catalogImage.getArchitecture(), imageCatalogUrl, imageCatalogName, imageId, catalogImage.getPackageVersions(), catalogImage.getDate(),
+                    catalogImage.getCreated());
         } catch (CloudbreakImageCatalogException | CloudbreakImageNotFoundException e) {
             LOGGER.warn("Failed to retrieve the current image {} from image catalog {}. Falling back to the image from the database.",
                     imageId, imageCatalogUrl);

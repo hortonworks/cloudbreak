@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -207,8 +206,24 @@ class UpgradeServiceTest {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
-        Image oldImage = new Image("name", Map.of(), "alma", "rocky", null, "mockcatalog", "111-222", Map.of(), "2019-10-24", 1571884856L);
-        Image newImage = new Image("name", Map.of(), "alma", "rocky", null, "mockcatalog", "333-444", Map.of(), "2019-10-24", 1571884856L);
+        Image oldImage = Image.builder()
+                .withImageName("name")
+                .withOs("alma")
+                .withOsType("rocky")
+                .withImageCatalogName("mockcatalog")
+                .withImageId("111-222")
+                .withDate("2019-10-24")
+                .withCreated(1571884856L)
+                .build();
+        Image newImage = Image.builder()
+                .withImageName("name")
+                .withOs("alma")
+                .withOsType("rocky")
+                .withImageCatalogName("mockcatalog")
+                .withImageId("333-444")
+                .withDate("2019-10-24")
+                .withCreated(1571884856L)
+                .build();
         allInstances.stream().filter(im -> "pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(oldImage)));
         allInstances.stream().filter(im -> !"pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(newImage)));
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);

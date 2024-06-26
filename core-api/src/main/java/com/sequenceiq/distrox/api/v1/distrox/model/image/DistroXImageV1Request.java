@@ -23,6 +23,9 @@ public class DistroXImageV1Request implements Serializable {
     @Schema(description = StackModelDescription.IMAGE_OS)
     private String os;
 
+    @Schema(description = StackModelDescription.IMAGE_ARCHITECTURE)
+    private String architecture;
+
     public String getCatalog() {
         return catalog;
     }
@@ -45,5 +48,13 @@ public class DistroXImageV1Request implements Serializable {
 
     public void setOs(String os) {
         this.os = os;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 }

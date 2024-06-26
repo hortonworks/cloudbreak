@@ -23,6 +23,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
@@ -87,6 +88,9 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private ImageOsService imageOsService;
 
+    @Mock
+    private ImageComparator imageComparator;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
@@ -111,12 +115,16 @@ public class ImageCatalogServiceDefaultNotFoundTest {
 
     @Test
     public void testGetDefaultImageShouldThrowNotFoundException() throws Exception {
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("gcp")), null, true, Set.of("notimportant"), null);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("gcp")))
+                .withOperatingSystems(Set.of("redhat8"))
+                .build();
         try {
-            underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
+            underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         } catch (CloudbreakImageNotFoundException exception) {
             Assertions.assertEquals(
-                    "Could not find any image for platform 'gcp', os 'notimportant', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                    "Could not find any image for platform 'gcp redhat8', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }
         verify(providerSpecificImageFilter, never()).filterImages(any(), anyList());
@@ -131,12 +139,45 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
         when(imageCatalog.getImageCatalogUrl()).thenReturn(DEFAULT_CDH_IMAGE_CATALOG);
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("aws")), "2.6", true, Set.of("centos7"), null);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("aws")))
+                .withCbVersion("2.6")
+                .withOperatingSystems(Set.of("centos7"))
+                .build();
         try {
-            underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
+            underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         } catch (CloudbreakImageNotFoundException exception) {
             Assertions.assertEquals(
-                    "Could not find any image for platform 'aws', os 'centos7', runtime 'null' " +
+                    "Could not find any image for platform 'aws centos7', runtime 'null' " +
+                            "and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                    exception.getMessage());
+        }
+        verify(providerSpecificImageFilter, times(3)).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[0]))), anyList());
+        verify(providerSpecificImageFilter, never()).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[1]))), anyList());
+        verify(providerSpecificImageFilter, never()).filterImages(eq(Set.of(imageCatalogPlatform(PROVIDERS[2]))), anyList());
+    }
+
+    @Test
+    public void testGetDefaultImageShouldThrowNotFoundException3() throws Exception {
+        String catalogJson = FileReaderUtils.readFileFromClasspath(DEFAULT_CDH_IMAGE_CATALOG);
+        CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
+        when(imageCatalogProvider.getImageCatalogV3(DEFAULT_CDH_IMAGE_CATALOG)).thenReturn(catalog);
+        when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
+        when(imageCatalog.getImageCatalogUrl()).thenReturn(DEFAULT_CDH_IMAGE_CATALOG);
+
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("aws")))
+                .withCbVersion("2.6")
+                .withOperatingSystems(Set.of("centos7"))
+                .withArchitecture(Architecture.ARM64)
+                .build();
+        try {
+            underTest.getImagePrewarmedDefaultPreferred(imageFilter);
+        } catch (CloudbreakImageNotFoundException exception) {
+            Assertions.assertEquals(
+                    "Could not find any image for platform 'aws centos7-arm64', runtime 'null' " +
                             "and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }

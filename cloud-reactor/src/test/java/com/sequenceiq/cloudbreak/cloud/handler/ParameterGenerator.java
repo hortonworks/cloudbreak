@@ -99,7 +99,7 @@ public class ParameterGenerator {
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>(), "2023-07-11",
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), "2023-07-11",
                 1689034454L);
 
         Subnet subnet = new Subnet("10.0.0.0/24");

@@ -97,8 +97,7 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testImageHasValidVhdFormat() {
-        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24",
-                1571884856L);
+        Image image = Image.builder().withImageName(VALID_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
@@ -111,8 +110,7 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testVhdImageOnlyAzureMarketplaceImageAllowed() {
-        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24",
-                1571884856L);
+        Image image = Image.builder().withImageName(VALID_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
 
@@ -129,8 +127,7 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testImageHasValidMarketplaceFormatNoEntitlement() {
-        Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
 
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
@@ -143,8 +140,7 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testImageHasValidMarketplaceFormatEntitlementTermsAccepted() {
-        Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
 
         setupAuthenticatedContext();
@@ -159,8 +155,7 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testImageHasValidMarketplaceFormatEntitlementNoTermsAccepted() {
-        Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
         setupAuthenticatedContext();
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
@@ -177,8 +172,7 @@ public class AzureImageFormatValidatorTest {
     @ParameterizedTest
     @MethodSource("marketplaceSettingsDataProvider")
     void testMarketplaceImageScenarios(boolean marketplaceOnly, boolean autoAccept, AzureImageTermStatus termStatus, String expectedResult) {
-        Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.toString(autoAccept)), Map.of(), null, null, null,
                 null, null, null, null, null);
         setupAuthenticatedContext();
@@ -235,8 +229,7 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testImageHasInvalidFormat() {
-        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(INVALID_IMAGE_NAME).build();
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
@@ -260,32 +253,28 @@ public class AzureImageFormatValidatorTest {
 
     @Test
     void testMarketplaceImage() {
-        Image image = new Image(MARKETPLACE_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
         boolean actualResult = underTest.isMarketplaceImageFormat(image);
         assertTrue(actualResult);
     }
 
     @Test
     void testWrongMarketplaceImage() {
-        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(INVALID_IMAGE_NAME).build();
         boolean actualResult = underTest.isMarketplaceImageFormat(image);
         assertFalse(actualResult);
     }
 
     @Test
     void testVhdImage() {
-        Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(VALID_IMAGE_NAME).build();
         boolean actualResult = underTest.isVhdImageFormat(image);
         assertTrue(actualResult);
     }
 
     @Test
     void testWrongVhdImage() {
-        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(INVALID_IMAGE_NAME).build();
         boolean actualResult = underTest.isVhdImageFormat(image);
         assertFalse(actualResult);
     }
@@ -295,8 +284,7 @@ public class AzureImageFormatValidatorTest {
     void testSourceImagePlan(String urn, Boolean result) {
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(ImagePackageVersion.SOURCE_IMAGE.getKey(), urn);
-        Image image = new Image(INVALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", packageVersions, "2019-10-24", 1571884856L);
+        Image image = Image.builder().withImageName(INVALID_IMAGE_NAME).withPackageVersions(packageVersions).build();
         try {
             boolean actualResult = underTest.hasSourceImagePlan(image);
             assertEquals(result, actualResult);

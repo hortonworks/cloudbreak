@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
@@ -245,7 +244,7 @@ class CentosToRedHatUpgradeAvailabilityServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createModelImage(OsType os) {
-        return ModelImageTestBuilder.builder()
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withOs(os.getOs())
                 .withOsType(os.getOsType())
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER))

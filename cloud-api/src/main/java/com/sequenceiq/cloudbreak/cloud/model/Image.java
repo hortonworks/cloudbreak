@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,8 @@ public class Image {
 
     private final String osType;
 
+    private final String architecture;
+
     private final String imageCatalogUrl;
 
     private final String imageId;
@@ -45,6 +48,7 @@ public class Image {
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
             @JsonProperty("os") String os,
             @JsonProperty("osType") String osType,
+            @JsonProperty("architecture") String architecture,
             @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
             @JsonProperty("imageCatalogName") String imageCatalogName,
             @JsonProperty("imageId") String imageId,
@@ -56,6 +60,7 @@ public class Image {
         this.imageCatalogUrl = imageCatalogUrl;
         this.os = os;
         this.osType = osType;
+        this.architecture = architecture;
         this.imageCatalogName = imageCatalogName;
         this.imageId = imageId;
         this.packageVersions = packageVersions;
@@ -116,6 +121,10 @@ public class Image {
         this.imageName = imageName;
     }
 
+    public String getArchitecture() {
+        return architecture;
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
@@ -129,6 +138,7 @@ public class Image {
                     && Objects.equals(userdata, image.userdata)
                     && Objects.equals(os, image.os)
                     && Objects.equals(osType, image.osType)
+                    && Objects.equals(architecture, image.architecture)
                     && Objects.equals(imageCatalogUrl, image.imageCatalogUrl)
                     && Objects.equals(imageId, image.imageId)
                     && Objects.equals(imageCatalogName, image.imageCatalogName)
@@ -140,7 +150,7 @@ public class Image {
 
     @Override
     public int hashCode() {
-        return Objects.hash(imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName, packageVersions, date, created);
+        return Objects.hash(imageName, userdata, os, osType, architecture, imageCatalogUrl, imageId, imageCatalogName, packageVersions, date, created);
     }
 
     @Override
@@ -149,11 +159,103 @@ public class Image {
                 + "imageName='" + imageName + '\''
                 + ", os='" + os + '\''
                 + ", osType='" + osType + '\''
+                + ", architecture='" + architecture + '\''
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", imageId='" + imageId + '\''
                 + ", imageCatalogName='" + imageCatalogName + '\''
                 + ", packageVersions=" + packageVersions + '\''
                 + ", date=" + date + '\''
                 + ", created=" + created + '}';
+    }
+
+    public static ImageBuilder builder() {
+        return new ImageBuilder();
+    }
+
+    public static final class ImageBuilder {
+
+        private String architecture = Architecture.X86_64.getName();
+
+        private String imageName;
+
+        private Map<InstanceGroupType, String> userdata = new EnumMap<>(InstanceGroupType.class);
+
+        private String os;
+
+        private String osType;
+
+        private String imageCatalogUrl;
+
+        private String imageId;
+
+        private String imageCatalogName;
+
+        private Map<String, String> packageVersions = new HashMap<>();
+
+        private String date;
+
+        private Long created;
+
+        private ImageBuilder() {
+        }
+
+        public ImageBuilder withArchitecture(String architecture) {
+            this.architecture = architecture;
+            return this;
+        }
+
+        public ImageBuilder withImageName(String imageName) {
+            this.imageName = imageName;
+            return this;
+        }
+
+        public ImageBuilder withUserdata(Map<InstanceGroupType, String> userdata) {
+            this.userdata = userdata;
+            return this;
+        }
+
+        public ImageBuilder withOs(String os) {
+            this.os = os;
+            return this;
+        }
+
+        public ImageBuilder withOsType(String osType) {
+            this.osType = osType;
+            return this;
+        }
+
+        public ImageBuilder withImageCatalogUrl(String imageCatalogUrl) {
+            this.imageCatalogUrl = imageCatalogUrl;
+            return this;
+        }
+
+        public ImageBuilder withImageId(String imageId) {
+            this.imageId = imageId;
+            return this;
+        }
+
+        public ImageBuilder withImageCatalogName(String imageCatalogName) {
+            this.imageCatalogName = imageCatalogName;
+            return this;
+        }
+
+        public ImageBuilder withPackageVersions(Map<String, String> packageVersions) {
+            this.packageVersions = packageVersions;
+            return this;
+        }
+
+        public ImageBuilder withDate(String date) {
+            this.date = date;
+            return this;
+        }
+
+        public ImageBuilder withCreated(Long created) {
+            this.created = created;
+            return this;
+        }
+
+        public Image build() {
+            return new Image(imageName, userdata, os, osType, architecture, imageCatalogUrl, imageCatalogName, imageId, packageVersions, date, created);
+        }
     }
 }

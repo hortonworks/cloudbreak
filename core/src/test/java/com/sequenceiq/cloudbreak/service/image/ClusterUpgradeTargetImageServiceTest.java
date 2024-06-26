@@ -165,7 +165,7 @@ public class ClusterUpgradeTargetImageServiceTest {
     }
 
     private Image createTargetModelImage(String imageId, String imageCatalogUrl, String imageCatalogName) {
-        return ModelImageTestBuilder.builder().withImageId(imageId).withImageCatalogUrl(imageCatalogUrl).withImageCatalogName(imageCatalogName).build();
+        return Image.builder().withImageId(imageId).withImageCatalogUrl(imageCatalogUrl).withImageCatalogName(imageCatalogName).build();
     }
 
 }

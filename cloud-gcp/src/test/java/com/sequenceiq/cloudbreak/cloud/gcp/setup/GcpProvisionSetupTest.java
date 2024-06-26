@@ -461,6 +461,7 @@ public class GcpProvisionSetupTest {
                 Map.of(),
                 "centos",
                 "redhat",
+                "x86_64",
                 "http://url",
                 "default",
                 "1234-1234-123-123",

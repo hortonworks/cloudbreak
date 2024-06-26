@@ -119,7 +119,7 @@ public class ComponentTestUtil {
                 InstanceGroupType.CORE, CORE_CUSTOM_DATA,
                 InstanceGroupType.GATEWAY, GATEWAY_CUSTOM_DATA
         );
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>(), null, null);
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null);
 
         String template = configuration.getTemplate(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH, "UTF-8").toString();
         return new CloudStack(groups, network, image, Map.of(), Map.of(), template, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY, null, null, null, null);
@@ -140,7 +140,7 @@ public class ComponentTestUtil {
                 InstanceGroupType.CORE, CORE_CUSTOM_DATA,
                 InstanceGroupType.GATEWAY, GATEWAY_CUSTOM_DATA
         );
-        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>(), null, null);
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null);
 
         String template = configuration.getTemplate(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH, "UTF-8").toString();
 

@@ -11,6 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 public class ImageUtil {
 
     public boolean isArm64Image(Image image) {
-        return !Objects.isNull(image) && Architecture.fromString(image.getArchitecture()) == Architecture.ARM64;
+        return !Objects.isNull(image) && Architecture.fromStringWithFallback(image.getArchitecture()) == Architecture.ARM64;
     }
 }

@@ -55,8 +55,8 @@ class ImageToImageEntityConverterTest {
     @Test
     void testExtractLdapAgentVersionCloudImage() {
         com.sequenceiq.cloudbreak.cloud.model.Image source =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("asd", Map.of(), "osss", "type", "url", "name", "imid", Map.of("freeipa-ldap-agent", "1.2.3"),
-                        "2019-10-24", 1571884856L);
+                new com.sequenceiq.cloudbreak.cloud.model.Image("asd", Map.of(), "osss", "type", "", "url", "name", "imid",
+                        Map.of("freeipa-ldap-agent", "1.2.3"), "2019-10-24", 1571884856L);
 
         String result = underTest.extractLdapAgentVersion(source);
 
@@ -66,8 +66,8 @@ class ImageToImageEntityConverterTest {
     @Test
     void testExtractSourceImageFromCloudImage() {
         com.sequenceiq.cloudbreak.cloud.model.Image source =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("asd", Map.of(), "osss", "type", "url", "name", "imid", Map.of("source-image", SOURCE_IMAGE),
-                        "2019-10-24", 1571884856L);
+                new com.sequenceiq.cloudbreak.cloud.model.Image("asd", Map.of(), "osss", "type", "", "url", "name", "imid",
+                        Map.of("source-image", SOURCE_IMAGE), "2019-10-24", 1571884856L);
 
         String result = underTest.extractSourceImage(source);
 

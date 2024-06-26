@@ -19,7 +19,7 @@ public class ImageToImageV4ResponseConverter {
         result.setDescription(source.getDescription());
         result.setOs(source.getOs());
         result.setOsType(source.getOsType());
-        result.setArchitecture(Architecture.fromString(source.getArchitecture()).name().toLowerCase());
+        result.setArchitecture(Architecture.fromStringWithFallback(source.getArchitecture()).getName());
         result.setUuid(source.getUuid());
         result.setVersion(source.getVersion());
         result.setDefaultImage(source.isDefaultImage());

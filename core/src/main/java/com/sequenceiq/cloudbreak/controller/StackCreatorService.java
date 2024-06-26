@@ -421,7 +421,6 @@ public class StackCreatorService {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
             LOGGER.info("The stack with name {} has base images enabled: {} and should use base images: {}",
                     stackName, baseImageEnabled, shouldUseBaseCMImage);
-            boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(ThreadBasedUserCrnProvider.getAccountId());
             StatedImage statedImage = ThreadBasedUserCrnProvider.doAs(user.getUserCrn(), () -> {
                 try {
                     restRequestThreadLocalService.setCloudbreakUser(cbUser);
@@ -434,8 +433,7 @@ public class StackCreatorService {
                             shouldUseBaseCMImage,
                             baseImageEnabled,
                             user,
-                            image -> !imageUtil.isArm64Image(image) || (dataHubArmEnabled && StackType.WORKLOAD.equals(stackRequest.getType()) &&
-                                    CloudPlatform.AWS.equalsIgnoreCase(platformString)));
+                            image -> true);
                 } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
                     throw new RuntimeException(e);
                 }

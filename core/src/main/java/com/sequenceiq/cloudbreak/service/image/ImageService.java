@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V1;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -33,7 +34,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -42,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -147,28 +151,39 @@ public class ImageService {
                 imageSettings.setCatalog(CDP_DEFAULT_CATALOG_NAME);
             }
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
-            validateBaseImageOs(workspaceId, image, clusterVersion, platform);
-            return checkIfBasePermitted(image, baseImageEnabled);
+            validateSpecifiedImage(workspaceId, user, image, clusterVersion, platform, baseImageEnabled, imageSettings.getArchitecture());
+            return image;
         } else if (useBaseImage && !baseImageEnabled) {
             throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
         }
 
-        ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
         boolean selectBaseImage = baseImageEnabled && useBaseImage;
-        ImageFilter imageFilter = new ImageFilter(
-                imageCatalog,
-                Set.of(platform),
-                null,
-                baseImageEnabled,
-                getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform),
-                selectBaseImage ? null : clusterVersion);
+        Architecture architecture = getIfNotNull(imageSettings, ImageSettingsV4Request::getArchitecture);
+        validateArchitectureEntitlement(user, architecture);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user))
+                .withPlatforms(Set.of(platform))
+                .withBaseImageEnabled(baseImageEnabled)
+                .withOperatingSystems(getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform))
+                .withClusterVersion(selectBaseImage ? null : clusterVersion)
+                .withArchitecture(architecture)
+                .withAdditionalPredicate(imagePredicate)
+                .build();
         LOGGER.info("Image id is not specified for the stack.");
-        if (selectBaseImage) {
-            LOGGER.info("Trying to select a base image.");
-            return imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilter, imagePredicate);
-        } else {
-            LOGGER.info("Trying to select a prewarmed image.");
-            return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
+        return imageCatalogService.getLatestImageDefaultPreferred(imageFilter, selectBaseImage);
+    }
+
+    private void validateSpecifiedImage(Long workspaceId, User user, StatedImage image, String clusterVersion, ImageCatalogPlatform platform, boolean baseImageEnabled,
+            Architecture architecture) throws CloudbreakImageCatalogException {
+        validateIfBaseImagePermitted(image, baseImageEnabled);
+        validateBaseImageOs(workspaceId, image, clusterVersion, platform);
+        validateArchitecture(user, image, architecture);
+    }
+
+    private void validateIfBaseImagePermitted(StatedImage image, boolean baseImageEnabled) throws CloudbreakImageCatalogException {
+        if (!baseImageEnabled && !image.getImage().isPrewarmed()) {
+            throw new CloudbreakImageCatalogException(String.format("Inconsistent request, base images are disabled but image with id %s is base image!",
+                    image.getImage().getUuid()));
         }
     }
 
@@ -185,6 +200,22 @@ public class ImageService {
         }
     }
 
+    private void validateArchitecture(User user, StatedImage image, Architecture requestedArchitecture) throws CloudbreakImageCatalogException {
+        Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
+        validateArchitectureEntitlement(user, imageArchitecture);
+        if (requestedArchitecture != null && imageArchitecture != requestedArchitecture) {
+            throw new CloudbreakImageCatalogException(String.format("The selected image's architecture (%s) is not matching requested architecture (%s)",
+                    imageArchitecture.getName(), requestedArchitecture.getName()));
+        }
+    }
+
+    private void validateArchitectureEntitlement(User user, Architecture architecture) {
+        if (architecture == Architecture.ARM64 && !entitlementService.isDataHubArmEnabled(Crn.safeFromString(user.getUserCrn()).getAccountId())) {
+            throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
+                    Architecture.ARM64.getName()));
+        }
+    }
+
     private String getClusterVersion(Blueprint blueprint) {
         String clusterVersion = ImageCatalogService.UNDEFINED;
         if (blueprint != null) {
@@ -196,14 +227,6 @@ public class ImageService {
             }
         }
         return clusterVersion;
-    }
-
-    private StatedImage checkIfBasePermitted(StatedImage image, boolean baseImageEnabled) throws CloudbreakImageCatalogException {
-        if (!baseImageEnabled && !image.getImage().isPrewarmed()) {
-            throw new CloudbreakImageCatalogException(String.format("Inconsistent request, base images are disabled but image with id %s is base image!",
-                    image.getImage().getUuid()));
-        }
-        return image;
     }
 
     private Set<String> getSupportedOperatingSystems(Long workspaceId, StatedImage image, String clusterVersion, ImageCatalogPlatform platform)
@@ -417,7 +440,7 @@ public class ImageService {
 
     private void addImage(Stack stack, StatedImage statedImage, String imageName, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage,
             Set<Component> components) {
-        Image image = new Image(imageName, new HashMap<>(), catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
+        Image image = new Image(imageName, new HashMap<>(), catalogBasedImage.getOs(), catalogBasedImage.getOsType(), catalogBasedImage.getArchitecture(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
                 catalogBasedImage.getPackageVersions(), catalogBasedImage.getDate(), catalogBasedImage.getCreated());
         components.add(new Component(IMAGE, IMAGE.name(), new Json(image), stack));

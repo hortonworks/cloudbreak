@@ -80,9 +80,13 @@ public class DefaultImageCatalogService {
             case FREEIPA:
                 throw new BadRequestException(String.format("Runtime is not supported in case of '%s' image type", imageType));
             case RUNTIME:
-                ImageCatalog imageCatalog = getCloudbreakDefaultImageCatalog();
-                ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(provider), null, false, null, runtime);
-                statedImage = imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, i -> true);
+                ImageFilter imageFilter = ImageFilter.builder()
+                        .withImageCatalog(getCloudbreakDefaultImageCatalog())
+                        .withPlatforms(Set.of(provider))
+                        .withBaseImageEnabled(false)
+                        .withClusterVersion(runtime)
+                        .build();
+                statedImage = imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter);
                 break;
             default:
                 throw new BadRequestException(String.format("Image type '%s' is not supported.", type));

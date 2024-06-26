@@ -8,6 +8,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -25,6 +26,7 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
                 ),
                 source.getOs(),
                 source.getOsType(),
+                Architecture.X86_64.getName(),
                 source.getImageCatalogUrl(),
                 source.getImageCatalogName(),
                 source.getImageId(),

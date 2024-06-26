@@ -59,7 +59,7 @@ class AwsImdsUtilTest {
     }
 
     private CloudStack cloudStack(Map<String, String> packageVersions) {
-        Image image = new Image(null, Map.of(), null, null, null, null, null, packageVersions, null, null);
+        Image image = new Image(null, Map.of(), null, null, null, null, null, null, packageVersions, null, null);
         return new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
     }
 }

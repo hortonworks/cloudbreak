@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -98,7 +99,7 @@ public class CurrentImageUsageConditionTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId) {
-        return ModelImageTestBuilder.builder().withImageId(imageId).build();
+        return Image.builder().withImageId(imageId).build();
     }
 
     private Set<InstanceMetaData> createInstanceMetaData(String... imageId) {

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ClusterUpgradeTargetImageService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
@@ -209,7 +208,7 @@ public class MixedPackageVersionServiceTest {
     }
 
     private Image createModelImage(String imageId) {
-        return ModelImageTestBuilder.builder().withImageId(imageId).withImageCatalogUrl(IMAGE_CATALOG_URL).withImageCatalogName(IMAGE_CATALOG_NAME).build();
+        return Image.builder().withImageId(imageId).withImageCatalogUrl(IMAGE_CATALOG_URL).withImageCatalogName(IMAGE_CATALOG_NAME).build();
     }
 
     private CmSyncOperationResult createCmSyncResult(String cmVersion, Map<String, String> parcelVersionsByName) {

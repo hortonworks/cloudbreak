@@ -126,6 +126,7 @@ public class RecommendedImageValidatorTest {
                 Map.of(),
                 "os",
                 "osType",
+                "arch",
                 "url",
                 "catalog",
                 "imageId",

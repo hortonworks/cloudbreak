@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -185,9 +184,11 @@ class ImageCreationBasedUpgradeImageFilterTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage(Long created) {
-        return ModelImageTestBuilder.builder()
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withOs("centos7")
                 .withOsType("redhat7")
-                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "a")).withCreated(created).build();
+                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "a"))
+                .withCreated(created)
+                .build();
     }
 }

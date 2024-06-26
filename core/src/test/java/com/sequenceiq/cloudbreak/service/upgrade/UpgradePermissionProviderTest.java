@@ -24,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
@@ -244,7 +243,7 @@ public class UpgradePermissionProviderTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage(String version, String buildNumber) {
-        return ModelImageTestBuilder.builder().withPackageVersions(createPackageVersions(version, buildNumber)).build();
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder().withPackageVersions(createPackageVersions(version, buildNumber)).build();
     }
 
     private Map<String, String> createPackageVersions(String version, String buildNumber) {

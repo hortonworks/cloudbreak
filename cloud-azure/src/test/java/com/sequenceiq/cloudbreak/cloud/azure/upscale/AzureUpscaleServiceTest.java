@@ -155,7 +155,7 @@ public class AzureUpscaleServiceTest {
     }
 
     private void vhdImageStubbing() {
-        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, null, null, null);
+        Image image = Image.builder().withImageName("azureImage.vhd").build();
         when(stack.getImage()).thenReturn(image);
         AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("", "", "", "");
         when(azureMarketplaceImageProviderService.get(eq(image))).thenReturn(azureMpImage);
@@ -177,7 +177,7 @@ public class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         Map<String, String> packageVersions = Map.of(ImagePackageVersion.SOURCE_IMAGE.getKey(), "cloudera:cdp-7_2_17:runtime-7_2_17:200.46967063.1701370975");
-        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, packageVersions, null, null);
+        Image image = Image.builder().withImageName("azureImage.vhd").withPackageVersions(packageVersions).build();
         when(stack.getImage()).thenReturn(image);
         AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("cloudera", "7_2_17", "runtime-7_2_17", "200.46967063.1701370975");
         when(azureMarketplaceImageProviderService.getSourceImage(eq(image))).thenReturn(azureMpImage);
@@ -241,7 +241,7 @@ public class AzureUpscaleServiceTest {
         List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
 
         Map<String, String> packageVersions = Map.of(ImagePackageVersion.SOURCE_IMAGE.getKey(), "cloudera:cdp-7_2_17:runtime-7_2_17:200.46967063.1701370975");
-        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, packageVersions, null, null);
+        Image image = Image.builder().withImageName("azureImage.vhd").withPackageVersions(packageVersions).build();
         when(stack.getImage()).thenReturn(image);
         AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("cloudera", "7_2_17", "runtime-7_2_17", "200.46967063.1701370975");
         when(azureMarketplaceImageProviderService.getSourceImage(eq(image))).thenReturn(azureMpImage);

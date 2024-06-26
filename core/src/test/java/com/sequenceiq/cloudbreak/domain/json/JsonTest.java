@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class JsonTest {
@@ -19,11 +18,12 @@ public class JsonTest {
     public void testMembers() {
         Map<InstanceGroupType, String> userData = new EnumMap<>(InstanceGroupType.class);
         userData.put(InstanceGroupType.CORE, "CORE");
-        Image image = ModelImageTestBuilder.builder()
+        Image image = Image.builder()
                 .withImageName("cb-centos66-amb200-2015-05-25")
-                .withUserData(userData)
+                .withUserdata(userData)
                 .withOs("redhat6")
                 .withOsType("redhat6")
+                .withArchitecture("arm64")
                 .withImageCatalogName("default")
                 .withImageCatalogUrl("")
                 .withImageId("default-id")
@@ -33,8 +33,8 @@ public class JsonTest {
                 .build();
         Json json = new Json(image);
         Assert.assertEquals("{\"imageName\":\"cb-centos66-amb200-2015-05-25\",\"userdata\":{\"CORE\":\"CORE\"},\"os\":\"redhat6\",\"osType\":\"redhat6\","
-                        + "\"imageCatalogUrl\":\"\",\"imageCatalogName\":\"default\",\"imageId\":\"default-id\",\"packageVersions\":{},"
-                        + "\"date\":\"2019-10-24\",\"created\":1571884856}",
+                        + "\"architecture\":\"arm64\",\"imageCatalogUrl\":\"\",\"imageCatalogName\":\"default\",\"imageId\":\"default-id\","
+                        + "\"packageVersions\":{},\"date\":\"2019-10-24\",\"created\":1571884856}",
                 json.getValue());
     }
 
@@ -43,9 +43,9 @@ public class JsonTest {
     public void testMultipleSerialisation() throws IOException {
         Map<InstanceGroupType, String> userData = new EnumMap<>(InstanceGroupType.class);
         userData.put(InstanceGroupType.CORE, "CORE");
-        Image image = ModelImageTestBuilder.builder()
+        Image image = Image.builder()
                 .withImageName("cb-centos66-amb200-2015-05-25")
-                .withUserData(userData)
+                .withUserdata(userData)
                 .withOs("redhat6")
                 .withOsType("redhat6")
                 .withImageCatalogName("default")
@@ -62,9 +62,9 @@ public class JsonTest {
     public void testMultipleSerialisationWithOtherConstructorOfImage() throws IOException {
         Map<InstanceGroupType, String> userData = new EnumMap<>(InstanceGroupType.class);
         userData.put(InstanceGroupType.CORE, "CORE");
-        Image image = ModelImageTestBuilder.builder()
+        Image image = Image.builder()
                 .withImageName("cb-centos66-amb200-2015-05-25")
-                .withUserData(userData)
+                .withUserdata(userData)
                 .withOs("redhat6")
                 .withOsType("redhat6")
                 .withImageCatalogName("default")

@@ -9,13 +9,29 @@ public enum Architecture {
     X86_64,
     ARM64;
 
-    public static Architecture fromString(String architecture) {
+    public static Architecture fromStringWithFallback(String architecture) {
+        return fromString(architecture, true);
+    }
+
+    public static Architecture fromStringWithValidation(String architecture) {
+        Architecture result = fromString(architecture, false);
+        if (result == UNKOWN) {
+            throw new IllegalArgumentException(String.format("Architecture '%s' is not supported", architecture));
+        }
+        return result;
+    }
+
+    private static Architecture fromString(String architecture, boolean fallback) {
         if (Strings.isNullOrEmpty(architecture)) {
-            return X86_64;
+            return fallback ? X86_64 : null;
         }
         if (Arrays.stream(values()).noneMatch(arch -> arch.name().equalsIgnoreCase(architecture))) {
             return UNKOWN;
         }
         return valueOf(architecture.toUpperCase());
+    }
+
+    public String getName() {
+        return name().toLowerCase();
     }
 }

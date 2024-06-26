@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -124,7 +123,7 @@ public class StackImageServiceTest {
     @Test
     public void testStoreNewImageComponent() throws CloudbreakImageNotFoundException, IOException {
 
-        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = ModelImageTestBuilder.builder()
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageName("imageOldName")
                 .withOs(image.getOs())
                 .withOsType(image.getOsType())
@@ -315,6 +314,10 @@ public class StackImageServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image anImageComponent() {
-        return ModelImageTestBuilder.builder().withImageName("imagename").withImageCatalogName(SOURCE_IMAGE_CATALOG).withImageId(IMAGE_ID).build();
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withImageName("imagename")
+                .withImageCatalogName(SOURCE_IMAGE_CATALOG)
+                .withImageId(IMAGE_ID)
+                .build();
     }
 }

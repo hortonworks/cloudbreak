@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageFilterUpgradeService;
 
 @ExtendWith(MockitoExtension.class)
@@ -120,9 +119,9 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, ModelImageTestBuilder.builder().withImageId("current-image-id").build(), null, false, Collections.emptyMap(),
-                StackType.DATALAKE, new Blueprint(), STACK_ID, new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
-                CLOUD_PLATFORM, REGION, false);
+        return new ImageFilterParams(null, com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId("current-image-id").build(),
+                null, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID, new InternalUpgradeSettings(false, true, true),
+                imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false);
     }
 
 }

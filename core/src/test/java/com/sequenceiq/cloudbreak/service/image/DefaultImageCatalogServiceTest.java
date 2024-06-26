@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -157,7 +156,7 @@ public class DefaultImageCatalogServiceTest {
     @Test
     public void testGetImageFromDefaultCatalogWithRuntime() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         ArgumentCaptor<ImageFilter> imageFilterArgumentCaptor = ArgumentCaptor.forClass(ImageFilter.class);
-        when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterArgumentCaptor.capture(), Mockito.any())).thenReturn(mock(StatedImage.class));
+        when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterArgumentCaptor.capture())).thenReturn(mock(StatedImage.class));
 
         StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws"), "7.2.10");
 

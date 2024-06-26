@@ -256,7 +256,7 @@ public class Image {
 
     @Override
     public String toString() {
-        return shortOsDescriptionFormat();
+        return shortDescriptionFormat();
     }
 
     @Override
@@ -359,7 +359,7 @@ public class Image {
                 tags);
     }
 
-    public String shortOsDescriptionFormat() {
+    public String shortDescriptionFormat() {
         return "Image{"
                 + "uuid='" + uuid + '\''
                 + ", os='" + os + '\''

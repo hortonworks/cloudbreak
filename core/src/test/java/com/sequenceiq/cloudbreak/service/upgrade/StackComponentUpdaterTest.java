@@ -55,7 +55,7 @@ class StackComponentUpdaterTest {
         stack.setCluster(cluster);
         StatedImage targetImage = ImageTestUtil.getImageFromCatalog(true, "targetImageUuid", TARGET_STACK_VERSION);
 
-        Image originalImage = ImageTestUtil.getImage(true, "originalImageUuid", STACK_VERSION);
+        Image originalImage = ImageTestUtil.getImage(true, "originalImageUuid", STACK_VERSION, null);
         Component originalImageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
 
         when(componentConfigProviderService.getComponentsByStackId(stack.getId())).thenReturn(Set.of(originalImageComponent));
@@ -94,7 +94,7 @@ class StackComponentUpdaterTest {
     private Component createImageComponent(StatedImage statedImage, Stack stack) {
         com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image("imageName",
                 Map.of(InstanceGroupType.GATEWAY, "gw user data"),
-                statedImage.getImage().getOs(), statedImage.getImage().getOsType(),
+                statedImage.getImage().getOs(), statedImage.getImage().getOsType(), statedImage.getImage().getArchitecture(),
                 statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), statedImage.getImage().getUuid(),
                 statedImage.getImage().getPackageVersions(), null, null);
         return new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);

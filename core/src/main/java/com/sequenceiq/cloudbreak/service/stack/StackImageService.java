@@ -80,9 +80,9 @@ public class StackImageService {
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetImage = targetStatedImage.getImage();
             String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage);
             userDataService.makeSureUserDataIsMigrated(stack.getId());
-            return new Image(newImageName, new HashMap<>(), targetImage.getOs(), targetImage.getOsType(), targetStatedImage.getImageCatalogUrl(),
-                    targetStatedImage.getImageCatalogName(), targetImage.getUuid(), targetImage.getPackageVersions(), targetImage.getDate(),
-                    targetImage.getCreated());
+            return new Image(newImageName, new HashMap<>(), targetImage.getOs(), targetImage.getOsType(), targetImage.getArchitecture(),
+                    targetStatedImage.getImageCatalogUrl(), targetStatedImage.getImageCatalogName(), targetImage.getUuid(), targetImage.getPackageVersions(),
+                    targetImage.getDate(), targetImage.getCreated());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);

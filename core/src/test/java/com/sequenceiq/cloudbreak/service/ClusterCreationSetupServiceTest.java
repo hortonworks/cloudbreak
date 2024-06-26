@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -92,9 +91,9 @@ class ClusterCreationSetupServiceTest {
         blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         user = new User();
-        Image image = ModelImageTestBuilder.builder()
+        Image image = Image.builder()
                 .withImageName("imagename")
-                .withUserData(Map.of(InstanceGroupType.CORE, "userdata"))
+                .withUserdata(Map.of(InstanceGroupType.CORE, "userdata"))
                 .withOs("centos7")
                 .withOsType(REDHAT_7)
                 .withImageCatalogUrl("url")

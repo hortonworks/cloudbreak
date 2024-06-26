@@ -102,7 +102,14 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     private Image createModelImage(Map<String, String> packageVersions) {
-        return new Image(IMAGE_NAME, null, null, null, null, IMAGE_CATALOG_NAME, IMAGE_ID, packageVersions, DATE, CREATED);
+        return Image.builder()
+                .withImageName(IMAGE_NAME)
+                .withImageCatalogName(IMAGE_CATALOG_NAME)
+                .withImageId(IMAGE_ID)
+                .withPackageVersions(packageVersions)
+                .withDate(DATE)
+                .withCreated(CREATED)
+                .build();
     }
 
     private Map<String, String> createPackageVersions() {

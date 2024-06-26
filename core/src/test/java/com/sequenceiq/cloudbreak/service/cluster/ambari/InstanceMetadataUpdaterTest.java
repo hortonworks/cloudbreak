@@ -199,7 +199,7 @@ public class InstanceMetadataUpdaterTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        Image image = new Image("imagename", null, "os", "ostype", "catalogurl",
+        Image image = new Image("imagename", null, "os", "ostype", "arch", "catalogurl",
                 "catalogname", "iamgeid", packageMap(), null, null);
         instanceMetaData.setImage(new Json(image));
         instanceMetaData.setInstanceId(instanceId);

@@ -199,7 +199,12 @@ public class AdvertisedImageProviderTest {
     }
 
     private ImageFilter createImageFilter(boolean enableBaseImages) {
-        return new ImageFilter(anImageCatalog(), Collections.singleton(imageCatalogPlatform(PLATFORM_AWS)), "CB version", enableBaseImages, null, null);
+        return ImageFilter.builder()
+                .withImageCatalog(anImageCatalog())
+                .withPlatforms(Collections.singleton(imageCatalogPlatform(PLATFORM_AWS)))
+                .withCbVersion("CB version")
+                .withBaseImageEnabled(enableBaseImages)
+                .build();
     }
 
     private ImageCatalog anImageCatalog() {

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -435,6 +436,7 @@ public class StackV4RequestToStackConverter {
                 null,
                 imageSettings.getOs(),
                 null,
+                getIfNotNull(imageSettings.getArchitecture(), Architecture::getName),
                 null,
                 imageSettings.getCatalog(),
                 imageSettings.getId(),

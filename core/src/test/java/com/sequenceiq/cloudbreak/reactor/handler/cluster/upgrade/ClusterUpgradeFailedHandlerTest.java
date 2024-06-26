@@ -58,7 +58,7 @@ class ClusterUpgradeFailedHandlerTest {
     @Test
     public void testHandleClusterUpgradeFailedRequestWhenNoConclusionFound() {
         ReflectionTestUtils.setField(underTest, "syncAfterFailureEnabled", true);
-        Set<Image> images = Set.of(getImage(true, "uuid1", "7.1.0"), getImage(true, "uuid2", "7.2.1"));
+        Set<Image> images = Set.of(getImage(true, "uuid1", "7.1.0", null), getImage(true, "uuid2", "7.2.1", null));
         when(stackService.getByIdWithListsInTransaction(eq(STACK_ID))).thenReturn(stack);
         when(cmSyncImageCollectorService.collectImages(stack, Collections.emptySet())).thenReturn(images);
         ClusterUpgradeFailedRequest request = new ClusterUpgradeFailedRequest(STACK_ID, new RuntimeException("error"),

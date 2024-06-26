@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -316,7 +315,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
-        return ModelImageTestBuilder.builder()
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageId(CURRENT_IMAGE_ID)
                 .withImageCatalogName(CATALOG_NAME)
                 .withImageCatalogUrl(FALLBACK_CATALOG_URL)
@@ -324,7 +323,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImageWithoutImageCatalogUrl() {
-        return ModelImageTestBuilder.builder()
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageId(CURRENT_IMAGE_ID)
                 .withImageCatalogName(CATALOG_NAME)
                 .build();

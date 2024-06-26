@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
@@ -420,7 +419,7 @@ public class UpgradeServiceTest {
     }
 
     private Image getImage(String imageName) {
-        return ModelImageTestBuilder.builder()
+        return Image.builder()
                 .withImageName(imageName)
                 .withOs("os")
                 .withImageCatalogName("catalogName")

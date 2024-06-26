@@ -76,7 +76,6 @@ import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
@@ -370,7 +369,7 @@ public class DistroXUpgradeRetrievalComponentTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentModelImage(Image currentCatalogImage) {
-        return ModelImageTestBuilder.builder()
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withImageName(currentCatalogImage.getImageSetsByProvider().get(CLOUD_PLATFORM.toLowerCase()).get(REGION))
                 .withImageId(currentCatalogImage.getUuid())
                 .withImageCatalogUrl(DEFAULT_IMAGE_CATALOG_PATH)

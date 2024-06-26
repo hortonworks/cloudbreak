@@ -90,20 +90,28 @@ public class DistroXService {
         if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }
-        DistroXImageV1Request imageRequest = request.getImage();
-        if (imageRequest != null) {
-            if (!imageOsService.isSupported(imageRequest.getOs())) {
-                throw new BadRequestException(String.format("Image os '%s' is not supported in your account.", imageRequest.getOs()));
-            }
-            if (StringUtils.isNoneBlank(imageRequest.getId(), imageRequest.getOs())) {
-                throw new BadRequestException("Image request can not have both image id and os parameters set.");
-            }
-        }
+        validateImageRequest(request.getImage());
     }
 
     private Predicate<StatusCheckResult> isSdxAvailable() {
         return statusResult -> StatusCheckResult.AVAILABLE.name().equals(statusResult.name())
                 || StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS.name().equals(statusResult.name());
+    }
+
+    private void validateImageRequest(DistroXImageV1Request imageRequest) {
+        if (imageRequest != null) {
+            if (!imageOsService.isSupported(imageRequest.getOs())) {
+                throw new BadRequestException(String.format("Image os '%s' is not supported in your account.", imageRequest.getOs()));
+            }
+            if (StringUtils.isNotBlank(imageRequest.getId())) {
+                if (StringUtils.isNotBlank(imageRequest.getOs())) {
+                    throw new BadRequestException("Image request can not have both image id and os parameters set.");
+                }
+                if (StringUtils.isNotBlank(imageRequest.getArchitecture())) {
+                    throw new BadRequestException("Image request can not have both image id and architecture parameters set.");
+                }
+            }
+        }
     }
 
 }

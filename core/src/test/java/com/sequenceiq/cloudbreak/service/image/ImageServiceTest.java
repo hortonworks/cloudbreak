@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
@@ -56,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -276,6 +279,64 @@ public class ImageServiceTest {
     }
 
     @Test
+    public void testGivenImageIdAndNotEntitledArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
+        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        false,
+                        false,
+                        TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
+                        image -> true));
+        assertEquals("The selected architecture (arm64) is not enabled in your account", exception.getMessage());
+    }
+
+    @Test
+    public void testGivenImageIdAndDifferentArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        imageSettingsV4Request.setArchitecture(Architecture.X86_64);
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
+        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(true);
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        false,
+                        false,
+                        TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
+                        image -> true));
+        assertEquals("The selected image's architecture (arm64) is not matching requested architecture (x86_64)", exception.getMessage());
+    }
+
+    @Test
+    public void testGivenImageNotEntitledArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
+        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        false,
+                        false,
+                        TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
+                        image -> true));
+        assertEquals("The selected architecture (arm64) is not enabled in your account", exception.getMessage());
+    }
+
+    @Test
     public void testGivenBaseImageIdAndTheOSIsNotSupportedByTheTemplateShouldReturnError() throws Exception {
         imageSettingsV4Request.setOs(null);
         StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
@@ -355,7 +416,7 @@ public class ImageServiceTest {
     @Test
     public void testUseBaseImageAndEnabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilterCaptor.capture(), any()))
+        when(imageCatalogService.getLatestImageDefaultPreferred(imageFilterCaptor.capture(), eq(true)))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
         StatedImage statedImage = underTest.determineImageFromCatalog(
@@ -376,7 +437,7 @@ public class ImageServiceTest {
     @Test
     public void testNoUseBaseImageAndEnabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterCaptor.capture(), any()))
+        when(imageCatalogService.getLatestImageDefaultPreferred(imageFilterCaptor.capture(), eq(false)))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
         StatedImage statedImage = underTest.determineImageFromCatalog(
@@ -397,7 +458,7 @@ public class ImageServiceTest {
     @Test
     public void testDisabledBaseImageShouldReturnCorrectImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         imageSettingsV4Request.setId(null);
-        when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterCaptor.capture(), any()))
+        when(imageCatalogService.getLatestImageDefaultPreferred(imageFilterCaptor.capture(), eq(false)))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
         StatedImage statedImage = underTest.determineImageFromCatalog(
@@ -418,7 +479,7 @@ public class ImageServiceTest {
     @Test
     public void testUpdateImageName() throws CloudbreakImageNotFoundException, IOException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageModel = new com.sequenceiq.cloudbreak.cloud.model.Image(
-                "anImage", new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
+                "anImage", new HashMap<>(), "centos7", "redhat7", "arch", "", "default", "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
         Component imageComponent = createImageComponent(imageModel);
         when(componentConfigProviderService.getImageComponent(STACK_ID)).thenReturn(imageComponent);
 

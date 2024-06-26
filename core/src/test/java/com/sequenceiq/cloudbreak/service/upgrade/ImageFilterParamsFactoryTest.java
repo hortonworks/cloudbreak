@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
@@ -60,7 +59,7 @@ public class ImageFilterParamsFactoryTest {
 
     @Test
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataLake() {
-        Image currentImage = ModelImageTestBuilder.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
+        Image currentImage = Image.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
         Stack stack = createStack(StackType.DATALAKE);
         Set<ClusterComponentView> clusterComponents = createCdhClusterComponent();
         String cdhName = com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name();
@@ -86,7 +85,7 @@ public class ImageFilterParamsFactoryTest {
 
     @Test
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataHub() {
-        Image currentImage = ModelImageTestBuilder.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
+        Image currentImage = Image.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
         Stack stack = createStack(StackType.WORKLOAD);
         Set<ClusterComponentView> cdhClusterComponent = createCdhClusterComponent();
         String sparkName = "Spark";
@@ -118,7 +117,7 @@ public class ImageFilterParamsFactoryTest {
 
     @Test
     public void testCreateShouldThrowExceptionThenThereIsNoCdhComponentAvailable() {
-        Image currentImage = ModelImageTestBuilder.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
+        Image currentImage = Image.builder().withImageCatalogName(IMAGE_CATALOG_NAME).build();
         Stack stack = createStack(StackType.DATALAKE);
         ClusterComponentView clusterComponent = new ClusterComponentView();
         clusterComponent.setName("CM");

@@ -151,7 +151,11 @@ class CentosToRedHatUpgradeImageFilterTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image image(String os, String osType, String version) {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, os, osType, null, null, null, Map.of("stack", version), null, null);
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withOs(os)
+                .withOsType(osType)
+                .withPackageVersions(Map.of("stack", version))
+                .build();
     }
 
     private Image redhatCatalogImage(String version) {

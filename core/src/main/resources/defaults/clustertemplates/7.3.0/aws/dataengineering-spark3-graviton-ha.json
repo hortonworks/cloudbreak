@@ -12,6 +12,7 @@
       "availabilityType": "HA"
     },
     "enableLoadBalancer": true,
+    "architecture": "arm64",
     "instanceGroups": [{
       "nodeCount": 2,
       "name": "manager",

@@ -138,6 +138,8 @@ public class ImageCatalogServiceTest {
 
     private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM = imageCatalogPlatform("aws");
 
+    private static final String CB_VERSION = "unspecified";
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -255,7 +257,7 @@ public class ImageCatalogServiceTest {
 
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultFreeIpaCatalogUrl", DEFAULT_FREEIPA_CATALOG_URL, null);
-        setMockedCbVersion("cbVersion", "unspecified");
+        setMockedCbVersion("cbVersion", CB_VERSION);
 
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
 
@@ -281,9 +283,12 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("AWS")),
-                null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertFalse(image.getImage().isDefaultImage());
@@ -295,12 +300,15 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProviderWithoutVersions(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         when(advertisedImageProvider.getImages(any(), any())).thenReturn(
                 StatedImages.statedImages(
-                        new Images(Collections.singletonList(ImageTestUtil.getImage(false, "uuid", "stack")),
+                        new Images(Collections.singletonList(ImageTestUtil.getImage(false, "uuid", "stack", null)),
                                 null, null, null), null, null));
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("AWS")),
-                null, true, null, null);
-        underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
+                .withBaseImageEnabled(true)
+                .build();
+        underTest.getLatestImageDefaultPreferred(imageFilter, true);
 
         verify(advertisedImageProvider).getImages(any(), any());
     }
@@ -318,9 +326,12 @@ public class ImageCatalogServiceTest {
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
         setupLatestDefaultImageUuidProvider("7aca1fa6-980c-44e2-a75e-3144b18a5993");
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("AWS")),
-                null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -333,9 +344,12 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
         setupLatestDefaultImageUuidProvider("7aca1fa6-980c-44e2-a75e-3144b18a5993");
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("AWS")),
-                null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
 
         assertEquals("7aca1fa6-980c-44e2-a75e-3144b18a5993", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -348,9 +362,12 @@ public class ImageCatalogServiceTest {
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
         setupLatestDefaultImageUuidProvider("f6e778fc-7f17-4535-9021-515351df3691");
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("AWS")),
-                null, true, null, null);
-        StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImage image = underTest.getLatestImageDefaultPreferred(imageFilter, true);
 
         assertEquals("f6e778fc-7f17-4535-9021-515351df3691", image.getImage().getUuid());
         assertTrue(image.getImage().isDefaultImage());
@@ -362,9 +379,13 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
         Set<String> operatingSystems = new HashSet<>(Arrays.asList("redhat7", "redhat6", "amazonlinux2"));
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("AWS")),
-                null, true, operatingSystems, null);
-        StatedImages images = underTest.getStatedImagesFilteredByOperatingSystems(imageFilter, i -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("AWS")))
+                .withOperatingSystems(operatingSystems)
+                .withCbVersion(CB_VERSION)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean allMatch = images.getImages().getBaseImages().stream().allMatch(image -> operatingSystems.contains(image.getOsType()));
         assertTrue(allMatch, "All images should be based on supported OS");
@@ -375,7 +396,12 @@ public class ImageCatalogServiceTest {
         String cbVersion = "1.16.2";
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton(imageCatalogPlatform("azure")), cbVersion));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform("azure")))
+                .withCbVersion(cbVersion)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -386,9 +412,13 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenExactVersionExistsInCatalogAndMorePlatformRequested() throws Exception {
         String cbVersion = "2.0.0";
         ImageCatalog imageCatalog = getImageCatalog();
-        StatedImages images = underTest.getImages(
-                new ImageFilter(imageCatalog, ImmutableSet.of(IMAGE_CATALOG_PLATFORM,
-                        imageCatalogPlatform("azure")), cbVersion, true, ImmutableSet.of("amazonlinux"), null));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(ImmutableSet.of(IMAGE_CATALOG_PLATFORM, imageCatalogPlatform("azure")))
+                .withCbVersion(cbVersion)
+                .withOperatingSystems(ImmutableSet.of("amazonlinux"))
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
         for (Image image : images.getImages().getBaseImages()) {
             boolean containsAws = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "aws".equals(platformImages.getKey()));
             boolean containsAzure = image.getImageSetsByProvider().entrySet().stream().anyMatch(platformImages -> "azure_rm".equals(platformImages.getKey()));
@@ -401,9 +431,14 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, PROD_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(
-                new ImageFilter(imageCatalog, Collections.singleton(IMAGE_CATALOG_PLATFORM),
-                        "2.6.0", true, ImmutableSet.of("amazonlinux"), null));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(IMAGE_CATALOG_PLATFORM))
+                .withCbVersion("2.6.0")
+                .withOperatingSystems(ImmutableSet.of("amazonlinux"))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
@@ -421,9 +456,14 @@ public class ImageCatalogServiceTest {
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(
-                new ImageFilter(imageCatalog, Collections.singleton(IMAGE_CATALOG_PLATFORM),
-                        "2.6.0-dev.132", true, ImmutableSet.of("amazonlinux", "centos7"), null));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(IMAGE_CATALOG_PLATFORM))
+                .withCbVersion("2.6.0-dev.132")
+                .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "cab28152-f5e1-43e1-5107-9e7bbed33eef".equals(img.getUuid()));
@@ -435,9 +475,14 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, RC_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(
-                new ImageFilter(imageCatalog, Collections.singleton(IMAGE_CATALOG_PLATFORM),
-                        "2.6.0-rc.13", true, ImmutableSet.of("amazonlinux", "centos7"), null));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(IMAGE_CATALOG_PLATFORM))
+                .withCbVersion("2.6.0-rc.13")
+                .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "0f575e42-9d90-4f85-5f8a-bdced2221dc3".equals(img.getUuid()));
@@ -455,9 +500,14 @@ public class ImageCatalogServiceTest {
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(
-                new ImageFilter(imageCatalog, Collections.singleton(IMAGE_CATALOG_PLATFORM),
-                        "2.6.0-rc.13", true, ImmutableSet.of("amazonlinux", "centos7"), null));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(IMAGE_CATALOG_PLATFORM))
+                .withCbVersion("2.6.0-rc.13")
+                .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> img.getUuid().equals("0f575e42-9d90-4f85-5f8a-bdced2221dc3"));
@@ -474,8 +524,13 @@ public class ImageCatalogServiceTest {
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog,
-                Collections.singleton(imageCatalogPlatform("azure")), "1.16.2-dev.132"));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
+                .withCbVersion("1.16.2-dev.132")
+                .withOperatingSystems(ImmutableSet.of("amazonlinux", "centos7"))
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -493,8 +548,12 @@ public class ImageCatalogServiceTest {
 
         when(prefixMatcherService.prefixMatchForCBVersion(eq("1.16.2-rc.13"), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog,
-                Collections.singleton(imageCatalogPlatform("azure")), "1.16.2-rc.13"));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
+                .withCbVersion("1.16.2-rc.13")
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -511,9 +570,13 @@ public class ImageCatalogServiceTest {
 
         when(prefixMatcherService.prefixMatchForCBVersion(eq("2.1.0-dev.4000"), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog,
-                Collections.singleton(IMAGE_CATALOG_PLATFORM), "2.1.0-dev.4000",
-                true, null, null));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(IMAGE_CATALOG_PLATFORM))
+                .withCbVersion("2.1.0-dev.4000")
+                .withBaseImageEnabled(true)
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean baseImgMatch = images.getImages().getBaseImages().stream()
                 .anyMatch(img -> "f6e778fc-7f17-4535-9021-515351df3691".equals(img.getUuid()));
@@ -530,8 +593,12 @@ public class ImageCatalogServiceTest {
         PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
         when(prefixMatcherService.prefixMatchForCBVersion(eq("2.0.0-rc.4"), any())).thenReturn(prefixMatchImages);
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog,
-                Collections.singleton(imageCatalogPlatform("azure")), "2.0.0-rc.4"));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
+                .withCbVersion("2.0.0-rc.4")
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean match = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -542,8 +609,12 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenExactVersionExistsInCatalogForPlatform() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        StatedImages images = underTest.getImages(new ImageFilter(imageCatalog,
-                Collections.singleton(imageCatalogPlatform("azure")), "1.16.2"));
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("azure")))
+                .withCbVersion("1.16.2")
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
 
         boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
                 .anyMatch(img -> "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2".equals(img.getUuid()));
@@ -554,7 +625,12 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenExactVersionDoesnotExistInCatalogForPlatform() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        assertThatThrownBy(() -> underTest.getImages(new ImageFilter(imageCatalog, Collections.singleton(imageCatalogPlatform("owncloud")), "1.16.4")))
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("owncloud")))
+                .withCbVersion("1.16.4")
+                .build();
+        assertThatThrownBy(() -> underTest.getImages(imageFilter))
                 .isInstanceOf(CloudbreakImageCatalogException.class)
                 .hasMessage("Platform(s) owncloud are not supported by the current catalog");
     }

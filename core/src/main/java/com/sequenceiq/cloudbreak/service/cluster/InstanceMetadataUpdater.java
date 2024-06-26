@@ -324,7 +324,7 @@ public class InstanceMetadataUpdater {
 
     private Image updatePackageVersions(Long stackId, Image image, Map<String, String> packageVersionsOnHost) {
         userDataService.makeSureUserDataIsMigrated(stackId);
-        return new Image(image.getImageName(), new HashMap<>(), image.getOs(), image.getOsType(), image.getImageCatalogUrl(),
+        return new Image(image.getImageName(), new HashMap<>(), image.getOs(), image.getOsType(), image.getArchitecture(), image.getImageCatalogUrl(),
                 image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost, image.getDate(), image.getCreated());
     }
 

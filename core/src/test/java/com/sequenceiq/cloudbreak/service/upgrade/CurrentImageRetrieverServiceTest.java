@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -117,9 +116,9 @@ class CurrentImageRetrieverServiceTest {
     }
 
     private Image createCurrentImage() {
-        return ModelImageTestBuilder.builder()
+        return Image.builder()
                 .withImageName("image-name")
-                .withUserData(Collections.emptyMap())
+                .withUserdata(Collections.emptyMap())
                 .withOs("centos")
                 .withOsType("centos")
                 .withImageCatalogUrl(IMAGE_CATALOG_URL)

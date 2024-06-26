@@ -51,8 +51,7 @@ public class RecommendImageService {
         User user = userService.getOrCreate(cloudbreakUser);
         try {
             StatedImage statedImage =
-                    imageService.determineImageFromCatalog(workspaceId, imageSettings, platform, null, blueprint, false, false, user,
-                            image -> !imageUtil.isArm64Image(image));
+                    imageService.determineImageFromCatalog(workspaceId, imageSettings, platform, null, blueprint, false, false, user, image -> true);
             LOGGER.debug("Determined stated image from catalog: {}", statedImage);
             ImageCatalogPlatform imageCatalogPlatform =
                     platformStringTransformer.getPlatformStringForImageCatalog(cloudPlatform.getPlatform().getValue(), cloudPlatform.getVariant().getValue());
@@ -63,6 +62,7 @@ public class RecommendImageService {
                     null,
                     catalogImage.getOs(),
                     catalogImage.getOsType(),
+                    catalogImage.getArchitecture(),
                     statedImage.getImageCatalogUrl(),
                     statedImage.getImageCatalogName(),
                     catalogImage.getUuid(),

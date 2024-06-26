@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
@@ -167,8 +166,11 @@ class StackVersionBasedRollingUpgradeValidatorTest {
     }
 
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled, String currentRuntimeVersion, String targetRuntimeVersion) {
+        com.sequenceiq.cloudbreak.cloud.model.Image image = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
+                .withPackageVersions(Map.of(STACK.getKey(), currentRuntimeVersion))
+                .build();
         return new ServiceUpgradeValidationRequest(stackDto, false, rollingUpgradeEnabled,
-                new UpgradeImageInfo(ModelImageTestBuilder.builder().withPackageVersions(Map.of(STACK.getKey(), currentRuntimeVersion)).build(),
+                new UpgradeImageInfo(image,
                         StatedImage.statedImage(Image.builder().withVersion(targetRuntimeVersion).build(), null, null)), false);
     }
 

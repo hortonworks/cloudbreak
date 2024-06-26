@@ -117,7 +117,7 @@ public class CachedImageCatalogWrapperProvider {
         if (hasFiltered(partitionedImages)) {
             LOGGER.debug("Used filter linuxTypes: | {} | Images filtered: {}",
                     getEnabledLinuxTypes(),
-                    partitionedImages.get(false).stream().map(Image::shortOsDescriptionFormat).collect(Collectors.joining(", ")));
+                    partitionedImages.get(false).stream().map(Image::shortDescriptionFormat).collect(Collectors.joining(", ")));
         }
         return partitionedImages.get(true);
     }

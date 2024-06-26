@@ -77,6 +77,7 @@ public class ImageFallbackService {
                     new HashMap<>(),
                     currentImage.getOs(),
                     currentImage.getOsType(),
+                    currentImage.getArchitecture(),
                     currentImage.getImageCatalogUrl(),
                     currentImage.getImageCatalogName(),
                     currentImage.getImageId(),

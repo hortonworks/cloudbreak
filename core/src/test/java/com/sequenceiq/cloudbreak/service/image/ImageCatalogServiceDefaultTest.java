@@ -179,8 +179,14 @@ public class ImageCatalogServiceDefaultTest {
             operatingSystems = Collections.singleton(os);
         }
         setupLatestDefaultImageUuidProvider(expectedImageId);
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform(provider)), cbVersion, true, operatingSystems, clusterVersion);
-        StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Set.of(imageCatalogPlatform(provider)))
+                .withCbVersion(cbVersion)
+                .withOperatingSystems(operatingSystems)
+                .withClusterVersion(clusterVersion)
+                .build();
+        StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
 

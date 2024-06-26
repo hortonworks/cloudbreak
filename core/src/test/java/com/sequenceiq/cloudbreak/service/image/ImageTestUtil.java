@@ -24,16 +24,21 @@ public class ImageTestUtil {
     }
 
     public static StatedImage getImageFromCatalog(boolean prewarmed, String uuid, String stackVersion, String imageCatalogUrl, String imageCatalogName) {
-        Image image = getImage(prewarmed, uuid, stackVersion);
+        Image image = getImage(prewarmed, uuid, stackVersion, "x86_64");
         return StatedImage.statedImage(image, imageCatalogUrl, imageCatalogName);
     }
 
     public static StatedImage getImageFromCatalog(boolean prewarmed, String uuid, String stackVersion) {
-        Image image = getImage(prewarmed, uuid, stackVersion);
+        Image image = getImage(prewarmed, uuid, stackVersion, "x86_64");
         return StatedImage.statedImage(image, "url", "name");
     }
 
-    public static Image getImage(boolean prewarmed, String uuid, String stackVersion) {
+    public static StatedImage getImageFromCatalog(boolean prewarmed, String uuid, String stackVersion, String architecture) {
+        Image image = getImage(prewarmed, uuid, stackVersion, architecture);
+        return StatedImage.statedImage(image, "url", "name");
+    }
+
+    public static Image getImage(boolean prewarmed, String uuid, String stackVersion, String architecture) {
         Map<String, String> packageVersions = Collections.singletonMap("package", "version");
 
         Map<String, String> regionImageIdMap = new HashMap<>();
@@ -54,6 +59,7 @@ public class ImageTestUtil {
                 .withUuid(uuid)
                 .withOs("centos7")
                 .withOsType("centos")
+                .withArchitecture(architecture)
                 .withVersion(stackVersion)
                 .withImageSetsByProvider(imageSetsByProvider)
                 .withStackDetails(stackDetails)

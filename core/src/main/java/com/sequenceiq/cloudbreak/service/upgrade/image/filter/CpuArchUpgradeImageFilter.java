@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -21,8 +22,9 @@ public class CpuArchUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
+        Architecture architecture = Architecture.fromStringWithFallback(imageFilterParams.getCurrentImage().getArchitecture());
         List<Image> filteredImages = imageFilterResult.getImages().stream()
-                .filter(image -> !imageUtil.isArm64Image(image))
+                .filter(image -> Architecture.fromStringWithFallback(image.getArchitecture()) == architecture)
                 .toList();
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
@@ -30,7 +32,7 @@ public class CpuArchUpgradeImageFilter implements UpgradeImageFilter {
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
         if (hasTargetImage(imageFilterParams)) {
-            return getCantUpgradeToImageMessage(imageFilterParams, "Can't upgrade to arm64 cpu architecture.");
+            return getCantUpgradeToImageMessage(imageFilterParams, "Can't upgrade to different cpu architecture.");
         } else {
             return "There are no eligible images to upgrade.";
         }

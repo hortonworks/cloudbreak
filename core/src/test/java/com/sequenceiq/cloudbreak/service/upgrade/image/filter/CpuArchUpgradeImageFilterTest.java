@@ -5,12 +5,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -26,25 +28,52 @@ class CpuArchUpgradeImageFilterTest {
     private CpuArchUpgradeImageFilter underTest;
 
     @Mock
-    private Image image1;
+    private com.sequenceiq.cloudbreak.cloud.model.Image currentImage;
 
     @Mock
-    private Image image2;
+    private Image oldImage;
 
     @Mock
-    private Image image3;
+    private Image x86Image;
+
+    @Mock
+    private Image armImage;
 
     @Mock
     private ImageFilterParams imageFilterParams;
 
+    @BeforeEach
+    void setUp() {
+        when(imageFilterParams.getCurrentImage()).thenReturn(currentImage);
+        when(oldImage.getArchitecture()).thenReturn(null);
+        when(x86Image.getArchitecture()).thenReturn(Architecture.X86_64.getName());
+        when(armImage.getArchitecture()).thenReturn(Architecture.ARM64.getName());
+    }
+
     @Test
-    public void testAllArmImageIsFilteredOut() {
-        when(imageUtil.isArm64Image(image1)).thenReturn(true);
-        when(imageUtil.isArm64Image(image2)).thenReturn(true);
-        when(imageUtil.isArm64Image(image3)).thenReturn(false);
+    public void testCurrentImageArchitectureNull() {
+        when(currentImage.getArchitecture()).thenReturn(null);
 
-        ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(image1, image2, image3)), imageFilterParams);
+        ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(armImage, oldImage, x86Image)), imageFilterParams);
 
-        assertEquals(List.of(image3), result.getImages());
+        assertEquals(List.of(oldImage, x86Image), result.getImages());
+    }
+
+    @Test
+    public void testCurrentImageArchitectureX86() {
+        when(currentImage.getArchitecture()).thenReturn(Architecture.X86_64.getName());
+
+        ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(armImage, oldImage, x86Image)), imageFilterParams);
+
+        assertEquals(List.of(oldImage, x86Image), result.getImages());
+    }
+
+    @Test
+    public void testCurrentImageArchitectureArm64() {
+        when(currentImage.getArchitecture()).thenReturn(Architecture.ARM64.getName());
+
+        ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(armImage, oldImage, x86Image)), imageFilterParams);
+
+        assertEquals(List.of(armImage), result.getImages());
     }
 }

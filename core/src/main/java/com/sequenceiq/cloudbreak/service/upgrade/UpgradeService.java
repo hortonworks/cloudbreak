@@ -337,7 +337,7 @@ public class UpgradeService {
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, StackView stack) {
-        return packageVersionFilter(image.getPackageVersions()).and(parcelFilter(stack)).and(i -> !imageUtil.isArm64Image(i));
+        return packageVersionFilter(image.getPackageVersions()).and(parcelFilter(stack));
     }
 
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {

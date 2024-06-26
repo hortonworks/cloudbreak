@@ -1,8 +1,11 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 
 @Component
@@ -13,6 +16,7 @@ public class DistroXImageToImageSettingsConverter {
         response.setCatalog(source.getCatalog());
         response.setId(source.getId());
         response.setOs(source.getOs());
+        response.setArchitecture(Architecture.fromStringWithValidation(source.getArchitecture()));
         return response;
     }
 
@@ -21,6 +25,7 @@ public class DistroXImageToImageSettingsConverter {
         response.setCatalog(source.getCatalog());
         response.setId(source.getId());
         response.setOs(source.getOs());
+        response.setArchitecture(getIfNotNull(source.getArchitecture(), Architecture::getName));
         return response;
     }
 

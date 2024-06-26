@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -126,7 +125,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage1 = ModelImageTestBuilder.builder()
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage1 = com.sequenceiq.cloudbreak.cloud.model.Image.builder()
                 .withOs("centos7")
                 .withOsType("redhat7")
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), BUILD_NUMBER)).build();

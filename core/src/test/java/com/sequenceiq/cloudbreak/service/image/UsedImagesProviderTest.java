@@ -64,7 +64,7 @@ class UsedImagesProviderTest {
     }
 
     private Image createImage(String imageId) {
-        return ModelImageTestBuilder.builder()
+        return Image.builder()
                 .withImageName("imageName")
                 .withOs("os")
                 .withOsType("osType")

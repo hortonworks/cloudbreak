@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
@@ -100,6 +99,6 @@ class PythonVersionValidatorTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
-        return ModelImageTestBuilder.builder().withImageId(CURRENT_IMAGE).withImageCatalogName(IMAGE_CATALOG_NAME).build();
+        return com.sequenceiq.cloudbreak.cloud.model.Image.builder().withImageId(CURRENT_IMAGE).withImageCatalogName(IMAGE_CATALOG_NAME).build();
     }
 }
