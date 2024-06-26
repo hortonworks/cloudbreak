@@ -1676,6 +1676,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCluster(new ClusterV4Response());
+        stackV4Response.getCluster().setDbSSLEnabled(false);
         stackV4Response.setStatus(Status.STOPPED);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         doThrow(new BadRequestException("Invalid custom instance type for instance group: master - r5.large"))
