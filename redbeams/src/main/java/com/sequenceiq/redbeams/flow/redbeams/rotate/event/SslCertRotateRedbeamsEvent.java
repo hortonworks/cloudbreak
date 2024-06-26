@@ -1,6 +1,5 @@
 package com.sequenceiq.redbeams.flow.redbeams.rotate.event;
 
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -48,19 +47,10 @@ public class SslCertRotateRedbeamsEvent extends RedbeamsEvent implements Idempot
 
     @Override
     public boolean equalsEvent(RedbeamsEvent other) {
-        return isClassAndEqualsEvent(RedbeamsEvent.class, other);
-    }
-
-    protected <T extends SslCertRotateRedbeamsEvent> boolean isClassAndEqualsEvent(Class<T> clazz, SslCertRotateRedbeamsEvent other) {
-        return isClassAndEqualsEvent(clazz, other, redbeamsEvent -> true);
+        return isClassAndEqualsEvent(SslCertRotateRedbeamsEvent.class, other);
     }
 
     protected <T extends RedbeamsEvent> boolean isClassAndEqualsEvent(Class<T> clazz, SslCertRotateRedbeamsEvent other, Predicate<T> equalsSubclass) {
-        if (!clazz.equals(getClass())) {
-            return false;
-        }
-        return Objects.equals(selector, other.selector)
-                && Objects.equals(resourceId, other.resourceId)
-                && equalsSubclass.test((T) other);
+        return super.isClassAndEqualsEvent(clazz, other, equalsSubclass);
     }
 }

@@ -1171,7 +1171,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 throw e;
             }
         } catch (ApiException | CloudbreakException e) {
-            LOGGER.error("Could not perform rolling restart services", e);
+            LOGGER.warn("Could not perform rolling restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
@@ -1180,7 +1180,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         try {
             restartServices(false);
         } catch (ApiException | CloudbreakException ex) {
-            LOGGER.error("Could not perform rolling restart services", e);
+            LOGGER.warn("Could not perform rolling restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }

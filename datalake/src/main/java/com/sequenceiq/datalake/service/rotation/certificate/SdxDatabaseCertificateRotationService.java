@@ -7,11 +7,15 @@ import static com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertRespons
 import static com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertResponseType.SKIP;
 import static com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertResponseType.TRIGGERED;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -97,7 +103,7 @@ public class SdxDatabaseCertificateRotationService {
                         () -> stackV4Endpoint.rotateRdsCertificateByCrnInternal(0L, stackCrn, initiatorUserCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, stackRotateRdsCertificateV4Response.getFlowIdentifier());
         LOGGER.debug("Waiting for Certificate rotation on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
-        cloudbreakPoller.pollDatabaseCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
+        cloudbreakPoller.pollCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
     }
 
     private SdxCluster getSdxClusterByCrn(String dlCrn) {
@@ -108,43 +114,59 @@ public class SdxDatabaseCertificateRotationService {
     }
 
     private SdxRotateRdsCertificateV1Response checkPrerequisitesAndTrigger(SdxCluster sdxCluster, StackV4Response stack) {
-        if (!stack.getStatus().isAvailable()) {
-            LOGGER.debug("Datalake stack {} is not available for Certificate rotation", stack.getName());
-            return new SdxRotateRdsCertificateV1Response(
-                    ERROR,
-                    FlowIdentifier.notTriggered(),
-                    getMessage(DATALAKE_DATABASE_CERTIFICATE_ROTATION_NOT_AVAILABLE),
-                    stack.getCrn());
+        if (Objects.isNull(stack) || !stack.getStatus().isAvailable()) {
+            LOGGER.info("Datalake stack {} is not available for Certificate rotation", sdxCluster.getName());
+            return getErrorDatalakeAnswer(getMessage(DATALAKE_DATABASE_CERTIFICATE_ROTATION_NOT_AVAILABLE), sdxCluster.getCrn());
         }
+        if (!isRemoteDatabaseRequested(stack.getCluster().getDatabaseServerCrn())) {
+            LOGGER.info("Datalake stack {} is not using external database", sdxCluster.getName());
+            return getErrorDatalakeAnswer(getMessage(DATALAKE_DATABASE_CERTIFICATE_ROTATION_NOT_AVAILABLE), sdxCluster.getCrn());
+        }
+        List<String> datahubNamesWithOutdatedCerts = getDatahubNamesWithOutdatedCerts(stack);
+        if (CollectionUtils.isNotEmpty(datahubNamesWithOutdatedCerts)) {
+            String errorMessage = String.format("Data Hub with name: '%s' is not on the latest certificate version. " +
+                    "Please update certificate on the Data Hub side before update the Data Lake", String.join(", ", datahubNamesWithOutdatedCerts));
+            LOGGER.info(errorMessage);
+            return getErrorDatalakeAnswer(errorMessage, stack.getCrn());
+        } else {
+            LOGGER.info("Triggering flow to rotate RDS client certificates on Datalake {}.", stack.getName());
+            return triggerCertificateRotationFlow(sdxCluster);
+        }
+    }
+
+    private List<String> getDatahubNamesWithOutdatedCerts(StackV4Response stack) {
+        List<String> datahubNamesWithOutdatedCerts = new ArrayList<>();
         StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
-        SslCertificateEntryResponse latestCertificates = ThreadBasedUserCrnProvider.doAsInternalActor(
+        SslCertificateEntryResponse latestCertificate = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> supportV4Endpoint.getLatestCertificates(stack.getCloudPlatform().name(), stack.getRegion()));
+                () -> supportV4Endpoint.getLatestCertificate(stack.getCloudPlatform().name(), stack.getRegion()));
         for (StackViewV4Response response : stackViewV4Responses.getResponses()) {
             if (!response.getExternalDatabase().getAvailabilityType().isEmbedded()) {
                 StackDatabaseServerResponse databaseServerByCrn = distroXDatabaseServerV1Endpoint.getDatabaseServerByCrn(response.getCrn());
-                if (databaseServerByCrn.getSslConfig().getSslCertificateActiveVersion() != latestCertificates.getVersion()) {
-                    return new SdxRotateRdsCertificateV1Response(
-                            ERROR,
-                            FlowIdentifier.notTriggered(),
-                            String.format("Data Hub %s is not on the latest certificate version. " +
-                                    "Please update that Data Hub first before update the Data Lake", response.getName()),
-                            stack.getCrn());
+                if (databaseServerByCrn.getSslConfig().getSslCertificateActiveVersion() != latestCertificate.getVersion()) {
+                    datahubNamesWithOutdatedCerts.add(response.getName());
                 }
             } else {
-                StackV4Response byCrn = distroXV1Endpoint.getByCrn(response.getCrn(), new HashSet<>());
-                if (!byCrn.getCluster().getDbSslRootCertBundle().contains(latestCertificates.getCertPem())) {
-                    return new SdxRotateRdsCertificateV1Response(
-                            ERROR,
-                            FlowIdentifier.notTriggered(),
-                            String.format("Data Hub %s is not on the latest certificate version. " +
-                                    "Please update that Data Hub first before update the Data Lake", response.getName()),
-                            stack.getCrn());
+                StackV4Response detailedStackResponse = distroXV1Endpoint.getByCrn(response.getCrn(), new HashSet<>());
+                if (!detailedStackResponse.getCluster().getDbSslRootCertBundle().contains(latestCertificate.getCertPem())) {
+                    datahubNamesWithOutdatedCerts.add(response.getName());
                 }
             }
         }
-        LOGGER.debug("Datalake stack {} has to be Certificate rotated.", stack.getName());
-        return triggerCertificateRotationFlow(sdxCluster);
+        return datahubNamesWithOutdatedCerts;
+    }
+
+    private boolean isRemoteDatabaseRequested(String dbServerCrn) {
+        return StringUtils.isNotEmpty(dbServerCrn) && Crn.isCrn(dbServerCrn) &&
+                CrnResourceDescriptor.DATABASE_SERVER.checkIfCrnMatches(Crn.safeFromString(dbServerCrn));
+    }
+
+    private SdxRotateRdsCertificateV1Response getErrorDatalakeAnswer(String message, String stackCrn) {
+        return new SdxRotateRdsCertificateV1Response(
+                ERROR,
+                FlowIdentifier.notTriggered(),
+                message,
+                stackCrn);
     }
 
     private SdxRotateRdsCertificateV1Response noDatalakeAnswer(String environmentCrn) {

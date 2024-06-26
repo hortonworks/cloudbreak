@@ -125,7 +125,7 @@ public class RedbeamsClientService {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> supportV4Endpoint.getLatestCertificates(cloudPlatform, region));
+                    () -> supportV4Endpoint.getLatestCertificate(cloudPlatform, region));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get certificate for %s cloudPlatform and %s region.", cloudPlatform, region);
             LOGGER.error(message, e);

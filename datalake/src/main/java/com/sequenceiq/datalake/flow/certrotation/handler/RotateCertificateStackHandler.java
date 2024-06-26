@@ -59,10 +59,11 @@ public class RotateCertificateStackHandler extends ExceptionCatcherEventHandler<
         String userId = request.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("Initiating Certificate Rotation and start polling for SDX: {}", sdxCluster.getName());
+            LOGGER.info("Initiating Certificate Rotation and start polling for SDX: {}", sdxCluster.getName());
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             certificateRotationService.initAndWaitForStackCertificateRotation(sdxCluster, pollingConfig);
             response = new RotateCertificateSuccessEvent(sdxId, userId);
+            LOGGER.info("Certificate Rotation has been finished for SDX: {}", sdxCluster.getName());
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Rotate Certificate poller exited before timeout. Cause: ", userBreakException);
             response = new RotateCertificateFailedEvent(sdxId, userId, userBreakException);

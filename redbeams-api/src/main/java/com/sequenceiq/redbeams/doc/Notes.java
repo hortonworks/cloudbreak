@@ -87,8 +87,8 @@ public final class Notes {
                 "Stop a running database server.";
         public static final String CERT_SWAP =
                 "Changes the certificate on mock provider";
-        public static final String CERT_LIST =
-                "Certificate for provider and region";
+        public static final String LATEST_CERT =
+                "Query latest certificate for provider and region";
         private DatabaseServerNotes() {
         }
     }

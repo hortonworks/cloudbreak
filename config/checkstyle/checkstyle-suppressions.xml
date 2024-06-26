@@ -6,7 +6,7 @@
 
 <suppressions>
     <!-- suppressing checks in real classes -->
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="SslCertificateEntryResponse.java|PublicKeyReaderUtil.java|AmbariClusterService.java|CachedUserDetailsService.java|StructuredParameterQueryResponse.java|BlueprintService.java|FileSystemV4Endpoint.java|FileSystemV4Controller.java|PlatformParameterService.java"/>
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java|AmbariClusterService.java|CachedUserDetailsService.java|StructuredParameterQueryResponse.java|BlueprintService.java|FileSystemV4Endpoint.java|FileSystemV4Controller.java|PlatformParameterService.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StatusToPollGroupConverter.java|StringTypesCompare.java|CredentialPlatformResourceEndpoint.java|CredentialPlatformResourceController.java"/>
     <!-- cases are increasing the complexity since the switchBlockAsSingleDecisionPoint=true parameter does not work  -->
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ContainerConfigService.java|InstanceMetaDataToCloudInstanceConverter.java"/>
@@ -52,7 +52,6 @@
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
-    <suppress checks="VisibilityModifierCheck" files="RedbeamsEvent.java"/>
 
     <!-- suppress test/dummy/mock classes -->
     <suppress checks="IllegalTypeImpl|IllegalCatch|AbstractClassName|EmptyBlock|MagicNumberCheck|ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>

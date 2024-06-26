@@ -76,7 +76,7 @@ public class DatabaseServerSslCertificateSyncService {
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             result = connector.resources().getDatabaseServerActiveSslRootCertificate(ac, databaseStack);
         } else {
-            LOGGER.info("SSL not enabled or unsupported cloud platform \"{}\": SslConfig={}. Skipping SSL certificate synchronization for database stack {}",
+            LOGGER.info("SSL not enabled or unsupported cloud platform \"{}\": SslConfig={}. Skipping SSL certificate retrieval for database stack {}",
                     cloudPlatform, sslConfig, cloudContext);
         }
         return Optional.ofNullable(result);

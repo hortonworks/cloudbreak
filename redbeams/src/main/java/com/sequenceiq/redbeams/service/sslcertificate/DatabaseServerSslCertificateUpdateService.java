@@ -32,7 +32,7 @@ public class DatabaseServerSslCertificateUpdateService {
     public void updateSslCertificateIfNeeded(DBStack dbStack, Optional<String> desiredCertificate) {
         Optional<SslConfig> sslConfigOptional = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
-        if (udatePossible(sslConfigOptional, cloudPlatform)) {
+        if (updatePossible(sslConfigOptional, cloudPlatform) && desiredCertificate.isPresent()) {
             SslConfig sslConfig = sslConfigOptional.get();
             SslCertificateEntry desiredSslCertificateEntry =
                     databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(cloudPlatform, dbStack.getRegion(),
@@ -43,14 +43,24 @@ public class DatabaseServerSslCertificateUpdateService {
         }
     }
 
-    private boolean udatePossible(Optional<SslConfig> sslConfig, String cloudPlatform) {
+    private boolean updatePossible(Optional<SslConfig> sslConfig, String cloudPlatform) {
         return sslConfig.isPresent() && CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
-                && (CloudPlatform.AWS.name().equals(cloudPlatform));
+                && (isAws(cloudPlatform) || isAzure(cloudPlatform) || isMock(cloudPlatform));
+    }
+
+    private boolean isAws(String cloudPlatform) {
+        return CloudPlatform.AWS.name().equals(cloudPlatform);
+    }
+
+    private boolean isAzure(String cloudPlatform) {
+        return CloudPlatform.AZURE.name().equals(cloudPlatform);
+    }
+
+    private boolean isMock(String cloudPlatform) {
+        return CloudPlatform.MOCK.name().equals(cloudPlatform);
     }
 
     private void updateSslConfigWithActiveSslCertificateEntry(SslConfig sslConfig, SslCertificateEntry desiredCertificateEntry) {
-        sslConfig.setSslCertificateActiveVersion(desiredCertificateEntry.version());
-
         String activeSslCertificatePem = desiredCertificateEntry.certPem();
         Set<String> sslCertificates = Optional.ofNullable(sslConfig.getSslCertificates()).orElse(new HashSet<>());
         if (!sslCertificates.contains(activeSslCertificatePem)) {

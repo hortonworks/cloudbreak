@@ -356,7 +356,7 @@ public class DatabaseServerV4ControllerTest {
     }
 
     @Test
-    public void testStopupdateToLatestSslCert() {
+    public void testUpdateToLatestSslCert() {
         underTest.updateToLatestSslCert(SERVER_CRN);
 
         verify(redbeamsRotateSslService).updateToLatestDatabaseServerSslCert(SERVER_CRN);

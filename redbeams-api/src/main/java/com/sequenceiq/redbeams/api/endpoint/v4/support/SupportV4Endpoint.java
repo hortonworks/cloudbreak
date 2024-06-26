@@ -36,13 +36,13 @@ public interface SupportV4Endpoint {
     );
 
     @GET
-    @Path("internal/get_latest_certificates")
+    @Path("internal/get_latest_certificate")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
-            summary = OperationDescriptions.DatabaseServerOpDescription.CERTIFICATE_LIST,
-            description = Notes.DatabaseServerNotes.CERT_LIST, operationId = "getDatabaseCertificates",
+            summary = OperationDescriptions.DatabaseServerOpDescription.LATEST_CERTIFICATE_LIST,
+            description = Notes.DatabaseServerNotes.LATEST_CERT, operationId = "getLatestDatabaseCertificate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SslCertificateEntryResponse getLatestCertificates(
+    SslCertificateEntryResponse getLatestCertificate(
             @QueryParam("cloudPlatform") String cloudPlatform,
             @QueryParam("region") String region);
 

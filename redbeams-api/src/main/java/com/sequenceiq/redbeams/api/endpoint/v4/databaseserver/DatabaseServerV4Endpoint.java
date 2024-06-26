@@ -221,8 +221,8 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("{crn}/rotate_ssl_cert")
-    @Operation(summary = DatabaseServerOpDescription.ROTATE_SSL_CERT, description = DatabaseServerNotes.UPDATE_SSL_CERT,
-            operationId = "updateDatabaseServerSSLCert",
+    @Operation(summary = DatabaseServerOpDescription.ROTATE_SSL_CERT, description = DatabaseServerNotes.ROTATE_SSL_CERT,
+            operationId = "rotateDatabaseServerSSLCert",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSslCert(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
@@ -231,8 +231,8 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("{crn}/update_ssl_cert")
-    @Operation(summary = DatabaseServerOpDescription.UPDATE_SSL_CERT, description = DatabaseServerNotes.ROTATE_SSL_CERT,
-            operationId = "rotateDatabaseServerSSLCert",
+    @Operation(summary = DatabaseServerOpDescription.UPDATE_SSL_CERT, description = DatabaseServerNotes.UPDATE_SSL_CERT,
+            operationId = "updateDatabaseServerSSLCert",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updateToLatestSslCert(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)

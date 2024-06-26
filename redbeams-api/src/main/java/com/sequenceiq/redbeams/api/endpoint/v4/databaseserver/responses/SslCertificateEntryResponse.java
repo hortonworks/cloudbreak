@@ -2,22 +2,39 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.redbeams.doc.ModelDescriptions;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(name = "SslCertificateEntryResponse")
 public class SslCertificateEntryResponse {
 
+    @Schema(description = ModelDescriptions.SslCertificate.VERSION)
     private int version;
 
+    @Schema(description = ModelDescriptions.SslCertificate.CLOUDKEY)
     private String cloudKey;
 
+    @Schema(description = ModelDescriptions.SslCertificate.CLOUDPROVIDERIDENTIFIER)
     private String cloudProviderIdentifier;
 
+    @Schema(description = ModelDescriptions.SslCertificate.CLOUDPLATFORM)
     private String cloudPlatform;
 
+    @Schema(description = ModelDescriptions.SslCertificate.CERTPEM)
     private String certPem;
 
+    @Schema(description = ModelDescriptions.SslCertificate.FINGERPRINT)
     private String fingerprint;
 
+    @Schema(description = ModelDescriptions.SslCertificate.EXPIRATIONDATE)
     private long expirationDate;
 
+    @Schema(description = ModelDescriptions.SslCertificate.DEPRECATED)
     private boolean deprecated;
 
     public int getVersion() {
@@ -84,6 +101,8 @@ public class SslCertificateEntryResponse {
         this.deprecated = deprecated;
     }
 
+    // @formatter:off
+    // CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -102,6 +121,8 @@ public class SslCertificateEntryResponse {
                 && Objects.equals(certPem, that.certPem)
                 && Objects.equals(fingerprint, that.fingerprint);
     }
+    // @formatter:on
+    // CHECKSTYLE:on
 
     @Override
     public int hashCode() {

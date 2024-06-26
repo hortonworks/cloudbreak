@@ -86,14 +86,14 @@ class RotateCertificateStackHandlerTest {
     void acceptSuccess() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.getById(any())).thenReturn(sdxCluster);
-        RotateCertificateStackRequest request = new RotateCertificateStackRequest(123L, "user");
+        RotateCertificateStackRequest request = new RotateCertificateStackRequest(1L, "user");
         PollingConfig expectedPollingConfig = new PollingConfig(1, TimeUnit.SECONDS, 2, TimeUnit.MINUTES);
         Event.Headers headers = new Event.Headers();
         Event<RotateCertificateStackRequest> event = new Event<>(headers, request);
 
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
-        RotateCertificateSuccessEvent successEvent = new RotateCertificateSuccessEvent(123L, "user");
+        RotateCertificateSuccessEvent successEvent = new RotateCertificateSuccessEvent(1L, "user");
 
         RecursiveComparisonConfiguration config = RecursiveComparisonConfiguration.builder()
                 .withIgnoredFields("accepted")
@@ -106,7 +106,7 @@ class RotateCertificateStackHandlerTest {
     @ValueSource(classes = { UserBreakException.class, PollerStoppedException.class, PollerException.class })
     void acceptWithExceptions(Class<? extends Exception> errorClass)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        RotateCertificateStackRequest request = new RotateCertificateStackRequest(123L, "user");
+        RotateCertificateStackRequest request = new RotateCertificateStackRequest(1L, "user");
         Event.Headers headers = new Event.Headers();
         Event<RotateCertificateStackRequest> event = new Event<>(headers, request);
         when(sdxService.getById(any())).thenReturn(getSdxCluster());
@@ -115,7 +115,7 @@ class RotateCertificateStackHandlerTest {
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
         Exception error = errorClass.getDeclaredConstructor(String.class).newInstance("error");
-        RotateCertificateFailedEvent failedEvent = new RotateCertificateFailedEvent(123L, "user", error);
+        RotateCertificateFailedEvent failedEvent = new RotateCertificateFailedEvent(1L, "user", error);
 
         RecursiveComparisonConfiguration config = RecursiveComparisonConfiguration.builder()
                 .withIgnoredFields("accepted")

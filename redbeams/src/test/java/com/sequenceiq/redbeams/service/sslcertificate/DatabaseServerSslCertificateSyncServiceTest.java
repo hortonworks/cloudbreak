@@ -1,9 +1,13 @@
 package com.sequenceiq.redbeams.service.sslcertificate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -459,6 +463,81 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
         verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER), cert.expirationDate());
+    }
+
+    @Test
+    public void testGetCertificateFromProviderWithValidConfigAndPlatform() throws Exception {
+        DBStack dbStack = mock(DBStack.class);
+        SslConfig sslConfig = mock(SslConfig.class);
+        CloudDatabaseServerSslCertificate cloudDatabaseServerSslCertificate =
+                new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, "213");
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
+        when(sslConfig.getSslCertificateType()).thenReturn(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        when(dbStack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+
+        when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
+        when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
+                .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, "213"));
+
+        // Act
+        Optional<CloudDatabaseServerSslCertificate> result =
+                underTest.getCertificateFromProvider(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(cloudDatabaseServerSslCertificate, result.get());
+    }
+
+    @Test
+    public void testGetCertificateFromProviderWithInvalidConfig() throws Exception {
+        DBStack dbStack = mock(DBStack.class);
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<CloudDatabaseServerSslCertificate> result =
+                underTest.getCertificateFromProvider(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        // Assert
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testGetCertificateFromProviderWithUnsupportedPlatform() throws Exception {
+        DBStack dbStack = mock(DBStack.class);
+        SslConfig sslConfig = mock(SslConfig.class);
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
+        when(sslConfig.getSslCertificateType()).thenReturn(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        when(dbStack.getCloudPlatform()).thenReturn("UnsupportedPlatform");
+
+        // Act
+        Optional<CloudDatabaseServerSslCertificate> result =
+                underTest.getCertificateFromProvider(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        // Assert
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testGetCertificateFromProviderWithNonProviderOwnedCertType() throws Exception {
+        DBStack dbStack = mock(DBStack.class);
+        SslConfig sslConfig = mock(SslConfig.class);
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
+        when(sslConfig.getSslCertificateType()).thenReturn(SslCertificateType.BRING_YOUR_OWN);
+        when(dbStack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+
+        // Act
+        Optional<CloudDatabaseServerSslCertificate> result =
+                underTest.getCertificateFromProvider(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        // Assert
+        assertFalse(result.isPresent());
     }
 
     private DBStack getDBStack() {

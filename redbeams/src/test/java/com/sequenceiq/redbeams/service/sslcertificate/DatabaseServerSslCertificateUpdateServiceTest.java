@@ -58,7 +58,7 @@ class DatabaseServerSslCertificateUpdateServiceTest {
         databaseServerSslCertificateUpdateService.updateSslCertificateIfNeeded(dbStack, Optional.of("desiredCertificateId"));
 
         verify(sslConfig).setSslCertificateActiveCloudProviderIdentifier("desiredCertificateId");
-        verify(sslConfig, times(2)).setSslCertificateActiveVersion(1);
+        verify(sslConfig, times(1)).setSslCertificateActiveVersion(1);
         verify(sslConfig).setSslCertificateExpirationDate(time);
         verify(sslConfigService).save(sslConfig);
     }

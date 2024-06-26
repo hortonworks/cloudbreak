@@ -42,7 +42,6 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
     public void accept(Event<DeregisterServicesRequest> event) {
         DeregisterServicesResult result;
         try {
-            // TODO refactor this shit
             LOGGER.info("Received DeregisterServicesRequest event: {}", event.getData());
             StackView stackView = stackDtoService.getStackViewById(event.getData().getStackId());
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());

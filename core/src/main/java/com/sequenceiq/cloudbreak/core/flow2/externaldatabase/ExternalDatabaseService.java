@@ -77,7 +77,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -200,15 +199,6 @@ public class ExternalDatabaseService {
             }
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
-        }
-    }
-
-    public SslCertificateEntryResponse getLatestCertificate(String cloudPlatform, String region) {
-        try {
-            return redbeamsClient.getLatestCertificate(cloudPlatform, region);
-        } catch (Exception e) {
-            LOGGER.info("Database server latest certificate not found");
-            throw e;
         }
     }
 

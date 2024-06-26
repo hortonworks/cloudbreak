@@ -437,7 +437,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public RotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
         return rotateRdsCertificateConverter.convert(
-                rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(name),
+                rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofName(name),
                 ThreadBasedUserCrnProvider.getAccountId()));
     }
 

@@ -31,7 +31,7 @@ public class RedbeamsRotateSslService {
     public FlowIdentifier rotateDatabaseServerSslCert(String crn) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
-        LOGGER.debug("Rotate ssl called for: {}", dbStack);
+        LOGGER.debug("Rotate to latest ssl called for: {}", dbStack);
         return flowManager.notify(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(),
                 new SslCertRotateRedbeamsEvent(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(), dbStack.getId(), false));
     }
@@ -39,7 +39,7 @@ public class RedbeamsRotateSslService {
     public FlowIdentifier updateToLatestDatabaseServerSslCert(String crn) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
-        LOGGER.debug("Rotate ssl called for: {}", dbStack);
+        LOGGER.debug("Update to latest ssl called for: {}", dbStack);
         return flowManager.notify(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(),
                 new SslCertRotateRedbeamsEvent(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(), dbStack.getId(), true));
     }

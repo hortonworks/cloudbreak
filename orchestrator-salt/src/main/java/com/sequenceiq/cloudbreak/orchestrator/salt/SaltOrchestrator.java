@@ -558,7 +558,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             saveCustomPillars(saltConfig, exitModel, stateParams.getTargetHostNames(), sc);
         } catch (Exception e) {
-            LOGGER.info("Error occurred during save custom pillars", e);
+            LOGGER.warn("Error occurred during save custom pillars", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

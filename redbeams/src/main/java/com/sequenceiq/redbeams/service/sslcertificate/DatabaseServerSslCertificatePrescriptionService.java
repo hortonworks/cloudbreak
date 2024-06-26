@@ -99,20 +99,22 @@ public class DatabaseServerSslCertificatePrescriptionService {
         Set<String> availableSslCertificateIdentifiers = getAvailableSslCertificateIdentifiers(cloudContext, cloudPlatform, availableSslCertificates);
         if (overriddenSslCertificateIdentifierOpt.isPresent()) {
             String overriddenSslCertificateIdentifier = overriddenSslCertificateIdentifierOpt.get();
-            LOGGER.info("Found overridden SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\". " +
-                    "Skipping prescription for database stack {}.", cloudPlatform, overriddenSslCertificateIdentifier, cloudContext);
+            LOGGER.info("Found overridden SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\". ",
+                    overriddenSslCertificateIdentifier, cloudContext);
             if (overriddenSslCertificateIdentifier.equals(desiredSslCertificateIdentifier)) {
                 if (certificateOnProvider.isPresent() && !overriddenSslCertificateIdentifier.equals(certificateOnProvider.get().certificateIdentifier())) {
                     databaseServer.putParameter(SSL_CERTIFICATE_IDENTIFIER, desiredSslCertificateIdentifier);
-                    LOGGER.info("Prescribing SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform,
+                    LOGGER.info("Overridden SSL certificate identifier differs from RDS instance's SSL certificate identifier. " +
+                                    "Prescribing SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform,
                             desiredSslCertificateIdentifier, cloudContext);
                     return Optional.of(desiredSslCertificateIdentifier);
                 }
-                LOGGER.info("Desired SSL certificate CloudProviderIdentifier matches the overridden one.");
+                LOGGER.info("Desired SSL certificate CloudProviderIdentifier matches the overridden one. Skipping prescription for database stack {}.",
+                        cloudContext);
             } else {
                 LOGGER.info("Ignoring desired SSL certificate CloudProviderIdentifier that is different from the overridden one: \"{}\". " +
-                                "The latter will be later synced back to SslConfig in DatabaseServerSslCertificateSyncService.syncSslCertificateAws().",
-                        desiredSslCertificateIdentifier);
+                                "The latter will be later synced back to SslConfig in DatabaseServerSslCertificateSyncService.syncSslCertificateAws(). " +
+                                "Skipping prescription for database stack {}.", desiredSslCertificateIdentifier, cloudContext);
             }
         } else if (availableSslCertificateIdentifiers.contains(desiredSslCertificateIdentifier)) {
             if (availableSslCertificateIdentifiers.size() == 1) {

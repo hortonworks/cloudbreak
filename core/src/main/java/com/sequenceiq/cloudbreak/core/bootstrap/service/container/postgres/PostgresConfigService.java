@@ -3,15 +3,12 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 import static java.util.Collections.singletonMap;
 import static java.util.Objects.requireNonNull;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -34,17 +31,12 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
-import com.sequenceiq.cloudbreak.orchestrator.salt.SaltService;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
-import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
@@ -59,11 +51,17 @@ public class PostgresConfigService {
 
     public static final String POSTGRES_ROTATION = "postgres-rotation";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConfigService.class);
-
     private static final String POSTGRES_COMMON = "postgres-common";
 
     private static final String POSTGRES_VERSION = "postgres_version";
+
+    private static final String POSTGRESQL_POSTGRE_SLS = "/postgresql/postgre.sls";
+
+    private static final String POSTGRESQL_ROTATION_SLS = "/postgresql/rotation.sls";
+
+    private static final String POSTGRES = "postgres";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresConfigService.class);
 
     @Value("${cb.recovery.database.reuse}")
     private List<String> databasesReusedDuringRecovery;
@@ -87,16 +85,7 @@ public class PostgresConfigService {
     private ExternalDatabaseConfig externalDatabaseConfig;
 
     @Inject
-    private SaltService saltService;
-
-    @Inject
-    private SaltRunner saltRunner;
-
-    @Inject
-    private ExitCriteria exitCriteria;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
+    private HostOrchestrator hostOrchestrator;
 
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
@@ -112,43 +101,29 @@ public class PostgresConfigService {
         }
 
         if (!postgresConfig.isEmpty()) {
-            servicePillar.put(POSTGRESQL_SERVER, new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig)));
-            servicePillar.put("postgres-rotation", getPillarPropertiesForRotation(stackDto));
+            servicePillar.put(POSTGRESQL_SERVER, new SaltPillarProperties(POSTGRESQL_POSTGRE_SLS, singletonMap(POSTGRES, postgresConfig)));
+            servicePillar.put(POSTGRES_ROTATION, getPillarPropertiesForRotation(stackDto));
         }
         servicePillar.putAll(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stackDto, ""));
     }
 
-    public void uploadServicePillarsForPostgres(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar, ExitCriteriaModel exitModel)
+    public void uploadServicePillarsForPostgres(StackDto stackDto, ExitCriteriaModel exitModel, OrchestratorStateParams stateParams)
             throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGatewayConfig = saltService.getPrimaryGatewayConfig(
-                List.of(gatewayConfigService.getPrimaryGatewayConfig(stackDto)));
-        Set<String> gatewayTargets = getGatewayPrivateIps(List.of(primaryGatewayConfig));
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGatewayConfig)) {
-            SaltPillarProperties saltPillarProperties =
-                    new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", initPostgresConfig(stackDto)));
-            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargets, saltPillarProperties);
-            Callable<Boolean> runner = saltRunner.runnerWithConfiguredErrorCount(pillarSave, exitCriteria, exitModel);
-            runner.call();
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during postgres pillar upload", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
-    private Set<String> getGatewayPrivateIps(Collection<GatewayConfig> allGatewayConfigs) {
-        return allGatewayConfigs.stream().map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
+            Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+            decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
+            hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitModel, stateParams);
     }
 
     public SaltPillarProperties getPillarPropertiesForRotation(StackDto stackDto) {
         Map<String, Object> postgresConfig = new HashMap<>();
         rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
                 postgresConfig.putAll(provider.createServicePillarConfigMapForRotation(stackDto)));
-        return new SaltPillarProperties("/postgresql/rotation.sls", singletonMap("postgres-rotation", postgresConfig));
+        return new SaltPillarProperties(POSTGRESQL_ROTATION_SLS, singletonMap(POSTGRES_ROTATION, postgresConfig));
     }
 
     public SaltPillarProperties getPostgreSQLServerPropertiesForRotation(StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
-        return new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig));
+        return new SaltPillarProperties(POSTGRESQL_POSTGRE_SLS, singletonMap("postgres", postgresConfig));
     }
 
     private SSLSaltConfig getSslSaltConfigWhenRootCertAlreadyInitialized(StackDto stackDto) {

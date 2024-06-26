@@ -15,13 +15,13 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
 
-    protected final String selector;
+    private final String selector;
 
-    protected final Long resourceId;
+    private final Long resourceId;
 
-    protected final Promise<AcceptResult> accepted;
+    private final Promise<AcceptResult> accepted;
 
-    protected final boolean forced;
+    private final boolean forced;
 
     public RedbeamsEvent(Long resourceId) {
         this(null, resourceId);

@@ -43,7 +43,7 @@ public final class OperationDescriptions {
         public static final String START = "start database server";
         public static final String ROTATE_SSL_CERT = "rotate database server cert";
         public static final String UPDATE_SSL_CERT = "update database server cert";
-        public static final String CERTIFICATE_LIST = "certificate list for a specific provider and region";
+        public static final String LATEST_CERTIFICATE_LIST = "query latest certificate for a specific provider and region";
         public static final String STOP = "stop database server";
         public static final String CERT_SWAP = "change certificate on mock provider";
 

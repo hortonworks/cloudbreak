@@ -474,6 +474,7 @@ public interface SdxEndpoint {
 
     @PUT
     @Path("crn/{crn}/rotate_rds_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_CRN, description = ROTATE_RDS_CERTIFICATE_NOTES,
             operationId = "rotateRdsCertificateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
