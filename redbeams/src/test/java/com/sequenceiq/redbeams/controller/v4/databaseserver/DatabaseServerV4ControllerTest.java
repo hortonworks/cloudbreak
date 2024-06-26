@@ -7,19 +7,20 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -56,6 +57,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsUpgradeService;
 import com.sequenceiq.redbeams.service.validation.RedBeamsTagValidator;
 
+@ExtendWith(MockitoExtension.class)
 public class DatabaseServerV4ControllerTest {
 
     private static final Crn CRN = CrnTestUtil.getDatabaseServerCrnBuilder()
@@ -148,10 +150,8 @@ public class DatabaseServerV4ControllerTest {
 
     private DBStack dbStack;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName(SERVER_NAME);
@@ -206,16 +206,11 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testUpdateClusterCrn() {
-        when(service.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.of(server));
+        when(service.listByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(List.of(server));
         underTest.updateClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN, CLUSTER_CRN1, USER_CRN);
 
-        when(service.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenThrow(new NotFoundException("Not found"));
-        try {
-            underTest.updateClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN, CLUSTER_CRN1, USER_CRN);
-            Assert.fail("NotFoundException should have been thrown");
-        } catch (NotFoundException notFoundException) {
-
-        }
+        when(service.listByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenThrow(new NotFoundException("Not found"));
+        assertThrows(NotFoundException.class, () -> underTest.updateClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN, CLUSTER_CRN1, USER_CRN));
     }
 
     @Test
@@ -241,6 +236,21 @@ public class DatabaseServerV4ControllerTest {
 
         assertEquals(allocateResponse, response);
         verify(creationService).launchDatabaseServer(dbStack, CLUSTER_CRN, null);
+    }
+
+    @Test
+    public void testCreateNonUnique() {
+        when(dbStackConverter.convert(allocateRequest, USER_CRN)).thenReturn(dbStack);
+        DBStack savedDBStack = new DBStack();
+        when(creationService.launchNonUniqueDatabaseServer(dbStack, CLUSTER_CRN, null)).thenReturn(savedDBStack);
+        when(dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack))
+                .thenReturn(allocateResponse);
+        when(redBeamsTagValidator.validateTags(any(), any())).thenReturn(validationResult);
+
+        DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.createNonUniqueInternal(allocateRequest, USER_CRN));
+
+        assertEquals(allocateResponse, response);
+        verify(creationService).launchNonUniqueDatabaseServer(dbStack, CLUSTER_CRN, null);
     }
 
     @Test

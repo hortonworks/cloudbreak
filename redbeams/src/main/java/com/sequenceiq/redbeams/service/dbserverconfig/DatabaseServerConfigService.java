@@ -137,6 +137,10 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.save(resource);
     }
 
+    public List<DatabaseServerConfig> updateAll(List<DatabaseServerConfig> resources) {
+        return repository.saveAll(resources);
+    }
+
     public DatabaseServerConfig release(String resourceCrn) {
         try {
             return transactionService.required(() -> {
@@ -202,15 +206,29 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByResourceCrn(resourceCrn);
     }
 
-    public DatabaseServerConfig getByClusterCrn(String environmentCrn, String clusterCrn) {
-        DatabaseServerConfig databaseServerConfig = findByEnvironmentCrnAndClusterCrn(environmentCrn, clusterCrn)
-                .orElseThrow(() -> new NotFoundException(String.format("No %s found with cluster CRN '%s' in environment '%s'",
-                        DatabaseServerConfig.class.getSimpleName(), clusterCrn, environmentCrn)));
-        MDCBuilder.buildMdcContext(databaseServerConfig);
-        return databaseServerConfig;
+    public List<DatabaseServerConfig> listByClusterCrn(String environmentCrn, String clusterCrn) {
+        List<DatabaseServerConfig> databaseServerConfigs = findByEnvironmentCrnAndClusterCrn(environmentCrn, clusterCrn);
+        if (databaseServerConfigs.isEmpty()) {
+            throw new NotFoundException(String.format("No %s found with cluster CRN '%s' in environment '%s'",
+                    DatabaseServerConfig.class.getSimpleName(), clusterCrn, environmentCrn));
+        } else {
+            return databaseServerConfigs;
+        }
     }
 
-    public Optional<DatabaseServerConfig> findByEnvironmentCrnAndClusterCrn(String environmentCrn, String clusterCrn) {
+    public Optional<DatabaseServerConfig> findByClusterCrn(String environmentCrn, String clusterCrn) {
+        List<DatabaseServerConfig> databaseServerConfigs = findByEnvironmentCrnAndClusterCrn(environmentCrn, clusterCrn);
+        if (databaseServerConfigs.isEmpty()) {
+            return Optional.empty();
+        } else if (databaseServerConfigs.size() > 1) {
+            throw new BadRequestException("There are multiple database server config found for this cluster. "
+                    + "Please use the list endpoint to get all database server.");
+        } else {
+            return Optional.of(databaseServerConfigs.getFirst());
+        }
+    }
+
+    public List<DatabaseServerConfig> findByEnvironmentCrnAndClusterCrn(String environmentCrn, String clusterCrn) {
         return repository.findByEnvironmentIdAndClusterCrn(environmentCrn, clusterCrn);
     }
 

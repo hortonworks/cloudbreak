@@ -4,20 +4,18 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +26,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -61,6 +61,7 @@ import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
+@ExtendWith(MockitoExtension.class)
 public class DatabaseServerConfigServiceTest {
 
     private static final String USERNAME = "username";
@@ -135,10 +136,8 @@ public class DatabaseServerConfigServiceTest {
 
     private DatabaseServerConfig server2;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         server = new DatabaseServerConfig();
         server.setId(1L);
         server.setResourceCrn(SERVER_CRN);
@@ -150,7 +149,7 @@ public class DatabaseServerConfigServiceTest {
         server2.setName("myotherserver");
         server2.setResourceCrn(SERVER_2_CRN);
 
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
+//        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
@@ -192,8 +191,6 @@ public class DatabaseServerConfigServiceTest {
         server.setConnectionDriver(null);
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         when(clock.getCurrentTimeMillis()).thenReturn(12345L);
-        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
-        when(crnService.createCrn(server)).thenReturn(serverCrn);
         when(repository.save(server)).thenReturn(server);
 
         DatabaseServerConfig createdServer = ThreadBasedUserCrnProvider.doAs(USER_CRN,
@@ -212,8 +209,6 @@ public class DatabaseServerConfigServiceTest {
     @Test
     public void testCreateFailure() {
         server.setConnectionDriver("org.postgresql.MyCustomDriver");
-        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
-        when(crnService.createCrn(server)).thenReturn(serverCrn);
         AccessDeniedException e = new AccessDeniedException("no way");
         when(repository.save(server)).thenThrow(e);
 
@@ -386,38 +381,44 @@ public class DatabaseServerConfigServiceTest {
     }
 
     @Test
-    public void testGetByClusterCrnFound() {
-        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.of(server));
+    public void testFindByClusterCrnFound() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(List.of(server));
 
-        DatabaseServerConfig foundServer = underTest.getByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
-
-        assertEquals(server, foundServer);
-    }
-
-    @Test
-    public void testGetByClusterCrnNotFound() {
-        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundException.class, () -> underTest.getByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString()));
-    }
-
-    @Test
-    public void testGetByClusterCrnOptionalFound() {
-        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.of(server));
-
-        Optional<DatabaseServerConfig> foundServer = underTest.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+        Optional<DatabaseServerConfig> foundServer = underTest.findByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
 
         assertTrue(foundServer.isPresent());
         assertEquals(server, foundServer.get());
     }
 
     @Test
-    public void testGetByClusterCrnNotOptionalFound() {
-        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.empty());
+    public void testFindByClusterCrnShouldThrowExceptionWhenMoreThanOneServerPresentForTheCluster() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(List.of(server, server));
 
-        Optional<DatabaseServerConfig> foundServer = underTest.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+        assertThrows(BadRequestException.class, () ->  underTest.findByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString()));
+    }
 
-        assertFalse(foundServer.isPresent());
+    @Test
+    public void testFindByClusterCrnShouldReturnOptionalEmpty() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        Optional<DatabaseServerConfig> actual = underTest.findByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+        assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    public void testListByClusterCrnShouldReturnTheConfigList() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(List.of(server));
+
+        List<DatabaseServerConfig> foundServer = underTest.listByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+
+        assertEquals(server, foundServer.getFirst());
+    }
+
+    @Test
+    public void testListByClusterCrnShouldThrowsExceptionWhenTheConfigsNotFound() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        assertThrows(NotFoundException.class, () -> underTest.listByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString()));
     }
 
 }

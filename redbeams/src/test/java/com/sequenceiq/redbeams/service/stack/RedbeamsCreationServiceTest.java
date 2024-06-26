@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -120,7 +121,7 @@ class RedbeamsCreationServiceTest {
         Crn crn = Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312");
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
-        when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.empty());
+        when(databaseServerConfigService.findByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.empty());
 
         DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN, null);
         assertThat(launchedStack).isEqualTo(dbStack);
@@ -155,9 +156,51 @@ class RedbeamsCreationServiceTest {
     }
 
     @Test
+    public void testLaunchDatabaseServerWhenExistingDatabaseServerIsAvailableAndMultipleDatabaseServerCreationIsEnabled() throws Exception {
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
+        when(connector.resources().getDBStackTemplate(null)).thenReturn(TEMPLATE);
+
+        Crn crn = Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312");
+        when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(dbStackService.save(dbStack)).thenReturn(dbStack);
+        when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(List.of(databaseServerConfig));
+
+        DBStack launchedStack = underTest.launchNonUniqueDatabaseServer(dbStack, CLUSTER_CRN, null);
+        assertThat(launchedStack).isEqualTo(dbStack);
+        verify(dbStackService).save(dbStack);
+
+        assertThat(dbStack.getResourceCrn()).isEqualTo(crn.toString());
+        assertThat(dbStack.getTemplate()).isEqualTo(TEMPLATE);
+
+        ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);
+        verify(databaseServerConfigService).create(databaseServerConfigCaptor.capture(), eq(0L));
+        DatabaseServerConfig databaseServerConfig = databaseServerConfigCaptor.getValue();
+        assertThat(databaseServerConfig.getResourceStatus()).isEqualTo(ResourceStatus.SERVICE_MANAGED);
+        assertThat(databaseServerConfig.getAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(databaseServerConfig.getName()).isEqualTo(DB_STACK_NAME);
+        assertThat(databaseServerConfig.getDescription()).isEqualTo(DB_STACK_DESCRIPTION);
+        assertThat(databaseServerConfig.getEnvironmentId()).isEqualTo(ENVIRONMENT_CRN);
+        assertThat(databaseServerConfig.getConnectionDriver()).isEqualTo(CONNECTION_DRIVER);
+        assertThat(databaseServerConfig.getConnectionUserName()).isEqualTo(ROOT_USER_NAME);
+        assertThat(databaseServerConfig.getConnectionPassword()).isEqualTo(ROOT_PASSWORD);
+        assertThat(databaseServerConfig.getDatabaseVendor()).isEqualTo(DatabaseVendor.POSTGRES);
+        assertThat(databaseServerConfig.getHost()).isNull();
+        assertThat(databaseServerConfig.getPort()).isNull();
+        assertThat(databaseServerConfig.getResourceCrn()).isEqualTo(crn);
+        assertThat(databaseServerConfig.getDbStack().isPresent()).isTrue();
+        assertThat(databaseServerConfig.getDbStack().get()).isEqualTo(dbStack);
+
+        ArgumentCaptor<RedbeamsEvent> eventCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);
+        verify(flowManager).notify(eq(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector()), eventCaptor.capture());
+        RedbeamsEvent provisionEvent = eventCaptor.getValue();
+        assertThat(provisionEvent.selector()).isEqualTo(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector());
+        assertThat(provisionEvent.getResourceId()).isEqualTo(dbStack.getId());
+    }
+
+    @Test
     public void testShouldNotLaunchDatabaseServerWhenDatabaseServerConfigIsAvailable() {
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
-        when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.of(databaseServerConfig));
+        when(databaseServerConfigService.findByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.of(databaseServerConfig));
         when(databaseServerConfig.getDbStack()).thenReturn(Optional.of(dbStack));
 
         DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN, null);

@@ -52,6 +52,8 @@ public final class Notes {
             "Gets information on a database server by its CRN.";
         public static final String GET_BY_CLUSTER_CRN =
                 "Gets information on a database server by cluster CRN";
+        public static final String LIST_BY_CLUSTER_CRN =
+                "Lists all database servers by cluster CRN";
         public static final String CREATE =
             "Creates a new database server. The database server starts out with only default databases.";
         public static final String UPGRADE =

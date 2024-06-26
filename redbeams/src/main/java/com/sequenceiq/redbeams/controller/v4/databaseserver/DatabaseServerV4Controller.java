@@ -155,38 +155,62 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public DatabaseServerV4Response getByClusterCrn(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterCrn) {
-        DatabaseServerConfig server = databaseServerConfigService.getByClusterCrn(environmentCrn, clusterCrn);
+        DatabaseServerConfig server = databaseServerConfigService.findByClusterCrn(environmentCrn, clusterCrn).orElseThrow(() ->
+                new NotFoundException(String.format("No database server config found with cluster CRN '%s' in environment '%s'", clusterCrn, environmentCrn)));
         return databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public DatabaseServerV4Responses listByClusterCrn(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterCrn) {
+        List<DatabaseServerConfig> servers = databaseServerConfigService.listByClusterCrn(environmentCrn, clusterCrn);
+        return new DatabaseServerV4Responses(servers.stream()
+                .map(server -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(server))
+                .collect(Collectors.toSet())
+        );
+    }
+
+    @Override
+    @InternalOnly
+    public DatabaseServerStatusV4Response createInternal(AllocateDatabaseServerV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+        return create(request);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATABASE_SERVER)
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
+        return createDatabaseServer(request, false);
+    }
+
+    @Override
+    @InternalOnly
+    public DatabaseServerStatusV4Response createNonUniqueInternal(AllocateDatabaseServerV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+        return createDatabaseServer(request, true);
+    }
+
+    private DatabaseServerStatusV4Response createDatabaseServer(AllocateDatabaseServerV4Request request, boolean enableMultipleDatabaseServers) {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
         ValidationResult validationResult = redBeamsTagValidator.validateTags(dbStack.getCloudPlatform(), request.getTags());
         if (validationResult.hasError()) {
             throw new IllegalArgumentException(validationResult.getFormattedErrors());
         }
-        DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
+        DBStack savedDBStack;
+        LOGGER.debug("Database server creation called with parameters: {}", request);
+        if (enableMultipleDatabaseServers) {
+            savedDBStack = redbeamsCreationService.launchNonUniqueDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
+        } else {
+            savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn(), request.getNetwork());
+        }
         return dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack);
     }
 
     @Override
     @InternalOnly
     public void updateClusterCrn(String environmentCrn, String currentClusterCrn, String newClusterCrn, @InitiatorUserCrn String initiatorUserCrn) {
-        DatabaseServerConfig databaseServerConfig = databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(environmentCrn, currentClusterCrn)
-                .orElseThrow(() -> new NotFoundException(String.format("No %s found with cluster CRN '%s' in environment '%s'",
-                        DatabaseServerConfig.class.getSimpleName(), currentClusterCrn, environmentCrn)));
-        databaseServerConfig.setClusterCrn(newClusterCrn);
-        databaseServerConfigService.update(databaseServerConfig);
-    }
-
-    @Override
-    @InternalOnly
-    public DatabaseServerStatusV4Response createInternal(AllocateDatabaseServerV4Request request,
-            @InitiatorUserCrn String initiatorUserCrn) {
-        return create(request);
+        List<DatabaseServerConfig> databaseServerConfigs = databaseServerConfigService.listByClusterCrn(environmentCrn, currentClusterCrn);
+        databaseServerConfigs.forEach(databaseServerConfig -> databaseServerConfig.setClusterCrn(newClusterCrn));
+        databaseServerConfigService.updateAll(databaseServerConfigs);
     }
 
     @Override

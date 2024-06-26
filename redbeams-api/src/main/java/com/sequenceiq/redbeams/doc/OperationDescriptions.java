@@ -26,6 +26,7 @@ public final class OperationDescriptions {
         public static final String GET_BY_NAME = "get a database server by name";
         public static final String GET_BY_CRN = "get a database server by CRN";
         public static final String GET_BY_CLUSTER_CRN = "get a database server by cluster CRN";
+        public static final String LIST_BY_CLUSTER_CRN = "list database servers by cluster CRN";
 
         public static final String CREATE = "create and register a database server in a cloud provider";
 
@@ -33,6 +34,8 @@ public final class OperationDescriptions {
         public static final String ROTATE = "rotate database server secrets";
         public static final String VALIDATE_UPGRADE = "validate if upgrade is possible on the database server in a cloud provider to a higher major version";
         public static final String CREATE_INTERNAL = "create and register a database server in a cloud provider with internal actor";
+        public static final String CREATE_INTERNAL_NON_UNIQUE =
+                "create and register multiple database servers for a cluster in a cloud provider with internal actor";
         public static final String UPDATE_CLUSTER_CRN = "Update the cluster crn associated with the database";
         public static final String RELEASE = "release management of a service-managed database server";
         public static final String REGISTER = "register a database server";

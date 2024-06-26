@@ -105,6 +105,19 @@ public interface DatabaseServerV4Endpoint {
             @NotNull @Parameter(description = DatabaseServerParamDescriptions.CLUSTER_CRN, required = true) @PathParam("clusterCrn") String clusterCrn
     );
 
+    @GET
+    @Path("clusterCrn/{clusterCrn}/list")
+    @Operation(summary = DatabaseServerOpDescription.LIST_BY_CLUSTER_CRN,
+            description = DatabaseServerNotes.LIST_BY_CLUSTER_CRN,
+            operationId = "listDatabaseServersByClusterCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerV4Responses listByClusterCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @NotNull @Parameter(description = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+    @QueryParam("environmentCrn") String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT, effect = DENY)
+            @NotNull @Parameter(description = DatabaseServerParamDescriptions.CLUSTER_CRN, required = true) @PathParam("clusterCrn") String clusterCrn
+    );
+
     @POST
     @Path("managed")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -131,6 +144,17 @@ public interface DatabaseServerV4Endpoint {
             operationId = "createDatabaseServerInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerStatusV4Response createInternal(
+            @Valid @Parameter(description = DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+    );
+
+    @POST
+    @Path("internal/managed/nonunique")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerOpDescription.CREATE_INTERNAL_NON_UNIQUE, description = DatabaseServerNotes.CREATE,
+            operationId = "createNonUniqueDatabaseServerInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerStatusV4Response createNonUniqueInternal(
             @Valid @Parameter(description = DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn
     );

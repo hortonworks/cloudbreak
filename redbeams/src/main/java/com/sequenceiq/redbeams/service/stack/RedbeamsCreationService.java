@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -31,9 +32,11 @@ import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigServic
 @Service
 public class RedbeamsCreationService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsCreationService.class);
+
     private static final long DEFAULT_WORKSPACE = 0L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsCreationService.class);
+    private static final int MAXIMUM_DB_SERVERS_FOR_CLUSTER = 2;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -52,12 +55,8 @@ public class RedbeamsCreationService {
 
     public DBStack launchDatabaseServer(DBStack dbStack, String clusterCrn, ProviderParametersBase networkParameters) {
         MDCBuilder.buildMdcContext(dbStack);
-        LOGGER.debug("Create called with: {}", dbStack);
         validateDbDoesNotExist(dbStack);
-
-        Optional<DatabaseServerConfig> optionalDBServerConfig =
-                databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(dbStack.getEnvironmentId(), clusterCrn);
-
+        Optional<DatabaseServerConfig> optionalDBServerConfig = databaseServerConfigService.findByClusterCrn(dbStack.getEnvironmentId(), clusterCrn);
         if (optionalDBServerConfig.isEmpty()) {
             LOGGER.debug("DataBaseServerConfig is not available by cluster crn '{}'", clusterCrn);
             DBStack savedDbStack = saveDbStackAndRegisterDatabaseServerConfig(dbStack, clusterCrn);
@@ -74,6 +73,20 @@ public class RedbeamsCreationService {
                 LOGGER.debug("No DB provision has been launched");
                 return dbServerConfig.getDbStack().get();
             }
+        }
+    }
+
+    public DBStack launchNonUniqueDatabaseServer(DBStack dbStack, String clusterCrn, ProviderParametersBase networkParameters) {
+        MDCBuilder.buildMdcContext(dbStack);
+        validateDbDoesNotExist(dbStack);
+        List<DatabaseServerConfig> configs = databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(dbStack.getEnvironmentId(), clusterCrn);
+        if (configs.size() < MAXIMUM_DB_SERVERS_FOR_CLUSTER) {
+            DBStack savedDbStack = saveDbStackAndRegisterDatabaseServerConfig(dbStack, clusterCrn);
+            triggerProvisionFlow(savedDbStack, networkParameters);
+            return savedDbStack;
+        } else {
+            throw new BadRequestException(String.format("You cannot create additional database servers for this cluster because you currently have %d servers,"
+                    + " exceeding the maximum limit of %d.", configs.size(), MAXIMUM_DB_SERVERS_FOR_CLUSTER));
         }
     }
 
