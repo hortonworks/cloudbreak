@@ -3,7 +3,10 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
 import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_CLUSTER_SHAPE;
+import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_DATABASE_CRN;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
@@ -149,6 +152,8 @@ class SdxServiceTest {
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
+
+    private static final String DATABASE_CRN = "crn:cdp:database:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     private static final Long SDX_ID = 2L;
 
@@ -591,6 +596,8 @@ class SdxServiceTest {
         image.setOs(OS_NAME);
         image.setCatalogName(CATALOG_NAME);
         stackV4Response.setImage(image);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -660,6 +667,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -766,6 +775,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         assertDoesNotThrow(
@@ -972,6 +983,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -1002,6 +1015,58 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
         assertEquals("Resizing of the data lake is not supported", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeDatabaseProperlySetUp() throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(DATABASE_CRN);
+        sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxCluster.setRuntime("7.2.17");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(resizeRequest, AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        StackImageV4Response image = new StackImageV4Response();
+        image.setOs(OS_NAME);
+        image.setCatalogName(CATALOG_NAME);
+        stackV4Response.setImage(image);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        clusterV4Response.setDbSSLEnabled(false);
+        stackV4Response.setCluster(clusterV4Response);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
+                any(DatalakeDrSkipOptions.class), eq(false));
+
+        SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
+        Map<String, Object> databaseAttributes = createdSdxCluster.getSdxDatabase().getAttributes().getMap();
+        assertEquals(SdxDatabaseAvailabilityType.NON_HA, createdSdxCluster.getSdxDatabase().getDatabaseAvailabilityType());
+        assertEquals(DATABASE_CRN, databaseAttributes.get(PREVIOUS_DATABASE_CRN));
+        assertEquals(LIGHT_DUTY.toString(), databaseAttributes.get(PREVIOUS_CLUSTER_SHAPE));
+        assertEquals(false, databaseAttributes.get(DATABASE_SSL_ENABLED));
     }
 
     @Test
@@ -1211,6 +1276,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -1257,6 +1324,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -1401,6 +1470,8 @@ class SdxServiceTest {
         image.setOs(OS_NAME);
         image.setCatalogName(CATALOG_NAME);
         stackV4Response.setImage(image);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(eq(0L), eq("dl-name"), any(), eq("hortonworks"))).thenReturn(stackV4Response);
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
         when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
@@ -1482,6 +1553,8 @@ class SdxServiceTest {
         volumeV4Response.setSize(1024);
         masterIgTemplate.setAttachedVolumes(Set.of(volumeV4Response));
         stackV4Response.setInstanceGroups(List.of(masterIg));
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
@@ -1538,6 +1611,8 @@ class SdxServiceTest {
         volumeV4Response.setSize(1024);
         masterIgTemplate.setAttachedVolumes(Set.of(volumeV4Response));
         stackV4Response.setInstanceGroups(List.of(masterIg));
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
@@ -1601,6 +1676,8 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setCluster(new ClusterV4Response());
+        stackV4Response.getCluster().setDbSSLEnabled(false);
         stackV4Response.setStatus(Status.STOPPED);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         doThrow(new BadRequestException("Invalid custom instance type for instance group: master - r5.large"))
@@ -1844,5 +1921,4 @@ class SdxServiceTest {
         clusterV4Response.setName(CLUSTER_NAME);
         return clusterV4Response;
     }
-
 }
