@@ -296,7 +296,10 @@ cb:
   blueprint:
     cm:
       gov:
-        exclusionList: "cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-data-engineering-spark3-ha,cdp-rt-data-mart-spark3"
+        exclusions:
+          7.2.16: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-data-engineering-spark3-ha,cdp-rt-data-mart-spark3
+          7.2.17: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light,cdp-data-engineering-spark3-ha,cdp-rt-data-mart-spark3
+          default: cdp-flow-management,cdp-flow-management-small,cdp-flink-heavy,cdp-flink-light
       defaults:
         7.2.7: >
           7.2.7 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
