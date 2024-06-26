@@ -181,6 +181,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public static final String PREVIOUS_CLUSTER_SHAPE = "previousClusterShape";
 
+    public static final String DATABASE_SSL_ENABLED = "databaseSslEnabled";
+
     public static final Map<CloudPlatform, Versioned> MIN_RUNTIME_VERSION_FOR_RAZ = new HashMap<>() {
         {
             put(AWS, () -> "7.2.2");
@@ -700,7 +702,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(), stackV4Response.getInstanceGroups(),
                 sdxCluster.getClusterShape());
         overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage(),
-                sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape());
+                sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape(), stackV4Response.getCluster().isDbSSLEnabled());
         newSdxCluster.setStackRequest(stackRequest);
         sdxRecommendationService.validateVmTypeOverride(environment, newSdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
@@ -798,7 +800,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void overrideDefaultDatabaseProperties(SdxDatabase sdxDatabase, SdxDatabaseComputeStorageRequest customSdxDatabase,
-            String previousDatabaseCrn, SdxClusterShape previousClusterShape) {
+            String previousDatabaseCrn, SdxClusterShape previousClusterShape, boolean dbSSLEnabled) {
         Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
         if (customSdxDatabase != null) {
             LOGGER.info("Custom database properties: {}", customSdxDatabase);
@@ -811,6 +813,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         attributes.put(PREVIOUS_DATABASE_CRN, previousDatabaseCrn);
         attributes.put(PREVIOUS_CLUSTER_SHAPE, previousClusterShape.toString());
+        attributes.put(DATABASE_SSL_ENABLED, dbSSLEnabled);
         sdxDatabase.setAttributes(new Json(attributes));
     }
 
