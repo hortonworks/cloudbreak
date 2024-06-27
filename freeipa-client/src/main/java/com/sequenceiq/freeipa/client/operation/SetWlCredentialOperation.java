@@ -6,12 +6,16 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SetWlCredentialOperation extends UserModOperation {
 
-    public static final String CDP_HASHED_PASSWORD = "cdpHashedPassword";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetWlCredentialOperation.class);
 
-    public static final String CDP_UNENCRYPTED_KRB_PRINCIPAL_KEY = "cdpUnencryptedKrbPrincipalKey";
+    private static final String CDP_HASHED_PASSWORD = "cdpHashedPassword";
+
+    private static final String CDP_UNENCRYPTED_KRB_PRINCIPAL_KEY = "cdpUnencryptedKrbPrincipalKey";
 
     private String hashedPassword;
 
@@ -47,10 +51,13 @@ public class SetWlCredentialOperation extends UserModOperation {
     protected Map<String, Object> getParams() {
         Map<String, Object> params = sensitiveMap();
         List<String> attributes = new ArrayList<>();
-        if (StringUtils.isNotBlank(hashedPassword)) {
+        if (StringUtils.isNoneBlank(hashedPassword, unencryptedKrbPrincipalKey)) {
             attributes.add(CDP_HASHED_PASSWORD + "=" + hashedPassword);
             attributes.add(CDP_UNENCRYPTED_KRB_PRINCIPAL_KEY + "=" + unencryptedKrbPrincipalKey);
             attributes.add("krbPasswordExpiration=" + expiration);
+        } else if (StringUtils.isNotBlank(hashedPassword) ^ StringUtils.isNotBlank(unencryptedKrbPrincipalKey)) {
+            LOGGER.warn("Not possible to update password as hashedPassword is [{}] and unencryptedKrbPrincipalKey is [{}]",
+                    StringUtils.isBlank(hashedPassword) ? "BLANK" : "PRESENT", StringUtils.isBlank(unencryptedKrbPrincipalKey) ? "BLANK" : "PRESENT");
         }
 
         // In order for the workload credentials update optimization to work correctly, we must update the title attribute
