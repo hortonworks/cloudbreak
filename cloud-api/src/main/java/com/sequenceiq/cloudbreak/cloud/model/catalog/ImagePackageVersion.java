@@ -23,6 +23,7 @@ public enum ImagePackageVersion {
     SPARK3("spark3", "Spark 3"),
     STACK("stack"),
     IMDS_VERSION("imds"),
+    CDP_PROMETHEUS("cdp-prometheus"),
     PSQL10("psql10", "PostgreSQL 10"),
     PSQL11("psql11", "PostgreSQL 11"),
     PSQL14("psql14", "PostgreSQL 14");
@@ -43,6 +44,12 @@ public enum ImagePackageVersion {
         this.displayName = displayName;
     }
 
+    public static Optional<ImagePackageVersion> getByKey(String key) {
+        return Arrays.stream(values())
+                .filter(imagePackageVersion -> imagePackageVersion.getKey().equals(key))
+                .findFirst();
+    }
+
     public String getKey() {
         return key;
     }
@@ -53,11 +60,5 @@ public enum ImagePackageVersion {
 
     public boolean hasProperDisplayName() {
         return !key.equals(displayName);
-    }
-
-    public static Optional<ImagePackageVersion> getByKey(String key) {
-        return Arrays.stream(values())
-                .filter(imagePackageVersion -> imagePackageVersion.getKey().equals(key))
-                .findFirst();
     }
 }
