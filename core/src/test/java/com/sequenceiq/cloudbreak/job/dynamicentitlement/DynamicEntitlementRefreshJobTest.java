@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,13 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
@@ -73,11 +78,14 @@ class DynamicEntitlementRefreshJobTest {
     @Mock
     private InternalCrnModifier internalCrnModifier;
 
+    @Mock
+    private ImageService imageService;
+
     @InjectMocks
     private DynamicEntitlementRefreshJob underTest;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws CloudbreakImageNotFoundException {
         underTest.setLocalId(String.valueOf(LOCAL_ID));
         lenient().when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
         lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -85,6 +93,9 @@ class DynamicEntitlementRefreshJobTest {
                 .thenReturn(INTERNAL_CRN);
         lenient().when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID)))
                 .thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
+        Image image = mock(Image.class);
+        lenient().when(image.getPackageVersions()).thenReturn(Map.of(ImagePackageVersion.CDP_PROMETHEUS.getKey(), "2.36.2"));
+        lenient().when(imageService.getImage(eq(LOCAL_ID))).thenReturn(image);
     }
 
     @Test
@@ -95,6 +106,7 @@ class DynamicEntitlementRefreshJobTest {
         underTest.executeTracedJob(jobExecutionContext);
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlements(eq(stack));
     }
 
     @Test
@@ -119,6 +131,7 @@ class DynamicEntitlementRefreshJobTest {
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
         verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
     }
 
     @Test
@@ -131,6 +144,21 @@ class DynamicEntitlementRefreshJobTest {
         underTest.executeTracedJob(jobExecutionContext);
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
+    }
+
+    @Test
+    void testExecuteWhenRequiredPackagesAreNotInstalled() throws JobExecutionException, CloudbreakImageNotFoundException {
+        StackDto stack = stack(Status.AVAILABLE);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        Image image = mock(Image.class);
+        when(image.getPackageVersions()).thenReturn(Map.of());
+        lenient().when(imageService.getImage(eq(LOCAL_ID))).thenReturn(image);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
     }
 
     private List<InstanceGroupDto> getInstanceGroupDtosWithSopped() {
