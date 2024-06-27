@@ -365,6 +365,7 @@ public class ModelDescriptions {
         public static final String ROTATE_SALT_PASSWORD_REASON = "Indicates why the salt password rotation was started";
 
         public static final String FLAG_SKIP_SALT_UPDATE = "Flag to indicate if salt update should be skipped or not.";
+        public static final String DATABASE_SSL_ENABLED = "Whether database SSL is enabled on this cluster or not.";
     }
 
     public static class GatewayModelDescription {

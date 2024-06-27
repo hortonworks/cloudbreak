@@ -133,6 +133,7 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setRangerRazEnabled(source.isRangerRazEnabled());
         clusterResponse.setRangerRmsEnabled(source.isRangerRmsEnabled());
         clusterResponse.setCertExpirationState(source.getCertExpirationState());
+        clusterResponse.setDbSSLEnabled(source.getDbSslEnabled() != null && source.getDbSslEnabled());
         return clusterResponse;
     }
 
