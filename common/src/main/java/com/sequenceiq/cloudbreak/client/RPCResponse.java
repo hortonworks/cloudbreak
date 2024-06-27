@@ -25,6 +25,8 @@ public class RPCResponse<R> {
 
     private Boolean truncated;
 
+    private List<RpcBatchResult> results;
+
     public Integer getCount() {
         return count;
     }
@@ -89,6 +91,14 @@ public class RPCResponse<R> {
         this.truncated = truncated;
     }
 
+    public List<RpcBatchResult> getResults() {
+        return results;
+    }
+
+    public void setResults(List<RpcBatchResult> results) {
+        this.results = results;
+    }
+
     @JsonIgnore
     public RPCMessage getFirstRpcMessage() {
         return CollectionUtils.isNotEmpty(messages) ? messages.get(0) : null;
@@ -101,15 +111,16 @@ public class RPCResponse<R> {
 
     @Override
     public String toString() {
-        return "RPCResponse{"
-                + "count=" + count
-                + ", messages=" + messages
-                + ", failed=" + failed
-                + ", completed=" + completed
-                + ", value=" + value
-                + ", summary='" + summary + '\''
-                + ", truncated=" + truncated
-                + ", result=" + result
-                + '}';
+        return "RPCResponse{" +
+                "count=" + count +
+                ", messages=" + messages +
+                ", result=" + result +
+                ", failed=" + failed +
+                ", completed=" + completed +
+                ", value=" + value +
+                ", summary='" + summary + '\'' +
+                ", truncated=" + truncated +
+                ", results=" + results +
+                '}';
     }
 }
