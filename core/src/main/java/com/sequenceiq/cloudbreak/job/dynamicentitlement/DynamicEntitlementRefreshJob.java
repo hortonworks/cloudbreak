@@ -19,11 +19,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -52,13 +56,16 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     @Inject
     private InternalCrnModifier internalCrnModifier;
 
+    @Inject
+    private ImageService imageService;
+
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         StackDto stack = stackDtoService.getById(getLocalIdAsLong());
         if (stack.getStatus().isAvailable() && anyInstanceStopped(stack)) {
             LOGGER.info("DynamicEntitlementRefreshJob cannot run because there are stopped instances in the stack {}.", stack.getResourceCrn());
             logDynamicEntitlementInfo(stack);
-        } else if (stack.getStatus().isAvailable() && config.isDynamicEntitlementEnabled()) {
+        } else if (stack.getStatus().isAvailable() && config.isDynamicEntitlementEnabled() && isRequiredPackagesInstalled(stack)) {
             LOGGER.debug("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}.", stack.getResourceCrn());
             try {
                 ThreadBasedUserCrnProvider.doAs(
@@ -75,6 +82,27 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.debug("DynamicEntitlementRefreshJob cannot run because of stack state.");
             logDynamicEntitlementInfo(stack);
         }
+    }
+
+    private boolean isRequiredPackagesInstalled(StackDto stack) {
+        try {
+            Image image = imageService.getImage(stack.getId());
+            if (image != null) {
+                Map<String, String> packageVersions = image.getPackageVersions();
+                if (packageVersions != null) {
+                    boolean requiredPackagesInstalled = packageVersions.containsKey(ImagePackageVersion.CDP_PROMETHEUS.getKey());
+                    LOGGER.debug("DynamicEntitlementRefreshJob required packages installed {}", requiredPackagesInstalled);
+                    return requiredPackagesInstalled;
+                } else {
+                    LOGGER.warn("PackageVersions is null in image {}", image.getImageId());
+                }
+            } else {
+                LOGGER.warn("Image not found");
+            }
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.warn("Image not found: {}", e.getMessage());
+        }
+        return false;
     }
 
     private void logDynamicEntitlementInfo(StackDto stack) {
