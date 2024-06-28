@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -22,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.util.FieldUtils;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
@@ -77,6 +80,22 @@ public class PlatformAwareSdxConnectorTest {
         FieldUtils.setProtectedFieldValue("platformDependentSdxStatusServicesMap", underTest, status);
         FieldUtils.setProtectedFieldValue("platformDependentSdxDescribeServices", underTest, describe);
         FieldUtils.setProtectedFieldValue("platformDependentSdxDeleteServices", underTest, delete);
+    }
+
+    @Test
+    public void testOtherPlatformValidationFailure() {
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
+        assertThrows(BadRequestException.class, () -> underTest.validateIfOtherPlatformsHasSdx("env", TargetPlatform.PAAS));
+        verify(cdlSdxDescribeService).listSdxCrns(any());
+        verifyNoInteractions(paasSdxDescribeService);
+    }
+
+    @Test
+    public void testOtherPlatformValidationSuccess() {
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
+        underTest.validateIfOtherPlatformsHasSdx("env", TargetPlatform.PAAS);
+        verify(cdlSdxDescribeService).listSdxCrns(any());
+        verifyNoInteractions(paasSdxDescribeService);
     }
 
     @Test

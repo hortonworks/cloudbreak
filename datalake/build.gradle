@@ -60,6 +60,7 @@ dependencies {
   implementation project(':notification-sender')
   implementation project(':idbmms-connector')
   implementation project(':datalake-dr-connector')
+  implementation project(':sdx-connector')
 
   implementation project(':core-api')
   implementation project(':datalake-api')

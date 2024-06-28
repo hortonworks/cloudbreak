@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDhTearDownSe
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 
 @Configuration
-public class PlatformConfig {
+public class SdxConnectorPlatformConfig {
 
     @Inject
     private Optional<List<PlatformAwareSdxStatusService<?>>> platformDependentSdxStatusServices;

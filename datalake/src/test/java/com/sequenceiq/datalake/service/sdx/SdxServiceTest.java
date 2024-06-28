@@ -108,6 +108,8 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
@@ -245,6 +247,9 @@ class SdxServiceTest {
     @Mock
     private SdxRecommendationService sdxRecommendationService;
 
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
     @InjectMocks
     private SdxService underTest;
 
@@ -292,8 +297,21 @@ class SdxServiceTest {
 
     @BeforeEach
     void initMocks() {
-        lenient().when(platformConfig.getRazSupportedPlatforms())
-                .thenReturn(List.of(AWS, AZURE, GCP));
+        lenient().when(platformConfig.getRazSupportedPlatforms()).thenReturn(List.of(AWS, AZURE, GCP));
+        lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
+    }
+
+    @Test
+    void testOtherPlatformValidationFailure() {
+        doThrow(BadRequestException.class).when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCrn(ENVIRONMENT_CRN);
+        environmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        sdxClusterRequest.setJavaVersion(null);
+        assertThrows(BadRequestException.class, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        verify(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(eq(ENVIRONMENT_CRN), eq(TargetPlatform.PAAS));
     }
 
     @Test

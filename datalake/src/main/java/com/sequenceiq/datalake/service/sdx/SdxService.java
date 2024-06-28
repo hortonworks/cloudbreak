@@ -112,6 +112,8 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -279,6 +281,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private SdxRecommendationService sdxRecommendationService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
@@ -497,6 +502,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
+        platformAwareSdxConnector.validateIfOtherPlatformsHasSdx(environment.getCrn(), TargetPlatform.PAAS);
         validateImageRequest(sdxClusterRequest, imageSettingsV4Request);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
                 .getPlatformStringForImageCatalog(environment.getCloudPlatform(), isGovCloudEnvironment(environment));

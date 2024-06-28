@@ -19,6 +19,7 @@ import com.dyngr.core.AttemptResults;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -91,6 +92,17 @@ public class PlatformAwareSdxConnector {
 
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentCrn) {
         return platformDependentSdxStatusServicesMap.get(calculatePlatform(environmentCrn)).listSdxCrnStatusCheckPair(environmentCrn);
+    }
+
+    public void validateIfOtherPlatformsHasSdx(String environmentCrn, TargetPlatform currentPlatform) {
+        Set<TargetPlatform> platforms = platformDependentSdxDescribeServices.entrySet().stream()
+                .filter(entry -> !currentPlatform.equals(entry.getKey()))
+                .filter(entry -> !entry.getValue().listSdxCrns(environmentCrn).isEmpty())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        if (!platforms.isEmpty()) {
+            throw new BadRequestException(String.format("Platforms [%s] have already SDX cluster!", platforms));
+        }
     }
 
     private TargetPlatform calculatePlatform(String environmentCrn) {

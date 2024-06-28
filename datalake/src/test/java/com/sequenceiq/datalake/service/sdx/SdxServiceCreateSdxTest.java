@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -180,6 +181,9 @@ class SdxServiceCreateSdxTest {
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private SdxService underTest;
@@ -288,6 +292,7 @@ class SdxServiceCreateSdxTest {
                 .thenReturn(List.of(AWS, AZURE, GCP));
         lenient().when(entitlementService.isRazForGcpEnabled(anyString()))
                 .thenReturn(true);
+        lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
     }
 
     @Test
