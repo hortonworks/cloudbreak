@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK;
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -19,11 +20,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
@@ -65,6 +69,8 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -76,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -87,6 +94,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 class StackCommonServiceTest {
 
     private static final long WORKSPACE_ID = 1L;
+
+    private static final String INSTANCE_ID_PREFIX = "i-";
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
@@ -375,6 +384,117 @@ class StackCommonServiceTest {
         assertEquals("i-09855f4f334550bce, i-0c06d3e9d07bacad8 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
                 exception.getMessage());
         verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testThrowsExceptionWhenStackIsStopped() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.isStopped()).thenReturn(TRUE);
+        when(stackView.getName()).thenReturn(STACK_NAME.getName());
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        List<String> instanceIds = List.of("i-1", "i-2", "i-3");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
+        assertEquals("Cannot restart instances because the stackName is in stopped state.", exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testThrowsExceptionWhenInstancesNotOfGivenStack() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.isStopped()).thenReturn(FALSE);
+        when(stackView.getDisplayName()).thenReturn(STACK_NAME.getName());
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(generateInstances(2, InstanceStatus.SERVICES_HEALTHY));
+        List<String> instanceIds = List.of("i-1", "i-2", "i-3");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
+        assertEquals("Instance(s) Restart Failed for stackName DATALAKE. This Instance(s): i-3 either don't belong to this DATALAKE or" +
+                " they are wrong InstanceId(s).", exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testThrowsExceptionWhenMoreThan20InstancesGivenForRestart() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        List<InstanceMetadataView> allInstanceMetadataView = generateInstances(25, InstanceStatus.SERVICES_HEALTHY);
+        List<String> instanceIds = allInstanceMetadataView.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.isStopped()).thenReturn(FALSE);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(allInstanceMetadataView);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
+        assertEquals("Cannot restart more than 20 instances at the same time.", exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testThrowsExceptionWhenOneOrMoreInstancesAreNotAvailable() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        List<InstanceMetadataView> allInstanceMetadataView = generateInstances(5, InstanceStatus.SERVICES_HEALTHY);
+        List<InstanceMetadataView> healthyInstanceMetadataView = generateInstances(5, InstanceStatus.SERVICES_HEALTHY);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId(INSTANCE_ID_PREFIX + (6));
+        instanceMetaData.setInstanceStatus(InstanceStatus.ZOMBIE);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        instanceMetaData.setDiscoveryFQDN(INSTANCE_ID_PREFIX + (6));
+        allInstanceMetadataView.add(instanceMetaData);
+        List<String> instanceIds = allInstanceMetadataView.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.isStopped()).thenReturn(FALSE);
+        when(stackView.getDisplayName()).thenReturn(STACK_NAME.getName());
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        when(stack.getAllAvailableInstances()).thenReturn(healthyInstanceMetadataView);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(allInstanceMetadataView);
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
+        assertEquals("Instance(s) Restart Failed for stackName DATALAKE. This Instance(s): i-6 are either terminated or are in zombie state.",
+                exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testThrowsExceptionWhenTriedRestartingWithInvalidCloudProvider() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        List<InstanceMetadataView> allInstanceMetadataView = generateInstances(5, InstanceStatus.SERVICES_HEALTHY);
+        List<String> instanceIds = allInstanceMetadataView.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.isStopped()).thenReturn(FALSE);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(allInstanceMetadataView);
+        when(stack.getAllAvailableInstances()).thenReturn(allInstanceMetadataView);
+        when(stack.getPlatformVariant()).thenReturn("GCP");
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
+        assertEquals("Restart instances is not supported for GCP Cloud Platform", exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    void testRestartMultipleInstances() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        List<InstanceMetadataView> allInstanceMetadataView = generateInstances(5, InstanceStatus.SERVICES_HEALTHY);
+        List<String> instanceIds = allInstanceMetadataView.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.isStopped()).thenReturn(FALSE);
+        when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(allInstanceMetadataView);
+        when(stack.getAllAvailableInstances()).thenReturn(allInstanceMetadataView);
+        when(stack.getPlatformVariant()).thenReturn("AWS");
+        underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds);
+        verify(stackOperationService).restartInstances(stack, instanceIds);
     }
 
     @Test
@@ -723,5 +843,20 @@ class StackCommonServiceTest {
         FlowIdentifier result = underTest.rotateRdsCertificate(stack);
         verify(clusterOperationService).rotateRdsCertificate(stack);
         assertThat(result).isEqualTo(FLOW_IDENTIFIER);
+    }
+
+    private List<InstanceMetadataView> generateInstances(int count,
+            com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus instanceStatus) {
+        List<InstanceMetadataView> instances = new ArrayList<>(count);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        for (int i = 1; i <= count; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceId(INSTANCE_ID_PREFIX + (i));
+            instanceMetaData.setInstanceStatus(instanceStatus);
+            instanceMetaData.setInstanceGroup(instanceGroup);
+            instanceMetaData.setDiscoveryFQDN(INSTANCE_ID_PREFIX + (i));
+            instances.add(instanceMetaData);
+        }
+        return instances;
     }
 }

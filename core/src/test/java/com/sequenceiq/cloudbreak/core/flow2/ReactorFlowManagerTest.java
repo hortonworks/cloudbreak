@@ -134,6 +134,7 @@ class ReactorFlowManagerTest {
         hostGroupAdjustment.setScalingAdjustment(5);
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
         instanceIdsByHostgroup.put("hostgroup", Collections.singleton(1L));
+        List<String> instanceIds = List.of("i-1", "i-2");
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageid");
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
@@ -187,6 +188,7 @@ class ReactorFlowManagerTest {
         underTest.triggerDatalakeClusterRecovery(STACK_ID);
         underTest.triggerStopStartStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
+        underTest.triggerRestartInstances(STACK_ID, instanceIds);
         underTest.triggerClusterServicesRestart(STACK_ID, false);
         underTest.triggerClusterProxyConfigReRegistration(STACK_ID, false, "");
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null, null);

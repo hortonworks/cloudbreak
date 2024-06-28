@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.data
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartEvent.RESTART_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
@@ -80,6 +81,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTrigg
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RefreshEntitlementParamsFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.RestartInstancesEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -230,6 +232,12 @@ public class ReactorFlowManager {
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
+        return reactorNotifier.notify(stackId, selector, event);
+    }
+
+    public FlowIdentifier triggerRestartInstances(Long stackId, List<String> instanceIds) {
+        String selector = RESTART_TRIGGER_EVENT.event();
+        RestartInstancesEvent event = new RestartInstancesEvent(selector, stackId, instanceIds);
         return reactorNotifier.notify(stackId, selector, event);
     }
 

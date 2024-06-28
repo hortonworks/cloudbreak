@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymi
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -81,6 +83,13 @@ import com.sequenceiq.flow.service.FlowRetryService;
 public class StackCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
+
+    private static final int MAX_INSTANCES_TO_RESTART = 20;
+
+    private static final Set<String> RESTART_INSTANCES_SUPPORTED_CLOUD_PLATFORMS = Set.of(
+            CloudConstants.AWS,
+            CloudConstants.AZURE,
+            CloudConstants.MOCK);
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -263,6 +272,16 @@ public class StackCommonService {
         return stackOperationService.stopInstances(stack, instanceIds, forced);
     }
 
+    public FlowIdentifier restartMultipleInstances(NameOrCrn nameOrCrn, String accountId, List<String> instanceIds) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        validateStackIsNotStopped(stack);
+        validateAllInstancesInSameStack(stack, instanceIds);
+        validateNumberOfInstancesToRestart(instanceIds);
+        validateAllInstancesAreNotTerminatedAndZombie(stack, instanceIds);
+        validateCloudProvider(stack.getPlatformVariant());
+        return stackOperationService.restartInstances(stack, instanceIds);
+    }
+
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return putStartInWorkspace(stack);
@@ -408,6 +427,60 @@ public class StackCommonService {
                 throw new BadRequestException(String.format("%s are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
                         String.join(", ", instanceIds)));
             }
+        }
+    }
+
+    private void validateStackIsNotStopped(StackDto stack) {
+        if (stack.getStack().isStopped()) {
+            throw new BadRequestException(String.format("Cannot restart instances because the %s is in stopped state.", stack.getStack().getName()));
+        }
+    }
+
+    private void validateAllInstancesInSameStack(StackDto stackDto, List<String> instanceIds) {
+        List<String> allAvailableInstancesInStack = stackDto.getAllNotTerminatedInstanceMetaData().stream().map(InstanceMetadataView::getInstanceId)
+                .collect(Collectors.toList());
+        List<String> instancesNotInThisStack = new ArrayList<>();
+        for (String instanceId : instanceIds) {
+            if (!allAvailableInstancesInStack.contains(instanceId)) {
+                instancesNotInThisStack.add(instanceId);
+            }
+        }
+        if (!instancesNotInThisStack.isEmpty()) {
+            throw new BadRequestException(
+                    String.format("Instance(s) Restart Failed for %s %s. This Instance(s): %s either don't belong to this %s or they are wrong InstanceId(s).",
+                            stackDto.getStack().getDisplayName(), stackDto.getStack().getType().name(),
+                            String.join(", ", instancesNotInThisStack), stackDto.getStack().getType().name()));
+        }
+    }
+
+    private void validateAllInstancesAreNotTerminatedAndZombie(StackDto stackDto, List<String> instanceIds) {
+        List<String> allAvailableInstancesInStack = stackDto.getAllAvailableInstances().stream().map(InstanceMetadataView::getInstanceId)
+                .collect(Collectors.toList());
+
+        List<String> instancesNotAvailable = new ArrayList<>();
+        for (String instanceId: instanceIds) {
+            if (!allAvailableInstancesInStack.contains(instanceId)) {
+                instancesNotAvailable.add(instanceId);
+            }
+        }
+
+        if (!instancesNotAvailable.isEmpty()) {
+            throw new BadRequestException(
+                    String.format("Instance(s) Restart Failed for %s %s. This Instance(s): %s are either terminated or are in zombie state.",
+                            stackDto.getStack().getDisplayName(), stackDto.getStack().getType().name(),
+                            String.join(", ", instancesNotAvailable)));
+        }
+    }
+
+    private void validateNumberOfInstancesToRestart(List<String> instanceIds) {
+        if (instanceIds.size() > MAX_INSTANCES_TO_RESTART) {
+            throw new BadRequestException(String.format("Cannot restart more than %s instances at the same time.", MAX_INSTANCES_TO_RESTART));
+        }
+    }
+
+    private void validateCloudProvider(String cloudPlatform) {
+        if (!RESTART_INSTANCES_SUPPORTED_CLOUD_PLATFORMS.contains(cloudPlatform)) {
+            throw new BadRequestException(String.format("Restart instances is not supported for %s Cloud Platform", cloudPlatform));
         }
     }
 
