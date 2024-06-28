@@ -147,6 +147,11 @@ public interface StackDtoDelegate {
 
     Map<String, String> getParameters();
 
+    /**
+     * @deprecated please use PlatformAwareSdxConnector instead to find out related DL CRN by environmentCrn
+     * or ensure to use this only in case of VM form DL deployment
+     */
+    @Deprecated
     default String getDatalakeCrn() {
         return getStack().getDatalakeCrn();
     }

@@ -76,7 +76,7 @@ public class SharedServiceConfigProvider {
     }
 
     private void configureClusterByPaasDatalake(Cluster requestedCluster, Stack stack, SdxBasicView sdxBasicView) {
-        Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+        Stack datalakeStack = stackService.getByCrn(sdxBasicView.crn());
         if (datalakeStack != null) {
             setupHmsRdsByPaasDatalakeStack(datalakeStack, requestedCluster);
         } else {

@@ -132,6 +132,11 @@ public class StackApiView extends CompactView {
         this.created = created;
     }
 
+    /**
+     * @deprecated please use PlatformAwareSdxConnector instead to find out related DL CRN by environmentCrn
+     * or ensure to use this only in case of VM form DL deployment
+     */
+    @Deprecated
     public String getDatalakeCrn() {
         return datalakeCrn;
     }
