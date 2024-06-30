@@ -169,7 +169,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public static final String CCMV2_REQUIRED_VERSION = "7.2.1";
 
-    public static final String SDX_RESIZE_NAME_SUFFIX = "-md";
+    public static final Map<SdxClusterShape, String> SDX_RESIZE_NAME_SUFFIX = Map.of(
+            SdxClusterShape.LIGHT_DUTY, "-ld",
+            SdxClusterShape.MEDIUM_DUTY_HA, "-md",
+            SdxClusterShape.ENTERPRISE, "-ent"
+    );
 
     public static final long WORKSPACE_ID_DEFAULT = 0L;
 
@@ -688,7 +692,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);
         CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
-        customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
+        customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX.get(shape));
         stackRequest.setCustomDomain(customDomainSettingsV4Request);
 
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster);
@@ -1372,6 +1376,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         if (sdxCluster.getClusterShape() == shape) {
             throw new BadRequestException("SDX cluster already is of requested shape");
+        }
+        if (!SDX_RESIZE_NAME_SUFFIX.containsKey(shape)) {
+            throw new BadRequestException("Requested resize shape " + shape + " is not present in the suffix mapping!");
         }
         sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(accountId, sdxCluster.getEnvCrn())
                 .ifPresent(existedSdx -> {
