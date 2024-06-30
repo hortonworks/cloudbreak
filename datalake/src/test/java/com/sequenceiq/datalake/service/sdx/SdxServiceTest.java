@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLE
 import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_CLUSTER_SHAPE;
 import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_DATABASE_CRN;
+import static com.sequenceiq.datalake.service.sdx.SdxService.SDX_RESIZE_NAME_SUFFIX;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
@@ -44,7 +45,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -565,7 +565,7 @@ class SdxServiceTest {
         resizeRequest.setEnvironment(ENVIRONMENT_NAME);
         resizeRequest.setClusterShape(ENTERPRISE);
         SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setId(1L);
+        sdxCluster.setId(SDX_ID);
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.17");
@@ -596,13 +596,21 @@ class SdxServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
-        SdxCluster createdSdxCluster = result.getLeft();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
+                any(DatalakeDrSkipOptions.class), eq(false));
+
+        SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
         assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
         assertEquals("7.2.17", createdSdxCluster.getRuntime());
         assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
         assertEquals(ENVIRONMENT_NAME, createdSdxCluster.getEnvName());
+
+        String stackRequestRawString = createdSdxCluster.getStackRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
+        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(ENTERPRISE), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -640,7 +648,7 @@ class SdxServiceTest {
         sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
 
         SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setId(1L);
+        sdxCluster.setId(SDX_ID);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
@@ -667,14 +675,22 @@ class SdxServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), sdxClusterResizeRequest));
-        SdxCluster createdSdxCluster = result.getLeft();
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
+                any(DatalakeDrSkipOptions.class), eq(false));
+
+        SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
         assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
         assertEquals(runtime, createdSdxCluster.getRuntime());
         assertEquals("gcs://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
         assertEquals(ENVIRONMENT_NAME, createdSdxCluster.getEnvName());
 
+        String stackRequestRawString = createdSdxCluster.getStackRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
+        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(MEDIUM_DUTY_HA), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -957,7 +973,7 @@ class SdxServiceTest {
         sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
 
         SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setId(1L);
+        sdxCluster.setId(SDX_ID);
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
@@ -983,13 +999,21 @@ class SdxServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), sdxClusterResizeRequest));
-        SdxCluster createdSdxCluster = result.getLeft();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, sdxClusterResizeRequest));
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
+                any(DatalakeDrSkipOptions.class), eq(false));
+
+        SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
         assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
         assertEquals(runtime, createdSdxCluster.getRuntime());
         assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
         assertEquals(ENVIRONMENT_NAME, createdSdxCluster.getEnvName());
+
+        String stackRequestRawString = createdSdxCluster.getStackRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
+        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(MEDIUM_DUTY_HA), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -1063,6 +1087,11 @@ class SdxServiceTest {
         assertEquals(DATABASE_CRN, databaseAttributes.get(PREVIOUS_DATABASE_CRN));
         assertEquals(LIGHT_DUTY.toString(), databaseAttributes.get(PREVIOUS_CLUSTER_SHAPE));
         assertEquals(false, databaseAttributes.get(DATABASE_SSL_ENABLED));
+
+        String stackRequestRawString = createdSdxCluster.getStackRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
+        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(ENTERPRISE), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -1727,7 +1756,7 @@ class SdxServiceTest {
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
 
         assertEquals(11, stackV4Request.getJavaVersion());
-        assertEquals(CLUSTER_NAME + "-md", stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(ENTERPRISE), stackV4Request.getCustomDomain().getHostname());
         assertEquals("RHEL8", stackV4Request.getImage().getOs());
         assertEquals("cb-default", stackV4Request.getImage().getCatalog());
         assertEquals("random-uuid-id", stackV4Request.getImage().getId());
