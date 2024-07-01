@@ -1,9 +1,11 @@
 package com.sequenceiq.redbeams.converter.v4.databaseserver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -132,6 +134,12 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         dbStack.setCloudPlatform(cloudPlatform.name());
         server.setDbStack(dbStack);
         when(stringToSecretResponseConverter.convert(anyString())).thenReturn(new SecretResponse());
+        dbStack.setSslConfig(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(mock(SslConfig.class)));
+        if (!CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform.name())) {
+            when(databaseServerSslCertificateConfig.getSslCertificatesOutdated(anyString(), any(), anySet()))
+                    .thenReturn(SslCertStatus.UP_TO_DATE);
+        }
 
         DatabaseServerV4Response response = converter.convert(server);
 
@@ -157,6 +165,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getStatusReason()).isEqualTo(dbStack.getStatusReason());
         assertThat(response.getMajorVersion()).isEqualTo(dbStack.getMajorVersion());
         assertThat(response.getDatabasePropertiesV4Response().getConnectionNameFormat()).isEqualTo(connectionNameFormat);
+        assertThat(response.getSslConfig().getSslCertificatesStatus()).isEqualTo(SslCertStatus.UP_TO_DATE);
     }
 
     private static void setDatabaseServer(DBStack dbStack, AzureDatabaseType azureDatabaseType) {

@@ -2,14 +2,22 @@ package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,15 +64,52 @@ class GcpDatabaseServerCertificateServiceTest {
     private GcpDatabaseServerCertificateService underTest;
 
     @BeforeEach
-    public void initTests() {
+    void initTests() {
         when(cloudCredential.getName()).thenReturn(PROJECT_ID);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(PROJECT_ID);
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpSQLAdminFactory.buildSQLAdmin(cloudCredential, PROJECT_ID)).thenReturn(sqlAdmin);
     }
 
+    static Stream<Arguments> stringIntAndListProvider() {
+        return Stream.of(
+                arguments("2034-06-29T09:55:05Z", "2023", "2023_2034-06-29T09:55:05Z", 2035187705000L),
+                arguments("2034-06-29T09:55:05.3Z", "2023", "2023_2034-06-29T09:55:05.3Z", 2035187705300L),
+                arguments("2034-06-29", "2023", "2023_2034-06-29", 2035152000000L),
+                arguments("2034-06-29T09:55:05.652Z", "2023", "2023_2034-06-29T09:55:05.652Z", 2035187705652L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("stringIntAndListProvider")
+    void testGetActiveSslRootCertificateAndReturnValidCert(String expirationTime, String createTime, String expectedCertificateIdentifier,
+            long expectedCreationTimeInEpochMillis) throws IOException {
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        DatabaseServer databaseServer = mock(DatabaseServer.class);
+        Instances instances = mock(Instances.class);
+        Get get = mock(Get.class);
+        DatabaseInstance instance = mock(DatabaseInstance.class);
+        SslCert sslCert = mock(SslCert.class);
+        when(databaseServer.getServerId()).thenReturn(DB_SERVER_ID);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(get.execute()).thenReturn(instance);
+        when(instances.get(PROJECT_ID, DB_SERVER_ID)).thenReturn(get);
+        when(sqlAdmin.instances()).thenReturn(instances);
+        when(instance.getServerCaCert()).thenReturn(sslCert);
+        when(sslCert.getCert()).thenReturn(CERT);
+        when(sslCert.getCommonName()).thenReturn("Google_CA");
+        when(sslCert.getCreateTime()).thenReturn(createTime);
+        when(sslCert.getExpirationTime()).thenReturn(expirationTime);
+
+        CloudDatabaseServerSslCertificate result = underTest.getActiveSslRootCertificate(authenticatedContext, databaseStack);
+        assertEquals(CERT, result.certificate());
+        assertEquals(expectedCertificateIdentifier, result.certificateIdentifier());
+        assertEquals(expectedCreationTimeInEpochMillis, result.expirationDate());
+        assertEquals(CloudDatabaseServerSslCertificateType.ROOT, result.certificateType());
+    }
+
     @Test
-    public void testGetActiveSslRootCertificateAndReturnValidCert() throws IOException {
+    void testGetActiveSslRootCertificateWhenInvalidExpirationDateGivenByGcp() throws IOException {
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         DatabaseServer databaseServer = mock(DatabaseServer.class);
         Instances instances = mock(Instances.class);
@@ -80,16 +125,22 @@ class GcpDatabaseServerCertificateServiceTest {
         when(sslCert.getCert()).thenReturn(CERT);
         when(sslCert.getCommonName()).thenReturn("Google_CA");
         when(sslCert.getCreateTime()).thenReturn("2023");
-        when(sslCert.getExpirationTime()).thenReturn("2033");
+        when(sslCert.getExpirationTime()).thenReturn("2034-06-29TZ");
 
         CloudDatabaseServerSslCertificate result = underTest.getActiveSslRootCertificate(authenticatedContext, databaseStack);
         assertEquals(CERT, result.certificate());
-        assertEquals("2023_2033", result.certificateIdentifier());
         assertEquals(CloudDatabaseServerSslCertificateType.ROOT, result.certificateType());
+        ZonedDateTime expectedExpirationDate = ZonedDateTime
+                .now(ZoneOffset.UTC)
+                .plusYears(10);
+        long expectedExpirationDateIntervalStart = expectedExpirationDate.minusMinutes(10).toInstant().toEpochMilli();
+        long expectedExpirationDateIntervalEnd = expectedExpirationDate.plusMinutes(10).toInstant().toEpochMilli();
+        assertTrue(expectedExpirationDateIntervalStart < result.expirationDate());
+        assertTrue(result.expirationDate() < expectedExpirationDateIntervalEnd);
     }
 
     @Test
-    public void testGetActiveSslRootCertificateAndNoCertIsConfigured() throws IOException {
+    void testGetActiveSslRootCertificateAndNoCertIsConfigured() throws IOException {
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         DatabaseServer databaseServer = mock(DatabaseServer.class);
         Instances instances = mock(Instances.class);
