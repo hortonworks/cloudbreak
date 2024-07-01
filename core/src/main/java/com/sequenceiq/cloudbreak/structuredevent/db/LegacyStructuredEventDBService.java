@@ -50,6 +50,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     private static final long NINETY_DAYS = 90L;
 
+    private static final long SLOW_QUERY_WARNING_THRESHOLD = 10000L;
+
     private static final long THREE_MONTHS = Duration.ofDays(NINETY_DAYS).toMillis();
 
     private static final int MILLISEC_MULTIPLIER = 1000;
@@ -130,8 +132,22 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Override
     public <T extends StructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId,
             Pageable pageable) {
-        Page<StructuredEventEntity> events = pagingRepository.findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass),
+        long start = System.currentTimeMillis();
+        StructuredEventType eventType = StructuredEventType.getByClass(eventClass);
+        Page<StructuredEventEntity> events = pagingRepository.findByEventTypeAndResourceTypeAndResourceId(eventType,
                 resourceType, resourceId, pageable);
+        long duration = System.currentTimeMillis() - start;
+        Long totalElements = events != null ? events.getTotalElements() : null;
+        Integer totalPages = events != null ? events.getTotalPages() : null;
+        if (duration < SLOW_QUERY_WARNING_THRESHOLD) {
+            LOGGER.debug("Querying StructuredEvents for eventType: {}, resource type: {}, resource ID: {} took {} ms, page: {}," +
+                    " totalElements: {}, totalPages: {}",
+                    eventType, resourceType, resourceId, duration, pageable, totalElements, totalPages);
+        } else {
+            LOGGER.warn("Querying StructuredEvents is SLOW for eventType: {}, resource type: {}, resource ID: {} took {} ms, page: {}," +
+                    " totalElements: {}, totalPages: {}",
+                    eventType, resourceType, resourceId, duration, pageable, totalElements, totalPages);
+        }
         return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> structuredEventEntityToStructuredEventConverter.convert(event));
     }
 
