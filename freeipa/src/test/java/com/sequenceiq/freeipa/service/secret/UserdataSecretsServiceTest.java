@@ -22,8 +22,6 @@ import java.util.stream.LongStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -173,15 +171,13 @@ class UserdataSecretsServiceTest {
         lenient().when(cloudInformationDecorator.getUserdataSecretEncryptionKeyType()).thenReturn(EncryptionKeyType.AWS_KMS_KEY_ARN);
     }
 
-    @ValueSource(booleans = {true, false})
-    @ParameterizedTest
-    void testCreateUserdataSecrets(boolean hasEncryptionKey) {
-        StackEncryption stackEncryption = getStackEncryption(hasEncryptionKey);
+    @Test
+    void testCreateUserdataSecrets() {
+        StackEncryption stackEncryption = getStackEncryption();
         Stack stack = createStack();
         List<Long> privateIds = LongStream.range(0, NODE_COUNT).boxed().toList();
         stubCreateCloudSecret();
         stubFindByResourceReferencesAndStatusAndTypeAndStack();
-        when(stackEncryptionService.getStackEncryption(STACK_ID)).thenReturn(stackEncryption);
 
         underTest.createUserdataSecrets(stack, privateIds, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
 
@@ -195,11 +191,7 @@ class UserdataSecretsServiceTest {
             assertEquals("PLACEHOLDER", request.secretValue());
             assertEquals(CLOUD_CONTEXT, request.cloudContext());
             assertEquals(CLOUD_CREDENTIAL, request.cloudCredential());
-            if (hasEncryptionKey) {
-                assertEquals(ENCRYPTION_KEY_SOURCE, request.encryptionKeySource().get());
-            } else {
-                assertEquals(DEFAULT_ENCRYPTION_KEY_SOURCE, request.encryptionKeySource().get());
-            }
+            assertEquals(DEFAULT_ENCRYPTION_KEY_SOURCE, request.encryptionKeySource().get());
             assertEquals("PLACEHOLDER", request.secretValue());
             assertEquals("Created by CDP. This secret stores the sensitive values needed on the instance during first boot.", request.description());
         }
@@ -258,7 +250,7 @@ class UserdataSecretsServiceTest {
 
     @Test
     void testUpdateUserdataSecrets() {
-        StackEncryption stackEncryption = getStackEncryption(true);
+        StackEncryption stackEncryption = getStackEncryption();
         Stack stack = createStack();
         List<InstanceMetaData> instanceMetaDatas = getInstanceMetaDatas();
         CredentialResponse credentialResponse = getCredentialResponse();
@@ -421,11 +413,9 @@ class UserdataSecretsServiceTest {
         return stack;
     }
 
-    private static StackEncryption getStackEncryption(boolean hasEncryptionKey) {
+    private static StackEncryption getStackEncryption() {
         StackEncryption stackEncryption = new StackEncryption();
-        if (hasEncryptionKey) {
-            stackEncryption.setEncryptionKeyCloudSecretManager(ENCRYPTION_KEY);
-        }
+        stackEncryption.setEncryptionKeyCloudSecretManager(ENCRYPTION_KEY);
         return stackEncryption;
     }
 

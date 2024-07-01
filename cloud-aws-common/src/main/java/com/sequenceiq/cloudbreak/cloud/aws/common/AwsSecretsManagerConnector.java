@@ -321,14 +321,17 @@ public class AwsSecretsManagerConnector implements SecretConnector {
                 .secretString(request.secretValue())
                 .description(request.description())
                 .tags(awsTaggingService.prepareSecretsManagerTags(request.tags()));
-        request.encryptionKeySource().ifPresent(value -> {
-            if (value.keyType().equals(EncryptionKeyType.AWS_KMS_KEY_ARN)) {
+        request.encryptionKeySource().ifPresentOrElse(value -> {
+            if (EncryptionKeyType.AWS_KMS_KEY_ARN.equals(value.keyType())) {
                 requestBuilder.kmsKeyId(value.keyValue());
+            } else if (EncryptionKeyType.AWS_MANAGED_KEY.equals(value.keyType())) {
+                LOGGER.info("Using the default AWS managed encryption key...");
             } else {
-                LOGGER.warn("Only EncryptionKeyType of {} is allowed when creating AWS Secrets Manager secrets! " +
-                                "Using the default AWS managed encryption key instead...", EncryptionKeyType.AWS_KMS_KEY_ARN);
+                LOGGER.warn("Only EncryptionKeyTypes of {} are allowed when creating AWS Secrets Manager secrets! " +
+                        "Using the default AWS managed encryption key...",
+                        List.of(EncryptionKeyType.AWS_KMS_KEY_ARN, EncryptionKeyType.AWS_MANAGED_KEY));
             }
-        });
+        }, () -> LOGGER.info("Using the default AWS managed encryption key, since no encryption key was specified in the request..."));
         return requestBuilder.build();
     }
 

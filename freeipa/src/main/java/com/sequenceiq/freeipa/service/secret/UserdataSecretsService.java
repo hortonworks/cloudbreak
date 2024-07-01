@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.SecretConnector;
@@ -43,7 +43,7 @@ import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvid
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
-@Component
+@Service
 public class UserdataSecretsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserdataSecretsService.class);
@@ -81,7 +81,7 @@ public class UserdataSecretsService {
         CreateCloudSecretRequest.Builder createRequestBuilder = CreateCloudSecretRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withEncryptionKeySource(getEncryptionKeySource(stack, secretConnector))
+                .withEncryptionKeySource(Optional.of(secretConnector.getDefaultEncryptionKeySource()))
                 .withSecretValue("PLACEHOLDER")
                 .withDescription("Created by CDP. This secret stores the sensitive values needed on the instance during first boot.");
 
@@ -240,6 +240,7 @@ public class UserdataSecretsService {
                     .withKeyValue(stackEncryption.getEncryptionKeyCloudSecretManager())
                     .build());
         } else {
+            LOGGER.warn("Cloud Secret Manager key not found for stack. Using the default key.");
             return Optional.of(secretConnector.getDefaultEncryptionKeySource());
         }
     }
