@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,11 +61,21 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         StackDto stack = stackDtoService.getById(getLocalIdAsLong());
-        if (stack.getStatus().isAvailable() && anyInstanceStopped(stack)) {
-            LOGGER.info("DynamicEntitlementRefreshJob cannot run because there are stopped instances in the stack {}.", stack.getResourceCrn());
-            logDynamicEntitlementInfo(stack);
-        } else if (stack.getStatus().isAvailable() && config.isDynamicEntitlementEnabled() && isRequiredPackagesInstalled(stack)) {
-            LOGGER.debug("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}.", stack.getResourceCrn());
+        if (!config.isDynamicEntitlementEnabled()) {
+            LOGGER.info("DynamicEntitlementRefreshJob cannot run because feature is disabled.");
+        } else if (Status.getUnschedulableStatuses().contains(stack.getStatus())) {
+            LOGGER.info("DynamicEntitlementRefreshJob will be unscheduled, stack state is {}", stack.getStatus());
+            jobService.unschedule(context.getJobDetail().getKey());
+        } else if (!isRequiredPackagesInstalled(stack)) {
+            LOGGER.info("DynamicEntitlementRefreshJob cannot run, because required package (cdp-prometheus) is missing, probably its an old image.");
+        } else if (!stack.getStatus().isAvailable()) {
+            LOGGER.info("DynamicEntitlementRefreshJob store new watched entitlements without triggering related flow, because status is {}", stack.getStatus());
+            getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
+        } else if (anyInstanceStopped(stack)) {
+            LOGGER.info("DynamicEntitlementRefreshJob store new watched entitlements without triggering related flow, because there are stopped instances.");
+            getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
+        } else {
+            LOGGER.info("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}.", stack.getResourceCrn());
             try {
                 ThreadBasedUserCrnProvider.doAs(
                         internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -75,12 +84,14 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             } catch (FlowsAlreadyRunningException e) {
                 LOGGER.info("DynamicEntitlementRefreshJob cannot run because another flow is running: {}", e.getMessage());
             }
-        } else if (Status.getUnschedulableStatuses().contains(stack.getStatus())) {
-            LOGGER.info("DynamicEntitlementRefreshJob will be unscheduled, stack state is {} for stack {}.", stack.getStatus(), stack.getResourceCrn());
-            jobService.unschedule(context.getJobDetail().getKey());
-        } else {
-            logDynamicEntitlementInfo(stack);
         }
+    }
+
+    private void getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
+        ThreadBasedUserCrnProvider.doAs(
+                internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        stack.getAccountId()).toString(),
+                () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack));
     }
 
     private boolean isRequiredPackagesInstalled(StackDto stack) {
@@ -89,9 +100,7 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             if (image != null) {
                 Map<String, String> packageVersions = image.getPackageVersions();
                 if (packageVersions != null) {
-                    boolean requiredPackagesInstalled = packageVersions.containsKey(ImagePackageVersion.CDP_PROMETHEUS.getKey());
-                    LOGGER.debug("DynamicEntitlementRefreshJob required packages installed {}", requiredPackagesInstalled);
-                    return requiredPackagesInstalled;
+                    return packageVersions.containsKey(ImagePackageVersion.CDP_PROMETHEUS.getKey());
                 } else {
                     LOGGER.warn("PackageVersions is null in image {}", image.getImageId());
                 }
@@ -102,19 +111,6 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.warn("Image not found: {}", e.getMessage());
         }
         return false;
-    }
-
-    private void logDynamicEntitlementInfo(StackDto stack) {
-        Map<String, Boolean> changedEntitlements = new HashMap<>();
-        if (config.isDynamicEntitlementEnabled()) {
-            changedEntitlements = ThreadBasedUserCrnProvider.doAs(
-                    internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                            stack.getAccountId()).toString(),
-                    () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stack));
-        }
-        LOGGER.info("DynamicEntitlementRefreshJob cannot run info: stack state is {} for stack {}," +
-                        " is DynamicEntitlementRefreshJob enabled: {}, changedEntitlements: {}.",
-                stack.getStatus(), stack.getResourceCrn(), config.isDynamicEntitlementEnabled(), changedEntitlements);
     }
 
     private boolean anyInstanceStopped(StackDto stack) {

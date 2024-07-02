@@ -358,7 +358,7 @@ class ClusterOperationServiceTest {
         when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         when(dynamicEntitlementRefreshService.isClusterManagerServerReachable(stackDto)).thenReturn(true);
         Map<String, Boolean> changedEntitlements = Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE);
-        when(dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stackDto)).thenReturn(changedEntitlements);
+        when(dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto)).thenReturn(changedEntitlements);
         when(dynamicEntitlementRefreshService.saltRefreshNeeded(any())).thenReturn(true);
 
         underTest.refreshEntitlementParams(stackDto);
@@ -373,7 +373,7 @@ class ClusterOperationServiceTest {
         when(stackDto.getName()).thenReturn(STACK_CRN);
         when(dynamicEntitlementRefreshService.isClusterManagerServerReachable(stackDto)).thenReturn(true);
         Map<String, Boolean> changedEntitlements = Map.of();
-        when(dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stackDto)).thenReturn(changedEntitlements);
+        when(dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto)).thenReturn(changedEntitlements);
 
         FlowIdentifier flowIdentifier = underTest.refreshEntitlementParams(stackDto);
 

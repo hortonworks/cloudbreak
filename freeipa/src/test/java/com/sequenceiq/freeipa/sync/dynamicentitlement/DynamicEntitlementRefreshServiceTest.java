@@ -31,7 +31,6 @@ import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
@@ -64,9 +63,6 @@ class DynamicEntitlementRefreshServiceTest {
     private OperationService operationService;
 
     @Mock
-    private OperationToOperationStatusConverter operationToOperationStatusConverter;
-
-    @Mock
     private MonitoringUrlResolver monitoringUrlResolver;
 
     @InjectMocks
@@ -86,27 +82,9 @@ class DynamicEntitlementRefreshServiceTest {
 
     @BeforeEach
     void setup() {
-        lenient().when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Set.of("CDP_CENTRAL_COMPUTE_MONITORING"));
+        lenient().when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Set.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
         lenient().when(operation.getStatus()).thenReturn(OperationState.RUNNING);
         lenient().when(operation.getOperationId()).thenReturn(OPERATION_ID);
-    }
-
-    @Test
-    void testSaltRefreshNeeded() {
-        Boolean result = underTest.saltRefreshNeeded(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
-        assertTrue(result);
-    }
-
-    @Test
-    void testSaltRefreshNeededEmpty() {
-        Boolean result = underTest.saltRefreshNeeded(Collections.emptyMap());
-        assertFalse(result);
-    }
-
-    @Test
-    void testSaltRefreshNeededNull() {
-        Boolean result = underTest.saltRefreshNeeded(null);
-        assertFalse(result);
     }
 
     @Test
@@ -118,7 +96,7 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stack);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
 
         assertTrue(result.isEmpty());
     }
@@ -131,9 +109,9 @@ class DynamicEntitlementRefreshServiceTest {
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
         when(stack.getTelemetry()).thenReturn(telemetry);
         //telemetry component is empty
-        when(telemetry.getDynamicEntitlements()).thenReturn(null);
+        when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>());
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stack);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
 
         assertTrue(result.isEmpty());
         verify(telemetryConfigService).storeTelemetry(STACK_ID, telemetry);
@@ -151,7 +129,7 @@ class DynamicEntitlementRefreshServiceTest {
         dynamicEntitlements.put("RANDOM_ENTITLEMENT", Boolean.FALSE);
         when(telemetry.getDynamicEntitlements()).thenReturn(dynamicEntitlements);
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stack);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
 
         assertTrue(result.isEmpty());
         verify(telemetryConfigService).storeTelemetry(STACK_ID, telemetry);
@@ -166,7 +144,7 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stack);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
 
         assertFalse(result.isEmpty());
         assertFalse(result.get(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
@@ -182,7 +160,7 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stack);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
 
         assertTrue(result.isEmpty());
     }
@@ -218,14 +196,12 @@ class DynamicEntitlementRefreshServiceTest {
     @Test
     void testChangeClusterConfigurationEntitlementsNotChanged() {
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
-        when(stack.getEnvironmentCrn()).thenReturn("envCrn");
         when(stack.getTelemetry()).thenReturn(telemetry);
         when(stack.getId()).thenReturn(STACK_ID);
         when(telemetry.getDynamicEntitlements()).thenReturn(new HashMap<>(Map.of(Entitlement.CLOUDERA_INTERNAL_ACCOUNT.name(), Boolean.TRUE)));
-        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(operation);
         underTest.changeClusterConfigurationIfEntitlementsChanged(stack);
 
-        verify(operationService).failOperation(any(), eq(OPERATION_ID), any());
+        verify(operationService, never()).startOperation(any(), any(), any(), any());
     }
 
     @Test

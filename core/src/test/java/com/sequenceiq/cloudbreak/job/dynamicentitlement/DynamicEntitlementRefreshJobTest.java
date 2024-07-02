@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -99,66 +101,90 @@ class DynamicEntitlementRefreshJobTest {
     }
 
     @Test
-    void testExecuteWhenClusterRunning() throws JobExecutionException {
+    void testExecuteWhenFeatureIsDisabled() throws JobExecutionException, CloudbreakImageNotFoundException {
         StackDto stack = stack(Status.AVAILABLE);
-        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.FALSE);
         underTest.executeTracedJob(jobExecutionContext);
-        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
-        verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
-        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlements(eq(stack));
+        verify(dynamicEntitlementRefreshConfig, times(1)).isDynamicEntitlementEnabled();
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
+        verify(imageService, never()).getImage(any());
+        verify(stack, never()).getInstanceGroupDtos();
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
     }
 
     @Test
-    void testExecuteWhenClusterDeleted() throws JobExecutionException {
+    void testExecuteWhenClusterDeleted() throws JobExecutionException, CloudbreakImageNotFoundException {
         StackDto stack = stack(Status.DELETE_COMPLETED);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
         when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
         when(jobDetail.getKey()).thenReturn(jobKey);
         underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshConfig, times(1)).isDynamicEntitlementEnabled();
         verify(dynamicEntitlementRefreshJobService, times(1)).unschedule(eq(jobKey));
-        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
-        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlements(eq(stack));
-    }
-
-    @Test
-    void testExecuteWhenClusterNotAvailable() throws JobExecutionException {
-        StackDto stack = stack(Status.NODE_FAILURE);
-        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
-        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
-        underTest.executeTracedJob(jobExecutionContext);
-        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
-        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
-        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
-        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
-    }
-
-    @Test
-    void testExecuteWhenInstanceStopped() throws JobExecutionException {
-        StackDto stack = stack(Status.AVAILABLE);
-        List<InstanceGroupDto> instanceGroupDtos = getInstanceGroupDtosWithSopped();
-        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroupDtos);
-        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
-        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
-        underTest.executeTracedJob(jobExecutionContext);
-        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
-        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
-        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
+        verify(imageService, never()).getImage(any());
+        verify(stack, never()).getInstanceGroupDtos();
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
     }
 
     @Test
     void testExecuteWhenRequiredPackagesAreNotInstalled() throws JobExecutionException, CloudbreakImageNotFoundException {
         StackDto stack = stack(Status.AVAILABLE);
-        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
         Image image = mock(Image.class);
         when(image.getPackageVersions()).thenReturn(Map.of());
-        lenient().when(imageService.getImage(eq(LOCAL_ID))).thenReturn(image);
+        when(imageService.getImage(eq(LOCAL_ID))).thenReturn(image);
         underTest.executeTracedJob(jobExecutionContext);
-        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
-        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
-        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
+        verify(dynamicEntitlementRefreshConfig, times(1)).isDynamicEntitlementEnabled();
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
+        verify(imageService, times(1)).getImage(eq(LOCAL_ID));
+        verify(stack, never()).getInstanceGroupDtos();
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
+    }
+
+    @Test
+    void testExecuteWhenClusterNotAvailable() throws JobExecutionException, CloudbreakImageNotFoundException {
+        StackDto stack = stack(Status.NODE_FAILURE);
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshConfig, times(1)).isDynamicEntitlementEnabled();
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
+        verify(imageService, times(1)).getImage(eq(LOCAL_ID));
+        verify(stack, never()).getInstanceGroupDtos();
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
+    }
+
+    @Test
+    void testExecuteWhenInstanceStopped() throws JobExecutionException, CloudbreakImageNotFoundException {
+        StackDto stack = stack(Status.AVAILABLE);
+        List<InstanceGroupDto> instanceGroupDtos = getInstanceGroupDtosWithSopped();
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroupDtos);
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshConfig, times(1)).isDynamicEntitlementEnabled();
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
+        verify(imageService, times(1)).getImage(eq(LOCAL_ID));
+        verify(stack, times(1)).getInstanceGroupDtos();
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(any());
+    }
+
+    @Test
+    void testExecuteWhenClusterRunning() throws JobExecutionException, CloudbreakImageNotFoundException {
+        StackDto stack = stack(Status.AVAILABLE);
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshConfig, times(1)).isDynamicEntitlementEnabled();
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(any());
+        verify(imageService, times(1)).getImage(eq(LOCAL_ID));
+        verify(stack, times(1)).getInstanceGroupDtos();
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlementsAndStoreNewFromUms(any());
+        verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
     }
 
     private List<InstanceGroupDto> getInstanceGroupDtosWithSopped() {
@@ -182,6 +208,7 @@ class DynamicEntitlementRefreshJobTest {
         lenient().when(stackDto.getStatus()).thenReturn(stackStatus);
         lenient().when(stackDto.getType()).thenReturn(WORKLOAD);
         lenient().when(stackDto.getAccountId()).thenReturn(ACCOUNT_ID);
+        lenient().when(stack.getInstanceGroupDtos()).thenReturn(new ArrayList<>());
         return stackDto;
     }
 

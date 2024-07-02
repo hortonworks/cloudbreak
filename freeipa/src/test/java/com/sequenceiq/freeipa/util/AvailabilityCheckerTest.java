@@ -1,18 +1,19 @@
 package com.sequenceiq.freeipa.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -20,8 +21,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvailabilityCheckerTest {
+@ExtendWith(MockitoExtension.class)
+class AvailabilityCheckerTest {
 
     private static final String PACKAGE_NAME = "salt-bootstrap";
 
@@ -34,7 +35,7 @@ public class AvailabilityCheckerTest {
     private ImageService imageService;
 
     @Test
-    public void testAvailable() {
+    void testAvailable() {
         Stack stack = new Stack();
 
         stack.setAppVersion("2.20.0-rc.1");
@@ -51,7 +52,7 @@ public class AvailabilityCheckerTest {
     }
 
     @Test
-    public void testUnavailable() {
+    void testUnavailable() {
         Stack stack = new Stack();
 
         stack.setAppVersion("2.19.0");
@@ -74,7 +75,7 @@ public class AvailabilityCheckerTest {
     }
 
     @Test
-    public void testAppVersionIsBlank() {
+    void testAppVersionIsBlank() {
         Stack stack = new Stack();
         assertFalse(underTest.isAvailable(stack, AFTER_VERSION));
 
@@ -86,7 +87,7 @@ public class AvailabilityCheckerTest {
     }
 
     @Test
-    public void testPackageAvailable() {
+    void testPackageAvailable() {
         Stack stack = new Stack();
         Map<String, String> packageVersions = createPackageVersions(stack);
 
@@ -104,7 +105,7 @@ public class AvailabilityCheckerTest {
     }
 
     @Test
-    public void testPackageUnavailable() {
+    void testPackageUnavailable() {
         Stack stack = new Stack();
         Map<String, String> packageVersions = createPackageVersions(stack);
 
@@ -128,7 +129,7 @@ public class AvailabilityCheckerTest {
     }
 
     @Test
-    public void testPackageVersionIsBlank() {
+    void testPackageVersionIsBlank() {
         Stack stack = new Stack();
         Map<String, String> packageVersions = createPackageVersions(stack);
 
@@ -142,13 +143,49 @@ public class AvailabilityCheckerTest {
     }
 
     @Test
-    public void testImageNotFoundForPackageVersion() {
+    void testImageNotFoundForPackageVersion() {
         Stack stack = new Stack();
         when(imageService.getImageForStack(stack)).thenThrow(ImageNotFoundException.class);
 
         boolean result = underTest.isPackageAvailable(stack, PACKAGE_NAME, AFTER_VERSION);
 
         assertFalse(result);
+    }
+
+    @Test
+    void testIsRequiredPackagesInstalledWhenRequiredPackagesIsNull() {
+        Stack stack = new Stack();
+        Map<String, String> packageVersions = createPackageVersions(stack);
+        packageVersions.put(PACKAGE_NAME, "2.19.0");
+
+        assertTrue(underTest.isRequiredPackagesInstalled(stack, null));
+    }
+
+    @Test
+    void testIsRequiredPackagesInstalledWhenRequiredPackagesIsEmpty() {
+        Stack stack = new Stack();
+        Map<String, String> packageVersions = createPackageVersions(stack);
+        packageVersions.put(PACKAGE_NAME, "2.19.0");
+
+        assertTrue(underTest.isRequiredPackagesInstalled(stack, Set.of()));
+    }
+
+    @Test
+    void testIsRequiredPackagesInstalledWhenRequiredPackagesAreAvailable() {
+        Stack stack = new Stack();
+        Map<String, String> packageVersions = createPackageVersions(stack);
+        packageVersions.put(PACKAGE_NAME, "2.19.0");
+
+        assertTrue(underTest.isRequiredPackagesInstalled(stack, Set.of(PACKAGE_NAME)));
+    }
+
+    @Test
+    void testIsRequiredPackagesInstalledWhenRequiredPackagesAreUnvailable() {
+        Stack stack = new Stack();
+        Map<String, String> packageVersions = createPackageVersions(stack);
+        packageVersions.put(PACKAGE_NAME, "2.19.0");
+
+        assertFalse(underTest.isRequiredPackagesInstalled(stack, Set.of("unknown-package")));
     }
 
     private Map<String, String> createPackageVersions(Stack stack) {

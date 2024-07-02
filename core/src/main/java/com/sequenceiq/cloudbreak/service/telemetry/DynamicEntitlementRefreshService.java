@@ -47,7 +47,7 @@ public class DynamicEntitlementRefreshService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public Map<String, Boolean> getChangedWatchedEntitlements(StackDto stack) {
+    public Map<String, Boolean> getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
         LOGGER.debug("Checking watched entitlement changes for stack {}", stack.getName());
         Map<String, Boolean> umsEntitlements = getEntitlementsFromUms(stack.getResourceCrn(), dynamicEntitlementRefreshConfig.getWatchedEntitlements());
         LOGGER.debug("Watched entitlements from UMS: {}", umsEntitlements);

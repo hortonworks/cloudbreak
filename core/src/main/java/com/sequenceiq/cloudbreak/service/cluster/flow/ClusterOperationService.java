@@ -608,7 +608,7 @@ public class ClusterOperationService {
             LOGGER.info("CM is not running for stack {}, skipping dynamic entitlement checking", stack.getResourceCrn());
             return FlowIdentifier.notTriggered();
         }
-        Map<String, Boolean> changedEntitlements = dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stack);
+        Map<String, Boolean> changedEntitlements = dynamicEntitlementRefreshService.getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
         if (changedEntitlements == null || changedEntitlements.isEmpty()) {
             LOGGER.debug("Watched entitlements didn't change for stack: '{}'.", stack.getName());
             return FlowIdentifier.notTriggered();

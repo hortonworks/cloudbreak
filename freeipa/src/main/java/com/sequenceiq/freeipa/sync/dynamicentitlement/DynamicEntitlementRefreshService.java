@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -61,14 +60,10 @@ public class DynamicEntitlementRefreshService {
     @Inject
     private MonitoringUrlResolver monitoringUrlResolver;
 
-    public Map<String, Boolean> getChangedWatchedEntitlements(Stack stack) {
+    public Map<String, Boolean> getChangedWatchedEntitlementsAndStoreNewFromUms(Stack stack) {
         Map<String, Boolean> umsEntitlements = getEntitlementsFromUms(stack.getResourceCrn(), dynamicEntitlementRefreshConfig.getWatchedEntitlements());
         Map<String, Boolean> telemetryEntitlements = getOrCreateEntitlementsFromTelemetry(stack, umsEntitlements);
         return getChangedEntitlements(telemetryEntitlements, umsEntitlements);
-    }
-
-    public Boolean saltRefreshNeeded(Map<String, Boolean> entitlementsChanged) {
-        return entitlementsChanged != null && !entitlementsChanged.isEmpty();
     }
 
     public void storeChangedEntitlementsInTelemetry(Stack stack, Map<String, Boolean> changedEntitlements) {
@@ -139,38 +134,24 @@ public class DynamicEntitlementRefreshService {
         return result;
     }
 
-    public OperationStatus changeClusterConfigurationIfEntitlementsChanged(Stack stack) {
-        LOGGER.info("Start '{}' operation", OperationType.CHANGE_DYNAMIC_ENTITLEMENTS.name());
-        Operation operation = operationService.startOperation(stack.getAccountId(), OperationType.CHANGE_DYNAMIC_ENTITLEMENTS,
-                List.of(stack.getEnvironmentCrn()), List.of());
-        if (OperationState.RUNNING == operation.getStatus()) {
-            operation = triggerEntitlementChangedOperation(operation, stack);
+    public void changeClusterConfigurationIfEntitlementsChanged(Stack stack) {
+        Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlementsAndStoreNewFromUms(stack);
+        if (!changedEntitlements.isEmpty()) {
+            LOGGER.info("Start '{}' operation", OperationType.CHANGE_DYNAMIC_ENTITLEMENTS.name());
+            Operation operation = operationService.startOperation(stack.getAccountId(), OperationType.CHANGE_DYNAMIC_ENTITLEMENTS,
+                    List.of(stack.getEnvironmentCrn()), List.of());
+            if (OperationState.RUNNING == operation.getStatus()) {
+                LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, true);
+                String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
+                Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, operation.getOperationId(),
+                        stack.getId(), changedEntitlements, true);
+                flowManager.notify(selector, triggerEvent);
+            } else {
+                LOGGER.warn("Operation isn't in RUNNING state: {}", operation);
+            }
         } else {
-            LOGGER.info("Operation isn't in RUNNING state: {}", operation);
+            LOGGER.info("Couldn't start refresh entitlement params flow. Watched entitlements didn't change");
         }
-        return operationConverter.convert(operation);
-    }
-
-    private Operation triggerEntitlementChangedOperation(Operation operation, Stack stack) {
-        Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlements(stack);
-        if (areEntitlementsChanged(changedEntitlements)) {
-            Boolean saltRefreshNeeded = saltRefreshNeeded(changedEntitlements);
-            LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, saltRefreshNeeded);
-            String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
-            Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, operation.getOperationId(),
-                    stack.getId(), changedEntitlements, saltRefreshNeeded);
-            flowManager.notify(selector, triggerEvent);
-            return operation;
-        } else {
-            String message = String.format("Couldn't start refresh entitlement params flow." +
-                    " Watched entitlements didn't change for stack: '%s'.", stack.getResourceCrn());
-            LOGGER.debug(message);
-            return operationService.failOperation(stack.getAccountId(), operation.getOperationId(), message);
-        }
-    }
-
-    private boolean areEntitlementsChanged(Map<String, Boolean> changedEntitlements) {
-        return changedEntitlements != null && !changedEntitlements.isEmpty();
     }
 
     public void setupDynamicEntitlementsForProvision(String resourceCrn, Telemetry telemetry) {

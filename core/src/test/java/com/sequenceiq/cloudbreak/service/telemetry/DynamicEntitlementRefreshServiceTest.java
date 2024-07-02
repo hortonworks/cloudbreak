@@ -101,7 +101,7 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stackDto);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
 
         assertTrue(result.isEmpty());
     }
@@ -116,7 +116,7 @@ class DynamicEntitlementRefreshServiceTest {
         //telemetry component is empty
         when(telemetry.getDynamicEntitlements()).thenReturn(null);
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stackDto);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
 
         assertTrue(result.isEmpty());
         verify(componentConfigProviderService).replaceTelemetryComponent(STACK_ID, telemetry);
@@ -134,7 +134,7 @@ class DynamicEntitlementRefreshServiceTest {
         dynamicEntitlements.put("RANDOM_ENTITLEMENT", Boolean.FALSE);
         when(telemetry.getDynamicEntitlements()).thenReturn(dynamicEntitlements);
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stackDto);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
 
         assertTrue(result.isEmpty());
         verify(componentConfigProviderService).replaceTelemetryComponent(STACK_ID, telemetry);
@@ -150,7 +150,7 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stackDto);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
 
         assertFalse(result.isEmpty());
         assertFalse(result.get(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
@@ -167,7 +167,7 @@ class DynamicEntitlementRefreshServiceTest {
         //monitoring enabled in telemetry component
         when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
 
-        Map<String, Boolean> result = underTest.getChangedWatchedEntitlements(stackDto);
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
 
         assertTrue(result.isEmpty());
     }

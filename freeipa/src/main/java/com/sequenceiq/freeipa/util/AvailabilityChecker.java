@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.util;
 
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -23,6 +24,27 @@ public class AvailabilityChecker {
 
     @Inject
     private ImageService imageService;
+
+    public boolean isRequiredPackagesInstalled(Stack stack, Set<String> requiredPackages) {
+        try {
+            Image image = imageService.getImageForStack(stack);
+            if (image != null) {
+                Map<String, String> packageVersions = image.getPackageVersions();
+                if (packageVersions != null) {
+                    boolean requiredPackagesInstalled = requiredPackages == null || packageVersions.keySet().containsAll(requiredPackages);
+                    LOGGER.debug("Required packages {} installed {}", requiredPackages, requiredPackagesInstalled);
+                    return requiredPackagesInstalled;
+                } else {
+                    LOGGER.warn("PackageVersions is null in image {}", image.getUuid());
+                }
+            } else {
+                LOGGER.warn("Image not found");
+            }
+        } catch (ImageNotFoundException e) {
+            LOGGER.warn("Image not found: {}", e);
+        }
+        return false;
+    }
 
     protected boolean isAvailable(Stack stack, Versioned supportedAfter) {
         if (StringUtils.isNotBlank(stack.getAppVersion())) {
