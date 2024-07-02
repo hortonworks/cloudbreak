@@ -3,6 +3,7 @@
 {%- set hostgroup = salt['grains.get']('hostgroup') %}
 {%- set cdp_prometheus_installed = salt['file.directory_exists' ]('/opt/cdp-prometheus') %}
 {%- set instance_name = salt['grains.get']('fqdn') %}
+{%- set network_addresses_file = '/opt/cdp-prometheus/network-addresses.json' %}
 {%- if telemetry.platform in ["AWS", "AZURE", "GCP"]  %}
   {%- set get_instance_cmd = "python3 /opt/salt/scripts/instanceid_retriever.py " +  telemetry.platform %}
   {%- set instance_cmd_output = salt.cmd.run(get_instance_cmd) %}
@@ -10,16 +11,14 @@
     {%- set instance_name = instance_cmd_output %}
   {%- endif %}
   {%- if salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.29-1') >= 0 %}
-    {%- set get_doctor_addresses = "cdp-doctor network addresses --format json --cloud-provider {}".format(telemetry.platform) %}
-    {%- if telemetry.databusEndpoint is defined and telemetry.databusEndpoint|length %}
-      {%- set get_doctor_addresses = "{} --databus-url {}".format(get_doctor_addresses, telemetry.databusEndpoint) %}
+    {%- if salt['file.file_exists'](network_addresses_file) %}
+      {%- set network_address_content = salt['cmd.run']('cat ' + network_addresses_file) %}
+      {%- if network_address_content is defined and network_address_content and network_address_content|length > 0 %}
+        {%- set doctorNetworkAddresses = network_address_content | load_json %}
+        {%- set blackboxClouderaUrls = doctorNetworkAddresses.get('cloudera', []) %}
+        {%- set blackboxCloudUrls = doctorNetworkAddresses.get('cloud', []) %}
+      {%- endif %}
     {%- endif %}
-    {%- if telemetry.databusS3Endpoint is defined and telemetry.databusS3Endpoint|length %}
-          {%- set get_doctor_addresses = "{} --databus-s3-url {}".format(get_doctor_addresses, telemetry.databusS3Endpoint) %}
-    {%- endif %}
-    {%- set doctorNetworkAddresses = salt.cmd.run(get_doctor_addresses) | load_json %}
-    {%- set blackboxClouderaUrls = doctorNetworkAddresses['cloudera'] %}
-    {%- set blackboxCloudUrls = doctorNetworkAddresses['cloud'] %}
   {%- endif %}
 {%- endif %}
 global:
@@ -108,7 +107,7 @@ scrape_configs:
     tls_config:
        insecure_skip_verify: true
 {%- if (monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', [])) or monitoring.blackboxExporterCheckOnAllNodes %}
-{%- if blackboxClouderaUrls is defined and blackboxClouderaUrls|length > 0 %}
+{%- if blackboxClouderaUrls is defined and blackboxClouderaUrls and blackboxClouderaUrls|length > 0 %}
   - job_name: 'blackbox-cloudera'
     scrape_interval: {{ monitoring.blackboxExporterClouderaIntervalSeconds }}s
     metrics_path: /probe
@@ -175,7 +174,7 @@ scrape_configs:
     tls_config:
       insecure_skip_verify: true
 {%- endif %}
-{%- if blackboxCloudUrls is defined and blackboxCloudUrls|length > 0 %}
+{%- if blackboxCloudUrls is defined and blackboxCloudUrls and blackboxCloudUrls|length > 0 %}
   - job_name: 'blackbox-cloud'
     scrape_interval: {{ monitoring.blackboxExporterCloudIntervalSeconds }}s
     metrics_path: /probe

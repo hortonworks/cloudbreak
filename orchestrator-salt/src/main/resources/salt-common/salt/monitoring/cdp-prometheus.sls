@@ -1,6 +1,7 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
 {%- set cdp_prometheus_installed = salt['file.directory_exists' ]('/opt/cdp-prometheus') %}
+{%- set network_addresses_file = '/opt/cdp-prometheus/network-addresses.json' %}
 
 {%- if monitoring.enabled and cdp_prometheus_installed %}
 generate_cdp_prometheus_cert_and_key:
@@ -31,6 +32,28 @@ remove_prometheus_pwd:
     - user: "root"
     - group: "root"
     - mode: 640
+
+{%- if telemetry.platform in ["AWS", "AZURE", "GCP"] %}
+  {%- if salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion, '0.4.29-1') >= 0 %}
+    {%- set get_doctor_addresses = "cdp-doctor network addresses --format json --cloud-provider {}".format(telemetry.platform) %}
+    {%- if telemetry.databusEndpoint is defined and telemetry.databusEndpoint and telemetry.databusEndpoint|length %}
+      {%- set get_doctor_addresses = "{} --databus-url {}".format(get_doctor_addresses, telemetry.databusEndpoint) %}
+    {%- endif %}
+    {%- if telemetry.databusS3Endpoint is defined and telemetry.databusS3Endpoint and telemetry.databusS3Endpoint|length %}
+      {%- set get_doctor_addresses = "{} --databus-s3-url {}".format(get_doctor_addresses, telemetry.databusS3Endpoint) %}
+    {%- endif %}
+  {%- endif %}
+{%- endif %}
+
+{%- if get_doctor_addresses is defined and get_doctor_addresses and get_doctor_addresses|length %}
+save_network_addresses:
+  cmd.run:
+    - name: {{ get_doctor_addresses }} > {{ network_addresses_file }} || echo '{}' > {{ network_addresses_file }}
+    - output_loglevel: quiet
+    - ignore_errors: True
+    - runas: root
+    - creates: {{ network_addresses_file }}
+{%- endif %}
 
 /opt/cdp-prometheus/prometheus.yml:
   file.managed:
