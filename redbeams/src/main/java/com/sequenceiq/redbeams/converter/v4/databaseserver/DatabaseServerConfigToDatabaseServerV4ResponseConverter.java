@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -70,6 +71,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
 
         response.setResourceStatus(source.getResourceStatus());
         response.setDatabasePropertiesV4Response(createDatabaseProperties(source));
+        response.setStatus(Status.UNKNOWN);
+        response.setSslConfig(new SslConfigV4Response());
         if (source.getDbStack().isPresent()) {
             DBStack dbStack = source.getDbStack().get();
             response.setStatus(dbStack.getStatus());
@@ -95,8 +98,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
                 sslConfigV4Response.setSslCertificateActiveCloudProviderIdentifier(
                         Optional.ofNullable(sslConfig.getSslCertificateActiveCloudProviderIdentifier())
                                 .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(cloudPlatform, region)));
+                SslCertStatus sslCertificatesOutdated = CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform) ?
+                        SslCertStatus.UP_TO_DATE
+                        : databaseServerSslCertificateConfig.getSslCertificatesOutdated(cloudPlatform, region, sslConfig.getSslCertificates());
                 sslConfigV4Response.setSslCertificatesStatus(
-                        databaseServerSslCertificateConfig.getSslCertificatesOutdated(cloudPlatform, region, sslConfig.getSslCertificates()));
+                        sslCertificatesOutdated);
                 Long sslCertificateExpirationDate = sslConfig.getSslCertificateExpirationDate();
                 if (sslCertificateExpirationDate != null) {
                     fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
@@ -108,11 +114,6 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
             }
         } else if (source.getHost() != null && source.getPort() != null) {
             response.setStatus(Status.AVAILABLE);
-        } else {
-            response.setStatus(Status.UNKNOWN);
-        }
-        if (response.getSslConfig() == null) {
-            response.setSslConfig(new SslConfigV4Response());
         }
 
         return response;
