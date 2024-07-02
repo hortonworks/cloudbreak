@@ -51,14 +51,16 @@ dependencies {
   // apacheds-kerberos-codec using a pretty old mina-core and that library was not update since 2020
   implementation     group: 'org.apache.mina',           name: 'mina-core',                            version: '2.2.3'
   implementation     group: 'javax.activation',          name: 'activation',                           version: '1.1.1'
-  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
-  implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
-  implementation     group: 'org.postgresql',            name: 'postgresql'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
+  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                        version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',            version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.ext',  name: 'jersey-micrometer',                    version: jerseyMicrometerVersion
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',                   version: mybatisMigrationVersion
+  implementation     group: 'org.postgresql',            name: 'postgresql',                           version: postgreSQLVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',                  version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',              version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',         version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',           version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',         version: springBootVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
   implementation     group: 'org.springframework',       name: 'spring-context-support',               version: springFrameworkVersion
   implementation     group: 'org.springframework.security', name: 'spring-security-web',               version: springSecurityVersion
