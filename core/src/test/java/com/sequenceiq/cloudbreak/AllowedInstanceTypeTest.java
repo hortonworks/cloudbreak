@@ -1,16 +1,20 @@
 package com.sequenceiq.cloudbreak;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,21 +51,24 @@ public class AllowedInstanceTypeTest {
 
     @Test
     public void validateAwsClusterTemplatesByInstanceType() {
-        Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
+        Map<String, Pair<DefaultClusterTemplateV4Request, String>> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
+        Set<String> allowedAwsTypes = new HashSet<>();
+        allowedAwsTypes.addAll(AWS_ENABLED_X86_TYPES_LIST);
+        allowedAwsTypes.addAll(AWS_ENABLED_ARM64_TYPES);
         stringClusterTemplateMap.entrySet()
                 .stream()
-                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue())))
+                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue().getValue())))
                 .filter(ct -> CloudPlatform.AWS.name().equalsIgnoreCase(ct.getCloudPlatform()))
-                .forEach(ctr -> validateClusterTemplate(ctr, AWS_ENABLED_TYPES_LIST));
-        assertNotNull(AWS_ENABLED_TYPES_LIST);
+                .forEach(ctr -> validateClusterTemplate(ctr, allowedAwsTypes));
+        assertNotNull(AWS_ENABLED_X86_TYPES_LIST);
     }
 
     @Test
     public void validateAzureClusterTemplatesByInstanceType() {
-        Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
+        Map<String, Pair<DefaultClusterTemplateV4Request, String>> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()
-                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue())))
+                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue().getValue())))
                 .filter(ct -> CloudPlatform.AZURE.name().equalsIgnoreCase(ct.getCloudPlatform()))
                 .forEach(ctr -> validateClusterTemplate(ctr, AZURE_ENABLED_TYPES_LIST));
         assertNotNull(AZURE_ENABLED_TYPES_LIST);
@@ -69,16 +76,16 @@ public class AllowedInstanceTypeTest {
 
     @Test
     public void validateGcpClusterTemplatesByInstanceType() {
-        Map<String, String> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
+        Map<String, Pair<DefaultClusterTemplateV4Request, String>> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()
-                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue())))
+                .map(ct -> templateCache.getDefaultClusterTemplate(Base64Util.decode(ct.getValue().getValue())))
                 .filter(ct -> CloudPlatform.GCP.name().equalsIgnoreCase(ct.getCloudPlatform()))
                 .forEach(ctr -> validateClusterTemplate(ctr, GCP_ENABLED_TYPES_LIST));
         assertNotNull(GCP_ENABLED_TYPES_LIST);
     }
 
-    private void validateClusterTemplate(DefaultClusterTemplateV4Request clusterTemplate, List<String> supportedTypes) {
+    private void validateClusterTemplate(DefaultClusterTemplateV4Request clusterTemplate, Collection<String> supportedTypes) {
         clusterTemplate.getDistroXTemplate().getInstanceGroups().stream()
                 .filter(ig -> !supportedTypes.contains(ig.getTemplate().getInstanceType()))
                 .findFirst()

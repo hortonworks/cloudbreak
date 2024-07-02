@@ -12,12 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -49,7 +52,7 @@ public class DefaultClusterTemplateCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClusterTemplateCache.class);
 
-    private final Map<String, String> defaultClusterTemplates = new HashMap<>();
+    private final Map<String, Pair<DefaultClusterTemplateV4Request, String>> defaultClusterTemplates = new ConcurrentHashMap<>();
 
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
@@ -138,7 +141,7 @@ public class DefaultClusterTemplateCache {
     }
 
     private void addClusterTemplateToDefaultClusterTemplates(String clusterTemplateName, String templateAsString,
-        Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) throws IOException {
+            Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) throws IOException {
         DefaultClusterTemplateV4Request clusterTemplateRequest = new Json(templateAsString).get(DefaultClusterTemplateV4Request.class);
         boolean useIt = doUseIt(clusterTemplateName, clusterTemplateRequest, enabledPlatforms, enabledGovPlatforms);
         if (useIt) {
@@ -147,12 +150,12 @@ public class DefaultClusterTemplateCache {
             }
             defaultClusterTemplates.put(
                     clusterTemplateRequest.getName(),
-                    Base64Util.encode(templateAsString));
+                    Pair.of(clusterTemplateRequest, Base64Util.encode(templateAsString)));
         }
     }
 
     private boolean doUseIt(String clusterTemplateName, DefaultClusterTemplateV4Request clusterTemplateRequest,
-        Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) {
+            Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) {
         boolean useIt = true;
         String aws = CloudPlatform.AWS.name();
         LOGGER.info("Enabled commercial platforms: {}", enabledPlatforms);
@@ -204,15 +207,24 @@ public class DefaultClusterTemplateCache {
         return !awsGovTemplate && awsGovEnabled;
     }
 
-    public Map<String, String> defaultClusterTemplateRequests() {
+    public Map<String, Pair<DefaultClusterTemplateV4Request, String>> defaultClusterTemplateRequests() {
         return defaultClusterTemplates;
+    }
+
+    public Map<String, String> defaultClusterTemplateRequestsForUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        boolean arm64Enabled = entitlementService.isDataHubArmEnabled(workspace.getTenant().getName());
+        return defaultClusterTemplates.entrySet().stream()
+                .filter(e -> notArm64TemplateOrArm64Enabled(e.getValue().getKey(), arm64Enabled))
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
     }
 
     public Map<String, ClusterTemplate> defaultClusterTemplates() {
         Map<String, ClusterTemplate> defaultTemplates = new HashMap<>();
         defaultClusterTemplateRequests().forEach((key, value) -> {
-            String defaultTemplateJson = Base64Util.decode(value);
-            DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
+            DefaultClusterTemplateV4Request defaultClusterTemplate = value.getKey();
             ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
             defaultTemplates.put(key, clusterTemplate);
         });
@@ -225,11 +237,12 @@ public class DefaultClusterTemplateCache {
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         boolean internalTenant = entitlementService.internalTenant(workspace.getTenant().getName());
+        boolean arm64Enabled = entitlementService.isDataHubArmEnabled(workspace.getTenant().getName());
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
-                String defaultTemplateJson = Base64Util.decode(value);
-                DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
-                if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant)) {
+                DefaultClusterTemplateV4Request defaultClusterTemplate = value.getKey();
+                if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant) &&
+                        notArm64TemplateOrArm64Enabled(defaultClusterTemplate, arm64Enabled)) {
                     ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
                     clusterTemplate.setWorkspace(workspace);
                     Optional<Blueprint> blueprint = blueprints.stream()
@@ -243,6 +256,13 @@ public class DefaultClusterTemplateCache {
             }
         });
         return defaultTemplates;
+    }
+
+    private boolean notArm64TemplateOrArm64Enabled(DefaultClusterTemplateV4Request defaultClusterTemplate, boolean arm64Enabled) {
+        boolean hasArm64InstanceType = defaultClusterTemplate.getDistroXTemplate().getInstanceGroups().stream()
+                .anyMatch(group -> StringUtils.isNotEmpty(group.getTemplate().getInstanceType()) &&
+                        DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES.contains(group.getTemplate().getInstanceType()));
+        return !hasArm64InstanceType || arm64Enabled;
     }
 
     public Collection<String> defaultClusterTemplateNames() {
@@ -270,7 +290,7 @@ public class DefaultClusterTemplateCache {
     }
 
     public String getByName(String name) {
-        return defaultClusterTemplates.get(name);
+        return defaultClusterTemplates.get(name).getValue();
     }
 
     private List<String> getFiles() throws IOException {

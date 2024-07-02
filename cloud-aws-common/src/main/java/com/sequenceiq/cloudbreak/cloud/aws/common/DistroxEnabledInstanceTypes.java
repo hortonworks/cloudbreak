@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DistroxEnabledInstanceTypes {
 
-    public static final String ENABLED_TYPES =
+    private static final String ENABLED_X86_TYPES =
             "h1.2xlarge,h1.4xlarge,h1.8xlarge," +
             "x1e.2xlarge," +
 
@@ -57,11 +57,19 @@ public class DistroxEnabledInstanceTypes {
             "c7i.xlarge,c7i.2xlarge,c7i.4xlarge,c7i.8xlarge,c7i.12xlarge,c7i.16xlarge,c7i.24xlarge,c7i.48xlarge," +
             "c7a.xlarge,c7a.2xlarge,c7a.4xlarge,c7a.8xlarge,c7a.12xlarge,c7a.16xlarge,c7a.24xlarge,c7a.32xlarge,c7a.48xlarge,";
 
-    public static final String AWS_ENABLED_ARM_TYPES = "r7gd.2xlarge";
+    private static final String ENABLED_ARM64_TYPES = "r7gd.2xlarge";
 
-    public static final List<String> AWS_ENABLED_TYPES_LIST = new ArrayList<String>(Arrays.asList(ENABLED_TYPES.trim().split(",")));
+    public static final Set<String> AWS_ENABLED_X86_TYPES_LIST = splitInstanceList(ENABLED_X86_TYPES);
+
+    public static final Set<String> AWS_ENABLED_ARM64_TYPES = splitInstanceList(ENABLED_ARM64_TYPES);
 
     private DistroxEnabledInstanceTypes() {
+    }
+
+    private static Set<String> splitInstanceList(String values) {
+        return Arrays.stream(values.trim().split(","))
+                .filter(it -> !it.isEmpty())
+                .collect(Collectors.toSet());
     }
 
 }

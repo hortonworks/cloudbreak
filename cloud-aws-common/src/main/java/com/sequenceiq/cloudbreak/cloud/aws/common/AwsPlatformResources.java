@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM_TYPES;
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
@@ -238,9 +238,7 @@ public class AwsPlatformResources implements PlatformResources {
             .filter(it -> !it.isEmpty())
             .noneMatch(di -> vmt.value().startsWith(di));
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AWS_ENABLED_TYPES_LIST.stream()
-            .filter(it -> !it.isEmpty())
-            .anyMatch(di -> vmt.value().equals(di));
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AWS_ENABLED_X86_TYPES_LIST.contains(vmt.value());
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
@@ -665,7 +663,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Predicate<VmType> getEnabledInstancePredicate(boolean dataHubArmEnabled, boolean restrictInstanceTypes) {
         if (restrictInstanceTypes) {
-            return enabledDistroxInstanceTypeFilter.or(vm -> dataHubArmEnabled && AWS_ENABLED_ARM_TYPES.equals(vm.value()));
+            return enabledDistroxInstanceTypeFilter.or(vm -> dataHubArmEnabled && AWS_ENABLED_ARM64_TYPES.contains(vm.value()));
         } else {
             return enabledInstanceTypeFilter;
         }

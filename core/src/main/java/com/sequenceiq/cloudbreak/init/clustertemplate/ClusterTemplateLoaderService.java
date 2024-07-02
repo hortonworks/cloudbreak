@@ -41,7 +41,7 @@ public class ClusterTemplateLoaderService {
     private BlueprintService blueprintService;
 
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
-        Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
+        Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(clusterTemplates);
         LOGGER.info("Merge default cluster definition in db ({}) with cached templates {}", defaultTemplatesInDb.size(), defaultTemplates.size());
         if (defaultTemplatesInDb.size() < defaultTemplates.size()) {
@@ -137,7 +137,7 @@ public class ClusterTemplateLoaderService {
     }
 
     public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Collection<ClusterTemplate> clusterTemplates) {
-        return collectOutdatedTemplatesInDb(defaultClusterTemplateCache.defaultClusterTemplateRequests(), clusterTemplates);
+        return collectOutdatedTemplatesInDb(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser(), clusterTemplates);
     }
 
     public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, String> defaultTemplates, Collection<ClusterTemplate> defaultTemplatesInDb) {

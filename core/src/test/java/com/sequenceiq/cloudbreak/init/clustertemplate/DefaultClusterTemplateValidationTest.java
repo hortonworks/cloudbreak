@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -109,10 +111,11 @@ public class DefaultClusterTemplateValidationTest {
 
     private void loadEnabledInstances() throws FileNotFoundException {
 
-        List<String> awsEnabledInstanceTypes = AWS_ENABLED_TYPES_LIST
+        List<String> awsEnabledInstanceTypes = new ArrayList<>(AWS_ENABLED_X86_TYPES_LIST
                 .stream()
                 .map(s -> s.replaceAll(" ", ""))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        awsEnabledInstanceTypes.addAll(AWS_ENABLED_ARM64_TYPES);
 
         List<String> azureEnabledInstanceTypes = AZURE_ENABLED_TYPES_LIST
                 .stream()

@@ -42,7 +42,7 @@ public class ClusterTemplateLoaderServiceTest {
 
     @Test
     public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenNoDefaultClusterTemplateAndNoDefaultInDB() {
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(emptyMap());
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser()).thenReturn(emptyMap());
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(emptyList());
 
@@ -55,7 +55,7 @@ public class ClusterTemplateLoaderServiceTest {
         clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         clusterTemplate.setName("cluster-template");
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(emptyMap());
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser()).thenReturn(emptyMap());
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
 
@@ -67,7 +67,7 @@ public class ClusterTemplateLoaderServiceTest {
         DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName("cluster-template");
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser())
                 .thenReturn(singletonMap(clusterTemplate.getName(), encode(clusterTemplate)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(emptyList());
@@ -81,7 +81,7 @@ public class ClusterTemplateLoaderServiceTest {
         ClusterTemplate clusterTemplate = sameClusterTemplate();
         clusterTemplate.setTemplateContent(Base64Util.encode(writeValueAsStringSilent(clusterTemplateFromDefault)));
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser())
                 .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
@@ -96,7 +96,7 @@ public class ClusterTemplateLoaderServiceTest {
         clusterTemplate.setResourceCrn(null);
         clusterTemplate.setTemplateContent(Base64Util.encode(writeValueAsStringSilent(clusterTemplateFromDefault)));
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser())
                 .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
@@ -109,7 +109,7 @@ public class ClusterTemplateLoaderServiceTest {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = clusterTemplateRequest("cluster-template");
         ClusterTemplate clusterTemplateFromDB = clusterTemplate("cluster-template", "gcp", "hostgroup2", "worker");
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser())
                 .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplateFromDB));
@@ -124,7 +124,7 @@ public class ClusterTemplateLoaderServiceTest {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault2 = clusterTemplateRequest("cluster-template2");
         ClusterTemplate clusterTemplateFromDB2 = clusterTemplate("cluster-template2", "gcp", "hostgroup2", "worker");
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser()).thenReturn(
                 Map.of(clusterTemplateFromDefault1.getName(), encode(clusterTemplateFromDefault1),
                         clusterTemplateFromDefault2.getName(), encode(clusterTemplateFromDefault2)));
 
