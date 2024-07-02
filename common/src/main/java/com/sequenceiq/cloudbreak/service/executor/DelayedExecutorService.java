@@ -33,7 +33,7 @@ public class DelayedExecutorService {
 
     public <T> T runWithDelay(Callable<T> callable, long delay, TimeUnit timeUnit) throws ExecutionException, InterruptedException {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
-        LOGGER.debug("Scheduling task with {} {}", delay, timeUnit);
+        LOGGER.debug("Scheduling Callable task with {} {}", delay, timeUnit);
         ScheduledFuture<T> scheduledFuture = delayedTaskExecutor.schedule(() -> {
             MDCBuilder.buildMdcContextFromMap(mdcContextMap);
             T result = callable.call();
@@ -44,5 +44,15 @@ public class DelayedExecutorService {
         T result = scheduledFuture.get();
         LOGGER.debug("Task result is available");
         return result;
+    }
+
+    public <T> void runWithDelayWithoutWaitingResult(Runnable runnable, long delay, TimeUnit timeUnit) {
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
+        LOGGER.debug("Scheduling Runnable task with {} {}.", delay, timeUnit);
+        delayedTaskExecutor.schedule(() -> {
+            MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+            runnable.run();
+            MDCBuilder.cleanupMdc();
+        }, delay, timeUnit);
     }
 }
