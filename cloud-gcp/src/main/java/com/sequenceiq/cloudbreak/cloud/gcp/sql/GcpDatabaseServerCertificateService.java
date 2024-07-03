@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import jakarta.inject.Inject;
 
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.SslCert;
@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCert
 public class GcpDatabaseServerCertificateService extends GcpDatabaseServerBaseService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpDatabaseServerCertificateService.class);
+
+    private static final int DATABASE_CERT_DEFAULT_EXPIRATION_TIME_IN_YEARS = 10;
 
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
@@ -55,12 +57,15 @@ public class GcpDatabaseServerCertificateService extends GcpDatabaseServerBaseSe
     }
 
     private long getExpirationDate(String expirationTime) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         try {
-            return simpleDateFormat.parse(expirationTime).getTime();
-        } catch (ParseException e) {
+            DateTime dateTime = DateTime.parseRfc3339(expirationTime);
+            return dateTime.getValue();
+        } catch (Exception e) {
             LOGGER.warn("We could not parse {} date which came from google so setting that for now.", expirationTime);
-            return new Date().getTime();
+            return ZonedDateTime.now(ZoneOffset.UTC)
+                    .plusYears(DATABASE_CERT_DEFAULT_EXPIRATION_TIME_IN_YEARS)
+                    .toInstant()
+                    .toEpochMilli();
         }
     }
 
