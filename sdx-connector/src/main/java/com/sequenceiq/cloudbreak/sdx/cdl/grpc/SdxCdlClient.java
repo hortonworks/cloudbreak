@@ -65,6 +65,14 @@ public class SdxCdlClient {
         return newStub().describeDatalake(request);
     }
 
+    public CdlCrudProto.DescribeServicesResponse describeDatalakeServices(String datalakeNameOrCrn) {
+        CdlCrudProto.DescribeServicesRequest request = CdlCrudProto.DescribeServicesRequest.newBuilder()
+                .setDatalake(datalakeNameOrCrn)
+                .setAccountID(ThreadBasedUserCrnProvider.getAccountId())
+                .build();
+        return newStub().describeServices(request);
+    }
+
     public CdlCrudProto.ListDatalakesResponse listDatalakes(String environmentNameOrCrn, String datalakeNameOrCrn) {
         CdlCrudProto.ListDatalakesRequest request = CdlCrudProto.ListDatalakesRequest.newBuilder()
                 .setEnvironment(environmentNameOrCrn)

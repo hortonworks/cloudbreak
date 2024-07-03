@@ -38,6 +38,7 @@ public class MockCdlController {
             String hmsDatabaseUser = requestJsonMap.get("hmsDatabaseUser").toString();
             String hmsDatabasePassword = requestJsonMap.get("hmsDatabasePassword").toString();
             String hmsDatabaseName = requestJsonMap.get("hmsDatabaseName").toString();
+            String rangerFqdn = requestJsonMap.get("rangerFqdn").toString();
 
             Optional<Cdl> cdl = cdlRespository.findByCrn(cdlCrn);
             cdl.ifPresent(cdlEntity -> {
@@ -46,6 +47,7 @@ public class MockCdlController {
                 cdlEntity.setHmsDatabaseName(hmsDatabaseName);
                 cdlEntity.setHmsDatabaseUser(hmsDatabaseUser);
                 cdlEntity.setHmsDatabasePassword(hmsDatabasePassword);
+                cdlEntity.setRangerFqdn(rangerFqdn);
                 cdlRespository.save(cdlEntity);
             });
 

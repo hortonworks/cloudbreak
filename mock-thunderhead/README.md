@@ -1,10 +1,11 @@
 ## Testing CDL - DH integration
 
 We need to mock CDL functionality in order to be able to provision DH with mocked CDL.
-The only problematic part is the DB server and related remote data context.
+Problematic parts are the DB server CRN, related remote data context and other details like Ranger FQDN.
 In order to supply everything we need for that, we need to invoke an API of thunderhead-mock, example command can be seen below.
 
 The corresponding HMS database should be set up the same way as we set it up during DH creation (HMS table structure and initial data is created).
+The Ranger FQDN should point to a working Ranger instance, preferably to another DL's working Ranger.
 
 Step-by-step guide to create mocked CDL for an environment:
 - Create a CDP environment.
@@ -29,7 +30,8 @@ Content should look like this:
     "hmsDatabaseHost":"hmsDatabaseHost",
     "hmsDatabaseUser":"hmsDatabaseUser",
     "hmsDatabasePassword":"hmsDatabasePassword",
-    "hmsDatabaseName":"hmsDatabaseName"
+    "hmsDatabaseName":"hmsDatabaseName",
+    "rangerFqdn": "rangerFqdn"
  }
 ```
 

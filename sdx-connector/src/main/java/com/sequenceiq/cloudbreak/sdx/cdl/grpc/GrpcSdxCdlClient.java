@@ -59,6 +59,11 @@ public class GrpcSdxCdlClient {
         return sdxCdlClient.describeDatalake(datalakeNameOrCrn);
     }
 
+    public CdlCrudProto.DescribeServicesResponse describeDatalakeServices(String datalakeNameOrCrn) {
+        SdxCdlClient sdxCdlClient = makeClient();
+        return sdxCdlClient.describeDatalakeServices(datalakeNameOrCrn);
+    }
+
     public CdlCrudProto.ListDatalakesResponse listDatalakes(String environmentNameOrCrn, String datalakeNameOrCrn) {
         SdxCdlClient sdxCdlClient = makeClient();
         return sdxCdlClient.listDatalakes(environmentNameOrCrn, datalakeNameOrCrn);

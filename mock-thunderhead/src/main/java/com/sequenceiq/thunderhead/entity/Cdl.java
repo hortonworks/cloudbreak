@@ -29,6 +29,8 @@ public class Cdl {
 
     private String hmsDatabaseName;
 
+    private String rangerFqdn;
+
     public Long getId() {
         return id;
     }
@@ -91,5 +93,13 @@ public class Cdl {
 
     public void setHmsDatabaseName(String hmsDatabaseName) {
         this.hmsDatabaseName = hmsDatabaseName;
+    }
+
+    public String getRangerFqdn() {
+        return rangerFqdn;
+    }
+
+    public void setRangerFqdn(String rangerFqdn) {
+        this.rangerFqdn = rangerFqdn;
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.cdl.service;
 
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -93,13 +94,25 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
 
     @Override
     public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {
-        CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, StringUtils.EMPTY);
-        CdlCrudProto.DescribeDatalakeResponse detailedCdl = grpcClient.describeDatalake(datalake.getCrn());
-        return detailedCdl.getInstanceGroupsList().stream()
-                .filter(ig -> StringUtils.equals(ig.getName(), ACCESS_VIEW_IG_NAME))
-                .flatMap(ig -> ig.getInstancesList().stream())
-                .map(instance -> new SdxAccessView(instance.getDiscoveryFQDN(), instance.getPrivateIP()))
-                .findFirst();
+        if  (isEnabled(environmentCrn)) {
+            CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, StringUtils.EMPTY);
+            String rangerFqdn = grpcClient.describeDatalakeServices(datalake.getCrn())
+                    .getEndpointsList().stream()
+                    .filter(endpointInfo -> StringUtils.containsIgnoreCase(endpointInfo.getName(), "ranger"))
+                    .filter(endpointInfo -> !endpointInfo.getEndpointHostsList().isEmpty())
+                    .map(endpointInfo -> {
+                        try {
+                            return new URI(endpointInfo.getEndpointHostsList().getFirst().getUri()).getHost();
+                        } catch (Exception e) {
+                            return StringUtils.EMPTY;
+                        }
+                    })
+                    .findFirst()
+                    .orElse(null);
+            // here we are returning only with ranger FQDN since in case of CDL, term "cluster manager" is not applicable
+            return Optional.of(SdxAccessView.builder().withRangerFqdn(rangerFqdn).build());
+        }
+        return Optional.empty();
     }
 
     @Override

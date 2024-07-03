@@ -122,7 +122,8 @@ public class DistroXTemplateGenerationTests extends AbstractMockTest {
                             "hmsDatabaseHost", vmFormDlDatabase.getHost(),
                             "hmsDatabaseUser", "hive",
                             "hmsDatabasePassword", "hive",
-                            "hmsDatabaseName", "hive");
+                            "hmsDatabaseName", "hive",
+                            "rangerFqdn", "rangerHost");
                     LOGGER.info("Posting map [{}] to thunderhead-mock regarding CDL {}", request, cdlCrn);
                     getMockCdlRestCallExecutor().executeMethod(Method.build("POST"), "/api/v1/cdl/addDatabaseConfig",
                             new HashMap<>(), Entity.entity(JsonUtil.writeValueAsString(request), MediaType.APPLICATION_JSON_TYPE), response -> { }, w -> w);

@@ -18,7 +18,7 @@ public class RangerAutoCompleteConfigProvider {
         Optional<HostgroupView> gateway = source.getHostgroupViews().stream().filter(hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()))
                 .findFirst();
         if (source.getGatewayView() != null && source.getSharedServiceConfigs().isPresent() && gateway.isPresent()) {
-            configList.add(config("ranger.fqdn", source.getSharedServiceConfigs().get().getDatalakeClusterManagerFqdn()));
+            configList.add(config("ranger.fqdn", source.getSharedServiceConfigs().get().getRangerFqdn()));
             configList.add(config("knox.gateway.fqdn", gateway.get().getHosts().first()));
             configList.add(config("knox.gateway.proxy.api.topology", source.getGatewayView().getTopologyName() + "-api"));
             configList.add(config("ranger.autocomplete.enabled", Boolean.TRUE.toString()));

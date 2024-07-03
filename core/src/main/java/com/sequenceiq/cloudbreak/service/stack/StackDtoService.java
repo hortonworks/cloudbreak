@@ -405,7 +405,14 @@ public class StackDtoService implements LocalPaasSdxService {
         return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
                 .stream()
                 .findFirst()
-                .map(stackDto -> new SdxAccessView(getClusterManagerFqdn(stackDto), stackDto.getClusterManagerIp()));
+                .map(stackDto -> {
+                    String clusterManagerFqdn = getClusterManagerFqdn(stackDto);
+                    return SdxAccessView.builder()
+                            .withRangerFqdn(clusterManagerFqdn)
+                            .withClusterManagerFqdn(clusterManagerFqdn)
+                            .withClusterManagerIp(stackDto.getClusterManagerIp())
+                            .build();
+                });
     }
 
     private String getClusterManagerFqdn(StackDto stackDto) {

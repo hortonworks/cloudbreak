@@ -92,8 +92,9 @@ public class DatalakeService {
 
                 if (StringUtils.isNotBlank(environmentCrn)) {
                     platformAwareSdxConnector.getSdxAccessViewByEnvironmentCrn(environmentCrn).ifPresent(sdxAccessView -> {
-                        sharedServiceConfigsView.setDatalakeClusterManagerFqdn(sdxAccessView.discoveryFqdn());
+                        sharedServiceConfigsView.setDatalakeClusterManagerFqdn(sdxAccessView.clusterManagerFqdn());
                         sharedServiceConfigsView.setDatalakeClusterManagerIp(sdxAccessView.clusterManagerIp());
+                        sharedServiceConfigsView.setRangerFqdn(sdxAccessView.rangerFqdn());
                     });
                 }
                 break;

@@ -38,6 +38,21 @@ public class MockCdlService extends CdlCrudGrpc.CdlCrudImplBase {
     private CdlRespository cdlRespository;
 
     @Override
+    public void describeServices(CdlCrudProto.DescribeServicesRequest request, StreamObserver<CdlCrudProto.DescribeServicesResponse> responseObserver) {
+        Crn crn = Crn.safeFromString(request.getDatalake());
+        Optional<Cdl> cdlByCrn = cdlRespository.findByCrn(crn.toString());
+        if (cdlByCrn.isPresent()) {
+            Cdl cdl = cdlByCrn.get();
+            CdlCrudProto.EndpointHost endpointHost = CdlCrudProto.EndpointHost.newBuilder().setUri("https://" + cdl.getRangerFqdn() + ":1234").build();
+            CdlCrudProto.EndpointInfo endpointInfo = CdlCrudProto.EndpointInfo.newBuilder().setName("RANGER").addEndpointHosts(endpointHost).build();
+            responseObserver.onNext(CdlCrudProto.DescribeServicesResponse.newBuilder().setCrn(cdl.getCrn()).addEndpoints(endpointInfo).build());
+            responseObserver.onCompleted();
+        } else {
+            responseObserver.onError(Status.NOT_FOUND.asException());
+        }
+    }
+
+    @Override
     public void createDatalake(CdlCrudProto.CreateDatalakeRequest request, StreamObserver<CdlCrudProto.CreateDatalakeResponse> responseObserver) {
         // request only contains environment name, not crn, so as a hack, we can use name field to define env crn
         Crn envCrn = Crn.safeFromString(request.getEnvironmentName());
