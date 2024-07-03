@@ -79,7 +79,6 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.info("DynamicEntitlementRefreshJob will be unscheduled, stack state is {} for stack {}.", stack.getStatus(), stack.getResourceCrn());
             jobService.unschedule(context.getJobDetail().getKey());
         } else {
-            LOGGER.debug("DynamicEntitlementRefreshJob cannot run because of stack state.");
             logDynamicEntitlementInfo(stack);
         }
     }
