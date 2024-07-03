@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -25,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -56,8 +57,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
@@ -79,7 +80,7 @@ public class RecipeServiceTest {
     private RecipeViewRepository recipeViewRepository;
 
     @Mock
-    private HostGroupService hostGroupService;
+    private ClusterService clusterService;
 
     @Mock
     private Clock clock;
@@ -167,7 +168,7 @@ public class RecipeServiceTest {
         when(recipeRepository.findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
         when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe.getName()));
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(NameOrCrn.ofName(recipe.getName()), recipe.getWorkspace().getId()));
+        assertThrows(BadRequestException.class, () -> underTest.delete(NameOrCrn.ofName(recipe.getName()), recipe.getWorkspace().getId()));
 
         verify(recipeRepository, times(1)).findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId());
         verify(recipeRepository, times(0)).delete(any());
@@ -179,7 +180,7 @@ public class RecipeServiceTest {
         Recipe recipe2 = getRecipe(2L);
         when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe1.getName()));
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(Set.of(recipe1, recipe2)));
+            assertThrows(BadRequestException.class, () -> underTest.delete(Set.of(recipe1, recipe2)));
         });
 
         verify(recipeRepository, atMostOnce()).delete(any());
@@ -191,7 +192,7 @@ public class RecipeServiceTest {
         Recipe recipe2 = getRecipe(2L);
         when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe1.getName(), recipe2.getName()));
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(Set.of(recipe1, recipe2)));
+            assertThrows(BadRequestException.class, () -> underTest.delete(Set.of(recipe1, recipe2)));
         });
 
         verify(recipeRepository, times(0)).delete(any());
@@ -205,7 +206,7 @@ public class RecipeServiceTest {
                 .thenReturn(Set.of(recipe1, recipe2));
         when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe1.getName()));
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            Assertions.assertThrows(BadRequestException.class, () -> underTest.deleteMultipleByNameFromWorkspace(Set.of(recipe1.getName(), recipe2.getName()),
+            assertThrows(BadRequestException.class, () -> underTest.deleteMultipleByNameFromWorkspace(Set.of(recipe1.getName(), recipe2.getName()),
                     recipe1.getWorkspace().getId()));
         });
 
@@ -303,6 +304,30 @@ public class RecipeServiceTest {
         assertTrue(recipe.getResourceCrn().matches("crn:cdp:recipe:us-west-1:account_id:recipe:.*"));
         assertEquals(workspace, savedRecipe.getWorkspace());
         assertEquals(CreationType.SERVICE, savedRecipe.getCreationType());
+    }
+
+    @Test
+    public void testPrepareDeletionWithNullRecipe() {
+        NotFoundException exc = assertThrows(NotFoundException.class, () -> underTest.prepareDeletion(null));
+        assertEquals("Recipe not found.", exc.getMessage());
+    }
+
+    @Test
+    public void testPrepareDeletionWithSingleCluster() {
+        Recipe recipe = getRecipe();
+        when(clusterService.findAllClusterNamesByRecipeId(eq(recipe.getId()))).thenReturn(Set.of("cluster1"));
+        BadRequestException exc = assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(recipe));
+        assertEquals("There is a cluster ['cluster1'] which uses recipe 'somename1'." +
+                " Please remove this cluster before deleting the recipe.", exc.getMessage());
+    }
+
+    @Test
+    public void testPrepareDeletionWithMultipleCluster() {
+        Recipe recipe = getRecipe();
+        when(clusterService.findAllClusterNamesByRecipeId(eq(recipe.getId()))).thenReturn(Set.of("cluster1", "cluster2"));
+        BadRequestException exc = assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(recipe));
+        assertEquals("There are clusters associated with recipe 'somename1'. Please remove these before deleting the recipe." +
+                " The following clusters are using this recipe: [cluster1, cluster2].", exc.getMessage());
     }
 
     private Recipe getRecipe() {

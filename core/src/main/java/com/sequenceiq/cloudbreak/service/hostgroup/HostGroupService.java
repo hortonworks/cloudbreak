@@ -61,10 +61,6 @@ public class HostGroupService {
         hostGroupRepository.deleteAll(hostGroups);
     }
 
-    public Set<HostGroup> findAllHostGroupsByRecipe(Long recipeId) {
-        return hostGroupRepository.findAllHostGroupsByRecipe(recipeId);
-    }
-
     public Set<Recipe> getRecipesByHostGroups(Set<HostGroup> hostGroups) {
         return hostGroups.stream().flatMap(hostGroup -> hostGroup.getRecipes().stream()).collect(Collectors.toSet());
     }
@@ -83,5 +79,9 @@ public class HostGroupService {
 
     public Optional<RecoveryMode> getRecoveryModeForHostGroup(Long clusterId, String groupName) {
         return hostGroupRepository.findRecoveryModeForHostGroup(clusterId, groupName);
+    }
+
+    public Set<Long> findAllHostGroupIdsByRecipeId(Long recipeId) {
+        return hostGroupRepository.findAllHostGroupIdsByRecipeId(recipeId);
     }
 }

@@ -41,9 +41,8 @@ public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
             + "WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
     Optional<HostGroupRepairView> findHostGroupRepairViewInClusterByName(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
 
-    @EntityGraph(value = "HostGroup.instanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
-    @Query("SELECT h FROM HostGroup h JOIN h.recipes r WHERE r.id= :recipeId")
-    Set<HostGroup> findAllHostGroupsByRecipe(@Param("recipeId") Long recipeId);
+    @Query(value = "SELECT hr.hostgroup_id FROM hostgroup_recipe hr WHERE hr.recipes_id = :recipeId", nativeQuery = true)
+    Set<Long> findAllHostGroupIdsByRecipeId(@Param("recipeId") Long recipeId);
 
     @Query("SELECT h FROM HostGroup h LEFT JOIN FETCH h.recipes LEFT JOIN FETCH h.generatedRecipes WHERE h.cluster.id= :clusterId")
     Set<HostGroup> findHostGroupsInClusterWithRecipes(@Param("clusterId") Long clusterId);

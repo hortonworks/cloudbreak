@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
@@ -97,6 +98,9 @@ public class ClusterService {
 
     @Inject
     private ClusterRepository repository;
+
+    @Inject
+    private HostGroupService hostGroupService;
 
     @Inject
     private GatewayService gatewayService;
@@ -379,6 +383,16 @@ public class ClusterService {
             throw new BadRequestException(String.format("Cloudera Manager is not running for cluster: %s", cluster.getName()));
         }
         return clusterApi.clusterModificationService().isServicePresent(cluster.getName(), RANGER_RAZ);
+    }
+
+    public Set<String> findAllClusterNamesByRecipeId(Long recipeId) {
+        Set<Long> hostGroupIds = hostGroupService.findAllHostGroupIdsByRecipeId(recipeId);
+        if (hostGroupIds.isEmpty()) {
+            return Set.of();
+        }
+        Set<String> clusterNames = repository.findAllClusterNamesByHostGroupIds(hostGroupIds);
+        LOGGER.debug("Clusters found for recipe. cluster names: {}, hostgroup ids: {}, recipe id: {}", clusterNames, hostGroupIds, recipeId);
+        return clusterNames;
     }
 
     public Cluster prepareCluster(Collection<HostGroup> hostGroups, Blueprint blueprint, long stackId, Cluster cluster) {
