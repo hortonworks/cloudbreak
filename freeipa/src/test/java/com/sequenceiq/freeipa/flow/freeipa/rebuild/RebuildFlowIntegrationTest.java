@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -341,6 +342,9 @@ class RebuildFlowIntegrationTest {
     @Mock
     private FreeIpaClient freeIpaClient;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     @BeforeEach
     public void setup() throws FreeIpaClientException, QuotaExceededException, CloudbreakOrchestratorException {
         stack = new Stack();
@@ -389,6 +393,7 @@ class RebuildFlowIntegrationTest {
                 .thenReturn(RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator(Crn.Service.IAM, "cdp", "us-west-1"));
         when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
         when(cloudInstance.getInstanceId()).thenReturn("instance-id");
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

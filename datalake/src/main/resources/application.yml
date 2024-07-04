@@ -188,6 +188,8 @@ notification:
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
 
+flow.trigger.node.heartbeat.validation.enabled: true
+
 crn:
   partition: cdp
   region: us-west-1

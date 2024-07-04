@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
@@ -130,6 +131,9 @@ public class SdxReactorFlowManager {
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private NodeValidator nodeValidator;
 
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
@@ -319,6 +323,7 @@ public class SdxReactorFlowManager {
     }
 
     private FlowIdentifier notify(String selector, String identifier, Event<Acceptable> event) {
+        nodeValidator.checkForRecentHeartbeat();
         reactor.notify(selector, event);
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);

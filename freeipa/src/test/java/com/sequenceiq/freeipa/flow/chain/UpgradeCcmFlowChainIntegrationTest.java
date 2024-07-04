@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -157,6 +159,9 @@ class UpgradeCcmFlowChainIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     @Mock
     private ResourceConnector resourcesApi;
 
@@ -178,6 +183,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         when(connector.authentication()).thenReturn(authApi);
         when(connector.resources()).thenReturn(resourcesApi);
         when(authApi.authenticate(any(), any())).thenReturn(context);
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

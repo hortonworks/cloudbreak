@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -71,6 +73,9 @@ class EnvironmentReactorFlowManagerTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private NodeValidator nodeValidator;
+
     @InjectMocks
     private EnvironmentReactorFlowManager underTest;
 
@@ -88,6 +93,11 @@ class EnvironmentReactorFlowManagerTest {
 
     @Captor
     private ArgumentCaptor<Event.Headers> headersCaptor;
+
+    @BeforeEach
+    void setup() {
+        lenient().doNothing().when(nodeValidator).checkForRecentHeartbeat();
+    }
 
     @ParameterizedTest(name = "forced={0}")
     @ValueSource(booleans = {false, true})

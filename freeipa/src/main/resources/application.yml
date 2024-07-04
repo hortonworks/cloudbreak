@@ -391,6 +391,8 @@ ccmRevertJob:
 dynamic-entitlement:
   entitlements: CDP_CENTRAL_COMPUTE_MONITORING
 
+flow.trigger.node.heartbeat.validation.enabled: true
+
 wiam:
   host: localhost
   port: 8982

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
@@ -159,11 +161,15 @@ class UpgradeCcmFlowIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     private Stack stack;
 
     @BeforeEach
     public void setup() {
         mockStackService();
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

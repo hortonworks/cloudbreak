@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents.UPDA
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -124,6 +126,9 @@ class UpdateUserDataFlowIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     @Mock
     private ResourceConnector resourcesApi;
 
@@ -145,6 +150,7 @@ class UpdateUserDataFlowIntegrationTest {
         when(connector.authentication()).thenReturn(authApi);
         when(connector.resources()).thenReturn(resourcesApi);
         when(authApi.authenticate(any(), any())).thenReturn(context);
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

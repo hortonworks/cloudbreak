@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,6 +36,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.metrics.CommonMetricService;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -127,12 +129,16 @@ class UpgradeCcmFlowIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     @BeforeEach
     public void setup() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setTunnel(CCM);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

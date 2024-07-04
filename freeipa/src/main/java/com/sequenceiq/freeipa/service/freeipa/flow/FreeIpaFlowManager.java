@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -51,6 +52,9 @@ public class FreeIpaFlowManager {
     @Inject
     private FreeIpaParallelFlowValidator parallelFlowValidator;
 
+    @Inject
+    private NodeValidator nodeValidator;
+
     public FlowIdentifier notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
@@ -58,6 +62,7 @@ public class FreeIpaFlowManager {
     }
 
     public void notifyNonFlowEvent(Selectable selectable) {
+        nodeValidator.checkForRecentHeartbeat();
         Event<Selectable> event = eventFactory.createEvent(selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
         reactorReporter.logInfoReport();
@@ -70,6 +75,7 @@ public class FreeIpaFlowManager {
     }
 
     private FlowIdentifier notify(String selector, Event<Acceptable> event) {
+        nodeValidator.checkForRecentHeartbeat();
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selector, event);
         parallelFlowValidator.checkFlowAllowedToStart(selector, event.getData().getResourceId());
         reactorReporter.logInfoReport();

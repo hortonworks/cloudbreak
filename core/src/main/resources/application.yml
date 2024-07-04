@@ -818,6 +818,8 @@ sssd:
   heartbeat.timeout: 90
   nss.timeout: 30
 
+flow.trigger.node.heartbeat.validation.enabled: true
+
 cdp:
   structuredevent:
     rest:

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -71,6 +72,7 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -249,6 +251,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
     @MockBean
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
     private Stack stack;
@@ -295,6 +300,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
         when(crnGeneratorFactory.iam()).thenReturn(mock(RegionAwareInternalCrnGenerator.class));
         when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(new DetailedEnvironmentResponse());
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(any(), anyList(), anyList())).thenReturn(stack);
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

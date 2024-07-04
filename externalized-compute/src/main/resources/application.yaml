@@ -89,6 +89,8 @@ cdp.structuredevent:
   rest:
     contentlogging: true
 
+flow.trigger.node.heartbeat.validation.enabled: true
+
 crn:
   partition: cdp
   region: us-west-1

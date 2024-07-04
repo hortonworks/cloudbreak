@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -67,6 +68,9 @@ public class ReactorNotifier {
     @Inject
     private FlowNameFormatService flowNameFormatService;
 
+    @Inject
+    private NodeValidator nodeValidator;
+
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable) {
         return notify(stackId, selector, acceptable, stackDtoService::getStackViewById);
     }
@@ -76,6 +80,7 @@ public class ReactorNotifier {
     }
 
     public FlowIdentifier notify(BaseFlowEvent selectable, Event.Headers headers) {
+        nodeValidator.checkForRecentHeartbeat();
         Event<BaseFlowEvent> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
         reactor.notify(selectable.selector(), event);
@@ -83,6 +88,7 @@ public class ReactorNotifier {
     }
 
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, StackView> getStackFn) {
+        nodeValidator.checkForRecentHeartbeat();
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(eventParameterFactory.createEventParameters(stackId), acceptable);
         StackView stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(StackView::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));

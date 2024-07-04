@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
@@ -41,6 +42,9 @@ public class RedbeamsFlowManager {
     @Inject
     private FlowNameFormatService flowNameFormatService;
 
+    @Inject
+    private NodeValidator nodeValidator;
+
     public FlowIdentifier notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
@@ -54,6 +58,7 @@ public class RedbeamsFlowManager {
     }
 
     private FlowIdentifier notify(String selector, Event<Acceptable> event) {
+        nodeValidator.checkForRecentHeartbeat();
         reactor.notify(selector, event);
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);

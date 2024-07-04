@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateFailedEvent;
@@ -126,6 +128,9 @@ class RotateRdsCertificateFlowIntegrationTest {
     @MockBean
     private NodeConfig nodeConfig;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     @SpyBean
     private RotateRdsCertificateService rotateRdsCertificateService;
 
@@ -134,6 +139,7 @@ class RotateRdsCertificateFlowIntegrationTest {
     @BeforeEach
     public void setup() {
         mockStackService();
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -50,11 +52,15 @@ class RedbeamsFlowManagerTest {
     @Mock
     private FlowNameFormatService flowNameFormatService;
 
+    @Mock
+    private NodeValidator nodeValidator;
+
     @InjectMocks
     private RedbeamsFlowManager underTest;
 
     @Test
     void triggerSecretRotationShouldSucceed() throws InterruptedException {
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
         Acceptable data = mock(Acceptable.class);
         Promise<AcceptResult> accepted = (Promise<AcceptResult>) mock(Promise.class);
         when(data.accepted()).thenReturn(accepted);

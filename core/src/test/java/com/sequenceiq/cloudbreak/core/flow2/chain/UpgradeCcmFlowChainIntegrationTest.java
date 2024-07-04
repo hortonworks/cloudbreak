@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -80,6 +81,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
@@ -250,6 +252,9 @@ class UpgradeCcmFlowChainIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     @Mock
     private ResourceConnector resourcesApi;
 
@@ -306,6 +311,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         when(authApi.authenticate(any(), any())).thenReturn(context);
         when(clusterApiConnectors.getConnector(any(), any())).thenReturn(clusterApi);
         when(userDataService.getUserData(anyLong())).thenReturn(USER_DATA_MAP);
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

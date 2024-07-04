@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.model.FileSystemType;
@@ -106,6 +107,9 @@ class SdxReactorFlowManagerTest {
     @Mock
     private Promise<AcceptResult> acceptResultPromise;
 
+    @Mock
+    private NodeValidator nodeValidator;
+
     @BeforeEach
     void setUp() throws InterruptedException {
         sdxCluster = getValidSdxCluster();
@@ -113,6 +117,7 @@ class SdxReactorFlowManagerTest {
         BaseFlowEvent baseFlowEvent = new BaseFlowEvent("dontcare", 1L, "crn", acceptResultPromise);
         lenient().when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
                 .thenReturn(new Event(baseFlowEvent));
+        lenient().doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

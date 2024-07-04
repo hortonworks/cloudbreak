@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -16,12 +18,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
@@ -43,7 +46,7 @@ import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ReactorNotifierTest {
 
     @Mock
@@ -64,15 +67,19 @@ public class ReactorNotifierTest {
     @Mock
     private FlowNameFormatService flowNameFormatService;
 
+    @Mock
+    private NodeValidator nodeValidator;
+
     @InjectMocks
     private ReactorNotifier underTest;
 
-    @Before
+    @BeforeEach
     public void init() {
         when(eventParameterFactory.createEventParameters(anyLong())).thenReturn(Map.of());
+        lenient().doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
-    @Test(expected = CloudbreakApiException.class)
+    @Test
     public void testNonAllowedFlowInMaintenanceMode() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
@@ -82,7 +89,7 @@ public class ReactorNotifierTest {
         when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
                 .thenReturn(new Event<Acceptable>(baseFlowEvent));
 
-        underTest.notify(1L, "RANDOM", baseFlowEvent, stackService::getByIdWithTransaction);
+        assertThrows(CloudbreakApiException.class, () -> underTest.notify(1L, "RANDOM", baseFlowEvent, stackService::getByIdWithTransaction));
 
         verify(reactor, never()).notify(anyString(), any(Event.class));
     }
@@ -110,7 +117,7 @@ public class ReactorNotifierTest {
         verify(accepted, times(1)).await(10L, TimeUnit.SECONDS);
     }
 
-    @Test(expected = FlowNotAcceptedException.class)
+    @Test
     public void testAcceptedReturnNull() throws InterruptedException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
@@ -124,7 +131,7 @@ public class ReactorNotifierTest {
                 .thenReturn(event);
         when(accepted.await(10L, TimeUnit.SECONDS)).thenReturn(null);
 
-        underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction);
+        assertThrows(FlowNotAcceptedException.class, () -> underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction));
 
         verify(reactorReporter, times(1)).logInfoReport();
         verify(reactorReporter, times(1)).logErrorReport();
@@ -132,7 +139,7 @@ public class ReactorNotifierTest {
         verify(accepted, times(1)).await(10L, TimeUnit.SECONDS);
     }
 
-    @Test(expected = FlowsAlreadyRunningException.class)
+    @Test
     public void testAcceptedReturnFalse() throws InterruptedException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
@@ -146,7 +153,7 @@ public class ReactorNotifierTest {
                 .thenReturn(event);
         when(accepted.await(10L, TimeUnit.SECONDS)).thenReturn(FlowAcceptResult.alreadyExistingFlow(Collections.EMPTY_SET));
 
-        underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction);
+        assertThrows(FlowsAlreadyRunningException.class, () -> underTest.notify(1L, "RANDOM", data, stackService::getByIdWithTransaction));
 
         verify(reactorReporter, times(1)).logInfoReport();
         verify(reactorReporter, times(1)).logErrorReport();

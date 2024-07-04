@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -44,6 +45,9 @@ public class ExternalizedComputeClusterFlowManager {
 
     @Inject
     private EventBus reactor;
+
+    @Inject
+    private NodeValidator nodeValidator;
 
     public FlowIdentifier triggerExternalizedComputeClusterCreation(ExternalizedComputeCluster externalizedComputeCluster) {
         LOGGER.info("Trigger Externalized Compute Cluster creation for: {}", externalizedComputeCluster);
@@ -75,6 +79,7 @@ public class ExternalizedComputeClusterFlowManager {
     }
 
     private FlowIdentifier notify(String selector, String identifier, Event<Acceptable> event) {
+        nodeValidator.checkForRecentHeartbeat();
         reactor.notify(selector, event);
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);

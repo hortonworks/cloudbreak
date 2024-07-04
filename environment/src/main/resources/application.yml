@@ -250,6 +250,8 @@ clusterdns:
   host: localhost
   port: 8982
 
+flow.trigger.node.heartbeat.validation.enabled: true
+
 wiam:
   host: localhost
   port: 8982

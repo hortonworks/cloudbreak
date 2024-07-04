@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -64,6 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -191,6 +193,9 @@ class StackProvisionFlowIntegrationTest {
     @MockBean
     private EncryptionKeyService encryptionKeyService;
 
+    @MockBean
+    private NodeValidator nodeValidator;
+
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
     private Stack stack;
@@ -223,6 +228,7 @@ class StackProvisionFlowIntegrationTest {
         when(resourceConnector.getTlsInfo(any(), any())).thenReturn(new TlsInfo(false));
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(new InstanceMetaData()));
         when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(new DetailedEnvironmentResponse());
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
     }
 
     @Test

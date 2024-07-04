@@ -239,6 +239,8 @@ altus:
     host: localhost
     caller: redbeams
 
+flow.trigger.node.heartbeat.validation.enabled: true
+
 crn:
   partition: cdp
   region: us-west-1

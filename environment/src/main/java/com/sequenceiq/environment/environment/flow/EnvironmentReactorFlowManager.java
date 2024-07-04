@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -46,6 +47,7 @@ import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
@@ -63,12 +65,15 @@ public class EnvironmentReactorFlowManager {
 
     private final EntitlementService entitlementService;
 
+    private final NodeValidator nodeValidator;
+
     public EnvironmentReactorFlowManager(EventSender eventSender,
-            FlowCancelService flowCancelService, StackService stackService, EntitlementService entitlementService) {
+            FlowCancelService flowCancelService, StackService stackService, EntitlementService entitlementService, NodeValidator nodeValidator) {
         this.eventSender = eventSender;
         this.flowCancelService = flowCancelService;
         this.stackService = stackService;
         this.entitlementService = entitlementService;
+        this.nodeValidator = nodeValidator;
     }
 
     public FlowIdentifier triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
@@ -81,7 +86,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceCrn(envCrn)
                 .build();
 
-        return eventSender.sendEvent(envCreationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(envCreationEvent, userCrn);
     }
 
     private Map<String, Object> getFlowTriggerUsercrn(String userCrn) {
@@ -99,7 +104,7 @@ public class EnvironmentReactorFlowManager {
                 .withForceDelete(forced)
                 .build();
 
-        return eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(envDeleteEvent, userCrn);
     }
 
     public FlowIdentifier triggerCascadingDeleteFlow(EnvironmentView environment, String userCrn, boolean forced) {
@@ -113,7 +118,7 @@ public class EnvironmentReactorFlowManager {
                 .withForceDelete(forced)
                 .build();
 
-        return eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(envDeleteEvent, userCrn);
     }
 
     public FlowIdentifier triggerStopFlow(long envId, String envName, String userCrn) {
@@ -125,7 +130,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(envName)
                 .build();
 
-        return eventSender.sendEvent(envStopEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(envStopEvent, userCrn);
     }
 
     public FlowIdentifier triggerStartFlow(long envId, String envName, String userCrn, DataHubStartAction dataHubStartAction) {
@@ -138,7 +143,7 @@ public class EnvironmentReactorFlowManager {
                 .withDataHubStartAction(dataHubStartAction)
                 .build();
 
-        return eventSender.sendEvent(envStartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(envStartEvent, userCrn);
     }
 
     public FlowIdentifier triggerStackConfigUpdatesFlow(EnvironmentView environment, String userCrn) {
@@ -155,8 +160,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceCrn(environment.getResourceCrn())
                 .build();
 
-        return eventSender.sendEvent(envStackConfigUpdatesEvent,
-                new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(envStackConfigUpdatesEvent, userCrn);
     }
 
     public FlowIdentifier triggerEnvironmentProxyConfigModification(EnvironmentDto environment, ProxyConfig proxyConfig) {
@@ -170,7 +174,7 @@ public class EnvironmentReactorFlowManager {
                         .withProxyConfigCrn(getIfNotNull(proxyConfig, ProxyConfig::getResourceCrn))
                         .withPreviousProxyConfigCrn(getIfNotNull(environment.getProxyConfig(), ProxyConfig::getResourceCrn))
                         .build();
-        return eventSender.sendEvent(envProxyModificationEvent, new Event.Headers(getFlowTriggerUsercrn(ThreadBasedUserCrnProvider.getUserCrn())));
+        return sendEvent(envProxyModificationEvent, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     public FlowIdentifier triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
@@ -195,7 +199,7 @@ public class EnvironmentReactorFlowManager {
                 .withSubnetIds(endpointGatewaySubnetIds)
                 .build();
 
-        return eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return sendEvent(loadBalancerUpdateEvent, userCrn);
     }
 
     public FlowIdentifier triggerCcmUpgradeFlow(EnvironmentDto environment, String userCrn) {
@@ -207,7 +211,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(environment.getName())
                 .withSelector(UpgradeCcmStateSelectors.UPGRADE_CCM_VALIDATION_EVENT.selector())
                 .build();
-        FlowIdentifier flowIdentifier = eventSender.sendEvent(upgradeCcmEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        FlowIdentifier flowIdentifier = sendEvent(upgradeCcmEvent, userCrn);
         LOGGER.debug("Environment CCM upgrade flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
     }
@@ -222,7 +226,7 @@ public class EnvironmentReactorFlowManager {
                 .withFreeIPAVerticalScaleRequest(updateRequest)
                 .withSelector(EnvironmentVerticalScaleStateSelectors.VERTICAL_SCALING_FREEIPA_VALIDATION_EVENT.selector())
                 .build();
-        FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        FlowIdentifier flowIdentifier = sendEvent(environmentVerticalScaleEvent, userCrn);
         LOGGER.debug("Environment Vertical Scale flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
     }
@@ -235,7 +239,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(environment.getResourceName())
                 .withSelector(ExternalizedComputeClusterCreationStateSelectors.DEFAULT_COMPUTE_CLUSTER_CREATION_START_EVENT.selector())
                 .build();
-        FlowIdentifier flowIdentifier = eventSender.sendEvent(externalizedComputeClusterCreationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        FlowIdentifier flowIdentifier = sendEvent(externalizedComputeClusterCreationEvent, userCrn);
         LOGGER.debug("Externalized compute cluster creation flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
     }
@@ -250,9 +254,13 @@ public class EnvironmentReactorFlowManager {
                 .withForce(force)
                 .withSelector(ExternalizedComputeClusterReInitializationStateSelectors.DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_START_EVENT.selector())
                 .build();
-        FlowIdentifier flowIdentifier =
-                eventSender.sendEvent(externalizedComputeClusterReInitializationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        FlowIdentifier flowIdentifier = sendEvent(externalizedComputeClusterReInitializationEvent, userCrn);
         LOGGER.debug("Externalized compute cluster reinitialization flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
+    }
+
+    private FlowIdentifier sendEvent(BaseNamedFlowEvent event, String userCrn) {
+        nodeValidator.checkForRecentHeartbeat();
+        return eventSender.sendEvent(event, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 }
