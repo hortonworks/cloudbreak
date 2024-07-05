@@ -257,4 +257,8 @@ public interface StackDtoDelegate {
     default String getSupportedImdsVersion() {
         return getStack().getSupportedImdsVersion();
     }
+
+    default Long getCreated() {
+        return getStack().getCreated();
+    }
 }
