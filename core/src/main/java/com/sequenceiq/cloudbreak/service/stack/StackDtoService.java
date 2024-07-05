@@ -384,7 +384,7 @@ public class StackDtoService implements LocalPaasSdxService {
                         .withCrn(stackDto.getResourceCrn())
                         .withRuntime(runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null))
                         .withRazEnabled(stackDto.getCluster().isRangerRazEnabled())
-                        .withCreated(stackDto.getCluster().getCreationFinished())
+                        .withCreated(stackDto.getCreated())
                         .withDbServerCrn(stackDto.getCluster().getDatabaseServerCrn())
                         .withFileSystemView(getHiveRelatedFileSystem(stackDto.getCluster().getFileSystem()))
                         .build());
