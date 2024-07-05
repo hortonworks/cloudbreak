@@ -237,6 +237,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
+                .await(EnvironmentStatus.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                     .withEnvironment()
                 .then((tc, testDto, client) -> {
