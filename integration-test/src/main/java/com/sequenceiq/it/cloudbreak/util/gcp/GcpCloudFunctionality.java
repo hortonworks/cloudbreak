@@ -145,7 +145,7 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public Map<String, String> getLaunchTemplateUserData(String stack) {
         LOGGER.debug("Currently not implemented for GCP!");
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override

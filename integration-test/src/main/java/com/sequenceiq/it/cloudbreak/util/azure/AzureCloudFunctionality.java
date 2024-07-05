@@ -151,7 +151,7 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public Map<String, String> getLaunchTemplateUserData(String stack) {
         LOGGER.info("not implemented for azure");
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
