@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOSTS_STATES_UPDATED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -19,6 +20,7 @@ import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -340,10 +342,10 @@ public class ClusterService {
     }
 
     private void fireHostStatusUpdateNotification(Long stackId, List<InstanceMetadataView> updatedInstanceMetaData) {
-        updatedInstanceMetaData.forEach(instanceMetaData -> {
-            eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(), CLUSTER_HOST_STATUS_UPDATED,
-                    Arrays.asList(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getInstanceStatus().name()));
-        });
+        String hostsWithStatuses = updatedInstanceMetaData.stream()
+                .map(im -> im.getDiscoveryFQDN() + " - " + im.getInstanceStatus())
+                .collect(Collectors.joining("\n"));
+        eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(), CLUSTER_HOSTS_STATES_UPDATED, Collections.singleton(hostsWithStatuses));
     }
 
     private List<InstanceMetadataView> updateInstanceStatuses(List<InstanceMetadataView> notTerminatedInstanceMetaDatas,

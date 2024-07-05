@@ -334,6 +334,7 @@ public enum ResourceEvent {
     CLUSTER_START_IGNORED("cluster.start.ignored"),
     CLUSTER_STOP_IGNORED("cluster.stop.ignored"),
     CLUSTER_HOST_STATUS_UPDATED("cluster.host.status.updated"),
+    CLUSTER_HOSTS_STATES_UPDATED("cluster.hosts.states.updated"),
     CLUSTER_START_REQUESTED("cluster.start.requested"),
     CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT("cluster.autorecovery.requested.cluster"),
     CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT("cluster.autorecovery.requested.host"),
