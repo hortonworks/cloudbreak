@@ -19,6 +19,7 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.core.PayloadContextProvider;
@@ -57,13 +58,19 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     public DescribeEnvironmentResponse getRemoteEnvironment(String publicCloudAccountId, String environmentCrn) {
         DescribeEnvironmentResponse response = null;
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
-            String privateCloudAccountId = Crn.fromString(environmentCrn).getAccountId();
-            Optional<PrivateControlPlane> privateControlPlanes =
-                    privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
-            if (privateControlPlanes.isPresent()) {
-                response = describeRemoteEnvironment(privateControlPlanes.get(), environmentCrn);
-            } else {
-                throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
+            try {
+                String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
+                Optional<PrivateControlPlane> privateControlPlanes =
+                        privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
+                if (privateControlPlanes.isPresent()) {
+                    response = describeRemoteEnvironment(privateControlPlanes.get(), environmentCrn);
+                } else {
+                    throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
+                }
+            } catch (CrnParseException crnParseException) {
+                String message = String.format("The provided environment CRN('%s') is invalid", environmentCrn);
+                LOGGER.info(message);
+                throw new BadRequestException(message, crnParseException);
             }
         }
         return response;
@@ -77,6 +84,7 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
             responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn(), userCrn)
                     .getEnvironments()
                     .stream()
+                    .filter(resp -> isCrnValidAndWithinAccount(controlPlane.getPrivateCloudAccountId(), resp.getCrn()))
                     .parallel()
                     .map(environment -> {
                         LOGGER.debug("Remote environment list on private control plane: {} will be executed by thread: {}", controlPlane.getName(),
@@ -106,5 +114,10 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
         }
         return response;
+    }
+
+    private boolean isCrnValidAndWithinAccount(String accountId, String envCrn) {
+        return Crn.isCrn(envCrn)
+                && accountId.equals(Crn.safeFromString(envCrn).getAccountId());
     }
 }

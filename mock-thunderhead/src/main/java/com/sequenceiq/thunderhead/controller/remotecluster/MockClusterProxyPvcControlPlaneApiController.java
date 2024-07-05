@@ -2,7 +2,8 @@ package com.sequenceiq.thunderhead.controller.remotecluster;
 
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -27,6 +30,9 @@ public class MockClusterProxyPvcControlPlaneApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterProxyPvcControlPlaneApiController.class);
 
     private DescribeEnvironmentResponse mockRemoteEnvironmentResponse;
+
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @PostConstruct
     public void setup() throws IOException {
@@ -40,10 +46,17 @@ public class MockClusterProxyPvcControlPlaneApiController {
         try {
             ListEnvironmentsResponse mockRemoteEnvironmentResponses = new ListEnvironmentsResponse();
             for (int i = 0; i < 10; i++) {
-                Crn crnObject = Crn.fromString(crn);
+                Crn controlPlaneCrn = Crn.safeFromString(crn);
+                String pvControlPlaneAccountId = controlPlaneCrn.getResource();
+                String environmentResourceId = pvControlPlaneAccountId + "-" + i;
+                String environmentName = i + pvControlPlaneAccountId.substring(pvControlPlaneAccountId.lastIndexOf("-"));
+                Crn envCrn = regionAwareCrnGenerator.generateCrn(
+                        CrnResourceDescriptor.ENVIRONMENT,
+                        environmentName + "/" + environmentResourceId,
+                        pvControlPlaneAccountId);
                 EnvironmentSummary mockRemoteEnvironmentResponse = new EnvironmentSummary();
-                mockRemoteEnvironmentResponse.setEnvironmentName(crnObject.getResource() + "-" + i);
-                mockRemoteEnvironmentResponse.setCrn(crn);
+                mockRemoteEnvironmentResponse.setEnvironmentName(environmentName);
+                mockRemoteEnvironmentResponse.setCrn(envCrn.toString());
                 mockRemoteEnvironmentResponse.setCloudPlatform("OPENSHIFT");
                 mockRemoteEnvironmentResponse.setStatus("AVAILABLE");
                 mockRemoteEnvironmentResponses.getEnvironments().add(mockRemoteEnvironmentResponse);
@@ -60,7 +73,7 @@ public class MockClusterProxyPvcControlPlaneApiController {
 
     @PostMapping("/cluster-proxy/proxy/{crn}/PvcControlPlane/api/v1/environments2/describeEnvironment")
     public ResponseEntity<DescribeEnvironmentResponse> describeEnvironments(@PathVariable("crn") String crn,
-        @RequestBody DescribeEnvironmentRequest environmentRequest) {
+            @RequestBody DescribeEnvironmentRequest environmentRequest) {
         LOGGER.info("Describe remote environments for crn: '{}'", crn);
         try {
             mockRemoteEnvironmentResponse.getEnvironment().setCrn(environmentRequest.getEnvironmentName());

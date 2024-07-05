@@ -10,6 +10,7 @@ import java.util.Set;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -55,7 +56,9 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
     public void queryPrivateControlPlaneConfigs() throws JobExecutionException {
         LOGGER.debug("query all remote clusters");
         try {
-            List<PvcControlPlaneConfiguration> remoteControlPlanes = grpcRemoteClusterClient.listAllPrivateControlPlanes();
+            List<PvcControlPlaneConfiguration> remoteControlPlanes = grpcRemoteClusterClient.listAllPrivateControlPlanes().stream()
+                    .filter(pcp -> StringUtils.isNotEmpty(pcp.getPvcCrn()) && Crn.isCrn(pcp.getPvcCrn()))
+                    .toList();
             if (!remoteControlPlanes.isEmpty()) {
                 List<PrivateControlPlane> controlPlanesInOurDatabase = privateControlPlaneService.findAll();
 

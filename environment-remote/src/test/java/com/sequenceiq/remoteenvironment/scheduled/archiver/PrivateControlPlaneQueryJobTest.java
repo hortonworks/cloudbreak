@@ -9,8 +9,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +20,7 @@ import org.quartz.JobExecutionException;
 
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
 import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
+import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequests;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.scheduled.PrivateControlPlaneQueryJob;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
@@ -36,6 +39,7 @@ class PrivateControlPlaneQueryJobTest {
     @Test
     public void testQueryPrivateControlPlaneConfigs() throws JobExecutionException {
         List<PvcControlPlaneConfiguration> remoteControlPlanes = new ArrayList<>();
+        String invalidCrn = "crn:cdp:hybrid:us-west-1:73d:pvcInvalidControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad4";
         remoteControlPlanes.add(getPvcControlPlaneConfiguration(
                 "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad1",
                 "NAME1", "URL1"));
@@ -48,6 +52,9 @@ class PrivateControlPlaneQueryJobTest {
         remoteControlPlanes.add(getPvcControlPlaneConfiguration(
                 "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad4",
                 "NAME4", "URL4"));
+        remoteControlPlanes.add(getPvcControlPlaneConfiguration(
+                invalidCrn,
+                "NAME5", "URL5"));
 
         List<PrivateControlPlane> controlPlanesInOurDatabase = new ArrayList<>();
         controlPlanesInOurDatabase.add(getPrivateControlPlane(
@@ -71,9 +78,16 @@ class PrivateControlPlaneQueryJobTest {
 
         privateControlPlaneQueryJob.queryPrivateControlPlaneConfigs();
 
+        ArgumentCaptor<PrivateControlPlaneRegistrationRequests> requestCaptor = ArgumentCaptor.forClass(PrivateControlPlaneRegistrationRequests.class);
+        verify(privateControlPlaneService, times(1)).register(requestCaptor.capture());
         verify(privateControlPlaneService, times(1)).deleteByResourceCrns(any());
-        verify(privateControlPlaneService, times(1)).register(any());
         verify(privateControlPlaneService, times(1)).pureSave(any());
+
+        Assertions.assertThat(requestCaptor)
+                .isNotNull()
+                .matches(rc -> rc.getValue().getItems().stream()
+                        .noneMatch(pvcRequest -> invalidCrn.equals(pvcRequest.getCrn())), "should not contain invalid CRN")
+                .matches(rc -> rc.getValue().getItems().size() == 1);
     }
 
     private static PrivateControlPlane getPrivateControlPlane(String crn, String name, String url) {
