@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -94,6 +95,9 @@ class ClusterServiceTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
+    private HostGroupService hostGroupService;
 
     @Mock
     private ClusterRepository repository;
@@ -253,6 +257,21 @@ class ClusterServiceTest {
         verify(instanceMetaDataService, times(1)).getAllAvailableInstanceMetadataViewsByStackId(eq(STACK_ID));
         verify(instanceMetaDataService, times(1)).updateAllInstancesToStatus(eq(List.of(INSTANCE_ID)),
                 eq(InstanceStatus.ORCHESTRATION_FAILED), contains("ORCHESTRATION_FAILED"));
+    }
+
+    @Test
+    void testFindAllClusterNamesByRecipeIdsWithoutRecipeAttachment() {
+        when(hostGroupService.findAllHostGroupIdsByRecipeId(eq(1L))).thenReturn(Set.of());
+        Set<String> clusterNames = underTest.findAllClusterNamesByRecipeId(1L);
+        assertEquals(0, clusterNames.size());
+    }
+
+    @Test
+    void testFindAllClusterNamesByRecipeIdsWithASingleCluster() {
+        when(hostGroupService.findAllHostGroupIdsByRecipeId(eq(1L))).thenReturn(Set.of(2L));
+        when(repository.findAllClusterNamesByHostGroupIds(eq(Set.of(2L)))).thenReturn(Set.of("cluster-name"));
+        Set<String> clusterNames = underTest.findAllClusterNamesByRecipeId(1L);
+        assertEquals(Set.of("cluster-name"), clusterNames);
     }
 
     private StackDto setupStack(long stackId) {

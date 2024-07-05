@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -48,8 +47,8 @@ import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.usage.service.RecipeUsageService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -66,7 +65,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     private RecipeViewRepository recipeViewRepository;
 
     @Inject
-    private HostGroupService hostGroupService;
+    private ClusterService clusterService;
 
     @Inject
     private TransactionService transactionService;
@@ -243,19 +242,19 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
             throw new NotFoundException("Recipe not found.");
         }
         LOGGER.debug("Check if recipe can be deleted. {} - {}", recipe.getId(), recipe.getName());
-        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupService.findAllHostGroupsByRecipe(recipe.getId()));
-        if (!hostGroupsWithRecipe.isEmpty()) {
-            if (hostGroupsWithRecipe.size() > 1) {
-                String clusters = hostGroupsWithRecipe
-                        .stream()
-                        .map(hostGroup -> hostGroup.getCluster().getName())
-                        .collect(Collectors.joining(", "));
-                throw new BadRequestException(String.format(
-                        "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe. "
-                                + "The following clusters are using this recipe: [%s]", recipe.getId(), clusters));
-            }
+        Set<String> clustersWithRecipe = clusterService.findAllClusterNamesByRecipeId(recipe.getId());
+        if (clustersWithRecipe.size() == 1) {
+            String onlyCluster = clustersWithRecipe.iterator().next();
             throw new BadRequestException(String.format("There is a cluster ['%s'] which uses recipe '%s'. Please remove this "
-                    + "cluster before deleting the recipe", hostGroupsWithRecipe.get(0).getCluster().getName(), recipe.getName()));
+                    + "cluster before deleting the recipe.", onlyCluster, recipe.getName()));
+        } else if (clustersWithRecipe.size() > 1) {
+            String clusterNames = clustersWithRecipe
+                    .stream()
+                    .sorted()
+                    .collect(Collectors.joining(", "));
+            throw new BadRequestException(String.format(
+                    "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe. "
+                            + "The following clusters are using this recipe: [%s].", recipe.getName(), clusterNames));
         }
     }
 
