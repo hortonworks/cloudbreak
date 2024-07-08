@@ -2,7 +2,6 @@ package com.sequenceiq.redbeams.service.network;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -117,9 +116,8 @@ public class NetworkParameterAdderTest {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform("AZURE");
         DetailedEnvironmentResponse environment = getAzureDetailedEnvironmentResponse();
-        CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
+        environment.getNetwork().setSubnetMetas(Map.of("mySubnet", new CloudSubnet("mySubnet", "")));
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
-        when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any(), anyBoolean())).thenReturn(List.of(subnetForPrivateEndpoint));
         when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
         CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
         when(subnetListerService.expandAzureResourceId(any(CloudSubnet.class), any(), anyString())).thenReturn(cloudSubnet);
@@ -140,7 +138,7 @@ public class NetworkParameterAdderTest {
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AZURE.name())
                 .withNetwork(EnvironmentNetworkResponse.builder()
-                        .withSubnetMetas(Map.of())
+                        .withSubnetMetas(Map.of("mySubnet", new CloudSubnet("mySubnet", "")))
                         .withAzure(
                                 EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
                                         .withResourceGroupName("myResourceGroup")
@@ -153,7 +151,6 @@ public class NetworkParameterAdderTest {
                 .build();
         CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
-        when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any(), anyBoolean())).thenReturn(List.of(subnetForPrivateEndpoint));
         when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
         CloudSubnet cloudSubnet = new CloudSubnet(SUBNET_RESOURCE_ID, SUBNET_ID);
         when(subnetListerService.expandAzureResourceId(subnetForPrivateEndpoint, environment, "mySubscription")).thenReturn(cloudSubnet);

@@ -2,17 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.azure.subnet.selector;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
@@ -21,9 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 public class AzureSubnetSelectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureSubnetSelectorService.class);
-
-    @Inject
-    private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
     public SubnetSelectionResult select(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         Optional<String> errorMessage = quickValidate(subnetMetas, subnetSelectionParameters);
@@ -43,22 +35,5 @@ public class AzureSubnetSelectorService {
             return Optional.of("Azure subnet selection: parameters were not specified.");
         }
         return Optional.empty();
-    }
-
-    public SubnetSelectionResult selectForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork) {
-        List<CloudSubnet> suitableCloudSubnet;
-        if (existingNetwork) {
-            LOGGER.debug("Selecting subnets for private endpoint, existing network");
-            suitableCloudSubnet = subnetMetas.stream()
-                    .filter(sn -> azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(sn))
-                    .collect(Collectors.toList());
-        } else {
-            LOGGER.debug("Selecting subnets for private endpoint, new network - all subnets are suitable");
-            suitableCloudSubnet = new ArrayList<>(subnetMetas);
-        }
-        return suitableCloudSubnet.isEmpty() ?
-                new SubnetSelectionResult("No suitable subnets found for placing a private endpoint "
-                        + "because of the network policy being enabled, please disable network policies for private endpoints and try again!") :
-                new SubnetSelectionResult(suitableCloudSubnet);
     }
 }
