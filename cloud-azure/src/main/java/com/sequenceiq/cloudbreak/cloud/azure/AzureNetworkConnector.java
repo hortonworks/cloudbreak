@@ -217,11 +217,6 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork) {
-        return azureSubnetSelectorService.selectForPrivateEndpoint(subnetMetas, existingNetwork);
-    }
-
-    @Override
     public List<CloudResource> createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
         PrivateDatabaseVariant privateEndpointVariant = request.getPrivateEndpointVariant();
         if (privateEndpointVariant.isZoneManagedByCdp()) {

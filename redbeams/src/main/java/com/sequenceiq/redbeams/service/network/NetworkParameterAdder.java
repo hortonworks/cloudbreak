@@ -151,12 +151,11 @@ public class NetworkParameterAdder {
 
     private String getAzureSubnetToUseWithPrivateEndpoint(DetailedEnvironmentResponse environmentResponse, DBStack dbStack) {
         String subscriptionId = subnetListerService.getAzureSubscriptionId(environmentResponse.getCrn());
-        return subnetChooserService.chooseSubnetForPrivateEndpoint(
-                        environmentResponse.getNetwork().getSubnetMetas().values(), dbStack, environmentResponse.getNetwork().isExistingNetwork())
+        return environmentResponse.getNetwork().getSubnetMetas().values()
                 .stream()
                 .findFirst()
                 .map(csn -> subnetListerService.expandAzureResourceId(csn, environmentResponse, subscriptionId))
                 .map(CloudSubnet::getId).orElseThrow(() -> new RedbeamsException("It is not possible to create private endpoints for database: " +
-                        "there are no subnets with privateEndpointNetworkPolicies disabled"));
+                        "there are no subnets in the environment."));
     }
 }

@@ -35,7 +35,6 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCrede
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.NetworkTestUtils;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
@@ -87,36 +86,6 @@ public class AzurePrivateEndpointValidatorTest {
                 azureNewPrivateDnsZoneValidatorService,
                 azureExistingPrivateDnsZonesService
         );
-    }
-
-    @Test
-    void testCheckNetworkPoliciesWhenExistingNetworkWhenPrivateEndpointNetworkPoliciesEnabled() {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams();
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
-                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
-                .build();
-        when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-
-        underTest.checkNetworkPoliciesWhenExistingNetwork(networkDto, getCloudSubnets(true), validationResultBuilder);
-
-        assertTrue(validationResultBuilder.build().hasError());
-        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "It is not possible to create private endpoints for existing network with id 'networkId' in resource group 'networkResourceGroupName': " +
-                        "Azure requires at least one subnet with private endpoint network policies (eg. NSGs) disabled.  Please disable private endpoint " +
-                        "network policies in at least one of the following subnets and retry: 'subnet-one'. Refer to Microsoft documentation at: " +
-                        "https://docs.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy"));
-    }
-
-    @Test
-    void testCheckNetworkPoliciesWhenExistingNetworkWhenPrivateEndpointNetworkPoliciesDisabled() {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        NetworkDto networkDto = getNetworkDto(getAzureParams());
-        when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-
-        underTest.checkNetworkPoliciesWhenExistingNetwork(networkDto, getCloudSubnets(false), validationResultBuilder);
-
-        assertFalse(validationResultBuilder.build().hasError());
     }
 
     @Test

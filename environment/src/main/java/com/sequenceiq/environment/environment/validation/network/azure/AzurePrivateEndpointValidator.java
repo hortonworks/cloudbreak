@@ -1,8 +1,6 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,13 +14,11 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.AzureExistingPrivateDnsZoneValidatorService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.AzureNewPrivateDnsZoneValidatorService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.ValidationType;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -63,30 +59,6 @@ public class AzurePrivateEndpointValidator {
         if (validationType == ValidationType.ENVIRONMENT_EDIT && StringUtils.isNotEmpty(originalZoneId) && StringUtils.isEmpty(newZoneId)) {
             String message = "Deletion of existing dns zone id is not a valid operation";
             addValidationError(message, resultBuilder);
-        }
-    }
-
-    public void checkNetworkPoliciesWhenExistingNetwork(
-            NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResultBuilder resultBuilder) {
-        if (!networkDto.isPrivateEndpointEnabled(CloudPlatform.AZURE)) {
-            LOGGER.debug("No private endpoint network policies validation requested");
-            return;
-        }
-
-        if (RegistrationType.CREATE_NEW == networkDto.getRegistrationType()) {
-            LOGGER.debug("Using new network -- bypassing private endpoint network policies validation");
-            return;
-        }
-
-        boolean noSuitableSubnetPresent = cloudNetworks.values().stream().noneMatch(azureCloudSubnetParametersService::isPrivateEndpointNetworkPoliciesDisabled);
-        if (noSuitableSubnetPresent) {
-            String subnetsInVnet = cloudNetworks.values().stream().map(CloudSubnet::getName).collect(Collectors.joining(", "));
-            String errorMessage = String.format("It is not possible to create private endpoints for existing network with id '%s' in resource group '%s': " +
-                            "Azure requires at least one subnet with private endpoint network policies (eg. NSGs) disabled.  Please disable private endpoint " +
-                            "network policies in at least one of the following subnets and retry: '%s'. Refer to Microsoft documentation at: " +
-                            "https://docs.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy",
-                    networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName(), subnetsInVnet);
-            addValidationError(errorMessage, resultBuilder);
         }
     }
 
