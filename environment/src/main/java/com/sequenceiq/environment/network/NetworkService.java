@@ -2,6 +2,7 @@ package com.sequenceiq.environment.network;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +68,9 @@ public class NetworkService {
             if (environmentNetworkConverter != null) {
                 baseNetwork = environmentNetworkConverter.convert(environment, networkDto, subnetMetas, endpointGatewaySubnetMetas);
                 baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
-                baseNetwork.setResourceCrn(createCRN(accountId));
+                if (isEmpty(baseNetwork.getResourceCrn())) {
+                    baseNetwork.setResourceCrn(isEmpty(networkDto.getResourceCrn()) ? createCRN(accountId) : networkDto.getResourceCrn());
+                }
                 baseNetwork.setAccountId(accountId);
                 baseNetwork = save(baseNetwork);
             }

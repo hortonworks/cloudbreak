@@ -1,12 +1,16 @@
 package com.sequenceiq.environment.network;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -17,14 +21,18 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -59,27 +67,43 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 @ExtendWith(MockitoExtension.class)
 class NetworkServiceTest {
 
-    private BaseNetworkRepository networkRepository = mock(BaseNetworkRepository.class);
+    private static final String TEST_NETWORK_CRN = "crn:cdp:environments:us-west-1:cloudera:network:d5310136-f814-4811-8787-124f1dc35b0a";
 
-    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = mock(Map.class);
+    private static final String  TEST_ACCOUNT_ID = "d5310136-f814-4811-8787-124f1dc35b0a";
 
-    private CloudNetworkService cloudNetworkService = mock(CloudNetworkService.class);
+    @Mock
+    private BaseNetworkRepository networkRepository;
 
-    private EnvironmentNetworkService environmentNetworkService = mock(EnvironmentNetworkService.class);
+    @Mock
+    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
-    private NetworkValidator networkCreationValidator = mock(NetworkValidator.class);
+    @Mock
+    private CloudNetworkService cloudNetworkService;
 
-    private EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
+    @Mock
+    private EnvironmentNetworkService environmentNetworkService;
 
-    private RegionAwareCrnGenerator regionAwareCrnGenerator = mock(RegionAwareCrnGenerator.class);
+    @Mock
+    private NetworkValidator networkCreationValidator;
 
-    private NetworkService underTest = new NetworkService(
-            networkRepository,
-            environmentNetworkConverterMap,
-            cloudNetworkService,
-            environmentNetworkService,
-            networkCreationValidator,
-            regionAwareCrnGenerator);
+    @Mock
+    private EnvironmentNetworkConverter environmentNetworkConverter;
+
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    private NetworkService underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new NetworkService(
+                networkRepository,
+                environmentNetworkConverterMap,
+                cloudNetworkService,
+                environmentNetworkService,
+                networkCreationValidator,
+                regionAwareCrnGenerator);
+    }
 
     @Test
     void testSaveNetworkIfNewNetwork() {
@@ -155,8 +179,8 @@ class NetworkServiceTest {
 
         BaseNetwork result = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
 
-        Assertions.assertEquals(result.getSubnetMetas().keySet().stream().findFirst().get(), "s1");
-        Assertions.assertEquals(result.getSubnetMetas().keySet().size(), 1);
+        assertEquals(result.getSubnetMetas().keySet().stream().findFirst().get(), "s1");
+        assertEquals(result.getSubnetMetas().keySet().size(), 1);
     }
 
     @Test
@@ -210,8 +234,8 @@ class NetworkServiceTest {
 
         BaseNetwork result = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
 
-        Assertions.assertEquals(result.getSubnetMetas().keySet().stream().findFirst().get(), "subnet1");
-        Assertions.assertEquals(result.getSubnetMetas().keySet().size(), 1);
+        assertEquals(result.getSubnetMetas().keySet().stream().findFirst().get(), "subnet1");
+        assertEquals(result.getSubnetMetas().keySet().size(), 1);
     }
 
     private CloudSubnet cloudSubnet(String id, String name) {
@@ -233,11 +257,6 @@ class NetworkServiceTest {
         NetworkDto networkDto = NetworkDto.builder().withRegistrationType(RegistrationType.CREATE_NEW).build();
         EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(networkDto).build();
 
-        when(environmentNetworkConverterMap.get(cloudPlatform)).thenReturn(environmentNetworkConverter);
-        when(environmentNetworkConverter.convertToDto(baseNetwork)).thenReturn(networkDto);
-        when(networkCreationValidator.validateNetworkEdit(eq(environment), any(NetworkDto.class)))
-                .thenReturn(new ValidationResult.ValidationResultBuilder());
-
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.validate(baseNetwork, environmentEditDto, environment));
         String baseMessage = "Subnets of this environment could not be modified, because its network has been created by Cloudera. " +
@@ -255,7 +274,7 @@ class NetworkServiceTest {
             default:
                 break;
         }
-        Assertions.assertEquals(String.format("%s%s", baseMessage, providerSpecificLink), exception.getMessage());
+        assertEquals(String.format("%s%s", baseMessage, providerSpecificLink), exception.getMessage());
     }
 
     @Test
@@ -306,8 +325,8 @@ class NetworkServiceTest {
 
         verify(cloudNetworkService, times(1)).retrieveSubnetMetadata(eq(environment), any(NetworkDto.class));
         verify(environmentNetworkService, times(1)).getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
-        Assertions.assertEquals(primaryCidr, actualNetwork.getNetworkCidr());
-        Assertions.assertEquals(StringUtils.join(networkCidr.getCidrs(), ","), actualNetwork.getNetworkCidrs());
+        assertEquals(primaryCidr, actualNetwork.getNetworkCidr());
+        assertEquals(StringUtils.join(networkCidr.getCidrs(), ","), actualNetwork.getNetworkCidrs());
     }
 
     @Test
@@ -326,6 +345,144 @@ class NetworkServiceTest {
                 .build();
         NetworkDto capturedNetwork = captureNetworkFromSubnetEditValidate(editNetworkDto);
         assertThat(capturedNetwork.getEndpointGatewaySubnetIds()).hasSameElementsAs(Set.of("editedGwSubnet1"));
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when networkDto and converter are not null and both - the converted - base network's and the networkDTO's CRN is null")
+    void testSaveNetworkNetworkDtoAndConverterNotNullBaseNwCrnIsNull() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        Environment environment = mock(Environment.class);
+        when(environment.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        BaseNetwork baseNetwork = new AwsNetwork();
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convert(environment, networkDto, Map.of(), Map.of())).thenReturn(baseNetwork);
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, TEST_ACCOUNT_ID)).thenReturn(TEST_NETWORK_CRN);
+        when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
+
+        BaseNetwork result = underTest.saveNetwork(environment, networkDto, TEST_ACCOUNT_ID, Map.of(), Map.of());
+
+        assertEquals(TEST_NETWORK_CRN, result.getResourceCrn());
+
+        verify(regionAwareCrnGenerator, times(1)).generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, TEST_ACCOUNT_ID);
+        verify(environmentNetworkConverterMap, times(1)).get(CloudPlatform.AWS);
+        verify(environmentNetworkConverter, times(1)).convert(environment, networkDto, Map.of(), Map.of());
+        verifyNoMoreInteractions(environmentNetworkConverterMap, environmentNetworkConverter, regionAwareCrnGenerator);
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when networkDto and converter are not null and both - the converted - base network's and the networkDTO's CRN is empty")
+    void testSaveNetworkNetworkDtoAndConverterNotNullBaseNwCrnIsEmpty() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        Environment environment = mock(Environment.class);
+        when(environment.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        BaseNetwork baseNetwork = new AwsNetwork();
+        baseNetwork.setResourceCrn("");
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convert(environment, networkDto, Map.of(), Map.of())).thenReturn(baseNetwork);
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, TEST_ACCOUNT_ID)).thenReturn(TEST_NETWORK_CRN);
+        when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
+        when(networkDto.getResourceCrn()).thenReturn("");
+
+        BaseNetwork result = underTest.saveNetwork(environment, networkDto, TEST_ACCOUNT_ID, Map.of(), Map.of());
+
+        assertEquals(TEST_NETWORK_CRN, result.getResourceCrn());
+
+        verify(regionAwareCrnGenerator, times(1)).generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, TEST_ACCOUNT_ID);
+        verify(environmentNetworkConverterMap, times(1)).get(CloudPlatform.AWS);
+        verify(environmentNetworkConverter, times(1)).convert(environment, networkDto, Map.of(), Map.of());
+        verifyNoMoreInteractions(environmentNetworkConverterMap, environmentNetworkConverter, regionAwareCrnGenerator);
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when networkDto and converter are not null and base network's CRN is null and the networkDTO's CRN is empty")
+    void testSaveNetworkNetworkDtoAndConverterNotNullBaseNwCrnIsNullDtoEmpty() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        Environment environment = mock(Environment.class);
+        when(environment.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        BaseNetwork baseNetwork = new AwsNetwork();
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convert(environment, networkDto, Map.of(), Map.of())).thenReturn(baseNetwork);
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, TEST_ACCOUNT_ID)).thenReturn(TEST_NETWORK_CRN);
+        when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
+        when(networkDto.getResourceCrn()).thenReturn("");
+
+        BaseNetwork result = underTest.saveNetwork(environment, networkDto, TEST_ACCOUNT_ID, Map.of(), Map.of());
+
+        assertEquals(TEST_NETWORK_CRN, result.getResourceCrn());
+
+        verify(regionAwareCrnGenerator, times(1)).generateCrnStringWithUuid(CrnResourceDescriptor.NETWORK, TEST_ACCOUNT_ID);
+        verify(environmentNetworkConverterMap, times(1)).get(CloudPlatform.AWS);
+        verify(environmentNetworkConverter, times(1)).convert(environment, networkDto, Map.of(), Map.of());
+        verifyNoMoreInteractions(environmentNetworkConverterMap, environmentNetworkConverter, regionAwareCrnGenerator);
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when networkDto and converter are not null and the converted base network's CRN is not null")
+    void testSaveNetworkNetworkDtoAndConverterNotNullBaseNwCrnIsNotNull() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        Environment environment = mock(Environment.class);
+        when(environment.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        BaseNetwork baseNetwork = new AwsNetwork();
+        baseNetwork.setResourceCrn(TEST_NETWORK_CRN);
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convert(environment, networkDto, Map.of(), Map.of())).thenReturn(baseNetwork);
+        when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
+
+        BaseNetwork result = underTest.saveNetwork(environment, networkDto, TEST_ACCOUNT_ID, Map.of(), Map.of());
+
+        assertEquals(TEST_NETWORK_CRN, result.getResourceCrn());
+
+        verify(environmentNetworkConverterMap, times(1)).get(CloudPlatform.AWS);
+        verify(environmentNetworkConverter, times(1)).convert(environment, networkDto, Map.of(), Map.of());
+        verifyNoMoreInteractions(environmentNetworkConverterMap, environmentNetworkConverter);
+        verifyNoInteractions(regionAwareCrnGenerator);
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when networkDto is null then no action shall happen and null shall be returned.")
+    void testSaveNetworkNetworkDtoIsNull() {
+        assertNull(underTest.saveNetwork(mock(Environment.class), null, TEST_ACCOUNT_ID, Map.of(), Map.of()));
+
+        verifyNoInteractions(environmentNetworkConverter, environmentNetworkConverterMap, networkRepository, regionAwareCrnGenerator);
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when no EnvironmentNetworkConverter can be found for the given cloudplatform then null shall be returned.")
+    void testSaveNetworkNoEnvironmentNetworkConverter() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        Environment environment = mock(Environment.class);
+        when(environment.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(null);
+
+        assertNull(underTest.saveNetwork(environment, networkDto, TEST_ACCOUNT_ID, Map.of(), Map.of()));
+
+        verify(environmentNetworkConverterMap, times(1)).get(CloudPlatform.AWS);
+        verifyNoMoreInteractions(environmentNetworkConverterMap);
+        verifyNoInteractions(environmentNetworkConverter, networkRepository, regionAwareCrnGenerator);
+    }
+
+    @Test
+    @DisplayName("Test saveNetwork when networkDto and converter are not null and the converted base network's CRN is null but the networkDto " +
+            "has a CRN then the networkDto's CRN shall be used.")
+    void testSaveNetworkNetworkDtoCrnIsNotNull() {
+        NetworkDto networkDto = mock(NetworkDto.class);
+        Environment environment = mock(Environment.class);
+        when(environment.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        BaseNetwork baseNetwork = new AwsNetwork();
+        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convert(environment, networkDto, Map.of(), Map.of())).thenReturn(baseNetwork);
+        when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
+        when(networkDto.getResourceCrn()).thenReturn(TEST_NETWORK_CRN);
+
+        BaseNetwork result = underTest.saveNetwork(environment, networkDto, TEST_ACCOUNT_ID, Map.of(), Map.of());
+
+        assertEquals(TEST_NETWORK_CRN, result.getResourceCrn());
+
+        verify(environmentNetworkConverterMap, times(1)).get(CloudPlatform.AWS);
+        verify(environmentNetworkConverter, times(1)).convert(environment, networkDto, Map.of(), Map.of());
+        verify(networkDto, times(2)).getResourceCrn();
+        verifyNoInteractions(regionAwareCrnGenerator);
+        verifyNoMoreInteractions(environmentNetworkConverterMap, environmentNetworkConverter);
     }
 
     private NetworkDto captureNetworkFromSubnetEditValidate(NetworkDto editNetworkDto) {
