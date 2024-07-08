@@ -6,7 +6,7 @@ public final class DnsRecordRegexpPatterns {
 
     public static final String DNS_ZONE_MSG = "DNS zone must be valid. It can contain alphanumeric characters, dash and dot.";
 
-    public static final String DNS_REVERSEZONE_PATTERN = "^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){1,4}in-addr\\.arpa\\.?$";
+    public static final String DNS_REVERSEZONE_PATTERN = "^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){1,3}in-addr\\.arpa\\.?$";
 
     public static final String DNS_REVERSEZONE_MSG = "DNS reverse zone must be valid (eg. 0.10.in-addr.arpa)";
 

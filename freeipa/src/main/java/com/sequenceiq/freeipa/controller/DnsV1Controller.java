@@ -31,6 +31,7 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.api.v1.dns.model.DeleteDnsPtrRecordRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsPtrRecordService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -45,6 +46,9 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Inject
     private DnsRecordService dnsRecordService;
+
+    @Inject
+    private DnsPtrRecordService dnsPtrRecordService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -179,12 +183,20 @@ public class DnsV1Controller implements DnsV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "environmentCrn", action = EDIT_ENVIRONMENT)
     public void addDnsPtrRecord(@TenantAwareParam @RequestObject AddDnsPtrRecordRequest request) {
-        dnsRecordService.addDnsPtrRecord(request);
+        try {
+            dnsPtrRecordService.addDnsPtrRecord(request, crnService.getCurrentAccountId());
+        } catch (FreeIpaClientException e) {
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
     }
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "environmentCrn", action = EDIT_ENVIRONMENT)
     public void deleteDnsPtrRecord(@TenantAwareParam @RequestObject DeleteDnsPtrRecordRequest deleteDnsPtrRecordRequest) {
-        dnsRecordService.deleteDnsPtrRecord(deleteDnsPtrRecordRequest);
+        try {
+            dnsPtrRecordService.deleteDnsPtrRecord(deleteDnsPtrRecordRequest, crnService.getCurrentAccountId());
+        } catch (FreeIpaClientException e) {
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
     }
 }

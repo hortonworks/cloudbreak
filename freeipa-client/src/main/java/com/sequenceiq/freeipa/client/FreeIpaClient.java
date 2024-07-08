@@ -525,6 +525,12 @@ public class FreeIpaClient {
         return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
     }
 
+    public DnsRecord addDnsPtrRecord(String dnsZoneName, String ptrRecordName, String hostName) throws FreeIpaClientException {
+        List<Object> flags = List.of(dnsZoneName, createPtrRecordName(dnsZoneName, ptrRecordName));
+        Map<String, Object> params = Map.of("ptr_part_hostname", hostName);
+        return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
+    }
+
     public RPCResponse<Object> deleteDnsZone(String dnsZoneName) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName);
         Map<String, Object> params = Map.of();
@@ -681,6 +687,10 @@ public class FreeIpaClient {
 
     private static Map<String, String> createDnsName(String name) {
         return Map.of("__dns_name__", name);
+    }
+
+    private static Map<String, String> createPtrRecordName(String reverseDnsZone, String ptrRecordName) {
+        return Map.of("__dns_name__", ptrRecordName);
     }
 
     public Set<SudoCommand> sudoCommandFindAll() throws FreeIpaClientException {
