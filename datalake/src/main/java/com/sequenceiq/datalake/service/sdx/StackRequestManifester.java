@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
+import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -350,9 +351,8 @@ public class StackRequestManifester {
                 MappingsConfig mappingsConfig;
                 try {
                     // Must pass the internal actor here as this operation is internal-use only; requests with other actors will always be rejected.
-                    mappingsConfig = idbmmsClient.getMappingsConfig(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                            environmentCrn, Optional.empty());
+                    mappingsConfig = idbmmsClient.getMappingsConfig(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            environmentCrn);
                     validateMappingsConfig(mappingsConfig, stackRequest);
                 } catch (IdbmmsOperationException e) {
                     throw new BadRequestException(String.format("Unable to get mappings: %s", e.getMessage()), e);
@@ -389,7 +389,7 @@ public class StackRequestManifester {
         }
         // Validate RAZ if enabled, making sure that the RAZ mapping exists when it is required.
         if (stackRequest.getCluster().isRangerRazEnabled()) {
-            if (!mappingsConfig.getActorMappings().containsKey("rangerraz")) {
+            if (!mappingsConfig.getActorMappings().containsKey(AccountMappingSubject.RANGER_RAZ_USER)) {
                 LOGGER.error("Cloud storage access (IDBroker) mapping must contain the RAZ role if RAZ is to be created!");
                 throw new BadRequestException("Cloud storage access (IDBroker) mapping must contain the RAZ role if RAZ is to be created!");
             }

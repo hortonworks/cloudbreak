@@ -3,8 +3,6 @@ package com.sequenceiq.environment.environment.flow.deletion.handler;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -81,7 +79,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
     private void deleteIdBrokerMappings(String environmentCrn) {
         try {
             // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
-            idbmmsClient.deleteMappings(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), environmentCrn, Optional.empty());
+            idbmmsClient.deleteMappings(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), environmentCrn);
         } catch (IdbmmsOperationException e) {
             if (e.getErrorStatus() == IdbmmsOperationErrorStatus.NOT_FOUND) {
                 // This is a non-fatal situation when deleting the environment.

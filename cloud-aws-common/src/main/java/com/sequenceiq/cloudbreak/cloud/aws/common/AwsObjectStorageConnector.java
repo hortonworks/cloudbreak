@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.util.S3ExpressBucketNameValidator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.ObjectStorageType;
 
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -108,10 +107,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
         AmazonIdentityManagementClient iam = awsClient.createAmazonIdentityManagement(awsCredentialView);
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
-        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        resultBuilder.prefix("Cloud Storage validation failed");
-        ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(request, iam, spiFileSystem,
-                accountId, resultBuilder);
+        ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(request, iam, spiFileSystem, accountId);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()

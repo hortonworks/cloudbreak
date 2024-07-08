@@ -32,6 +32,9 @@ public class SdxValidateCloudStorageRequest {
     @Schema(description = ModelDescriptions.CLUSTER_TEMPLATE_NAME)
     private String blueprintName;
 
+    @Schema(description = ModelDescriptions.RANGER_CLOUD_ACCESS_AUTHORIZER_ROLE)
+    private String rangerCloudAccessAuthorizerRole;
+
     public SdxValidateCloudStorageRequest() {
     }
 
@@ -53,5 +56,9 @@ public class SdxValidateCloudStorageRequest {
 
     public String getRangerAuditRole() {
         return rangerAuditRole;
+    }
+
+    public String getRangerCloudAccessAuthorizerRole() {
+        return rangerCloudAccessAuthorizerRole;
     }
 }

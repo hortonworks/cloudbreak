@@ -204,7 +204,8 @@ public class SdxController implements SdxEndpoint {
             @RequestObject @Valid SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest) {
         return storageValidationService.validateObjectStorage(sdxValidateCloudStorageRequest.getCredentialCrn(),
                 sdxValidateCloudStorageRequest.getSdxCloudStorageRequest(), sdxValidateCloudStorageRequest.getBlueprintName(), clusterName,
-                sdxValidateCloudStorageRequest.getDataAccessRole(), sdxValidateCloudStorageRequest.getRangerAuditRole());
+                sdxValidateCloudStorageRequest.getDataAccessRole(), sdxValidateCloudStorageRequest.getRangerAuditRole(),
+                sdxValidateCloudStorageRequest.getRangerCloudAccessAuthorizerRole());
     }
 
     @Override

@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.idbmms;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -39,20 +36,17 @@ public class GrpcIdbmmsClient {
      *
      * @param actorCrn       the actor CRN; must not be {@code null}
      * @param environmentCrn the environment CRN to get mappings for; must not be {@code null}
-     * @param requestId      an optional request ID; must not be {@code null}
      * @return the mappings config associated with environment {@code environmentCrn}; never {@code null}
      * @throws NullPointerException     if either argument is {@code null}
      * @throws IdbmmsOperationException if any problem is encountered during the IDBMMS call processing
      */
-    public MappingsConfig getMappingsConfig(String actorCrn, String environmentCrn, Optional<String> requestId) {
+    public MappingsConfig getMappingsConfig(String actorCrn, String environmentCrn) {
         checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(environmentCrn);
-        checkNotNull(requestId, "requestId should not be null.");
         try {
             IdbmmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            String effectiveRequestId = requestId.orElse(UUID.randomUUID().toString());
-            LOGGER.debug("Fetching IDBroker mappings for environment {} using request ID {}", environmentCrn, effectiveRequestId);
-            MappingsConfig mappingsConfig = client.getMappingsConfig(effectiveRequestId, environmentCrn);
+            LOGGER.debug("Fetching IDBroker mappings for environment {}", environmentCrn);
+            MappingsConfig mappingsConfig = client.getMappingsConfig(environmentCrn);
             LOGGER.debug("Retrieved IDBroker mappings of version {} for environment {}", mappingsConfig.getMappingsVersion(), environmentCrn);
             return mappingsConfig;
         } catch (RuntimeException e) {
@@ -65,19 +59,16 @@ public class GrpcIdbmmsClient {
      *
      * @param actorCrn       the actor CRN; must not be {@code null}
      * @param environmentCrn the environment CRN to delete mappings for; must not be {@code null}
-     * @param requestId      an optional request ID; must not be {@code null}
      * @throws NullPointerException     if either argument is {@code null}
      * @throws IdbmmsOperationException if any problem is encountered during the IDBMMS call processing
      */
-    public void deleteMappings(String actorCrn, String environmentCrn, Optional<String> requestId) {
+    public void deleteMappings(String actorCrn, String environmentCrn) {
         checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(environmentCrn);
-        checkNotNull(requestId, "requestId should not be null.");
         try {
             IdbmmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            String effectiveRequestId = requestId.orElse(UUID.randomUUID().toString());
-            LOGGER.debug("Deleting IDBroker mappings for environment {} using request ID {}", environmentCrn, effectiveRequestId);
-            client.deleteMappings(effectiveRequestId, environmentCrn);
+            LOGGER.debug("Deleting IDBroker mappings for environment {}", environmentCrn);
+            client.deleteMappings(environmentCrn);
             LOGGER.debug("Deleted IDBroker mappings for environment {}", environmentCrn);
         } catch (RuntimeException e) {
             throw new IdbmmsOperationException(String.format("Error during IDBMMS operation: %s", e.getMessage()), e);

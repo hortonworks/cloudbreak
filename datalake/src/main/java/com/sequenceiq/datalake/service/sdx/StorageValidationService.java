@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidate
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -77,13 +78,13 @@ public class StorageValidationService {
     private StackV4Endpoint stackV4Endpoint;
 
     public ObjectStorageValidateResponse validateObjectStorage(String credentialCrn, SdxCloudStorageRequest sdxCloudStorageRequest, String blueprintName,
-            String clusterName, String dataAccessRole, String rangerAuditRole) {
+            String clusterName, String dataAccessRole, String rangerAuditRole, String rangerCloudAccessAuthorizerRole) {
         CredentialResponse credentialResponse = environmentClientService.getCredentialByCrn(credentialCrn);
         CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(credentialResponse);
         CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initSdxCloudStorageRequest(credentialResponse.getCloudPlatform(),
                 blueprintName, clusterName, sdxCloudStorageRequest);
         AccountMappingBase accountMapping = new AccountMappingBase();
-        Map<String, String> userMapping = getUserMapping(dataAccessRole, rangerAuditRole);
+        Map<String, String> userMapping = getUserMapping(dataAccessRole, rangerAuditRole, rangerCloudAccessAuthorizerRole);
         accountMapping.setUserMappings(userMapping);
         cloudStorageRequest.setAccountMapping(accountMapping);
         ObjectStorageValidateRequest objectStorageValidateRequest = ObjectStorageValidateRequest.builder()
@@ -187,7 +188,7 @@ public class StorageValidationService {
                 || !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey()) && !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName()));
     }
 
-    private Map<String, String> getUserMapping(String dataAccessRole, String rangerAuditRole) {
+    private Map<String, String> getUserMapping(String dataAccessRole, String rangerAuditRole, String rangerCloudAccessAuthorizerRole) {
         Map<String, String> userMapping = new HashMap<>();
         if (dataAccessRole != null) {
             for (String dataAccessUser : DATA_ACCESS_USERS) {
@@ -198,6 +199,9 @@ public class StorageValidationService {
             for (String rangerAuditUser : RANGER_AUDIT_USERS) {
                 userMapping.put(rangerAuditUser, rangerAuditRole);
             }
+        }
+        if (rangerCloudAccessAuthorizerRole != null) {
+            userMapping.put(AccountMappingSubject.RANGER_RAZ_USER, rangerCloudAccessAuthorizerRole);
         }
         return userMapping;
     }

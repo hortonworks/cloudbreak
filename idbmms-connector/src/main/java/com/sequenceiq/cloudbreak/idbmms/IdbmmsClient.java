@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.idbmms.config.IdbmmsConfig;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
@@ -40,15 +41,13 @@ class IdbmmsClient {
     /**
      * Wraps a call to {@code GetMappingsConfig}.
      *
-     * @param requestId      the request ID for the request; must not be {@code null}
      * @param environmentCrn the environment CRN; must not be {@code null}
      * @return the mappings config; never {@code null}
      * @throws NullPointerException if either argument is {@code null}
      */
-    MappingsConfig getMappingsConfig(String requestId, String environmentCrn) {
-        checkNotNull(requestId, "requestId should not be null.");
+    MappingsConfig getMappingsConfig(String environmentCrn) {
         checkNotNull(environmentCrn);
-        IdBrokerMappingManagementProto.GetMappingsConfigResponse mappingsConfig = newStub(requestId).getMappingsConfig(
+        IdBrokerMappingManagementProto.GetMappingsConfigResponse mappingsConfig = newStub().getMappingsConfig(
                 IdBrokerMappingManagementProto.GetMappingsConfigRequest.newBuilder()
                         .setEnvironmentCrn(environmentCrn)
                         .build()
@@ -62,14 +61,12 @@ class IdbmmsClient {
     /**
      * Wraps a call to {@code DeleteMappings}.
      *
-     * @param requestId      the request ID for the request; must not be {@code null}
      * @param environmentCrn the environment CRN; must not be {@code null}
      * @throws NullPointerException if either argument is {@code null}
      */
-    void deleteMappings(String requestId, String environmentCrn) {
-        checkNotNull(requestId, "requestId should not be null.");
+    void deleteMappings(String environmentCrn) {
         checkNotNull(environmentCrn);
-        newStub(requestId).deleteMappings(
+        newStub().deleteMappings(
                 IdBrokerMappingManagementProto.DeleteMappingsRequest.newBuilder()
                         .setEnvironmentCrn(environmentCrn)
                         .build()
@@ -79,11 +76,10 @@ class IdbmmsClient {
     /**
      * Creates a new stub with the appropriate metadata injecting interceptors.
      *
-     * @param requestId the request ID
      * @return the stub
      */
-    private IdBrokerMappingManagementGrpc.IdBrokerMappingManagementBlockingStub newStub(String requestId) {
-        checkNotNull(requestId, "requestId should not be null.");
+    private IdBrokerMappingManagementGrpc.IdBrokerMappingManagementBlockingStub newStub() {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
         return IdBrokerMappingManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(idbmmsConfig.getGrpcTimeoutSec()),

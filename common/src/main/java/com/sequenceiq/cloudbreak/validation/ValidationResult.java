@@ -22,11 +22,11 @@ public class ValidationResult {
 
     private final List<String> warnings;
 
+    private final String prefix;
+
     private String formattedErrors = "";
 
     private String formattedWarnings = "";
-
-    private final String prefix;
 
     private ValidationResult(State state, SortedSet<String> errors, SortedSet<String> warnings, String prefix) {
         this.state = state;
@@ -35,10 +35,20 @@ public class ValidationResult {
         this.prefix = prefix;
         formattedErrors = formatNumberedList(this.errors);
         formattedWarnings = formatNumberedList(this.warnings);
-        if (!StringUtils.isEmpty(prefix)) {
+        if (!StringUtils.isEmpty(prefix) && !this.errors.isEmpty()) {
             formattedErrors = prefix + ": \n" + formattedErrors;
+        }
+        if (!StringUtils.isEmpty(prefix) && !this.warnings.isEmpty()) {
             formattedWarnings = prefix + ": \n" + formattedWarnings;
         }
+    }
+
+    public static ValidationResult empty() {
+        return builder().build();
+    }
+
+    public static ValidationResultBuilder builder() {
+        return new ValidationResultBuilder();
     }
 
     private String formatNumberedList(List<String> issues) {
@@ -97,10 +107,6 @@ public class ValidationResult {
 
     }
 
-    public enum State {
-        VALID, ERROR
-    }
-
     @Override
     public String toString() {
         return "ValidationResult{" +
@@ -110,21 +116,17 @@ public class ValidationResult {
                 '}';
     }
 
-    public static ValidationResult empty() {
-        return builder().build();
-    }
-
-    public static ValidationResultBuilder builder() {
-        return new ValidationResultBuilder();
+    public enum State {
+        VALID, ERROR
     }
 
     public static class ValidationResultBuilder {
 
-        private State state = VALID;
-
         private final SortedSet<String> errors = new TreeSet<>();
 
         private final SortedSet<String> warnings = new TreeSet<>();
+
+        private State state = VALID;
 
         private String prefix;
 

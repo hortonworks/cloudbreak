@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -47,6 +48,9 @@ public class AwsIDBrokerObjectStorageValidator {
     private AwsRangerAuditRolePermissionValidator awsRangerAuditRolePermissionValidator;
 
     @Inject
+    private AwsRazRolePermissionValidator awsRazRolePermissionValidator;
+
+    @Inject
     private AwsIamService awsIamService;
 
     @Inject
@@ -55,11 +59,10 @@ public class AwsIDBrokerObjectStorageValidator {
     @Inject
     private EntitlementService entitlementService;
 
-    public ValidationResult validateObjectStorage(ObjectStorageValidateRequest validationRequest,
-            AmazonIdentityManagementClient iam,
-            SpiFileSystem spiFileSystem,
-            String accountId,
-            ValidationResultBuilder resultBuilder) {
+    public ValidationResult validateObjectStorage(ObjectStorageValidateRequest validationRequest, AmazonIdentityManagementClient iam,
+            SpiFileSystem spiFileSystem, String accountId) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.prefix("Cloud Storage validation failed");
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
             CloudS3View cloudFileSystem = (CloudS3View) cloudFileSystemView;
@@ -90,6 +93,10 @@ public class AwsIDBrokerObjectStorageValidator {
                 accountId, validationRequest.getBackupOperationType(), resultBuilder, skipOrgPolicyDecisions);
         awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, validationRequest.getBackupLocationBase(),
                 accountId, validationRequest.getBackupOperationType(), resultBuilder, skipOrgPolicyDecisions);
+        if (isRangerRazEnabled(cloudFileSystem)) {
+            awsRazRolePermissionValidator.validate(iam, cloudFileSystem, validationRequest.getBackupLocationBase(),
+                    accountId, validationRequest.getBackupOperationType(), resultBuilder, skipOrgPolicyDecisions);
+        }
     }
 
     private void validateLocation(ObjectStorageValidateRequest validationRequest, AmazonIdentityManagementClient iam,
@@ -109,7 +116,14 @@ public class AwsIDBrokerObjectStorageValidator {
         }
     }
 
-    private static String backupLocationBase(ObjectStorageValidateRequest validationRequest) {
+    private boolean isRangerRazEnabled(CloudS3View cloudFileSystem) {
+        // idbmms includes 'rangerraz' into user mappings if --ranger-cloud-access-authorizer-role specified
+        return cloudFileSystem.getAccountMapping() != null
+                && cloudFileSystem.getAccountMapping().getUserMappings() != null
+                && cloudFileSystem.getAccountMapping().getUserMappings().containsKey(AccountMappingSubject.RANGER_RAZ_USER);
+    }
+
+    private String backupLocationBase(ObjectStorageValidateRequest validationRequest) {
         return Strings.isNullOrEmpty(validationRequest.getBackupLocationBase()) ? validationRequest.getLogsLocationBase()
                 : validationRequest.getBackupLocationBase();
     }
