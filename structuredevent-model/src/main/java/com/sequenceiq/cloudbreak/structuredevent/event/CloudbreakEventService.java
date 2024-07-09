@@ -38,7 +38,7 @@ public interface CloudbreakEventService {
 
     List<StructuredNotificationEvent> cloudbreakEvents(Long workspaceId, Long since);
 
-    List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId);
+    List<StructuredNotificationEvent> cloudbreakLastEventsForStack(Long stackId, String stackType, int size);
 
     Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, String stackType, Pageable pageable);
 

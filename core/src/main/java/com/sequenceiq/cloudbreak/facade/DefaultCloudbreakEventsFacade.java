@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.StructuredNotificationEventToCloudbreakEventV4ResponseConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -28,9 +26,6 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
     private CloudbreakEventService cloudbreakEventService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private StructuredNotificationEventToCloudbreakEventV4ResponseConverter eventConverter;
 
     @Override
@@ -38,6 +33,15 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
         return cloudbreakEventService.cloudbreakEvents(workspaceId, since).stream()
                 .map(e -> eventConverter.convert(e))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CloudbreakEventV4Response> retrieveLastEventsByStack(Long stackId, StackType stackType, int size) {
+        List<StructuredNotificationEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakLastEventsForStack(stackId, stackType.getResourceType(), size);
+        LOGGER.debug("Convert notification events for stack [{}]", stackId);
+        List<CloudbreakEventV4Response> cloudbreakEventsJsons = cloudbreakEvents.stream().map(eventConverter::convert).toList();
+        LOGGER.debug("Convert notification events for stack [{}] is done", stackId);
+        return cloudbreakEventsJsons;
     }
 
     @Override
@@ -49,11 +53,4 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
         return cloudbreakEventsJsons;
     }
 
-    @Override
-    public List<CloudbreakEventV4Response> retrieveEventsForWorkspaceByStack(Long workspaceId, String stackName) {
-        Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
-        return cloudbreakEventService.cloudbreakEventsForStack(stack.getId()).stream()
-                .map(e -> eventConverter.convert(e))
-                .collect(Collectors.toList());
-    }
 }

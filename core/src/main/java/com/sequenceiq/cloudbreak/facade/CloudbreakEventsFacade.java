@@ -12,8 +12,8 @@ public interface CloudbreakEventsFacade {
 
     List<CloudbreakEventV4Response> retrieveEventsForWorkspace(Long workspaceId, Long since);
 
-    Page<CloudbreakEventV4Response> retrieveEventsByStack(Long stackId, StackType stackType, Pageable pageable);
+    List<CloudbreakEventV4Response> retrieveLastEventsByStack(Long stackId, StackType stackType, int size);
 
-    List<CloudbreakEventV4Response> retrieveEventsForWorkspaceByStack(Long workspaceId, String stackName);
+    Page<CloudbreakEventV4Response> retrieveEventsByStack(Long stackId, StackType stackType, Pageable pageable);
 
 }
