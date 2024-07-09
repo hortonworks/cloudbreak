@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -51,9 +50,6 @@ import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertificateV1Respo
 public class SdxDatabaseCertificateRotationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDatabaseCertificateRotationService.class);
-
-    @Inject
-    private EnvironmentClientService environmentService;
 
     @Inject
     private SdxService sdxService;
@@ -90,6 +86,7 @@ public class SdxDatabaseCertificateRotationService {
         if (sdxCluster == null) {
             return noDatalakeAnswer(dlCrn);
         }
+        sdxService.validateRdsSslCertRotation(dlCrn);
         StackV4Response stack = sdxService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(dlCrn));
         return checkPrerequisitesAndTrigger(sdxCluster, stack);
     }

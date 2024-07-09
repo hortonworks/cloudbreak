@@ -696,4 +696,10 @@ public class StackV4Controller extends NotificationController implements StackV4
     public StackRotateRdsCertificateV4Response rotateRdsCertificateByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
+
+    @Override
+    @InternalOnly
+    public void validateRotateRdsCertificateByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        rotateRdsCertificateService.validateThatRotationIsTriggerable(ThreadBasedUserCrnProvider.getAccountId(), crn);
+    }
 }
