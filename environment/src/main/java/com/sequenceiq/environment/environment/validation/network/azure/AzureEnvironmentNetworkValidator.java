@@ -310,7 +310,6 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             LOGGER.debug("Dns zone validation: validation type: {}, originalDnsZone: {}, newDnsZone {}", validationType, originalDnsZone, newDnsZone);
             azurePrivateEndpointValidator.checkExistingDnsZoneDeletion(validationType, originalDnsZone, newDnsZone, resultBuilder);
             validateNetworkId(environmentValidationDto, networkDto, resultBuilder);
-            azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
             azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);
             azurePrivateEndpointValidator.checkNewPrivateDnsZone(resultBuilder, environmentDto, networkDto);

@@ -32,7 +32,5 @@ public interface NetworkConnector extends CloudPlatformAware {
 
     SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters);
 
-    SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork);
-
     List<CloudResource> createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest);
 }
