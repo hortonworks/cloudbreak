@@ -89,9 +89,7 @@ public class ExternalizedComputeClusterResponse {
             ExternalizedComputeClusterResponse externalizedComputeCluster = new ExternalizedComputeClusterResponse();
             externalizedComputeCluster.setPrivateCluster(privateCluster);
             externalizedComputeCluster.setOutboundType(outboundType);
-            // Temporarily return with null until Liftie update to the latest cb version.
-            // Without this the String -> Set<String> refactor would break Liftie despite the fields are not yet used.
-            //externalizedComputeCluster.setKubeApiAuthorizedIpRanges(kubeApiAuthorizedIpRanges);
+            externalizedComputeCluster.setKubeApiAuthorizedIpRanges(kubeApiAuthorizedIpRanges);
             return externalizedComputeCluster;
         }
     }
