@@ -49,6 +49,7 @@ jobs:
           export PROJECT=$PROJECT
           ./scripts/jira.sh
 
+
   unit-test:
     permissions: write-all
     name: Unit Test
@@ -386,3 +387,14 @@ jobs:
           name: SpotBugs Main Report
           title: SpotBugs Main Report
           path: '**/spotbugsXml.xml'
+
+  auto-approve:
+    permissions: write-all
+    name: Auto Approve
+    runs-on: [ cb-ubi8-jdk21 ]
+
+    if: github.actor == 'dependabot[bot]' || github.actor == 'cloudbreak-jenkins'
+    steps:
+      - uses: cloudbreak/cloudbreak-github-actions/actions/auto-approve-action@master
+        with:
+          review-message: "Auto approved pull request."
