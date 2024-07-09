@@ -77,6 +77,12 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
     abstract boolean checkLocation(StorageLocationBase location);
 
     /**
+     * Returns the type of the validated roles
+     * @return role type
+     */
+    abstract String getRoleType();
+
+    /**
      * Validates the cloudFileSystem
      *
      * @param cloudFileSystem         cloud file system to evaluate
@@ -114,9 +120,10 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                 }
             }
             if (!warnings.isEmpty()) {
-                String validationWarningMessage = String.format("The validation of the Data Access Role (%s) was not successful" +
+                String validationWarningMessage = String.format("The validation of the %s (%s) was not successful" +
                                 " because there are missing context values (%s). This is not an issue in itself you might have an SCPs configured" +
                                 " in your aws account and the system couldn't guess these extra parameters.",
+                        getRoleType(),
                         String.join(", ", roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join(", ", warnings)
                 );
@@ -124,9 +131,10 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                 validationResultBuilder.warning(validationWarningMessage);
             }
             if (!failedActions.isEmpty()) {
-                String validationErrorMessage = String.format("Data Access Role (%s) is not set up correctly. " +
-                                "Please follow the official documentation on required policies for Data Access Role.%n" +
+                String validationErrorMessage = String.format("%s (%s) is not set up correctly. " +
+                                "Please follow the official documentation on required policies.%n" +
                                 "Missing policies (chunked):%n%s",
+                        getRoleType(),
                         String.join(", ", roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join("\n", failedActions.stream().limit(MAX_SIZE).collect(Collectors.toSet())));
 
@@ -134,7 +142,8 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
                     validationErrorMessage = validationErrorMessage.concat(DENIED_BY_ORGANIZATION_RULE_ERROR_MESSAGE);
                 }
 
-                String fullErrorMessage = String.format("Data Access Role (%s) is not set up correctly. Missing policies:%n%s",
+                String fullErrorMessage = String.format("%s (%s) is not set up correctly. Missing policies:%n%s",
+                        getRoleType(),
                         String.join(", ", roles.stream().map(Role::arn).collect(Collectors.toCollection(TreeSet::new))),
                         String.join("\n", failedActions));
 

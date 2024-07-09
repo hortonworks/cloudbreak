@@ -41,4 +41,9 @@ public class AwsRangerAuditRolePermissionValidator extends AwsIDBrokerMappedRole
     boolean checkLocation(StorageLocationBase location) {
         return CloudStorageCdpService.RANGER_AUDIT.equals(location.getType());
     }
+
+    @Override
+    String getRoleType() {
+        return "Ranger Audit Role";
+    }
 }

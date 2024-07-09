@@ -38,4 +38,9 @@ public class AwsDataAccessRolePermissionValidator extends AwsIDBrokerMappedRoleP
     boolean checkLocation(StorageLocationBase location) {
         return true;
     }
+
+    @Override
+    String getRoleType() {
+        return "Data Access Role";
+    }
 }

@@ -13,4 +13,9 @@ public class AwsRazRolePermissionValidator extends AwsDataAccessRolePermissionVa
     Set<String> getUsers() {
         return Set.of(AccountMappingSubject.RANGER_RAZ_USER);
     }
+
+    @Override
+    String getRoleType() {
+        return "Raz Role";
+    }
 }
