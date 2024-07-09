@@ -315,6 +315,54 @@ public class ServiceEndpointCollectorTest {
     }
 
     @Test
+    public void testPrepareClusterExposedServicesWhenImpalaDebugUi() {
+        when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(
+                List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI"),
+                        exposedService("NAMENODE"), exposedService("IMPALA_DEBUG_UI")));
+        when(exposedServiceCollector.getImpalaDebugUIService()).thenReturn(
+                exposedService("IMPALA_DEBUG_UI"));
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("IMPALA_DEBUG_UI")},
+                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("IMPALA_DEBUG_UI")}, GatewayType.INDIVIDUAL);
+        stack.getCluster().getGateway().setGatewayPort(443);
+        stack.getCluster().setExtendedBlueprintText("blueprintOfTheYear");
+        mockBlueprintTextProcessor();
+        Map<String, List<String>> componentPrivateIps = Maps.newHashMap();
+        componentPrivateIps.put("IMPALA_DEBUG_UI", List.of("10.0.0.1"));
+        when(componentLocatorService.getComponentLocationEvenIfStopped(any(), any(), any())).thenReturn(componentPrivateIps);
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
+
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
+        assertTrue(clusterExposedServicesMap.get("topology1-api").stream().anyMatch(exposed -> exposed.getServiceName().equals("IMPALA_DEBUG_UI")));
+    }
+
+    @Test
+    public void testPrepareClusterExposedServicesWhenImpalaDebugWhenOnlyImpalaServiceAvailable() {
+        when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(
+                List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI"),
+                        exposedService("NAMENODE"), exposedService("IMPALA_DEBUG_UI")));
+        when(exposedServiceCollector.getImpalaDebugUIService()).thenReturn(
+                exposedService("IMPALA_DEBUG_UI"));
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("IMPALA")},
+                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
+        stack.getCluster().getGateway().setGatewayPort(443);
+        stack.getCluster().setExtendedBlueprintText("blueprintOfTheYear");
+        mockBlueprintTextProcessor();
+        Map<String, List<String>> componentPrivateIps = Maps.newHashMap();
+        componentPrivateIps.put("IMPALA_DEBUG_UI", List.of("10.0.0.1"));
+        componentPrivateIps.put("IMPALA", List.of("10.0.0.1"));
+
+        when(componentLocatorService.getComponentLocationEvenIfStopped(any(), any(), any())).thenReturn(componentPrivateIps);
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
+
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
+        assertTrue(clusterExposedServicesMap.get("topology1-api").stream().anyMatch(exposed -> exposed.getServiceName().equals("IMPALA_DEBUG_UI")));
+    }
+
+    @Test
     public void testGetKnoxServices() {
         mockBlueprintTextProcessor();
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");

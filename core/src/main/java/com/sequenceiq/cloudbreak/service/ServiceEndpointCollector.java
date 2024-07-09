@@ -513,15 +513,30 @@ public class ServiceEndpointCollector {
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
         } else {
-            Optional<String> coordinatorUrl = privateIps.get(serviceName)
-                    .stream()
-                    .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled, version))
-                    .flatMap(Optional::stream)
-                    .findFirst();
-            if (coordinatorUrl.isPresent()) {
-                urls.add(coordinatorUrl.get());
+            String impalaDebugUIServiceName = exposedServiceCollector.getImpalaDebugUIService().getServiceName();
+            String impalaServiceName = exposedServiceCollector.getImpalaService().getServiceName();
+
+            Optional<String> coordinatorUrl = getServiceUrl(managerIp, gateway, privateIps, autoTlsEnabled, version, impalaDebugUIServiceName);
+            Optional<String> impalaUrl = getServiceUrl(privateIps, impalaServiceName);
+
+            String url = coordinatorUrl.orElse(impalaUrl.orElse(null));
+            if (!Strings.isNullOrEmpty(url)) {
+                urls.add(url);
             }
         }
+    }
+
+    private Optional<String> getServiceUrl(String managerIp, GatewayView gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled,
+            Optional<String> version, String serviceName) {
+        return privateIps.get(serviceName)
+                .stream()
+                .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled, version))
+                .flatMap(Optional::stream)
+                .findFirst();
+    }
+
+    private Optional<String> getServiceUrl(Map<String, List<String>> privateIps, String serviceName) {
+        return Optional.ofNullable(privateIps.get(serviceName)).orElse(List.of()).stream().findFirst();
     }
 
     private void addKuduUrl(
