@@ -20,9 +20,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -480,6 +483,7 @@ public class SaltStateService {
         return getGrains(sc, Glob.ALL, grain);
     }
 
+    @Retryable(retryFor = WebApplicationException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, JsonNode> getGrains(SaltConnector sc, Target<String> target, String grain) {
         ApplyResponse resp = measure(() -> sc.run(target, "grains.get", LOCAL, ApplyResponse.class, grain), LOGGER,
                 "GrainsGet took {}ms for grain [{}]", grain);
