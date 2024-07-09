@@ -24,7 +24,6 @@ import com.google.api.services.sqladmin.model.DiskEncryptionConfiguration;
 import com.google.api.services.sqladmin.model.IpConfiguration;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
-import com.google.api.services.sqladmin.model.User;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -66,6 +65,9 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     private GcpSQLAdminFactory gcpSQLAdminFactory;
 
     @Inject
+    private GcpDatabaseServerUserService gcpDatabaseServerUserService;
+
+    @Inject
     private GcpLabelUtil gcpLabelUtil;
 
     @Inject
@@ -99,13 +101,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                         String instanceName = instance.getName();
                         Builder rdsInstance = CloudResource.builder();
                         buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName, availabilityZone));
-                        User rootUser = getRootUser(stack, projectId, instanceName);
-                        operation = sqlAdmin.users()
-                                .insert(projectId, instanceName, rootUser)
-                                .execute();
-                        verifyOperation(operation, buildableResource);
-                        operationAwareCloudResource = createOperationAwareCloudResource(buildableResource.get(0), operation);
-                        databasePollerService.insertUserPoller(ac, List.of(operationAwareCloudResource));
+                        gcpDatabaseServerUserService.createUser(ac, stack, buildableResource, instanceName);
                     }
                     buildableResource.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
                     return Collections.singletonList(operationAwareCloudResource);
@@ -205,13 +201,5 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                                 .setEnabled(true)
                                 .setBinaryLogEnabled(false)
                 );
-    }
-
-    private User getRootUser(DatabaseStack stack, String projectId, String instanceName) {
-        return new User()
-                .setProject(projectId)
-                .setInstance(instanceName)
-                .setName(stack.getDatabaseServer().getRootUserName())
-                .setPassword(stack.getDatabaseServer().getRootPassword());
     }
 }
