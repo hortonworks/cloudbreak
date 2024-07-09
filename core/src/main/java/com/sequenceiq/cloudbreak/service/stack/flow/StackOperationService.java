@@ -206,8 +206,6 @@ public class StackOperationService {
     }
 
     public FlowIdentifier restartInstances(StackDto stackDto, List<String> instanceIds) {
-        stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.RESTART_INSTANCES_REQUESTED,
-                "Requested instances for Restarting: " + instanceIds);
         return flowManager.triggerRestartInstances(stackDto.getId(), instanceIds);
     }
 

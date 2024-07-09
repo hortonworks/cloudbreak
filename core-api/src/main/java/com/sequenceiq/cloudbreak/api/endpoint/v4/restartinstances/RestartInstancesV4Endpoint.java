@@ -15,6 +15,7 @@ import jakarta.ws.rs.QueryParam;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,7 +32,7 @@ public interface RestartInstancesV4Endpoint {
     @Operation(summary = OperationDescriptions.StackOpDescription.RESTART_MULTIPLE_INSTANCES,
             description = Notes.STACK_NOTES, operationId = "restartInstancesForClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void restartInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+    FlowIdentifier restartInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @QueryParam("instanceId") @NotEmpty List<String> instanceIds);
 
     @POST
@@ -40,6 +41,6 @@ public interface RestartInstancesV4Endpoint {
     @Operation(summary = OperationDescriptions.StackOpDescription.RESTART_MULTIPLE_INSTANCES,
             description = Notes.STACK_NOTES, operationId = "restartInstancesForClusterName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void restartInstancesForClusterName(@PathParam("name") String clusterName,
+    FlowIdentifier restartInstancesForClusterName(@PathParam("name") String clusterName,
             @QueryParam("instanceId") @NotEmpty List<String> instanceIds);
 }

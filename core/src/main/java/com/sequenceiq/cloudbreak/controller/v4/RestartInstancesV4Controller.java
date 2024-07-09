@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.restartinstances.RestartInstanc
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
@@ -31,17 +32,17 @@ public class RestartInstancesV4Controller implements RestartInstancesV4Endpoint 
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void restartInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, List<String> instanceIds) {
+    public FlowIdentifier restartInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, List<String> instanceIds) {
         LOGGER.info("restartInstancesForClusterCrn: clusterCrn={}, instanceIds=[{}]", clusterCrn, instanceIds);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        stackCommonService.restartMultipleInstances(NameOrCrn.ofCrn(clusterCrn), accountId, instanceIds);
+        return stackCommonService.restartMultipleInstances(NameOrCrn.ofCrn(clusterCrn), accountId, instanceIds);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void restartInstancesForClusterName(@ResourceName String clusterName, List<String> instanceIds) {
+    public FlowIdentifier restartInstancesForClusterName(@ResourceName String clusterName, List<String> instanceIds) {
         LOGGER.info("restartInstancesForClusterName: clusterName={}, instanceIds=[{}]", clusterName, instanceIds);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        stackCommonService.restartMultipleInstances(NameOrCrn.ofName(clusterName), accountId, instanceIds);
+        return stackCommonService.restartMultipleInstances(NameOrCrn.ofName(clusterName), accountId, instanceIds);
     }
 }
