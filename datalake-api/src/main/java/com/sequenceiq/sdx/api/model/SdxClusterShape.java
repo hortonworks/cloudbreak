@@ -1,21 +1,28 @@
 package com.sequenceiq.sdx.api.model;
 
 public enum SdxClusterShape {
-    CUSTOM(Boolean.FALSE),
-    LIGHT_DUTY(Boolean.FALSE),
-    MEDIUM_DUTY_HA(Boolean.TRUE),
-    ENTERPRISE(Boolean.TRUE),
-    MICRO_DUTY(Boolean.FALSE),
-    CONTAINERIZED(Boolean.FALSE);
+    CUSTOM(Boolean.FALSE, "-cus"),
+    LIGHT_DUTY(Boolean.FALSE, "-ld"),
+    MEDIUM_DUTY_HA(Boolean.TRUE, "-md"),
+    ENTERPRISE(Boolean.TRUE, "-ent"),
+    MICRO_DUTY(Boolean.FALSE, "-mic"),
+    CONTAINERIZED(Boolean.FALSE, "-con");
 
     private final boolean multiAzEnabledByDefault;
 
-    SdxClusterShape(Boolean multiAzEnabledByDefault) {
+    private final String resizeSuffix;
+
+    SdxClusterShape(Boolean multiAzEnabledByDefault, String resizeSuffix) {
         this.multiAzEnabledByDefault = multiAzEnabledByDefault;
+        this.resizeSuffix = resizeSuffix;
     }
 
     public boolean isMultiAzEnabledByDefault() {
         return multiAzEnabledByDefault;
+    }
+
+    public String getResizeSuffix() {
+        return resizeSuffix;
     }
 
     public boolean isHA() {

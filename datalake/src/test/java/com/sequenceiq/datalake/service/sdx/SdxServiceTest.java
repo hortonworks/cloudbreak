@@ -7,7 +7,6 @@ import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLE
 import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_CLUSTER_SHAPE;
 import static com.sequenceiq.datalake.service.sdx.SdxService.PREVIOUS_DATABASE_CRN;
-import static com.sequenceiq.datalake.service.sdx.SdxService.SDX_RESIZE_NAME_SUFFIX;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.ENTERPRISE;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
@@ -36,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
@@ -61,6 +62,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -140,6 +142,7 @@ import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseComputeStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
@@ -632,7 +635,7 @@ class SdxServiceTest {
         String stackRequestRawString = createdSdxCluster.getStackRequest();
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
-        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(ENTERPRISE), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + ENTERPRISE.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -712,7 +715,7 @@ class SdxServiceTest {
         String stackRequestRawString = createdSdxCluster.getStackRequest();
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
-        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(MEDIUM_DUTY_HA), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -1035,7 +1038,7 @@ class SdxServiceTest {
         String stackRequestRawString = createdSdxCluster.getStackRequest();
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
-        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(MEDIUM_DUTY_HA), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -1113,7 +1116,7 @@ class SdxServiceTest {
         String stackRequestRawString = createdSdxCluster.getStackRequest();
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
-        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(ENTERPRISE), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + ENTERPRISE.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
     }
 
     @Test
@@ -1822,7 +1825,7 @@ class SdxServiceTest {
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
 
         assertEquals(11, stackV4Request.getJavaVersion());
-        assertEquals(CLUSTER_NAME + SDX_RESIZE_NAME_SUFFIX.get(ENTERPRISE), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + ENTERPRISE.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
         assertEquals("RHEL8", stackV4Request.getImage().getOs());
         assertEquals("cb-default", stackV4Request.getImage().getCatalog());
         assertEquals("random-uuid-id", stackV4Request.getImage().getId());
@@ -1846,6 +1849,19 @@ class SdxServiceTest {
             assertTrue(masterRecipes.contains("recipe2"));
             assertFalse(masterRecipes.contains("recipe3"));
         });
+    }
+
+    @Test
+    void ensureNoShapeHasSameResizeSuffix() {
+        Set<String> resizeSuffixes = Arrays.stream(SdxClusterShape.values())
+                .map(SdxClusterShape::getResizeSuffix)
+                .collect(Collectors.toSet());
+        assertEquals(SdxClusterShape.values().length, resizeSuffixes.size());
+    }
+
+    @Test
+    void ensureNoShapeHasEmptyResizeSuffix() {
+        Arrays.stream(SdxClusterShape.values()).forEach(shape -> assertFalse(Strings.isNullOrEmpty(shape.getResizeSuffix())));
     }
 
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse() {
