@@ -1,3 +1,5 @@
+{%- if grains.get('saltversion', "") != "2017.7.5" %}
+
 ipadnskeysyncdRestart:
    file.replace:
     - name: /usr/lib/systemd/system/ipa-dnskeysyncd.service
@@ -81,5 +83,7 @@ reload-systemd:
   cmd.run:
     - name: systemctl daemon-reload
     - failhard: True
+
+{%- endif %}
 
 {%- endif %}
