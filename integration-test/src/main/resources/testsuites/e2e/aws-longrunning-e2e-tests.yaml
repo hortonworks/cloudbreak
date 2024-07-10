@@ -15,3 +15,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeDatabaseServerTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxCustomInstanceResizeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRestartInstancesTest

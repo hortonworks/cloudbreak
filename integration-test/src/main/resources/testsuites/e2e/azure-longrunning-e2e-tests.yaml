@@ -21,3 +21,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxVolumesVerticalScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXVolumesVerticalScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeDatabaseServerTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRestartInstancesTest
