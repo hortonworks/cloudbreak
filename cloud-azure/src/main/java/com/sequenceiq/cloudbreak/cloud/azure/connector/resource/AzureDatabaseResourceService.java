@@ -396,13 +396,22 @@ public class AzureDatabaseResourceService {
         String serverName = databaseStack.getDatabaseServer().getServerId();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), databaseStack);
         try {
-            LOGGER.info("Update default admin user password for database: {}", serverName);
-            client.getSingleServerClient().updateAdministratorLoginPassword(resourceGroupName, serverName, newPassword);
+            AzureDatabaseType azureDatabaseType = getAzureDatabaseType(databaseStack);
+            LOGGER.info("Update default admin user password for database: {}, database type: {}", serverName, azureDatabaseType);
+            if (azureDatabaseType == AzureDatabaseType.FLEXIBLE_SERVER) {
+                client.getFlexibleServerClient().updateAdministratorLoginPassword(resourceGroupName, serverName, newPassword);
+            } else {
+                client.getSingleServerClient().updateAdministratorLoginPassword(resourceGroupName, serverName, newPassword);
+            }
             LOGGER.info("Default admin user password updated for database: {}", serverName);
         } catch (Exception e) {
             LOGGER.warn("Update default admin user password failed for database: {}, reason: {}", serverName, e.getMessage());
             throw new CloudConnectorException(e.getMessage(), e);
         }
+    }
+
+    private AzureDatabaseType getAzureDatabaseType(DatabaseStack databaseStack) {
+        return AzureDatabaseType.safeValueOf(databaseStack.getDatabaseServer().getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
     }
 
     private void deleteDatabaseServer(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, List<CloudResource> resources, AzureClient client) {

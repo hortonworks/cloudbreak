@@ -7,6 +7,7 @@ import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.ServerState;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 public class AzureSingleServerClient extends AbstractAzureServiceClient {
 
@@ -24,7 +25,13 @@ public class AzureSingleServerClient extends AbstractAzureServiceClient {
 
     public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
         Server singleServer = getSingleServer(resourceGroupName, serverName);
-        handleException(() -> singleServer.update().withAdministratorLoginPassword(newPassword).apply());
+        if (singleServer == null) {
+            String message = String.format("Single server not found with name %s in resource group %s", serverName, resourceGroupName);
+            LOGGER.warn(message);
+            throw new CloudConnectorException(message);
+        } else {
+            handleException(() -> singleServer.update().withAdministratorLoginPassword(newPassword).apply());
+        }
     }
 
     public ServerState getSingleServerStatus(String resourceGroupName, String serverName) {

@@ -16,6 +16,7 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
@@ -41,22 +42,30 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
     }
 
     public ServerState getFlexibleServerStatus(String resourceGroupName, String serverName) {
-        return handleException(() -> {
-            Server server = postgreSqlFlexibleManager.servers()
-                    .getByResourceGroup(resourceGroupName, serverName);
-            if (server == null) {
-                LOGGER.debug("Flexible server not found with name {} in resourcegroup {}", serverName, resourceGroupName);
-                return UNKNOWN;
-            } else {
-                LOGGER.debug("Flexible server status on Azure is {}", server.state());
-                return server.state() != null ? server.state() : UNKNOWN;
-            }
-        });
+        Server server = getFlexibleServer(resourceGroupName, serverName);
+        if (server == null) {
+            LOGGER.debug("Flexible server not found with name {} in resourcegroup {}", serverName, resourceGroupName);
+            return UNKNOWN;
+        } else {
+            LOGGER.debug("Flexible server status on Azure is {}", server.state());
+            return server.state() != null ? server.state() : UNKNOWN;
+        }
     }
 
     public Map<Region, Optional<FlexibleServerCapability>> getFlexibleServerCapabilityMap(Map<Region, AzureCoordinate> regions) {
         return regions.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, regionEntry -> getFlexibleServerCapability(regionEntry.getValue().getKey())));
+    }
+
+    public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
+        Server server = getFlexibleServer(resourceGroupName, serverName);
+        if (server == null) {
+            String message = String.format("Flexible server not found with name %s in resource group %s", serverName, resourceGroupName);
+            LOGGER.warn(message);
+            throw new CloudConnectorException(message);
+        } else {
+            handleException(() -> server.update().withAdministratorLoginPassword(newPassword).apply());
+        }
     }
 
     private Optional<FlexibleServerCapability> getFlexibleServerCapability(String locationName) {
@@ -76,5 +85,9 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
             LOGGER.debug("We were not able to query flexible supported capability because of: " + managementException.getMessage());
             return Optional.empty();
         }
+    }
+
+    private Server getFlexibleServer(String resourceGroupName, String serverName) {
+        return handleException(() -> postgreSqlFlexibleManager.servers().getByResourceGroup(resourceGroupName, serverName));
     }
 }

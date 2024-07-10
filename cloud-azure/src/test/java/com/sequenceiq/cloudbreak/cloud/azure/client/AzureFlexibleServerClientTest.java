@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -13,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,13 +37,17 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Servers;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 @ExtendWith(MockitoExtension.class)
 class AzureFlexibleServerClientTest {
+
     private static final String RESOURCE_GROUP_NAME = "rg";
 
     private static final String SERVER_NAME = "serverName";
+
+    private static final String NEW_PASSWORD = "newPassword";
 
     @Spy
     private AzureExceptionHandler azureExceptionHandler;
@@ -90,7 +96,7 @@ class AzureFlexibleServerClientTest {
         when(server.state()).thenReturn(ServerState.DISABLED);
         when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
         ServerState serverState = underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
-        Assertions.assertEquals(ServerState.DISABLED, serverState);
+        assertEquals(ServerState.DISABLED, serverState);
     }
 
     @Test
@@ -98,7 +104,7 @@ class AzureFlexibleServerClientTest {
         Servers servers = mock(Servers.class);
         when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
         ServerState serverState = underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
-        Assertions.assertEquals(AzureFlexibleServerClient.UNKNOWN, serverState);
+        assertEquals(AzureFlexibleServerClient.UNKNOWN, serverState);
     }
 
     @Test
@@ -110,7 +116,7 @@ class AzureFlexibleServerClientTest {
         when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenThrow(managementException);
         when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
         ServerState serverState = underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
-        Assertions.assertNull(serverState);
+        assertEquals(AzureFlexibleServerClient.UNKNOWN, serverState);
     }
 
     @Test
@@ -120,7 +126,7 @@ class AzureFlexibleServerClientTest {
         ManagementException managementException = new ManagementException("", httpResponse);
         when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenThrow(managementException);
         when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
-        Assertions.assertThrows(ManagementException.class, () -> underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME));
+        assertThrows(ManagementException.class, () -> underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME));
     }
 
     @Test
@@ -142,8 +148,8 @@ class AzureFlexibleServerClientTest {
         when(postgreSqlFlexibleManager.locationBasedCapabilities()).thenReturn(locationBasedCapabilities);
 
         Map<Region, Optional<FlexibleServerCapability>> actualCapabilityMap = underTest.getFlexibleServerCapabilityMap(regionMap);
-        Assertions.assertEquals(actualCapabilityMap.get(Region.region("us-west-1")), Optional.empty());
-        Assertions.assertEquals(actualCapabilityMap.get(Region.region("us-west-2")).get(), capability);
+        assertEquals(actualCapabilityMap.get(Region.region("us-west-1")), Optional.empty());
+        assertEquals(actualCapabilityMap.get(Region.region("us-west-2")).get(), capability);
     }
 
     @Test
@@ -161,8 +167,39 @@ class AzureFlexibleServerClientTest {
         when(postgreSqlFlexibleManager.locationBasedCapabilities()).thenReturn(locationBasedCapabilities);
 
         Map<Region, Optional<FlexibleServerCapability>> actualCapabilityMap = underTest.getFlexibleServerCapabilityMap(regionMap);
-        Assertions.assertEquals(actualCapabilityMap.get(Region.region("us-west-1")), Optional.empty());
-        Assertions.assertEquals(actualCapabilityMap.get(Region.region("us-west-2")).get(), capability);
+        assertEquals(actualCapabilityMap.get(Region.region("us-west-1")), Optional.empty());
+        assertEquals(actualCapabilityMap.get(Region.region("us-west-2")).get(), capability);
+    }
+
+    @Test
+    void testUpdateAdministratorLoginPassword() {
+        Servers servers = mock(Servers.class);
+        when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+        Server server = mock(Server.class);
+        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
+        Server.Update update = mock(Server.Update.class);
+        when(server.update()).thenReturn(update);
+        when(update.withAdministratorLoginPassword(eq(NEW_PASSWORD))).thenReturn(update);
+        when(update.apply()).thenReturn(server);
+        underTest.updateAdministratorLoginPassword(RESOURCE_GROUP_NAME, SERVER_NAME, NEW_PASSWORD);
+        verify(postgreSqlFlexibleManager, times(1)).servers();
+        verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
+        verify(server, times(1)).update();
+        verify(update, times(1)).withAdministratorLoginPassword(eq(NEW_PASSWORD));
+        verify(update, times(1)).apply();
+    }
+
+    @Test
+    void testUpdateAdministratorLoginPasswordWhenServerIsNull() {
+        Servers servers = mock(Servers.class);
+        when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(null);
+
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.updateAdministratorLoginPassword(RESOURCE_GROUP_NAME, SERVER_NAME, NEW_PASSWORD));
+        verify(postgreSqlFlexibleManager, times(1)).servers();
+        verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
+        assertThat(cloudConnectorException.getMessage()).contains("Flexible server not found with name");
     }
 
     private AzureCoordinate azureCoordinate(String name) {

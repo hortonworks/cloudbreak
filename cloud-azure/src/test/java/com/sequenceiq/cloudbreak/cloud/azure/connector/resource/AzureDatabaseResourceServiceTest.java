@@ -143,6 +143,31 @@ class AzureDatabaseResourceServiceTest {
     @InjectMocks
     private AzureDatabaseResourceService underTest;
 
+    private static Stream<Arguments> flexibleServerStates() {
+        return Stream.of(
+                Arguments.of(ServerState.DISABLED, ExternalDatabaseStatus.DELETED),
+                Arguments.of(ServerState.READY, ExternalDatabaseStatus.STARTED),
+                Arguments.of(ServerState.DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
+                Arguments.of(ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS),
+                Arguments.of(ServerState.STOPPED, ExternalDatabaseStatus.STOPPED),
+                Arguments.of(ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS),
+                Arguments.of(ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS),
+                Arguments.of(ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN),
+                Arguments.of(null, ExternalDatabaseStatus.DELETED)
+        );
+    }
+
+    private static Stream<Arguments> singleServerStates() {
+        return Stream.of(
+                Arguments.of(DISABLED, ExternalDatabaseStatus.DELETED),
+                Arguments.of(READY, ExternalDatabaseStatus.STARTED),
+                Arguments.of(DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
+                Arguments.of(INACCESSIBLE, ExternalDatabaseStatus.UNKNOWN),
+                Arguments.of(com.azure.resourcemanager.postgresql.models.ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN),
+                Arguments.of(null, ExternalDatabaseStatus.DELETED)
+        );
+    }
+
     @BeforeEach
     void initTests() {
         lenient().when(ac.getCloudContext()).thenReturn(cloudContext);
@@ -186,31 +211,6 @@ class AzureDatabaseResourceServiceTest {
         when(flexibleServerClientMock.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME)).thenThrow(exception);
         CloudConnectorException actualException = assertThrows(CloudConnectorException.class, () -> underTest.getDatabaseServerStatus(ac, databaseStack));
         assertEquals(exception, actualException.getCause());
-    }
-
-    private static Stream<Arguments> flexibleServerStates() {
-        return Stream.of(
-                Arguments.of(ServerState.DISABLED, ExternalDatabaseStatus.DELETED),
-                Arguments.of(ServerState.READY, ExternalDatabaseStatus.STARTED),
-                Arguments.of(ServerState.DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
-                Arguments.of(ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS),
-                Arguments.of(ServerState.STOPPED, ExternalDatabaseStatus.STOPPED),
-                Arguments.of(ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS),
-                Arguments.of(ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS),
-                Arguments.of(ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN),
-                Arguments.of(null, ExternalDatabaseStatus.DELETED)
-        );
-    }
-
-    private static Stream<Arguments> singleServerStates() {
-        return Stream.of(
-                Arguments.of(DISABLED, ExternalDatabaseStatus.DELETED),
-                Arguments.of(READY, ExternalDatabaseStatus.STARTED),
-                Arguments.of(DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
-                Arguments.of(INACCESSIBLE, ExternalDatabaseStatus.UNKNOWN),
-                Arguments.of(com.azure.resourcemanager.postgresql.models.ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN),
-                Arguments.of(null, ExternalDatabaseStatus.DELETED)
-        );
     }
 
     @Test
@@ -721,7 +721,7 @@ class AzureDatabaseResourceServiceTest {
     }
 
     @Test
-    void updateAdministratorLoginPasswordShouldSucceed() {
+    void updateDefaultSingleServerAdministratorLoginPasswordShouldSucceed() {
         AzureSingleServerClient azureSingleServerClient = mock(AzureSingleServerClient.class);
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).build());
         when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
@@ -733,7 +733,7 @@ class AzureDatabaseResourceServiceTest {
     }
 
     @Test
-    void updateAdministratorLoginPasswordShouldFailWhenClientThrowsException() {
+    void updateDefaultSingleServerAdministratorLoginPasswordShouldFailWhenClientThrowsException() {
         AzureSingleServerClient azureSingleServerClient = mock(AzureSingleServerClient.class);
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).build());
         when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
@@ -747,6 +747,19 @@ class AzureDatabaseResourceServiceTest {
         assertEquals("error", cloudConnectorException.getMessage());
         verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
         verify(azureSingleServerClient, times(1)).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
+    }
+
+    @Test
+    void updateFlexibleServerAdministratorLoginPasswordShouldSucceed() {
+        AzureFlexibleServerClient azureFlexibleServerClient = mock(AzureFlexibleServerClient.class);
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME)
+                .withParams(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER)).build());
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
+        when(client.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        underTest.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD);
+
+        verify(azureResourceGroupMetadataProvider, times(1)).getResourceGroupName(eq(cloudContext), eq(databaseStack));
+        verify(azureFlexibleServerClient, times(1)).updateAdministratorLoginPassword(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME), eq(NEW_PASSWORD));
     }
 
     @Test

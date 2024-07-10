@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,9 +23,11 @@ import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.ServerState;
 import com.azure.resourcemanager.postgresql.models.Servers;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @ExtendWith(MockitoExtension.class)
 class AzureSingleServerClientTest {
+
     private static final String NEW_PASSWORD = "newPassword";
 
     private static final String RESOURCE_GROUP_NAME = "rg";
@@ -56,6 +59,19 @@ class AzureSingleServerClientTest {
         verify(server, times(1)).update();
         verify(update, times(1)).withAdministratorLoginPassword(eq(NEW_PASSWORD));
         verify(update, times(1)).apply();
+    }
+
+    @Test
+    void testUpdateAdministratorLoginPasswordWhenServerIsNull() {
+        Servers servers = mock(Servers.class);
+        when(postgreSqlManager.servers()).thenReturn(servers);
+        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(null);
+
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.updateAdministratorLoginPassword(RESOURCE_GROUP_NAME, SERVER_NAME, NEW_PASSWORD));
+        verify(postgreSqlManager, times(1)).servers();
+        verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
+        assertThat(cloudConnectorException.getMessage()).contains("Single server not found with name");
     }
 
     @Test
@@ -96,6 +112,6 @@ class AzureSingleServerClientTest {
         ManagementException managementException = new ManagementException("", httpResponse);
         when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenThrow(managementException);
         when(postgreSqlManager.servers()).thenReturn(servers);
-        Assertions.assertThrows(ManagementException.class, () -> underTest.getSingleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME));
+        assertThrows(ManagementException.class, () -> underTest.getSingleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME));
     }
 }
