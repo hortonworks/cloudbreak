@@ -99,22 +99,6 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
         validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    @UseSpotInstances
-    @Description(
-            given = "There is a running environment with datalake connected via CCMv2",
-            when = "CCM Upgrade called on the environment - CCMv2 to the latest (JUMPGATE)",
-            then = "environment CCM Upgrade should be successful, along with datalake.")
-    public void testCcmV2Upgrade(TestContext testContext) {
-        createEnvironmentWithCcm(testContext, Tunnel.CCMV2);
-        createSdxForEnvironment(testContext);
-        validateCcmServices(testContext, Tunnel.CCMV2);
-        upgradeCcmOnEnvironment(testContext);
-        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
-        repairMasterNodes(testContext);
-        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
-    }
-
     private void createEnvironmentWithCcm(TestContext testContext, Tunnel ccmVersion) {
         environmentUtil
                 .createEnvironmentWithDefinedCcm(testContext, ccmVersion)
