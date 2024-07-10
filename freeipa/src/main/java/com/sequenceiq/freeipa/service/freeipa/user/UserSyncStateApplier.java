@@ -50,7 +50,8 @@ public class UserSyncStateApplier {
     private UserSyncGroupAddMemberOperations groupAddMemberOperations;
 
     public void applyDifference(UmsUsersState umsUsersState, String environmentCrn, Multimap<String, String> warnings,
-            UsersStateDifference usersStateDifference, UserSyncOptions options, FreeIpaClient freeIpaClient) throws FreeIpaClientException, TimeoutException {
+            UsersStateDifference usersStateDifference, UserSyncOptions options, FreeIpaClient freeIpaClient,
+            Long stackId) throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Starting {} ...", APPLY_DIFFERENCE_TO_IPA);
         applyStateDifferenceToIpa(umsUsersState, environmentCrn, freeIpaClient, usersStateDifference, warnings::put, options.isFmsToFreeIpaBatchCallEnabled());
         LOGGER.debug("Finished {}.", APPLY_DIFFERENCE_TO_IPA);
@@ -62,7 +63,7 @@ public class UserSyncStateApplier {
             ImmutableSet<WorkloadCredentialUpdate> credentialUpdates = usersStateDifference.getUsersWithCredentialsToUpdate().stream()
                     .map(username -> getCredentialUpdate(username, umsUsersState))
                     .collect(ImmutableSet.toImmutableSet());
-            workloadCredentialService.setWorkloadCredentials(options, freeIpaClient, credentialUpdates, warnings::put);
+            workloadCredentialService.setWorkloadCredentials(options, freeIpaClient, credentialUpdates, warnings::put, stackId);
             LOGGER.debug("Finished {}.", SET_WORKLOAD_CREDENTIALS);
         }
     }

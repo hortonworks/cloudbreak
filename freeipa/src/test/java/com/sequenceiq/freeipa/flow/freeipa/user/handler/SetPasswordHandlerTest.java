@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +57,8 @@ class SetPasswordHandlerTest {
 
     private static final long UMS_WORKLOAD_CREDENTIALS_VERSION = 123L;
 
+    private static final long STACK_ID = 3L;
+
     @Mock
     private StackService stackService;
 
@@ -91,7 +94,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any(), eq(STACK_ID));
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -109,7 +112,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(0)).setWorkloadCredential(eq(true), any(), any());
+        verify(workloadCredentialService, times(0)).setWorkloadCredential(eq(true), any(), any(), eq(STACK_ID));
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -126,7 +129,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any(), eq(STACK_ID));
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -139,7 +142,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(false), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(false), any(), any(), eq(STACK_ID));
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -152,7 +155,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(anyBoolean(), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(anyBoolean(), any(), any(), eq(STACK_ID));
         verify(mockFreeIpaClient, times(1)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -187,6 +190,7 @@ class SetPasswordHandlerTest {
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(stackService.getStackById(any())).thenReturn(stack);
+        lenient().when(stack.getId()).thenReturn(STACK_ID);
 
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(credentialsUpdateOptimizationEnabled);
     }

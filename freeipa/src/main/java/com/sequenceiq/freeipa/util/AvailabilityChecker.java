@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
 public class AvailabilityChecker {
@@ -24,6 +25,9 @@ public class AvailabilityChecker {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private StackService stackService;
 
     public boolean isRequiredPackagesInstalled(Stack stack, Set<String> requiredPackages) {
         try {
@@ -44,6 +48,11 @@ public class AvailabilityChecker {
             LOGGER.warn("Image not found: {}", e);
         }
         return false;
+    }
+
+    public boolean isPackageAvailable(Long stackId, String packageName, Versioned supportedAfter) {
+        Stack stack = stackService.getStackById(stackId);
+        return isPackageAvailable(stack, packageName, supportedAfter);
     }
 
     protected boolean isAvailable(Stack stack, Versioned supportedAfter) {

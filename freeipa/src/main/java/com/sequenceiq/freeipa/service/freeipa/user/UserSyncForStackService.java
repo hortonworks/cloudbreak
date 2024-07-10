@@ -74,7 +74,7 @@ public class UserSyncForStackService {
         try {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stack.id());
             UsersStateDifference usersStateDifferenceBeforeSync = compareUmsAndFreeIpa(umsUsersState, options, freeIpaClient, warnings::put);
-            stateApplier.applyDifference(umsUsersState, environmentCrn, warnings, usersStateDifferenceBeforeSync, options, freeIpaClient);
+            stateApplier.applyDifference(umsUsersState, environmentCrn, warnings, usersStateDifferenceBeforeSync, options, freeIpaClient, stack.id());
 
             retrySyncIfBatchCallHasWarnings(stack, umsUsersState, warnings, options, freeIpaClient, usersStateDifferenceBeforeSync);
 
@@ -166,7 +166,8 @@ public class UserSyncForStackService {
                 Multimap<String, String> retryWarnings = ArrayListMultimap.create();
                 try {
                     LOGGER.info(String.format("Sync was partially successful for %s, thus we are trying it once again", stack.resourceCrn()));
-                    stateApplier.applyDifference(umsUsersState, stack.environmentCrn(), retryWarnings, usersStateDifferenceAfterSync, options, freeIpaClient);
+                    stateApplier.applyDifference(umsUsersState, stack.environmentCrn(), retryWarnings, usersStateDifferenceAfterSync, options, freeIpaClient,
+                            stack.id());
                     warnings.clear();
                 } finally {
                     warnings.putAll(retryWarnings);

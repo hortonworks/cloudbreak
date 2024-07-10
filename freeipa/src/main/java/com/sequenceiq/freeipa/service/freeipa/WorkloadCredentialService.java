@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
+import com.sequenceiq.freeipa.util.AvailabilityChecker;
 import com.sequenceiq.freeipa.util.ThreadInterruptChecker;
 
 @Service
@@ -41,18 +42,23 @@ public class WorkloadCredentialService {
     @Inject
     private ThreadInterruptChecker interruptChecker;
 
-    public void setWorkloadCredential(boolean credentialsUpdateOptimizationEnabled, FreeIpaClient freeIpaClient, WorkloadCredentialUpdate update)
+    @Inject
+    private AvailabilityChecker availabilityChecker;
+
+    public void setWorkloadCredential(boolean credentialsUpdateOptimizationEnabled, FreeIpaClient freeIpaClient, WorkloadCredentialUpdate update, Long stackId)
             throws IOException, FreeIpaClientException {
         LOGGER.debug("Setting workload credentials for user '{}'", update.getUsername());
-        getOperation(update.getUsername(), update.getUserCrn(), update.getWorkloadCredential(), credentialsUpdateOptimizationEnabled, freeIpaClient)
-                .invoke(freeIpaClient);
+        boolean postfixSupported = isPasswordPluginPostfixSupported(stackId);
+        getOperation(update.getUsername(), update.getUserCrn(), update.getWorkloadCredential(), credentialsUpdateOptimizationEnabled, freeIpaClient,
+                postfixSupported).invoke(freeIpaClient);
     }
 
     public void setWorkloadCredentials(UserSyncOptions options, FreeIpaClient freeIpaClient, Set<WorkloadCredentialUpdate> updates,
-            BiConsumer<String, String> warnings) throws FreeIpaClientException, TimeoutException {
+            BiConsumer<String, String> warnings, Long stackId) throws FreeIpaClientException, TimeoutException {
         if (!updates.isEmpty()) {
+            boolean postfixSupported = isPasswordPluginPostfixSupported(stackId);
             List<SetWlCredentialOperation> operations = updates.stream()
-                    .flatMap(update -> createUpdateOperation(options, freeIpaClient, warnings, update))
+                    .flatMap(update -> createUpdateOperation(options, freeIpaClient, warnings, update, postfixSupported))
                     .collect(Collectors.toList());
             if (options.isFmsToFreeIpaBatchCallEnabled()) {
                 updateInBatch(freeIpaClient, warnings, operations);
@@ -64,7 +70,11 @@ public class WorkloadCredentialService {
         }
     }
 
-    private void updateOneByOne(FreeIpaClient freeIpaClient,  BiConsumer<String, String> warnings, List<SetWlCredentialOperation> operations)
+    private boolean isPasswordPluginPostfixSupported(Long stackId) {
+        return availabilityChecker.isPackageAvailable(stackId, "freeipa-plugin", () -> "1.0");
+    }
+
+    private void updateOneByOne(FreeIpaClient freeIpaClient, BiConsumer<String, String> warnings, List<SetWlCredentialOperation> operations)
             throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Updating workload credentials one by one");
         for (SetWlCredentialOperation operation : operations) {
@@ -78,7 +88,7 @@ public class WorkloadCredentialService {
         }
     }
 
-    private void updateInBatch(FreeIpaClient freeIpaClient,  BiConsumer<String, String> warnings, List<SetWlCredentialOperation> operations)
+    private void updateInBatch(FreeIpaClient freeIpaClient, BiConsumer<String, String> warnings, List<SetWlCredentialOperation> operations)
             throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Updating workload credentials in batches");
         List<Object> batchCallOperations = operations.stream()
@@ -92,10 +102,10 @@ public class WorkloadCredentialService {
     }
 
     private Stream<SetWlCredentialOperation> createUpdateOperation(UserSyncOptions options, FreeIpaClient freeIpaClient, BiConsumer<String, String> warnings,
-            WorkloadCredentialUpdate update) {
+            WorkloadCredentialUpdate update, boolean postfixSupported) {
         try {
             return Stream.of(getOperation(update.getUsername(), update.getUserCrn(), update.getWorkloadCredential(),
-                    options.isCredentialsUpdateOptimizationEnabled(), freeIpaClient));
+                    options.isCredentialsUpdateOptimizationEnabled(), freeIpaClient, postfixSupported));
         } catch (IOException e) {
             recordWarning(update.getUsername(), e, warnings);
             return Stream.empty();
@@ -103,7 +113,7 @@ public class WorkloadCredentialService {
     }
 
     private SetWlCredentialOperation getOperation(String user, String crn, WorkloadCredential workloadCredential, boolean credentialsUpdateOptimizationEnabled,
-            FreeIpaClient freeIpaClient) throws IOException {
+            FreeIpaClient freeIpaClient, boolean postfixSupported) throws IOException {
         String expiration = freeIpaClient.formatDate(workloadCredential.getExpirationDate());
         String asnEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
         List<String> sshPublicKeys = workloadCredential.getSshPublicKeys().stream()
@@ -112,10 +122,10 @@ public class WorkloadCredentialService {
         if (credentialsUpdateOptimizationEnabled) {
             String userMetadataJson = userMetadataConverter.toUserMetadataJson(crn, workloadCredential.getVersion());
             return SetWlCredentialOperation.create(user, workloadCredential.getHashedPassword(), asnEncodedKrbPrincipalKey,
-                    sshPublicKeys, expiration, userMetadataJson);
+                    sshPublicKeys, expiration, userMetadataJson, postfixSupported);
         } else {
             return SetWlCredentialOperation.create(user, workloadCredential.getHashedPassword(), asnEncodedKrbPrincipalKey,
-                    sshPublicKeys, expiration);
+                    sshPublicKeys, expiration, postfixSupported);
         }
     }
 

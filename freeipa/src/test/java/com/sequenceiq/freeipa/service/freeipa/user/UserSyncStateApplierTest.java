@@ -50,6 +50,8 @@ class UserSyncStateApplierTest {
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:"
             + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
 
+    private static final long STACK_ID = 3L;
+
     @Mock
     private FreeIpaClient freeIpaClient;
 
@@ -92,7 +94,7 @@ class UserSyncStateApplierTest {
         when(userSyncOptions.isFmsToFreeIpaBatchCallEnabled()).thenReturn(Boolean.TRUE);
         when(freeIpaClient.getConfig()).thenReturn(new Config());
 
-        underTest.applyDifference(umsUsersState, ENV_CRN, warnings, usersStateDifference, userSyncOptions, freeIpaClient);
+        underTest.applyDifference(umsUsersState, ENV_CRN, warnings, usersStateDifference, userSyncOptions, freeIpaClient, STACK_ID);
 
         verifyNoInteractions(workloadCredentialService);
     }
@@ -118,10 +120,10 @@ class UserSyncStateApplierTest {
         config.setIpauserobjectclasses(Set.of("cdpUserAttr"));
         when(freeIpaClient.getConfig()).thenReturn(config);
 
-        underTest.applyDifference(umsUsersState, ENV_CRN, warnings, usersStateDifference, userSyncOptions, freeIpaClient);
+        underTest.applyDifference(umsUsersState, ENV_CRN, warnings, usersStateDifference, userSyncOptions, freeIpaClient, STACK_ID);
 
         ArgumentCaptor<Set<WorkloadCredentialUpdate>> credentialUpdateCaptor = ArgumentCaptor.forClass(Set.class);
-        verify(workloadCredentialService).setWorkloadCredentials(eq(userSyncOptions), eq(freeIpaClient), credentialUpdateCaptor.capture(), any());
+        verify(workloadCredentialService).setWorkloadCredentials(eq(userSyncOptions), eq(freeIpaClient), credentialUpdateCaptor.capture(), any(), eq(STACK_ID));
         Set<WorkloadCredentialUpdate> workloadCredentialUpdates = credentialUpdateCaptor.getValue();
         assertThat(workloadCredentialUpdates, allOf(
                 hasItem(allOf(

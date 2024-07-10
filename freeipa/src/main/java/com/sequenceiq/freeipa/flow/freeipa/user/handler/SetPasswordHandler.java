@@ -99,7 +99,7 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
 
         if (credentialUpdateRequired(credentialsUpdateOptimizationEnabled, request.getUsername(), freeIpaClient, workloadCredential)) {
             workloadCredentialService.setWorkloadCredential(credentialsUpdateOptimizationEnabled, freeIpaClient,
-                    new WorkloadCredentialUpdate(request.getUsername(), request.getUserCrn(), workloadCredential));
+                    new WorkloadCredentialUpdate(request.getUsername(), request.getUserCrn(), workloadCredential), stack.getId());
         } else {
             LOGGER.debug("Not setting workload credentials for user '{}' because credentials are already up to date", request.getUsername());
         }

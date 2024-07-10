@@ -119,7 +119,7 @@ class UserSyncForStackServiceTest {
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
         verify(freeIpaUsersStateProvider, never()).getFilteredFreeIpaState(any(), any());
-        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT));
+        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT), eq(STACK_ID));
         verifyNoMoreInteractions(stateApplier);
         verify(cloudIdentitySyncService).syncCloudIdentities(eq(STACK), eq(umsUsersState), any());
         verify(sudoRuleService).setupSudoRule(STACK, FREE_IPA_CLIENT);
@@ -151,7 +151,7 @@ class UserSyncForStackServiceTest {
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
         verify(freeIpaUsersStateProvider, never()).getFilteredFreeIpaState(any(), any());
-        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT));
+        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT), eq(STACK_ID));
         verifyNoMoreInteractions(stateApplier);
         verify(cloudIdentitySyncService).syncCloudIdentities(eq(STACK), eq(umsUsersState), any());
         verify(authDistributorService, never()).updateAuthViewForEnvironment(eq(ENV_CRN), any(), eq(ACCOUNT), eq(OPERATION_ID));
@@ -184,7 +184,8 @@ class UserSyncForStackServiceTest {
             return null;
         })
                 .doNothing()
-                .when(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT));
+                .when(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT),
+                        eq(STACK_ID));
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
@@ -217,7 +218,7 @@ class UserSyncForStackServiceTest {
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
         verify(freeIpaUsersStateProvider, never()).getUsersState(any(), anyBoolean());
-        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT));
+        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT), eq(STACK_ID));
         verifyNoMoreInteractions(stateApplier);
         verifyNoInteractions(cloudIdentitySyncService);
         verifyNoInteractions(sudoRuleService);
@@ -248,12 +249,13 @@ class UserSyncForStackServiceTest {
             warnings.put(ENV_CRN, "failed");
             return null;
         })
-                .when(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT));
+                .when(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT),
+                        eq(STACK_ID));
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
         verify(freeIpaUsersStateProvider, never()).getUsersState(any(), anyBoolean());
-        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT));
+        verify(stateApplier).applyDifference(eq(umsUsersState), eq(ENV_CRN), any(), eq(usersStateDifference), eq(options), eq(FREE_IPA_CLIENT), eq(STACK_ID));
         verifyNoMoreInteractions(stateApplier);
         verifyNoInteractions(cloudIdentitySyncService);
         verifyNoInteractions(sudoRuleService);

@@ -45,6 +45,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConver
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
+import com.sequenceiq.freeipa.util.AvailabilityChecker;
 import com.sequenceiq.freeipa.util.ThreadInterruptChecker;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +63,8 @@ class WorkloadCredentialServiceTest {
 
     private static final long UMS_WORKLOAD_CREDENTIALS_VERSION = 123L;
 
+    private static final long STACK_ID = 3L;
+
     @Mock
     private FreeIpaClient freeIpaClient;
 
@@ -74,6 +77,9 @@ class WorkloadCredentialServiceTest {
     @Mock
     private ThreadInterruptChecker interruptChecker;
 
+    @Mock
+    private AvailabilityChecker availabilityChecker;
+
     @InjectMocks
     private WorkloadCredentialService underTest;
 
@@ -82,7 +88,7 @@ class WorkloadCredentialServiceTest {
         when(freeIpaClient.formatDate(any(Optional.class))).thenReturn(FreeIpaClient.MAX_PASSWORD_EXPIRATION_DATETIME);
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
 
-        underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
+        underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()), STACK_ID);
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), any(), any());
         verifyNoInteractions(interruptChecker);
@@ -94,7 +100,7 @@ class WorkloadCredentialServiceTest {
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenThrow(
                 new FreeIpaClientException("error", new JsonRpcClientException(4202, "", null)));
 
-        underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
+        underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()), STACK_ID);
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), any(), any());
         verifyNoInteractions(interruptChecker);
@@ -105,7 +111,7 @@ class WorkloadCredentialServiceTest {
         doReturn("userMetadataJson").when(userMetadataConverter).toUserMetadataJson(USER_CRN, UMS_WORKLOAD_CREDENTIALS_VERSION);
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
 
-        underTest.setWorkloadCredential(true, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
+        underTest.setWorkloadCredential(true, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()), STACK_ID);
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), argThat(matchesTitleAttribute("userMetadataJson")), any());
         verifyNoInteractions(interruptChecker);
@@ -239,7 +245,6 @@ class WorkloadCredentialServiceTest {
                 .fmsToFreeIpaBatchCallEnabled(batchCallEnabled)
                 .workloadCredentialsUpdateType(credentialsUpdateType)
                 .build();
-        underTest.setWorkloadCredentials(options, ipaClient, credentialUpdates,
-                warnings);
+        underTest.setWorkloadCredentials(options, ipaClient, credentialUpdates, warnings, STACK_ID);
     }
 }

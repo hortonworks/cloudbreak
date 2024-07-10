@@ -43,7 +43,7 @@ public abstract class AbstractFreeipaOperation<R> {
         return new HashMap() {
             @Override
             public String toString() {
-                return "__sensitive__";
+                return "Sensitive, keys only: " + keySet();
             }
         };
     }
