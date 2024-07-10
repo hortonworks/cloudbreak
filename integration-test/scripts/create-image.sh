@@ -113,4 +113,5 @@ docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./inte
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-externalizedcompute:dev ./integcb/docker-containers/docker-externalized-compute & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-infrastructure:dev ./integcb/docker-containers/docker-mock-infrastructure & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-thunderhead:dev ./integcb/docker-containers/docker-mock-thunderhead & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-remote-environment:dev ./integcb/docker-containers/docker-environment-remote & \
   wait
