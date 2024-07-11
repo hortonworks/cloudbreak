@@ -150,7 +150,6 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                         ". Please double check the name/ID.");
             }
         }
-
     }
 
     private void checkResourceGroupNameWhenExistingNetwork(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
@@ -252,10 +251,11 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
                 LOGGER.info("Flexible server subnet validation is not needed during environment edit as subnet ids has not changed.");
             } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
-                String message = "Deletion of all flexible server delegated subnets is not a valid operation";
+                String message = "Deletion of all Flexible server delegated subnets is not supported";
                 LOGGER.warn(message);
                 resultBuilder.error(message);
             } else if (!newFlexibleSubnets.isEmpty()) {
+                checkPrivateEndpointSetting(networkDto, resultBuilder);
                 Set<String> flexibleServerSubnetIds = convertFlexibleServerSubnetIds(newFlexibleSubnets);
                 Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
                 if (flexibleSubnets.size() != flexibleServerSubnetIds.size()) {
@@ -277,6 +277,15 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                     }
                 }
             }
+        }
+    }
+
+    private void checkPrivateEndpointSetting(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        if (networkDto.isPrivateEndpointEnabled(AZURE)) {
+            String message = "Both Private Endpoint and Flexible Server delegated subnet(s) are specified in the request. " +
+                            "As they are mutually exclusive, please specify only one of them and retry.";
+            LOGGER.warn(message);
+            resultBuilder.error(message);
         }
     }
 

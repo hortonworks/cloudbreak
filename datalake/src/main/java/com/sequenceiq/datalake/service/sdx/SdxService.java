@@ -122,6 +122,7 @@ import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -140,7 +141,9 @@ import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
@@ -151,7 +154,9 @@ import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseComputeStorageRequest;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
@@ -509,7 +514,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         validateCcmV2Requirement(environment, runtimeVersion);
 
-        SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
+        SdxCluster sdxCluster = validateAndCreateNewSdxClusterForResize(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
@@ -630,10 +635,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> recipeV4Endpoint.listInternal(
                         WORKSPACE_ID_DEFAULT, initiatorUserCrn));
-        Set<String> recipeNames = recipeResponses.getResponses()
+        return recipeResponses.getResponses()
                 .stream()
                 .map(CompactViewV4Response::getName).collect(Collectors.toSet());
-        return recipeNames;
     }
 
     private void validateRecipeExists(Set<String> recipeNames, SdxRecipe recipe) {
@@ -672,7 +676,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(environmentName);
 
-        SdxCluster newSdxCluster = validateAndCreateNewSdxCluster(sdxCluster, shape, sdxCluster.isEnableMultiAz()
+        SdxCluster newSdxCluster = validateAndCreateNewSdxClusterForResize(sdxCluster, shape, sdxCluster.isEnableMultiAz()
                 || sdxClusterResizeRequest.isEnableMultiAz(), clusterName, userCrn, environment);
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());
@@ -850,7 +854,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         stackV4Request.getCluster().setRangerRmsEnabled(rmsEnabled);
     }
 
-    private SdxCluster validateAndCreateNewSdxCluster(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
+    // database type should not change during SDX resizing so validateDatabaseType() is not necessary
+    private SdxCluster validateAndCreateNewSdxClusterForResize(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
             String clusterName, String userCrn, DetailedEnvironmentResponse environmentResponse) {
         validateShape(shape, sdxCluster.getRuntime(), environmentResponse);
         validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
@@ -874,13 +879,15 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return newSdxCluster;
     }
 
-    private SdxCluster validateAndCreateNewSdxCluster(SdxClusterRequest cluster, String version, String clusterName, String userCrn,
+    private SdxCluster validateAndCreateNewSdxClusterForResize(SdxClusterRequest cluster, String version, String clusterName, String userCrn,
             DetailedEnvironmentResponse environmentResponse) {
         validateShape(cluster.getClusterShape(), version, environmentResponse);
         validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
         validateRmsEnablement(version, cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
         validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape());
+        validateDatabaseType(cluster.getExternalDatabase(), environmentResponse);
+
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
@@ -896,6 +903,33 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setEnableMultiAz(cluster.isEnableMultiAz());
         newSdxCluster.setCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
         return newSdxCluster;
+    }
+
+    private void validateDatabaseType(SdxDatabaseRequest databaseRequest, DetailedEnvironmentResponse environmentResponse) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+        boolean flexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentResponse.getAccountId());
+        LOGGER.debug("Validating database type for platform {}, Flexible Server enabled: {}", cloudPlatform, flexibleServerEnabled);
+        if (AZURE.equals(cloudPlatform) && flexibleServerEnabled) {
+            AzureDatabaseType azureDatabaseType = Optional.ofNullable(databaseRequest)
+                    .map(SdxDatabaseRequest::getSdxDatabaseAzureRequest)
+                    .map(SdxDatabaseAzureRequest::getAzureDatabaseType)
+                    .orElse(AzureDatabaseType.FLEXIBLE_SERVER);
+
+            if (azureDatabaseType == AzureDatabaseType.SINGLE_SERVER) {
+                Optional.ofNullable(environmentResponse.getNetwork())
+                        .map(EnvironmentNetworkResponse::getAzure)
+                        .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
+                        .ifPresent(this::checkFlexibleServerDelegatedSubnets);
+            }
+        }
+    }
+
+    private void checkFlexibleServerDelegatedSubnets(Set<String> flexibleServerSubnetIds) {
+        if (!flexibleServerSubnetIds.isEmpty()) {
+            String message = "Provisioning a Single Server RDS for the Data Lake is not supported if Flexible Server subnets are specified.";
+            LOGGER.info(message);
+            throw new BadRequestException(message);
+        }
     }
 
     private void validateMultiAz(boolean enableMultiAz, DetailedEnvironmentResponse environmentResponse, SdxClusterShape clusterShape) {

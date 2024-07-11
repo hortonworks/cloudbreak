@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +52,7 @@ import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkValidatorTest {
+
     private static final String MY_SINGLE_RG = "mySingleRg";
 
     private AzureEnvironmentNetworkValidator underTest;
@@ -290,7 +292,7 @@ class AzureEnvironmentNetworkValidatorTest {
         ValidationResult validationResult = validationResultBuilder.build();
         assertTrue(validationResult.hasError());
         assertTrue(validationResult.getErrors().stream()
-                .anyMatch(error -> error.startsWith("Deletion of all flexible server delegated subnets is not a valid operation")));
+                .anyMatch(error -> error.startsWith("Deletion of all Flexible server delegated subnets is not supported")));
     }
 
     @Test
@@ -313,6 +315,34 @@ class AzureEnvironmentNetworkValidatorTest {
         assertTrue(validationResult.hasError());
         assertTrue(validationResult.getErrors().stream()
                 .anyMatch(error -> error.startsWith("The following flexible server delegated subnets are not found on the provider side")));
+    }
+
+    @Test
+    void testValidateDuringFlowWhenFlexibleServerSubnetIdsAndPrivateEndpointsAreSpecified() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
+        azureParams.setFlexibleServerSubnetIds(Set.of("azure/flexibleSubnet"));
+
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
+                .build();
+        EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
+        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
+        when(cloudNetworkService.retrieveSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto))
+                .thenReturn(Map.ofEntries(Map.entry("flexibleSubnet", new CloudSubnet())));
+        when(cloudNetworkService.getSubnetMetadata(environmentValidationDto.getEnvironmentDto(), networkDto, Set.of("flexibleSubnet")))
+                .thenReturn(Map.ofEntries(Map.entry(networkDto.getSubnetIds().iterator().next(), new CloudSubnet())));
+        when(cloudNetworkService.retrieveCloudNetworks(environmentValidationDto.getEnvironmentDto()))
+                .thenReturn(Set.of(azureParams.getNetworkId()));
+        when(azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(any(CloudSubnet.class))).thenReturn(true);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
+
+        ValidationResult validationResult = validationResultBuilder.build();
+        assertTrue(validationResultBuilder.build().hasError());
+        assertEquals(1, validationResult.getErrors().size());
+        assertTrue(validationResult.getErrors().stream()
+                .anyMatch(error -> error.startsWith("Both Private Endpoint and Flexible Server delegated subnet(s) are specified in the request. " +
+                        "As they are mutually exclusive, please specify only one of them and retry.")));
     }
 
     @Test

@@ -6,15 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig.KerberosConfigBuilder;
@@ -42,9 +47,12 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterCreationEnvironmentValidatorTest {
@@ -353,6 +361,52 @@ class ClusterCreationEnvironmentValidatorTest {
         boolean result = underTest.hasFreeIpaKerberosConfig(stack);
         // THEN
         assertFalse(result);
+    }
+
+    @Test
+    public void testDatabaseAttributesNullWithNoFlexibleServerSubnets() {
+        Stack stack = mock(Stack.class);
+        DetailedEnvironmentResponse environment = mock(DetailedEnvironmentResponse.class);
+        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+
+        when(stack.getDatabase()).thenReturn(null);
+
+        ClusterCreationEnvironmentValidator validator = new ClusterCreationEnvironmentValidator();
+        validator.validateDatabaseType(stack, environment, resultBuilder);
+
+        assertFalse(resultBuilder.build().hasError());
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideDatabaseTypeValidationInputCombinations")
+    public void testDatabaseTypeValidation(String type, Set<String> delegatedSubnets, String expectedError) {
+        Stack stack = mock(Stack.class);
+        Database database = mock(Database.class);
+        DetailedEnvironmentResponse environment = mock(DetailedEnvironmentResponse.class);
+        EnvironmentNetworkResponse networkResponse = mock(EnvironmentNetworkResponse.class);
+        EnvironmentNetworkAzureParams azureParams = mock(EnvironmentNetworkAzureParams.class);
+        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+
+        when(stack.getDatabase()).thenReturn(database);
+        when(database.getAttributesMap()).thenReturn(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, type));
+        lenient().when(environment.getNetwork()).thenReturn(networkResponse);
+        lenient().when(networkResponse.getAzure()).thenReturn(azureParams);
+        lenient().when(azureParams.getFlexibleServerSubnetIds()).thenReturn(delegatedSubnets);
+
+        ClusterCreationEnvironmentValidator validator = new ClusterCreationEnvironmentValidator();
+        validator.validateDatabaseType(stack, environment, resultBuilder);
+
+        assertEquals(expectedError, resultBuilder.build().getFormattedErrors());
+    }
+
+    private static Stream<Arguments> provideDatabaseTypeValidationInputCombinations() {
+        return Stream.of(
+                Arguments.of("SINGLE_SERVER", Set.of(), ""),
+                Arguments.of("SINGLE_SERVER", Set.of("subnet1"),
+                        "Provisioning a Single Server RDS for the Data Lake is not supported if Flexible Server subnets are specified."),
+                Arguments.of("FLEXIBLE_SERVER", Set.of(), ""),
+                Arguments.of("FLEXIBLE_SERVER", Set.of("subnet1"), "")
+        );
     }
 
     private DetailedEnvironmentResponse getEnvironmentResponse() {

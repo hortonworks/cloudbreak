@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -61,7 +59,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -368,15 +365,6 @@ public class StackCreatorService {
         } else {
             multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
         }
-    }
-
-    private String getStackSubnetIdIfExists(Stack stack) {
-        return Optional.ofNullable(stack.getNetwork())
-                .map(Network::getAttributes)
-                .map(Json::getMap)
-                .map(attr -> attr.get(SUBNET_ID))
-                .map(Object::toString)
-                .orElse(null);
     }
 
     public List<InstanceGroup> sortInstanceGroups(Stack stack) {

@@ -206,9 +206,9 @@ public class AzureNetworkConnector implements NetworkConnector {
         List<String> networkCidrs = networkByResourceGroup.addressSpaces();
         if (networkCidrs.size() > 1) {
             LOGGER.info("More than one network CIDRs for Resource Group name: {} and network id: {}. We will use the first one: {}",
-                    resourceGroupName, networkId, networkCidrs.get(0));
+                    resourceGroupName, networkId, networkCidrs.getFirst());
         }
-        return new NetworkCidr(networkCidrs.get(0), networkCidrs);
+        return new NetworkCidr(networkCidrs.getFirst(), networkCidrs);
     }
 
     @Override
@@ -240,7 +240,6 @@ public class AzureNetworkConnector implements NetworkConnector {
             LOGGER.debug("Private endpoints setting is {}, there is nothing to do.", privateEndpointVariant);
             return List.of();
         }
-
     }
 
     private Set<AzureManagedPrivateDnsZoneServiceType> getServicesWithExistingDnsZone(NetworkResourcesCreationRequest request) {
