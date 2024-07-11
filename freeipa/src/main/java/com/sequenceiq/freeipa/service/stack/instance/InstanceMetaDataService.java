@@ -215,4 +215,8 @@ public class InstanceMetaDataService {
             saveAll(instancesToUpdate);
         }
     }
+
+    public Set<InstanceMetaData> findAllInstancesForStack(Long stackId) {
+        return instanceMetaDataRepository.findAllInStack(stackId);
+    }
 }

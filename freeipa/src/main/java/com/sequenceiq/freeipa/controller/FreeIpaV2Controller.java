@@ -11,9 +11,9 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Response;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.rebuild.RebuildService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -29,7 +29,7 @@ public class FreeIpaV2Controller implements FreeIpaV2Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public DescribeFreeIpaResponse rebuildv2(@RequestObject @Valid RebuildV2Request request) {
+    public RebuildV2Response rebuildv2(@RequestObject @Valid RebuildV2Request request) {
         String accountId = crnService.getCurrentAccountId();
         return rebuildService.rebuild(accountId, request);
     }

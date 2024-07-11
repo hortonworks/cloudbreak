@@ -21,6 +21,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.RebuildFailureEvent;
@@ -30,7 +31,8 @@ import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
-public abstract class AbstractRebuildAction<P extends Payload> extends AbstractStackAction<FreeIpaRebuildState, FreeIpaRebuildFlowEvent, StackContext, P> {
+public abstract class AbstractRebuildAction<P extends Payload> extends AbstractStackAction<FreeIpaRebuildState, FreeIpaRebuildFlowEvent, StackContext, P>
+        implements OperationAwareAction {
 
     private static final String INSTANCE_TO_RESTORE = "INSTANCE_TO_RESTORE";
 

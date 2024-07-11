@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -30,6 +30,7 @@ import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.RebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.backup.ValidateBackupFailed;
@@ -38,12 +39,15 @@ import com.sequenceiq.freeipa.flow.instance.InstanceFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 @ExtendWith(MockitoExtension.class)
 class RebuildFailedActionTest {
 
     private static final int PAYLOAD_CONVERTER_COUNT = 6;
+
+    private static final String OPERATION_ID = "operationId";
 
     @Mock
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
@@ -57,6 +61,9 @@ class RebuildFailedActionTest {
     @Mock
     private StackUpdater stackUpdater;
 
+    @Mock
+    private OperationService operationService;
+
     @InjectMocks
     private RebuildFailedAction underTest;
 
@@ -68,7 +75,7 @@ class RebuildFailedActionTest {
         CloudStack cloudStack = mock(CloudStack.class);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
 
-        underTest.doExecute(context, new RebuildFailureEvent(4L, new CloudbreakException("asdf")), new HashMap<>());
+        underTest.doExecute(context, new RebuildFailureEvent(4L, new CloudbreakException("asdf")), Map.of(OperationAwareAction.OPERATION_ID, OPERATION_ID));
 
         ArgumentCaptor<Object> payloadCapture = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), payloadCapture.capture());
@@ -76,6 +83,7 @@ class RebuildFailedActionTest {
         assertEquals(4L, payload.getResourceId());
         assertEquals(FreeIpaRebuildFlowEvent.REBUILD_FAILURE_HANDLED_EVENT.event(), payload.selector());
         verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED, "Failed to rebuild FreeIPA: asdf");
+        verify(operationService).failOperation(stack.getAccountId(), OPERATION_ID, "Failed to rebuild FreeIPA: asdf");
     }
 
     @Test
