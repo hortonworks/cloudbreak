@@ -331,7 +331,8 @@ subprojects {
             'datalake',
             'externalized-compute',
             'environment-remote',
-            'integration-test'] && project.plugins.hasPlugin('org.springframework.boot')) {
+            'integration-test',
+            'mock-infrastructure'] && project.plugins.hasPlugin('org.springframework.boot')) {
       buildInfo.configure {
         destination = file("$project.buildDir")
         basename = project.bootJar.archiveBaseName.get()

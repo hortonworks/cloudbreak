@@ -14,6 +14,28 @@ spring:
   web:
     resources:
         add-mappings: false
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: info,health,prometheus
+      path-mapping:
+        prometheus: metrics
+  endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
 mock:
   experiences:
     liftie:
