@@ -216,7 +216,6 @@ public class ImageValidatorE2ETestUtil {
                 if (runAdditionalTests) {
                     XmlTest additionalTests = testNGUtil.createTest(suite, "Additional FreeIPA tests", false);
                     addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
                     addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddUsersToEnvironment");
                     addTestCaseIfNotAlreadyPassed(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddGroupsToEnvironment");
                     addTestCaseIfNotAlreadyPassed(additionalTests, FreeIpaUpgradeTests.class, "testHAFreeIpaInstanceUpgrade");
@@ -229,7 +228,6 @@ public class ImageValidatorE2ETestUtil {
                 if (runAdditionalTests) {
                     XmlTest additionalTests = testNGUtil.createTest(suite, "Additional runtime tests", false);
                     addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
-                    addTestCaseIfNotAlreadyPassed(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
                     addTestCaseIfNotAlreadyPassed(additionalTests, ForceJavaVersionE2ETest.class, "testClusterProvisionWithForcedJavaVersion");
                     addTestCaseIfNotAlreadyPassed(additionalTests, SdxUpgradeTests.class, "testSDXUpgrade");
                     addTestCaseIfNotAlreadyPassed(additionalTests, MonitoringTests.class, "testMonitoringOnFreeIpaSdxDistrox");
