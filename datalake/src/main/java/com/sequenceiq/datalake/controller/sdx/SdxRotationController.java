@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -22,6 +23,7 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
@@ -44,6 +46,9 @@ public class SdxRotationController implements SdxRotationEndpoint {
 
     @Inject
     private SecretRotationNotificationService notificationService;
+
+    @Inject
+    private List<SecretType> enabledSecretTypes;
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DL_SECRETS)
@@ -73,6 +78,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
         // further improvement needed to query secret types for resource
         return Arrays.stream(DatalakeSecretType.values())
                 .filter(Predicate.not(DatalakeSecretType::internal))
+                .filter(secretType -> CollectionUtils.isEmpty(enabledSecretTypes) || enabledSecretTypes.contains(secretType))
                 .map(type -> new SdxSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }

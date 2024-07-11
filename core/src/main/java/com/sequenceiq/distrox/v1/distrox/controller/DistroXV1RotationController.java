@@ -10,10 +10,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
+import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -24,6 +26,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
@@ -42,6 +45,9 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
 
     @Inject
     private SecretRotationNotificationService notificationService;
+
+    @Resource
+    private List<SecretType> enabledSecretTypes;
 
     @Override
     @CheckPermissionByRequestProperty(type = CRN, path = "crn", action = ROTATE_DH_SECRETS)
@@ -71,6 +77,7 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
         // further improvement needed to query secret types for resource
         return Arrays.stream(CloudbreakSecretType.values())
                 .filter(Predicate.not(CloudbreakSecretType::internal))
+                .filter(secretType -> CollectionUtils.isEmpty(enabledSecretTypes) || enabledSecretTypes.contains(secretType))
                 .map(type -> new DistroXSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }

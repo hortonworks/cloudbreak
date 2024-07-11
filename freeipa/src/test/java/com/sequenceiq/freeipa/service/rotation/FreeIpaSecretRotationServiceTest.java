@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.service.rotation;
 
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +32,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -67,17 +69,18 @@ class FreeIpaSecretRotationServiceTest {
 
         FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
         request.setExecutionType(RotationFlowExecutionType.ROTATE);
-        request.setSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS.name()));
+        request.setSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS.name()));
 
         FlowIdentifier result = underTest.rotateSecretsByCrn(ACCOUNT_ID, ENV_CRN, request);
 
         assertEquals(flowIdentifier, result);
         verify(flowManager).notify(eq("SECRETROTATIONFLOWCHAINTRIGGEREVENT"), captor.capture());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(FREEIPA_SALT_BOOT_SECRETS)), isNull());
         Acceptable acceptable = captor.getValue();
         assertInstanceOf(SecretRotationFlowChainTriggerEvent.class, acceptable);
         SecretRotationFlowChainTriggerEvent event = (SecretRotationFlowChainTriggerEvent) acceptable;
         assertEquals(RotationFlowExecutionType.ROTATE, event.getExecutionType());
-        assertEquals(List.of(FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS), event.getSecretTypes());
+        assertEquals(List.of(FREEIPA_SALT_BOOT_SECRETS), event.getSecretTypes());
     }
 
     private Stack newStack(DetailedStackStatus status) {

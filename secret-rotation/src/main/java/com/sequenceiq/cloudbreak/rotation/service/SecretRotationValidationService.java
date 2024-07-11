@@ -35,6 +35,9 @@ public class SecretRotationValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationValidationService.class);
 
     @Inject
+    private List<SecretType> enabledSecretTypes;
+
+    @Inject
     private EntitlementService entitlementService;
 
     @Inject
@@ -46,6 +49,16 @@ public class SecretRotationValidationService {
     public void validateSecretRotationEntitlement(String resourceCrn) {
         if (!entitlementService.isSecretRotationEnabled(Crn.safeFromString(resourceCrn).getAccountId())) {
             throwBadRequest("Account is not entitled to execute secret rotation.");
+        }
+    }
+
+    public void validateEnabledSecretTypes(Collection<SecretType> secretTypes, RotationFlowExecutionType requestedExecutionType) {
+        if (requestedExecutionType == null && CollectionUtils.isNotEmpty(enabledSecretTypes) && CollectionUtils.isNotEmpty(secretTypes)) {
+            List<SecretType> publicSecretTypes = secretTypes.stream().filter(Predicate.not(SecretType::internal)).toList();
+            Collection<SecretType> invalidSecretTypes = CollectionUtils.removeAll(publicSecretTypes, enabledSecretTypes);
+            if (!invalidSecretTypes.isEmpty()) {
+                throwBadRequest(String.format("Secret types are not enabled: %s", invalidSecretTypes));
+            }
         }
     }
 

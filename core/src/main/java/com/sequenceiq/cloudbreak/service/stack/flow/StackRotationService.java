@@ -63,6 +63,7 @@ public class StackRotationService {
             Map<String, String> additionalProperties) {
         secretRotationValidationService.validateSecretRotationEntitlement(crn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+        secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
         StackView stack = stackDtoService.getStackViewByCrn(crn);
         Optional<RotationFlowExecutionType> usedExecutionType =
                 secretRotationValidationService.validate(crn, secretTypes, requestedExecutionType, stack::isAvailable);

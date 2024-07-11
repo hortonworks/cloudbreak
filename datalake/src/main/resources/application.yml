@@ -191,3 +191,6 @@ clusterProxy:
 crn:
   partition: cdp
   region: us-west-1
+
+secretrotation:
+  commercialEnabledSecretTypes: DATALAKE_CM_DB_PASSWORD,DATALAKE_DATABASE_ROOT_PASSWORD

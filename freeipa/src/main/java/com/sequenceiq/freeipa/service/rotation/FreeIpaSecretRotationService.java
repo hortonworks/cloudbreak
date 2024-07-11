@@ -51,6 +51,7 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         secretRotationValidationService.validateSecretRotationEntitlement(environmentCrn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets());
+        secretRotationValidationService.validateEnabledSecretTypes(secretTypes, null);
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         Optional<RotationFlowExecutionType> usedExecutionType =
                 secretRotationValidationService.validate(environmentCrn, secretTypes, request.getExecutionType(), stack::isAvailable);

@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +24,12 @@ import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 
 @Configuration
 public class SecretRotationConfig {
+
+    @Value("${aws.use.fips.endpoint:false}")
+    private boolean fipsEnabled;
+
+    @Value("${secretrotation.commercialEnabledSecretTypes:}")
+    private List<String> commercialEnabledSecretTypes;
 
     @Inject
     private Optional<List<RotationContextProvider>> rotationContextProviders;
@@ -64,6 +72,21 @@ public class SecretRotationConfig {
             return beans;
         } else {
             return Map.of();
+        }
+    }
+
+    @Bean
+    public List<SecretType> enabledSecretTypes() {
+        if (!fipsEnabled && CollectionUtils.isNotEmpty(commercialEnabledSecretTypes)) {
+            List<SecretType> enabledSecretTypes = SecretTypeConverter.mapSecretTypes(this.commercialEnabledSecretTypes);
+            List<SecretType> internalSecretTypes = enabledSecretTypes.stream().filter(SecretType::internal).toList();
+            if (!internalSecretTypes.isEmpty()) {
+                throw new IllegalStateException(String.format("Do not configure internal secret types in commercialEnabledSecretTypes filter: %s",
+                        internalSecretTypes));
+            }
+            return enabledSecretTypes;
+        } else {
+            return List.of();
         }
     }
 }

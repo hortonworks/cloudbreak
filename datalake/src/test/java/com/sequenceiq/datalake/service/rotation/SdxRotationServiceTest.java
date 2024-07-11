@@ -210,6 +210,7 @@ class SdxRotationServiceTest {
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
         FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null);
         verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull(), any());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(DATALAKE_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
     @Test
@@ -223,6 +224,7 @@ class SdxRotationServiceTest {
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
         underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null);
         verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull(), any());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(DATALAKE_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
     @Test
@@ -231,6 +233,7 @@ class SdxRotationServiceTest {
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null));
         assertEquals("SDX cluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(DATALAKE_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
     @Test

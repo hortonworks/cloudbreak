@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,6 +60,26 @@ public class StackRotationServiceTest {
     @Mock
     private SecretRotationValidationService secretRotationValidationService;
 
+    private static StackIdView getStackIdView() {
+        return new StackIdView() {
+
+            @Override
+            public Long getId() {
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return null;
+            }
+
+            @Override
+            public String getCrn() {
+                return CRN;
+            }
+        };
+    }
+
     @Test
     public void testRotateSecrets() {
         Stack stack = new Stack();
@@ -71,6 +92,7 @@ public class StackRotationServiceTest {
 
         verify(stackDtoService).getStackViewByCrn(eq(CRN));
         verify(secretRotationValidationService).validate(eq(CRN), eq(List.of(CLUSTER_CB_CM_ADMIN_PASSWORD)), eq(null), any());
+        verify(secretRotationValidationService).validateEnabledSecretTypes(eq(List.of(CLUSTER_CB_CM_ADMIN_PASSWORD)), isNull());
         verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any(), anyMap());
     }
 
@@ -94,25 +116,5 @@ public class StackRotationServiceTest {
 
         verify(stackService, times(0)).getByEnvironmentCrnAndStackType(any(), any());
         verify(stackService).findNotTerminatedByDatalakeCrn(eq(DATALAKE_CRN));
-    }
-
-    private static StackIdView getStackIdView() {
-        return new StackIdView() {
-
-            @Override
-            public Long getId() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public String getCrn() {
-                return CRN;
-            }
-        };
     }
 }

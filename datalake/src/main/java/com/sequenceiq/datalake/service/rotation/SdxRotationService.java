@@ -179,6 +179,7 @@ public class SdxRotationService {
             Map<String, String> additionalProperties) {
         secretRotationValidationService.validateSecretRotationEntitlement(datalakeCrn);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+        secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
         SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdxCluster.getId());
         Optional<RotationFlowExecutionType> usedExecutionType = secretRotationValidationService.validate(datalakeCrn, secretTypes, requestedExecutionType,

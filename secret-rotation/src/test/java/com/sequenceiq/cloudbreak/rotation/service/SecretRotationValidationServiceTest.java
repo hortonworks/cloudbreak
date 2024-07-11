@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -25,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -37,7 +39,7 @@ import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotat
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
-public class SecretRotationValidationServiceTest {
+class SecretRotationValidationServiceTest {
 
     private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:resource1";
 
@@ -56,75 +58,6 @@ public class SecretRotationValidationServiceTest {
 
     @InjectMocks
     private SecretRotationValidationService underTest;
-
-    @Test
-    public void testSecretRotationEntitlementIsDisabled() {
-        when(entitlementService.isSecretRotationEnabled(any())).thenReturn(false);
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateSecretRotationEntitlement(DATAHUB_CRN));
-        assertEquals("Account is not entitled to execute secret rotation.", exception.getMessage());
-    }
-
-    @Test
-    public void testWhenSecretIsInFailedRollbackStateThenOtherSecretRotationFails() {
-        when(secretRotationStepProgressService.getProgressList(any()))
-                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
-
-        Optional<RotationFlowExecutionType> rotationFlowExecutionType = underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, available());
-        assertEquals(Optional.of(ROLLBACK), rotationFlowExecutionType);
-    }
-
-    @Test
-    public void testWhenSecretIsInFailedRollbackStateThenRollbackFailsWithOtherSecretType() {
-        when(secretRotationStepProgressService.getProgressList(any()))
-                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validate(DATAHUB_CRN, List.of(TestSecretType.TEST_2), null, available()));
-        assertEquals("There is already a failed secret rotation for TEST secret type in ROLLBACK phase. " +
-                "To resolve the issue please retry secret rotation.", exception.getMessage());
-    }
-
-    @Test
-    public void testWhenStatusIsNotAvailable() {
-        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(List.of());
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, notAvailable()));
-        assertEquals("The cluster must be in available state to start secret rotation.", exception.getMessage());
-    }
-
-    @Test
-    public void testWhenSecretIsInFailedRollbackStateThenRotateFailsWithTheSameSecretType() {
-        when(secretRotationStepProgressService.getProgressList(any()))
-                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), ROTATE, available()));
-        assertEquals("There is already a failed secret rotation for TEST secret type in ROLLBACK phase. " +
-                "To resolve the issue please retry secret rotation.", exception.getMessage());
-    }
-
-    @ParameterizedTest
-    @MethodSource("requests")
-    void testExecutionTypeValidation(RotationFlowExecutionType requestedExecutionType, Optional<RotationFlowExecutionType> executionTypeInDb,
-            boolean errorExpected) {
-        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(executionTypeInDb
-                .map(executionType -> List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, executionType, IN_PROGRESS)))
-                .orElse(List.of()));
-        if (errorExpected) {
-            assertThrows(BadRequestException.class, () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType, available()));
-        } else {
-            assertDoesNotThrow(() -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType, available()));
-        }
-    }
-
-    private Supplier<Boolean> available() {
-        return () -> true;
-    }
-
-    private Supplier<Boolean> notAvailable() {
-        return () -> false;
-    }
 
     static Stream<Arguments> requests() {
         return Stream.of(
@@ -154,5 +87,109 @@ public class SecretRotationValidationServiceTest {
                 Arguments.of(FINALIZE, Optional.of(ROLLBACK), true),
                 Arguments.of(FINALIZE, Optional.of(FINALIZE), true)
         );
+    }
+
+    @Test
+    void testSecretRotationEntitlementIsDisabled() {
+        when(entitlementService.isSecretRotationEnabled(any())).thenReturn(false);
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateSecretRotationEntitlement(DATAHUB_CRN));
+        assertEquals("Account is not entitled to execute secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    void testWhenSecretIsInFailedRollbackStateThenOtherSecretRotationFails() {
+        when(secretRotationStepProgressService.getProgressList(any()))
+                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
+
+        Optional<RotationFlowExecutionType> rotationFlowExecutionType = underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, available());
+        assertEquals(Optional.of(ROLLBACK), rotationFlowExecutionType);
+    }
+
+    @Test
+    void testWhenSecretIsInFailedRollbackStateThenRollbackFailsWithOtherSecretType() {
+        when(secretRotationStepProgressService.getProgressList(any()))
+                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validate(DATAHUB_CRN, List.of(TestSecretType.TEST_2), null, available()));
+        assertEquals("There is already a failed secret rotation for TEST secret type in ROLLBACK phase. " +
+                "To resolve the issue please retry secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    public void testWhenStatusIsNotAvailable() {
+        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(List.of());
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), null, notAvailable()));
+        assertEquals("The cluster must be in available state to start secret rotation.", exception.getMessage());
+    }
+
+    @Test
+    void testWhenSecretIsInFailedRollbackStateThenRotateFailsWithTheSameSecretType() {
+        when(secretRotationStepProgressService.getProgressList(any()))
+                .thenReturn(List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, ROLLBACK, FAILED)));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), ROTATE, available()));
+        assertEquals("There is already a failed secret rotation for TEST secret type in ROLLBACK phase. " +
+                "To resolve the issue please retry secret rotation.", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("requests")
+    void testExecutionTypeValidation(RotationFlowExecutionType requestedExecutionType, Optional<RotationFlowExecutionType> executionTypeInDb,
+            boolean errorExpected) {
+        when(secretRotationStepProgressService.getProgressList(any())).thenReturn(executionTypeInDb
+                .map(executionType -> List.of(new SecretRotationStepProgress(DATAHUB_CRN, TEST_SECRET, TEST_STEP, executionType, IN_PROGRESS)))
+                .orElse(List.of()));
+        if (errorExpected) {
+            assertThrows(BadRequestException.class, () -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType, available()));
+        } else {
+            assertDoesNotThrow(() -> underTest.validate(DATAHUB_CRN, List.of(TEST_SECRET), requestedExecutionType, available()));
+        }
+    }
+
+    @Test
+    void testValidateEnabledSecretTypesWhenEnabledSecretTypesIsNull() {
+        assertDoesNotThrow(() -> underTest.validateEnabledSecretTypes(Set.of(TestSecretType.TEST), null));
+    }
+
+    @Test
+    void testValidateEnabledSecretTypesWhenRequestedSecretTypesIsNull() {
+        assertDoesNotThrow(() -> underTest.validateEnabledSecretTypes(null, null));
+    }
+
+    @Test
+    void testValidateEnabledSecretTypesWhenRequestedSecretTypeIsInternal() {
+        ReflectionTestUtils.setField(underTest, "enabledSecretTypes", List.of(TestSecretType.TEST));
+        assertDoesNotThrow(() -> underTest.validateEnabledSecretTypes(Set.of(TestSecretType.TEST_3), null));
+    }
+
+    @Test
+    void testValidateEnabledSecretTypesWhenSubRotation() {
+        ReflectionTestUtils.setField(underTest, "enabledSecretTypes", List.of(TestSecretType.TEST));
+        assertDoesNotThrow(() -> underTest.validateEnabledSecretTypes(Set.of(TestSecretType.TEST_2), ROTATE));
+    }
+
+    @Test
+    void testValidateEnabledSecretTypesWhenRequestedSecretTypeIsNotEnabled() {
+        ReflectionTestUtils.setField(underTest, "enabledSecretTypes", List.of(TestSecretType.TEST_2));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.validateEnabledSecretTypes(Set.of(TestSecretType.TEST), null));
+        assertEquals("Secret types are not enabled: [TEST]", exception.getMessage());
+    }
+
+    @Test
+    void testValidateEnabledSecretTypesWhenRequestedSecretTypeIsEnabled() {
+        ReflectionTestUtils.setField(underTest, "enabledSecretTypes", List.of(TestSecretType.TEST));
+        assertDoesNotThrow(() -> underTest.validateEnabledSecretTypes(Set.of(TestSecretType.TEST), null));
+    }
+
+    private Supplier<Boolean> available() {
+        return () -> true;
+    }
+
+    private Supplier<Boolean> notAvailable() {
+        return () -> false;
     }
 }
