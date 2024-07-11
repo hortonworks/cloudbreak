@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.encryption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -437,5 +438,35 @@ class UserdataSecretsServiceTest {
                         .withType(ResourceType.AWS_SECRETSMANAGER_SECRET)
                         .build())
                 .toList();
+    }
+
+    @Test
+    void testDeleteUserdataSecretsForInstances() {
+        List<InstanceMetaData> goodInstanceMetaDatas = getInstanceMetaDatas();
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(goodInstanceMetaDatas);
+        InstanceMetaData instanceWithNoSecret = new InstanceMetaData();
+        instanceWithNoSecret.setInstanceId("instance-with-no-secret");
+        instanceMetaDatas.add(instanceWithNoSecret);
+        List<Resource> resources = getResources();
+        stubConvert(resources);
+        when(resourceService.findAllByResourceId(LongStream.range(0, NODE_COUNT).boxed().toList())).thenReturn(resources);
+
+        underTest.deleteUserdataSecretsForInstances(instanceMetaDatas, CLOUD_CONTEXT, CLOUD_CREDENTIAL);
+
+        verify(secretConnector, times(NODE_COUNT)).deleteCloudSecret(deleteRequestCaptor.capture());
+        List<DeleteCloudSecretRequest> deleteCloudSecretRequests = deleteRequestCaptor.getAllValues();
+        List<String> secretNamesCaptured = new ArrayList<>();
+        List<String> secretNamesExpected = new ArrayList<>();
+        for (int i = 0; i < NODE_COUNT; i++) {
+            DeleteCloudSecretRequest request = deleteCloudSecretRequests.get(i);
+            assertEquals(CLOUD_CONTEXT, request.cloudContext());
+            assertEquals(CLOUD_CREDENTIAL, request.cloudCredential());
+            secretNamesExpected.add("secret-" + i);
+            secretNamesCaptured.add(request.cloudResources().getFirst().getName());
+        }
+        assertThat(secretNamesCaptured).hasSameElementsAs(secretNamesExpected);
+        instanceMetaDatas.forEach(imd -> assertNull(imd.getUserdataSecretResourceId()));
+        verify(instanceMetaDataService, times(1)).saveAll(instanceMetaDataCaptor.capture());
+        assertThat(instanceMetaDataCaptor.getValue()).hasSameElementsAs(goodInstanceMetaDatas);
     }
 }

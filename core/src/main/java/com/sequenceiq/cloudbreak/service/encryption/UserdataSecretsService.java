@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -34,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -118,7 +118,7 @@ public class UserdataSecretsService {
         return String.format(SECRET_NAME_FORMAT, stackName, modifiedStackCrn, instancePrivateId);
     }
 
-    public void assignSecretsToInstances(Stack stack, List<Resource> secretResources, List<InstanceMetaData> instances) {
+    public void assignSecretsToInstances(StackDtoDelegate stack, List<Resource> secretResources, List<InstanceMetaData> instances) {
         if (secretResources.size() != instances.size()) {
             throw new UserdataSecretsException("The number of secrets and number of instances do not match.");
         }
@@ -179,13 +179,15 @@ public class UserdataSecretsService {
     }
 
     private Map<InstanceMetaData, Optional<Resource>> getAssociations(List<InstanceMetaData> instances) {
-        List<Long> secretResourceIds = instances.stream()
-                .filter(Objects::nonNull)
+        List<InstanceMetaData> instancesWithUserdataSecret = instances.stream()
+                .filter(imd -> imd.getUserdataSecretResourceId() != null)
+                .toList();
+        List<Long> secretResourceIds = instancesWithUserdataSecret.stream()
                 .map(InstanceMetaData::getUserdataSecretResourceId)
                 .toList();
         List<Resource> secretResources = StreamSupport.stream(resourceService.findAllByResourceId(secretResourceIds).spliterator(), false).toList();
-        Map<InstanceMetaData, Optional<Resource>> associations = new HashMap<>(instances.size());
-        instances.forEach(imd -> {
+        Map<InstanceMetaData, Optional<Resource>> associations = new HashMap<>(instancesWithUserdataSecret.size());
+        instancesWithUserdataSecret.forEach(imd -> {
             Optional<Resource> secretResource = secretResources.stream()
                     .filter(r -> r.getId().equals(imd.getUserdataSecretResourceId()))
                     .findFirst();
@@ -213,6 +215,40 @@ public class UserdataSecretsService {
                     .withSecretName(cloudResource.getName())
                     .withCloudResources(List.of(cloudResource));
             secretConnector.deleteCloudSecret(deleteRequestBuilder.build());
+        }
+    }
+
+    public void deleteUserdataSecretsForInstances(List<InstanceMetaData> instances, CloudContext cloudContext, CloudCredential cloudCredential) {
+        CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        SecretConnector secretConnector = cloudConnector.secretConnector();
+        Map<InstanceMetaData, Optional<Resource>> associations = getAssociations(instances);
+        for (Map.Entry<InstanceMetaData, Optional<Resource>> entry : associations.entrySet()) {
+            InstanceMetaData instanceMetaData = entry.getKey();
+            Optional<Resource> secretResource = entry.getValue();
+            if (secretResource.isPresent()) {
+                LOGGER.info("Removing association between instance [{}] and secret [{}]...", instanceMetaData, secretResource.get().getResourceName());
+                instanceMetaData.setUserdataSecretResourceId(null);
+            }
+        }
+        instanceMetaDataService.saveAll(associations.keySet());
+
+        LOGGER.info("Deleting userdata secrets for instances [{}]...", associations.keySet());
+        DeleteCloudSecretRequest.Builder deleteRequestBuilder = DeleteCloudSecretRequest.builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential);
+
+        for (Map.Entry<InstanceMetaData, Optional<Resource>> entry : associations.entrySet()) {
+            InstanceMetaData instanceMetaData = entry.getKey();
+            Optional<Resource> secretResource = entry.getValue();
+            if (secretResource.isPresent()) {
+                CloudResource cloudResource = resourceToCloudResourceConverter.convert(secretResource.get());
+                LOGGER.info("Deleting secret resource [{}] formerly associated with instance [{}]...", secretResource.get().getResourceName(),
+                        instanceMetaData.getInstanceId());
+                deleteRequestBuilder
+                        .withSecretName(cloudResource.getName())
+                        .withCloudResources(List.of(cloudResource));
+                secretConnector.deleteCloudSecret(deleteRequestBuilder.build());
+            }
         }
     }
 }

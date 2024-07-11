@@ -6,6 +6,7 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public enum StackDownscaleState implements FlowState {
     INIT_STATE,
+    DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE,
     DOWNSCALE_FAILED_STATE,
     DOWNSCALE_COLLECT_RESOURCES_STATE,
     DOWNSCALE_STATE,

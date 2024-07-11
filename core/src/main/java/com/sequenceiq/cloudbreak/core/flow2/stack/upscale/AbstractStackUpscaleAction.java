@@ -59,6 +59,10 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     static final String ADJUSTMENT_WITH_THRESHOLD = "ADJUSTMENT_WITH_THRESHOLD";
 
+    static final String SECRET_ENCRYPTION_ENABLED = "SECRET_ENCRYPTION_ENABLED";
+
+    static final String NEW_INSTANCE_ENTITY_IDS = "NEW_INSTANCE_ENTITY_IDS";
+
     @Inject
     private StackDtoService stackDtoService;
 

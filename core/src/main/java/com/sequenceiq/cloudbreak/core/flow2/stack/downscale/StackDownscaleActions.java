@@ -34,10 +34,14 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.DownscaleRemoveUserdataSecretsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.DownscaleRemoveUserdataSecretsSuccess;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Configuration
 public class StackDownscaleActions {
@@ -64,6 +68,9 @@ public class StackDownscaleActions {
 
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
     public Action<?, ?> stackDownscaleCollectResourcesAction() {
@@ -112,11 +119,32 @@ public class StackDownscaleActions {
         };
     }
 
+    @Bean("DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> downscaleRemoveUserdataSecretsAction() {
+        return new AbstractStackDownscaleAction<>(DownscaleStackResult.class) {
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables) {
+                StackView stack = context.getStack();
+                DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+                if (environment.isEnableSecretEncryption()) {
+                    List<Long> downscaledInstancePrivateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).toList();
+                    DownscaleRemoveUserdataSecretsRequest request = new DownscaleRemoveUserdataSecretsRequest(stack.getId(), context.getCloudContext(),
+                            context.getCloudCredential(), downscaledInstancePrivateIds);
+                    sendEvent(context, request.selector(), request);
+                } else {
+                    LOGGER.info("Skipping userdata secret deletion, since secret encryption is not enabled.");
+                    sendEvent(context, new DownscaleRemoveUserdataSecretsSuccess(stack.getId()));
+                }
+            }
+        };
+    }
+
     @Bean(name = "DOWNSCALE_FINISHED_STATE")
     public Action<?, ?> stackDownscaleFinishedAction() {
-        return new AbstractStackDownscaleAction<>(DownscaleStackResult.class) {
+        return new AbstractStackDownscaleAction<>(DownscaleRemoveUserdataSecretsSuccess.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, DownscaleStackResult payload, Map<Object, Object> variables)
+            protected void doExecute(StackScalingFlowContext context, DownscaleRemoveUserdataSecretsSuccess payload, Map<Object, Object> variables)
                     throws TransactionExecutionException {
                 List<Long> privateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
                 stackDownscaleService.finishStackDownscale(context, privateIds);

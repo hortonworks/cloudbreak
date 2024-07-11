@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_HOSTNAMES;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.StreamSupport;
 
 import jakarta.inject.Inject;
 
@@ -46,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowCont
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -64,6 +68,12 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolver
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackImageFallbackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsSuccess;
+import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -78,6 +88,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -117,6 +128,12 @@ public class StackUpscaleActions {
 
     @Inject
     private DataLakeAwareInstanceMetadataAvailabilityZoneCalculator availabilityZoneCalculator;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private UserdataSecretsService userdataSecretsService;
 
     @Bean(name = "UPDATE_DOMAIN_DNS_RESOLVER_STATE")
     public Action<?, ?> updateDomainDnsResolverAction() {
@@ -188,17 +205,47 @@ public class StackUpscaleActions {
         };
     }
 
-    @Bean(name = "ADD_INSTANCES_STATE")
-    public Action<?, ?> addInstances() {
+    @Bean(name = "UPSCALE_CREATE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> createUserdataSecretsAction() {
         return new AbstractStackUpscaleAction<>(UpscaleStackValidationResult.class) {
+
             @Override
             protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) {
+                StackView stackView = context.getStack();
+                Long stackId = stackView.getId();
+                DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackView.getEnvironmentCrn());
+                if (environment.isEnableSecretEncryption()) {
+                    variables.put(SECRET_ENCRYPTION_ENABLED, Boolean.TRUE);
+                    StackDto stackDto = stackDtoService.getById(stackId);
+                    Integer numberOfSecretsToCreate = getHostGroupsWithInstanceCountToCreate(context, stackDto).values().stream()
+                            .reduce(0, Integer::sum);
+                    long firstValidPrivateId = instanceMetaDataService.getFirstValidPrivateId(stackId);
+                    List<Long> newPrivateIds = LongStream.range(firstValidPrivateId, firstValidPrivateId + numberOfSecretsToCreate).boxed().toList();
+                    UpscaleCreateUserdataSecretsRequest request = new UpscaleCreateUserdataSecretsRequest(stackId, context.getCloudContext(),
+                            context.getCloudCredential(), newPrivateIds);
+                    sendEvent(context, request.selector(), request);
+                } else {
+                    variables.put(SECRET_ENCRYPTION_ENABLED, Boolean.FALSE);
+                    LOGGER.info("Skipping userdata secret creation, since secret encryption is not enabled.");
+                    sendEvent(context, new UpscaleCreateUserdataSecretsSuccess(stackId, List.of()));
+                }
+            }
+        };
+    }
+
+    @Bean(name = "ADD_INSTANCES_STATE")
+    public Action<?, ?> addInstances() {
+        return new AbstractStackUpscaleAction<>(UpscaleCreateUserdataSecretsSuccess.class) {
+            @Override
+            protected void doExecute(StackScalingFlowContext context, UpscaleCreateUserdataSecretsSuccess payload, Map<Object, Object> variables) {
                 boolean repair = context.isRepair();
+                List<Long> createdSecretResourceIds = payload.getCreatedSecretResourceIds();
                 NetworkScaleDetails stackNetworkScaleDetails = context.getStackNetworkScaleDetails();
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context, stack);
                 StackDtoDelegate updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, hostGroupWithInstanceCountToCreate,
                         context.getHostgroupWithHostnames(), true, repair, stackNetworkScaleDetails);
+                assignNewSecretsToNewInstances(updatedStack, createdSecretResourceIds, variables);
                 if (availabilityZoneCalculator.populateForScaling(updatedStack, hostGroupWithInstanceCountToCreate.keySet(),
                         repair, stackNetworkScaleDetails)) {
                     updatedStack = stackDtoService.getById(context.getStackId());
@@ -220,9 +267,23 @@ public class StackUpscaleActions {
                 sendEvent(context, request);
             }
 
+            private void assignNewSecretsToNewInstances(StackDtoDelegate stack, List<Long> createdSecretResourceIds, Map<Object, Object> variables) {
+                if (!createdSecretResourceIds.isEmpty()) {
+                    List<Resource> secretResources = StreamSupport.stream(
+                            resourceService.findAllByResourceId(createdSecretResourceIds).spliterator(), false).toList();
+                    List<InstanceMetaData> newInstanceMetadas = stack.getAllAvailableInstances()
+                            .stream()
+                            .filter(imd -> imd instanceof InstanceMetaData && imd.getInstanceId() == null && imd.getUserdataSecretResourceId() == null)
+                            .map(imd -> (InstanceMetaData) imd)
+                            .toList();
+                    variables.put(NEW_INSTANCE_ENTITY_IDS, newInstanceMetadas.stream().map(InstanceMetaData::getId).toList());
+                    userdataSecretsService.assignSecretsToInstances(stack, secretResources, newInstanceMetadas);
+                }
+            }
+
             @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<UpscaleStackValidationResult>> payloadConverters) {
-                payloadConverters.add(new ImageFallbackSuccessToUpscaleStackValidationResultConverter());
+            protected void initPayloadConverterMap(List<PayloadConverter<UpscaleCreateUserdataSecretsSuccess>> payloadConverters) {
+                payloadConverters.add(new ImageFallbackSuccessToUpscaleCreateUserdataSecretsSuccessConverter());
             }
         };
     }
@@ -305,6 +366,37 @@ public class StackUpscaleActions {
                 Integer adjustment = context.getHostGroupWithAdjustment().values().stream().reduce(0, Integer::sum);
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), adjustment, payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
+                sendEvent(context, StackUpscaleEvent.UPSCALE_UPDATE_USERDATA_SECRETS_EVENT.event(), new StackEvent(context.getStackId()));
+            }
+        };
+    }
+
+    @Bean("UPSCALE_UPDATE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> updateUserdataSecretsAction() {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
+                StackView stack = context.getStack();
+                if ((Boolean) variables.getOrDefault(SECRET_ENCRYPTION_ENABLED, Boolean.FALSE)) {
+                    List<Long> newInstanceIds = getIfNotNullOtherwise(variables.remove(NEW_INSTANCE_ENTITY_IDS), x -> (List<Long>) x, List.of());
+                    UpscaleUpdateUserdataSecretsRequest request = new UpscaleUpdateUserdataSecretsRequest(stack.getId(), context.getCloudContext(),
+                            context.getCloudCredential(), newInstanceIds);
+                    sendEvent(context, request.selector(), request);
+                } else {
+                    LOGGER.info("Skipping updating userdata secrets, since secret encryption is not enabled.");
+                    sendEvent(context, new UpscaleUpdateUserdataSecretsSuccess(context.getStackId()));
+                }
+            }
+        };
+    }
+
+    @Bean("UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_STATE")
+    public Action<?, ?> updateUserdataSecretsFinishedAction() {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 Set<String> hostGroups = context.getHostGroupWithAdjustment().keySet();
                 List<InstanceGroupView> scaledInstanceGroups = instanceGroupService.findAllInstanceGroupViewByStackIdAndGroupName(payload.getResourceId(),
                         hostGroups);
@@ -327,8 +419,7 @@ public class StackUpscaleActions {
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);
                 } else {
-                    StackEvent bootstrapPayload = new StackEvent(context.getStack().getId());
-                    sendEvent(context, StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
+                    sendEvent(context, StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), new StackEvent(context.getStackId()));
                 }
             }
         };

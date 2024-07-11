@@ -176,10 +176,13 @@ public class InstanceMetaDataService {
         return hostNameIterator;
     }
 
-    private long getFirstValidPrivateId(Long stackId) {
+    public long getFirstValidPrivateId(Long stackId) {
         LOGGER.debug("Get first valid PrivateId of instanceGroups");
-        long id = repository.findLastPrivateIdForStack(stackId, Pageable.ofSize(1)).stream().findFirst().orElse(0L);
-        long validId = id + 1;
+        Optional<Long> id = repository.findLastPrivateIdForStack(stackId, Pageable.ofSize(1)).stream().findFirst();
+        long validId = 0L;
+        if (id.isPresent()) {
+            validId = id.get() + 1;
+        }
         LOGGER.debug("First valid privateId: {}", validId);
         return validId;
     }

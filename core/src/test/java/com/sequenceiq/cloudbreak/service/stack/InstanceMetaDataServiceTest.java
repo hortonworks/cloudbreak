@@ -35,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -341,7 +342,7 @@ class InstanceMetaDataServiceTest {
 
     @ParameterizedTest
     @MethodSource("supportedProvidersWithVolumeResource")
-    public void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupported(CloudPlatform cloudPlatform, ResourceType supportedVolumeResourceType) {
+    void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupported(CloudPlatform cloudPlatform, ResourceType supportedVolumeResourceType) {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform(cloudPlatform.name());
@@ -361,7 +362,7 @@ class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testGetAzFromDiskOrNullIfRepairWhenRepairwhenCloudPlatformNotSupported() {
+    void testGetAzFromDiskOrNullIfRepairWhenRepairwhenCloudPlatformNotSupported() {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform(CloudPlatform.GCP.name());
@@ -371,7 +372,7 @@ class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupportedButNoVolumeWithHostName() {
+    void testGetAzFromDiskOrNullIfRepairWhenRepairAndCloudPlatformSupportedButNoVolumeWithHostName() {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setCloudPlatform(CloudPlatform.AWS.name());
@@ -391,17 +392,31 @@ class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testAnyInstanceStoppedAndZeroStopped() {
+    void testAnyInstanceStoppedAndZeroStopped() {
         when(repository.countStoppedForStack(any())).thenReturn(0L);
         boolean anyInstanceStopped = underTest.anyInstanceStopped(1L);
         Assertions.assertFalse(anyInstanceStopped);
     }
 
     @Test
-    public void testAnyInstanceStoppedAnd2Stopped() {
+    void testAnyInstanceStoppedAnd2Stopped() {
         when(repository.countStoppedForStack(any())).thenReturn(2L);
         boolean anyInstanceStopped = underTest.anyInstanceStopped(1L);
         Assertions.assertTrue(anyInstanceStopped);
+    }
+
+    @Test
+    void testGetFirstValidPrivateId() {
+        when(repository.findLastPrivateIdForStack(1L, Pageable.ofSize(1))).thenReturn(new PageImpl<>(List.of(420L)));
+        long result = underTest.getFirstValidPrivateId(1L);
+        Assertions.assertEquals(421L, result);
+    }
+
+    @Test
+    void testGetFirstValidPrivateIdWhenNoExistingPrivateId() {
+        when(repository.findLastPrivateIdForStack(1L, Pageable.ofSize(1))).thenReturn(new PageImpl<>(List.of()));
+        long result = underTest.getFirstValidPrivateId(1L);
+        Assertions.assertEquals(0L, result);
     }
 
     private Stack stack(int instanceGroupCount) {
