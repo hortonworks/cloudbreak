@@ -92,7 +92,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
                 hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
             }
 
-            result = new DatabaseBackupSuccess(stackId);
+            result = new DatabaseBackupSuccess(stackId, event.getData().isDryRun());
         } catch (Exception e) {
             LOGGER.error("Database backup event failed", e);
             result = new DatabaseBackupFailedEvent(stackId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);

@@ -222,6 +222,7 @@ public class DatalakeRestoreActions {
                 int databaseMaxDurationInMin = variables.get(DATABASE_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(DATABASE_MAX_DURATION_IN_MIN) : 0;
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 if ((Boolean) variables.getOrDefault(VALIDATION_ONLY, Boolean.FALSE)) {
+                    sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_VALIDATION_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_VALIDATION_IN_PROGRESS,
                         "Datalake restore validation in progress", payload.getResourceId());

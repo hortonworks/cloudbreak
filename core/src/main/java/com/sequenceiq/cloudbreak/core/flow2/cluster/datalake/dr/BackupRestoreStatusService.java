@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_VALIDATION_FAILED;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,36 +39,52 @@ public class BackupRestoreStatusService {
     @Inject
     private StackUpdater stackUpdater;
 
-    public void backupDatabase(long stackId, String backupId) {
+    public void backupDatabase(long stackId, String backupId, boolean dryRun) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_BACKUP_IN_PROGRESS, "Initiating database backup " + backupId);
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_DATABASE_BACKUP);
+        if (!dryRun) {
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_DATABASE_BACKUP);
+        }
     }
 
-    public void backupDatabaseFinished(long stackId) {
+    public void backupDatabaseFinished(long stackId, boolean dryRun) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_BACKUP_FINISHED, "Database was successfully backed up." +
                 " Continuing with the rest.");
-        flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_DATABASE_BACKUP_FINISHED);
+        if (!dryRun) {
+            flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_DATABASE_BACKUP_FINISHED);
+        }
     }
 
-    public void handleDatabaseBackupFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
+    public void handleDatabaseBackupFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus, boolean dryRun) {
         stackUpdater.updateStackStatus(stackId, detailedStatus, extractSaltErrorIfAvailable(errorReason));
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_BACKUP_FAILED, errorReason);
+        if (dryRun) {
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_BACKUP_VALIDATION_FAILED, errorReason);
+        } else {
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_BACKUP_FAILED, errorReason);
+        }
     }
 
-    public void restoreDatabase(long stackId, String backupId) {
+    public void restoreDatabase(long stackId, String backupId, boolean dryRun) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_RESTORE_IN_PROGRESS, "Initiating database restore " + backupId);
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_DATABASE_RESTORE);
+        if (!dryRun) {
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_DATABASE_RESTORE);
+        }
     }
 
-    public void restoreDatabaseFinished(long stackId) {
+    public void restoreDatabaseFinished(long stackId, boolean dryRun) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_RESTORE_FINISHED, "Database was successfully restored. " +
                 "Continuing with the rest.");
-        flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_DATABASE_RESTORE_FINISHED);
+        if (!dryRun) {
+            flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_DATABASE_RESTORE_FINISHED);
+        }
     }
 
-    public void handleDatabaseRestoreFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
+    public void handleDatabaseRestoreFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus, boolean dryRun) {
         stackUpdater.updateStackStatus(stackId, detailedStatus, extractSaltErrorIfAvailable(errorReason));
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_RESTORE_FAILED, errorReason);
+        if (dryRun) {
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_RESTORE_VALIDATION_FAILED, errorReason);
+        } else {
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_DATABASE_RESTORE_FAILED, errorReason);
+        }
     }
 
     private String extractSaltErrorIfAvailable(String errorReason) {

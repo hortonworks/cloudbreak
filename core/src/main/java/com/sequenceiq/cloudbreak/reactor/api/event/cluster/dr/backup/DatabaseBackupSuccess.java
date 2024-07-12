@@ -8,7 +8,8 @@ public class DatabaseBackupSuccess extends BackupRestoreEvent {
 
     @JsonCreator
     public DatabaseBackupSuccess(
-            @JsonProperty("resourceId") Long stackId) {
-        super(stackId, null, null);
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("dryRun") boolean dryRun) {
+        super(stackId, null, null, dryRun);
     }
 }

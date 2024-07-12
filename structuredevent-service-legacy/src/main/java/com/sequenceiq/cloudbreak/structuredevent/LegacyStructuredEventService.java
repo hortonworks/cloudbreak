@@ -24,4 +24,6 @@ public interface LegacyStructuredEventService extends StructuredEventSenderServi
     StructuredEventContainer getStructuredEventsForStack(String name, Long workspaceId);
 
     StructuredEventContainer getStructuredEventsForStackByCrn(String crn, Long workspaceId, boolean onlyAlive);
+
+    <T extends StructuredEvent> List<T> getLastEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId, int size);
 }

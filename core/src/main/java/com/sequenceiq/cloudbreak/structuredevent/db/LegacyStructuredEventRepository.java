@@ -41,6 +41,11 @@ public interface LegacyStructuredEventRepository extends WorkspaceResourceReposi
 
     Page<StructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType, String resourceType, Long resourceId, Pageable page);
 
+    @Query(value = "SELECT se FROM StructuredEventEntity se WHERE se.eventType = :eventType" +
+            " AND se.resourceType = :resourceType AND se.resourceId = :resourceId ORDER BY se.timestamp DESC LIMIT :limit")
+    List<StructuredEventEntity> findLastEventsByEventTypeAndResourceTypeAndResourceId(@Param("eventType") StructuredEventType eventType,
+            @Param("resourceType") String resourceType, @Param("resourceId") Long resourceId, @Param("limit") Integer limit);
+
     @Override
     default Optional<StructuredEventEntity> findByNameAndWorkspace(String name, Workspace workspace) {
         throw new UnsupportedOperationException();

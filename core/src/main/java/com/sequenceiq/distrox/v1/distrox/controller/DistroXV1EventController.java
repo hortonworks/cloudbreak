@@ -60,12 +60,22 @@ public class DistroXV1EventController implements DistroXV1EventEndpoint {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         StackView stackView = Optional.ofNullable(stackService.getViewByCrnInWorkspace(resourceCrn, workspaceId)).orElseThrow(notFound("stack", resourceCrn));
         MDCBuilder.buildMdcContext(stackView);
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("timestamp").descending());
-        return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageRequest)
-                .toList()
-                .stream()
-                .map(eventResponse -> convert(eventResponse, resourceCrn))
-                .collect(Collectors.toList());
+        List<CDPStructuredEvent> ret;
+        if (page == null || page.equals(0)) {
+            // Temporary workaroud to use a quicker repository call, without paging
+            ret = cloudbreakEventsFacade.retrieveLastEventsByStack(stackView.getId(), stackView.getType(), size)
+                    .stream()
+                    .map(eventResponse -> convert(eventResponse, resourceCrn))
+                    .collect(Collectors.toList());
+        } else {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("timestamp").descending());
+            ret = cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageRequest)
+                    .toList()
+                    .stream()
+                    .map(eventResponse -> convert(eventResponse, resourceCrn))
+                    .collect(Collectors.toList());
+        }
+        return ret;
     }
 
     private CDPStructuredEvent convert(CloudbreakEventV4Response cloudbreakEventV4Response, String resourceCrn) {

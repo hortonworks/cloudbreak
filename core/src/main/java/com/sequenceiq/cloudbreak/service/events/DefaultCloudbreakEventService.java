@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -146,21 +145,17 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
     }
 
     @Override
-    public List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId) {
-        List<StructuredNotificationEvent> events = new ArrayList<>();
-        if (stackId != null) {
-            StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
-            events = legacyStructuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, stackView.getType().getResourceType(),
-                    stackId);
-        }
-        return events;
-    }
-
-    @Override
     public Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, String resourceType, Pageable pageable) {
         return Optional.ofNullable(stackId)
                 .map(id -> legacyStructuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, resourceType, id, pageable))
                 .orElse(Page.empty());
+    }
+
+    @Override
+    public List<StructuredNotificationEvent> cloudbreakLastEventsForStack(Long stackId, String stackType, int size) {
+        return Optional.ofNullable(stackId)
+                .map(id -> legacyStructuredEventService.getLastEventsWithTypeAndResourceId(StructuredNotificationEvent.class, stackType, id, size))
+                .orElse(new ArrayList<>());
     }
 
     private String getMessage(ResourceEvent resourceEvent, Collection<String> eventMessageArgs) {

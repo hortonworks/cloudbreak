@@ -130,6 +130,24 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     }
 
     @Override
+    public <T extends StructuredEvent> List<T> getLastEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId, int size) {
+        long start = System.currentTimeMillis();
+        StructuredEventType eventType = StructuredEventType.getByClass(eventClass);
+        List<StructuredEventEntity> events = repository.findLastEventsByEventTypeAndResourceTypeAndResourceId(eventType, resourceType, resourceId, size);
+        long duration = System.currentTimeMillis() - start;
+        Integer fetchedElements = events != null ? events.size() : null;
+        if (duration < SLOW_QUERY_WARNING_THRESHOLD) {
+            LOGGER.debug("Querying StructuredEvents for eventType: {}, resource type: {}, resource ID: {} took {} ms,  fetchedElements: {}, pageSize: {},",
+                    eventType, resourceType, resourceId, duration, fetchedElements, size);
+        } else {
+            LOGGER.warn("Querying StructuredEvents is SLOW for eventType: {}, resource type: {}, resource ID: {} took {} ms, fetchedElements: {}, pageSize: {}",
+                    eventType, resourceType, resourceId, duration, fetchedElements, size);
+        }
+        return (List<T>) Optional.ofNullable(events).orElse(List.of()).stream()
+                .map(event -> structuredEventEntityToStructuredEventConverter.convert(event)).toList();
+    }
+
+    @Override
     public <T extends StructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId,
             Pageable pageable) {
         long start = System.currentTimeMillis();

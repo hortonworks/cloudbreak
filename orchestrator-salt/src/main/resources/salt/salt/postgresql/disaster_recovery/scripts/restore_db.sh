@@ -66,13 +66,13 @@ export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 errorExit() {
-  if [[ -z "$DATABASENAMES" ]]; then
+  if [[ -z "$DATABASENAME" ]]; then
     limit_incomming_connection "hive" -1
     limit_incomming_connection "ranger" -1
     limit_incomming_connection "profiler_agent" -1
     limit_incomming_connection "profiler_metric" -1
   else
-    for db in $DATABASENAMES; do
+    for db in $DATABASENAME; do
       doLog "Limiting incomming connections to ${db}."
       limit_incomming_connection "${db}" -1
     done

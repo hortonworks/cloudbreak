@@ -449,10 +449,10 @@ public class ReactorFlowManager {
                 location, backupId, closeConnections, skipDatabaseNames, databaseMaxDurationInMin, dryRun));
     }
 
-    public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId, int databaseMaxDurationInMin) {
+    public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId, int databaseMaxDurationInMin, boolean dryRun) {
         String selector = DATABASE_RESTORE_EVENT.event();
         DatabaseRestoreTriggerEvent databaseRestoreTriggerEvent =
-            new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId, databaseMaxDurationInMin);
+            new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId, databaseMaxDurationInMin, dryRun);
         return reactorNotifier.notify(stackId, selector, databaseRestoreTriggerEvent);
     }
 
