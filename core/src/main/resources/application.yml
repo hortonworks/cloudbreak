@@ -822,6 +822,3 @@ cdp:
   structuredevent:
     rest:
       contentlogging: false
-
-secretrotation:
-  commercialEnabledSecretTypes: CLUSTER_CM_DB_PASSWORD,DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD
