@@ -33,20 +33,11 @@ update-cb-profile() {
     echo 'export FREEIPA_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
     echo 'export ENVIRONMENT_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
     echo 'export REMOTE_ENVIRONMENT_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
-    echo 'export CDP_GW_DOCKER_IMAGE="cdp-gateway"' >> integcb/Profile
-    echo 'export CDP_GW_VERSION="latest"' >> integcb/Profile
     echo 'export CDP_GW_GRPC_DEBUG_ALLOWED="true"' >> integcb/Profile
     echo 'export CDP_GW_GRPC_CLIENT_RETRY_ALLOWED="true"' >> integcb/Profile
 
 
     echo "Replacement done with UMS_HOST and JAVA OPTS for altus.ums.rights.cache.seconds"
-}
-
-create-internal-core-gateway() {
-  git clone https://github.infra.cloudera.com/horadla23/dps-platform.git
-  cd dps-platform
-  docker build -f core-gateway/Dockerfile -t cdp-gateway:latest .
-  cd ..
 }
 
 main() {
@@ -55,7 +46,6 @@ main() {
   validate-ums-users
   prepare-cb-profile
   update-cb-profile
-  create-internal-core-gateway
 }
 
 main "$@"
