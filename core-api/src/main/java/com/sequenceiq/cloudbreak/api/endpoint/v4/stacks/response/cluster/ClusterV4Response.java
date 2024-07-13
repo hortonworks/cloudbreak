@@ -136,6 +136,8 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.DATABASE_SSL_ENABLED)
     private boolean dbSSLEnabled;
 
+    private String dbSslRootCertBundle;
+
     public Long getId() {
         return id;
     }
@@ -406,5 +408,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setDbSSLEnabled(boolean dbSSLEnabled) {
         this.dbSSLEnabled = dbSSLEnabled;
+    }
+
+    public String getDbSslRootCertBundle() {
+        return dbSslRootCertBundle;
+    }
+
+    public void setDbSslRootCertBundle(String dbSslRootCertBundle) {
+        this.dbSslRootCertBundle = dbSslRootCertBundle;
     }
 }

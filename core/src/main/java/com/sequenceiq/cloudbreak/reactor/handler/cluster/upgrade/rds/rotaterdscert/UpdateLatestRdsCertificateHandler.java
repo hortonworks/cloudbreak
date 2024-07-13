@@ -38,7 +38,6 @@ public class UpdateLatestRdsCertificateHandler extends ExceptionCatcherEventHand
     public Selectable doAccept(HandlerEvent<UpdateLatestRdsCertificateRequest> event) {
         UpdateLatestRdsCertificateRequest request = event.getData();
         Long stackId = request.getResourceId();
-        // TODO push down new rds cert in salt
         rotateRdsCertificateService.updateLatestRdsCertificate(stackId);
         return new UpdateLatestRdsCertificateResult(stackId);
     }

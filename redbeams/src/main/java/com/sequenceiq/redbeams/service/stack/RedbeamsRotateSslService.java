@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import static com.sequenceiq.redbeams.flow.redbeams.rotate.RedbeamsSslCertRotateEvent.REDBEAMS_SSL_CERT_ROTATE_EVENT;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,10 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.rotate.RedbeamsSslCertRotateEvent;
+import com.sequenceiq.redbeams.flow.redbeams.rotate.event.SslCertRotateRedbeamsEvent;
 
 @Service
 public class RedbeamsRotateSslService {
@@ -26,11 +28,19 @@ public class RedbeamsRotateSslService {
     @Inject
     private RedbeamsFlowManager flowManager;
 
-    public void rotateDatabaseServerSslCert(String crn) {
+    public FlowIdentifier rotateDatabaseServerSslCert(String crn) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
-        LOGGER.debug("Rotate ssl called for: {}", dbStack);
-        flowManager.notify(RedbeamsSslCertRotateEvent.REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(),
-                new RedbeamsEvent(RedbeamsSslCertRotateEvent.REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(), dbStack.getId()));
+        LOGGER.debug("Rotate to latest ssl called for: {}", dbStack);
+        return flowManager.notify(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(),
+                new SslCertRotateRedbeamsEvent(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(), dbStack.getId(), false));
+    }
+
+    public FlowIdentifier updateToLatestDatabaseServerSslCert(String crn) {
+        DBStack dbStack = dbStackService.getByCrn(crn);
+        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
+        LOGGER.debug("Update to latest ssl called for: {}", dbStack);
+        return flowManager.notify(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(),
+                new SslCertRotateRedbeamsEvent(REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(), dbStack.getId(), true));
     }
 }

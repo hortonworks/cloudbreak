@@ -32,6 +32,8 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 @ExtendWith(MockitoExtension.class)
 class RedbeamsClientServiceTest {
@@ -44,6 +46,9 @@ class RedbeamsClientServiceTest {
 
     @Mock
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
+
+    @Mock
+    private SupportV4Endpoint supportV4Endpoint;
 
     @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -68,6 +73,45 @@ class RedbeamsClientServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThatThrownBy(() -> underTest.deleteByCrn("crn", true)).isExactlyInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void rotateSslCert() {
+        when(redbeamsServerEndpoint.rotateSslCert(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "123"));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        FlowIdentifier flowIdentifier = underTest.rotateSslCert("crn");
+
+        verify(redbeamsServerEndpoint, times(1)).rotateSslCert(any());
+        assertEquals("123", flowIdentifier.getPollableId());
+        assertEquals(FlowType.FLOW_CHAIN, flowIdentifier.getType());
+    }
+
+    @Test
+    void getLatestCertificate() {
+        SslCertificateEntryResponse sslCertificateEntryResponse = new SslCertificateEntryResponse();
+        when(supportV4Endpoint.getLatestCertificate(any(), anyString())).thenReturn(sslCertificateEntryResponse);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        SslCertificateEntryResponse aws = underTest.getLatestCertificate("AWS", "eu-central-1");
+
+        verify(supportV4Endpoint, times(1)).getLatestCertificate(any(), anyString());
+        assertEquals(sslCertificateEntryResponse, aws);
+    }
+
+    @Test
+    void updateToLatestSslCert() {
+        when(redbeamsServerEndpoint.updateToLatestSslCert(any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, "123"));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        FlowIdentifier flowIdentifier = underTest.updateToLatestSslCert("crn");
+
+        verify(redbeamsServerEndpoint, times(1)).updateToLatestSslCert(any());
+        assertEquals("123", flowIdentifier.getPollableId());
+        assertEquals(FlowType.FLOW_CHAIN, flowIdentifier.getType());
     }
 
     @Test

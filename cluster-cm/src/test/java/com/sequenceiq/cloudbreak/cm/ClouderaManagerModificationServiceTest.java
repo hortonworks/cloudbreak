@@ -1424,6 +1424,21 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), any());
     }
 
+    @Test
+    void testClusterRollingRestartWhenRollingUpgradeNotAvailable() throws Exception {
+        doThrow(new ClouderaManagerOperationFailedException("Command Rolling Restart is not currently available for execution"))
+                .when(clouderaManagerRestartService)
+                .doRestartServicesIfNeeded(any(), any(), eq(true), any());
+
+        doNothing()
+                .when(clouderaManagerRestartService)
+                .doRestartServicesIfNeeded(any(), any(), eq(false), any());
+
+        underTest.rollingRestartServices();
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), any());
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), any());
+    }
+
     private ClusterComponentView createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {
         ClusterComponentView component = new ClusterComponentView();
         Json attribute = mock(Json.class);

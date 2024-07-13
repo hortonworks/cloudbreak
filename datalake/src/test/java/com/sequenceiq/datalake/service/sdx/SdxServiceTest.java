@@ -1783,24 +1783,24 @@ class SdxServiceTest {
         coreIg.setRecipes(List.of(recipeV4Response1, recipeV4Response2, recipeV4Response3));
 
         StackV4Response stackV4Response = getStackV4ResponseForEnterpriseDatalake(Map.of("tag1", "value1"),
-            List.of(masterIg, coreIg), getClusterV4Response());
+                List.of(masterIg, coreIg), getClusterV4Response());
 
         String enterpriseDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.17/aws/enterprise.json");
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(eq(accountId)))
-            .thenReturn(true);
+                .thenReturn(true);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-            .thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+                .thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam())
-            .thenReturn(regionAwareInternalCrnGenerator);
+                .thenReturn(regionAwareInternalCrnGenerator);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq(accountId), eq(CLUSTER_NAME)))
-            .thenReturn(Optional.of(sdxCluster));
+                .thenReturn(Optional.of(sdxCluster));
         when(environmentClientService.getByName(eq(ENVIRONMENT_NAME)))
-            .thenReturn(detailedEnvironmentResponse);
+                .thenReturn(detailedEnvironmentResponse);
         when(stackV4Endpoint.get(eq(0L), eq(CLUSTER_NAME), anySet(), eq(accountId)))
-            .thenReturn(stackV4Response);
+                .thenReturn(stackV4Response);
         when(cdpConfigService.getConfigForKey(any()))
-            .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
+                .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
 
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
@@ -1808,13 +1808,13 @@ class SdxServiceTest {
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
 
         verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
-            any(DatalakeDrSkipOptions.class), eq(false));
+                any(DatalakeDrSkipOptions.class), eq(false));
 
         SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
 
         // Validate new SdxCluster
         assertEquals(ENTERPRISE, createdSdxCluster.getClusterShape());
-        assertEquals("7.2.17",  createdSdxCluster.getRuntime());
+        assertEquals("7.2.17", createdSdxCluster.getRuntime());
         assertEquals(sdxCluster.getCloudStorageBaseLocation(), createdSdxCluster.getCloudStorageBaseLocation());
         assertEquals(sdxCluster.getCloudStorageFileSystemType(), createdSdxCluster.getCloudStorageFileSystemType());
         assertEquals(sdxCluster.getTags(), createdSdxCluster.getTags());
@@ -1836,8 +1836,8 @@ class SdxServiceTest {
         assertAll(() -> {
             assertEquals(11, stackV4Request.getInstanceGroups().size());
             Map<String, List<RecipeV4Response>> hostGroupRecipesMap = stackV4Response.getInstanceGroups()
-                .stream()
-                .collect(toMap(InstanceGroupV4Response::getName, InstanceGroupV4Response::getRecipes));
+                    .stream()
+                    .collect(toMap(InstanceGroupV4Response::getName, InstanceGroupV4Response::getRecipes));
             assertEquals(3, hostGroupRecipesMap.get("core").size());
             assertEquals(2, hostGroupRecipesMap.get("master").size());
             List<String> coreRecipes = hostGroupRecipesMap.get("core").stream().map(RecipeV4Base::getName).toList();
@@ -1891,7 +1891,7 @@ class SdxServiceTest {
     }
 
     private StackV4Response getStackV4ResponseForEnterpriseDatalake(Map<String, String> userDefinedTags, List<InstanceGroupV4Response> instanceGroups,
-        ClusterV4Response clusterV4Response) {
+            ClusterV4Response clusterV4Response) {
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setId(1L);
         stackV4Response.setCrn(getCrn());

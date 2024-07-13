@@ -21,7 +21,7 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class RedbeamsSslCertRotateFlowConfing extends AbstractFlowConfiguration<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent>
+public class RedbeamsSslCertRotateFlowConfig extends AbstractFlowConfiguration<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent>
         implements RetryableFlowConfiguration<RedbeamsSslCertRotateEvent> {
 
     private static final RedbeamsSslCertRotateEvent[] REDBEAMS_INIT_EVENTS = {REDBEAMS_SSL_CERT_ROTATE_EVENT};
@@ -50,7 +50,7 @@ public class RedbeamsSslCertRotateFlowConfing extends AbstractFlowConfiguration<
     private static final FlowEdgeConfig<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, REDBEAMS_SSL_CERT_ROTATE_FAILED_STATE, REDBEAMS_SSL_CERT_ROTATE_FAILURE_HANDLED_EVENT);
 
-    public RedbeamsSslCertRotateFlowConfing() {
+    public RedbeamsSslCertRotateFlowConfig() {
         super(RedbeamsSslCertRotateState.class, RedbeamsSslCertRotateEvent.class);
     }
 

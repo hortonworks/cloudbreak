@@ -1163,8 +1163,24 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public void rollingRestartServices() {
         try {
             restartServices(true);
+        } catch (ClouderaManagerOperationFailedException e) {
+            if (e.getMessage().contains("Command Rolling Restart is not currently available for execution")) {
+                //https://jira.cloudera.com/browse/OPSAPS-70856
+                tryWithoutRollingRestartCommand(e);
+            } else {
+                throw e;
+            }
         } catch (ApiException | CloudbreakException e) {
-            LOGGER.error("Could not perform rolling restart services", e);
+            LOGGER.warn("Could not perform rolling restart services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void tryWithoutRollingRestartCommand(ClouderaManagerOperationFailedException e) {
+        try {
+            restartServices(false);
+        } catch (ApiException | CloudbreakException ex) {
+            LOGGER.warn("Could not perform rolling restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }

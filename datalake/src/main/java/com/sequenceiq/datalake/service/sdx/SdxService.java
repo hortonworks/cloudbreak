@@ -101,6 +101,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -1718,6 +1719,28 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             throw new BadRequestException(message);
         } else {
             return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
+        }
+    }
+
+    public void validateRdsSslCertRotation(String crn) {
+        try {
+            LOGGER.info("Calling Cloudbreak to validate RDS SSL certificate rotation is triggerable by CRN {}", crn);
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.validateRotateRdsCertificateByCrnInternal(WORKSPACE_ID_DEFAULT, crn, userCrn));
+        } catch (jakarta.ws.rs.BadRequestException e) {
+            String defaultMessage = "RDS SSL certificate rotation is not triggerable";
+            LOGGER.info(defaultMessage, e);
+            String message = Optional.ofNullable(e.getResponse())
+                    .map(resp -> resp.hasEntity() ? resp.readEntity(ExceptionResponse.class) : new ExceptionResponse(defaultMessage))
+                    .map(ExceptionResponse::getMessage)
+                    .orElse(defaultMessage);
+            throw new BadRequestException(message, e);
+        } catch (jakarta.ws.rs.WebApplicationException wae) {
+            String msg = "Failed to validate RDS SSL certificate rotation for SDX";
+            LOGGER.warn(msg, wae);
+            throw new IllegalStateException(msg, wae);
         }
     }
 }

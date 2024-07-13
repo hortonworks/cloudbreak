@@ -190,6 +190,30 @@ public class ExternalDatabaseService {
         }
     }
 
+    public void updateToLatestSslCert(Cluster cluster) {
+        String databaseCrn = cluster.getDatabaseServerCrn();
+        try {
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                FlowIdentifier flowIdentifier = redbeamsClient.updateToLatestSslCert(databaseCrn);
+                pollUntilFlowFinished(databaseCrn, flowIdentifier);
+            }
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
+    public void rotateSSLCertificate(Cluster cluster) {
+        String databaseCrn = cluster.getDatabaseServerCrn();
+        try {
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                FlowIdentifier flowIdentifier = redbeamsClient.rotateSslCert(databaseCrn);
+                pollUntilFlowFinished(databaseCrn, flowIdentifier);
+            }
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
     public void upgradeDatabase(ClusterView cluster, UpgradeTargetMajorVersion targetMajorVersion, DatabaseServerV4StackRequest newSettings) {
         LOGGER.info("Upgrading external database server to version {} for DataHub {}",
                 targetMajorVersion.name(), cluster.getName());

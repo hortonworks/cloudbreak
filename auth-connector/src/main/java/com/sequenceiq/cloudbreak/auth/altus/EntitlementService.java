@@ -67,6 +67,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SKIP_ROLLING_UPGRADE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TRIAL;
@@ -568,5 +569,9 @@ public class EntitlementService {
 
     public boolean isSdxRuntimeUpgradeEnabledOnMediumDuty(String accountId) {
         return isEntitlementRegistered(accountId, MEDIUM_DUTY_UPGRADE_ON_HIGHER_RUNTIME);
+    }
+
+    public boolean cdpSkipRdsSslCertificateRollingRotationValidation(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION);
     }
 }

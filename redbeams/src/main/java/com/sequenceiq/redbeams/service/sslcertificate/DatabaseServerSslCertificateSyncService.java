@@ -65,6 +65,23 @@ public class DatabaseServerSslCertificateSyncService {
         }
     }
 
+    public Optional<CloudDatabaseServerSslCertificate> getCertificateFromProvider(CloudContext cloudContext,
+            CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack) throws Exception {
+        CloudDatabaseServerSslCertificate result = null;
+        Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
+        String cloudPlatform = dbStack.getCloudPlatform();
+        if (sslConfig.isPresent() && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
+                && (CloudPlatform.AWS.name().equals(cloudPlatform) || CloudPlatform.GCP.name().equals(cloudPlatform))) {
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+            result = connector.resources().getDatabaseServerActiveSslRootCertificate(ac, databaseStack);
+        } else {
+            LOGGER.info("SSL not enabled or unsupported cloud platform \"{}\": SslConfig={}. Skipping SSL certificate retrieval for database stack {}",
+                    cloudPlatform, sslConfig, cloudContext);
+        }
+        return Optional.ofNullable(result);
+    }
+
     private void syncSslCertificateGcp(CloudDatabaseServerSslCertificate activeSslRootCertificate, SslConfig sslConfig) {
         sslConfig.setSslCertificateActiveVersion(0);
         sslConfig.setSslCertificates(Collections.singleton(activeSslRootCertificate.certificate()));

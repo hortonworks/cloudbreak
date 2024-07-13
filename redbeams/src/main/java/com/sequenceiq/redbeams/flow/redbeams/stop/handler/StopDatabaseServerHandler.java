@@ -71,7 +71,12 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
 
             if (status != STOPPED) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.", request.getDbStack(), status, STOPPED);
-                cloudProviderCertRotator.rotate(request.getResourceId(), cloudContext, cloudCredential, request.getDbStack());
+                cloudProviderCertRotator.rotate(
+                        request.getResourceId(),
+                        cloudContext,
+                        cloudCredential,
+                        request.getDbStack(),
+                        false);
                 connector.resources().stopDatabaseServer(ac, request.getDbStack());
             } else {
                 LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STOPPED);

@@ -163,6 +163,17 @@ class CloudbreakPollerTest {
     }
 
     @Test
+    public void pollCertificateRotationUntilAvailable() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        underTest.pollCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
+    }
+
+    @Test
     public void testCcmUpgradeFailedStack() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()

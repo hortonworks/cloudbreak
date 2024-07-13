@@ -61,6 +61,17 @@ public final class ModelDescriptions {
         public static final String RESULT = "Result of database connection test";
     }
 
+    public static class SslCertificate {
+        public static final String VERSION = "Version of ssl certificate";
+        public static final String CLOUDKEY = "Cloud key of ssl certificate";
+        public static final String CLOUDPROVIDERIDENTIFIER = "Cloud provider identifier";
+        public static final String CLOUDPLATFORM = "Cloud platform";
+        public static final String CERTPEM = "Certificate pem part";
+        public static final String FINGERPRINT = "Fingerprint of the certificate";
+        public static final String EXPIRATIONDATE = "Expiration date";
+        public static final String DEPRECATED = "Deprecated";
+    }
+
     public static class DatabaseServer {
         public static final String ID = "Internal ID of the database server";
         public static final String NAME = "Name of the database server";

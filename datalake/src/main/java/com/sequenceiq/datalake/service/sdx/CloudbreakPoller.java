@@ -75,6 +75,11 @@ public class CloudbreakPoller extends AbstractFlowPoller {
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPGRADE_CCM_FAILED));
     }
 
+    public void pollCertificateRotationUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
+        waitForState("Database certificate rotation", sdxCluster, pollingConfig,
+                Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPDATE_FAILED));
+    }
+
     public void pollDatabaseServerUpgradeUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         waitForState("Database server upgrade", sdxCluster, pollingConfig,
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPDATE_FAILED));

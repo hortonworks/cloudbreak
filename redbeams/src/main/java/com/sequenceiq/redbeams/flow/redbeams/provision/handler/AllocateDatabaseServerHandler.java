@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -102,7 +103,12 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             DBStack dbStack = dbStackService.getById(request.getResourceId());
             DatabaseStack databaseStack = setupMissingParameters(connector, cloudCredential, cloudContext.getPlatformVariant(), request, dbStack);
-            databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+            databaseServerSslCertificatePrescriptionService
+                    .prescribeSslCertificateIfNeeded(cloudContext,
+                            cloudCredential,
+                            dbStack,
+                            databaseStack,
+                            Optional.empty());
             List<CloudResourceStatus> resourceStatuses = connector.resources().launchDatabaseServer(ac, databaseStack, persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 

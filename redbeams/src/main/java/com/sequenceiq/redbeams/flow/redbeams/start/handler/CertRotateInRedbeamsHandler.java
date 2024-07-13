@@ -50,7 +50,8 @@ public class CertRotateInRedbeamsHandler extends ExceptionCatcherEventHandler<Ce
                     data.getResourceId(),
                     data.getCloudContext(),
                     data.getCloudCredential(),
-                    data.getDbStack());
+                    data.getDbStack(),
+                    false);
             dbStackUpdater.updateSslConfig(
                     data.getResourceId(),
                     data.getCloudContext(),
