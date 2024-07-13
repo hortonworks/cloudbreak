@@ -64,11 +64,15 @@ import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdsce
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.RollingRestartServicesHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.RotateRdsCertificateOnProviderHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.UpdateLatestRdsCertificateHandler;
+import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -242,7 +246,12 @@ class RotateRdsCertificateFlowIntegrationTest {
             RestartCmHandler.class,
             UpdateLatestRdsCertificateHandler.class,
             RollingRestartServicesHandler.class,
-            RotateRdsCertificateOnProviderHandler.class
+            RotateRdsCertificateOnProviderHandler.class,
+            ClusterApiConnectors.class,
+            TlsSecurityService.class,
+            SecurityConfigService.class,
+            SecurityConfigRepository.class,
+            RotateRdsCertificateService.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",
@@ -311,6 +320,21 @@ class RotateRdsCertificateFlowIntegrationTest {
 
         @MockBean
         private MeterRegistry meterRegistry;
+
+        @MockBean
+        private TlsSecurityService tlsSecurityService;
+
+        @MockBean
+        private ClusterApiConnectors clusterApiConnectors;
+
+        @MockBean
+        private SecurityConfigService securityConfigService;
+
+        @MockBean
+        private SecurityConfigRepository securityConfigRepository;
+
+        @MockBean
+        private RotateRdsCertificateService rotateRdsCertificateService;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {

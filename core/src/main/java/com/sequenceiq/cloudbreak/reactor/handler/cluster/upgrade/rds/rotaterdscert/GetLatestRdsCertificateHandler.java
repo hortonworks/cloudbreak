@@ -38,9 +38,6 @@ public class GetLatestRdsCertificateHandler extends ExceptionCatcherEventHandler
     public Selectable doAccept(HandlerEvent<GetLatestRdsCertificateRequest> event) {
         GetLatestRdsCertificateRequest request = event.getData();
         Long stackId = request.getResourceId();
-        // TODO: get cert from redbeams from the provider in the region, is there an endpoint?
-        // clue: rotate rds endpoint could only update the registered certificate in the database (with a flag) (poll the flow)
-        // then the next rds describe would return the new cert (as well) and we could propagate it onto the CM cluster
         rotateRdsCertificateService.getLatestRdsCertificate(stackId);
         return new GetLatestRdsCertificateResult(stackId);
     }

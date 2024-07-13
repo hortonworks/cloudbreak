@@ -56,6 +56,6 @@ public class CertRotateInRedbeamsHandlerTest {
         Assertions.assertThat(selectable.getClass()).isEqualTo(CertRotateInRedbeamsSuccess.class);
         Assertions.assertThat(selectable.selector()).isEqualTo("CERTROTATEINREDBEAMSSUCCESS");
         verify(dbStackUpdater).updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack);
-        verify(cloudProviderCertRotator).rotate(STACK_ID, cloudContext, cloudCredential, databaseStack);
+        verify(cloudProviderCertRotator).rotate(STACK_ID, cloudContext, cloudCredential, databaseStack, false);
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.handler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -100,7 +101,7 @@ class StopDatabaseServerHandlerTest {
     @Test
     void shouldCallStopDatabaseAndNotifyEventBusWithoutWaitingForPermanentStatus() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
-        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any());
+        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any(), anyBoolean());
 
         victim.accept(anEvent());
 
@@ -114,7 +115,7 @@ class StopDatabaseServerHandlerTest {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
         when(statusCheckFactory.newPollPermanentExternalDatabaseStateTask(authenticatedContext, dbStack))
                 .thenReturn(externalDatabaseStatusPollTask);
-        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any());
+        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any(), anyBoolean());
         when(externalDatabaseStatusSyncPollingScheduler.schedule(externalDatabaseStatusPollTask)).thenReturn(ExternalDatabaseStatus.STARTED);
         victim.accept(anEvent());
 
@@ -138,7 +139,7 @@ class StopDatabaseServerHandlerTest {
     void shouldCallStopDatabaseAndNotifyEventBusOnFailure() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
         doThrow(new Exception()).when(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
-        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any());
+        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any(), anyBoolean());
 
         victim.accept(anEvent());
 

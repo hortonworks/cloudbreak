@@ -38,7 +38,6 @@ public class RollingRestartServicesHandler extends ExceptionCatcherEventHandler<
     public Selectable doAccept(HandlerEvent<RollingRestartServicesRequest> event) {
         RollingRestartServicesRequest request = event.getData();
         Long stackId = request.getResourceId();
-        // TODO: do a rolling restart of the CDH services
         rotateRdsCertificateService.rollingRestartServices(stackId);
         return new RollingRestartServicesResult(stackId);
     }

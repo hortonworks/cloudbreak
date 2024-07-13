@@ -60,6 +60,8 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private boolean govCloud;
 
+    private String region;
+
     @Schema(description = StackModelDescription.STACK_STATUS)
     private Status status;
 
@@ -466,6 +468,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -473,6 +483,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 " id=" + id +
                 ", crn='" + crn + '\'' +
                 ", govCloud='" + govCloud + '\'' +
+                ", region='" + region + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", environmentName='" + environmentName + '\'' +
                 ", credentialName='" + credentialName + '\'' +

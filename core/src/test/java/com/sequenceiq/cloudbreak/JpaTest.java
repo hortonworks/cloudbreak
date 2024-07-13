@@ -96,6 +96,8 @@ public class JpaTest {
             case "boolean":
             case "Boolean":
                 return true;
+            case "Integer":
+                return Integer.valueOf(1);
             default:
                 return null;
         }

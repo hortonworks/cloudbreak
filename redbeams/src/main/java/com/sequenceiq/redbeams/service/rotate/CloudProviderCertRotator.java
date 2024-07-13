@@ -16,11 +16,13 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
+import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateUpdateService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @Service
@@ -38,12 +40,16 @@ public class CloudProviderCertRotator {
     private DatabaseServerSslCertificateSyncService databaseServerSslCertificateSyncService;
 
     @Inject
+    private DatabaseServerSslCertificateUpdateService databaseServerSslCertificateUpdateService;
+
+    @Inject
     private DatabaseServerSslCertificatePrescriptionService databaseServerSslCertificatePrescriptionService;
 
     @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
-    public void rotate(Long dbStackId, CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack) throws Exception {
+    public void rotate(Long dbStackId, CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack,
+        boolean onlyCertificateUpdateOnDatabase) throws Exception {
         DBStack dbStack = dbStackService.getById(dbStackId);
 
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
@@ -63,22 +69,34 @@ public class CloudProviderCertRotator {
                     dbStack.getRegion(),
                     maxVersion);
             if (cert != null) {
+                Optional<CloudDatabaseServerSslCertificate> cloudDatabaseServerSslCertificate =
+                        databaseServerSslCertificateSyncService.getCertificateFromProvider(cloudContext,
+                        cloudCredential,
+                        dbStack,
+                        databaseStack);
                 Optional<String> desiredCertificate = databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(
                         cloudContext,
                         cloudCredential,
                         dbStack,
                         cert.cloudProviderIdentifier(),
-                        databaseStack);
+                        databaseStack,
+                        cloudDatabaseServerSslCertificate);
                 if (desiredCertificate.isPresent()) {
-                    resources.updateDatabaseServerActiveSslRootCertificate(
-                            ac,
-                            databaseStack,
-                            desiredCertificate.get());
-                    databaseServerSslCertificateSyncService.syncSslCertificateIfNeeded(
-                            cloudContext,
-                            cloudCredential,
-                            dbStack,
-                            databaseStack);
+                    if (onlyCertificateUpdateOnDatabase) {
+                        databaseServerSslCertificateUpdateService.updateSslCertificateIfNeeded(
+                                dbStack,
+                                desiredCertificate);
+                    } else {
+                        resources.updateDatabaseServerActiveSslRootCertificate(
+                                ac,
+                                databaseStack,
+                                desiredCertificate.get());
+                        databaseServerSslCertificateSyncService.syncSslCertificateIfNeeded(
+                                cloudContext,
+                                cloudCredential,
+                                dbStack,
+                                databaseStack);
+                    }
                 } else {
                     LOGGER.warn("The desired certificate {} not found.", desiredCertificate);
                 }

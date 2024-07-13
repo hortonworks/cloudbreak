@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -311,7 +312,11 @@ class AllocateDatabaseServerHandlerTest {
 
         verify(syncPollingScheduler, never()).schedule(task);
 
-        verify(databaseServerSslCertificatePrescriptionService).prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        verify(databaseServerSslCertificatePrescriptionService).prescribeSslCertificateIfNeeded(cloudContext,
+                cloudCredential,
+                dbStack,
+                databaseStack,
+                Optional.empty());
         verify(dbStackService).save(dbStack);
         assertEquals(NETWORK_ID, dbStack.getNetwork());
     }
@@ -335,7 +340,8 @@ class AllocateDatabaseServerHandlerTest {
 
         verify(syncPollingScheduler).schedule(task);
 
-        verify(databaseServerSslCertificatePrescriptionService).prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+        verify(databaseServerSslCertificatePrescriptionService)
+                .prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack, Optional.empty());
         verify(dbStackService).save(dbStack);
         assertEquals(NETWORK_ID, dbStack.getNetwork());
     }

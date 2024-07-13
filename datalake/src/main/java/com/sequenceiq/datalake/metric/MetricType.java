@@ -25,6 +25,8 @@ public enum MetricType implements Metric {
     SDX_RESTORE_FINISHED("sdx.restore.finished"),
     UPGRADE_CCM_FINISHED("sdx.upgrade.ccm.finished"),
     UPGRADE_CCM_FAILED("sdx.upgrade.ccm.failed"),
+    ROTATE_DATABASE_CERTIFICATE_FINISHED("sdx.rotate.database.certificate.finished"),
+    ROTATE_DATABASE_CERTIFICATE_FAILED("sdx.rotate.database.certificate.failed"),
     UPGRADE_DATABASE_SERVER_FINISHED("sdx.upgrade.database.finished"),
     UPGRADE_DATABASE_SERVER_FAILED("sdx.upgrade.database.failed"),
     IMD_UPDATE_FINISHED("sdx.update.imd.finished"),

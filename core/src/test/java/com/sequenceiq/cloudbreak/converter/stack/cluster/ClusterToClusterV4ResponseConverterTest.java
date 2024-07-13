@@ -103,6 +103,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         source.setBlueprint(new Blueprint());
         source.setExtendedBlueprintText("asdf");
         source.setFqdn("some.fqdn");
+        source.setDbSslRootCertBundle("bundle");
         source.setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
         Blueprint blueprint = source.getBlueprint();
         when(stackDtoDelegate.getBlueprint()).thenReturn(blueprint);

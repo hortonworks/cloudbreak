@@ -280,8 +280,15 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public void rotateSslCert(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
-        redbeamsRotateSslService.rotateDatabaseServerSslCert(crn);
+    public FlowIdentifier rotateSslCert(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+        return redbeamsRotateSslService.rotateDatabaseServerSslCert(crn);
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public FlowIdentifier updateToLatestSslCert(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+        return redbeamsRotateSslService.updateToLatestDatabaseServerSslCert(crn);
     }
 
     @Override

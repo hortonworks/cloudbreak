@@ -79,12 +79,23 @@ public class DatabaseSslService {
         return getDbSslDetailsAndUpdateInClusterInternal(stackDto, false);
     }
 
+    public DatabaseSslDetails setEmbeddedDbSslDetailsAndUpdateInClusterInternal(StackDto stackDto) {
+        return setEmbeddedDbSslDetailsAndUpdateInCluster(stackDto);
+    }
+
     private DatabaseSslDetails getDbSslDetailsAndUpdateInClusterInternal(StackDto stackDto, boolean creation) {
         LOGGER.info("Invocation mode: {}", creation ? "Creation" : "Rotation");
         DatabaseSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
         LOGGER.info("SslDetails from RedbeamsDbCertificateProvider: {}", sslDetails);
         decorateSslDetailsWithEmbeddedDatabase(stackDto, sslDetails, creation);
         LOGGER.info("SslDetails after decorating with embedded DB: {}", sslDetails);
+        clusterService.updateDbSslCert(stackDto.getCluster().getId(), sslDetails);
+        return sslDetails;
+    }
+
+    private DatabaseSslDetails setEmbeddedDbSslDetailsAndUpdateInCluster(StackDto stackDto) {
+        DatabaseSslDetails sslDetails = dbCertificateProvider.getRelatedSslCerts(stackDto);
+        decorateSslDetailsWithEmbeddedDatabase(stackDto, sslDetails, false);
         clusterService.updateDbSslCert(stackDto.getCluster().getId(), sslDetails);
         return sslDetails;
     }

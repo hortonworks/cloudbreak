@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -252,26 +253,25 @@ class DistroXV1ControllerTest {
     }
 
     @Test
-    void testRotateRdsCertifcateByName() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofName(NAME);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+    void testRotateRdsCertificateByName() {
         when(rotateRdsCertificateConverter.convert(any())).thenReturn(RESPONSE);
+        when(stackRotateRdsCertificateService.rotateRdsCertificate(any(), anyString()))
+                .thenReturn(new StackRotateRdsCertificateV4Response());
 
-        RotateRdsCertificateV1Response result = distroXV1Controller.rotateRdsCertificateByName(NAME);
-        verify(stackRotateRdsCertificateService).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
+        RotateRdsCertificateV1Response result = doAs(TEST_USER_CRN, () -> distroXV1Controller.rotateRdsCertificateByName(NAME));
+        verify(stackRotateRdsCertificateService).rotateRdsCertificate(any(), anyString());
         assertThat(result).isEqualTo(RESPONSE);
     }
 
     @Test
-    void testRotateRdsCertifcateByCrn() {
+    void testRotateRdsCertificateByCrn() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(CRN);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
-        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(rotateRdsCertificateConverter.convert(any())).thenReturn(RESPONSE);
+        when(stackRotateRdsCertificateService.rotateRdsCertificate(nameOrCrn, ACCOUNT_ID))
+                .thenReturn(new StackRotateRdsCertificateV4Response());
 
-        RotateRdsCertificateV1Response result = distroXV1Controller.rotateRdsCertificateByCrn(CRN);
-        verify(stackRotateRdsCertificateService).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
+        RotateRdsCertificateV1Response result = doAs(TEST_USER_CRN, () -> distroXV1Controller.rotateRdsCertificateByCrn(CRN));
+        verify(stackRotateRdsCertificateService).rotateRdsCertificate(nameOrCrn, ACCOUNT_ID);
         assertThat(result).isEqualTo(RESPONSE);
     }
 }

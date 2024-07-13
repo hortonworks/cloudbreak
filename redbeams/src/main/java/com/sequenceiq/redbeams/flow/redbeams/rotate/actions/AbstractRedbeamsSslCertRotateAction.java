@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -24,15 +23,14 @@ import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConver
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 import com.sequenceiq.redbeams.flow.redbeams.rotate.RedbeamsSslCertRotateEvent;
 import com.sequenceiq.redbeams.flow.redbeams.rotate.RedbeamsSslCertRotateState;
+import com.sequenceiq.redbeams.flow.redbeams.rotate.SslCertRotateDatabaseRedbeamsContext;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 public abstract class AbstractRedbeamsSslCertRotateAction<P extends Payload>
-        extends AbstractAction<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent, RedbeamsContext, P> {
+        extends AbstractAction<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent, SslCertRotateDatabaseRedbeamsContext, P> {
 
     @Inject
     private DBStackService dbStackService;
@@ -56,13 +54,12 @@ public abstract class AbstractRedbeamsSslCertRotateAction<P extends Payload>
     }
 
     @Override
-    protected void doExecute(RedbeamsContext context, P payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(SslCertRotateDatabaseRedbeamsContext context, P payload, Map<Object, Object> variables) throws Exception {
         sendEvent(context);
     }
 
-    @Override
-    protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-            StateContext<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent> stateContext, P payload) {
+    protected SslCertRotateDatabaseRedbeamsContext createFlowContext(FlowParameters flowParameters,
+            StateContext<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent> stateContext, P payload, boolean onlyCertificateUpdate) {
         DBStack dbStack = dbStackService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(dbStack);
         Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
@@ -82,11 +79,12 @@ public abstract class AbstractRedbeamsSslCertRotateAction<P extends Payload>
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
 
-        return new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
-    }
-
-    @Override
-    protected Object getFailurePayload(P payload, Optional<RedbeamsContext> flowContext, Exception ex) {
-        return new RedbeamsFailureEvent(payload.getResourceId(), ex);
+        return new SslCertRotateDatabaseRedbeamsContext(
+                flowParameters,
+                cloudContext,
+                cloudCredential,
+                databaseStack,
+                dbStack,
+                onlyCertificateUpdate);
     }
 }

@@ -63,7 +63,7 @@ public enum Status {
     private static final List<Status> IS_REMOVABLE_STATUS_LIST = Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED,
             ENABLE_SECURITY_FAILED, DELETE_FAILED, DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED, SSL_ROTATE_FAILED);
 
-    private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED);
+    private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED);
 
     public boolean isRemovableStatus() {
         return IS_REMOVABLE_STATUS_LIST.contains(valueOf(name()));

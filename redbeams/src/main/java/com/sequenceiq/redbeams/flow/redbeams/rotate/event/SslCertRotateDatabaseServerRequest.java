@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
-public class SslCertRotateDatabaseServerRequest extends RedbeamsEvent {
+public class SslCertRotateDatabaseServerRequest extends SslCertRotateRedbeamsEvent {
 
     private final CloudContext cloudContext;
 
@@ -19,8 +18,9 @@ public class SslCertRotateDatabaseServerRequest extends RedbeamsEvent {
     public SslCertRotateDatabaseServerRequest(
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
-            @JsonProperty("databaseStack") DatabaseStack databaseStack) {
-        super(cloudContext != null ? cloudContext.getId() : null);
+            @JsonProperty("databaseStack") DatabaseStack databaseStack,
+            @JsonProperty("onlyCertificateUpdate") boolean onlyCertificateUpdate) {
+        super(cloudContext != null ? cloudContext.getId() : null, onlyCertificateUpdate);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.databaseStack = databaseStack;

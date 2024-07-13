@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,7 +37,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
@@ -61,6 +67,9 @@ class PostgresConfigServiceTest {
 
     @Mock
     private RdsConfigProviderFactory rdsConfigProviderFactory;
+
+    @Mock
+    private HostOrchestrator hostOrchestrator;
 
     @Mock
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
@@ -397,4 +406,21 @@ class PostgresConfigServiceTest {
         verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }
 
+    @Test
+    void testUploadServicePillarsForPostgres() throws CloudbreakOrchestratorFailedException {
+        ExitCriteriaModel exitCriteriaModel = mock(ExitCriteriaModel.class);
+        OrchestratorStateParams orchestratorStateParams = mock(OrchestratorStateParams.class);
+        StackView stackView = new Stack();
+        when(stack.getStack()).thenReturn(stackView);
+        Cluster cluster = new Cluster();
+        cluster.setDbSslEnabled(false);
+        cluster.setDbSslRootCertBundle("");
+        when(stack.getCluster()).thenReturn(cluster);
+        when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(false);
+
+
+        underTest.uploadServicePillarsForPostgres(stack, exitCriteriaModel, orchestratorStateParams);
+
+        verify(hostOrchestrator, times(1)).saveCustomPillars(any(), eq(exitCriteriaModel), eq(orchestratorStateParams));
+    }
 }

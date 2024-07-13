@@ -15,6 +15,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.progress.ProgressV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
 @Configuration
 public class RedbeamsApiClientConfig {
@@ -41,6 +42,12 @@ public class RedbeamsApiClientConfig {
     @ConditionalOnBean(RedbeamsApiClientParams.class)
     DatabaseV4Endpoint databaseV4Endpoint(WebTarget redbeamsApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, DatabaseV4Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(RedbeamsApiClientParams.class)
+    SupportV4Endpoint supportV4Endpoint(WebTarget redbeamsApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, SupportV4Endpoint.class);
     }
 
     @Bean

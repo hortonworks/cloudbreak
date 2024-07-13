@@ -58,6 +58,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
+import com.sequenceiq.datalake.service.rotation.certificate.SdxDatabaseCertificateRotationService;
 import com.sequenceiq.datalake.service.sdx.SdxHorizontalScalingService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
@@ -158,6 +159,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Inject
+    private SdxDatabaseCertificateRotationService certificateRotationService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -558,13 +562,13 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
     public SdxRotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
-        return new SdxRotateRdsCertificateV1Response();
+        return certificateRotationService.rotateCertificate(getSdxClusterByName(name).getCrn());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
-    public SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
-        return new SdxRotateRdsCertificateV1Response();
+    public SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn @TenantAwareParam String crn) {
+        return certificateRotationService.rotateCertificate(crn);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

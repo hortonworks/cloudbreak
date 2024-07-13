@@ -248,7 +248,17 @@ public interface DatabaseServerV4Endpoint {
     @Operation(summary = DatabaseServerOpDescription.ROTATE_SSL_CERT, description = DatabaseServerNotes.ROTATE_SSL_CERT,
             operationId = "rotateDatabaseServerSSLCert",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void rotateSslCert(
+    FlowIdentifier rotateSslCert(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
+    );
+
+    @PUT
+    @Path("{crn}/update_ssl_cert")
+    @Operation(summary = DatabaseServerOpDescription.UPDATE_SSL_CERT, description = DatabaseServerNotes.UPDATE_SSL_CERT,
+            operationId = "updateDatabaseServerSSLCert",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateToLatestSslCert(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
             @PathParam("crn") String crn
     );
