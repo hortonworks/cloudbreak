@@ -23,6 +23,7 @@ public final class OperationDescriptions {
     public static final class DatabaseServerOpDescription {
         public static final String TEST_CONNECTION = "test database server connectivity";
         public static final String LIST = "list database servers";
+        public static final String LIST_CERTIFICATE_STATUS = "list certificate status for database servers";
         public static final String GET_BY_NAME = "get a database server by name";
         public static final String GET_BY_CRN = "get a database server by CRN";
         public static final String GET_BY_CLUSTER_CRN = "get a database server by cluster CRN";

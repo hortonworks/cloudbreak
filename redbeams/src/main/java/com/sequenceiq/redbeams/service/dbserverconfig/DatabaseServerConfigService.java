@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -99,6 +100,14 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         }
 
         return repository.findByWorkspaceIdAndEnvironmentId(workspaceId, environmentCrn);
+    }
+
+    public Set<DatabaseServerConfig> findAll(Long workspaceId, Set<String> environmentCrns) {
+        if (CollectionUtils.isEmpty(environmentCrns)) {
+            throw new IllegalArgumentException("No environment CRNs supplied.");
+        }
+
+        return repository.findByWorkspaceIdAndEnvironmentIds(workspaceId, environmentCrns);
     }
 
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {

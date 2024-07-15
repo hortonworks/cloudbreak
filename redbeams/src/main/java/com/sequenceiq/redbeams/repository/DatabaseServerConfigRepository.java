@@ -23,6 +23,10 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
 
     Set<DatabaseServerConfig> findByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
 
+    @Query("SELECT d FROM DatabaseServerConfig d WHERE d.environmentId IN (:environmentIds) AND d.workspaceId = :workspaceId")
+    Set<DatabaseServerConfig> findByWorkspaceIdAndEnvironmentIds(@Param("workspaceId") Long workspaceId,
+        @Param("environmentIds") Collection<String> environmentIds);
+
     Optional<DatabaseServerConfig> findByResourceCrn(Crn crn);
 
     Optional<DatabaseServerConfig> findByNameAndWorkspaceIdAndEnvironmentId(String name, Long workspaceId, String environmentId);

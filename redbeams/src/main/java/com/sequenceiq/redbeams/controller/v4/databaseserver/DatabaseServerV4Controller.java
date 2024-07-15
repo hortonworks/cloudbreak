@@ -46,10 +46,12 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -66,6 +68,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
+import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerSslCertificateConfigService;
 import com.sequenceiq.redbeams.service.rotation.RedbeamsRotationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsRotateSslService;
@@ -108,6 +111,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private DatabaseServerConfigService databaseServerConfigService;
 
     @Inject
+    private DatabaseServerSslCertificateConfigService databaseServerSslCertificateConfigService;
+
+    @Inject
     private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
 
     @Inject
@@ -136,6 +142,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
                 .map(d -> databaseServerConfigToDatabaseServerV4ResponseConverter.convert(d))
                 .collect(Collectors.toSet())
         );
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
+    public DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(DatabaseServerCertificateStatusV4Request request) {
+        return databaseServerSslCertificateConfigService.listDatabaseServersCertificateStatus(request);
     }
 
     @Override
