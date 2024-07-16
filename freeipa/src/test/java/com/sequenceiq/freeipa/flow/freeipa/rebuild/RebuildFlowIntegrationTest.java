@@ -86,6 +86,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientCallable;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -157,6 +158,7 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceAttributeUtil;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
@@ -183,6 +185,10 @@ class RebuildFlowIntegrationTest {
     private static final long STACK_ID = 1L;
 
     private static final String ENVIRONMENT_CRN = "ENVIRONMENT_CRN";
+
+    private static final String OPERATION_ID = UUID.randomUUID().toString();
+
+    private static final String ACCOUNT_ID = "accId";
 
     @Inject
     private FlowRegister flowRegister;
@@ -304,6 +310,9 @@ class RebuildFlowIntegrationTest {
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @MockBean
+    private OperationService operationService;
+
     @Inject
     private FreeIpaService freeIpaService;
 
@@ -338,6 +347,7 @@ class RebuildFlowIntegrationTest {
         stack.setId(STACK_ID);
         stack.setTunnel(CLUSTER_PROXY);
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        stack.setAccountId(ACCOUNT_ID);
         InstanceGroup ig = new InstanceGroup();
         instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
@@ -471,6 +481,7 @@ class RebuildFlowIntegrationTest {
         verify(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
         verify(kerberosConfigUpdateService).updateNameservers(STACK_ID);
         verify(environmentEndpoint).updateConfigsInEnvironmentByCrn(ENVIRONMENT_CRN);
+        verify(operationService).completeOperation(ACCOUNT_ID, OPERATION_ID, List.of(new SuccessDetails(ENVIRONMENT_CRN)), List.of());
     }
 
     @Test
@@ -562,6 +573,8 @@ class RebuildFlowIntegrationTest {
         verify(freeIpaPostInstallService).postInstallFreeIpa(STACK_ID, false);
         verifyNoInteractions(kerberosConfigUpdateService);
         verifyNoInteractions(environmentEndpoint);
+        verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
+                "Failed to rebuild FreeIPA: Instance(s) healthcheck failed: [NodeHealthDetails{issues=null, status=FAILED, name='null', instanceId='null'}]");
     }
 
     @Test
@@ -648,6 +661,8 @@ class RebuildFlowIntegrationTest {
         verify(cleanupService).removeDnsEntries(STACK_ID, Set.of("ipaserver1.example.com"), Set.of(), "example.com");
         verifyNoInteractions(kerberosConfigUpdateService);
         verifyNoInteractions(environmentEndpoint);
+        verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
+                "Failed to rebuild FreeIPA: postinstall failure");
     }
 
     @Test
@@ -732,6 +747,8 @@ class RebuildFlowIntegrationTest {
         verifyNoInteractions(freeIpaPostInstallService);
         verifyNoInteractions(kerberosConfigUpdateService);
         verifyNoInteractions(environmentEndpoint);
+        verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
+                "Failed to rebuild FreeIPA: cleanup failure");
     }
 
     @Test
@@ -809,6 +826,8 @@ class RebuildFlowIntegrationTest {
         verify(freeIpaInstallService).installFreeIpa(STACK_ID);
         verifyNoInteractions(freeIpaPostInstallService, kerberosConfigUpdateService, environmentEndpoint, cleanupService, instanceConnector,
                 freeIpaServiceStartService, stackStatusCheckerJob);
+        verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
+                "Failed to rebuild FreeIPA: restore failed");
     }
 
     @Test
@@ -885,6 +904,8 @@ class RebuildFlowIntegrationTest {
         assertEquals(gatewayConfig, orchestratorStateParams.getPrimaryGatewayConfig());
         verifyNoInteractions(freeIpaPostInstallService, kerberosConfigUpdateService, environmentEndpoint, cleanupService, instanceConnector,
                 freeIpaServiceStartService, stackStatusCheckerJob, freeIpaInstallService);
+        verify(operationService).failOperation(ACCOUNT_ID, OPERATION_ID,
+                "Failed to rebuild FreeIPA: backup dl and validate failed");
     }
 
     private void testFlow() {
@@ -901,7 +922,7 @@ class RebuildFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        RebuildEvent rebuildEvent = new RebuildEvent(STACK_ID, "", "", "");
+        RebuildEvent rebuildEvent = new RebuildEvent(STACK_ID, "", "", "", OPERATION_ID);
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(rebuildEvent.selector(), rebuildEvent));

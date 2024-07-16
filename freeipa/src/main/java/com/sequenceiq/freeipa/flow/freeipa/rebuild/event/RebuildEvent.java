@@ -12,15 +12,19 @@ public class RebuildEvent extends StackEvent {
 
     private final String dataBackupStorageLocation;
 
+    private final String operationId;
+
     @JsonCreator
     public RebuildEvent(@JsonProperty("resourceId") Long stackId,
             @JsonProperty("instanceToRestoreFqdn") String instanceToRestoreFqdn,
             @JsonProperty("fullBackupStorageLocation") String fullBackupStorageLocation,
-            @JsonProperty("dataBackupStorageLocation") String dataBackupStorageLocation) {
+            @JsonProperty("dataBackupStorageLocation") String dataBackupStorageLocation,
+            @JsonProperty("operationId") String operationId) {
         super(stackId);
         this.instanceToRestoreFqdn = instanceToRestoreFqdn;
         this.fullBackupStorageLocation = fullBackupStorageLocation;
         this.dataBackupStorageLocation = dataBackupStorageLocation;
+        this.operationId = operationId;
     }
 
     public String getInstanceToRestoreFqdn() {
@@ -35,12 +39,17 @@ public class RebuildEvent extends StackEvent {
         return dataBackupStorageLocation;
     }
 
+    public String getOperationId() {
+        return operationId;
+    }
+
     @Override
     public String toString() {
         return "RebuildEvent{" +
                 "instanceToRestoreFqdn='" + instanceToRestoreFqdn + '\'' +
                 ", fullBackupStorageLocation='" + fullBackupStorageLocation + '\'' +
                 ", dataBackupStorageLocation='" + dataBackupStorageLocation + '\'' +
+                ", operationId='" + operationId + '\'' +
                 "} " + super.toString();
     }
 }

@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Response;
 import com.sequenceiq.freeipa.service.rebuild.RebuildService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -30,11 +30,11 @@ class FreeIpaV2ControllerTest {
     @Test
     void rebuildv2() throws Exception {
         when(crnService.getCurrentAccountId()).thenReturn("accId");
-        DescribeFreeIpaResponse response = new DescribeFreeIpaResponse();
+        RebuildV2Response response = new RebuildV2Response();
         RebuildV2Request request = new RebuildV2Request();
         when(rebuildService.rebuild("accId", request)).thenReturn(response);
 
-        DescribeFreeIpaResponse result = underTest.rebuildv2(request);
+        RebuildV2Response result = underTest.rebuildv2(request);
 
         assertEquals(response, result);
     }

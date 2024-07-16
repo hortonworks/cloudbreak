@@ -52,7 +52,7 @@ class RebuildStartActionTest {
 
     @Test
     void prepareExecution() {
-        RebuildEvent payload = new RebuildEvent(STACK_ID, "FQDN", "fback", "dback");
+        RebuildEvent payload = new RebuildEvent(STACK_ID, "FQDN", "fback", "dback", "opid");
         Map<Object, Object> variables = new HashMap<>();
 
         underTest.prepareExecution(payload, variables);
@@ -60,11 +60,12 @@ class RebuildStartActionTest {
         assertEquals(payload.getInstanceToRestoreFqdn(), underTest.getInstanceToRestoreFqdn(variables));
         assertEquals(payload.getFullBackupStorageLocation(), underTest.getFullBackupStorageLocation(variables));
         assertEquals(payload.getDataBackupStorageLocation(), underTest.getDataBackupStorageLocation(variables));
+        assertEquals(payload.getOperationId(), underTest.getOperationId(variables));
     }
 
     @Test
     void doExecute() throws Exception {
-        RebuildEvent payload = new RebuildEvent(STACK_ID, "FQDN", "fback", "dback");
+        RebuildEvent payload = new RebuildEvent(STACK_ID, "FQDN", "fback", "dback", "opid");
         Stack stack = new Stack();
         CloudContext cloudContext = mock(CloudContext.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
