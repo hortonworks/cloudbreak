@@ -1,20 +1,33 @@
 package com.sequenceiq.freeipa.service.rebuild;
 
+import java.util.Set;
+
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Response;
+import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.RebuildEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class RebuildService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RebuildService.class);
+
     @Inject
     private EntitlementService entitlementService;
 
@@ -24,17 +37,28 @@ public class RebuildService {
     @Inject
     private StackService stackService;
 
-    public DescribeFreeIpaResponse rebuild(String accountId, RebuildV2Request request) {
-        validate(accountId);
-        Stack stack = stackService.getFreeIpaStackWithMdcContext(request.getEnvironmentCrn(), accountId);
-        RebuildEvent rebuildEvent = new RebuildEvent(stack.getId(), request.getInstanceToRestoreFqdn(), request.getFullBackupStorageLocation(),
-                request.getDataBackupStorageLocation());
-        flowManager.notify(rebuildEvent.selector(), rebuildEvent);
-        return null;
-    }
+    @Inject
+    private RebuildRequestValidator requestValidator;
 
-    private void validate(String accountId) {
+    @Inject
+    private OperationService operationService;
+
+    @Inject
+    private OperationToOperationStatusConverter operationConverter;
+
+    public RebuildV2Response rebuild(String accountId, RebuildV2Request request) {
         checkEntitlement(accountId);
+        Stack stack = stackService.getFreeIpaStackWithMdcContext(request.getEnvironmentCrn(), accountId);
+        requestValidator.validate(request, stack);
+        Operation operation = operationService.startOperation(accountId, OperationType.REBUILD, Set.of(request.getEnvironmentCrn()), Set.of());
+        RebuildEvent rebuildEvent = new RebuildEvent(stack.getId(), request.getInstanceToRestoreFqdn(), request.getFullBackupStorageLocation(),
+                request.getDataBackupStorageLocation(), operation.getOperationId());
+        FlowIdentifier flowIdentifier = flowManager.notify(rebuildEvent.selector(), rebuildEvent);
+        RebuildV2Response response = new RebuildV2Response();
+        response.setFlowIdentifier(flowIdentifier);
+        response.setOperationStatus(operationConverter.convert(operation));
+        BeanUtils.copyProperties(request, response);
+        return response;
     }
 
     private void checkEntitlement(String accountId) {

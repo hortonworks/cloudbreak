@@ -10,8 +10,8 @@ import jakarta.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Response;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +28,5 @@ public interface FreeIpaV2Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = FreeIpaOperationDescriptions.REBUILD, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "rebuildV2",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    // TODO revisit return value
-    DescribeFreeIpaResponse rebuildv2(@Valid RebuildV2Request request) throws Exception;
+    RebuildV2Response rebuildv2(@Valid RebuildV2Request request) throws Exception;
 }

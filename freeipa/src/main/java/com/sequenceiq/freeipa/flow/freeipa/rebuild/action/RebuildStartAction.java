@@ -23,6 +23,7 @@ public class RebuildStartAction extends AbstractRebuildAction<RebuildEvent> {
         setInstanceToRestoreFqdn(variables, payload.getInstanceToRestoreFqdn());
         setFullBackupStorageLocation(variables, payload.getFullBackupStorageLocation());
         setDataBackupStorageLocation(variables, payload.getDataBackupStorageLocation());
+        setOperationId(variables, payload.getOperationId());
     }
 
     @Override

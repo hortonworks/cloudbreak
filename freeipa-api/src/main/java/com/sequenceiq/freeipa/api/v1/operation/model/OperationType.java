@@ -16,7 +16,8 @@ public enum OperationType {
     UPGRADE,
     UPGRADE_CCM,
     MODIFY_PROXY_CONFIG,
-    CHANGE_DYNAMIC_ENTITLEMENTS;
+    CHANGE_DYNAMIC_ENTITLEMENTS,
+    REBUILD;
 
     private final String lowerCaseName;
 
