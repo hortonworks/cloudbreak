@@ -157,9 +157,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public TestUsers getTestUsers() {
         checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
-        if (StringUtils.containsIgnoreCase(defaultServer, "dps.mow")
+        if ((StringUtils.containsIgnoreCase(defaultServer, "dps.mow")
                 || StringUtils.containsIgnoreCase(defaultServer, "cdp.mow")
-                || StringUtils.containsIgnoreCase(defaultServer, "cdp-priv.mow")) {
+                || StringUtils.containsIgnoreCase(defaultServer, "cdp-priv.mow"))
+            && this instanceof E2ETestContext) {
             testUsers.setSelector(TestUserSelectors.UMS_PREFERED);
         }
         return testUsers;
