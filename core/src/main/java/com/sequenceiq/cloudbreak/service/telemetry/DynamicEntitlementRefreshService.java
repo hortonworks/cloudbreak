@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshConfig;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.ExporterConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -47,13 +52,33 @@ public class DynamicEntitlementRefreshService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private MonitoringConfiguration monitoringConfiguration;
+
     public Map<String, Boolean> getChangedWatchedEntitlementsAndStoreNewFromUms(StackDto stack) {
+        handleLegacyConfigurations(stack);
         LOGGER.debug("Checking watched entitlement changes for stack {}", stack.getName());
         Map<String, Boolean> umsEntitlements = getEntitlementsFromUms(stack.getResourceCrn(), dynamicEntitlementRefreshConfig.getWatchedEntitlements());
         LOGGER.debug("Watched entitlements from UMS: {}", umsEntitlements);
         Map<String, Boolean> telemetryEntitlements = getOrCreateEntitlementsFromTelemetry(stack.getId(), umsEntitlements);
         LOGGER.debug("Watched entitlements from Telemetry: {}", telemetryEntitlements);
         return getChangedEntitlements(telemetryEntitlements, umsEntitlements);
+    }
+
+    private void handleLegacyConfigurations(StackDto stackDto) {
+        Optional<String> cmMonitoringUser = getCMMonitoringUser();
+        if (stackDto.getCluster().getCloudbreakClusterManagerMonitoringUser() == null && cmMonitoringUser.isPresent()) {
+            clusterService.generateClusterManagerMonitoringUserIfMissing(stackDto.getCluster().getId(), cmMonitoringUser.get());
+        }
+    }
+
+    private Optional<String> getCMMonitoringUser() {
+        return Optional.ofNullable(monitoringConfiguration.getClouderaManagerExporter())
+                .map(ExporterConfiguration::getUser)
+                .filter(StringUtils::isNotBlank);
     }
 
     public Boolean saltRefreshNeeded(Map<String, Boolean> entitlementsChanged) {

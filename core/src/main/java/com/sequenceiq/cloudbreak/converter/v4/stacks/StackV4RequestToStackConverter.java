@@ -417,8 +417,7 @@ public class StackV4RequestToStackConverter {
             cluster.setPassword(source.getCluster().getPassword());
             cluster.setCloudbreakUser(ambariUserName);
             cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
-            if (entitlementService.isComputeMonitoringEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                    && monitoringConfiguration.getClouderaManagerExporter() != null) {
+            if (monitoringConfiguration.getClouderaManagerExporter() != null) {
                 cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
                 cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
             }

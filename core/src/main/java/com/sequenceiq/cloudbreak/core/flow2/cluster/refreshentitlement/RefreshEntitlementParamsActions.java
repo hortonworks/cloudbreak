@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RefreshEntitlementParamsTriggerEvent;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.flow.core.Flow;
@@ -40,14 +42,45 @@ public class RefreshEntitlementParamsActions {
 
             @Override
             protected Selectable createRequest(RefreshEntitlementParamsContext context) {
-                return new StackEvent(RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FINALIZED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(RefreshEntitlementParamsEvent.CONFIGURE_MANAGEMENT_SERVICES_EVENT.event(), context.getStack().getId());
             }
 
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, RefreshEntitlementParamsTriggerEvent payload, Map<Object, Object> variables) {
                 dynamicEntitlementRefreshService.storeChangedEntitlementsInTelemetry(payload.getResourceId(), payload.getChangedEntitlements());
+                sendEvent(context);
+            }
+        };
+    }
+
+    @Bean(name = "RE_CONFIGURE_MANAGEMENT_SERVICES_STATE")
+    public Action<?, ?> configureManagementServicesAction() {
+        return new AbstractRefreshEntitlementParamsAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(RefreshEntitlementParamsContext context, StackEvent payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(RefreshEntitlementParamsContext context) {
+                return new ConfigureClusterManagerManagementServicesRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "RE_CONFIGURE_MANAGEMENT_SERVICES_FINISHED_STATE")
+    public Action<?, ?> configureManagementServicesFinishedAction() {
+        return new AbstractRefreshEntitlementParamsAction<>(ConfigureClusterManagerManagementServicesSuccess.class) {
+            @Override
+            protected void doExecute(RefreshEntitlementParamsContext context, ConfigureClusterManagerManagementServicesSuccess payload,
+                    Map<Object, Object> variables) {
                 flowMessageService.fireEventAndLog(context.getStack().getId(), EVENT_TYPE, ResourceEvent.STACK_DYNAMIC_ENTITLEMENT_FINISHED);
                 sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(RefreshEntitlementParamsContext context) {
+                return new StackEvent(RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsEvent.CONFIGURE_MANAGEMENT_SERVICES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsEvent.CONFIGURE_MANAGEMENT_SERVICES_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsEvent.CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FINALIZED_EVENT;
@@ -8,6 +11,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.Re
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsState.REFRESH_CB_ENTITLEMENT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsState.REFRESH_ENTITLEMENT_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsState.RE_CONFIGURE_MANAGEMENT_SERVICES_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.refreshentitlement.RefreshEntitlementParamsState.RE_CONFIGURE_MANAGEMENT_SERVICES_STATE;
 
 import java.util.List;
 
@@ -20,11 +25,20 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Buil
 public class RefreshEntitlementParamsFlowConfig extends StackStatusFinalizerAbstractFlowConfig<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent> {
     private static final List<Transition<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent>> TRANSITIONS =
             new Builder<RefreshEntitlementParamsState, RefreshEntitlementParamsEvent>()
-                    .defaultFailureEvent(REFRESH_ENTITLEMENT_FAILURE_EVENT)
-                    .from(INIT_STATE).to(REFRESH_CB_ENTITLEMENT_STATE).event(REFRESH_ENTITLEMENT_PARAMS_TRIGGER_EVENT)
+                    .defaultFailureEvent(REFRESH_ENTITLEMENT_FAILURE_EVENT).from(INIT_STATE).to(REFRESH_CB_ENTITLEMENT_STATE)
+                    .event(REFRESH_ENTITLEMENT_PARAMS_TRIGGER_EVENT)
                     .defaultFailureEvent()
 
-                    .from(REFRESH_CB_ENTITLEMENT_STATE).to(FINAL_STATE).event(REFRESH_ENTITLEMENT_FINALIZED_EVENT)
+                    .from(REFRESH_CB_ENTITLEMENT_STATE).to(RE_CONFIGURE_MANAGEMENT_SERVICES_STATE)
+                    .event(CONFIGURE_MANAGEMENT_SERVICES_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(RE_CONFIGURE_MANAGEMENT_SERVICES_STATE).to(RE_CONFIGURE_MANAGEMENT_SERVICES_FINISHED_STATE)
+                    .event(CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT)
+                    .failureEvent(CONFIGURE_MANAGEMENT_SERVICES_FAILED_EVENT)
+
+                    .from(RE_CONFIGURE_MANAGEMENT_SERVICES_FINISHED_STATE).to(FINAL_STATE)
+                    .event(REFRESH_ENTITLEMENT_FINALIZED_EVENT)
                     .defaultFailureEvent()
                     .build();
 

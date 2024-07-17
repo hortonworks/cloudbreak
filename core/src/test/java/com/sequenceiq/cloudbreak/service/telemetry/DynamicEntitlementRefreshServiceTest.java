@@ -29,6 +29,10 @@ import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshConfig;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.ExporterConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
@@ -40,6 +44,8 @@ class DynamicEntitlementRefreshServiceTest {
 
     private static final String STACK_CRN = "crn:cdp:datalake:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:datalake:f551c9f0-e837-4c61-9623-b8fe596757c4";
 
+    private static final String USER = "user";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -48,6 +54,12 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Mock
     private DynamicEntitlementRefreshConfig dynamicEntitlementRefreshConfig;
+
+    @Mock
+    private MonitoringConfiguration monitoringConfiguration;
+
+    @Mock
+    private ClusterService clusterService;
 
     @InjectMocks
     private DynamicEntitlementRefreshService underTest;
@@ -61,10 +73,37 @@ class DynamicEntitlementRefreshServiceTest {
     @Mock
     private Features features;
 
+    @Mock
+    private ExporterConfiguration exporterConfiguration;
+
+    @Mock
+    private ClusterView clusterView;
+
     @BeforeEach
     void setup() {
         lenient().when(dynamicEntitlementRefreshConfig.getCbEntitlements()).thenReturn(List.of("CDP_CENTRAL_COMPUTE_MONITORING"));
         lenient().when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Set.of("CDP_CENTRAL_COMPUTE_MONITORING"));
+        lenient().when(monitoringConfiguration.getClouderaManagerExporter()).thenReturn(exporterConfiguration);
+        lenient().when(exporterConfiguration.getUser()).thenReturn(USER);
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
+        lenient().when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
+        lenient().when(stackDto.getCluster()).thenReturn(clusterView);
+        lenient().when(clusterView.getCloudbreakClusterManagerMonitoringUser()).thenReturn(USER);
+        lenient().when(clusterView.getId()).thenReturn(STACK_ID);
+    }
+
+    @Test
+    void testHandleLegacyConfigurationsGenerateMonitoringUser() {
+        when(clusterView.getCloudbreakClusterManagerMonitoringUser()).thenReturn(null);
+        when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
+        when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
+        //monitoring enabled in telemetry component
+        when(telemetry.getDynamicEntitlements()).thenReturn(Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE));
+
+        Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
+
+        assertTrue(result.isEmpty());
+        verify(clusterService).generateClusterManagerMonitoringUserIfMissing(eq(STACK_ID), eq(USER));
     }
 
     @Test
@@ -93,8 +132,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsNotChanged() {
-        when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
         when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
@@ -104,12 +141,11 @@ class DynamicEntitlementRefreshServiceTest {
         Map<String, Boolean> result = underTest.getChangedWatchedEntitlementsAndStoreNewFromUms(stackDto);
 
         assertTrue(result.isEmpty());
+        verify(clusterService, never()).generateClusterManagerMonitoringUserIfMissing(any(), any());
     }
 
     @Test
     void testGetChangedWatchedEntitlementsEmptyTelemetry() {
-        when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
         when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
@@ -124,8 +160,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsNoRightEntitlementInTelemetry() {
-        when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring enabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(List.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
         when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
@@ -142,8 +176,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsChanged() {
-        when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring disabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(Collections.emptyList());
         when(componentConfigProviderService.getTelemetry(STACK_ID)).thenReturn(telemetry);
@@ -158,8 +190,6 @@ class DynamicEntitlementRefreshServiceTest {
 
     @Test
     void testGetChangedWatchedEntitlementsWatchedEntitlementsEmpty() {
-        when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
         //monitoring disabled in ums
         when(entitlementService.getEntitlements(any())).thenReturn(Collections.emptyList());
         when(dynamicEntitlementRefreshConfig.getWatchedEntitlements()).thenReturn(Collections.emptySet());

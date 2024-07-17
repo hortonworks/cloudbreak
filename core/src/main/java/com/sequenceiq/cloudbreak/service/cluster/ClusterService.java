@@ -31,11 +31,11 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -302,6 +303,16 @@ public class ClusterService {
 
     public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, DetailedStackStatus detailedStackStatus) throws TransactionExecutionException {
         return transactionService.notSupported(() -> updateClusterStatusByStackId(stackId, detailedStackStatus, ""));
+    }
+
+    public Cluster generateClusterManagerMonitoringUserIfMissing(Long clusterId, String cmMonitoringUser) {
+        Cluster cluster = getCluster(clusterId);
+        if (cluster.getCloudbreakClusterManagerMonitoringUser() == null && StringUtils.isNotBlank(cmMonitoringUser)) {
+            LOGGER.debug("Update cluster with cm monitoring user. clusterId: {}", cluster.getId());
+            cluster.setCloudbreakClusterManagerMonitoringUser(cmMonitoringUser);
+            cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
+        }
+        return updateCluster(cluster);
     }
 
     public Cluster updateCluster(Cluster cluster) {
