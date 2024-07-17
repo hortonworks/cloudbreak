@@ -130,4 +130,17 @@ class CloudParameterServiceTest {
                 new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
                         "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
     }
+
+    @Test
+    void getDatabaseCapabilitiesFailsWithAzureAuthException() {
+        doAnswer(invocation -> {
+            Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("reason",
+                    new RuntimeException("does not have authorization to perform action X"), 1L));
+            return null;
+        }).when(eventBus).notify(anyString(), any(Event.class));
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseCapabilities(
+                new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
+                        "azure", "desc", "account", new ArrayList<>()), "region", "azure", null));
+    }
 }
