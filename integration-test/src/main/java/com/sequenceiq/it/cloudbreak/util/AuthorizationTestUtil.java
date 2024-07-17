@@ -38,21 +38,21 @@ public class AuthorizationTestUtil {
     }
 
     public static String environmentPattern(TestContext testContext) {
-        return String.format("[\\[]name: %s, crn: crn:cdp:environments:us-west-1:.*:environment:.*[]]\\.",
+        return String.format("[\\[]name: %s, crn: crn:cdp:environments:.*:.*:environment:.*[]]\\.",
                 testContext.get(EnvironmentTestDto.class).getName());
     }
 
     public static String environmentDatalakePattern(TestContext testContext) {
-        return String.format("[\\[]name: %s, crn: crn:cdp:environments:us-west-1:.*:environment:.*[]]\\",
+        return String.format("[\\[]name: %s, crn: crn:cdp:environments:.*:.*:environment:.*[]]\\",
                 testContext.get(EnvironmentTestDto.class).getName());
     }
 
     public static String environmentDatahubPattern(TestContext testContext) {
-        return "environment[(]s[)] [\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*";
+        return "environment[(]s[)] [\\[]crn: crn:cdp:environments:.*:.*:environment:.*";
     }
 
     public static String environmentFreeIpaPattern(TestContext testContext) {
-        return "[\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]]\\.";
+        return "[\\[]crn: crn:cdp:environments:.*:.*:environment:.*[]]\\.";
     }
 
     public static String datalakePattern(TestContext testContext) {
@@ -60,11 +60,11 @@ public class AuthorizationTestUtil {
     }
 
     public static String datalakePattern(String name) {
-        return String.format("datalake[(]s[)] [\\[]name: %s, crn: crn:cdp:datalake:us-west-1:.*:datalake:.*\\.", name);
+        return String.format("datalake[(]s[)] [\\[]name: %s, crn: crn:cdp:datalake:.*:.*:datalake:.*\\.", name);
     }
 
     public static String datahubPattern(TestContext testContext) {
-        return String.format("cluster[(]s[)] [\\[]name: %s, crn: crn:cdp:datahub:us-west-1:.*:cluster:.*",
+        return String.format("cluster[(]s[)] [\\[]name: %s, crn: crn:cdp:datahub:.*:.*:cluster:.*",
                 testContext.get(DistroXTestDto.class).getName());
     }
 
@@ -73,11 +73,11 @@ public class AuthorizationTestUtil {
     }
 
     public static String datahubRecipePattern(String recipeName) {
-        return String.format("[\\[]name: %s, crn: crn:cdp:recipe:us-west-1:.*:recipe:.*[]]\\.", recipeName);
+        return String.format("[\\[]name: %s, crn: crn:cdp:recipe:.*:.*:recipe:.*[]]\\.", recipeName);
     }
 
     public static String proxyConfigPattern(String proxyConfig) {
-        return String.format("[\\[]name: %s, crn: crn:cdp:environments:us-west-1:.*:proxyConfig:.*[]]\\.", proxyConfig);
+        return String.format("[\\[]name: %s, crn: crn:cdp:environments:.*:.*:proxyConfig:.*[]]\\.", proxyConfig);
     }
 
 }

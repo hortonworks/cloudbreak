@@ -324,7 +324,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .whenException(distroXClient.changeImageCatalog(), ForbiddenException.class,
                         expectedMessage("Doesn't have " +
                                 "'datahub/changeImageCatalog' right on any of the environment[(]s[)] " +
-                                "[\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on .*"))
+                                "[\\[]crn: crn:cdp:environments:.*:.*:environment:.*[]] or on .*"))
                 .validate();
 
         //ENV_CREATOR_B can't change ENV_CREATOR_A's DH image catalog in case of having environment admin right but the catalog is created by ENV_CREATOR_A
