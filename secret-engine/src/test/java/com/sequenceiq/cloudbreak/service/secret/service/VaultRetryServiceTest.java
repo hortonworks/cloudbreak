@@ -19,6 +19,7 @@ import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
+import com.sequenceiq.cloudbreak.service.secret.service.VaultRetryService.VaultRetryException;
 
 @ExtendWith(MockitoExtension.class)
 class VaultRetryServiceTest {
@@ -60,6 +61,21 @@ class VaultRetryServiceTest {
             throw new RuntimeException("error");
         }));
         assertEquals("error", exception.getMessage());
+        verify(metricService, never()).incrementMetricCounter(any(MetricType.class));
+    }
+
+    @Test
+    void testRecoverVaultRetryException() {
+        VaultRetryException exception = assertThrows(VaultRetryException.class,
+                () -> underTest.recover(new VaultRetryException("error", new RuntimeException("error"), "read", MetricType.VAULT_READ_FAILED)));
+        assertEquals("error", exception.getMessage());
         verify(metricService, times(1)).incrementMetricCounter(eq(MetricType.VAULT_READ_FAILED));
+    }
+
+    @Test
+    void testRecoverNonRetryableRuntimeException() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.recover(new RuntimeException("error")));
+        assertEquals("error", exception.getMessage());
+        verify(metricService, never()).incrementMetricCounter(any(MetricType.class));
     }
 }

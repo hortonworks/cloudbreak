@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
@@ -56,13 +57,45 @@ public class VaultRetryService {
             LOGGER.warn("Exception during vault " + operation + ", possible shutdown.");
             throw e;
         } catch (RuntimeException e) {
-            LOGGER.error("Exception during vault " + operation, e);
+            LOGGER.warn("Exception during vault " + operation, e);
             if (e.getMessage() != null && e.getMessage().contains(FORBIDDEN_ERROR_MESSAGE)) {
                 throw e;
             } else {
-                metricService.incrementMetricCounter(metricType);
-                throw new Retry.ActionFailedException(e.getMessage());
+                throw new VaultRetryException(e.getMessage(), e, operation, metricType);
             }
+        }
+    }
+
+    @Recover
+    public <T> T recover(VaultRetryException exception) {
+        LOGGER.error("Retry exhausted during vault {}", exception.getOperation(), exception);
+        metricService.incrementMetricCounter(exception.getMetricType());
+        throw exception;
+    }
+
+    @Recover
+    public <T> T recover(RuntimeException exception) {
+        throw exception;
+    }
+
+    static class VaultRetryException extends Retry.ActionFailedException {
+
+        private final String operation;
+
+        private final MetricType metricType;
+
+        VaultRetryException(String message, Exception cause, String operation, MetricType metricType) {
+            super(message, cause);
+            this.operation = operation;
+            this.metricType = metricType;
+        }
+
+        public String getOperation() {
+            return operation;
+        }
+
+        public MetricType getMetricType() {
+            return metricType;
         }
     }
 }

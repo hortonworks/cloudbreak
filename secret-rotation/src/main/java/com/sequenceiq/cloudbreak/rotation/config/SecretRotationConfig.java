@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,8 @@ import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 
 @Configuration
 public class SecretRotationConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationConfig.class);
 
     @Value("${aws.use.fips.endpoint:false}")
     private boolean fipsEnabled;
@@ -78,6 +82,7 @@ public class SecretRotationConfig {
     @Bean
     public List<SecretType> enabledSecretTypes() {
         if (!fipsEnabled && CollectionUtils.isNotEmpty(commercialEnabledSecretTypes)) {
+            LOGGER.debug("Secret types filtering is enabled, secret types: {}", commercialEnabledSecretTypes);
             List<SecretType> enabledSecretTypes = SecretTypeConverter.mapSecretTypes(this.commercialEnabledSecretTypes);
             List<SecretType> internalSecretTypes = enabledSecretTypes.stream().filter(SecretType::internal).toList();
             if (!internalSecretTypes.isEmpty()) {
@@ -86,6 +91,7 @@ public class SecretRotationConfig {
             }
             return enabledSecretTypes;
         } else {
+            LOGGER.debug("Secret types filtering is disabled");
             return List.of();
         }
     }
