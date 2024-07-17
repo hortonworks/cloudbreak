@@ -22,6 +22,7 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBacku
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest.Builder;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag;
 import com.google.common.base.Strings;
@@ -147,6 +148,26 @@ public class DatalakeDrClient {
             builder.setValidationOnly(true);
             builder.setForce(true);
         }
+        return statusConverter.convert(
+                newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                        .restoreDatalake(builder.build())
+        );
+    }
+
+    public DatalakeRestoreStatusResponse triggerRestoreValidation(String datalakeName, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return missingConnectorResponseOnRestore();
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
+
+        Builder builder =
+                RestoreDatalakeRequest
+                        .newBuilder()
+                        .setDatalakeName(datalakeName)
+                        .setValidationOnly(true);
+
         return statusConverter.convert(
                 newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                         .restoreDatalake(builder.build())

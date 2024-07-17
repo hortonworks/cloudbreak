@@ -10,6 +10,7 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreState.DATALAKE_RESTORE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationState.DATALAKE_BACKUP_VALIDATION_FAILED_STATE;
+import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationEvent.DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
 import java.util.Collections;
@@ -29,6 +30,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerBackupValidationEvent;
+import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerRestoreValidationEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -55,12 +57,11 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
 
         if (!event.getSkipOptions().isSkipValidation()) {
             chain.add(new DatalakeTriggerBackupValidationEvent(DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT.event(),
-                event.getResourceId(), event.getUserId(), event.getBackupLocation(), DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));
+                    event.getResourceId(), event.getUserId(), event.getBackupLocation(), DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));
 
-            chain.add(new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(),
-                event.getResourceId(), event.getSdxName(), event.getUserId(), null, event.getBackupLocation(),
-                null, event.getSkipOptions(),
-                DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, 0, true));
+            chain.add(new DatalakeTriggerRestoreValidationEvent(DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT.event(),
+                    event.getResourceId(), event.getSdxName(), event.getUserId(), event.getBackupLocation(),
+                    DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, event.accepted()));
             if (event.isValidationOnly()) {
                 return new FlowTriggerEventQueue(getName(), event, chain);
             }

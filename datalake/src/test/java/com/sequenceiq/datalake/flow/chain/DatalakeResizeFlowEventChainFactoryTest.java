@@ -1,9 +1,9 @@
 package com.sequenceiq.datalake.flow.chain;
 
-
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT;
+import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationEvent.DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +19,13 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerBackupValidationEvent;
+import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerRestoreValidationEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(MockitoJUnitRunner.class)
-public class DatalakeResizeFlowEventChainTest {
+public class DatalakeResizeFlowEventChainFactoryTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -48,6 +49,7 @@ public class DatalakeResizeFlowEventChainTest {
 
         assertEquals(10, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
+        assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
     }
 
     @Test
@@ -59,6 +61,7 @@ public class DatalakeResizeFlowEventChainTest {
 
         assertEquals(10, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupValidationEvent(flowTriggerEventQueue);
+        assertTriggerRestoreValidationEvent(flowTriggerEventQueue);
     }
 
     private void assertTriggerBackupValidationEvent(FlowTriggerEventQueue flowChainQueue) {
@@ -66,7 +69,7 @@ public class DatalakeResizeFlowEventChainTest {
         Selectable triggerEvent = flowChainQueue.getQueue().remove();
         assertEquals(DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT.selector(), triggerEvent.selector());
         assertEquals(sdxCluster.getId(), triggerEvent.getResourceId());
-        assertTrue(triggerEvent instanceof DatalakeTriggerBackupValidationEvent);
+        assertInstanceOf(DatalakeTriggerBackupValidationEvent.class, triggerEvent);
         DatalakeTriggerBackupValidationEvent event = (DatalakeTriggerBackupValidationEvent) triggerEvent;
         assertEquals(BACKUP_LOCATION, event.getBackupLocation());
     }
@@ -96,5 +99,14 @@ public class DatalakeResizeFlowEventChainTest {
         sdxDatabase.setDatabaseCrn("crn:sdxcluster");
         sdxCluster.setSdxDatabase(sdxDatabase);
         return sdxCluster;
+    }
+
+    private void assertTriggerRestoreValidationEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable triggerEvent = flowChainQueue.getQueue().remove();
+        assertEquals(DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT.selector(), triggerEvent.selector());
+        assertEquals(sdxCluster.getId(), triggerEvent.getResourceId());
+        assertInstanceOf(DatalakeTriggerRestoreValidationEvent.class, triggerEvent);
+        DatalakeTriggerRestoreValidationEvent event = (DatalakeTriggerRestoreValidationEvent) triggerEvent;
+        assertEquals(BACKUP_LOCATION, event.getBackupLocation());
     }
 }
