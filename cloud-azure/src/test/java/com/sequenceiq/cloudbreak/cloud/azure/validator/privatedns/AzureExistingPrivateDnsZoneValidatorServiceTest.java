@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneServiceType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.ValidationTestUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -86,7 +86,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
     void testValidateWhenAKSPrivateDNSZoneIdIsNone() {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         AzurePrivateDnsZoneDescriptor azurePrivateDnsZoneDescriptor = new AzurePrivateDnsZoneDescriptorTestImpl(
-                AzureRegisteredPrivateDnsZoneServiceType.AKS.getResourceType());
+                AzureRegisteredPrivateDnsZoneService.AKS.getResourceType());
         Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId = Map.of(azurePrivateDnsZoneDescriptor, NONE_DNS_ZONE_ID);
 
         resultBuilder = underTest.validate(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME, serviceToPrivateDnsZoneId, resultBuilder);

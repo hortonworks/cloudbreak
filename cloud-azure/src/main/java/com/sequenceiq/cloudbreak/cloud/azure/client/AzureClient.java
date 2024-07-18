@@ -122,7 +122,7 @@ import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureVmCapabilities;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
@@ -879,13 +879,13 @@ public class AzureClient {
                 privateDnsZoneManager.serviceClient().getVirtualNetworkLinks().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName));
     }
 
-    public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzureManagedPrivateDnsZoneServiceType> services) {
+    public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzureManagedPrivateDnsZoneService> services) {
         LOGGER.debug("Checking DNS Zones for services {}", services.stream()
                 .map(azureManagedPrivateDnsZoneService -> azureManagedPrivateDnsZoneService.getDnsZoneName(resourceGroupName))
                 .collect(Collectors.toList()));
 
         List<PrivateDnsZone> dnsZones = listPrivateDnsZonesByResourceGroup(resourceGroupName).getAll();
-        for (AzureManagedPrivateDnsZoneServiceType service : services) {
+        for (AzureManagedPrivateDnsZoneService service : services) {
             String dnsZoneName = service.getDnsZoneName(resourceGroupName);
             boolean dnsZoneFound = dnsZones.stream()
                     .filter(dnsZone -> dnsZone.name().equals(dnsZoneName))
@@ -898,12 +898,12 @@ public class AzureClient {
         return true;
     }
 
-    public boolean checkIfNetworkLinksDeployed(String resourceGroupName, String networkId, List<AzureManagedPrivateDnsZoneServiceType> services) {
+    public boolean checkIfNetworkLinksDeployed(String resourceGroupName, String networkId, List<AzureManagedPrivateDnsZoneService> services) {
         LOGGER.debug("Checking Network link between network and services {} and network link {}", networkId,
                 services.stream()
                         .map(azureManagedPrivateDnsZoneService -> azureManagedPrivateDnsZoneService.getDnsZoneName(resourceGroupName))
                         .collect(Collectors.toList()));
-        for (AzureManagedPrivateDnsZoneServiceType service : services) {
+        for (AzureManagedPrivateDnsZoneService service : services) {
             String dnsZoneName = service.getDnsZoneName(resourceGroupName);
             AzureListResult<VirtualNetworkLinkInner> virtualNetworkLinks = listNetworkLinksByPrivateDnsZoneName(resourceGroupName, dnsZoneName);
             if (!isNetworkLinkCreated(networkId, virtualNetworkLinks)) {

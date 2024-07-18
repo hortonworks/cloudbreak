@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -23,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 @ExtendWith(MockitoExtension.class)
 class AzureSingleServerDatabaseTemplateModelBuilderTest {
-
     @InjectMocks
     private AzureSingleServerDatabaseTemplateModelBuilder underTest;
 
@@ -53,8 +51,7 @@ class AzureSingleServerDatabaseTemplateModelBuilderTest {
         DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Map.of("tag1", "tag1"), "");
         AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(databaseServer);
         AzureNetworkView azureNetworkView = new AzureNetworkView(network);
-        when(azureUtils.getResourceName(anyString())).thenReturn("net1");
-        when(azureUtils.encodeString("net1")).thenReturn("net1");
+        Mockito.when(azureUtils.encodeString("net1")).thenReturn("net1");
         Map<String, Object> actualResult = underTest.buildModel(azureDatabaseServerView, azureNetworkView, databaseStack);
         assertEquals("location", actualResult.get("location"));
         assertEquals("root", actualResult.get("adminLoginName"));

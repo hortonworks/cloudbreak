@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES;
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE;
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE_FOR_PRIVATE_ENDPOINT;
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.STORAGE;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.STORAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +50,7 @@ public class AzureNetworkDnsZoneTemplateBuilderTest {
     @Test
     public void whenBuildTemplateThenModelParametersAreSet() throws Exception {
         AzureDnsZoneDeploymentParameters parameters = new AzureDnsZoneDeploymentParameters("networkId", false,
-                List.of(STORAGE, POSTGRES, POSTGRES_FLEXIBLE, POSTGRES_FLEXIBLE_FOR_PRIVATE_ENDPOINT),
+                List.of(STORAGE, POSTGRES, POSTGRES_FLEXIBLE),
                 "resourceGroup",
                 Collections.emptyMap());
 

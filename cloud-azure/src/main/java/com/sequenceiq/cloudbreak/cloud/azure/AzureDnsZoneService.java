@@ -48,11 +48,11 @@ public class AzureDnsZoneService {
     private AzureCloudResourceService azureCloudResourceService;
 
     public List<CloudResource> checkOrCreateDnsZones(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
-            String resourceGroup, Map<String, String> tags, Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone,
+            String resourceGroup, Map<String, String> tags, Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone,
             PrivateDatabaseVariant privateEndpointVariant) {
 
         String networkId = networkView.getNetworkId();
-        List<AzureManagedPrivateDnsZoneServiceType> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
+        List<AzureManagedPrivateDnsZoneService> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
                 .getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, privateEndpointVariant);
         boolean dnsZonesDeployed = azureClient.checkIfDnsZonesDeployed(resourceGroup, cdpManagedDnsZones);
         String deploymentName = azureResourceDeploymentHelperService.generateDeploymentName(cdpManagedDnsZones, DNS_ZONES);
@@ -110,7 +110,7 @@ public class AzureDnsZoneService {
     }
 
     private Deployment createDnsZonesAndNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
-            Map<String, String> tags, List<AzureManagedPrivateDnsZoneServiceType> enabledPrivateEndpointServices) {
+            Map<String, String> tags, List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices) {
         AzureDnsZoneDeploymentParameters parameters = new AzureDnsZoneDeploymentParameters(azureNetworkId,
                 false,
                 enabledPrivateEndpointServices,

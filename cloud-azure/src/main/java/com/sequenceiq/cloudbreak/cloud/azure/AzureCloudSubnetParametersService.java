@@ -35,7 +35,7 @@ public class AzureCloudSubnetParametersService {
     public void addFlexibleServerDelegatedSubnet(CloudSubnet cloudSubnet, List<Delegation> delegations) {
         Boolean flexibleServerDelegatedSubnet = CollectionUtils.isNotEmpty(delegations) ? delegations.stream()
                 .map(Delegation::serviceName)
-                .anyMatch(serviceName -> serviceName.equals(AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE.getResourceType())) : Boolean.FALSE;
+                .anyMatch(serviceName -> serviceName.equals(AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE.getResourceType())) : Boolean.FALSE;
         cloudSubnet.putParameter(FLEXIBLE_SERVER_DELEGATED_SUBNET, flexibleServerDelegatedSubnet);
     }
 

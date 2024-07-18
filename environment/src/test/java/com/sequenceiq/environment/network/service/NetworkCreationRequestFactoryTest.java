@@ -158,10 +158,8 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(REGION, request.getRegion().getRegionName());
         assertEquals(SINGLE_RG, request.getResourceGroup());
         switch (serviceEndpointCreation) {
-            case ENABLED, DISABLED ->
-                    assertEquals(PrivateDatabaseVariant.NONE, request.getPrivateEndpointVariant());
-            case ENABLED_PRIVATE_ENDPOINT ->
-                    assertEquals(PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE, request.getPrivateEndpointVariant());
+            case ENABLED, DISABLED -> assertEquals(PrivateDatabaseVariant.NONE, request.getPrivateEndpointVariant());
+            case ENABLED_PRIVATE_ENDPOINT -> assertEquals(PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE, request.getPrivateEndpointVariant());
             // Needed for checkstyle
             default -> { }
         }
