@@ -1,14 +1,11 @@
 package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 
-/**
- *
- */
 public class AdlsGen2BackupConfigGeneratorTest {
 
     @Test
@@ -64,5 +61,14 @@ public class AdlsGen2BackupConfigGeneratorTest {
                 "mycluster",
                 "12345");
         assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/someplace/deeper/cluster-backups/freeipa/mycluster_12345", location);
+    }
+
+    @Test
+    public void testConvertToRestoreLocation() {
+        AdlsGen2BackupConfigGenerator generator = new AdlsGen2BackupConfigGenerator();
+
+        String result = generator.convertToRestoreLocation("abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/full/");
+
+        assertEquals("https://cloudbreaktestpersistent.dfs.core.windows.net/rebuild/full/", result);
     }
 }

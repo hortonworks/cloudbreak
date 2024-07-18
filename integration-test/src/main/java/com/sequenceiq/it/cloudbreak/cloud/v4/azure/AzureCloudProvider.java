@@ -564,4 +564,14 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public String getEmbeddedDbUpgradeSourceVersion() {
         return azureProperties.getEmbeddedDbUpgradeSourceVersion();
     }
+
+    @Override
+    public String getFreeIpaRebuildFullBackup() {
+        return azureProperties.getFreeipa().getRebuild().getFullbackup();
+    }
+
+    @Override
+    public String getFreeIpaRebuildDataBackup() {
+        return azureProperties.getFreeipa().getRebuild().getDatabackup();
+    }
 }

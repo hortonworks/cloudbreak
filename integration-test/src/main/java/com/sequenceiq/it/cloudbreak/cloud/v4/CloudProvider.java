@@ -227,4 +227,8 @@ public interface CloudProvider {
     boolean isExternalDatabaseSslEnforcementSupported();
 
     String getEmbeddedDbUpgradeSourceVersion();
+
+    String getFreeIpaRebuildFullBackup();
+
+    String getFreeIpaRebuildDataBackup();
 }

@@ -6,6 +6,8 @@ public class FreeIpaProperties {
 
     private Marketplace marketplace = new Marketplace();
 
+    private Rebuild rebuild = new Rebuild();
+
     public Upgrade getUpgrade() {
         return upgrade;
     }
@@ -20,6 +22,14 @@ public class FreeIpaProperties {
 
     public void setMarketplace(Marketplace marketplace) {
         this.marketplace = marketplace;
+    }
+
+    public Rebuild getRebuild() {
+        return rebuild;
+    }
+
+    public void setRebuild(Rebuild rebuild) {
+        this.rebuild = rebuild;
     }
 
     public static class Upgrade {
@@ -54,6 +64,28 @@ public class FreeIpaProperties {
 
         public void setUpgrade(Upgrade upgrade) {
             this.upgrade = upgrade;
+        }
+    }
+
+    public static final class Rebuild {
+        private String fullbackup;
+
+        private String databackup;
+
+        public String getFullbackup() {
+            return fullbackup;
+        }
+
+        public void setFullbackup(String fullbackup) {
+            this.fullbackup = fullbackup;
+        }
+
+        public String getDatabackup() {
+            return databackup;
+        }
+
+        public void setDatabackup(String databackup) {
+            this.databackup = databackup;
         }
     }
 }

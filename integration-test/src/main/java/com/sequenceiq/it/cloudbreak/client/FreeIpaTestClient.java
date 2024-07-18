@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersInGroupAction
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetHealthDetailsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildv2Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRotateSecretAction;
@@ -114,6 +115,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> rebuild() {
         return new FreeIpaRebuildAction();
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> rebuildv2() {
+        return new FreeIpaRebuildv2Action();
     }
 
     public Action<FreeIpaDiagnosticsTestDto, FreeIpaClient> collectDiagnostics() {

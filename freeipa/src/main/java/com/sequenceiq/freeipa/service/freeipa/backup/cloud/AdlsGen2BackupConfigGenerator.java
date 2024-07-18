@@ -33,6 +33,10 @@ public class AdlsGen2BackupConfigGenerator extends CloudBackupConfigGenerator<Ad
         return generatedLocation;
     }
 
+    public String convertToRestoreLocation(String location) {
+        return StringUtils.substringBeforeLast(generateBackupLocation(location, "", "", ""), CLUSTER_BACKUP_PREFIX);
+    }
+
     private AdlsGen2BackupConfig generateBackupConfig(String location) {
         if (StringUtils.isNotEmpty(location)) {
             String locationWithoutScheme = getLocationWithoutSchemePrefixes(location, ADLS_GEN2_SCHEME_PREFIXES);

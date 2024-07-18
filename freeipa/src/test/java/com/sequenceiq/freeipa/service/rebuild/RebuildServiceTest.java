@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.api.v2.freeipa.model.rebuild.RebuildV2Request;
@@ -66,6 +67,7 @@ class RebuildServiceTest {
         request.setFullBackupStorageLocation("fbackup");
         Stack stack = new Stack();
         stack.setId(56L);
+        stack.setCloudPlatform(CloudPlatform.MOCK.name());
         when(stackService.getFreeIpaStackWithMdcContext(request.getEnvironmentCrn(), ACCOUNT_ID)).thenReturn(stack);
         when(entitlementService.isFreeIpaRebuildEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         Operation operation = new Operation();

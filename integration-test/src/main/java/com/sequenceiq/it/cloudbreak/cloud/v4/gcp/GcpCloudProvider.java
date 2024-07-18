@@ -505,4 +505,14 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public String getEmbeddedDbUpgradeSourceVersion() {
         return gcpProperties.getEmbeddedDbUpgradeSourceVersion();
     }
+
+    @Override
+    public String getFreeIpaRebuildFullBackup() {
+        return gcpProperties.getFreeipa().getRebuild().getFullbackup();
+    }
+
+    @Override
+    public String getFreeIpaRebuildDataBackup() {
+        return gcpProperties.getFreeipa().getRebuild().getDatabackup();
+    }
 }

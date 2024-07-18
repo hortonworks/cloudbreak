@@ -182,6 +182,9 @@ integrationtest:
       upgrade:
         imageId: ee52a28a-7551-4f56-8b08-a23f155316ba
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
+      rebuild:
+        fullbackup: s3://cloudbreak-test-persistent/freeipa_rebuild/full/
+        databackup: s3://cloudbreak-test-persistent/freeipa_rebuild/hourly/
     diskEncryption:
       environmentKey:
       datahubKey:
@@ -264,6 +267,9 @@ integrationtest:
         upgrade:
             imageId: 5cc93573-4bf2-49f3-927b-b12a52f72dba
             catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/v3-mp-freeipa-image-catalog.json
+      rebuild:
+        fullbackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/full/
+        databackup: abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/hourly/
     diskEncryption:
       encryptionKeyUrl:
       resourceGroupName:
@@ -328,6 +334,9 @@ integrationtest:
       upgrade:
         imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
+      rebuild:
+        fullbackup: gs://cloudbreak-test-persistent/rebuild/full
+        databackup: gs://cloudbreak-test-persistent/rebuild/hourly
     diskEncryption:
       environmentKey:
       datahubKey:

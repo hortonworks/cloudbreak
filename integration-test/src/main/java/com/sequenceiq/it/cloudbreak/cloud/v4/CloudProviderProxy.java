@@ -521,4 +521,14 @@ public class CloudProviderProxy implements CloudProvider {
     public String getEmbeddedDbUpgradeSourceVersion() {
         return delegate.getEmbeddedDbUpgradeSourceVersion();
     }
+
+    @Override
+    public String getFreeIpaRebuildFullBackup() {
+        return delegate.getFreeIpaRebuildFullBackup();
+    }
+
+    @Override
+    public String getFreeIpaRebuildDataBackup() {
+        return delegate.getFreeIpaRebuildDataBackup();
+    }
 }

@@ -23,3 +23,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeDatabaseServerTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRestartInstancesTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRestartInstancesTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests

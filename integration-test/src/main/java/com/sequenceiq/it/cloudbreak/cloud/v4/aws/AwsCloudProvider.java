@@ -543,4 +543,14 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public String getEmbeddedDbUpgradeSourceVersion() {
         return awsProperties.getEmbeddedDbUpgradeSourceVersion();
     }
+
+    @Override
+    public String getFreeIpaRebuildFullBackup() {
+        return awsProperties.getFreeipa().getRebuild().getFullbackup();
+    }
+
+    @Override
+    public String getFreeIpaRebuildDataBackup() {
+        return awsProperties.getFreeipa().getRebuild().getDatabackup();
+    }
 }

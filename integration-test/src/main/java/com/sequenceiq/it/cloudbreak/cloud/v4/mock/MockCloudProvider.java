@@ -136,6 +136,18 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaRebuildFullBackup() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
+    public String getFreeIpaRebuildDataBackup() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
     public MockStackV4Parameters stackParameters() {
         return new MockStackV4Parameters();
     }
