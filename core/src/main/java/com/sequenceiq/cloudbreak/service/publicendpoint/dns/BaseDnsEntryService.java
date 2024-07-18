@@ -55,7 +55,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
             BiFunction<Map<String, String>, String, Map<String, String>> action) {
 
         Map<String, String> result = new HashMap<>();
-        if (stack.getCluster() != null && manageCertificateAndDnsInPem()) {
+        if (stack.getCluster() != null && manageCertificateAndDnsInPem(stack.getStack())) {
             LOGGER.info("Modifying DNS entries for {} on stack '{}'", logName(), stack.getName());
             Map<String, String> ipsByFqdn = getCandidateIpsByFqdn(stack);
             if (!CollectionUtils.isEmpty(candidateAddressesByFqdn)) {

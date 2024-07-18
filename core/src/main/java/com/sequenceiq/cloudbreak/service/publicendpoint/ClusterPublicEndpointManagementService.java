@@ -63,7 +63,7 @@ public class ClusterPublicEndpointManagementService {
 
     public boolean changeGateway(StackDtoDelegate stack) {
         String result = null;
-        if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
+        if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(stack.getStack())) {
             result = gatewayPublicEndpointManagementService.updateDnsEntryForCluster(stack);
         }
         return StringUtils.isNoneEmpty(result);
@@ -76,7 +76,7 @@ public class ClusterPublicEndpointManagementService {
     }
 
     public void start(StackDtoDelegate stack) {
-        if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
+        if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(stack.getStack())) {
             try {
                 LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
                 gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
@@ -87,8 +87,8 @@ public class ClusterPublicEndpointManagementService {
         }
     }
 
-    public boolean manageCertificateAndDnsInPem() {
-        return gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem();
+    public boolean manageCertificateAndDnsInPem(StackView stackView) {
+        return gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(stackView);
     }
 
     private void changeGatewayAddress(StackDtoDelegate stackDto, Map<String, String> newAddressesByFqdn) {

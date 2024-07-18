@@ -44,7 +44,7 @@ class ClusterPublicEndpointManagementServiceTest {
 
     @Test
     void testStartWhenPemIsDisabled() {
-        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()).thenReturn(false);
+        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(false);
 
         underTest.start(stack);
 
@@ -54,7 +54,7 @@ class ClusterPublicEndpointManagementServiceTest {
 
     @Test
     void testStartWhenPemIsEnabled() {
-        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()).thenReturn(true);
+        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(true);
 
         underTest.start(stack);
 
@@ -64,7 +64,7 @@ class ClusterPublicEndpointManagementServiceTest {
 
     @Test
     void testChangeGateway() {
-        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()).thenReturn(true);
+        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(true);
         underTest.changeGateway(stack);
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForCluster(stack);
     }
@@ -74,7 +74,7 @@ class ClusterPublicEndpointManagementServiceTest {
         InstanceMetaData pgw = new InstanceMetaData();
         pgw.setPublicIp("192.168.1.1");
         when(stack.getPrimaryGatewayInstance()).thenReturn(pgw);
-        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()).thenReturn(true);
+        when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(true);
         underTest.upscale(stack, Map.of("fqdn1", "192.168.1.1", "fqdn2", "192.168.1.2"));
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForCluster(stack);
         verify(dnsEntryServices, times(1)).forEach(any());

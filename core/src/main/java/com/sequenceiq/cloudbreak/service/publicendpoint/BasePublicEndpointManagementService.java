@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.view.StackView;
+
+import software.amazon.awssdk.utils.StringUtils;
 
 public abstract class BasePublicEndpointManagementService {
 
@@ -21,8 +25,8 @@ public abstract class BasePublicEndpointManagementService {
     @Inject
     private CertificateCreationService certificateCreationService;
 
-    public boolean manageCertificateAndDnsInPem() {
-        return certGenerationEnabled;
+    public boolean manageCertificateAndDnsInPem(StackView stackView) {
+        return certGenerationEnabled && !StringUtils.equals(CloudPlatform.MOCK.name(), stackView.getCloudPlatform());
     }
 
     public DnsManagementService getDnsManagementService() {

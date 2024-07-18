@@ -70,7 +70,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private TransactionService transactionService;
 
     public boolean isCertRenewalTriggerable(StackView stack) {
-        return manageCertificateAndDnsInPem()
+        return manageCertificateAndDnsInPem(stack)
                 && stack != null
                 && stack.getClusterId() != null;
     }
@@ -125,7 +125,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public void updateDnsEntryForLoadBalancers(StackDtoDelegate stack) {
-        if (manageCertificateAndDnsInPem() && stack != null) {
+        if (stack != null && manageCertificateAndDnsInPem(stack.getStack())) {
             Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
             if (loadBalancerOptional.isEmpty()) {
                 LOGGER.warn("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");

@@ -49,7 +49,7 @@ public class ClusterStartService {
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public void updateDnsEntriesInPem(StackDtoDelegate stack) {
-        if (clusterPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
+        if (clusterPublicEndpointManagementService.manageCertificateAndDnsInPem(stack.getStack())) {
             String updatingDnsMsg = "Updating the cluster's DNS entries in Public Endpoint Management Service.";
             LOGGER.info(updatingDnsMsg);
             String clusterManagerIp = stackUtil.extractClusterManagerIp(stack);
