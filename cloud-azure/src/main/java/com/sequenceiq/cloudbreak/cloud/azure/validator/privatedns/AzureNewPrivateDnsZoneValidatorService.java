@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateEndpointServicesProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant;
@@ -29,9 +29,9 @@ public class AzureNewPrivateDnsZoneValidatorService {
 
     public ValidationResult.ValidationResultBuilder zonesNotConnectedToNetwork(
             AzureClient azureClient, String networkId, String singleResourceGroupName,
-            Set<AzureManagedPrivateDnsZoneService> servicesWithExistingDnsZones,
+            Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingDnsZones,
             PrivateDatabaseVariant privateDatabaseVariant, ValidationResult.ValidationResultBuilder resultBuilder) {
-        List<AzureManagedPrivateDnsZoneService> cdpManagedPrivateEndpointServices = azurePrivateEndpointServicesProvider
+        List<AzureManagedPrivateDnsZoneServiceType> cdpManagedPrivateEndpointServices = azurePrivateEndpointServicesProvider
                 .getCdpManagedDnsZoneServices(servicesWithExistingDnsZones, privateDatabaseVariant);
         if (cdpManagedPrivateEndpointServices.isEmpty()) {
             LOGGER.debug("There are no private DNS zone services that CDP would manage on its own, skipping checking if DNS zones are already connected " +
@@ -40,7 +40,7 @@ public class AzureNewPrivateDnsZoneValidatorService {
         }
 
         List<PrivateDnsZone> privateDnsZoneList = azureClient.getPrivateDnsZoneList().getAll();
-        for (AzureManagedPrivateDnsZoneService service : cdpManagedPrivateEndpointServices) {
+        for (AzureManagedPrivateDnsZoneServiceType service : cdpManagedPrivateEndpointServices) {
             LOGGER.debug("Validating network that no private DNS zone with name {} is connected to it.", service.getDnsZoneName(singleResourceGroupName));
             azurePrivateDnsZoneValidatorService.privateDnsZonesNotConnectedToNetwork(azureClient, networkId, singleResourceGroupName,
                     service.getDnsZoneName(singleResourceGroupName), resultBuilder, privateDnsZoneList);

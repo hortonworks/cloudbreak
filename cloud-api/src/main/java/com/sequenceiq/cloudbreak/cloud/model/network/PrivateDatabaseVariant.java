@@ -13,18 +13,20 @@ public enum PrivateDatabaseVariant {
     NONE(false, null),
     POSTGRES_WITH_EXISTING_DNS_ZONE(false, SINGLE_SERVER),
     POSTGRES_WITH_NEW_DNS_ZONE(true, SINGLE_SERVER),
-    FLEXIBLE_POSTGRES_WITH_EXISTING_DNS_ZONE(false, FLEXIBLE_SERVER),
-    FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE(true, FLEXIBLE_SERVER);
+    FLEXIBLE_POSTGRES_WITH_PE_AND_EXISTING_DNS_ZONE(false, FLEXIBLE_SERVER),
+    FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE(true, FLEXIBLE_SERVER),
+    FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_EXISTING_DNS_ZONE(false, FLEXIBLE_SERVER),
+    FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE(true, FLEXIBLE_SERVER);
 
     private static final Map<PrivateDatabaseVariantKey, PrivateDatabaseVariant> VARIANT_MAP = Map.ofEntries(
             entry(new PrivateDatabaseVariantKey(false, false, false), NONE),
             entry(new PrivateDatabaseVariantKey(false, true, false), NONE),
             entry(new PrivateDatabaseVariantKey(true, false, true), NONE),
             entry(new PrivateDatabaseVariantKey(true, true, true), NONE),
-            entry(new PrivateDatabaseVariantKey(false, false, true), FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE),
-            entry(new PrivateDatabaseVariantKey(false, true, true), FLEXIBLE_POSTGRES_WITH_EXISTING_DNS_ZONE),
-            entry(new PrivateDatabaseVariantKey(true, false, false), POSTGRES_WITH_NEW_DNS_ZONE),
-            entry(new PrivateDatabaseVariantKey(true, true, false), POSTGRES_WITH_EXISTING_DNS_ZONE));
+            entry(new PrivateDatabaseVariantKey(false, false, true), FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE),
+            entry(new PrivateDatabaseVariantKey(false, true, true), FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_EXISTING_DNS_ZONE),
+            entry(new PrivateDatabaseVariantKey(true, false, false), FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE),
+            entry(new PrivateDatabaseVariantKey(true, true, false), FLEXIBLE_POSTGRES_WITH_PE_AND_EXISTING_DNS_ZONE));
 
     private final boolean zoneManagedByCdp;
 

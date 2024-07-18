@@ -24,9 +24,9 @@ public class AzurePrivateEndpointServicesProviderTest {
     @Test
     void testGetCdpManagedDnsZonesWhenExistingDnsZone() {
         setEnabledPrivateEndpointServices(List.of("postgresqlServer"));
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of(AzureManagedPrivateDnsZoneService.POSTGRES);
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = Set.of(AzureManagedPrivateDnsZoneServiceType.POSTGRES);
 
-        List<AzureManagedPrivateDnsZoneService> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
+        List<AzureManagedPrivateDnsZoneServiceType> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
                 PrivateDatabaseVariant.POSTGRES_WITH_EXISTING_DNS_ZONE);
 
         assertThat(privateEndpointServices).isEmpty();
@@ -35,35 +35,37 @@ public class AzurePrivateEndpointServicesProviderTest {
     @Test
     void testGetCdpManagedDnsZonesWhenCdpManagesZone() {
         setEnabledPrivateEndpointServices(List.of("postgresqlServer"));
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of();
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = Set.of();
 
-        List<AzureManagedPrivateDnsZoneService> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
+        List<AzureManagedPrivateDnsZoneServiceType> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
                 PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE);
 
         assertThat(privateEndpointServices).hasSize(1);
-        assertThat(privateEndpointServices).contains(AzureManagedPrivateDnsZoneService.POSTGRES);
+        assertThat(privateEndpointServices).contains(AzureManagedPrivateDnsZoneServiceType.POSTGRES);
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
+            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
     void testGetCdpManagedDnsZonesWhenBothDBServicesEnabledAndCdpManagesZone(PrivateDatabaseVariant variant) {
         setEnabledPrivateEndpointServices(List.of("postgresqlServer", "flexiblePostgresqlServer"));
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of();
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = Set.of();
 
-        List<AzureManagedPrivateDnsZoneService> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, variant);
+        List<AzureManagedPrivateDnsZoneServiceType> privateEndpointServices =
+                underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, variant);
 
         assertThat(privateEndpointServices).hasSize(1);
         assertThat(privateEndpointServices).contains(variant == PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE ?
-                AzureManagedPrivateDnsZoneService.POSTGRES :
-                AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE);
+                AzureManagedPrivateDnsZoneServiceType.POSTGRES :
+                AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE);
     }
 
     @Test
     void testGetCdpManagedDnsZonesWhenServiceNotEnabled() {
         setEnabledPrivateEndpointServices(List.of());
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of();
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = Set.of();
 
-        List<AzureManagedPrivateDnsZoneService> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
+        List<AzureManagedPrivateDnsZoneServiceType> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
                 PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE);
 
         assertThat(privateEndpointServices).isEmpty();
@@ -72,9 +74,9 @@ public class AzurePrivateEndpointServicesProviderTest {
     @Test
     void testGetCdpManagedDnsZonesShouldReturnEmptyListWhenPrivateDatabaseVariantIsNone() {
         setEnabledPrivateEndpointServices(List.of("postgresqlServer", "flexiblePostgresqlServer"));
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of();
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = Set.of();
 
-        List<AzureManagedPrivateDnsZoneService> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
+        List<AzureManagedPrivateDnsZoneServiceType> privateEndpointServices = underTest.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone,
                 PrivateDatabaseVariant.NONE);
 
         assertThat(privateEndpointServices).isEmpty();

@@ -74,22 +74,6 @@ class EnvironmentDatabaseServiceTest {
     }
 
     @Test
-    void testValidateWhenPrivateSingleSetupAndFlexibleDbTypeShouldThrowBadRequest() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
-        environmentResponse.setNetwork(environmentNetworkResponse);
-        EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
-        environmentNetworkAzureParams.setDatabasePrivateDnsZoneId("zoneid");
-        environmentNetworkResponse.setAzure(environmentNetworkAzureParams);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.validateOrModifyDatabaseTypeIfNeeded(environmentResponse, FLEXIBLE_SERVER)));
-
-        assertTrue(exception.getMessage().contains("Your environment was created with Azure Private Single Server database setup."));
-    }
-
-    @Test
     void testValidateWhenFlexibleEnabledAndNoDBTypeGiven() {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);

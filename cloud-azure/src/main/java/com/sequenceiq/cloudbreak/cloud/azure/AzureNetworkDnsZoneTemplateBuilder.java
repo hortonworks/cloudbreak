@@ -57,12 +57,12 @@ public class AzureNetworkDnsZoneTemplateBuilder {
     }
 
     private Map<String, Object> createModel(AzureDnsZoneDeploymentParameters parameters) {
-        List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices = parameters.getEnabledPrivateEndpointServices();
+        List<AzureManagedPrivateDnsZoneServiceType> enabledPrivateEndpointServices = parameters.getEnabledPrivateEndpointServices();
         String networkId = parameters.getNetworkId();
         String resourceGroup = parameters.getResourceGroupName();
         boolean deployOnlyNetworkLinks = parameters.getDeployOnlyNetworkLinks();
         Map<String, String> tags = parameters.getTags();
-        EnumMap<AzureManagedPrivateDnsZoneService, String> privateEndpointServicesWithNames = new EnumMap<>(AzureManagedPrivateDnsZoneService.class);
+        EnumMap<AzureManagedPrivateDnsZoneServiceType, String> privateEndpointServicesWithNames = new EnumMap<>(AzureManagedPrivateDnsZoneServiceType.class);
         enabledPrivateEndpointServices.forEach(service -> privateEndpointServicesWithNames.put(service, service.getDnsZoneName(resourceGroup)));
 
         Map<String, Object> model = new HashMap<>();

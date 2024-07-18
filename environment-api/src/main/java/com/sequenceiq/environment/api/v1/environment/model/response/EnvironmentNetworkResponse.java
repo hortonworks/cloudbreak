@@ -169,8 +169,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
                 ", mlxSubnets=" + mlxSubnets +
                 ", liftieSubnets=" + liftieSubnets +
                 ", existingNetwork=" + existingNetwork +
-                ", preferedSubnetId='" + preferedSubnetId + '\'' +
-                ", preferedSubnetIds='" + preferedSubnetIds + '\'' +
+                ", preferredSubnetId='" + preferedSubnetId + '\'' +
+                ", preferredSubnetIds='" + preferedSubnetIds + '\'' +
                 ", networkCidrs=" + networkCidrs +
                 ", gatewayEndpointSubnetMetas=" + gatewayEndpointSubnetMetas +
                 '}';

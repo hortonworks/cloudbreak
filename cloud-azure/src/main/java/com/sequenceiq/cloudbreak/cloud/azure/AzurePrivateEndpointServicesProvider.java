@@ -22,20 +22,21 @@ public class AzurePrivateEndpointServicesProvider {
     @Value("${cb.arm.privateendpoint.services:}")
     private List<String> privateEndpointServices;
 
-    public List<AzureManagedPrivateDnsZoneService> getCdpManagedDnsZoneServices(Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone,
-            PrivateDatabaseVariant privateDatabaseVariant) {
-        AzureDatabaseType databaseType = privateDatabaseVariant.getDatabaseType();
-        List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices =
-                getEnabledPrivateEndpointServices(servicesWithExistingPrivateDnsZone, databaseType);
+    public List<AzureManagedPrivateDnsZoneServiceType> getCdpManagedDnsZoneServices(
+            Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone, PrivateDatabaseVariant privateDatabaseVariant) {
+        List<AzureManagedPrivateDnsZoneServiceType> enabledPrivateEndpointServices =
+                getEnabledPrivateEndpointServices(servicesWithExistingPrivateDnsZone, privateDatabaseVariant);
         LOGGER.debug("Services with existing private dns zones: {}, services where new private DNS zone needs to be created: {}",
                 servicesWithExistingPrivateDnsZone, enabledPrivateEndpointServices);
         return enabledPrivateEndpointServices;
     }
 
-    private List<AzureManagedPrivateDnsZoneService> getEnabledPrivateEndpointServices(
-            Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone, AzureDatabaseType databaseType) {
-        List<AzureManagedPrivateDnsZoneService> serviceEnumList = privateEndpointServices.stream()
-                .map(AzureManagedPrivateDnsZoneService::getBySubResource)
+    private List<AzureManagedPrivateDnsZoneServiceType> getEnabledPrivateEndpointServices(
+            Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone, PrivateDatabaseVariant privateDatabaseVariant) {
+        AzureDatabaseType databaseType = privateDatabaseVariant.getDatabaseType();
+        List<AzureManagedPrivateDnsZoneServiceType> serviceEnumList = privateEndpointServices.stream()
+                .map(privateEndpointServices ->
+                        AzureManagedPrivateDnsZoneServiceType.getBySubResourceAndVariant(privateEndpointServices, privateDatabaseVariant))
                 .filter(Predicate.not(servicesWithExistingPrivateDnsZone::contains))
                 .filter(service ->
                         service.getResourceFamily() != AzureResourceFamily.DATABASE ||

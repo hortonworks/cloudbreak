@@ -1,8 +1,9 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_PE_AND_EXISTING_DNS_ZONE;
+import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.NONE;
-import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.POSTGRES_WITH_EXISTING_DNS_ZONE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -97,7 +98,7 @@ public class AzurePrivateEndpointValidatorTest {
         AzureParams azureParams = getAzureParams();
         NetworkDto networkDto = getNetworkDto(azureParams);
         when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(),
-                eq(POSTGRES_WITH_NEW_DNS_ZONE), any())).
+                eq(FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE), any())).
                 thenReturn(envValidationResultBuilder.error(message));
 
         underTest.checkNewPrivateDnsZone(envValidationResultBuilder, environmentDto, networkDto);
@@ -111,14 +112,16 @@ public class AzurePrivateEndpointValidatorTest {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         EnvironmentDto environmentDto = getEnvironmentDto(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         AzureParams azureParams = getAzureParams();
-        when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), eq(POSTGRES_WITH_NEW_DNS_ZONE), any())).
+        when(azureNewPrivateDnsZoneValidatorService.zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(),
+                eq(FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE), any())).
                 thenReturn(null);
 
         underTest.checkNewPrivateDnsZone(validationResultBuilder, environmentDto, getNetworkDto(azureParams));
 
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
-        verify(azureNewPrivateDnsZoneValidatorService).zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(), eq(POSTGRES_WITH_NEW_DNS_ZONE), any());
+        verify(azureNewPrivateDnsZoneValidatorService).zonesNotConnectedToNetwork(any(), any(), eq(MY_SINGLE_RG), any(),
+                eq(FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE), any());
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -162,7 +165,7 @@ public class AzurePrivateEndpointValidatorTest {
         verify(credentialToCloudCredentialConverter).convert(any());
         verify(azureClientService).getClient(any());
         verify(azureNewPrivateDnsZoneValidatorService).zonesNotConnectedToNetwork(any(), eq(NETWORK_ID), eq(MY_SINGLE_RG),
-                any(), eq(POSTGRES_WITH_EXISTING_DNS_ZONE), eq(validationResultBuilder));
+                any(), eq(FLEXIBLE_POSTGRES_WITH_PE_AND_EXISTING_DNS_ZONE), eq(validationResultBuilder));
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -338,5 +341,4 @@ public class AzurePrivateEndpointValidatorTest {
         cloudSubnetOne.setName("subnet-one");
         return Map.of("subnet-one", cloudSubnetOne);
     }
-
 }

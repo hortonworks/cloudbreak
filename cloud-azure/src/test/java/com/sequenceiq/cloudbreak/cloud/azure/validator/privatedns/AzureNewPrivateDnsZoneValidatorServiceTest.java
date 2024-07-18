@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateEndpointServicesProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
@@ -51,14 +51,15 @@ public class AzureNewPrivateDnsZoneValidatorServiceTest {
     @Mock
     private AzureClient azureClient;
 
-    private final List<AzureManagedPrivateDnsZoneService> availableServicesForPrivateEndpoint = Arrays.asList(AzureManagedPrivateDnsZoneService.values());
+    private final List<AzureManagedPrivateDnsZoneServiceType> availableServicesForPrivateEndpoint =
+            Arrays.asList(AzureManagedPrivateDnsZoneServiceType.values());
 
     @ParameterizedTest
     @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
-            names = {"POSTGRES_WITH_EXISTING_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_EXISTING_DNS_ZONE"})
+            names = {"POSTGRES_WITH_EXISTING_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_EXISTING_DNS_ZONE"})
     void testZonesNotConnectedToNetworkWhenNoExistingDnsZones(PrivateDatabaseVariant variant) {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = Set.of();
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = Set.of();
         when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, variant))
                 .thenReturn(availableServicesForPrivateEndpoint);
         List<PrivateDnsZone> privateDnsZoneList = setupPrivateDnsZones();
@@ -77,10 +78,11 @@ public class AzureNewPrivateDnsZoneValidatorServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
+            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
     void testZonesNotConnectedToNetworkWhenNoCdpManagedZones(PrivateDatabaseVariant variant) {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        Set<AzureManagedPrivateDnsZoneService> servicesWithExistingPrivateDnsZone = new HashSet<>(availableServicesForPrivateEndpoint);
+        Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingPrivateDnsZone = new HashSet<>(availableServicesForPrivateEndpoint);
         when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZoneServices(servicesWithExistingPrivateDnsZone, variant)).thenReturn(List.of());
 
         underTest.zonesNotConnectedToNetwork(azureClient, NETWORK_NAME, SINGLE_RESOURCE_GROUP_NAME, servicesWithExistingPrivateDnsZone, variant, resultBuilder);

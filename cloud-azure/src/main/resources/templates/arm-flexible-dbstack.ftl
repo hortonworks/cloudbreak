@@ -142,6 +142,10 @@
       "type": "string",
       "defaultValue": ""
     },
+    "privateEndpointName": {
+      "type": "String",
+      "defaultValue": "${privateEndpointName}"
+    },
     "existingDatabasePrivateDnsZoneId": {
       "type": "string",
       "defaultValue": "${existingDatabasePrivateDnsZoneId!""}"
@@ -165,7 +169,7 @@
   "resources": [
     {
       "type": "Microsoft.DBforPostgreSQL/flexibleServers",
-      "apiVersion": "2022-12-01",
+      "apiVersion": "2023-06-01-preview",
       "name": "[parameters('dbServerName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -192,11 +196,14 @@
             "primaryUserAssignedIdentityId": "[parameters('encryptionUserManagedIdentity')]"
         },</#if>
         "network": {
-          <#if existingDatabasePrivateDnsZoneId?has_content && flexibleServerDelegatedSubnetId?has_content>
-          "publicNetworkAccess": "Disabled",
+          <#if usePrivateEndpoints>
+          "publicNetworkAccess": "Disabled"
           </#if>
+          <#if useDelegatedSubnet>
+          "publicNetworkAccess": "Disabled",
           "delegatedSubnetResourceId": "[if(empty(parameters('flexibleServerDelegatedSubnetId')), json('null'), parameters('flexibleServerDelegatedSubnetId'))]",
           "privateDnsZoneArmResourceId": "[if(empty(parameters('existingDatabasePrivateDnsZoneId')), json('null'), parameters('existingDatabasePrivateDnsZoneId'))]"
+          </#if>
         },
         "highAvailability": {
           "mode": "[parameters('haMode')]"
@@ -230,7 +237,63 @@
       }
     }
     </#if>
-    <#if !existingDatabasePrivateDnsZoneId?has_content && !flexibleServerDelegatedSubnetId?has_content>
+    <#if usePrivateEndpoints>
+    ,{
+        "type": "Microsoft.Network/privateEndpoints",
+        "apiVersion": "2023-05-01",
+        "name": "${privateEndpointName}",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('dbServerName'))]"
+        ],
+        "tags": "[parameters('serverTags')]",
+        "properties": {
+            "privateLinkServiceConnections": [
+                {
+                    "name": "${privateEndpointName}",
+                    "properties": {
+                        "privateLinkServiceId": "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', parameters('dbServerName'))]",
+                        "groupIds": [
+                            "postgresqlServer"
+                        ],
+                        "privateLinkServiceConnectionState": {
+                            "status": "Approved",
+                            "description": "Auto-approved",
+                            "actionsRequired": "None"
+                        }
+                    }
+                }
+            ],
+            "manualPrivateLinkServiceConnections": [],
+            "subnet": {
+                "id": "${subnetIdForPrivateEndpoint}"
+            },
+            "customDnsConfigs": []
+        }
+    },
+    {
+        "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+        "apiVersion": "2023-05-01",
+        "name": "[concat('${privateEndpointName}', '/default')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/privateEndpoints', '${privateEndpointName}') ]"
+        ],
+        "properties": {
+            "privateDnsZoneConfigs": [
+                {
+                    "name": "dns-${privateEndpointName}",
+                    "properties": {
+                        <#if existingDatabasePrivateDnsZoneId??>
+                        "privateDnsZoneId": "${existingDatabasePrivateDnsZoneId}"
+                        <#else>
+                        "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
+                        </#if>
+                    }
+                }
+            ]
+        }
+    }
+    <#elseif !useDelegatedSubnet && !usePrivateEndpoints>
     ,{
       "name": "[concat(parameters('dbServerName'), '/publicaccess')]",
       "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules",
