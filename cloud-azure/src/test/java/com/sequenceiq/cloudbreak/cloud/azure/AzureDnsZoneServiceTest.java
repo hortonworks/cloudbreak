@@ -85,12 +85,11 @@ public class AzureDnsZoneServiceTest {
         ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
         when(azurePrivateEndpointServicesProvider.getCdpManagedDnsZoneServices(any(), any(PrivateDatabaseVariant.class)))
-                .thenReturn(List.of(AzureManagedPrivateDnsZoneServiceType.STORAGE, AzureManagedPrivateDnsZoneServiceType.POSTGRES));
+                .thenReturn(List.of(AzureManagedPrivateDnsZoneService.STORAGE, AzureManagedPrivateDnsZoneService.POSTGRES));
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
-            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
     public void testCheckOrCreateWhenAllResourceExists(PrivateDatabaseVariant variant) {
 
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(true);
@@ -106,8 +105,7 @@ public class AzureDnsZoneServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
-            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsButRequested(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
@@ -126,8 +124,7 @@ public class AzureDnsZoneServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
-            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedButAlreadyCreatedInDatabase(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
@@ -147,8 +144,7 @@ public class AzureDnsZoneServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE,
-            names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabase(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));
@@ -168,8 +164,7 @@ public class AzureDnsZoneServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names =
-            {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE"})
+    @EnumSource(value = PrivateDatabaseVariant.class, mode = Mode.INCLUDE, names = {"POSTGRES_WITH_NEW_DNS_ZONE", "FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE"})
     public void testCheckOrCreateWhenDnsZoneResourceNotExistsAndNotRequestedAndNotCreatedInDatabaseAndError(PrivateDatabaseVariant variant) {
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);
         when(azureResourceDeploymentHelperService.getAzureNetwork(any(), any(), any())).thenReturn(mock(Network.class));

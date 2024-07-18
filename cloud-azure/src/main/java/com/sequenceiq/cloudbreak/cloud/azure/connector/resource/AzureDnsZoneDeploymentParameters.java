@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
 
 public class AzureDnsZoneDeploymentParameters {
 
@@ -12,14 +12,14 @@ public class AzureDnsZoneDeploymentParameters {
 
     private final boolean deployOnlyNetworkLinks;
 
-    private final List<AzureManagedPrivateDnsZoneServiceType> enabledPrivateEndpointServices;
+    private final List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices;
 
     private final String resourceGroupName;
 
     private final Map<String, String> tags;
 
     public AzureDnsZoneDeploymentParameters(String networkId, boolean deployOnlyNetworkLinks,
-            List<AzureManagedPrivateDnsZoneServiceType> enabledPrivateEndpointServices, String resourceGroupName, Map<String, String> tags) {
+            List<AzureManagedPrivateDnsZoneService> enabledPrivateEndpointServices, String resourceGroupName, Map<String, String> tags) {
         this.networkId = networkId;
         this.deployOnlyNetworkLinks = deployOnlyNetworkLinks;
         this.enabledPrivateEndpointServices = enabledPrivateEndpointServices;
@@ -35,7 +35,7 @@ public class AzureDnsZoneDeploymentParameters {
         return deployOnlyNetworkLinks;
     }
 
-    public List<AzureManagedPrivateDnsZoneServiceType> getEnabledPrivateEndpointServices() {
+    public List<AzureManagedPrivateDnsZoneService> getEnabledPrivateEndpointServices() {
         return enabledPrivateEndpointServices;
     }
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.azure.resourcemanager.resources.fluentcore.arm.ResourceId;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneDescriptor;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneServiceType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureRegisteredPrivateDnsZoneService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -28,7 +28,7 @@ public class AzureExistingPrivateDnsZoneValidatorService {
             String networkName, Map<AzurePrivateDnsZoneDescriptor, String> serviceToPrivateDnsZoneId, ValidationResultBuilder resultBuilder) {
         serviceToPrivateDnsZoneId.forEach((service, privateDnsZoneId) -> {
             try {
-                if (AzureRegisteredPrivateDnsZoneServiceType.AKS.getResourceType().equals(service.getResourceType())
+                if (AzureRegisteredPrivateDnsZoneService.AKS.getResourceType().equals(service.getResourceType())
                         && privateDnsZoneId.equalsIgnoreCase(NONE_DNS_ZONE_ID)) {
                     LOGGER.info("AKS Private DNS Zone Id is set to None, skip validations");
                     return;

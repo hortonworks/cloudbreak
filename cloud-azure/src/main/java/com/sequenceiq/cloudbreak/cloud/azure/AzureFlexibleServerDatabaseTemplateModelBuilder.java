@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.common.model.PrivateEndpointType.USE_PRIVATE_ENDPOINT;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
-import io.micrometer.common.util.StringUtils;
-
 @Component
 public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDatabaseTemplateModelBuilder {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureFlexibleServerDatabaseTemplateModelBuilder.class);
 
     private static final String GENERAL_PURPOSE = "GeneralPurpose";
@@ -35,9 +28,6 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
 
     private static final Set<String> MEMORY_OPTIMIZED_INSTANCE_TYPES = Set.of("Standard_E2s_v3", "Standard_E4s_v3", "Standard_E2ds_v4", "Standard_E4ds_v4",
             "Standard_E2ds_v5", "Standard_E4ds_v5");
-
-    @Inject
-    private AzureUtils azureUtils;
 
     @Override
     public Map<String, Object> buildModel(AzureDatabaseServerView azureDatabaseServerView, AzureNetworkView azureNetworkView, DatabaseStack databaseStack) {
@@ -52,12 +42,8 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
             LOGGER.warn("Found port {} in database stack, but Azure ignores it", azureDatabaseServerView.getPort());
         }
         model.put("serverTags", databaseStack.getTags());
-        model.put("usePrivateEndpoints", USE_PRIVATE_ENDPOINT.equals(azureNetworkView.getEndpointType()));
-        model.put("subnetIdForPrivateEndpoint", azureNetworkView.getSubnetIdForPrivateEndpoint());
         model.put("existingDatabasePrivateDnsZoneId", azureNetworkView.getExistingDatabasePrivateDnsZoneId());
         model.put("flexibleServerDelegatedSubnetId", azureNetworkView.getFlexibleServerDelegatedSubnetId());
-        model.put("useDelegatedSubnet", StringUtils.isNotEmpty(azureNetworkView.getExistingDatabasePrivateDnsZoneId()) &&
-                StringUtils.isNotEmpty(azureNetworkView.getFlexibleServerDelegatedSubnetId()));
         model.put("skuName", azureDatabaseServerView.getSkuName());
         model.put("skuSizeGB", azureDatabaseServerView.getStorageSizeInGb());
         model.put("skuTier", getSkuTier(azureDatabaseServerView));
@@ -68,8 +54,6 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
         model.put("useAvailabilityZone", azureDatabaseServerView.useAvailabilityZone());
         model.put("standbyAvailabilityZone", azureDatabaseServerView.getStandbyAvailabilityZone());
         model.put("useStandbyAvailabilityZone", azureDatabaseServerView.useStandbyAvailabilityZone());
-        model.put("privateEndpointName", String.format("pe-%s-to-%s",
-                azureUtils.encodeString(azureUtils.getResourceName(azureNetworkView.getSubnetList().getFirst())), azureDatabaseServerView.getDbServerName()));
         addEncryptionParameters(model, azureDatabaseServerView);
         return model;
     }

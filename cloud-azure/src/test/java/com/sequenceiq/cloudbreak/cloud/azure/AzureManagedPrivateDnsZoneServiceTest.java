@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES;
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.POSTGRES_FLEXIBLE;
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType.STORAGE;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.POSTGRES_FLEXIBLE;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService.STORAGE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class AzureManagedPrivateDnsZoneServiceTypeTest {
+public class AzureManagedPrivateDnsZoneServiceTest {
 
     @Test
     void testNumberOfZoneTypes() {
@@ -32,7 +32,7 @@ public class AzureManagedPrivateDnsZoneServiceTypeTest {
 
     @ParameterizedTest(name = "{index} {1} {0}")
     @MethodSource("testZoneNamePatterns")
-    void testPatterns(AzureManagedPrivateDnsZoneServiceType serviceEnum, String testZoneName, Boolean shouldMatch) {
+    void testPatterns(AzureManagedPrivateDnsZoneService serviceEnum, String testZoneName, Boolean shouldMatch) {
         boolean zoneNameMatchedByPattern = serviceEnum.getDnsZoneNamePatterns().stream()
                 .map(pattern -> pattern.matcher(testZoneName))
                 .anyMatch(Matcher::matches);
@@ -81,9 +81,9 @@ public class AzureManagedPrivateDnsZoneServiceTypeTest {
 
     @ParameterizedTest
     @MethodSource(value = "testServicesSource")
-    void testServiceEnumValues(Pair<AzureManagedPrivateDnsZoneServiceType, AzurePrivateDnsZoneServiceEnumValues> serviceEnumAndExpectedValues) {
+    void testServiceEnumValues(Pair<AzureManagedPrivateDnsZoneService, AzurePrivateDnsZoneServiceEnumValues> serviceEnumAndExpectedValues) {
         String rgName = "rgName";
-        AzureManagedPrivateDnsZoneServiceType serviceEnum = serviceEnumAndExpectedValues.getKey();
+        AzureManagedPrivateDnsZoneService serviceEnum = serviceEnumAndExpectedValues.getKey();
         AzurePrivateDnsZoneServiceEnumValues expectedValues = serviceEnumAndExpectedValues.getValue();
 
         assertEquals(expectedValues.getResourceType(), serviceEnum.getResourceType());
@@ -95,7 +95,7 @@ public class AzureManagedPrivateDnsZoneServiceTypeTest {
         assertThat(dnsZoneNamePatterns).asList().hasSameElementsAs(expectedValues.getDnsZoneNamePattern());
     }
 
-    private static Stream<Pair<AzureManagedPrivateDnsZoneServiceType, AzurePrivateDnsZoneServiceEnumValues>> testServicesSource() {
+    private static Stream<Pair<AzureManagedPrivateDnsZoneService, AzurePrivateDnsZoneServiceEnumValues>> testServicesSource() {
         return Stream.of(
                 Pair.of(POSTGRES, new AzurePrivateDnsZoneServiceEnumValues(
                         "Microsoft.DBforPostgreSQL/servers",

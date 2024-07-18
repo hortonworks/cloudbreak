@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 /**
  * This enum contains possible private DNS zones that are only registered in environment service, but are not used by cloudbreak.
  */
-public enum AzureRegisteredPrivateDnsZoneServiceType implements AzurePrivateDnsZoneDescriptor {
+public enum AzureRegisteredPrivateDnsZoneService implements AzurePrivateDnsZoneDescriptor {
 
     AKS("Microsoft.ContainerService/managedClusters", "managedClusters",
             "privatelink.{region}.azmk8s.io or {subzone}.privatelink.{region}.azmk8s.io",
-            List.of(AzureRegisteredPrivateDnsZoneServiceType.AKS_DNS_ZONE_NAME_PATTERN_REGION,
-                    AzureRegisteredPrivateDnsZoneServiceType.AKS_DNS_ZONE_NAME_PATTERN_SUBZONE_AND_REGION));
+            List.of(AzureRegisteredPrivateDnsZoneService.AKS_DNS_ZONE_NAME_PATTERN_REGION,
+                    AzureRegisteredPrivateDnsZoneService.AKS_DNS_ZONE_NAME_PATTERN_SUBZONE_AND_REGION));
 
     private static final String AKS_DNS_ZONE_NAME_PATTERN_REGION = "privatelink\\.[a-z\\d-]+.azmk8s.io";
 
@@ -26,7 +26,7 @@ public enum AzureRegisteredPrivateDnsZoneServiceType implements AzurePrivateDnsZ
 
     private final List<Pattern> dnsZoneNameRegexPatterns;
 
-    AzureRegisteredPrivateDnsZoneServiceType(String resourceType, String subResource, String dnsZoneName, List<String> dnsZoneNameTemplate) {
+    AzureRegisteredPrivateDnsZoneService(String resourceType, String subResource, String dnsZoneName, List<String> dnsZoneNameTemplate) {
         this.resourceType = resourceType;
         this.subResource = subResource;
         this.dnsZoneName = dnsZoneName;

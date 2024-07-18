@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,6 @@ import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Component
 public class AzureSingleServerDatabaseTemplateModelBuilder implements AzureDatabaseTemplateModelBuilder {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureSingleServerDatabaseTemplateModelBuilder.class);
 
     private static final String GENERAL_PURPOSE = "GeneralPurpose";
@@ -108,7 +108,7 @@ public class AzureSingleServerDatabaseTemplateModelBuilder implements AzureDatab
         // if subnet number is 1 then Azure does not create the endpoints if the batchsize is 5
         model.put("batchSize", azureNetworkView.getSubnets().split(",").length >= defaultBatchSize ? defaultBatchSize : 1);
         model.put("privateEndpointName", String.format("pe-%s-to-%s",
-                azureUtils.encodeString(azureUtils.getResourceName(azureNetworkView.getSubnetList().getFirst())), azureDatabaseServerView.getDbServerName()));
+                azureUtils.encodeString(getSubnetName(azureNetworkView.getSubnetList().get(0))), azureDatabaseServerView.getDbServerName()));
         return model;
     }
 
@@ -139,5 +139,9 @@ public class AzureSingleServerDatabaseTemplateModelBuilder implements AzureDatab
         } else {
             return null;
         }
+    }
+
+    private String getSubnetName(String subnetId) {
+        return StringUtils.substringAfterLast(subnetId, "/");
     }
 }
