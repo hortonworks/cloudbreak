@@ -36,10 +36,10 @@ public class PrivateDatabaseVariantTest {
                 arguments(false, true, false, PrivateDatabaseVariant.NONE),
                 arguments(true, false, true, PrivateDatabaseVariant.NONE),
                 arguments(true, true, true, PrivateDatabaseVariant.NONE),
-                arguments(true, false, false, PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_PE_AND_NEW_DNS_ZONE),
-                arguments(true, true, false, PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_PE_AND_EXISTING_DNS_ZONE),
-                arguments(false, false, true, PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_NEW_DNS_ZONE),
-                arguments(false, true, true, PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_DELEGATED_SUBNET_AND_EXISTING_DNS_ZONE)
+                arguments(true, false, false, PrivateDatabaseVariant.POSTGRES_WITH_NEW_DNS_ZONE),
+                arguments(true, true, false, PrivateDatabaseVariant.POSTGRES_WITH_EXISTING_DNS_ZONE),
+                arguments(false, false, true, PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_NEW_DNS_ZONE),
+                arguments(false, true, true, PrivateDatabaseVariant.FLEXIBLE_POSTGRES_WITH_EXISTING_DNS_ZONE)
         );
     }
 }

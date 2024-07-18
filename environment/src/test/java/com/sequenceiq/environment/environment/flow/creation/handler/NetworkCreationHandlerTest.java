@@ -2,8 +2,8 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.NETWORK_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -15,15 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -79,15 +77,6 @@ public class NetworkCreationHandlerTest extends NetworkTest {
     @InjectMocks
     private NetworkCreationHandler underTest;
 
-    private static Stream<Arguments> provideDnsZoneTestCombinations() {
-        return Stream.of(
-                // DNS Zone name, to be saved
-                Arguments.of("test.flexible.postgres.database.azure.com", true),
-                Arguments.of("test.privatelink.postgres.database.azure.com", true),
-                Arguments.of("test.privatelink.blob.core.windows.net", false)
-        );
-    }
-
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -142,8 +131,8 @@ public class NetworkCreationHandlerTest extends NetworkTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideDnsZoneTestCombinations")
-    public void testWithAzureSpecificResources(String dnsZoneName, boolean toBeSaved) {
+    @ValueSource(booleans = {true, false})
+    public void testWithAzureSpecificResources(boolean flexibleServerDnsZoneCreated) {
         EnvironmentDto environmentDto = createEnvironmentDto();
         environmentDto.setCloudPlatform(CloudConstants.AZURE);
         Event<EnvironmentDto> environmentDtoEvent = Event.wrap(environmentDto);
@@ -151,17 +140,20 @@ public class NetworkCreationHandlerTest extends NetworkTest {
         Environment environment = createEnvironment(network);
         Optional<Environment> environmentOptional = Optional.of(environment);
 
-        when(environmentNetworkService.createProviderSpecificNetworkResources(eq(environmentDto), eq(network))).thenReturn(
-                List.of(buildResource(ResourceType.AZURE_NETWORK),
-                buildResource(ResourceType.AZURE_PRIVATE_DNS_ZONE, dnsZoneName),
+        when(environmentNetworkService.createProviderSpecificNetworkResources(eq(environmentDto), eq(network))).thenReturn(flexibleServerDnsZoneCreated
+                ? List.of(buildResource(ResourceType.AZURE_NETWORK),
+                buildResource(ResourceType.AZURE_PRIVATE_DNS_ZONE, "test.flexible.postgres.database.azure.com"),
+                buildResource(ResourceType.AZURE_VIRTUAL_NETWORK_LINK))
+                : List.of(buildResource(ResourceType.AZURE_NETWORK),
+                buildResource(ResourceType.AZURE_PRIVATE_DNS_ZONE, "test.privatelink.postgres.database.azure.com"),
                 buildResource(ResourceType.AZURE_VIRTUAL_NETWORK_LINK)));
         when(environmentService.findEnvironmentById(any())).thenReturn(environmentOptional);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.accept(environmentDtoEvent));
 
         String databasePrivateDnsZoneId = ((AzureNetwork) environment.getNetwork()).getDatabasePrivateDnsZoneId();
-        if (toBeSaved) {
-            assertEquals(dnsZoneName, databasePrivateDnsZoneId);
+        if (flexibleServerDnsZoneCreated) {
+            assertEquals("test.flexible.postgres.database.azure.com", databasePrivateDnsZoneId);
         } else {
             assertNull(databasePrivateDnsZoneId);
         }
@@ -207,7 +199,7 @@ public class NetworkCreationHandlerTest extends NetworkTest {
         ArgumentCaptor<Event<EnvCreationFailureEvent>> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus, times(1)).notify(any(), eventCaptor.capture());
         Event<EnvCreationFailureEvent> value = eventCaptor.getValue();
-        assertInstanceOf(BadRequestException.class, value.getData().getException());
+        assertTrue(value.getData().getException() instanceof BadRequestException);
     }
 
     private AzureNetwork getAzureNetwork() {

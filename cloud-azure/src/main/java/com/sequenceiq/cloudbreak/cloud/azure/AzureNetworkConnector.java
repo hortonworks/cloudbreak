@@ -230,7 +230,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             networkView.setExistingNetwork(request.isExistingNetwork());
             networkView.setNetworkId(request.getNetworkId());
             networkView.setResourceGroupName(request.getNetworkResourceGroup());
-            Set<AzureManagedPrivateDnsZoneServiceType> servicesWithExistingDnsZone = getServicesWithExistingDnsZone(request);
+            Set<AzureManagedPrivateDnsZoneService> servicesWithExistingDnsZone = getServicesWithExistingDnsZone(request);
             List<CloudResource> createdResources = new ArrayList<>(azureDnsZoneService.checkOrCreateDnsZones(
                     authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone, privateEndpointVariant));
             createdResources.addAll(azureNetworkLinkService.checkOrCreateNetworkLinks(
@@ -243,9 +243,9 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     }
 
-    private Set<AzureManagedPrivateDnsZoneServiceType> getServicesWithExistingDnsZone(NetworkResourcesCreationRequest request) {
+    private Set<AzureManagedPrivateDnsZoneService> getServicesWithExistingDnsZone(NetworkResourcesCreationRequest request) {
         return request.getServicesWithExistingPrivateDnsZone().stream()
-                .map(AzureManagedPrivateDnsZoneServiceType::valueOf)
+                .map(AzureManagedPrivateDnsZoneService::valueOf)
                 .collect(Collectors.toSet());
     }
 

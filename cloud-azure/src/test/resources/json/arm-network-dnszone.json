@@ -90,29 +90,6 @@
           "id": "[parameters('virtualNetworkId')]"
         }
       }
-    },
-    {
-      "type": "Microsoft.Network/privateDnsZones",
-      "apiVersion": "2020-06-01",
-      "name": "privatelink.postgres.database.azure.com",
-      "location": "global",
-      "tags": "[parameters('serverTags')]"
-    },
-    {
-      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-      "apiVersion": "2020-06-01",
-      "name": "[concat('privatelink.postgres.database.azure.com', '/', parameters('virtualNetworkName'))]",
-      "location": "global",
-      "tags": "[parameters('serverTags')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
-      ],
-      "properties": {
-        "registrationEnabled": false,
-        "virtualNetwork": {
-          "id": "[parameters('virtualNetworkId')]"
-        }
-      }
     }
   ]
 }

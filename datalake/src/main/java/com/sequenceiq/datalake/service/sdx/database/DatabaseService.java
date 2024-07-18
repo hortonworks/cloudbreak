@@ -265,7 +265,7 @@ public class DatabaseService {
         Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
         String instanceType;
         Long storageSize;
-        // Cascade instanceType and storageSize of the previous database if they are different of the default ones.
+        // Cascade instanceType and storageSize of the prevoius database if they are different of the default ones.
         Optional<DatabaseServerV4Response> previousDatabaseOp = getPreviousDatabaseIfPropertiesWereModified(attributes, cloudPlatform, sdxCluster);
         if (previousDatabaseOp.isPresent()) {
             DatabaseServerV4Response previousDatabase = previousDatabaseOp.get();
