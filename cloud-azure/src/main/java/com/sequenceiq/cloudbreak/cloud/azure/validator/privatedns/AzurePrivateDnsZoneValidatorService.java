@@ -36,9 +36,9 @@ public class AzurePrivateDnsZoneValidatorService {
     public ValidationResultBuilder existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneDescriptor dnsZoneDescriptor,
             ResourceId existingPrivateDnsZoneResourceId, ValidationResultBuilder resultBuilder) {
         if (!azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(dnsZoneDescriptor, existingPrivateDnsZoneResourceId.name())) {
-            String validationMessage = String.format("The provided private DNS zone %s is not a valid DNS zone name for %s. Please use a DNS zone with " +
-                    "name %s and try again.", existingPrivateDnsZoneResourceId.id(), dnsZoneDescriptor.getResourceType(),
-                    dnsZoneDescriptor.getDnsZoneName(existingPrivateDnsZoneResourceId.resourceGroupName()));
+            String validationMessage = String.format("The provided private DNS zone %s is not a valid DNS zone name for %s. Please use a DNS zone " +
+                    "name matching the format %s and try again.", existingPrivateDnsZoneResourceId.id(), dnsZoneDescriptor.getResourceType(),
+                    dnsZoneDescriptor.getDnsZoneNamePatterns());
             addValidation(validationMessage, resultBuilder::error);
         }
         return resultBuilder;

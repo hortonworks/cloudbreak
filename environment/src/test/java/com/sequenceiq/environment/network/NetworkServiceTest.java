@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -275,6 +276,38 @@ class NetworkServiceTest {
                 break;
         }
         assertEquals(String.format("%s%s", baseMessage, providerSpecificLink), exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ServiceEndpointCreation.class)
+    public void testRefreshServiceEndpointCreationWithValidData(ServiceEndpointCreation serviceEndpointCreation) {
+        NetworkService networkService = new NetworkService(null, null, null, null, null, null);
+        BaseNetwork network = new AzureNetwork();
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withNetwork(NetworkDto.builder().withServiceEndpointCreation(serviceEndpointCreation).build())
+                .build();
+        Environment environment = new Environment();
+        environment.setNetwork(network);
+
+        networkService.refreshServiceEndpointCreation(network, editDto, environment);
+
+        assertEquals(serviceEndpointCreation, environment.getNetwork().getServiceEndpointCreation());
+    }
+
+    @Test
+    public void testRefreshServiceEndpointCreationWitMissingData() {
+        NetworkService networkService = new NetworkService(null, null, null, null, null, null);
+        BaseNetwork network = new AzureNetwork();
+        network.setServiceEndpointCreation(ServiceEndpointCreation.DISABLED);
+        EnvironmentEditDto editDto = EnvironmentEditDto.builder()
+                .withNetwork(NetworkDto.builder().build())
+                .build();
+        Environment environment = new Environment();
+        environment.setNetwork(network);
+
+        networkService.refreshServiceEndpointCreation(network, editDto, environment);
+
+        assertEquals(ServiceEndpointCreation.DISABLED, environment.getNetwork().getServiceEndpointCreation());
     }
 
     @Test

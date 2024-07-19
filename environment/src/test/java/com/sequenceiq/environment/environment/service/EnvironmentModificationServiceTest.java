@@ -845,6 +845,8 @@ class EnvironmentModificationServiceTest {
                 .thenReturn(awsNetwork);
         when(networkService.refreshProviderSpecificParameters(any(), any(), any()))
                 .thenReturn(awsNetwork);
+        when(networkService.refreshServiceEndpointCreation(any(), any(), any()))
+                .thenReturn(awsNetwork);
         when(dnsV1Endpoint.addDnsZoneForSubnetIds(any())).thenReturn(new AddDnsZoneForSubnetsResponse());
         when(environmentService.save(any()))
                 .thenReturn(environment);
@@ -858,6 +860,7 @@ class EnvironmentModificationServiceTest {
         verify(networkService, times(1)).validate(any(), any(), any());
         verify(networkService, times(1)).refreshMetadataFromCloudProvider(any(), any(), any());
         verify(networkService, times(1)).refreshProviderSpecificParameters(any(), any(), any());
+        verify(networkService, times(1)).refreshServiceEndpointCreation(any(), any(), any());
         verify(dnsV1Endpoint, times(1)).addDnsZoneForSubnetIds(any());
         verify(environmentService, times(1)).save(any());
         verify(environmentDtoConverter, times(1)).environmentToDto(any());

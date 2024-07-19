@@ -84,8 +84,8 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
                 "The provided private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
-                        "/unknown.service.zone.name is not a valid DNS zone name for Microsoft.DBforPostgreSQL/servers. Please use a DNS zone with name " +
-                        "privatelink.postgres.database.azure.com and try again."));
+                        "/unknown.service.zone.name is not a valid DNS zone name for Microsoft.DBforPostgreSQL/servers. " +
+                        "Please use a DNS zone name matching the format [privatelink\\.postgres\\.database\\.azure\\.com] and try again."));
     }
 
     @Test

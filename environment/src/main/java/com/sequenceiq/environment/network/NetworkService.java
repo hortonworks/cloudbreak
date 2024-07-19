@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
@@ -106,15 +107,15 @@ public class NetworkService {
         NetworkDto cloneNetworkDto = getNetworkDtoClone(editDto, originalNetworkDto, environmentNetworkConverter);
 
         try {
-            Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
-            originalNetwork.setSubnetMetas(subnetMetadatas.values()
+            Map<String, CloudSubnet> subnetMetadata = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
+            originalNetwork.setSubnetMetas(subnetMetadata.values()
                     .stream()
                     .collect(toMap(c -> getId(environment.getCloudPlatform(), c), c -> c)));
 
-            Map<String, CloudSubnet> endpointGatewaySubnetMetadatas =
+            Map<String, CloudSubnet> endpointGatewaySubnetMetadata =
                     cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environment, cloneNetworkDto);
             originalNetwork.setEndpointGatewaySubnetMetas(
-                    endpointGatewaySubnetMetadatas.values()
+                    endpointGatewaySubnetMetadata.values()
                             .stream()
                             .collect(toMap(c -> getId(environment.getCloudPlatform(), c), c -> c)));
 
@@ -150,6 +151,14 @@ public class NetworkService {
         return originalNetwork;
     }
 
+    public BaseNetwork refreshServiceEndpointCreation(BaseNetwork network, EnvironmentEditDto editDto, Environment environment) {
+        Optional<ServiceEndpointCreation> editedServiceEndpointCreation = Optional.ofNullable(editDto)
+                .map(EnvironmentEditDto::getNetworkDto)
+                .map(NetworkDto::getServiceEndpointCreation);
+        editedServiceEndpointCreation.ifPresent(value -> environment.getNetwork().setServiceEndpointCreation(value));
+        return network;
+    }
+
     private String getId(String cloudPlatform, CloudSubnet cloudSubnet) {
         if (cloudPlatform.equals(CloudPlatform.GCP.name())) {
             return cloudSubnet.getName();
@@ -175,14 +184,10 @@ public class NetworkService {
 
     private String getDocLink(CloudPlatform cloudPlatform) {
         String docReferenceLink = " Refer to Cloudera documentation at %s for more information.";
-        switch (cloudPlatform) {
-            case AWS:
-                return String.format(docReferenceLink, DocumentationLinkProvider.awsAddSubnetLink());
-            case AZURE:
-                return String.format(docReferenceLink, DocumentationLinkProvider.azureAddSubnetLink());
-            default:
-                return "";
-        }
+        return switch (cloudPlatform) {
+            case AWS -> String.format(docReferenceLink, DocumentationLinkProvider.awsAddSubnetLink());
+            case AZURE -> String.format(docReferenceLink, DocumentationLinkProvider.azureAddSubnetLink());
+            default -> "";
+        };
     }
-
 }
