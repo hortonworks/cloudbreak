@@ -82,41 +82,54 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
                 response.setInstanceType(dbStack.getDatabaseServer().getInstanceType());
                 response.setStorageSize(dbStack.getDatabaseServer().getStorageSize());
             }
-            if (dbStack.getSslConfig() != null) {
-                SslConfig sslConfig = sslConfigService.fetchById(dbStack.getSslConfig()).get();
-                SslConfigV4Response sslConfigV4Response = new SslConfigV4Response();
-                sslConfigV4Response.setSslCertificates(sslConfig.getSslCertificates());
-                sslConfigV4Response.setSslCertificateType(sslConfig.getSslCertificateType());
-                sslConfigV4Response.setSslMode(NONE.equals(sslConfig.getSslCertificateType()) ? DISABLED : ENABLED);
-                String cloudPlatform = dbStack.getCloudPlatform();
-                String region = dbStack.getRegion();
-                // TODO Add SslConfig.sslCertificateMaxVersion that is kept up-to-date (mostly for GCP), use getMaxVersionByPlatform() as fallback
-                sslConfigV4Response.setSslCertificateHighestAvailableVersion(
-                        databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region));
-                sslConfigV4Response.setSslCertificateActiveVersion(Optional.ofNullable(sslConfig.getSslCertificateActiveVersion())
-                        .orElse(databaseServerSslCertificateConfig.getLegacyMaxVersionByCloudPlatformAndRegion(cloudPlatform, region)));
-                sslConfigV4Response.setSslCertificateActiveCloudProviderIdentifier(
-                        Optional.ofNullable(sslConfig.getSslCertificateActiveCloudProviderIdentifier())
-                                .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(cloudPlatform, region)));
-                SslCertStatus sslCertificatesOutdated = CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform) ?
-                        SslCertStatus.UP_TO_DATE
-                        : databaseServerSslCertificateConfig.getSslCertificatesOutdated(cloudPlatform, region, sslConfig.getSslCertificates());
-                sslConfigV4Response.setSslCertificatesStatus(
-                        sslCertificatesOutdated);
-                Long sslCertificateExpirationDate = sslConfig.getSslCertificateExpirationDate();
-                if (sslCertificateExpirationDate != null) {
-                    fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
-                } else if (!NONE.equals(sslConfig.getSslCertificateType())) {
-                    sslCertificateExpirationDate = updateEmptyExpirationDate(source, sslConfig, sslConfigV4Response);
-                    fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
-                }
-                response.setSslConfig(sslConfigV4Response);
-            }
+            response.setSslConfig(convertSslConfig(source));
         } else if (source.getHost() != null && source.getPort() != null) {
             response.setStatus(Status.AVAILABLE);
         }
 
         return response;
+    }
+
+    public SslConfigV4Response convertSslConfig(DatabaseServerConfig source) {
+        SslConfigV4Response sslConfigV4Response = new SslConfigV4Response();
+        Optional<DBStack> dbStackOptional = source.getDbStack();
+        if (dbStackOptional.isPresent()) {
+            DBStack dbStack = dbStackOptional.get();
+            if (dbStack.getSslConfig() != null) {
+                String cloudPlatform = dbStack.getCloudPlatform();
+                String region = dbStack.getRegion();
+                SslConfig sslConfig = sslConfigService.fetchById(dbStack.getSslConfig()).orElse(null);
+                sslConfigV4Response = new SslConfigV4Response();
+                if (sslConfig != null) {
+                    sslConfigV4Response.setSslCertificates(sslConfig.getSslCertificates());
+                    sslConfigV4Response.setSslCertificateType(sslConfig.getSslCertificateType());
+                    sslConfigV4Response.setSslMode(NONE.equals(sslConfig.getSslCertificateType()) ? DISABLED : ENABLED);
+                    sslConfigV4Response.setSslCertificateActiveVersion(Optional.ofNullable(sslConfig.getSslCertificateActiveVersion())
+                            .orElse(databaseServerSslCertificateConfig.getLegacyMaxVersionByCloudPlatformAndRegion(cloudPlatform, region)));
+                    sslConfigV4Response.setSslCertificateActiveCloudProviderIdentifier(
+                            Optional.ofNullable(sslConfig.getSslCertificateActiveCloudProviderIdentifier())
+                                    .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(cloudPlatform, region)));
+                    // TODO Add SslConfig.sslCertificateMaxVersion that is kept up-to-date (mostly for GCP), use getMaxVersionByPlatform() as fallback
+                    Long sslCertificateExpirationDate = sslConfig.getSslCertificateExpirationDate();
+                    if (sslCertificateExpirationDate != null) {
+                        fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
+                    } else if (!NONE.equals(sslConfig.getSslCertificateType())) {
+                        sslCertificateExpirationDate = updateEmptyExpirationDate(source, sslConfig, sslConfigV4Response);
+                        fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
+                    }
+                    SslCertStatus sslCertificatesOutdated = CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform) ?
+                            SslCertStatus.UP_TO_DATE
+                            : databaseServerSslCertificateConfig.getSslCertificatesOutdated(cloudPlatform, region, sslConfig.getSslCertificates());
+                    sslConfigV4Response.setSslCertificatesStatus(sslCertificatesOutdated);
+                }
+                if (CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform)) {
+                    sslConfigV4Response.setSslCertificatesStatus(SslCertStatus.UP_TO_DATE);
+                }
+                sslConfigV4Response.setSslCertificateHighestAvailableVersion(
+                        databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region));
+            }
+        }
+        return sslConfigV4Response;
     }
 
     private void fillupExpirationDate(SslConfigV4Response sslConfigV4Response, long sslCertificateExpirationDate) {
