@@ -31,6 +31,8 @@ public class MockCdlService extends CdlCrudGrpc.CdlCrudImplBase {
 
     private static final String CDL_SHAPE = "CONTAINERIZED";
 
+    private static final String CLOUD_STORAGE_BASE_LOCATION = "s3a://data";
+
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
@@ -108,6 +110,7 @@ public class MockCdlService extends CdlCrudGrpc.CdlCrudImplBase {
                     .setRangerRazEnabled(false)
                     .setEnvironmentCrn(cdl.getEnvironmentCrn())
                     .setDatabaseDetails(databaseDetails)
+                    .setCloudStorageBaseLocation(CLOUD_STORAGE_BASE_LOCATION)
                     .build());
             responseObserver.onCompleted();
         } else {

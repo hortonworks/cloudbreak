@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
+import static com.sequenceiq.common.model.CloudStorageCdpService.DEFAULT_FS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -38,7 +39,13 @@ import com.sequenceiq.common.model.FileSystemType;
 @ExtendWith(MockitoExtension.class)
 public class RemoteDataContextWorkaroundServiceTest {
 
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:datalake:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
+
+    private static final String CDL_CRN = "crn:cdp:sdxsvc:us-west-1:tenant:instance:crn2";
+
     private static final Random RANDOM = new Random();
+
+    private static final String CLUSTER_NAME = "clusterName";
 
     @Mock
     private StackService stackService;
@@ -54,7 +61,7 @@ public class RemoteDataContextWorkaroundServiceTest {
         FileSystem fileSystem = underTest
                 .prepareFilesystem(
                         mockRequestedCluster(mockNonHiveStorageLocation(3), mockNonHiveStorageLocation(4)),
-                        mockSdxFileSystemView());
+                        mockSdxFileSystemView(), DATALAKE_CRN);
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         assertEquals(2, locations.size());
@@ -67,7 +74,7 @@ public class RemoteDataContextWorkaroundServiceTest {
         FileSystem fileSystem = underTest
                 .prepareFilesystem(
                         mockRequestedCluster(mockNonHiveStorageLocation(3), mockNonHiveStorageLocation(4)),
-                        mockSdxFileSystemView(mockHiveStorageLocation(1), mockHiveStorageLocation(2)));
+                        mockSdxFileSystemView(mockHiveStorageLocation(1), mockHiveStorageLocation(2)), DATALAKE_CRN);
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         assertEquals(4, locations.size());
@@ -82,7 +89,7 @@ public class RemoteDataContextWorkaroundServiceTest {
         FileSystem fileSystem = underTest
                 .prepareFilesystem(
                         mockRequestedCluster(mockRds(HIVE)),
-                        mockSdxFileSystemView(mockHiveStorageLocation(1), mockHiveStorageLocation(2)));
+                        mockSdxFileSystemView(mockHiveStorageLocation(1), mockHiveStorageLocation(2)), DATALAKE_CRN);
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         assertEquals(2, locations.size());
@@ -97,10 +104,27 @@ public class RemoteDataContextWorkaroundServiceTest {
         FileSystem fileSystem = underTest
                 .prepareFilesystem(
                         mockRequestedCluster(mockRds(HIVE)),
-                        mockSdxFileSystemView());
+                        mockSdxFileSystemView(), DATALAKE_CRN);
 
         List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
         assertEquals(0, locations.size());
+    }
+
+    @Test
+    public void testFileSystemWhenCorePathPresentAndCDLWithoutDistroxNameShouldAppendName() throws IOException {
+        when(nameGenerator.generateName(APIResourceType.FILESYSTEM)).thenReturn("appletree");
+
+        StorageLocation coreLocation = new StorageLocation();
+        coreLocation.setType(DEFAULT_FS);
+        coreLocation.setValue("corepath");
+        FileSystem fileSystem = underTest
+                .prepareFilesystem(
+                        mockRequestedCluster(mockRds(HIVE)),
+                        mockSdxFileSystemView(coreLocation), CDL_CRN);
+
+        List<StorageLocation> locations = fileSystem.getCloudStorage().getLocations();
+        assertEquals(1, locations.size());
+        assertEquals("corepath/" + CLUSTER_NAME, locations.getFirst().getValue());
     }
 
     private RDSConfig get(Set<RDSConfig> rdsConfigs, DatabaseType databaseType) {
@@ -136,6 +160,7 @@ public class RemoteDataContextWorkaroundServiceTest {
 
     private Cluster mockRequestedCluster(RDSConfig... rds) {
         Cluster cluster = new Cluster();
+        cluster.setName(CLUSTER_NAME);
         cluster.setRdsConfigs(new HashSet<>());
         for (RDSConfig r : rds) {
             cluster.getRdsConfigs().add(r);
@@ -159,6 +184,7 @@ public class RemoteDataContextWorkaroundServiceTest {
 
     private Cluster mockRequestedCluster(StorageLocation... storageLocations) {
         Cluster cluster = new Cluster();
+        cluster.setName(CLUSTER_NAME);
         FileSystem fileSystem = new FileSystem();
         fileSystem.setType(FileSystemType.S3);
 

@@ -75,14 +75,14 @@ public class SharedServiceConfigProviderTest {
         dlCluster.setId(1L);
         dlStack.setCluster(dlCluster);
         when(stackService.getByCrn(any())).thenReturn(dlStack);
-        when(remoteDataContextWorkaroundService.prepareFilesystem(any(), any())).thenReturn(new FileSystem());
+        when(remoteDataContextWorkaroundService.prepareFilesystem(any(), any(), any())).thenReturn(new FileSystem());
         RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
         when(rdsConfigWithoutCluster.getId()).thenReturn(1L);
         when(rdsConfigWithoutClusterService.findByClusterIdAndStatusInAndTypeIn(any(), any(), any())).thenReturn(List.of(rdsConfigWithoutCluster));
 
         underTest.configureCluster(cluster);
 
-        verify(remoteDataContextWorkaroundService).prepareFilesystem(any(), any());
+        verify(remoteDataContextWorkaroundService).prepareFilesystem(any(), any(), any());
         verify(platformAwareSdxConnector, never()).getHmsServiceConfig(any());
         assertEquals(cluster.getRdsConfigs().size(), 1);
     }

@@ -69,7 +69,8 @@ public class SharedServiceConfigProvider {
                     default -> LOGGER.info("Data Lake CRN is not recognized, skipping setup regarding shared filesystem and RDS!");
                 }
                 sdxBasicView.get().fileSystemView().ifPresent(sdxFileSystemView ->
-                        requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesystem(requestedCluster, sdxFileSystemView)));
+                        requestedCluster.setFileSystem(
+                                remoteDataContextWorkaroundService.prepareFilesystem(requestedCluster, sdxFileSystemView, sdxBasicView.get().crn())));
             }
         }
         return requestedCluster;

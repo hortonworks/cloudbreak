@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.sdx.cdl;
 
+import static com.sequenceiq.common.model.CloudStorageCdpService.DEFAULT_FS;
+import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_METASTORE_EXTERNAL_WAREHOUSE;
+import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_METASTORE_WAREHOUSE;
+import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_REPLICA_WAREHOUSE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,6 +16,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +33,9 @@ import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcSdxCdlClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
+import com.sequenceiq.common.model.FileSystemType;
 
 @ExtendWith(MockitoExtension.class)
 public class CdlSdxDescribeServiceTest {
@@ -34,6 +43,30 @@ public class CdlSdxDescribeServiceTest {
     private static final String CDL_CRN = "crn:cdp:sdxsvc:us-west-1:tenant:instance:crn2";
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:crn1";
+
+    private static final String CDL_NAME = "test-cdl";
+
+    private static final String CDL_RUNTIME = "7.2.17";
+
+    private static final boolean CDL_RAZ_ENABLED = true;
+
+    private static final long CDL_CREATED_TIME = 1L;
+
+    private static final String CDL_DB_CRN = "crn:cdp:redbeams:us-west-1:tenant:instance:crn2";
+
+    private static final String CDL_CLOUD_STORAGE = "s3a://bucket";
+
+    private static final String HIVE_WAREHOUSE_SERVICE_CONFIG = "hive_warehouse_directory";
+
+    private static final String HIVE_WAREHOUSE_DIR = "s3a://bucket/hive_warehouse";
+
+    private static final String HIVE_EXTERNAL_WAREHOUSE_SERVICE_CONFIG = "hive_warehouse_external_directory";
+
+    private static final String HIVE_EXTERNAL_WAREHOUSE_DIR = "s3a://bucket/hive_warehouse_external";
+
+    private static final String HIVE_REPLICA_WAREHOUSE_SERVICE_CONFIG = "hive_repl_replica_functions_root_dir";
+
+    private static final String HIVE_REPLICA_WAREHOUSE_DIR = "s3a://bucket/hive_repl_replica";
 
     @Mock
     private EntitlementService entitlementService;
@@ -70,6 +103,61 @@ public class CdlSdxDescribeServiceTest {
         assertNull(sdxAccessView.get().clusterManagerFqdn());
         assertNull(sdxAccessView.get().clusterManagerIp());
         assertEquals("rangerhost", sdxAccessView.get().rangerFqdn());
+    }
+
+    @Test
+    void testGetSdxByEnvironmentCRN() {
+        setEnabled();
+        when(sdxClient.findDatalake(anyString(), anyString())).thenReturn(CdlCrudProto.DatalakeResponse.newBuilder().setCrn(CDL_CRN).build());
+        when(sdxClient.describeDatalake(anyString())).thenReturn(CdlCrudProto.DescribeDatalakeResponse.newBuilder()
+                .setName(CDL_NAME)
+                .setCrn(CDL_CRN)
+                .setRuntimeVersion(CDL_RUNTIME)
+                .setRangerRazEnabled(CDL_RAZ_ENABLED)
+                .setCreated(CDL_CREATED_TIME)
+                .setDatabaseDetails(CdlCrudProto.DatabaseInfo.newBuilder()
+                        .setCrn(CDL_DB_CRN)
+                        .build())
+                .setCloudStorageBaseLocation(CDL_CLOUD_STORAGE)
+                .build());
+
+        CdlCrudProto.EndpointInfo hiveEndpointInfo = CdlCrudProto.EndpointInfo.newBuilder()
+                .setName("hive")
+                .addServiceConfigs(CdlCrudProto.Config.newBuilder()
+                        .setKey(HIVE_WAREHOUSE_SERVICE_CONFIG)
+                        .setValue(HIVE_WAREHOUSE_DIR)
+                        .build())
+                .addServiceConfigs(CdlCrudProto.Config.newBuilder()
+                        .setKey(HIVE_EXTERNAL_WAREHOUSE_SERVICE_CONFIG)
+                        .setValue(HIVE_EXTERNAL_WAREHOUSE_DIR)
+                        .build())
+                .addServiceConfigs(CdlCrudProto.Config.newBuilder()
+                        .setKey(HIVE_REPLICA_WAREHOUSE_SERVICE_CONFIG)
+                        .setValue(HIVE_REPLICA_WAREHOUSE_DIR)
+                        .build())
+                .build();
+        when(sdxClient.describeDatalakeServices(anyString())).thenReturn(CdlCrudProto.DescribeServicesResponse.newBuilder()
+                .addEndpoints(hiveEndpointInfo)
+                .build());
+
+        Optional<SdxBasicView> response = underTest.getSdxByEnvironmentCrn(ENV_CRN);
+        assertTrue(response.isPresent());
+
+        SdxBasicView sdxBasicView = response.get();
+        assertEquals(CDL_NAME, sdxBasicView.name());
+        assertEquals(CDL_CRN, sdxBasicView.crn());
+        assertEquals(CDL_RUNTIME, sdxBasicView.runtime());
+        assertEquals(CDL_RAZ_ENABLED, sdxBasicView.razEnabled());
+        assertEquals(CDL_CREATED_TIME, sdxBasicView.created());
+        assertEquals(CDL_DB_CRN, sdxBasicView.dbServerCrn());
+        assertNotNull(sdxBasicView.fileSystemView());
+
+        SdxFileSystemView fileSystemView = sdxBasicView.fileSystemView().orElse(new SdxFileSystemView(null, Map.of()));
+        assertEquals(FileSystemType.S3.name(), fileSystemView.fileSystemType());
+        assertEquals(CDL_CLOUD_STORAGE, fileSystemView.sharedFileSystemLocationsByService().get(DEFAULT_FS.name()));
+        assertEquals(HIVE_WAREHOUSE_DIR, fileSystemView.sharedFileSystemLocationsByService().get(HIVE_METASTORE_WAREHOUSE.name()));
+        assertEquals(HIVE_EXTERNAL_WAREHOUSE_DIR, fileSystemView.sharedFileSystemLocationsByService().get(HIVE_METASTORE_EXTERNAL_WAREHOUSE.name()));
+        assertEquals(HIVE_REPLICA_WAREHOUSE_DIR, fileSystemView.sharedFileSystemLocationsByService().get(HIVE_REPLICA_WAREHOUSE.name()));
     }
 
     private CdlCrudProto.ListDatalakesResponse getDatalakeList() {
