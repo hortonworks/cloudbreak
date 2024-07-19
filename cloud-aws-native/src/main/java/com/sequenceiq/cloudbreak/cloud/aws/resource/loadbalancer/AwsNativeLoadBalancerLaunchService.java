@@ -122,10 +122,13 @@ public class AwsNativeLoadBalancerLaunchService {
                 if (registerTargetGroups) {
                     for (AwsListener listener : awsLoadBalancer.getListeners()) {
                         AwsTargetGroup targetGroup = listener.getTargetGroup();
+                        String loadBalancerScheme = awsLoadBalancer.getScheme().resourceName();
                         creationContext.setTargetGroupName(resourceNameService.loadBalancerTargetGroup(stackName,
-                                awsLoadBalancer.getScheme().resourceName(), targetGroup.getPort()));
-                        createTargetGroup(creationContext, awsNetworkView, targetGroup);
-                        createListener(creationContext, listener);
+                                loadBalancerScheme, targetGroup.getPort()));
+                        String targetGroupNameTypeSchemePortPart = resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(
+                                loadBalancerScheme, targetGroup.getPort());
+                        createTargetGroup(creationContext, awsNetworkView, targetGroup, targetGroupNameTypeSchemePortPart);
+                        createListener(creationContext, listener, targetGroupNameTypeSchemePortPart);
                         registerTarget(loadBalancingClient, stackId, targetGroup);
                     }
                 }
@@ -141,14 +144,13 @@ public class AwsNativeLoadBalancerLaunchService {
     private void createLoadBalancer(ResourceCreationContext context, AwsLoadBalancer awsLoadBalancer) {
         CloudResource loadBalancerResource;
         AwsLoadBalancerScheme scheme = awsLoadBalancer.getScheme();
-        String loadBalancerName = resourceNameService.loadBalancer(context.getStackName(), scheme.resourceName());
-        String loadBalancerNameWithoutHash = resourceNameService.trimHash(loadBalancerName);
-        LOGGER.info("Looking for elastic load balancer resource for stack with resource name prefix '{}'", loadBalancerNameWithoutHash);
+        String loadBalancerResourceTypeAndSchemePart = resourceNameService.loadBalancerResourceTypeAndSchemeNamePart(scheme.resourceName());
+        LOGGER.info("Looking for elastic load balancer resource for stack with '{}' in it's name", loadBalancerResourceTypeAndSchemePart);
         List<CloudResource> existingLoadBalancers = resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, context.getStackId());
         LOGGER.info("Existing elastic load balancer resources for stack: {}", existingLoadBalancers);
         Optional<CloudResource> existingLoadBalancer = existingLoadBalancers.stream()
-                .filter(cloudResource -> loadBalancerNameWithoutHash.equals(resourceNameService.trimHash(cloudResource.getName())))
+                .filter(cloudResource -> cloudResource.getName().contains(loadBalancerResourceTypeAndSchemePart))
                 .findFirst();
         String loadBalancerArn;
         if (existingLoadBalancer.isPresent()) {
@@ -157,6 +159,7 @@ public class AwsNativeLoadBalancerLaunchService {
             LOGGER.info("Elastic load balancer resource has already been created for stack, proceeding forward with existing resource '{}'",
                     loadBalancerArn);
         } else {
+            String loadBalancerName = resourceNameService.loadBalancer(context.getStackName(), scheme.resourceName());
             Set<String> subnetIds = awsLoadBalancer.getSubnetIds();
             LOGGER.info("Creating load balancer with name '{}', subnet ids: '{}' and scheme: '{}'", loadBalancerName, String.join(",", subnetIds), scheme);
             CreateLoadBalancerRequest request = CreateLoadBalancerRequest.builder()
@@ -212,16 +215,17 @@ public class AwsNativeLoadBalancerLaunchService {
         }
     }
 
-    private void createTargetGroup(ResourceCreationContext context, AwsNetworkView awsNetworkView, AwsTargetGroup targetGroup) {
+    private void createTargetGroup(ResourceCreationContext context, AwsNetworkView awsNetworkView, AwsTargetGroup targetGroup,
+            String targetGroupNameTypeSchemePortPart) {
         CloudResource targetGroupResource;
         String targetGroupName = context.getTargetGroupName();
-        String targetGroupNameWithoutHash = resourceNameService.trimHash(targetGroupName);
-        LOGGER.info("Looking for elastic load balancer target group resource for stack with resource name prefix '{}'", targetGroupNameWithoutHash);
+
+        LOGGER.info("Looking for elastic load balancer target group resource for stack with resource name prefix '{}'", targetGroupNameTypeSchemePortPart);
         List<CloudResource> existingTargetGroups = resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, context.getStackId());
         LOGGER.info("Existing elastic load balancer target group resources for stack: {}", existingTargetGroups);
         Optional<CloudResource> existingTargetGroup = existingTargetGroups.stream()
-                .filter(cloudResource -> targetGroupNameWithoutHash.equals(resourceNameService.trimHash(cloudResource.getName())))
+                .filter(cloudResource -> cloudResource.getName().contains(targetGroupNameTypeSchemePortPart))
                 .findFirst();
         String targetGroupArn;
         if (existingTargetGroup.isPresent()) {
@@ -288,22 +292,21 @@ public class AwsNativeLoadBalancerLaunchService {
         }
     }
 
-    private void createListener(ResourceCreationContext context, AwsListener listener) {
+    private void createListener(ResourceCreationContext context, AwsListener listener, String targetGroupNameTypeSchemePortPart) {
         CloudResource listenerResource;
-        String targetGroupName = context.getTargetGroupName();
-        String targetGroupNameWithoutHash = resourceNameService.trimHash(targetGroupName);
-        LOGGER.info("Looking for elastic load balancer listener resource for stack with resource name prefix '{}'", targetGroupNameWithoutHash);
+        LOGGER.info("Looking for elastic load balancer listener resource for stack with scheme and port: '{}'", targetGroupNameTypeSchemePortPart);
         List<CloudResource> existingListeners = resourceRetriever
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, context.getStackId());
         LOGGER.info("Existing elastic load balancer listener resources for stack: {}", existingListeners);
         Optional<CloudResource> existingListener = existingListeners.stream()
-                .filter(cloudResource -> targetGroupNameWithoutHash.equals(resourceNameService.trimHash(cloudResource.getName())))
+                .filter(cloudResource -> cloudResource.getName().contains(targetGroupNameTypeSchemePortPart))
                 .findFirst();
         if (existingListener.isPresent()) {
             listenerResource = existingListener.get();
             LOGGER.info("Elastic load balancer listener resource has already been created for stack, proceeding forward with existing resource '{}'",
                     listenerResource.getReference());
         } else {
+            String targetGroupName = context.getTargetGroupName();
             String loadBalancerArn = context.getLoadBalancerArn();
             String targetGroupArn = context.getTargetGroupArn();
             LOGGER.info("Creating listener for load balancer('{}') on target group('{}')", loadBalancerArn, targetGroupArn);

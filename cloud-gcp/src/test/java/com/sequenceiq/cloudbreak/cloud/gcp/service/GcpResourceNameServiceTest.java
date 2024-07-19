@@ -4,9 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +24,6 @@ public class GcpResourceNameServiceTest {
 
     private static final String GROUP_NAME = "groupName";
 
-    private static final String SCHEME = "scheme";
-
     private static final LoadBalancerType LOAD_BALACNER_TYPE = LoadBalancerType.GATEWAY_PRIVATE;
 
     private static final Long PRIVATE_ID = 0L;
@@ -36,8 +31,6 @@ public class GcpResourceNameServiceTest {
     private static final Integer PORT = 8080;
 
     private static final int COUNT = 1;
-
-    private static final DateFormat DATE_FORMAT_WITHOUT_SECONDS = new SimpleDateFormat("yyyyMMddHHmm");
 
     @InjectMocks
     private GcpResourceNameService underTest;

@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 public class AwsResourceNameService extends CloudbreakResourceNameService {
 
     public static final String TG_PART_NAME = "TG";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceNameService.class);
 
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
@@ -82,13 +78,17 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         return name;
     }
 
+    public String loadBalancerResourceTypeAndSchemeNamePart(String scheme) {
+        return "LB" + scheme;
+    }
+
     public String loadBalancer(String stackName, String scheme) {
         String name;
-        String resourceNameWithScheme = "LB" + scheme;
+        String resourceNameWithScheme = loadBalancerResourceTypeAndSchemeNamePart(scheme);
         int numberOfAppends = 2;
         int stackNameLength = stackName.length();
         int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
-        String reducedStackName = String.valueOf(stackName).substring(0, stackNameLength < maxLengthOfStackName ? stackNameLength : maxLengthOfStackName);
+        String reducedStackName = stackName.substring(0, Math.min(stackNameLength, maxLengthOfStackName));
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
@@ -97,12 +97,16 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         return name;
     }
 
+    public String loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(String scheme, int port) {
+        return TG_PART_NAME + port + scheme;
+    }
+
     public String loadBalancerTargetGroup(String stackName, String scheme, int port) {
         String name;
-        String resourceNameWithScheme = TG_PART_NAME + port + scheme;
+        String resourceNameWithScheme = loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(scheme, port);
         int numberOfAppends = 2;
         int maxLengthOfStackName = maxLoadBalancerResourceNameLength - getDefaultHashLength() - resourceNameWithScheme.length() - numberOfAppends;
-        String reducedStackName = String.valueOf(stackName).substring(0, maxLengthOfStackName);
+        String reducedStackName = stackName.substring(0, maxLengthOfStackName);
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
