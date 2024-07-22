@@ -46,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
@@ -73,6 +74,9 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
     @Inject
     private SshJUtil sshJUtil;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -93,8 +97,11 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
         validateCcmServices(testContext, Tunnel.CCM);
         upgradeCcmOnEnvironment(testContext);
         validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
-        rotateCcmV2JumpgateAgentAccessKey(testContext);
-        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
+        if (!imageValidatorE2ETestUtil.isImageValidation()) {
+            // secret rotation testing is not needed for image validation
+            rotateCcmV2JumpgateAgentAccessKey(testContext);
+            validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
+        }
         repairMasterNodes(testContext);
         validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
     }
