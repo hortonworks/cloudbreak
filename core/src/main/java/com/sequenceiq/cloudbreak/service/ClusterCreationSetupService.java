@@ -76,7 +76,6 @@ public class ClusterCreationSetupService {
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
 
-        environmentValidator.validateDatabaseType(stack, environment, resultBuilder);
         environmentValidator.validateRdsConfigNames(request.getDatabases(), resultBuilder, stack.getWorkspaceId());
         environmentValidator.validateProxyConfig(request.getProxyConfigCrn(), resultBuilder);
         String parentEnvironmentCloudPlatform = environment.getParentEnvironmentCloudPlatform();

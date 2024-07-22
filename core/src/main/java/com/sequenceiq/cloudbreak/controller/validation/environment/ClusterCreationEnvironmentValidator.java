@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -35,10 +34,7 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
 public class ClusterCreationEnvironmentValidator {
@@ -119,31 +115,6 @@ public class ClusterCreationEnvironmentValidator {
             if (!platformAutoTls && requestedAutoTls) {
                 resultBuilder.error(String.format("AutoTLS is not supported by '%s' platform!", stack.getCloudPlatform()));
             }
-        }
-    }
-
-    public void validateDatabaseType(Stack stack, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
-        if (isSingleServer(stack.getDatabase())) {
-            Optional.ofNullable(environment.getNetwork())
-                    .map(EnvironmentNetworkResponse::getAzure)
-                    .map(EnvironmentNetworkAzureParams::getFlexibleServerSubnetIds)
-                    .ifPresent(subnets -> checkFlexibleServerDelegatedSubnets(subnets, resultBuilder));
-        }
-    }
-
-    private boolean isSingleServer(Database database) {
-        Object azureDatabaseTypeObj = Optional.ofNullable(database)
-                .map(Database::getAttributesMap)
-                .map(attributes -> attributes.get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY))
-                .orElse(null);
-        return azureDatabaseTypeObj != null && AzureDatabaseType.safeValueOf(String.valueOf(azureDatabaseTypeObj)) == AzureDatabaseType.SINGLE_SERVER;
-    }
-
-    private void checkFlexibleServerDelegatedSubnets(Set<String> subnets, ValidationResultBuilder resultBuilder) {
-        if (!subnets.isEmpty()) {
-            String message = "Provisioning a Single Server RDS for the Data Lake is not supported if Flexible Server subnets are specified.";
-            LOGGER.info(message);
-            resultBuilder.error(message);
         }
     }
 
