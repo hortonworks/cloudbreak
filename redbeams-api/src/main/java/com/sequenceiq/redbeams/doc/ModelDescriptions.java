@@ -20,6 +20,9 @@ public final class ModelDescriptions {
     public static final String DATABASE_SERVER_REQUEST = "Request containing information about a database server to be registered";
     public static final String DATABASE_SERVER_RESPONSE = "Response containing information about a database server that was acted upon, e.g., retrieved, "
         + "deleted, listed";
+    public static final String DATABASE_SERVER_CERTIFICATE_REQUEST = "Request containing information about a database server SSL certificate";
+    public static final String DATABASE_SERVER_CERTIFICATE_RESPONSE = "Response containing information about a database server SSL certificate";
+    public static final String DATABASE_SERVER_CERTIFICATE_RESPONSES = "A set of multiple database server SSL certificate responses";
     public static final String DATABASE_SERVER_RESPONSES = "A set of multiple database server responses";
     public static final String SSL_CONFIG_RESPONSE = "Response for the SSL config of a database server";
     public static final String DATABASE_SERVER_STATUS_RESPONSE = "Response containing status information about a database server";

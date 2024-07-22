@@ -46,6 +46,9 @@ public final class Notes {
         public static final String LIST =
             "Lists all database servers that are known, either because they were registered or because this service "
             + "created them.";
+        public static final String LIST_CERTIFICATE_STATUS =
+                "Lists all database servers certificate status that are known, either because they were registered or because this service "
+                        + "created them.";
         public static final String GET_BY_NAME =
             "Gets information on a database server by its name.";
         public static final String GET_BY_CRN =
