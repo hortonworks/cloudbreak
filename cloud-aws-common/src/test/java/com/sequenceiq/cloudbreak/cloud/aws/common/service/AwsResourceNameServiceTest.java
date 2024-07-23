@@ -69,7 +69,14 @@ class AwsResourceNameServiceTest {
     @Test
     void testLoadBalancer() {
         String resourceName = underTest.loadBalancer(STACK_NAME_LONG, SCHEME);
-        assertTrue(resourceName.matches("stackname-LBscheme-\\d{13}"));
+        assertTrue(resourceName.matches("stacknam-LBscheme-\\d{13}"));
+    }
+
+    @Test
+    void testLoadBalancerBackwardCompatibleWithNewHash() {
+        //satori-LBGwayPriv-20240521151654
+        String resourceName = underTest.loadBalancer("satori-dev", "GwayPriv");
+        assertTrue(resourceName.matches("satori-LBGwayPriv-\\d{13}"));
     }
 
     @Test
@@ -81,13 +88,19 @@ class AwsResourceNameServiceTest {
     @Test
     void testLoadBalancerTargetGroup() {
         String resourceName = underTest.loadBalancerTargetGroup(STACK_NAME, SCHEME, PORT);
-        assertTrue(resourceName.matches("stack-TG8080scheme-\\d{13}"));
+        assertTrue(resourceName.matches("stac-TG8080scheme-\\d{13}"));
+    }
+
+    @Test
+    void testLoadBalancerTargetGroupBackwardCompatibleWithNewHash() {
+        String resourceName = underTest.loadBalancerTargetGroup("sator-dev", "GwayPriv", 443);
+        assertTrue(resourceName.matches("sat-TG443GwayPriv-\\d{13}"));
     }
 
     @Test
     void testLoadBalancerTargetGroupShorterThanSevenCharacter() {
         String resourceName = underTest.loadBalancerTargetGroup("sdfsda", SCHEME, PORT);
-        assertTrue(resourceName.matches("sdfsd-TG8080scheme-\\d{13}"));
+        assertTrue(resourceName.matches("sdfs-TG8080scheme-\\d{13}"));
     }
 
     @Test
