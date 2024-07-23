@@ -22,7 +22,8 @@ public abstract class CloudbreakResourceNameService {
     private static final int MAX_PART_LENGTH = 20;
 
     // The length of Epoch milliseconds is 13 characters, until Nov 20 2286
-    private static final int DATE_LENGTH = 13;
+    // We need 14 as hash length to keep backward compatibility with the legacy "yyyyMMddHHmmss" date format based hashed names
+    private static final int DATE_LENGTH = 14;
 
     public String trimHash(String part) {
         if (part == null) {
