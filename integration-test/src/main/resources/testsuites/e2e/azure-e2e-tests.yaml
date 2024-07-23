@@ -11,6 +11,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXMarketplaceImageTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRecipeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRotationTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.AzureMarketplaceImageTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest

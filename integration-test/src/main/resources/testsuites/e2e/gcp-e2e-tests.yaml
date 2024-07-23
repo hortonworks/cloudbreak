@@ -6,7 +6,9 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRecipeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRotationTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest

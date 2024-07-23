@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
@@ -90,23 +89,16 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is an environment with SDX in available state",
-            when = "in case of AWS provider secrets are getting rotated before " +
-                    "recovery called on the IDBROKER and MASTER host group, " +
-                    "where the instance had been stopped",
-            then = "all the actions (secret rotatioin then recovery for AWS OR just recovery) " +
-                    "should be successful, the cluster should be available"
+            when = "secrets are getting rotated (AWS - all secrets, non-AWS - limited set of secrets),  before " +
+                    "recovery called on the IDBROKER and MASTER host group, where the instance had been stopped",
+            then = "all the actions (secret rotation then recovery) should be successful, the cluster should be available"
     )
     public void testIDBRokerAndMasterRepairWithRecipeFile(TestContext testContext) {
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
-        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            createAutoTLSSdx(testContext);
-            secretRotation(testContext);
-            multiRepairThenValidate(testContext);
-        } else {
-            createAutoTLSSdx(testContext);
-            multiRepairThenValidate(testContext);
-        }
+        createAutoTLSSdx(testContext);
+        secretRotation(testContext, cloudProvider);
+        multiRepairThenValidate(testContext);
     }
 
     private void createAutoTLSSdx(TestContext testContext) {
@@ -156,34 +148,46 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1, sshJUtil));
     }
 
-    private void secretRotation(TestContext testContext) {
+    private void secretRotation(TestContext testContext, String cloudProvider) {
         String clusterName = testContext.given(sdxInternal, SdxInternalTestDto.class).getResponse().getName();
-        Set<DatalakeSecretType> secretTypes = Sets.newHashSet();
-        secretTypes.addAll(Set.of(
-                // CB-24849 and CB-25311
-                //DATALAKE_GATEWAY_CERT,
-                DATALAKE_USER_KEYPAIR,
-                DATALAKE_IDBROKER_CERT,
-                DATALAKE_SALT_BOOT_SECRETS,
-                DATALAKE_MGMT_CM_ADMIN_PASSWORD,
-                DATALAKE_CB_CM_ADMIN_PASSWORD,
-                DATALAKE_DATABASE_ROOT_PASSWORD,
-                DATALAKE_CM_DB_PASSWORD,
-                DATALAKE_CM_SERVICE_DB_PASSWORD,
-                DATALAKE_CM_INTERMEDIATE_CA_CERT));
-        testContext
+        Set<DatalakeSecretType> secretTypes = getAvailableSecretTypes(cloudProvider);
+        SdxInternalTestDto sdxInternalTestDto = testContext
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))
                 .when(sdxTestClient.rotateSecret(secretTypes))
-                .awaitForFlow()
-                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_LDAP_BIND_PASSWORD),
-                        Map.of(CLUSTER_NAME.name(), clusterName)))
-                .awaitForFlow()
-                .then((tc, testDto, client) -> {
-                    secretRotationCheckUtil.checkLdapLogin(testDto.getCrn(), client);
-                    secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
-                    return testDto;
-                });
+                .awaitForFlow();
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
+            sdxInternalTestDto
+                    .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_LDAP_BIND_PASSWORD),
+                            Map.of(CLUSTER_NAME.name(), clusterName)))
+                    .awaitForFlow()
+                    .then((tc, testDto, client) -> {
+                        secretRotationCheckUtil.checkLdapLogin(testDto.getCrn(), client);
+                        secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
+                        return testDto;
+                    });
+        }
+    }
+
+    private Set<DatalakeSecretType> getAvailableSecretTypes(String cloudProvider) {
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
+            return Set.of(
+                    // CB-24849 and CB-25311
+                    //DATALAKE_GATEWAY_CERT,
+                    DATALAKE_USER_KEYPAIR,
+                    DATALAKE_IDBROKER_CERT,
+                    DATALAKE_SALT_BOOT_SECRETS,
+                    DATALAKE_MGMT_CM_ADMIN_PASSWORD,
+                    DATALAKE_CB_CM_ADMIN_PASSWORD,
+                    DATALAKE_DATABASE_ROOT_PASSWORD,
+                    DATALAKE_CM_DB_PASSWORD,
+                    DATALAKE_CM_SERVICE_DB_PASSWORD,
+                    DATALAKE_CM_INTERMEDIATE_CA_CERT);
+        } else {
+            return Set.of(
+                    DATALAKE_DATABASE_ROOT_PASSWORD,
+                    DATALAKE_CM_DB_PASSWORD);
+        }
     }
 
     private void multiRepairThenValidate(TestContext testContext) {

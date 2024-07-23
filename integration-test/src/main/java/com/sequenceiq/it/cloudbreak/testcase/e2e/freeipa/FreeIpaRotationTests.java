@@ -62,15 +62,17 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent with 2 FreeIPA instance " +
-                    "AND do a FREEIPA_ADMIN_PASSWORD rotation, after that {FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD} rotations",
+                    "AND do a FREEIPA_ADMIN_PASSWORD rotation on all cloud provider, " +
+                    "after that {FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD} rotations on AWS only",
             then = "the stack should be available AND deletable and have 2 nodes AND the primary gateway should not change" +
                     " AND the rotations should happen")
     public void testFreeIpaRotation(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
         Map<String, String> originalPasswordLastChangedMap = new HashMap<>();
         Map<String, String> originalPasswordsFromPillarMap = new HashMap<>();
+        String cloudProvider = commonCloudProperties().getCloudProvider();
 
-        testContext
+        FreeIpaRotationTestDto freeIpaRotationTestDto = testContext
                 .given(freeIpa, FreeIpaTestDto.class)
                 .withTelemetry("telemetry")
                 .withOsType(RHEL8.getOs())
@@ -90,12 +92,15 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> {
                     checkDirectoryManagerPasswordAfterRotation(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, testDto, client);
                     return testDto;
-                })
-                .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD))
-                .when(freeIpaTestClient.rotateSecret())
-                .awaitForFlow()
-                .validate();
+                });
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
+            freeIpaRotationTestDto = testContext
+                    .given(FreeIpaRotationTestDto.class)
+                    .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD))
+                    .when(freeIpaTestClient.rotateSecret())
+                    .awaitForFlow();
+        }
+        freeIpaRotationTestDto.validate();
     }
 
     private void getPasswordAndLastChangedFromPillar(Map<String, String> originalPasswordLastChangedMap,

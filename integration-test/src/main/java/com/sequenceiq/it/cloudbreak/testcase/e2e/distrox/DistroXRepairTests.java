@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -63,49 +62,55 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is an environment and DistroX with Auto TLS in available state",
-            when = "in case of AWS provider secrets are getting rotated before " +
-                    "recovery called on the MASTER host group, where the instance had been " +
-                    "terminated",
-            then = "all the actions (secret rotation then recovery for AWS OR just recovery) should be successful, " +
-                    "the cluster should be available"
+            when = "secrets are getting rotated (AWS - all secrets, non-AWS - limited set of secrets) before " +
+                    "recovery called on the MASTER host group, where the instance had been terminated",
+            then = "all the actions (secret rotation then recovery) should be successful, the cluster should be available"
     )
     public void testSecretRotationAndMasterRepairWithTerminatedInstances(TestContext testContext) {
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
+        secretRotation(testContext, cloudProvider);
+        masterRepairValidate(testContext);
+    }
+
+    private void secretRotation(TestContext testContext, String cloudProvider) {
+        String clusterName = testContext.given(DistroXTestDto.class).getResponse().getName();
+        Set<CloudbreakSecretType> secretTypes = getAvailableSecretTypes(cloudProvider);
+        DistroXTestDto distroXTestDto = testContext
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.rotateSecret(secretTypes))
+                .awaitForFlow();
         if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
-            secretRotation(testContext);
-            masterRepairValidate(testContext);
-        } else {
-            masterRepairValidate(testContext);
+            distroXTestDto
+                    .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_LDAP_BIND_PASSWORD), Map.of(CLUSTER_NAME.name(), clusterName)))
+                    .awaitForFlow()
+                    .then((tc, testDto, client) -> {
+                        secretRotationCheckUtil.checkLdapLogin(tc, testDto, client);
+                        secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);
+                        return testDto;
+                    });
         }
     }
 
-    private void secretRotation(TestContext testContext) {
-        String clusterName = testContext.given(DistroXTestDto.class).getResponse().getName();
-        Set<CloudbreakSecretType> secretTypes = Sets.newHashSet();
-        secretTypes.addAll(Set.of(
-                USER_KEYPAIR,
-                SALT_BOOT_SECRETS,
-                CLUSTER_MGMT_CM_ADMIN_PASSWORD,
-                CLUSTER_CB_CM_ADMIN_PASSWORD,
-                CLUSTER_CM_DB_PASSWORD,
-                // we should enable this again when CDPD-43281 is resolved
-                //CLUSTER_CM_SERVICES_DB_PASSWORD,
-                // CB-24849 and CB-25311
-                //GATEWAY_CERT
-                DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
-                DATAHUB_CM_INTERMEDIATE_CA_CERT));
-        testContext
-                .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecret(secretTypes))
-                .awaitForFlow()
-                .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_LDAP_BIND_PASSWORD), Map.of(CLUSTER_NAME.name(), clusterName)))
-                .awaitForFlow()
-                .then((tc, testDto, client) -> {
-                    secretRotationCheckUtil.checkLdapLogin(tc, testDto, client);
-                    secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);
-                    return testDto;
-                });
+    private Set<CloudbreakSecretType> getAvailableSecretTypes(String cloudProvider) {
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
+            return Set.of(
+                    USER_KEYPAIR,
+                    SALT_BOOT_SECRETS,
+                    CLUSTER_MGMT_CM_ADMIN_PASSWORD,
+                    CLUSTER_CB_CM_ADMIN_PASSWORD,
+                    CLUSTER_CM_DB_PASSWORD,
+                    // we should enable this again when CDPD-43281 is resolved
+                    //CLUSTER_CM_SERVICES_DB_PASSWORD,
+                    // CB-24849 and CB-25311
+                    //GATEWAY_CERT
+                    DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
+                    DATAHUB_CM_INTERMEDIATE_CA_CERT);
+        } else {
+            return Set.of(
+                    DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
+                    CLUSTER_CM_DB_PASSWORD);
+        }
     }
 
     private void masterRepairValidate(TestContext testContext) {
