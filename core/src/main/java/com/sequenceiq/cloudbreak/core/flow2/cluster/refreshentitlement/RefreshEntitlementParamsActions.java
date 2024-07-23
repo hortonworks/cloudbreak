@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RefreshEntitlementParamsTriggerEvent;
@@ -24,6 +25,8 @@ import com.sequenceiq.flow.core.Flow;
 public class RefreshEntitlementParamsActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshEntitlementParamsActions.class);
+
+    private static final String EVENT_TYPE = "DYNAMIC_ENTITLEMENT";
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
@@ -43,6 +46,7 @@ public class RefreshEntitlementParamsActions {
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, RefreshEntitlementParamsTriggerEvent payload, Map<Object, Object> variables) {
                 dynamicEntitlementRefreshService.storeChangedEntitlementsInTelemetry(payload.getResourceId(), payload.getChangedEntitlements());
+                flowMessageService.fireEventAndLog(context.getStack().getId(), EVENT_TYPE, ResourceEvent.STACK_DYNAMIC_ENTITLEMENT_FINISHED);
                 sendEvent(context);
             }
         };
@@ -54,6 +58,8 @@ public class RefreshEntitlementParamsActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Error during refreshing dynamic entitlements.", payload.getException());
+                flowMessageService.fireEventAndLog(context.getStackId(), EVENT_TYPE, ResourceEvent.STACK_DYNAMIC_ENTITLEMENT_FAILED,
+                        payload.getException().getMessage());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
                 sendEvent(context);
