@@ -131,6 +131,7 @@ public enum ResourceEvent {
     ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED("environment.resource.encryption.deletion.started"),
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
     ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
+    ENVIRONMENT_DELETION_FAILED_WITH_REASON("environment.deletion.failed.with.reason"),
 
     ENVIRONMENT_STOP_DATAHUB_STARTED("environment.stop.datahub.started"),
     ENVIRONMENT_STOP_DATAHUB_FAILED("environment.stop.datahub.failed"),

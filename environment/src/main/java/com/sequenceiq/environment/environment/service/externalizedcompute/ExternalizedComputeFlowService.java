@@ -36,7 +36,7 @@ public class ExternalizedComputeFlowService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-        externalizedComputeService.checkDefaultClusterExists(environment);
+        externalizedComputeService.checkDefaultCluster(environment, force);
         externalizedComputeService.updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         return environmentReactorFlowManager.triggerExternalizedComputeReinitializationFlow(ThreadBasedUserCrnProvider.getUserCrn(), environment, force);
     }

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -157,6 +158,27 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         } catch (TransactionExecutionException e) {
             LOGGER.error("Externalized compute cluster save failed", e);
             throw new RuntimeException("Externalized compute cluster initiation failed");
+        }
+    }
+
+    public void initiateAuxClusterDelete(Long externalizedComputeClusterId, String actorCrn) {
+        ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(externalizedComputeClusterId);
+        LOGGER.info("Initiate auxiliary cluster delete for: {}", externalizedComputeCluster.getName());
+
+        String environmentCrn = externalizedComputeCluster.getEnvironmentCrn();
+        List<ListClusterItem> auxClusters = liftieGrpcClient.listAuxClusters(environmentCrn, actorCrn);
+        for (ListClusterItem listClusterItem : auxClusters) {
+            try {
+                liftieGrpcClient.deleteCluster(listClusterItem.getClusterCrn(),
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        environmentCrn);
+            } catch (Exception e) {
+                if (!e.getMessage().contains("already deleted") && !e.getMessage().contains("not found in database")
+                        && !e.getMessage().contains("existing operation 'Delete'")) {
+                    LOGGER.error("Auxiliary compute cluster deletion failed", e);
+                    throw new RuntimeException("Auxiliary compute cluster deletion failed. Cause: " + e.getMessage(), e);
+                }
+            }
         }
     }
 

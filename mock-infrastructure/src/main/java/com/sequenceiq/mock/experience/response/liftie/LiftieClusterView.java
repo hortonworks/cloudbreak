@@ -19,13 +19,19 @@ public class LiftieClusterView {
     @SerializedName("cluster_status")
     private StatusMessage clusterStatus;
 
-    public LiftieClusterView(String name, String clusterId, String environmentCrn, String accountId, String clusterType, StatusMessage clusterStatus) {
+    private boolean defaultCluster;
+
+    private boolean failCommands;
+
+    public LiftieClusterView(String name, String clusterId, String environmentCrn, String accountId, String clusterType, StatusMessage clusterStatus,
+            boolean defaultCluster) {
         this.name = name;
         this.clusterId = clusterId;
         this.env = environmentCrn;
         this.tenant = accountId;
         this.clusterType = clusterType;
         this.clusterStatus = clusterStatus;
+        this.defaultCluster = defaultCluster;
     }
 
     public String getName() {
@@ -74,5 +80,21 @@ public class LiftieClusterView {
 
     public void setClusterStatus(StatusMessage clusterStatus) {
         this.clusterStatus = clusterStatus;
+    }
+
+    public boolean isDefaultCluster() {
+        return defaultCluster;
+    }
+
+    public void setDefaultCluster(boolean defaultCluster) {
+        this.defaultCluster = defaultCluster;
+    }
+
+    public boolean isFailCommands() {
+        return failCommands;
+    }
+
+    public void setFailCommands(boolean failCommands) {
+        this.failCommands = failCommands;
     }
 }

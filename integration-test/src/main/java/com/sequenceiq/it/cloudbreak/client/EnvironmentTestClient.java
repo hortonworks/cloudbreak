@@ -16,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteActio
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByCrnsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByNamesAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetByCrnAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
@@ -54,6 +55,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> delete() {
         return new EnvironmentDeleteAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> forceDelete() {
+        return new EnvironmentForceDeleteAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> cascadingDelete() {

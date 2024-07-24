@@ -10,6 +10,9 @@ logging:
   file:
     path: ${integrationtest.outputdir}
 
+liftie:
+  grpc:
+    port: 8987
 mock:
   server:
     address: localhost

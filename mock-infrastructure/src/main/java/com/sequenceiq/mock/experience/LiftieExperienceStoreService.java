@@ -23,23 +23,28 @@ public class LiftieExperienceStoreService {
         return String.valueOf(idCounter.getAndIncrement());
     }
 
-    public String create(String env, String tenant) {
+    public String create(String env, String tenant, String name, boolean defaultCluster) {
         String id = "liftie" + createID();
         StatusMessage clusterStatus = new StatusMessage();
         clusterStatus.setMessage("");
         clusterStatus.setStatus("RUNNING");
-        store.put(id, new LiftieClusterView(id, id, env, tenant, "X", clusterStatus));
+        store.put(id, new LiftieClusterView(name, id, env, tenant, "X", clusterStatus, defaultCluster));
         return id;
     }
 
-    public void createIfNotExist(String env, String tenant) {
+    public void createIfNotExist(String env, String tenant, String name, boolean defaultCluster) {
         if (store.values().stream().noneMatch(cluster -> env.equals(cluster.getEnv()))) {
-            create(env, tenant);
+            create(env, tenant, name, defaultCluster);
         }
     }
 
     public void deleteById(String id) {
-        setStatusById(id, "DELETED");
+        LiftieClusterView cluster = store.get(id);
+        if (cluster.isFailCommands()) {
+            setStatusById(id, "DELETE_FAILED");
+        } else {
+            setStatusById(id, "DELETED");
+        }
     }
 
     public LiftieClusterView setStatusById(String id, String status) {

@@ -57,7 +57,7 @@ class ExternalizedComputeFlowServiceTest {
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true));
         verify(environmentValidatorService, times(1)).validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any());
-        verify(externalizedComputeService, times(1)).checkDefaultClusterExists(environment);
+        verify(externalizedComputeService, times(1)).checkDefaultCluster(environment, true);
         verify(externalizedComputeService, times(1)).updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         verify(environmentReactorFlowManager, times(1)).triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
         assertEquals(flowIdentifierMock, flowIdentifier);
@@ -71,7 +71,7 @@ class ExternalizedComputeFlowServiceTest {
                 () -> externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true)));
         assertEquals("Create field is disabled in externalized compute cluster request!", badRequestException.getMessage());
         verify(environmentValidatorService, never()).validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any());
-        verify(externalizedComputeService, never()).checkDefaultClusterExists(environment);
+        verify(externalizedComputeService, never()).checkDefaultCluster(environment, false);
         verify(externalizedComputeService, never()).updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         verify(environmentReactorFlowManager, never()).triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
     }
@@ -86,7 +86,7 @@ class ExternalizedComputeFlowServiceTest {
                 () -> externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true)));
         assertEquals("error", badRequestException.getMessage());
         verify(environmentValidatorService, times(1)).validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any());
-        verify(externalizedComputeService, never()).checkDefaultClusterExists(environment);
+        verify(externalizedComputeService, never()).checkDefaultCluster(environment, false);
         verify(externalizedComputeService, never()).updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         verify(environmentReactorFlowManager, never()).triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
     }

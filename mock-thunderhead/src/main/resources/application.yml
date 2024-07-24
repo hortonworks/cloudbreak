@@ -95,6 +95,9 @@ auth:
     container.ready.env.enabled: true
     cdl:
       enabled: true
+    compute:
+      ui:
+        enabled: true
 
 crn:
   partition: cdp

@@ -123,6 +123,7 @@ dependencies {
 
   implementation project(':common')
   implementation project(':cloud-gcp')
+  implementation project(':liftie-connector')
 
   implementation group: 'xerces',              name: 'xercesImpl',            version: xerces
 

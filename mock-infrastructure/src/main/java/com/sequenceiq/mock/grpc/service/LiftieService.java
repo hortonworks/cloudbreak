@@ -1,5 +1,8 @@
 package com.sequenceiq.mock.grpc.service;
 
+import java.util.Map;
+import java.util.Objects;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,8 +17,13 @@ import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClu
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse.Builder;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.mock.experience.LiftieExperienceStoreService;
+import com.sequenceiq.mock.experience.response.liftie.LiftieClusterView;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -32,7 +40,7 @@ public class LiftieService extends LiftiePublicImplBase {
     public void createCluster(CreateClusterRequest request,
             io.grpc.stub.StreamObserver<CreateClusterResponse> responseObserver) {
         String liftieId = liftieExperienceStoreService
-                .create(request.getMetadata().getEnvironmentCrn(), request.getMetadata().getClusterOwner().getAccountId());
+                .create(request.getEnvironment(), Crn.fromString(request.getEnvironment()).getAccountId(), request.getName(), request.getIsDefault());
         responseObserver.onNext(CreateClusterResponse.newBuilder().setClusterId(liftieId).build());
         responseObserver.onCompleted();
     }
@@ -63,9 +71,11 @@ public class LiftieService extends LiftiePublicImplBase {
         Crn crn = Crn.fromString(clusterCrn);
         if (crn != null) {
             String liftie = crn.getResource();
-            if (liftieExperienceStoreService.getById(liftie) != null) {
+            LiftieClusterView liftieClusterView = liftieExperienceStoreService.getById(liftie);
+            if (liftieClusterView != null) {
                 responseObserver.onNext(DescribeClusterResponse.newBuilder().setClusterCrn(clusterCrn)
-                        .setStatus(liftieExperienceStoreService.getById(liftie).getClusterStatus().getStatus()).build());
+                                .setClusterName(liftieClusterView.getName()).setClusterId(liftieClusterView.getClusterId())
+                        .setStatus(liftieClusterView.getClusterStatus().getStatus()).build());
                 responseObserver.onCompleted();
             } else {
                 responseObserver.onError(Status.NOT_FOUND.withDescription(liftie + " not found in databased").asException());
@@ -73,6 +83,31 @@ public class LiftieService extends LiftiePublicImplBase {
         } else {
             getLiftieClusterCrnParsingFailed(responseObserver);
         }
+    }
+
+    @Override
+    public void listClusters(ListClustersRequest request, StreamObserver<ListClustersResponse> responseObserver) {
+        Map<String, LiftieClusterView> clusters = liftieExperienceStoreService.get(request.getEnvNameOrCrn()).getClusters();
+        Builder builder = ListClustersResponse.newBuilder();
+        for (LiftieClusterView liftieClusterView : clusters.values()) {
+            if (!Objects.equals(liftieClusterView.getClusterStatus().getStatus(), "DELETED")) {
+                ListClusterItem.Builder cluster = ListClusterItem.newBuilder();
+                cluster.setClusterName(liftieClusterView.getName());
+                cluster.setClusterId(liftieClusterView.getClusterId());
+                cluster.setIsDefault(liftieClusterView.isDefaultCluster());
+                Crn envCrn = Crn.fromString(liftieClusterView.getEnv());
+                String liftieCrn = liftieClusterView.getEnv()
+                        .replace(envCrn.getResource(), liftieClusterView.getClusterId())
+                        .replace(envCrn.getService().getName(), "compute")
+                        .replace(envCrn.getResourceType().getName(), "cluster");
+                cluster.setClusterCrn(liftieCrn);
+                cluster.setStatus(liftieClusterView.getClusterStatus().getStatus());
+                cluster.setMessage(liftieClusterView.getClusterStatus().getMessage());
+                builder.addClusters(cluster);
+            }
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 
     private void getLiftieClusterCrnParsingFailed(StreamObserver<DescribeClusterResponse> responseObserver) {

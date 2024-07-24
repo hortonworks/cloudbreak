@@ -8,6 +8,8 @@ import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClu
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -31,6 +33,10 @@ public class LiftieServiceClient {
 
     public DescribeClusterResponse describeCluster(DescribeClusterRequest describeClusterRequest) {
         return newStub().describeCluster(describeClusterRequest);
+    }
+
+    public ListClustersResponse listClusters(ListClustersRequest listClustersRequest) {
+        return newStub().listClusters(listClustersRequest);
     }
 
     public CreateClusterResponse createCluster(CreateClusterRequest createClusterRequest) {

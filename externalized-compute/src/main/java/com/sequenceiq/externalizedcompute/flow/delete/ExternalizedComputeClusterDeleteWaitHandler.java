@@ -34,7 +34,7 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterDeleteWaitHandler.class);
 
-    @Value("${externalizedcompute.delete.wait.sleep.time.sec:10}")
+    @Value("${externalizedcompute.delete.wait.sleep.time.ms:10000}")
     private int sleepTime;
 
     @Value("${externalizedcompute.delete.wait.sleep.time.limit.seconds:7200}")
@@ -66,7 +66,7 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
         try {
             return Polling.stopAfterDelay(timeLimit, TimeUnit.SECONDS)
                     .stopIfException(false)
-                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                    .waitPeriodly(sleepTime, TimeUnit.MILLISECONDS)
                     .run(() -> {
                         try {
                             DescribeClusterResponse cluster = liftieGrpcClient.describeCluster(

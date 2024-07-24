@@ -6,6 +6,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATALAKE_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -139,7 +140,13 @@ public class EnvClustersDeleteActions {
                             Environment result = environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             metricService.incrementMetricCounter(MetricType.ENV_CLUSTERS_DELETION_FAILED, environmentDto, payload.getException());
-                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_DELETION_FAILED);
+                            String errorMessage = "Unknown error";
+                            if (payload.getException() != null && payload.getException().getMessage() != null) {
+                                errorMessage = payload.getException().getMessage();
+                            }
+                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
+                                    ResourceEvent.ENVIRONMENT_DELETION_FAILED_WITH_REASON, List.of(errorMessage));
+
                         }, () -> LOGGER.error("Cannot set delete failed to env because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CLUSTERS_DELETE_FAILED_STATE");

@@ -21,7 +21,8 @@ import org.springframework.util.StringUtils;
 import org.testng.TestNG;
 
 @Configuration
-@ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util", "com.sequenceiq.cloudbreak.auth.crn" })
+@ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util",
+        "com.sequenceiq.cloudbreak.auth.crn", "com.sequenceiq.liftie" })
 @EnableConfigurationProperties
 @EnableRetry
 @EnableAspectJAutoProxy(proxyTargetClass = true)

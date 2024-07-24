@@ -121,8 +121,12 @@ public class ExternalizedComputeService {
                 defaultComputeClusterName);
     }
 
-    public void checkDefaultClusterExists(Environment environment) {
-        getDefaultCluster(environment).orElseThrow(() -> new BadRequestException("Default compute cluster does not exists for this environment."));
+    public void checkDefaultCluster(Environment environment, boolean force) {
+        ExternalizedComputeClusterResponse externalizedComputeClusterResponse = getDefaultCluster(environment).orElseThrow(
+                () -> new BadRequestException("Default compute cluster does not exists for this environment."));
+        if (!force && ExternalizedComputeClusterApiStatus.AVAILABLE.equals(externalizedComputeClusterResponse.getStatus())) {
+            throw new BadRequestException("Your default compute cluster is in Available state!");
+        }
     }
 
     public String getDefaultComputeClusterName(String environmentName) {
@@ -143,7 +147,8 @@ public class ExternalizedComputeService {
                     if (!clustersUnderDeletion.isEmpty()) {
                         for (ExternalizedComputeClusterResponse clusterResponse : clustersUnderDeletion) {
                             if (ExternalizedComputeClusterApiStatus.DELETE_FAILED.equals(clusterResponse.getStatus())) {
-                                return AttemptResults.breakFor("Found a compute cluster with delete failed status: " + clusterResponse.getName());
+                                return AttemptResults.breakFor("Found a compute cluster with delete failed status: " + clusterResponse.getName() +
+                                        ". Failure reason: " + clusterResponse.getStatusReason());
                             }
                         }
                         return AttemptResults.justContinue();

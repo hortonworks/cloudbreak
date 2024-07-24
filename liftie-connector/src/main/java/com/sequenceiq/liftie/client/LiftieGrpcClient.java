@@ -1,5 +1,7 @@
 package com.sequenceiq.liftie.client;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +15,9 @@ import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClu
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -31,6 +36,15 @@ public class LiftieGrpcClient {
     public DescribeClusterResponse describeCluster(String liftieCrn, String actorCrn) {
         LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
         return liftieServiceClient.describeCluster(DescribeClusterRequest.newBuilder().setClusterCrn(liftieCrn).build());
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public List<ListClusterItem> listAuxClusters(String envCrn, String actorCrn) {
+        LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
+        ListClustersResponse listClustersResponse = liftieServiceClient.listClusters(ListClustersRequest.newBuilder().setEnvNameOrCrn(envCrn).build());
+        return listClustersResponse.getClustersList().stream()
+                        .filter(listClusterItem -> !listClusterItem.getIsDefault())
+                        .toList();
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))

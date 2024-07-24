@@ -1,5 +1,7 @@
 package com.sequenceiq.mock.experience;
 
+import java.util.UUID;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 
@@ -39,7 +41,7 @@ public class LiftieController {
     public ListClustersResponse listCluster(@RequestParam("env") String env, @RequestParam("tenant") String tenant) throws Exception {
         if (createDummyCluster) {
             LOGGER.debug("Creting dummy Liftie cluster if it does not exist in the local store");
-            liftieExperienceStoreService.createIfNotExist(env, tenant);
+            liftieExperienceStoreService.createIfNotExist(env, tenant, "cluster" + UUID.randomUUID(), false);
         }
         return liftieExperienceStoreService.get(env);
     }
@@ -55,7 +57,7 @@ public class LiftieController {
 
     @PostMapping(value = "mocksupport/{crn}")
     public ListClustersResponse createNew(@PathVariable("crn") String env) throws Exception {
-        liftieExperienceStoreService.create(env, ThreadBasedUserCrnProvider.getAccountId());
+        liftieExperienceStoreService.create(env, ThreadBasedUserCrnProvider.getAccountId(), "cluster" + UUID.randomUUID(), false);
         return liftieExperienceStoreService.get(env);
     }
 

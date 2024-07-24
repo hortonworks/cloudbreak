@@ -9,12 +9,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -28,6 +31,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -295,6 +300,76 @@ class ExternalizedComputeClusterServiceTest {
         assertEquals("Compute cluster is under operation.", badRequestException.getMessage());
 
         verify(externalizedComputeClusterFlowManager, times(0)).triggerExternalizedComputeClusterReInitialization(cluster);
+    }
+
+    @Test
+    public void testInitiateAuxClusterDeleteSuccess() {
+        Long externalizedComputeClusterId = 1L;
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("TestCluster");
+        cluster.setEnvironmentCrn("envCrn");
+        when(externalizedComputeClusterRepository.findByIdAndDeletedIsNull(1L)).thenReturn(Optional.of(cluster));
+        ListClusterItem listClusterItem1 = ListClusterItem.newBuilder().setClusterCrn("clusterCrn1").build();
+        ListClusterItem listClusterItem2 = ListClusterItem.newBuilder().setClusterCrn("clusterCrn2").build();
+        when(liftieGrpcClient.listAuxClusters("envCrn", USER_CRN)).thenReturn(List.of(listClusterItem1, listClusterItem2));
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        String internalCrn = "internalCrn";
+        when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
+
+        ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
+        verify(liftieGrpcClient).deleteCluster(eq("clusterCrn1"), crnCaptor.capture(), eq("envCrn"));
+        verify(liftieGrpcClient).deleteCluster(eq("clusterCrn2"), crnCaptor.capture(), eq("envCrn"));
+        assertEquals("internalCrn", crnCaptor.getValue());
+    }
+
+    @Test
+    public void testInitiateAuxClusterDeleteFailure() {
+        Long externalizedComputeClusterId = 1L;
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("TestCluster");
+        cluster.setEnvironmentCrn("envCrn");
+        when(externalizedComputeClusterRepository.findByIdAndDeletedIsNull(1L)).thenReturn(Optional.of(cluster));
+        ListClusterItem listClusterItem1 = ListClusterItem.newBuilder().setClusterCrn("clusterCrn1").build();
+        ListClusterItem listClusterItem2 = ListClusterItem.newBuilder().setClusterCrn("clusterCrn2").build();
+        when(liftieGrpcClient.listAuxClusters("envCrn", USER_CRN)).thenReturn(List.of(listClusterItem1, listClusterItem2));
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        String internalCrn = "internalCrn";
+        when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+
+        when(liftieGrpcClient.deleteCluster("clusterCrn1", internalCrn, ENV_CRN)).thenReturn(DeleteClusterResponse.newBuilder().build());
+        doThrow(new RuntimeException("liftie error happened")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN));
+        assertEquals("Auxiliary compute cluster deletion failed. Cause: " + "liftie error happened", runtimeException.getMessage());
+    }
+
+    @Test
+    public void testInitiateAuxClusterDeleteAlreadyDeletedOrNotFoundOrDeleteInProgress() {
+        Long externalizedComputeClusterId = 1L;
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("TestCluster");
+        cluster.setEnvironmentCrn("envCrn");
+        when(externalizedComputeClusterRepository.findByIdAndDeletedIsNull(1L)).thenReturn(Optional.of(cluster));
+        ListClusterItem listClusterItem1 = ListClusterItem.newBuilder().setClusterCrn("clusterCrn1").build();
+        ListClusterItem listClusterItem2 = ListClusterItem.newBuilder().setClusterCrn("clusterCrn2").build();
+        when(liftieGrpcClient.listAuxClusters("envCrn", USER_CRN)).thenReturn(List.of(listClusterItem1, listClusterItem2));
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        String internalCrn = "internalCrn";
+        when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalCrn);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+
+        when(liftieGrpcClient.deleteCluster("clusterCrn1", internalCrn, ENV_CRN)).thenReturn(DeleteClusterResponse.newBuilder().build());
+        doThrow(new RuntimeException("clusterCrn2 already deleted")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
+        doThrow(new RuntimeException("clusterCrn2 not found in database")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
+        doThrow(new RuntimeException("existing operation 'Delete'")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
+        clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
     }
 
 }

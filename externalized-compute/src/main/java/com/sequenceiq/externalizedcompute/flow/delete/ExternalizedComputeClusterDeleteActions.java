@@ -1,5 +1,6 @@
 package com.sequenceiq.externalizedcompute.flow.delete;
 
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT;
@@ -32,6 +33,56 @@ public class ExternalizedComputeClusterDeleteActions {
 
     @Inject
     private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
+
+    @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_STATE")
+    public Action<?, ?> auxiliaryClusterDelete() {
+        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterDeleteEvent.class) {
+
+            @Override
+            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
+                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
+                        "Auxiliary cluster delete initiated");
+                try {
+                    externalizedComputeClusterService.initiateAuxClusterDelete(context.getExternalizedComputeId(), context.getActorCrn());
+                    sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED.event(), payload);
+                } catch (Exception e) {
+                    if (payload.isForce()) {
+                        LOGGER.warn("Auxiliary cluster delete failed: {}", e.getMessage(), e);
+                        sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED.event(), payload);
+                    } else {
+                        ExternalizedComputeClusterDeleteFailedEvent failedEvent = ExternalizedComputeClusterDeleteFailedEvent.from(payload, e);
+                        sendEvent(context, failedEvent.selector(), failedEvent);
+                    }
+                }
+            }
+
+            @Override
+            protected Object getFailurePayload(ExternalizedComputeClusterDeleteEvent payload, Optional<ExternalizedComputeClusterContext> flowContext,
+                    Exception ex) {
+                return ExternalizedComputeClusterDeleteFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_IN_PROGRESS_STATE")
+    public Action<?, ?> auxiliaryClusterDeleteWait() {
+        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterDeleteEvent.class) {
+
+            @Override
+            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
+                ExternalizedComputeClusterAuxiliaryDeleteWaitRequest auxiliaryDeleteWaitRequest =
+                        new ExternalizedComputeClusterAuxiliaryDeleteWaitRequest(context.getExternalizedComputeId(), context.getActorCrn(), payload.isForce(),
+                                payload.isPreserveCluster());
+                sendEvent(context, auxiliaryDeleteWaitRequest.selector(), auxiliaryDeleteWaitRequest);
+            }
+
+            @Override
+            protected Object getFailurePayload(ExternalizedComputeClusterDeleteEvent payload, Optional<ExternalizedComputeClusterContext> flowContext,
+                    Exception ex) {
+                return ExternalizedComputeClusterDeleteFailedEvent.from(payload, ex);
+            }
+        };
+    }
 
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STATE")
     public Action<?, ?> externalizedComputeClusterDelete() {

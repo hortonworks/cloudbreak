@@ -76,6 +76,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SY
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_API_LIFTIE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_API_LIFTIE_BETA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COMPUTE_UI;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
@@ -145,6 +148,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Assig
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest;
@@ -209,6 +214,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Resou
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
@@ -542,6 +548,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cdl.enabled}")
     private boolean cdlEnabled;
+
+    @Value("${auth.mock.compute.ui.enabled}")
+    private boolean computeUiEnabled;
 
     private Set<String> grantedEntitlements = new HashSet<>();
 
@@ -1013,6 +1022,11 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (cdlEnabled) {
             builder.addEntitlements(createEntitlement(ENABLE_CONTAINERIZED_DATALKE));
         }
+        if (computeUiEnabled) {
+            builder.addEntitlements(createEntitlement(COMPUTE_UI));
+            builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE));
+            builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE_BETA));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -1480,9 +1494,13 @@ public class MockUserManagementService extends UserManagementImplBase {
     }
 
     @Override
-    public void checkRights(UserManagementProto.CheckRightsRequest request, StreamObserver<UserManagementProto.CheckRightsResponse> responseObserver) {
+    public void checkRights(CheckRightsRequest request, StreamObserver<CheckRightsResponse> responseObserver) {
         LOGGER.info("Check {} rights for {}, ", request.getCheckList(), request.getActorCrn());
-        responseObserver.onNext(UserManagementProto.CheckRightsResponse.newBuilder().build());
+        CheckRightsResponse.Builder builder = CheckRightsResponse.newBuilder();
+        for (RightsCheck rightsCheck : request.getCheckList()) {
+            builder.addResult(true);
+        }
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 

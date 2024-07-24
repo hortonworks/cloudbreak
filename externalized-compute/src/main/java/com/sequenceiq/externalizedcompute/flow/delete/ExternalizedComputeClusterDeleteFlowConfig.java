@@ -1,10 +1,14 @@
 package com.sequenceiq.externalizedcompute.flow.delete;
 
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_INITIATED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINISHED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteState.EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_IN_PROGRESS_STATE;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteState.EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_STATE;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteState.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAILED_STATE;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteState.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINISHED_STATE;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteState.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_IN_PROGRESS_STATE;
@@ -29,6 +33,18 @@ public class ExternalizedComputeClusterDeleteFlowConfig
             new Transition.Builder<ExternalizedComputeClusterDeleteState, ExternalizedComputeClusterDeleteFlowEvent>()
                     .defaultFailureEvent(ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAILED_EVENT)
                     .from(INIT_STATE)
+                    .to(EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_STATE)
+                    .event(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_INITIATED_EVENT).defaultFailureEvent()
+
+                    .from(INIT_STATE)
+                    .to(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STATE)
+                    .event(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT).defaultFailureEvent()
+
+                    .from(EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_STATE)
+                    .to(EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_IN_PROGRESS_STATE)
+                    .event(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_STARTED).defaultFailureEvent()
+
+                    .from(EXTERNALIZED_COMPUTE_CLUSTER_AUXILIARY_DELETE_IN_PROGRESS_STATE)
                     .to(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STATE)
                     .event(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT).defaultFailureEvent()
 
@@ -61,6 +77,7 @@ public class ExternalizedComputeClusterDeleteFlowConfig
     @Override
     public ExternalizedComputeClusterDeleteFlowEvent[] getInitEvents() {
         return new ExternalizedComputeClusterDeleteFlowEvent[] {
+                EXTERNALIZED_COMPUTE_CLUSTER_DELETE_AUX_CLUSTER_DELETE_INITIATED_EVENT,
                 EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT
         };
     }
