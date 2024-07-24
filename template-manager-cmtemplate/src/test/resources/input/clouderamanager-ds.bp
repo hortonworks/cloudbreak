@@ -184,6 +184,17 @@
       ]
     },
     {
+      "refName": "nifi-NIFI-BASE",
+      "serviceType": "NIFI",
+      "roleConfigGroups": [
+        {
+          "refName": "nifi-NIFI_NODE-BASE",
+          "roleType": "NIFI_NODE",
+          "base": true
+        }
+      ]
+    },
+    {
       "refName": "tez",
       "serviceType": "TEZ",
       "serviceConfigs": [
@@ -242,7 +253,8 @@
         "yarn-JOBHISTORY-BASE",
         "yarn-RESOURCEMANAGER-BASE",
         "zookeeper-SERVER-BASE",
-        "zeppelin-ZEPPELIN_SERVER-BASE"
+        "zeppelin-ZEPPELIN_SERVER-BASE",
+        "nifi-NIFI_NODE-BASE"
       ]
     },
     {

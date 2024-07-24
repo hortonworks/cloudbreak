@@ -164,6 +164,17 @@
       "relatedServices": ["ICEBERG_REPLICATION_ADMINSERVER"],
       "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
+    },
+    {
+      "type": "NIFI_LOGS_REPLICATION",
+      "propertyName": "nifi.log.dir.copy.to.cloud.object.storage",
+      "propertyFile": "nifi.properties",
+      "description": "The directory where NiFi logs are saved",
+      "defaultPath": "{{{ defaultPath }}}/{{{ clusterName }}}/nifi/logs",
+      "propertyDisplayName": "NiFi Logs Root Directory",
+      "relatedServices": ["NIFI_NODE"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     }
   ]
 }

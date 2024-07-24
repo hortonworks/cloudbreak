@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.nifi;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.VolumeConfigProviderTestHelper.hostGroupWithVolumeCount;
@@ -14,8 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiRoles;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiVolumeConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;

@@ -23,7 +23,8 @@ public enum CloudStorageCdpService {
     FLINK_CHECKPOINTS,
     FLINK_SAVEPOINTS,
     FLINK_HIGH_AVAILABILITY,
-    ICEBERG_REPLICATION_CLOUD_ROOT;
+    ICEBERG_REPLICATION_CLOUD_ROOT,
+    NIFI_LOGS_REPLICATION;
 
     @JsonIgnore
     public static String typeListing() {
