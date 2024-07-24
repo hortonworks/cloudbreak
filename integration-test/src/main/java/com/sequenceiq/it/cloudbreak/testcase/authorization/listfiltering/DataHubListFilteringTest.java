@@ -62,7 +62,7 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
     public void testDataHubListFiltering(TestContext testContext) {
         testContext.as(AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
-        EnvironmentTestDto environment = resourceCreator.createDefaultEnvironment(testContext);
+        EnvironmentTestDto environment = resourceCreator.createDefaultEnvironmentWithTelemetryFeaturesDisabled(testContext);
         resourceCreator.createNewFreeIpa(testContext, environment);
         resourceCreator.createDefaultDataLake(testContext);
         DistroXTestDto datahubA = resourceCreator
@@ -99,15 +99,6 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
         assertUserSeesAll(testContext, USER_ENV_CREATOR_B, datahubA.getName(), dataHubB.getName());
 
         testContext.as(AuthUserKeys.USER_ACCOUNT_ADMIN);
-    }
-
-    private void assertUserDoesNotSeeAnyOf(TestContext testContext, String user, String... names) {
-        testContext.as(user);
-        Assertions.assertThat(testContext.given(DistroXTestDto.class).getAll(testContext.getMicroserviceClient(CloudbreakClient.class))
-                .stream()
-                .map(StackV4Response::getName)
-                .collect(Collectors.toList()))
-                .doesNotContainAnyElementsOf(Arrays.asList(names));
     }
 
     private void assertUserSeesAll(TestContext testContext, String user, String... names) {

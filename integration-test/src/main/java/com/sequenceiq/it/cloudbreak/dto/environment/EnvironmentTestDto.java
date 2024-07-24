@@ -20,7 +20,9 @@ import org.testng.util.Strings;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
+import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
@@ -296,6 +298,26 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withTelemetry(TelemetryRequest telemetry) {
+        getRequest().setTelemetry(telemetry);
+        return this;
+    }
+
+    public EnvironmentTestDto withTelemetryDisabled() {
+        TelemetryRequest telemetry = new TelemetryRequest();
+        FeaturesRequest features = new FeaturesRequest();
+        FeatureSetting monitoringFeature = new FeatureSetting();
+        monitoringFeature.setEnabled(false);
+        features.setMonitoring(monitoringFeature);
+        FeatureSetting workloadFeature = new FeatureSetting();
+        workloadFeature.setEnabled(false);
+        features.setWorkloadAnalytics(workloadFeature);
+        FeatureSetting storageLoggingFeature = new FeatureSetting();
+        storageLoggingFeature.setEnabled(false);
+        features.setCloudStorageLogging(storageLoggingFeature);
+        FeatureSetting clusterLogCollectionFeature = new FeatureSetting();
+        clusterLogCollectionFeature.setEnabled(false);
+        features.setClusterLogsCollection(clusterLogCollectionFeature);
+        telemetry.setFeatures(features);
         getRequest().setTelemetry(telemetry);
         return this;
     }

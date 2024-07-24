@@ -86,6 +86,10 @@ public class ResourceCreator {
         return create(testContext.given(EnvironmentTestDto.class));
     }
 
+    public EnvironmentTestDto createDefaultEnvironmentWithTelemetryFeaturesDisabled(TestContext testContext) {
+        return create(testContext.given(EnvironmentTestDto.class).withTelemetryDisabled());
+    }
+
     public EnvironmentTestDto createNewEnvironment(TestContext testContext) {
         String name = resourcePropertyProvider.getEnvironmentName();
         return create(testContext.given(name, EnvironmentTestDto.class)

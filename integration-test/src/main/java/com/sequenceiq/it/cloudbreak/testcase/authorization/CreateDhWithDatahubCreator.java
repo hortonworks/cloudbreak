@@ -102,6 +102,7 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
+                .withTelemetryDisabled()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment

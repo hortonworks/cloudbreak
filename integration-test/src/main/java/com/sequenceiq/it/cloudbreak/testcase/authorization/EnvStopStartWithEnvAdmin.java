@@ -99,6 +99,7 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
+                .withTelemetryDisabled()
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
