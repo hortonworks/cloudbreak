@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -17,6 +18,10 @@ public interface DatabaseServerParameterDecorator {
     }
 
     default Optional<? extends DatabaseType> getDatabaseType(Map<String, Object> attributes) {
+        return Optional.empty();
+    }
+
+    default Optional<Database> updateVersionRelatedDatabaseParams(Database database, String dbVersion) {
         return Optional.empty();
     }
 

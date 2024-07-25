@@ -16,8 +16,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -38,11 +40,7 @@ public class AzureDatabaseAttributesService {
     public AzureDatabaseType getAzureDatabaseType(SdxDatabase sdxDatabase) {
         String dbTypeStr = sdxDatabase.getAttributes() != null ?
                 (String) sdxDatabase.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY) : "";
-        if (StringUtils.isNotBlank(dbTypeStr)) {
-            return AzureDatabaseType.safeValueOf(dbTypeStr);
-        } else {
-            return AzureDatabaseType.SINGLE_SERVER;
-        }
+        return getAzureDatabaseType(dbTypeStr);
     }
 
     public String getFlexibleServerDelegatedSubnetId(SdxDatabase sdxDatabase) {
@@ -85,5 +83,30 @@ public class AzureDatabaseAttributesService {
                 .or(() -> Optional.ofNullable(internalDatabaseRequest)
                         .map(DatabaseRequest::getDatabaseAzureRequest)
                         .map(DatabaseAzureRequest::getFlexibleServerDelegatedSubnetId));
+    }
+
+    public Optional<SdxDatabase> updateVersionRelatedDatabaseParams(SdxDatabase sdxDatabase, String dbVersion) {
+        VersionComparator versionComparator = new VersionComparator();
+        Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
+        AzureDatabaseType dbType = getAzureDatabaseType((String) attributes.getOrDefault(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, ""));
+        boolean updateNeeded = versionComparator.compare(() -> dbVersion, MajorVersion.VERSION_14::getMajorVersion) >= 0 &&
+                dbType != AzureDatabaseType.FLEXIBLE_SERVER;
+        if (updateNeeded) {
+            LOGGER.debug("Azure database type is updated to FLEXIBLE_SERVER, because of db version {}", dbVersion);
+            attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER);
+            sdxDatabase.setAttributes(new Json(attributes));
+            return Optional.of(sdxDatabase);
+        } else {
+            LOGGER.debug("No Azure databasetype update is needed. Azure dbtype: {}, db version: {}", dbType, dbVersion);
+            return Optional.empty();
+        }
+    }
+
+    private AzureDatabaseType getAzureDatabaseType(String dbTypeStr) {
+        if (StringUtils.isNotBlank(dbTypeStr)) {
+            return AzureDatabaseType.safeValueOf(dbTypeStr);
+        } else {
+            return AzureDatabaseType.SINGLE_SERVER;
+        }
     }
 }

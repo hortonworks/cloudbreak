@@ -1136,11 +1136,17 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
         LOGGER.info("Updating DB engine version for [{}] to [{}]", stackId, databaseVersion);
         Optional<Long> databaseId = stackRepository.findDatabaseIdByStackId(stackId);
-        databaseId.ifPresentOrElse(id -> databaseService.updateExternalDatabaseEngineVersion(id, databaseVersion), () -> {
+        databaseId.ifPresentOrElse(id -> updateExternalDatabaseEngineVersion(stackId, id, databaseVersion), () -> {
             LOGGER.warn("Stack with id [{}] is not found, update database engine version to [{}] is not possible", stackId, databaseVersion);
             throw notFoundException("Stack with", stackId + " id");
         });
         LOGGER.info("Updated database engine version for [{}] with [{}]", stackId, databaseVersion);
+    }
+
+    private void updateExternalDatabaseEngineVersion(Long stackId, Long databaseId, String databaseVersion) {
+        Optional<PayloadContext> payloadContext = stackRepository.findStackAsPayloadContext(stackId);
+        String cloudPlatform = payloadContext.map(PayloadContext::getCloudPlatform).orElse(null);
+        databaseService.updateExternalDatabaseEngineVersion(databaseId, databaseVersion, CloudPlatform.fromName(cloudPlatform));
     }
 
     public void updateDomainDnsResolverByStackId(Long stackId, DnsResolverType actualDnsResolverType) {

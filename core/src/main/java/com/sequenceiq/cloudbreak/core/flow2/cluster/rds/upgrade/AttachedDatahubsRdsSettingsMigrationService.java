@@ -62,7 +62,7 @@ public class AttachedDatahubsRdsSettingsMigrationService {
     public void migrate(Long stackId) throws Exception {
         StackDto stackDto = stackDtoService.getById(stackId);
         if (stackDto.getStack().isDatalake()) {
-            Set<StackIdView> datahubIds = stackService.findByDatalakeCrn(stackDto.getResourceCrn());
+            Set<StackIdView> datahubIds = stackService.findNotTerminatedByDatalakeCrn(stackDto.getResourceCrn());
             if (CollectionUtils.isNotEmpty(datahubIds)) {
                 migrateDatahubs(stackId, datahubIds, stackDto);
             }

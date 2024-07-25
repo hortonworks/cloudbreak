@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.database;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -14,9 +15,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.DatabaseRepository;
+import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseServerParameterDecorator;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DatabaseServerConverter;
 import com.sequenceiq.flow.api.model.operation.OperationView;
@@ -47,6 +50,9 @@ public class DatabaseService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private Map<CloudPlatform, DatabaseServerParameterDecorator> databaseServerParameterDecoratorMap;
+
     public StackDatabaseServerResponse getDatabaseServer(NameOrCrn nameOrCrn) {
         Stack stack = stackOperations.getStackByNameOrCrn(nameOrCrn);
         if (stack.getCluster() == null) {
@@ -74,8 +80,17 @@ public class DatabaseService {
         return result;
     }
 
-    public int updateExternalDatabaseEngineVersion(Long id, String externalDatabaseEngineVersion) {
-        return databaseRepository.updateExternalDatabaseEngineVersion(id, externalDatabaseEngineVersion);
+    public int updateExternalDatabaseEngineVersion(Long id, String externalDatabaseEngineVersion, CloudPlatform cloudPlatform) {
+        int updated = databaseRepository.updateExternalDatabaseEngineVersion(id, externalDatabaseEngineVersion);
+        if (updated > 0 && cloudPlatform != null) {
+            Optional<Database> database = databaseRepository.findById(id);
+            database.ifPresentOrElse(db -> {
+                Optional<Database> updatedDb = databaseServerParameterDecoratorMap.get(cloudPlatform)
+                        .updateVersionRelatedDatabaseParams(db, externalDatabaseEngineVersion);
+                updatedDb.ifPresent(udb -> databaseRepository.save(udb));
+            }, () -> log("Database not found with id: {}", id));
+        }
+        return updated;
     }
 
     public Database save(Database database) {
@@ -84,5 +99,9 @@ public class DatabaseService {
 
     public Optional<Database> findById(Long id) {
         return databaseRepository.findById(id);
+    }
+
+    private void log(String msg, Object... args) {
+        LOGGER.debug(msg, args);
     }
 }

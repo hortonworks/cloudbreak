@@ -10,6 +10,7 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDAN
 import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
 import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_SINGLE_SERVER;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,9 +24,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -60,6 +65,23 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
     @Override
     public Optional<AzureDatabaseType> getDatabaseType(Map<String, Object> attributes) {
         return Optional.ofNullable(getAzureDatabaseType(attributes));
+    }
+
+    public Optional<Database> updateVersionRelatedDatabaseParams(Database database, String dbVersion) {
+        VersionComparator versionComparator = new VersionComparator();
+        Map<String, Object> attributes = database.getAttributes() != null ? database.getAttributes().getMap() : new HashMap<>();
+        AzureDatabaseType dbType = getAzureDatabaseType(attributes);
+        boolean updateNeeded = versionComparator.compare(() -> dbVersion, MajorVersion.VERSION_14::getMajorVersion) >= 0 &&
+                dbType != AzureDatabaseType.FLEXIBLE_SERVER;
+        if (updateNeeded) {
+            LOGGER.debug("Azure database type is updated to FLEXIBLE_SERVER, because of db version {}", dbVersion);
+            attributes.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER);
+            database.setAttributes(new Json(attributes));
+            return Optional.of(database);
+        } else {
+            LOGGER.debug("No Azure databasetype update is needed. Azure dbtype: {}, db version: {}", dbType, dbVersion);
+            return Optional.empty();
+        }
     }
 
     @Override

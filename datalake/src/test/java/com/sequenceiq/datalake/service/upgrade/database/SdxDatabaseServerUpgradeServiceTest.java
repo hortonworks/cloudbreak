@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.upgrade.database;
 import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_11;
 import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_14;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -48,15 +52,20 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.database.DatabaseUpgradeRuntimeValidator;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -109,6 +118,18 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetterMap;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
+    @Mock
+    private SdxDatabaseRepository sdxDatabaseRepository;
+
+    @Mock
+    private DatabaseServerParameterSetter databaseServerParameterSetter;
 
     @InjectMocks
     private SdxDatabaseServerUpgradeService underTest;
@@ -331,7 +352,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
                 eq(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage()),
                 eq(List.of(targetMajorVersion.getMajorVersion())));
         verify(databaseEngineVersionReaderService, times(1)).getDatabaseServerMajorVersion(sdxCluster);
-        verify(sdxService, times(1)).updateDatabaseEngineVersion(eq(sdxCluster.getCrn()), eq(targetMajorVersion.getMajorVersion()));
+        verify(sdxService, times(1)).updateDatabaseEngineVersion(eq(sdxCluster), eq(targetMajorVersion.getMajorVersion()));
     }
 
     @ParameterizedTest
@@ -406,6 +427,54 @@ public class SdxDatabaseServerUpgradeServiceTest {
         underTest.waitDatabaseUpgradeInCb(sdxCluster, pollingConfig);
 
         verify(cloudbreakPoller).pollDatabaseServerUpgradeUntilAvailable(sdxCluster, pollingConfig);
+    }
+
+    @Test
+    void testUpdateDatabaseServerEngineVersionWithoutVersion() {
+        SdxCluster sdxCluster = new SdxCluster();
+        when(databaseEngineVersionReaderService.getDatabaseServerMajorVersion(any())).thenReturn(Optional.empty());
+
+        underTest.updateDatabaseServerEngineVersion(sdxCluster);
+
+        verify(sdxService, never()).updateDatabaseEngineVersion(any(SdxCluster.class), any());
+    }
+
+    @Test
+    void testUpdateDatabaseServerEngineVersionWithVersionNoExternal() {
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        when(databaseEngineVersionReaderService.getDatabaseServerMajorVersion(any())).thenReturn(Optional.of(MajorVersion.VERSION_11));
+
+        underTest.updateDatabaseServerEngineVersion(sdxCluster);
+
+        verify(sdxService, times(1)).updateDatabaseEngineVersion(sdxCluster, MajorVersion.VERSION_11.getMajorVersion());
+        verify(environmentClientService, never()).getByCrn(any());
+    }
+
+    @Test
+    void testUpdateDatabaseServerEngineVersionWithVersionExternalDB() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setCrn("crn");
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxDatabase.setDatabaseCrn("dbcrn");
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        SdxDatabase expectedSdxDatabase = new SdxDatabase();
+        when(databaseEngineVersionReaderService.getDatabaseServerMajorVersion(any())).thenReturn(Optional.of(MajorVersion.VERSION_11));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        when(environmentClientService.getByCrn(null)).thenReturn(detailedEnvironmentResponse);
+        when(databaseServerParameterSetterMap.get(CloudPlatform.AZURE)).thenReturn(databaseServerParameterSetter);
+        when(databaseServerParameterSetter.updateVersionRelatedDatabaseParameters(sdxDatabase, MajorVersion.VERSION_11.getMajorVersion()))
+                .thenReturn(Optional.of(expectedSdxDatabase));
+
+        underTest.updateDatabaseServerEngineVersion(sdxCluster);
+
+        verify(sdxService, times(1)).updateDatabaseEngineVersion(sdxCluster, MajorVersion.VERSION_11.getMajorVersion());
+        ArgumentCaptor<SdxDatabase> dbCaptor = ArgumentCaptor.forClass(SdxDatabase.class);
+        verify(sdxDatabaseRepository, times(1)).save(dbCaptor.capture());
+        assertSame(expectedSdxDatabase, dbCaptor.getValue());
     }
 
     private SdxCluster getSdxCluster() {

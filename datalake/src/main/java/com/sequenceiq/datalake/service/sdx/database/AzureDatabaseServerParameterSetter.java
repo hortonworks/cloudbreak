@@ -202,6 +202,11 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     }
 
     @Override
+    public Optional<SdxDatabase> updateVersionRelatedDatabaseParameters(SdxDatabase sdxDatabase, String dbVersion) {
+        return azureDatabaseAttributesService.updateVersionRelatedDatabaseParams(sdxDatabase, dbVersion);
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }

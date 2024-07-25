@@ -20,5 +20,9 @@ public interface DatabaseServerParameterSetter {
         return Optional.empty();
     }
 
+    default Optional<SdxDatabase> updateVersionRelatedDatabaseParameters(SdxDatabase sdxDatabase, String dbVersion) {
+        return Optional.empty();
+    }
+
     CloudPlatform getCloudPlatform();
 }

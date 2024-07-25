@@ -1700,6 +1700,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return sdxReactorFlowManager.triggerModifyProxyConfigTracker(sdxCluster);
     }
 
+    public void updateDatabaseEngineVersion(SdxCluster sdxCluster, String databaseEngineVersion) {
+        updateDatabaseEngineVersion(sdxCluster.getCrn(), databaseEngineVersion);
+        sdxCluster.getSdxDatabase().setDatabaseEngineVersion(databaseEngineVersion);
+    }
+
     public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
         Optional<Long> databaseId = sdxClusterRepository.findDatabaseIdByCrn(crn);
         databaseId.ifPresentOrElse(id -> sdxDatabaseRepository.updateDatabaseEngineVersion(id, databaseEngineVersion), () -> {

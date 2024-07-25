@@ -81,7 +81,7 @@ class AttachedDatahubsRdsSettingsMigrationServiceTest {
         stackIds.add(new StackIdViewImpl(2L, "name1", "crn1"));
         stackIds.add(new StackIdViewImpl(3L, "name2", "crn2"));
         stackIds.add(new StackIdViewImpl(4L, "name3", "crn3"));
-        when(stackService.findByDatalakeCrn("crn")).thenReturn(stackIds);
+        when(stackService.findNotTerminatedByDatalakeCrn("crn")).thenReturn(stackIds);
         List<Long> ids = List.of(2L, 3L, 4L);
         List<StackClusterStatusView> statuses = List.of(createStackClusterStatusView(2L, "name1", Status.AVAILABLE, Status.AVAILABLE),
                 createStackClusterStatusView(3L, "name2", Status.AVAILABLE, Status.AVAILABLE),
@@ -120,7 +120,7 @@ class AttachedDatahubsRdsSettingsMigrationServiceTest {
         stackIds.add(new StackIdViewImpl(2L, "name1", "crn1"));
         stackIds.add(new StackIdViewImpl(3L, "name2", "crn2"));
         stackIds.add(new StackIdViewImpl(4L, "name3", "crn3"));
-        when(stackService.findByDatalakeCrn("crn")).thenReturn(stackIds);
+        when(stackService.findNotTerminatedByDatalakeCrn("crn")).thenReturn(stackIds);
         List<Long> ids = List.of(2L, 3L, 4L);
         List<StackClusterStatusView> statuses = List.of(createStackClusterStatusView(2L, "name1", Status.AVAILABLE, Status.AVAILABLE),
                 createStackClusterStatusView(3L, "name2", Status.STOPPED, Status.AVAILABLE),
@@ -159,7 +159,7 @@ class AttachedDatahubsRdsSettingsMigrationServiceTest {
         stackIds.add(new StackIdViewImpl(3L, "name2", "crn2"));
         stackIds.add(new StackIdViewImpl(4L, "name3", "crn3"));
         stackIds.add(new StackIdViewImpl(5L, "name4", "crn4"));
-        when(stackService.findByDatalakeCrn("crn")).thenReturn(stackIds);
+        when(stackService.findNotTerminatedByDatalakeCrn("crn")).thenReturn(stackIds);
         List<Long> ids = List.of(2L, 3L, 4L, 5L);
         List<StackClusterStatusView> statuses = List.of(createStackClusterStatusView(2L, "name1", Status.AVAILABLE, Status.AVAILABLE),
                 createStackClusterStatusView(3L, "name2", Status.AVAILABLE, Status.AVAILABLE),

@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -804,14 +805,15 @@ class StackServiceTest {
     void updateExternalDatabaseEngineVersionWhenNoDBEntity() {
         when(stackRepository.findDatabaseIdByStackId(1L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> underTest.updateExternalDatabaseEngineVersion(1L, "11"));
-        verify(databaseService, never()).updateExternalDatabaseEngineVersion(anyLong(), anyString());
+        verify(stackRepository, never()).findStackAsPayloadContext(any());
+        verify(databaseService, never()).updateExternalDatabaseEngineVersion(anyLong(), anyString(), isNull());
     }
 
     @Test
     void updateExternalDatabaseEngineVersion() {
         when(stackRepository.findDatabaseIdByStackId(1L)).thenReturn(Optional.of(2L));
         underTest.updateExternalDatabaseEngineVersion(1L, "11");
-        verify(databaseService, times(1)).updateExternalDatabaseEngineVersion(2L, "11");
+        verify(databaseService, times(1)).updateExternalDatabaseEngineVersion(2L, "11", null);
     }
 
     @Test

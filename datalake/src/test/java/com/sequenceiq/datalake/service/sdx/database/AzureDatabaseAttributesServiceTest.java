@@ -1,11 +1,15 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.common.model.AzureDatabaseType;
@@ -153,5 +158,30 @@ public class AzureDatabaseAttributesServiceTest {
         SdxDatabase sdxDatabase = new SdxDatabase();
         service.configureAzureDatabase(AzureDatabaseType.FLEXIBLE_SERVER, null, null, sdxDatabase);
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, service.getAzureDatabaseType(sdxDatabase));
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParams() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"SINGLE_SERVER\"}"));
+        Optional<SdxDatabase> actualDb = service.updateVersionRelatedDatabaseParams(sdxDatabase, MajorVersion.VERSION_14.getMajorVersion());
+        assertTrue(actualDb.isPresent());
+        assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, service.getAzureDatabaseType(sdxDatabase));
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParamsNoUpdateNeeded() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"FLEXIBLE_SERVER\"}"));
+        Optional<SdxDatabase> actualDb = service.updateVersionRelatedDatabaseParams(sdxDatabase, MajorVersion.VERSION_14.getMajorVersion());
+        assertFalse(actualDb.isPresent());
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParamsNoUpdateNeededVersion() {
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"SINGLE_SERVER\"}"));
+        Optional<SdxDatabase> actualDb = service.updateVersionRelatedDatabaseParams(sdxDatabase, MajorVersion.VERSION_11.getMajorVersion());
+        assertFalse(actualDb.isPresent());
     }
 }

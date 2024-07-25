@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -36,8 +37,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
@@ -459,5 +463,38 @@ class AzureDatabaseServerParameterDecoratorTest {
         when(entitlementService.localDevelopment(anyString())).thenReturn(false);
 
         underTest.validate(databaseServerV4StackRequest, databaseServerParameter, environmentResponse, true);
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParams() {
+        Database database = new Database();
+        database.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"SINGLE_SERVER\"}"));
+        Optional<Database> actualDb = underTest.updateVersionRelatedDatabaseParams(database, MajorVersion.VERSION_14.getMajorVersion());
+        assertTrue(actualDb.isPresent());
+        assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, underTest.getDatabaseType(database.getAttributesMap()).get());
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParamsNoUpdateNeeded() {
+        Database database = new Database();
+        database.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"FLEXIBLE_SERVER\"}"));
+        Optional<Database> actualDb = underTest.updateVersionRelatedDatabaseParams(database, MajorVersion.VERSION_14.getMajorVersion());
+        assertFalse(actualDb.isPresent());
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParamsNoUpdateNeededVersion() {
+        Database database = new Database();
+        database.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"SINGLE_SERVER\"}"));
+        Optional<Database> actualDb = underTest.updateVersionRelatedDatabaseParams(database, MajorVersion.VERSION_11.getMajorVersion());
+        assertFalse(actualDb.isPresent());
+    }
+
+    @Test
+    void testUpdateVersionRelatedDatabaseParamsNoUpdateNeededVersionFlexi11() {
+        Database database = new Database();
+        database.setAttributes(new Json("{\"AZURE_DATABASE_TYPE\": \"FLEXIBLE_SERVER\"}"));
+        Optional<Database> actualDb = underTest.updateVersionRelatedDatabaseParams(database, MajorVersion.VERSION_11.getMajorVersion());
+        assertFalse(actualDb.isPresent());
     }
 }

@@ -6,10 +6,13 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +23,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -29,11 +34,15 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.database.DatabaseUpgradeRuntimeValidator;
@@ -83,6 +92,15 @@ public class SdxDatabaseServerUpgradeService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetterMap;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private SdxDatabaseRepository sdxDatabaseRepository;
 
     public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion, boolean forced) {
         LOGGER.debug("Upgrade database server called for {} with target major version {}", sdxNameOrCrn, requestedTargetMajorVersion);
@@ -185,7 +203,17 @@ public class SdxDatabaseServerUpgradeService {
     public void updateDatabaseServerEngineVersion(SdxCluster sdxCluster) {
         LOGGER.debug("Updating database server engine version  {} for datalake {}", sdxCluster.getStackCrn(), sdxCluster.getName());
         databaseEngineVersionReaderService.getDatabaseServerMajorVersion(sdxCluster)
-                .ifPresent(majorVersion -> sdxService.updateDatabaseEngineVersion(sdxCluster.getCrn(), majorVersion.getMajorVersion()));
+                .ifPresent(majorVersion -> updateVersionRelatedDatabaseParams(sdxCluster, majorVersion));
+    }
+
+    private void updateVersionRelatedDatabaseParams(SdxCluster sdxCluster, MajorVersion majorVersion) {
+        sdxService.updateDatabaseEngineVersion(sdxCluster, majorVersion.getMajorVersion());
+        if (sdxCluster.hasExternalDatabase() && StringUtils.isNotEmpty(sdxCluster.getDatabaseCrn())) {
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentClientService.getByCrn(sdxCluster.getEnvCrn()).getCloudPlatform());
+            Optional<SdxDatabase> sdxDatabase = databaseServerParameterSetterMap.get(cloudPlatform)
+                    .updateVersionRelatedDatabaseParameters(sdxCluster.getSdxDatabase(), majorVersion.getMajorVersion());
+            sdxDatabase.ifPresent(database -> sdxDatabaseRepository.save(database));
+        }
     }
 
     private void throwDatalakeNotAvailableForUpgradeError(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
