@@ -184,9 +184,6 @@ public class ExternalizedComputeService {
     }
 
     public void updateDefaultComputeClusterProperties(Environment environment, ExternalizedComputeClusterDto externalizedComputeClusterDto) {
-        if (!externalizedComputeClusterDto.isCreate()) {
-            throw new BadRequestException("Create field is disabled in externalized compute cluster request!");
-        }
         DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
         defaultComputeCluster.setCreate(externalizedComputeClusterDto.isCreate());
         defaultComputeCluster.setPrivateCluster(externalizedComputeClusterDto.isPrivateCluster());

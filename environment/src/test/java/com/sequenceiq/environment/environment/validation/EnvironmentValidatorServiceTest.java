@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation;
 
 import static java.util.Collections.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -98,8 +101,36 @@ class EnvironmentValidatorServiceTest {
 
     private EnvironmentValidatorService underTest;
 
+    private static Stream<Arguments> freeIpaCreationArguments() {
+        return Stream.of(
+                Arguments.of(1, 0, true),
+                Arguments.of(1, 100, true),
+                Arguments.of(1, 50, false),
+                Arguments.of(2, 0, true),
+                Arguments.of(2, 100, true),
+                Arguments.of(2, 50, true)
+        );
+    }
+
+    private static Stream<Arguments> storageValidationArguments() {
+        return Stream.of(
+                Arguments.of("location with whitespace", false),
+                Arguments.of("   /path", true),
+                Arguments.of("/path    ", true),
+                Arguments.of("    /path/path   ", true),
+                Arguments.of("/path  /  path", false),
+                Arguments.of("/pa th/", false),
+                Arguments.of("\t/path/path", true),
+                Arguments.of("/path/path\t", true),
+                Arguments.of("/path/\tpath", false),
+                Arguments.of("\n/path/path", true),
+                Arguments.of("/path/path\n", true),
+                Arguments.of("/path/\npath", false)
+        );
+    }
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         underTest = new EnvironmentValidatorService(
                 networkCreationValidator,
                 platformParameterService,
@@ -456,7 +487,7 @@ class EnvironmentValidatorServiceTest {
     }
 
     @Test
-    public void testValidateEncryptionRoleValidRole() {
+    void testValidateEncryptionRoleValidRole() {
         String encryptionKeyRole = "validRole";
         when(encryptionRoleValidator.validateEncryptionRole(any()))
                 .thenReturn(ValidationResult.builder().build());
@@ -468,7 +499,7 @@ class EnvironmentValidatorServiceTest {
     }
 
     @Test
-    public void testValidateEncryptionRoleInvalidRole() {
+    void testValidateEncryptionRoleInvalidRole() {
         String encryptionKeyRole = "invalidRole";
         when(encryptionRoleValidator.validateEncryptionRole(any()))
                 .thenReturn(ValidationResult.builder().error("Invalid role").build());
@@ -478,6 +509,66 @@ class EnvironmentValidatorServiceTest {
         assertTrue(result.hasError());
         assertEquals(1, result.getErrors().size());
         assertEquals("Invalid role", result.getErrors().get(0));
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenPrivateClusterEnabledAndKubeApiAuthorizedIpRangesSpecified() {
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(true).withKubeApiAuthorizedIpRanges(Set.of("1.1.1.1/1")).build(), ACCOUNT);
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getErrors()).hasSize(1);
+        assertThat(validationResult.getErrors())
+                .containsOnly("The 'kubeApiAuthorizedIpRanges' parameter cannot be specified when 'privateCluster' is enabled.");
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenPrivateClusterDisabledAndKubeApiAuthorizedIpRangesNotSpecifiedAndNotInternal() {
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(false).build(), ACCOUNT);
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getErrors()).hasSize(1);
+        assertThat(validationResult.getErrors())
+                .containsOnly("The 'kubeApiAuthorizedIpRanges' parameter must be specified when 'privateCluster' is disabled.");
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenPrivateClusterDisabledAndKubeApiAuthorizedIpRangesNotSpecifiedAndInternal() {
+        when(entitlementService.internalTenant(eq(ACCOUNT))).thenReturn(true);
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(false).build(), ACCOUNT);
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenKubeApiAuthorizedIpRangesContainsDisallowedCidrAndNotInternalTenant() {
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0")).build(), ACCOUNT);
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getErrors()).hasSize(1);
+        assertThat(validationResult.getErrors())
+                .containsOnly("The value '0.0.0.0/0' is not allowed for 'kubeApiAuthorizedIpRanges'.");
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenKubeApiAuthorizedIpRangesContainsDisallowedCidrAndInternalTenant() {
+        when(entitlementService.internalTenant(eq(ACCOUNT))).thenReturn(true);
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0")).build(), ACCOUNT);
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenPrivateClusterDisabledAndKubeApiAuthorizedIpRangesSpecifiedValidCidr() {
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("1.1.1.1/1")).build(), ACCOUNT);
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenPrivateClusterEnabledAndKubeApiAuthorizedIpRangesNotSpecified() {
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(true).build(), ACCOUNT);
+        assertFalse(validationResult.hasError());
     }
 
     private Environment aValidEnvirontmentWithParent() {
@@ -506,34 +597,6 @@ class EnvironmentValidatorServiceTest {
 
         ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
         assertEquals(!valid, validationResult.hasError());
-    }
-
-    private static Stream<Arguments> freeIpaCreationArguments() {
-        return Stream.of(
-                Arguments.of(1, 0, true),
-                Arguments.of(1, 100, true),
-                Arguments.of(1, 50, false),
-                Arguments.of(2, 0, true),
-                Arguments.of(2, 100, true),
-                Arguments.of(2, 50, true)
-        );
-    }
-
-    private static Stream<Arguments> storageValidationArguments() {
-        return Stream.of(
-                Arguments.of("location with whitespace", false),
-                Arguments.of("   /path", true),
-                Arguments.of("/path    ", true),
-                Arguments.of("    /path/path   ", true),
-                Arguments.of("/path  /  path", false),
-                Arguments.of("/pa th/", false),
-                Arguments.of("\t/path/path", true),
-                Arguments.of("/path/path\t", true),
-                Arguments.of("/path/\tpath", false),
-                Arguments.of("\n/path/path", true),
-                Arguments.of("/path/path\n", true),
-                Arguments.of("/path/\npath", false)
-        );
     }
 
 }

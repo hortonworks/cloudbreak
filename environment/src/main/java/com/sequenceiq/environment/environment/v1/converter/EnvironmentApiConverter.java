@@ -198,8 +198,6 @@ public class EnvironmentApiConverter {
             }
             if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {
                 builder.withKubeApiAuthorizedIpRanges(CidrUtil.cidrSet(externalizedCompute.getKubeApiAuthorizedIpRanges()));
-            } else {
-                builder.withKubeApiAuthorizedIpRanges(Set.of(DEFAULT_CIDR));
             }
         }
         return builder.build();

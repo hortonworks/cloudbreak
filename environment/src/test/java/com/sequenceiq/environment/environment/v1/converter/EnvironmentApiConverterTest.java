@@ -101,7 +101,7 @@ class EnvironmentApiConverterTest {
 
     private static final String ENCRYPTION_KEY_ARN = "dummy-key-arn";
 
-    private static final String KUBE_API_AUTHORIZED_IP_RANGES = "0.0.0.0/0";
+    private static final String KUBE_API_AUTHORIZED_IP_RANGES = "1.1.1.1/1";
 
     private static final String OUTBOUND_TYPE = "udr";
 

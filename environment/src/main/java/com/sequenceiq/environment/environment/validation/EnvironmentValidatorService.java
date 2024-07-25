@@ -36,6 +36,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -61,6 +62,8 @@ public class EnvironmentValidatorService {
     private static final int ALL_ON_DEMAND_PERCENTAGE = 0;
 
     private static final int ALL_SPOT_PERCENTAGE = 100;
+
+    private static final String DISALLOWED_CIDR = "0.0.0.0/0";
 
     private final NetworkValidator networkValidator;
 
@@ -322,5 +325,24 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateEncryptionKey(String encryptionKey) {
         return encryptionKeyValidator.validateEncryptionKey(encryptionKey);
+    }
+
+    public ValidationResult validateExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster, String accountId) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder().prefix("Default externalized compute cluster validation failed");
+        if (externalizedComputeCluster.isCreate()) {
+            if (externalizedComputeCluster.isPrivateCluster() && !externalizedComputeCluster.getKubeApiAuthorizedIpRanges().isEmpty()) {
+                resultBuilder.error("The 'kubeApiAuthorizedIpRanges' parameter cannot be specified when 'privateCluster' is enabled.");
+            }
+            boolean internalTenant = entitlementService.internalTenant(accountId);
+            if (!internalTenant) {
+                if (!externalizedComputeCluster.isPrivateCluster() && externalizedComputeCluster.getKubeApiAuthorizedIpRanges().isEmpty()) {
+                    resultBuilder.error("The 'kubeApiAuthorizedIpRanges' parameter must be specified when 'privateCluster' is disabled.");
+                }
+                if (externalizedComputeCluster.getKubeApiAuthorizedIpRanges().contains(DISALLOWED_CIDR)) {
+                    resultBuilder.error(String.format("The value '%s' is not allowed for 'kubeApiAuthorizedIpRanges'.", DISALLOWED_CIDR));
+                }
+            }
+        }
+        return resultBuilder.build();
     }
 }

@@ -210,6 +210,10 @@ public class EnvironmentCreationService {
         }
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
+        if (creationDto.getExternalizedComputeCluster() != null) {
+            validationBuilder.merge(validatorService.validateExternalizedComputeCluster(creationDto.getExternalizedComputeCluster(),
+                    creationDto.getAccountId()));
+        }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());

@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -21,8 +23,19 @@ public class ExternalizedComputeFlowService {
     @Inject
     private EnvironmentReactorFlowManager environmentReactorFlowManager;
 
+    @Inject
+    private EnvironmentValidatorService environmentValidatorService;
+
     public FlowIdentifier reinitializeDefaultExternalizedComputeCluster(Environment environment, ExternalizedComputeClusterDto externalizedComputeClusterDto,
             boolean force) {
+        if (!externalizedComputeClusterDto.isCreate()) {
+            throw new BadRequestException("Create field is disabled in externalized compute cluster request!");
+        }
+        ValidationResult validationResult = environmentValidatorService.validateExternalizedComputeCluster(externalizedComputeClusterDto,
+                environment.getAccountId());
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
         externalizedComputeService.checkDefaultClusterExists(environment);
         externalizedComputeService.updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         return environmentReactorFlowManager.triggerExternalizedComputeReinitializationFlow(ThreadBasedUserCrnProvider.getUserCrn(), environment, force);
@@ -32,6 +45,14 @@ public class ExternalizedComputeFlowService {
             ExternalizedComputeClusterDto externalizedComputeClusterDto) {
         if (!EnvironmentStatus.AVAILABLE.equals(environment.getStatus())) {
             throw new BadRequestException("Environment is not in AVAILABLE state");
+        }
+        if (!externalizedComputeClusterDto.isCreate()) {
+            throw new BadRequestException("Create field is disabled in externalized compute cluster request!");
+        }
+        ValidationResult validationResult = environmentValidatorService.validateExternalizedComputeCluster(externalizedComputeClusterDto,
+                environment.getAccountId());
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
         if (externalizedComputeService.getDefaultCluster(environment).isPresent()) {
             throw new BadRequestException("You can only have one default externalized compute cluster for an environment");
