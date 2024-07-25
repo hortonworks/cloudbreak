@@ -195,7 +195,9 @@ public class NetworkV1ToNetworkV4Converter {
             } else {
                 response.setSubnetId(networkResponse.getPreferedSubnetId());
             }
-
+            if (awsNetworkV1Parameters.getLoadBalancer() != null) {
+                response.setLoadBalancer(awsNetworkV1Parameters.getLoadBalancer());
+            }
             if (PublicEndpointAccessGateway.ENABLED.equals(networkResponse.getPublicEndpointAccessGateway()) || isTargetingEndpointGateway(networkResponse)) {
                 ValidationResult validationResult = endpointGatewayNetworkValidator.validate(new ImmutablePair<>(response.getSubnetId(), networkResponse));
                 if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {

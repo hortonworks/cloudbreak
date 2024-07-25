@@ -23,6 +23,9 @@ public class AwsNetworkV1Parameters implements Serializable {
     @Deprecated
     private String subnetId;
 
+    @Schema
+    private AwsLoadBalancerParams loadBalancer;
+
     public String getSubnetId() {
         return subnetId;
     }
@@ -34,5 +37,13 @@ public class AwsNetworkV1Parameters implements Serializable {
     @JsonIgnore
     public List<String> getSubnetIds() {
         return Arrays.asList(subnetId);
+    }
+
+    public AwsLoadBalancerParams getLoadBalancer() {
+        return loadBalancer;
+    }
+
+    public void setLoadBalancer(AwsLoadBalancerParams loadBalancer) {
+        this.loadBalancer = loadBalancer;
     }
 }
