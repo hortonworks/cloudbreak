@@ -53,8 +53,6 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        // unfortunately we don't have any Azure image for rhel8 at the moment
-        assertSupportedCloudPlatform(CloudPlatform.AWS);
         super.setupTest(testContext);
     }
 
