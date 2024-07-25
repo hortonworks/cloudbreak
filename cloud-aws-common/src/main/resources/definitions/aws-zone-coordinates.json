@@ -65,7 +65,7 @@
     },
     {
       "name": "us-east-1",
-      "displayName": "US East(N. Virginia)",
+      "displayName": "US East (N. Virginia)",
       "latitude": "38.89954938",
       "longitude": "-77.00941858",
       "k8sSupported": true
