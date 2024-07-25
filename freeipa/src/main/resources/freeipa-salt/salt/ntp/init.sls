@@ -15,11 +15,18 @@ chronyd:
 # consider whatever servers chronyd was configured with out of the box; this
 # just gives preference to the cloud native one.
 add_cloud_platform_time_server_to_chrony:
+  file.replace:
+    - name: /etc/chrony.conf
+    - append_if_not_found: true
+    - pattern: {{ ntp.ntp_config_line_replace }}
+    - repl: |
+
+        {{ ntp.ntp_config_line }}
+
+add_allow_all_to_chrony:
   file.append:
     - name: /etc/chrony.conf
     - text: |
-
-        {{ ntp.ntp_config_line }}
         allow all
 
 {% endif %}
