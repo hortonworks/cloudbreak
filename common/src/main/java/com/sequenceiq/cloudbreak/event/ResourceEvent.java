@@ -298,6 +298,10 @@ public enum ResourceEvent {
     STACK_LB_RESTART_CM("stack.lb.update.restart.cm"),
     STACK_LB_UPDATE_FINISHED("stack.lb.update.finished"),
     STACK_LB_UPDATE_FAILED("stack.lb.update.failed"),
+    STACK_DYNAMIC_ENTITLEMENT_STARTED("stack.dynamic.entitlement.started"),
+    STACK_DYNAMIC_ENTITLEMENT_FINISHED("stack.dynamic.entitlement.finished"),
+    STACK_DYNAMIC_ENTITLEMENT_FAILED("stack.dynamic.entitlement.failed"),
+
     CONFIGURE_POLICY("configure.policy"),
     CLUSTER_BUILDING("cluster.building"),
     CLUSTER_RESET("cluster.reset"),

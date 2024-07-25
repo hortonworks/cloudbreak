@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -105,6 +106,9 @@ class ReactorFlowManagerTest {
 
     @Mock
     private CloudPlatformVariant cloudPlatformVariant;
+
+    @Mock
+    private CloudbreakFlowMessageService flowMessageService;
 
     private Stack stack;
 
