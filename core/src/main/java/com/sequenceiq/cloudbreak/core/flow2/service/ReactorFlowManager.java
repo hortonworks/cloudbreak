@@ -88,11 +88,13 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -143,6 +145,9 @@ public class ReactorFlowManager {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private CloudbreakFlowMessageService flowMessageService;
 
     public FlowIdentifier triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
@@ -539,6 +544,7 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerRefreshEntitlementParams(Long stackId, String crn, Map<String, Boolean> changedEntitlements, Boolean saltRefreshNeeded) {
         String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
+        flowMessageService.fireEventAndLog(stackId, "DYNAMIC_ENTITLEMENT", ResourceEvent.STACK_DYNAMIC_ENTITLEMENT_STARTED);
         Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, stackId, crn, changedEntitlements, saltRefreshNeeded);
         return reactorNotifier.notify(stackId, selector, triggerEvent);
     }
