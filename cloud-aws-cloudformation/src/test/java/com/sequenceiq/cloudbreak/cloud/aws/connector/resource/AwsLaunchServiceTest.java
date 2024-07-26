@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsElasticIpService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsModelService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsNetworkService;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessagePro
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -95,13 +98,17 @@ class AwsLaunchServiceTest {
     void testLaunchAndWaiterShouldReturnSuccessfullyEvenIfStackGetsModifiedAfterCreation() throws Exception {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
+        Map<String, String> tags = Map.of("test-tag", "tag");
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
+        List<CloudResource> cloudInstances = List.of(mock(CloudResource.class));
+        List<CloudResource> rootVolumeResources = List.of(mock(CloudResource.class));
         when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet("cidr")));
         ResourceNotifier resourceNotifier = mock(ResourceNotifier.class);
         when(awsClient.existingKeyPairNameSpecified(any())).thenReturn(Boolean.TRUE);
+        CloudContext context = CloudContext.Builder.builder()
+                .withLocation(Location.location(Region.region("region"), AvailabilityZone.availabilityZone("AZ"))).build();
         when(authenticatedContext.getCloudContext())
-                .thenReturn(CloudContext.Builder.builder()
-                        .withLocation(Location.location(Region.region("region"), AvailabilityZone.availabilityZone("AZ")))
-                        .build());
+                .thenReturn(context);
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
         CloudFormationClient cloudFormationClient = mock(CloudFormationClient.class);
         when(amazonCloudFormationClient.waiters()).thenReturn(CloudFormationWaiter.builder().client(cloudFormationClient).build());
@@ -110,8 +117,13 @@ class AwsLaunchServiceTest {
         when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(DescribeStacksResponse.builder()
                 .stacks(Stack.builder().stackStatus(StackStatus.UPDATE_COMPLETE).build())
                 .build());
+        when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
+        when(cfStackUtil.getInstanceCloudResources(any(), any(), any(), anyList())).thenReturn(cloudInstances);
+        when(cloudStack.getTags()).thenReturn(tags);
+        when(awsTaggingService.tagRootVolumes(authenticatedContext, ec2Client, cloudInstances, tags)).thenReturn(rootVolumeResources);
         when(cfStackUtil.getOutputs(any(), any())).thenReturn(Map.of("CreatedVpc", "vpc", "CreatedSubnet", "subnet"));
         underTest.launch(authenticatedContext, cloudStack, resourceNotifier, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L));
         verify(awsResourceConnector, times(1)).check(eq(authenticatedContext), anyList());
+        verify(resourceNotifier).notifyAllocations(rootVolumeResources, context);
     }
 }

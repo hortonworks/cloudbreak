@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -34,6 +35,9 @@ public class RootDiskTaggingResourceBuilder extends AbstractAwsNativeComputeBuil
 
     @Inject
     private AwsTaggingService awsTaggingService;
+
+    @Inject
+    private PersistenceNotifier persistenceNotifier;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -57,7 +61,9 @@ public class RootDiskTaggingResourceBuilder extends AbstractAwsNativeComputeBuil
                 CommonStatus.CREATED,
                 ResourceType.AWS_INSTANCE);
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
-        awsTaggingService.tagRootVolumes(auth, amazonEc2Client, List.of(instanceResourceOpt.get()), cloudStack.getTags());
+        List<CloudResource> rootVolumeResources = awsTaggingService.tagRootVolumes(auth, amazonEc2Client, List.of(instanceResourceOpt.get()),
+                cloudStack.getTags());
+        persistenceNotifier.notifyAllocations(rootVolumeResources, auth.getCloudContext());
         return List.of();
     }
 

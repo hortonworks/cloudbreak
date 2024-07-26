@@ -30,6 +30,8 @@ public enum ResourceType {
     AWS_SECURITY_GROUP,
     AWS_SECRETSMANAGER_SECRET,
     AWS_KMS_KEY,
+    // AWS DISK TYPE FOR ROOT DISK
+    AWS_ROOT_DISK,
 
     // GCP
     GCP_DISK,

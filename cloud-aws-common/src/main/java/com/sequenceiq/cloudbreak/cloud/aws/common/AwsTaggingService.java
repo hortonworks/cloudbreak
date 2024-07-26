@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static java.lang.String.format;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +17,15 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.common.api.type.CommonStatus;
 
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.ResourceType;
@@ -79,7 +87,7 @@ public class AwsTaggingService {
                 .collect(Collectors.toMap(software.amazon.awssdk.services.efs.model.Tag::key, software.amazon.awssdk.services.efs.model.Tag::value));
     }
 
-    public void tagRootVolumes(AuthenticatedContext ac, AmazonEc2Client ec2Client, List<CloudResource> instanceResources,
+    public List<CloudResource> tagRootVolumes(AuthenticatedContext ac, AmazonEc2Client ec2Client, List<CloudResource> instanceResources,
             Map<String, String> userDefinedTags) {
         String stackName = ac.getCloudContext().getName();
         LOGGER.debug("Fetch AWS instances to collect all root volume ids for stack: {}", stackName);
@@ -92,6 +100,10 @@ public class AwsTaggingService {
                 .filter(Optional::isPresent)
                 .map(blockDeviceMapping -> blockDeviceMapping.get().ebs().volumeId())
                 .collect(Collectors.toList());
+
+        Map<String, String> groupNameByInstanceId = instanceResources.stream().collect(Collectors.toMap(CloudResource::getInstanceId,
+                CloudResource::getGroup));
+        List<CloudResource> rootVolumeResources = getRootVolumeResource(rootVolumeIds, ec2Client, groupNameByInstanceId);
 
         int instanceCount = instances.size();
         int volumeCount = rootVolumeIds.size();
@@ -110,6 +122,42 @@ public class AwsTaggingService {
             LOGGER.debug("Tag {} root volumes for stack: {}", volumeIds.size(), stackName);
             ec2Client.createTags(CreateTagsRequest.builder().resources(volumeIds).tags(tags).build());
         }
+
+        return rootVolumeResources;
+    }
+
+    private List<CloudResource> getRootVolumeResource(List<String> rootVolumeIds, AmazonEc2Client ec2Client,
+            Map<String, String> groupNameByInstanceId) {
+        DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(rootVolumeIds).build();
+        try {
+            DescribeVolumesResponse volumesResponse = ec2Client.describeVolumes(describeVolumesRequest);
+            if (volumesResponse.hasVolumes()) {
+                return volumesResponse.volumes().stream().map(
+                        (vol) -> {
+                            String instanceId = vol.attachments().getFirst().instanceId();
+                            String deviceName = vol.attachments().getFirst().device();
+                            return CloudResource.builder()
+                                    .withGroup(groupNameByInstanceId.get(instanceId))
+                                    .withInstanceId(instanceId)
+                                    .withName(instanceId + '-' + vol.volumeId())
+                                    .withType(com.sequenceiq.common.api.type.ResourceType.AWS_ROOT_DISK)
+                                    .withStatus(CommonStatus.CREATED)
+                                    .withAvailabilityZone(vol.availabilityZone())
+                                    .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                                                    .withAvailabilityZone(vol.availabilityZone())
+                                                    .withVolumes(List.of(new VolumeSetAttributes.Volume(vol.volumeId(), deviceName, vol.size(),
+                                                            vol.volumeType().name(), CloudVolumeUsageType.GENERAL)))
+                                                    .withDeleteOnTermination(Boolean.TRUE)
+                                                    .build()))
+                                    .build();
+                        }).toList();
+            }
+        } catch (Exception ex) {
+            String exceptionMessage = format("Exception while querying describe root volumes for volume - %s. " +
+                            "returning empty list. Exception - %s", rootVolumeIds, ex.getMessage());
+            LOGGER.warn(exceptionMessage + "This should not prevent instance creation.");
+        }
+        return new ArrayList<>();
     }
 
     public TagSpecification prepareEc2TagSpecification(Map<String, String> userDefinedTags, ResourceType resourceType) {

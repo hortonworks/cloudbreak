@@ -30,15 +30,20 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDevice;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.Volume;
+import software.amazon.awssdk.services.ec2.model.VolumeAttachment;
+import software.amazon.awssdk.services.ec2.model.VolumeType;
 import software.amazon.awssdk.services.kms.model.Tag;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +54,8 @@ public class AwsTaggingServiceTest {
     private static final String INSTANCE_ID = "i-nstance";
 
     private static final String VOLUME_ID = "vol-12345678";
+
+    private static final String GROUP = "COMPUTE";
 
     @InjectMocks
     private AwsTaggingService awsTaggingService;
@@ -68,7 +75,8 @@ public class AwsTaggingServiceTest {
     @Test
     public void tesTagRootVolumesForSingleInstance() {
         CloudResource instance = CloudResource.builder()
-                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
+                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED)
+                .withGroup(GROUP).build();
 
         DescribeInstancesResponse describeResult = DescribeInstancesResponse.builder()
                 .reservations(Reservation.builder()
@@ -83,11 +91,17 @@ public class AwsTaggingServiceTest {
                         .build()
                 ).build();
 
+        VolumeAttachment volumeAttachment = VolumeAttachment.builder().instanceId(INSTANCE_ID).volumeId(VOLUME_ID).device("/dev/sda1").build();
+        Volume volume = Volume.builder().volumeType(VolumeType.GP2).volumeId(VOLUME_ID).attachments(volumeAttachment).availabilityZone("az")
+                .size(200).build();
+        DescribeVolumesResponse volumesResponse = DescribeVolumesResponse.builder().volumes(volume).build();
+
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
+        when(ec2Client.describeVolumes(any())).thenReturn(volumesResponse);
         Map<String, String> userTags = Map.of("key1", "val1", "key2", "val2");
 
-        awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, List.of(instance), userTags);
+        List<CloudResource> rootVolumeResources = awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, List.of(instance), userTags);
 
         verify(ec2Client, times(1)).createTags(tagRequestCaptor.capture());
         CreateTagsRequest request = tagRequestCaptor.getValue();
@@ -96,12 +110,22 @@ public class AwsTaggingServiceTest {
         List<software.amazon.awssdk.services.ec2.model.Tag> tags = request.tags();
         assertThat(userTags, hasEntry(tags.get(0).key(), tags.get(0).value()));
         assertThat(userTags, hasEntry(tags.get(1).key(), tags.get(1).value()));
+        assertEquals(1, rootVolumeResources.size());
+        CloudResource rootResource = rootVolumeResources.get(0);
+        VolumeSetAttributes volumeSetAttributes = rootResource.getParameter("attributes", VolumeSetAttributes.class);
+        assertEquals(INSTANCE_ID, rootResource.getInstanceId());
+        VolumeSetAttributes.Volume rootVolume = volumeSetAttributes.getVolumes().get(0);
+        assertEquals(VOLUME_ID, rootVolume.getId());
+        assertEquals("/dev/sda1", rootVolume.getDevice());
+        assertEquals(VolumeType.GP2.name(), rootVolume.getType());
+        assertEquals(200, rootVolume.getSize());
     }
 
     @Test
     public void tesTagRootVolumesWhenNoInstancesReturned() {
         CloudResource instance = CloudResource.builder()
-                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
+                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED)
+                .withGroup(GROUP).build();
 
         DescribeInstancesResponse describeResult = DescribeInstancesResponse.builder()
                 .reservations(Reservation.builder().build()).build();
@@ -118,8 +142,7 @@ public class AwsTaggingServiceTest {
     public void tesTagRootVolumesForInstancesMoreThanSingleRequestLimit() {
         int instanceCount = 1200;
 
-        CloudResource instance = CloudResource.builder()
-                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
+        CloudResource instance;
 
         Instance awsInstance = Instance.builder()
                 .instanceId(INSTANCE_ID)
@@ -132,6 +155,10 @@ public class AwsTaggingServiceTest {
         List<CloudResource> instanceList = new ArrayList<>(instanceCount);
         List<Instance> awsInstances = new ArrayList<>(instanceCount);
         for (int i = 0; i < instanceCount; i++) {
+            instance = CloudResource.builder()
+                    .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID + "_" + i)
+                    .withName(INSTANCE_ID).withStatus(CommonStatus.CREATED)
+                    .withGroup(GROUP).build();
             instanceList.add(instance);
             awsInstances.add(awsInstance);
         }
@@ -154,8 +181,7 @@ public class AwsTaggingServiceTest {
     public void tesTagRootVolumesForInstancesMoreThanSingleRequestLimitAndNotAllVolumesFound() {
         int instanceCount = 1200;
 
-        CloudResource instance = CloudResource.builder()
-                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
+        CloudResource instance;
 
         Instance awsInstance = Instance.builder()
                 .instanceId(INSTANCE_ID)
@@ -177,6 +203,10 @@ public class AwsTaggingServiceTest {
 
         List<CloudResource> instanceList = new ArrayList<>(instanceCount);
         for (int i = 0; i < instanceCount; i++) {
+            instance = CloudResource.builder()
+                    .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID + "_" + i)
+                    .withName(INSTANCE_ID + "_" + i).withStatus(CommonStatus.CREATED)
+                    .withGroup(GROUP).build();
             instanceList.add(instance);
         }
         List<Instance> awsInstances = new ArrayList<>(instanceCount);

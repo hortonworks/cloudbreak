@@ -156,7 +156,9 @@ public class AwsLaunchService {
 
         awsComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentTypeWithThreshold, instances, networkResources);
 
-        awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+        List<CloudResource> rootVolumeResources = awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+        // Save Root Volume Resources
+        resourceNotifier.notifyAllocations(rootVolumeResources, ac.getCloudContext());
 
         awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView, stack.getTags());
 
