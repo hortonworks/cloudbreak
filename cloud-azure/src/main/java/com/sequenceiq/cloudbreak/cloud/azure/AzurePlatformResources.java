@@ -342,7 +342,8 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "databaseCapabilities", key = "#cloudCredential?.id + #region.getRegionName() + 'databases'")
+    @Cacheable(cacheNames = "databaseCapabilities", key =
+            "#cloudCredential?.id + #region.getRegionName() + #filters[T(com.sequenceiq.cloudbreak.cloud.CloudParameterConst).DATABASE_TYPE] + 'databases'")
     public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, region, filters);
     }
