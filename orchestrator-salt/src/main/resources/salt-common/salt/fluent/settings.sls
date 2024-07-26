@@ -60,12 +60,6 @@
 {% set gcs_bucket = salt['pillar.get']('fluent:gcsBucket') %}
 {% set gcs_project_id = salt['pillar.get']('fluent:gcsProjectId') %}
 
-{% if salt['pillar.get']('fluent:dbusMeteringEnabled') %}
-    {% set dbus_metering_enabled = True %}
-{% else %}
-    {% set dbus_metering_enabled = False %}
-{% endif %}
-
 {% if salt['pillar.get']('fluent:dbusIncludeSaltLogs') %}
     {% set dbus_include_salt_logs = True %}
 {% else %}
@@ -92,13 +86,8 @@
 
 {% set number_of_workers=0 %}
 {% set cloud_storage_worker_index=0 %}
-{% set metering_worker_index=0 %}
 {% if cloud_storage_logging_enabled or cloud_logging_service_enabled %}
 {%   set cloud_storage_worker_index=number_of_workers %}
-{%   set number_of_workers=number_of_workers+1 %}
-{% endif %}
-{% if dbus_metering_enabled %}
-{%   set metering_worker_index=number_of_workers %}
 {%   set number_of_workers=number_of_workers+1 %}
 {% endif %}
 
@@ -129,34 +118,7 @@
   {% set proxy_full_url = None %}
 {% endif %}
 {% set no_proxy_hosts = salt['pillar.get']('proxy:noProxyHosts') %}
-
-{% set metering_version_data = namespace(entities=[]) %}
-{% for role in grains.get('roles', []) %}
-{% if role.startswith("metering_prewarmed") %}
-  {% set metering_version_data.entities = metering_version_data.entities + [role.split("metering_prewarmed_v")[1]]%}
-{% endif %}
-{% endfor %}
-{% if metering_version_data.entities|length > 0 %}
-{% set metering_version = metering_version_data.entities[0] | int %}
-{% else %}
-{% set metering_version = 0 %}
-{% endif %}
-
-{% if dbus_metering_enabled %}
-  {% if metering_version > 1 and salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
-    {% set dbus_metering_app_headers = 'app:' + cluster_type + ',@metering-app:' + salt['pillar.get']('fluent:dbusMeteringAppName') %}
-    {% set dbus_metering_stream_name = salt['pillar.get']('fluent:dbusMeteringStreamName') %}
-  {% else %}
-    {% set dbus_metering_app_headers = 'app:' + cluster_type %}
-    {% set dbus_metering_stream_name = 'Metering' %}
-  {% endif %}
-{% else %}
-  {% set dbus_metering_app_headers = None %}
-  {% set dbus_metering_stream_name = None %}
-{% endif %}
-
 {% set forward_port = 24224 %}
-
 {% set version_data = namespace(entities=[]) %}
 {% for role in grains.get('roles', []) %}
 {% if role.startswith("fluent_prewarmed") %}
@@ -210,9 +172,6 @@
     "azureStorageAccessKey": azure_storage_access_key,
     "gcsBucket": gcs_bucket,
     "gcsProjectId": gcs_project_id,
-    "dbusMeteringEnabled": dbus_metering_enabled,
-    "dbusMeteringAppHeaders": dbus_metering_app_headers,
-    "dbusMeteringStreamName": dbus_metering_stream_name,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
     "clouderaAzureGen2PluginVersion": cloudera_azure_gen2_plugin_version,
@@ -220,7 +179,6 @@
     "redactionPluginVersion": redaction_plugin_version,
     "numberOfWorkers": number_of_workers,
     "cloudStorageWorkerIndex": cloud_storage_worker_index,
-    "meteringWorkerIndex": metering_worker_index,
     "anonymizationRules": anonymization_rules,
     "dbusIncludeSaltLogs": dbus_include_salt_logs,
     "forwardPort" : 24224,

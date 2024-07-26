@@ -58,10 +58,6 @@ commands:
     - command: cdp-doctor scm list-commands
       output: /tmp/doctor_scm_agent_commands.txt
 {%- endif %}
-{%- if filecollector.clusterType == "DATAHUB" and (filecollector.updatePackage or telemetry.cdpTelemetryVersion > 0) %}
-    - command: cdp-doctor metering status
-      output: /tmp/doctor_metering.txt
-{%- endif %}
 report:
     location: /tmp/cdp_report.html
     title: CDP commands report

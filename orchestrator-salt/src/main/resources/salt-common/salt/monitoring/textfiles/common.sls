@@ -11,9 +11,6 @@
     {% do logging_types_arr.append("gcs") %}
   {%- endif %}
 {%- endif %}
-{%- if salt['pillar.get']('fluent:dbusMeteringEnabled') %}
-  {% do logging_types_arr.append("metering_databus") %}
-{%- endif %}
 
 /var/lib/node_exporter/scripts/salt.sh:
   file.managed:

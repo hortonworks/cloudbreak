@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -154,22 +153,6 @@ public class TelemetryUpgradeServiceTest {
         verify(orchestratorMetadataProvider, times(1)).getOrchestratorMetadata(STACK_ID);
         verify(telemetryOrchestrator, times(1))
                 .updateTelemetryComponent(anyList(), anySet(), any(), anyMap());
-    }
-
-    @Test
-    public void testUpdateMeteringComponent() throws Exception {
-        // GIVEN
-        given(orchestratorMetadataProvider.getOrchestratorMetadata(STACK_ID)).willReturn(metadata);
-        TelemetryComponentUpgradeConfiguration meteringAgentConfig = new TelemetryComponentUpgradeConfiguration();
-        meteringAgentConfig.setDesiredDate("2000-01-01");
-        given(telemetryUpgradeConfiguration.getMeteringAgent()).willReturn(meteringAgentConfig);
-        doNothing().when(telemetryOrchestrator).upgradeMetering(anyList(), anySet(), any(), anyString(), isNull());
-        // WHEN
-        underTest.upgradeTelemetryComponent(STACK_ID, TelemetryComponentType.METERING, null);
-        // THEN
-        verify(telemetryUpgradeConfiguration, times(1)).getMeteringAgent();
-        verify(orchestratorMetadataProvider, times(1)).getOrchestratorMetadata(STACK_ID);
-        verify(telemetryOrchestrator, times(1)).upgradeMetering(anyList(), anySet(), any(), anyString(), isNull());
     }
 
     @Test

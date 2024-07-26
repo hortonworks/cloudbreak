@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigVi
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.DATABUS;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.FILECOLLECTOR;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.FLUENT;
-import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.METERING;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.MONITORING;
 import static com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryOrchestratorModule.TELEMETRY;
 
@@ -49,8 +48,6 @@ public class TelemetryUpgradeService {
 
     private static final Set<TelemetryOrchestratorModule> LOGGING_AGENT_MODULES = Set.of(TELEMETRY, DATABUS, FLUENT);
 
-    private static final Set<TelemetryOrchestratorModule> METERING_MODULES = Set.of(TELEMETRY, DATABUS, METERING);
-
     @Inject
     private TelemetryUpgradeConfiguration telemetryUpgradeConfiguration;
 
@@ -73,11 +70,7 @@ public class TelemetryUpgradeService {
             throws CloudbreakOrchestratorFailedException {
         OrchestratorMetadata metadata = orchestratorMetadataProvider.getOrchestratorMetadata(stackId);
         Set<Node> nodes = filter != null ? filter.apply(metadata).getNodes() : metadata.getNodes();
-        if (TelemetryComponentType.METERING.equals(componentType)) {
-            LOGGER.debug("Starting metering component upgrade");
-            telemetryOrchestrator.upgradeMetering(metadata.getGatewayConfigs(), nodes, metadata.getExitCriteriaModel(),
-                    telemetryUpgradeConfiguration.getMeteringAgent().getDesiredDate(), null);
-        } else if (TelemetryComponentType.CDP_LOGGING_AGENT.equals(componentType)) {
+        if (TelemetryComponentType.CDP_LOGGING_AGENT.equals(componentType)) {
             LOGGER.debug("Starting cdp-logging-agent upgrade");
             telemetryOrchestrator.updateTelemetryComponent(metadata.getGatewayConfigs(), nodes, metadata.getExitCriteriaModel(),
                     Map.of("telemetry", Map.of(DESIRED_CDP_LOGGING_AGENT_VERSION, telemetryUpgradeConfiguration.getCdpLoggingAgent().getDesiredVersion(),
@@ -156,8 +149,6 @@ public class TelemetryUpgradeService {
                 return TELEMETRY_MODULES;
             case CDP_LOGGING_AGENT:
                 return LOGGING_AGENT_MODULES;
-            case METERING:
-                return METERING_MODULES;
             default:
                 return Set.of();
         }

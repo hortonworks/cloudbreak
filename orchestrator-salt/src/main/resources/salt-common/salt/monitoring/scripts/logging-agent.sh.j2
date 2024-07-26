@@ -14,7 +14,7 @@ if [[ -f "/var/run/cdp-logging-agent/cdp-logging-agent.pid" ]]; then
       rss=$(echo "$logging_agent_process" | cut -d ',' -f6)
       rss_bytes=$(($rss*1024))
       fds_num=$(ls -la "/proc/$pid/fd" | wc -l)
-      # processes that contains under-supervisor in their command: fluentd workers/processes (cloud storage shipper, metering shipper, deployment log shipper)
+      # processes that contains under-supervisor in their command: fluentd workers/processes (cloud storage shipper, deployment log shipper)
       if [[ "$logging_agent_process" == *"under-supervisor"* ]]; then
          logging_type="${logging_types_arr[$i]}"
          if [[ "$logging_type" != "" ]]; then

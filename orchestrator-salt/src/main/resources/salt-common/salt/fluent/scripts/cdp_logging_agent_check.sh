@@ -21,7 +21,6 @@ function print_help() {
   cat << EOF
    Usage: [<command>]
    commands:
-     doctor             run cdp-logging-agent checks
      dump               dump details about logging worker processes for troubleshooting
      version            print version of the script
      help               print usage
@@ -205,73 +204,6 @@ function get_logging_agent_worker_pids() {
   ps aux | grep cdp-logging-agent | grep under-supervisor | awk '{print $2}'
 }
 
-function update_metering_conf() {
-  local file=${1:?"usage: <metering config file location>"}
-  if [[ -f "${file}" ]]; then
-    if ! grep -q "retry_forever" "${file}"; then
-      sed -z 's/flush_at_shutdown true\n/flush_at_shutdown true\n      retry_forever true\n      retry_max_interval 1200\n/' -i $file
-    else
-      if ! grep -q "retry_max_interval" "${file}"; then
-        sed -z 's/retry_forever true\n/retry_forever true\n      retry_max_interval 1200\n/' -i $file
-      fi
-    fi
-  fi
-}
-
-function doctor() {
-  if [[ -d "/srv/salt/fluent" ]]; then
-    log "As this node is a salt-master, do additional operations on it."
-    update_metering_conf "/srv/salt/fluent/template/databus_metering.conf.j2"
-  fi
-  # cleanup distribute crontab
-  if [[ -f "/etc/cron.d/cdp_logging_agent_check_distribute" ]]; then
-    rm -rf /etc/cron.d/cdp_logging_agent_check_distribute
-  fi
-  local_metering_fluent_conf="/etc/cdp-logging-agent/databus_metering.conf"
-  is_datahub="false"
-  if grep -q "/var/log/metering/heartbeats.json" "$local_metering_fluent_conf"; then
-    is_datahub="true"
-  fi
-
-  local is_installed=$(rpm -q "cdp-logging-agent" 2>&1 >/dev/null; echo $?)
-  local is_active=$(systemctl is-active --quiet cdp-logging-agent; echo $?)
-
-  if [[ "$is_active" == "0" ]]; then
-    log "Service cdp-logging-agent is active."
-    buffer_folder="/var/log/cdp-logging-agent/metering_databus"
-    if [[ -d "$buffer_folder" && "$is_datahub" == "true" ]]; then
-      log "Do additional checks as this is a dathub node..."
-      if ! grep -q "retry_max_interval" "$local_metering_fluent_conf"; then
-        update_metering_conf "${local_metering_fluent_conf}"
-        dump
-        systemctl restart cdp-logging-agent
-        return
-      fi
-      last_modified_date=`stat "$buffer_folder" | grep Modify | sed -r "s/Modify: (.*)/\1/"`;
-      last_modified_timestamp=`date -d "$last_modified_date" +%s`;
-      log "Metering buffer folder /var/log/cdp-logging-agent/metering_databus was accessed: $last_modified_date"
-      if [ `date +%s` -gt `expr $last_modified_timestamp + $LIVENESS_THRESHOLD_SECONDS` ]; then
-        log "Metering buffer folder was not accessed for long time. Restarting logging agent."
-        dump
-        systemctl restart cdp-logging-agent
-        return
-      fi
-      log "Check if metering buffer folder is too large. (max: 10MB)"
-      buffer_folder_size=$(du -bs "$buffer_folder" | cut -f1)
-      local max_buffer_size=$(expr $BUFFER_LIMIT_BYTES + 0)
-      local act_buffer_size=$(expr $buffer_folder_size + 0)
-      if [[ $act_buffer_size -ge $max_buffer_size ]]; then
-        log "Metering buffer size is too large: $act_buffer_size Bytes. Restarting logging agent."
-        dump
-        systemctl restart cdp-logging-agent
-      else
-        log "Metering buffer size: $act_buffer_size Bytes"
-      fi
-    fi
-  fi
-  do_exit 0 "LOGGING AGENT DOCTOR OPERATION FINISHED"
-}
-
 function setup_workdir() {
   if [[ "$WORKING_DIR" == "" ]]; then
       WORKING_DIR="/tmp"
@@ -287,11 +219,7 @@ function run_operation() {
     echo "${VERSION}"
     return
   fi
-  if [[ "${operation}" == "doctor" ]]; then
-    init_logfile "doctor"
-    setup_workdir
-    doctor
-  elif [[ "${operation}" == "dump" ]]; then
+  if [[ "${operation}" == "dump" ]]; then
     init_logfile "dump"
     setup_workdir
     dump
@@ -301,9 +229,6 @@ function run_operation() {
 function main() {
   command="$1"
   case $command in
-   "doctor")
-      run_operation "doctor"
-    ;;
    "dump")
       run_operation "dump"
     ;;
@@ -314,7 +239,7 @@ function main() {
       print_help
     ;;
    *)
-    echo "Available commands: (doctor | dump | version | help)"
+    echo "Available commands: (dump | version | help)"
    ;;
    esac
 }

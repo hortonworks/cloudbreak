@@ -23,7 +23,6 @@ base:
 {{ include_if_exists('cloudera-manager', 'csd') }}
 {{ include_if_exists('cloudera-manager', 'settings') }}
     - fluent
-    - metering
     - monitoring.init
 {{ include_if_exists('mount', 'disk') }}
 {{ include_if_exists('postgresql', 'root-certs') }}

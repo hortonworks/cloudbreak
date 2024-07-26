@@ -6,8 +6,7 @@ public enum TelemetryOrchestratorModule {
     FLUENT("fluent"),
     FILECOLLECTOR("filecollector"),
     DATABUS("databus"),
-    MONITORING("monitoring"),
-    METERING("metering");
+    MONITORING("monitoring");
 
     private final String value;
 
