@@ -32,6 +32,7 @@ public class CustomImageProvider {
                 .withPublished(customImage.getCreated())
                 .withDescription(customImage.getDescription())
                 .withOs(image.getOs())
+                .withOsType(image.getOsType())
                 .withUuid(customImage.getName())
                 .withVersion(image.getVersion())
                 .withRepo(getRepoWithCustomBaseUrl(image.getRepo(), customImage.getBaseParcelUrl()))
@@ -44,6 +45,7 @@ public class CustomImageProvider {
                 .withBaseParcelUrl(customImage.getBaseParcelUrl())
                 .withSourceImageId(customImage.getCustomizedImageId())
                 .withTags(image.getTags())
+                .withPackageVersions(image.getPackageVersions())
                 .build();
         return StatedImage.statedImage(result, imageCatalogUrl, catalogName);
     }
