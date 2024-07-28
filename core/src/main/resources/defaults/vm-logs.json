@@ -406,5 +406,21 @@
   {
     "path": "/var/log/dl_postgres_dry_run_restore.log",
     "label": "dl_dry_run_restore"
+  },
+  {
+    "path": "/var/log/pip36.log",
+    "label": "python36_pip"
+  },
+  {
+    "path": "/var/log/pip38.log",
+    "label": "python38_pip"
+  },
+  {
+    "path": "/var/log/pip39.log",
+    "label": "python39_pip"
+  },
+  {
+    "path": "/var/log/pip311.log",
+    "label": "python311_pip"
   }
 ]
