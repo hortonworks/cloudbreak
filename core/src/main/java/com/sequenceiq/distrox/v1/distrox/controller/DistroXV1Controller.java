@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -479,6 +480,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public StackStatusV4Response getStatusByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
         return stackOperations.getStatusByCrn(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrnList(action = DESCRIBE_DATAHUB)
+    public StackEndpointV4Responses getEndpointsByCrns(@ResourceCrnList List<String> crns) {
+        return stackOperations.getEndpointsCrns(crns, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

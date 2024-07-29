@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,12 +42,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackInstancesV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
@@ -357,6 +361,21 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public StackStatusV4Response getStatusByCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         StackClusterStatusView stackStatusView = stackService.getStatusByNameOrCrn(nameOrCrn, workspaceId);
         return stackClusterStatusViewToStatusConverter.convert(stackStatusView);
+    }
+
+    public StackEndpointV4Responses getEndpointsCrns(@NotNull List<String> crns, String accountId) {
+        StackEndpointV4Responses stackEndpointV4Responses = new StackEndpointV4Responses();
+        Set<StackEndpointV4Response> stackEndpointV4ResponsesSet = new HashSet<>();
+        for (String crn : crns) {
+            Map<String, Collection<ClusterExposedServiceV4Response>> endpointsByCrn = stackService.getEndpointsByCrn(crn, accountId);
+            LOGGER.debug("Endpoint for crn: {} has been found and the response is {}.", crn, endpointsByCrn);
+            StackEndpointV4Response stackEndpointV4Response = new StackEndpointV4Response();
+            stackEndpointV4Response.setCrn(crn);
+            stackEndpointV4Response.setEndpoints(endpointsByCrn);
+            stackEndpointV4ResponsesSet.add(stackEndpointV4Response);
+        }
+        stackEndpointV4Responses.setResponses(stackEndpointV4ResponsesSet);
+        return stackEndpointV4Responses;
     }
 
     public StackStatusV4Response getStatus(@NotNull String crn) {

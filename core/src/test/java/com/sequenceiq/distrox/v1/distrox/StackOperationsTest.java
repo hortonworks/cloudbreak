@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -341,6 +343,22 @@ class StackOperationsTest {
         underTest.putAddVolumes(nameOrCrn, stackAddVolumesRequest, ACCOUNT_ID);
 
         verify(stackCommonService).putAddVolumesInWorkspace(nameOrCrn, ACCOUNT_ID, stackAddVolumesRequest);
+    }
+
+    @Test
+    void testGetEndpointsFroMultipleCrns() {
+        List<String> crns = new ArrayList<>();
+        crns.add("crn1");
+        crns.add("crn2");
+
+        when(stackService.getEndpointsByCrn("crn1", ACCOUNT_ID)).thenReturn(Map.of("proxy", Set.of()));
+        when(stackService.getEndpointsByCrn("crn2", ACCOUNT_ID)).thenReturn(Map.of("proxy", Set.of()));
+
+        StackEndpointV4Responses endpointV4Responses = underTest.getEndpointsCrns(crns, ACCOUNT_ID);
+
+        assertEquals(2, endpointV4Responses.getResponses().size());
+        verify(stackService).getEndpointsByCrn("crn1", ACCOUNT_ID);
+        verify(stackService).getEndpointsByCrn("crn2", ACCOUNT_ID);
     }
 
 }

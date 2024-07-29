@@ -28,6 +28,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DEL
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_ENDPOINTS_BY_CRNS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_LAST_FLOW_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_OPERATION;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_CRN;
@@ -88,6 +89,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.DistroXSyncCmV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -395,6 +397,14 @@ public interface DistroXV1Endpoint {
             operationId = "statusDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Response getStatusByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
+    @GET
+    @Path("crn/endpoints")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = GET_ENDPOINTS_BY_CRNS, description = Notes.STACK_NOTES,
+            operationId = "endpointsDistroXV1ByCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackEndpointV4Responses getEndpointsByCrns(@QueryParam("crns") List<String> crns);
 
     @DELETE
     @Path("name/{name}/instance")

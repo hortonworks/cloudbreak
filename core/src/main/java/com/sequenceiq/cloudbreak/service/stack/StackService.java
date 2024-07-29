@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -115,6 +116,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
@@ -141,6 +143,7 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -294,6 +297,12 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     @Inject
     private DynamicEntitlementRefreshService dynamicEntitlementRefreshService;
 
+    @Inject
+    private ServiceEndpointCollector serviceEndpointCollector;
+
+    @Inject
+    private StackUtil stackUtil;
+
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
@@ -387,6 +396,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 ? stackRepository.getStatusByNameAndWorkspace(nameOrCrn.getName(), workspaceId)
                 : stackRepository.getStatusByCrnAndWorkspace(nameOrCrn.getCrn(), workspaceId);
         return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
+    }
+
+    public Map<String, Collection<ClusterExposedServiceV4Response>> getEndpointsByCrn(String crn, String accountId) {
+        StackDto stackDto = stackDtoService.getByNameOrCrn(NameOrCrn.ofCrn(crn), accountId);
+        return serviceEndpointCollector.prepareClusterExposedServices(stackDto, stackUtil.extractClusterManagerIp(stackDto));
     }
 
     public List<StackClusterStatusView> getStatusesByCrnsInternal(List<String> crns, StackType stackType) {

@@ -4,6 +4,7 @@ public class DistroXOpDescription {
     public static final String GET_BY_ID = "retrieve stack by id";
     public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
     public static final String GET_STATUS_BY_CRN = "retrieve stack status by stack crn";
+    public static final String GET_ENDPOINTS_BY_CRNS = "retrieve stack endpoints by stack crns";
     public static final String PUT_BY_ID = "update stack by id";
     public static final String PUT_BY_NAME = "update stack by name";
     public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
