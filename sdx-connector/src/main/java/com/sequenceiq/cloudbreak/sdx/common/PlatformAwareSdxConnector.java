@@ -113,7 +113,8 @@ public class PlatformAwareSdxConnector {
     private static TargetPlatform calculatePlatform(Set<String> sdxCrns) {
         if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.CDL.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.CDL;
-        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn)))) {
+        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn))
+                || CrnResourceDescriptor.DATAHUB.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.PAAS;
         }
         throw new IllegalStateException("CRNs cannot be recognized based on the list.");

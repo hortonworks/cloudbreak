@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitFor
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
@@ -107,11 +105,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
 
     private void setupRuntimeParameters(TestContext testContext, SdxTestDto sdxTestDto) {
         if (imageValidatorE2ETestUtil.isImageValidation()) {
-            Optional<ImageV4Response> imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext);
-            String imageUnderValidationVersion = imageUnderValidation.get().getVersion();
-            String os = imageUnderValidation.get().getOs();
-            if (OsType.RHEL8.getOs().equalsIgnoreCase(os) && "7.2.17".equals(imageUnderValidationVersion)) {
-                // RHEL8 was introduced with 7.2.17, meaning we can not upgrade from a previous version but have to get the latest image with same runtime
+            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).get();
+            String imageUnderValidationVersion = imageUnderValidation.getVersion();
+            if (imageValidatorE2ETestUtil.shouldValidateWithSameRuntime(testContext)) {
                 ImageV4Response latestImageWithSameRuntime = imageValidatorE2ETestUtil.getLatestImageWithSameRuntimeAsImageUnderValidation(testContext);
                 if (latestImageWithSameRuntime == null) {
                     throw new TestFailException("No other image found with version " + imageUnderValidationVersion);
@@ -123,7 +119,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     throw new TestFailException("Upgrade matrix entry is not defined for image version " + imageUnderValidationVersion);
                 }
                 sdxTestDto
-                        .withOs(os)
+                        .withOs(imageUnderValidation.getOs())
                         .withRuntimeVersion(runtimeVersion);
             }
         } else {

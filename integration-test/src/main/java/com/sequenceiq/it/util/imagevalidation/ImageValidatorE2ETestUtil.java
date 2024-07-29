@@ -28,7 +28,9 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -180,17 +182,33 @@ public class ImageValidatorE2ETestUtil {
         }
     }
 
+    public boolean shouldValidateWithSameRuntime(TestContext testContext) {
+        ImageV4Response imageUnderValidation = getImage(testContext).get();
+        return isRhel8InitialVersion(imageUnderValidation);
+    }
+
+    private boolean isRhel8InitialVersion(ImageV4Response imageUnderValidation) {
+        return OsType.RHEL8.getOs().equalsIgnoreCase(imageUnderValidation.getOs())
+                && "7.2.17".equals(imageUnderValidation.getVersion());
+    }
+
     public ImageV4Response getLatestImageWithSameRuntimeAsImageUnderValidation(TestContext testContext) {
         List<ImageV4Response> images = getImages(testContext).getCdhImages();
         ImageV4Response imageUnderValidation = images.stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
                 .findFirst()
                 .orElseThrow();
+        Architecture architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
+        int cmBuildNumber = Integer.parseInt(imageUnderValidation.getCmBuildNumber());
+        int stackBuildNumber = Integer.parseInt(imageUnderValidation.getStackDetails().getStackBuildNumber());
         return images.stream()
                 .filter(img -> img.getCreated() < imageUnderValidation.getCreated())
                 .filter(img -> Objects.equals(imageUnderValidation.getImageSetsByProvider().keySet(), img.getImageSetsByProvider().keySet()))
                 .filter(img -> Objects.equals(imageUnderValidation.getOs(), img.getOs()))
+                .filter(img -> Objects.equals(architecture, Architecture.fromStringWithFallback(img.getArchitecture())))
                 .filter(img -> Objects.equals(imageUnderValidation.getVersion(), img.getVersion()))
+                .filter(img -> cmBuildNumber > Integer.parseInt(img.getCmBuildNumber()))
+                .filter(img -> stackBuildNumber > Integer.parseInt(img.getStackDetails().getStackBuildNumber()))
                 .max(Comparator.comparing(ImageV4Response::getCreated))
                 .orElse(null);
     }

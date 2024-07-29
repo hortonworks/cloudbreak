@@ -55,15 +55,13 @@ public class CustomImageProviderTest {
 
         StatedImage image = underTest.mergeSourceImageAndCustomImageProperties(statedImage, customImage, CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
 
-        assertEquals(customImage.getCreated(), image.getImage().getCreated());
-        assertEquals(customImage.getDescription(), image.getImage().getDescription());
-        assertEquals(CUSTOM_IMAGE_ID, image.getImage().getUuid());
-        assertEquals("https://myarchive.test.com/cm-public/7.2.2/redhat7/yum/", image.getImage().getRepo().get("redhat7"));
-        assertEquals("https://myarchive.test.com/cdp-public/7.2.2.0/parcels/", image.getImage().getStackDetails().getRepo().getStack().get("redhat7"));
+        validateCommonParameters(statedImage, customImage, image);
         assertFalse(image.getImage().getPreWarmParcels().contains(CUSTOM_BASE_PARCEL_URL));
         assertFalse(image.getImage().getPreWarmCsd().contains(CUSTOM_BASE_PARCEL_URL));
+        assertEquals("https://myarchive.test.com/cm-public/7.2.2/redhat7/yum/", image.getImage().getRepo().get("redhat7"));
         assertTrue(image.getImage().getImageSetsByProvider().containsKey("aws"));
         assertEquals(16, image.getImage().getImageSetsByProvider().get("aws").size());
+        assertEquals("https://myarchive.test.com/cdp-public/7.2.2.0/parcels/", image.getImage().getStackDetails().getRepo().getStack().get("redhat7"));
     }
 
     @Test
@@ -78,9 +76,7 @@ public class CustomImageProviderTest {
 
         StatedImage image = underTest.mergeSourceImageAndCustomImageProperties(statedImage, customImage, CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
 
-        assertEquals(customImage.getCreated(), image.getImage().getCreated());
-        assertEquals(customImage.getDescription(), image.getImage().getDescription());
-        assertEquals(CUSTOM_IMAGE_ID, image.getImage().getUuid());
+        validateCommonParameters(statedImage, customImage, image);
         assertTrue(image.getImage().getRepo().isEmpty());
         assertTrue(image.getImage().getPreWarmParcels().isEmpty());
         assertTrue(image.getImage().getPreWarmCsd().isEmpty());
@@ -90,6 +86,24 @@ public class CustomImageProviderTest {
         assertEquals(1, imageSetsByProvider.get("aws").size());
         assertTrue(imageSetsByProvider.get("aws").containsKey("europe-west1"));
         assertEquals("cloudera-freeipa-images/freeipa-cdh--2103081304.tar.gz", image.getImage().getImageSetsByProvider().get("aws").get("europe-west1"));
+    }
+
+    private void validateCommonParameters(StatedImage statedImage, CustomImage customImage, StatedImage result) {
+        assertEquals(statedImage.getImage().getDate(), result.getImage().getDate());
+        assertEquals(customImage.getCreated(), result.getImage().getCreated());
+        assertEquals(customImage.getCreated(), result.getImage().getPublished());
+        assertEquals(customImage.getDescription(), result.getImage().getDescription());
+        assertEquals(statedImage.getImage().getOs(), result.getImage().getOs());
+        assertEquals(customImage.getName(), result.getImage().getUuid());
+        assertEquals(statedImage.getImage().getVersion(), result.getImage().getVersion());
+        assertEquals(statedImage.getImage().getOsType(), result.getImage().getOsType());
+        assertEquals(statedImage.getImage().getPackageVersions(), result.getImage().getPackageVersions());
+        assertEquals(statedImage.getImage().getCmBuildNumber(), result.getImage().getCmBuildNumber());
+        assertEquals(statedImage.getImage().isAdvertised(), result.getImage().isAdvertised());
+        assertEquals(customImage.getBaseParcelUrl(), result.getImage().getBaseParcelUrl());
+        assertEquals(customImage.getCustomizedImageId(), result.getImage().getSourceImageId());
+        assertEquals(statedImage.getImage().getArchitecture(), result.getImage().getArchitecture());
+        assertEquals(statedImage.getImage().getTags(), result.getImage().getTags());
     }
 
     private Image getImageFromCatalog(String catalogFile, String imageId) throws IOException, CloudbreakImageNotFoundException {

@@ -188,6 +188,12 @@ public class SdxBackupRestoreService {
         return triggerDatalakeRestoreFlow(sdxCluster, backupId, backupLocation, backupLocationOverride, skipOptions, fullDrMaxDurationInMin, validationOnly);
     }
 
+    public DatalakeRestoreStatusResponse triggerDatalakeRestoreValidation(SdxCluster sdxCluster, String userCrn) {
+        LOGGER.info("Triggering datalake restore validation for datalake: '{}' in '{}' env",
+                sdxCluster.getClusterName(), sdxCluster.getEnvName());
+        return datalakeDrClient.triggerRestoreValidation(sdxCluster.getClusterName(), userCrn);
+    }
+
     public datalakeDRProto.DatalakeBackupInfo getLastSuccessfulBackupInfo(String datalakeName, String userCrn) {
         datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackupInfo = datalakeDrClient.getLastSuccessfulBackup(datalakeName, userCrn, Optional.empty());
         if (lastSuccessfulBackupInfo == null) {
