@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
@@ -60,8 +61,6 @@ class DatabaseSslServiceTest {
     private static final Long CLUSTER_ID = 12L;
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
-
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
 
     @Mock
     private RedbeamsDbCertificateProvider dbCertificateProvider;
@@ -111,7 +110,7 @@ class DatabaseSslServiceTest {
         lenient().when(stackDto.getDatabase()).thenReturn(database);
         lenient().when(clusterView.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN);
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
+                Optional.of(SdxBasicView.builder().withPlatform(TargetPlatform.PAAS).build()));
     }
 
     @Test

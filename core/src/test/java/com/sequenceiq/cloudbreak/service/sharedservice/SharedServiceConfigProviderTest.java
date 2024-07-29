@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.H
 import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PASSWORD;
 import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_PORT;
 import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HiveMetastoreDatabase.HIVE_METASTORE_DATABASE_USER;
+import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.CDL;
+import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.PAAS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -42,10 +44,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @ExtendWith(MockitoExtension.class)
 public class SharedServiceConfigProviderTest {
 
-    private static final String DL_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
-
-    private static final String CDL_CRN = "crn:cdp:sdxsvc:us-west-1:cloudera:instance:f22e7f31-a98d-424d-917a-a62a36cb3c9e";
-
     @Mock
     private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
 
@@ -67,9 +65,8 @@ public class SharedServiceConfigProviderTest {
     @Test
     void testConfigureForPaasDatalake() {
         Cluster cluster = cluster();
-        cluster.getStack().setDatalakeCrn(DL_CRN);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(SdxBasicView.builder().withCrn(DL_CRN).withFileSystemView(new SdxFileSystemView(null, null)).build()));
+                Optional.of(SdxBasicView.builder().withPlatform(PAAS).withFileSystemView(new SdxFileSystemView(null, null)).build()));
         Stack dlStack = new Stack();
         Cluster dlCluster = new Cluster();
         dlCluster.setId(1L);
@@ -90,7 +87,7 @@ public class SharedServiceConfigProviderTest {
     @Test
     void testConfigureForCdlDatalakeIfHiveRdsConfigNotPresent() {
         Cluster cluster = cluster();
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(CDL_CRN).build()));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withPlatform(CDL).build()));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
                 HIVE_METASTORE_DATABASE_PORT, "port",
                 HIVE_METASTORE_DATABASE_HOST, "host",
@@ -111,7 +108,7 @@ public class SharedServiceConfigProviderTest {
     @Test
     void testConfigureForCdlDatalakeIfHiveRdsConfigPresent() {
         Cluster cluster = cluster();
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withCrn(CDL_CRN).build()));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withPlatform(CDL).build()));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
                 HIVE_METASTORE_DATABASE_PORT, "port",
                 HIVE_METASTORE_DATABASE_HOST, "host",

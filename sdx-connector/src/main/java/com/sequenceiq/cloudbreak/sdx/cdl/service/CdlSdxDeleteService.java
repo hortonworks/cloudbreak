@@ -26,7 +26,7 @@ public class CdlSdxDeleteService extends CdlSdxStatusService implements Platform
             try {
                 grpcClient.deleteDatalake(sdxCrn, force);
             } catch (RuntimeException exception) {
-                LOGGER.info("We are not able to delete CDL with CRN: {}, Exception: {}", sdxCrn, exception.getMessage());
+                LOGGER.error(String.format("We are not able to delete CDL with CRN: %s.", sdxCrn), exception);
             }
         }
     }

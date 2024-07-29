@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -63,10 +62,10 @@ public class SharedServiceConfigProvider {
         if (StackType.WORKLOAD.equals(stack.getType())) {
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
             if (sdxBasicView.isPresent()) {
-                switch (CrnResourceDescriptor.getByCrnString(sdxBasicView.get().crn())) {
-                    case VM_DATALAKE, DATAHUB -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView.get());
+                switch (sdxBasicView.get().platform()) {
+                    case PAAS -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView.get());
                     case CDL -> setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
-                    default -> LOGGER.info("Data Lake CRN is not recognized, skipping setup regarding shared filesystem and RDS!");
+                    default -> LOGGER.info("Data Lake platform is not recognized, skipping setup regarding shared filesystem and RDS!");
                 }
                 sdxBasicView.get().fileSystemView().ifPresent(sdxFileSystemView ->
                         requestedCluster.setFileSystem(remoteDataContextWorkaroundService.prepareFilesystem(requestedCluster, sdxFileSystemView)));
