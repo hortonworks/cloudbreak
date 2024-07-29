@@ -134,7 +134,7 @@ public class DatabaseSslService {
             Optional<SdxBasicView> sdxBasicViewOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());
             if (sdxBasicViewOptional.isPresent()) {
                 return switch (CrnResourceDescriptor.getByCrnString(sdxBasicViewOptional.get().crn())) {
-                    case VM_DATALAKE -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
+                    case VM_DATALAKE, DATAHUB -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
                     case CDL -> isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicViewOptional.get());
                     default -> false;
                 };
