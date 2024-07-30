@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,10 @@ import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxStatusService;
 public class PlatformAwareSdxConnectorTest {
 
     private static final String PAAS_CRN = "crn:cdp:datalake:us-west-1:tenant:datalake:crn1";
+
+    private static final String INVALID_CRN = "crn:cdp:environments:us-west-1:tenant:environment:crn1";
+
+    private static final String LEGACY_PAAS_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:crn1";
 
     private static final String SAAS_CRN = "crn:cdp:sdxsvc:us-west-1:tenant:instance:crn2";
 
@@ -147,5 +152,24 @@ public class PlatformAwareSdxConnectorTest {
         when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
         Optional<SdxBasicView> sdx = underTest.getSdxBasicViewByEnvironmentCrn("envCrn");
         assertEquals(PAAS_CRN, sdx.get().crn());
+    }
+
+    @Test
+    public void testGetSdxBasicViewWithInvalidCrn() {
+        when(paasSdxDescribeService.listSdxCrns(any())).thenReturn(Set.of(INVALID_CRN));
+
+        assertThrows(IllegalStateException.class, () -> underTest.getSdxBasicViewByEnvironmentCrn(""));
+
+        verify(paasSdxDescribeService, never()).getSdxAccessViewByEnvironmentCrn(any());
+    }
+
+    @Test
+    public void testGetSdxBasicViewWithLegacyPaasCrn() {
+        when(paasSdxDescribeService.listSdxCrns(any())).thenReturn(Set.of(LEGACY_PAAS_CRN));
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().build()));
+
+        underTest.getSdxBasicViewByEnvironmentCrn("");
+
+        verify(paasSdxDescribeService).getSdxByEnvironmentCrn(any());
     }
 }
