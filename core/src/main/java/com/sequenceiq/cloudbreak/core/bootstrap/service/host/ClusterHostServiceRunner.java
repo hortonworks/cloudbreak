@@ -532,7 +532,7 @@ public class ClusterHostServiceRunner {
 
         servicePillar.putAll(sssdConfigProvider.createSssdAdPillar(kerberosConfig));
         servicePillar.putAll(sssdConfigProvider.createSssdIpaPillar(kerberosConfig, serviceLocations,
-                stack.getEnvironmentCrn(), cdhProduct));
+                stack.getEnvironmentCrn(), stack.getStackVersion(), cluster.getExtendedBlueprintText()));
 
         Map<String, Map<String, String>> mountPathMap = new HashMap<>();
         stackDto.getInstanceGroupDtos().forEach(group -> {

@@ -61,6 +61,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RANGER_LDAP_USERSYNC;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
@@ -552,6 +553,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.compute.ui.enabled}")
     private boolean computeUiEnabled;
 
+    @Value("${auth.mock.ranger.ldap.usersync}")
+    private boolean rangerLdapUsersyncEnabled;
+
     private Set<String> grantedEntitlements = new HashSet<>();
 
     private Set<String> revokedEntitlements = new HashSet<>();
@@ -1026,6 +1030,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(COMPUTE_UI));
             builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE));
             builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE_BETA));
+        }
+        if (rangerLdapUsersyncEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_RANGER_LDAP_USERSYNC));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

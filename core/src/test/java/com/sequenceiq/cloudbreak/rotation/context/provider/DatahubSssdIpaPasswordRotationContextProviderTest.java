@@ -39,7 +39,6 @@ public class DatahubSssdIpaPasswordRotationContextProviderTest extends AbstractS
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(stackDto.getName()).thenReturn("stack");
-        when(clusterView.getId()).thenReturn(1L);
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(stackDtoService.getByCrn(any())).thenReturn(stackDto);
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("crn");

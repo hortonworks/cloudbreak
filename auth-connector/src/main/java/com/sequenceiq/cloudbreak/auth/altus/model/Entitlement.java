@@ -115,4 +115,5 @@ public enum Entitlement {
     COMPUTE_UI,
     COMPUTE_API_LIFTIE,
     COMPUTE_API_LIFTIE_BETA,
+    CDP_RANGER_LDAP_USERSYNC;
 }

@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RANGER_LDAP_USERSYNC;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
@@ -573,5 +574,9 @@ public class EntitlementService {
 
     public boolean cdpSkipRdsSslCertificateRollingRotationValidation(String accountId) {
         return isEntitlementRegistered(accountId, CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION);
+    }
+
+    public boolean isRangerLdapUsersyncEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_RANGER_LDAP_USERSYNC);
     }
 }

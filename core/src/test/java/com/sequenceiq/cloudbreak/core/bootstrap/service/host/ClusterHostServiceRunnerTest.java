@@ -156,6 +156,8 @@ class ClusterHostServiceRunnerTest {
 
     private static final String KNOX_IDBROKER_SECURITY_DIR = "knoxIdBrokerSecurityDir";
 
+    private static final String EXTENDED_BLUEPRINT_TEXT = "extendedBlueprintText";
+
     @Mock
     private GatewayConfigService gatewayConfigService;
 
@@ -311,6 +313,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(stackView.getName()).thenReturn(STACK_NAME);
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
+        lenient().when(cluster.getExtendedBlueprintText()).thenReturn(EXTENDED_BLUEPRINT_TEXT);
     }
 
     @Test
@@ -470,7 +473,7 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
-        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any()))
+        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
 
@@ -527,7 +530,7 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
-        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any()))
+        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
@@ -561,7 +564,7 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
-        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any()))
+        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());

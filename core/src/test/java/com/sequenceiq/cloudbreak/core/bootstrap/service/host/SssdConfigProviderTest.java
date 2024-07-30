@@ -3,12 +3,13 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaConfigProvider;
@@ -39,13 +40,16 @@ class SssdConfigProviderTest {
 
     private static final int DNS_TTL = 30;
 
-    private static final String ENV_CRN = "envCrn";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:default:environment:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
 
     @Mock
     private FreeIpaConfigProvider freeIpaConfigProvider;
 
     @Mock
     private KerberosDetailService kerberosDetailService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private SssdConfigProvider underTest;
@@ -62,10 +66,9 @@ class SssdConfigProviderTest {
     public void testCreateIpaPillarNonIpaJoinable() {
         KerberosConfig kerberosConfig = new KerberosConfig();
         when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(Boolean.FALSE);
-        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct().withVersion("7.2.11");
 
         Map<String, SaltPillarProperties> result = underTest.createSssdIpaPillar(kerberosConfig, Map.of(),
-                "", Optional.of(clouderaManagerProduct));
+                "", "7.2.11", "");
 
         assertTrue(result.isEmpty());
     }
@@ -73,14 +76,13 @@ class SssdConfigProviderTest {
     @Test
     public void testCreateIpaPillarIpaJoinableWOEnumerate() {
         KerberosConfig kerberosConfig = createKerberosConfig();
-        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct().withVersion("7.2.11");
         when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);
         when(kerberosDetailService.getDnsTtl()).thenReturn(DNS_TTL);
         Map<String, Object> freeIpaConfig = Map.of("random", "stuff");
         when(freeIpaConfigProvider.createFreeIpaConfig(ENV_CRN)).thenReturn(freeIpaConfig);
 
         Map<String, SaltPillarProperties> result = underTest.createSssdIpaPillar(kerberosConfig, Map.of(),
-                ENV_CRN, Optional.of(clouderaManagerProduct));
+                ENV_CRN, "7.2.11", "");
 
         assertGenericConfig(result, kerberosConfig, freeIpaConfig);
         assertFalse((Boolean) ((Map<String, Object>) result.get("sssd-ipa").getProperties().get("sssd-ipa")).get("enumerate"));
@@ -92,61 +94,81 @@ class SssdConfigProviderTest {
                         "Empty Services 7.2.11",
                         Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of()),
                         false,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "Ranger present 7.2.11",
                         Map.of("RANGER_ADMIN", List.of("asf"), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of()),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "Ranger present alone 7.2.11",
                         Map.of("RANGER_ADMIN", List.of("asf")),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "NifiNode present 7.2.11",
                         Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of("asf")),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "NifiNode present alone 7.2.11",
                         Map.of("NIFI_NODE", List.of("asf")),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "NifiRegistry present 7.2.11",
                         Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of("asf"), "NIFI_NODE", List.of()),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "NifiRegistry present alone 7.2.11",
                         Map.of("NIFI_REGISTRY_SERVER", List.of("asf")),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "All present 7.2.11",
                         Map.of("RANGER_ADMIN", List.of("asf"), "NIFI_REGISTRY_SERVER", List.of("asf"), "NIFI_NODE", List.of("asf")),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "Empty Services 7.2.11",
                         Map.of("RANGER_ADMIN", List.of()),
                         false,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
                 {
                         "Ranger present 7.2.11",
                         Map.of("RANGER_ADMIN", List.of("asf")),
                         true,
-                        "7.2.11"
+                        "7.2.11",
+                        "",
+                        false
                 },
 
 
@@ -155,49 +177,81 @@ class SssdConfigProviderTest {
                         "Ranger present alone 7.2.18",
                         Map.of("RANGER_ADMIN", List.of("asf")),
                         true,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "NifiNode present 7.2.18",
                         Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of(), "NIFI_NODE", List.of("asf")),
                         false,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "NifiNode present alone 7.2.18",
                         Map.of("NIFI_NODE", List.of("asf")),
                         false,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "NifiRegistry present 7.2.18",
                         Map.of("RANGER_ADMIN", List.of(), "NIFI_REGISTRY_SERVER", List.of("asf"), "NIFI_NODE", List.of()),
                         false,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "NifiRegistry present alone 7.2.18",
                         Map.of("NIFI_REGISTRY_SERVER", List.of("asf")),
                         false,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "All present 7.2.18",
                         Map.of("RANGER_ADMIN", List.of("asf"), "NIFI_REGISTRY_SERVER", List.of("asf"), "NIFI_NODE", List.of("asf")),
                         true,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "Empty Services 7.2.18",
                         Map.of("RANGER_ADMIN", List.of()),
                         false,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
                 },
                 {
                         "Ranger present 7.2.18",
                         Map.of("RANGER_ADMIN", List.of("asf")),
                         true,
-                        "7.2.18"
+                        "7.2.18",
+                        "",
+                        false
+                },
+                {
+                        "Ranger present 7.2.18, LDAP enabled",
+                        Map.of("RANGER_ADMIN", List.of("asf")),
+                        false,
+                        "7.2.18",
+                        "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+                        true
+                },
+                {
+                        "Ranger present 7.2.18, LDAP enabled",
+                        Map.of("RANGER_ADMIN", List.of("asf")),
+                        false,
+                        "7.2.18",
+                        null,
+                        true
                 },
         };
     }
@@ -205,16 +259,16 @@ class SssdConfigProviderTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("scenarios")
     public void testCreateIpaPillarIpaJoinableWithEnumerateCheck(String name, Map<String, List<String>> serviceLocations,
-            boolean expectedEnumerate, String version) {
+            boolean expectedEnumerate, String version, String extendedBlueprint, boolean rangerLdapUsersyncEnabled) {
         KerberosConfig kerberosConfig = createKerberosConfig();
-        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct().withVersion(version);
         when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);
         when(kerberosDetailService.getDnsTtl()).thenReturn(DNS_TTL);
         Map<String, Object> freeIpaConfig = Map.of("random", "stuff");
         when(freeIpaConfigProvider.createFreeIpaConfig(ENV_CRN)).thenReturn(freeIpaConfig);
+        lenient().when(entitlementService.isRangerLdapUsersyncEnabled(any())).thenReturn(rangerLdapUsersyncEnabled);
 
         Map<String, SaltPillarProperties> result = underTest.createSssdIpaPillar(kerberosConfig, serviceLocations,
-                ENV_CRN, Optional.of(clouderaManagerProduct));
+                ENV_CRN, version, extendedBlueprint);
 
         assertGenericConfig(result, kerberosConfig, freeIpaConfig);
         assertEquals(expectedEnumerate, ((Map<String, Object>) result.get("sssd-ipa").getProperties().get("sssd-ipa")).get("enumerate"));

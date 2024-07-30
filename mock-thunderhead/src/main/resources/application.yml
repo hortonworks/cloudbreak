@@ -98,7 +98,7 @@ auth:
     compute:
       ui:
         enabled: true
-
+    ranger.ldap.usersync: true
 crn:
   partition: cdp
   region: us-west-1

@@ -35,7 +35,6 @@ public class InternalDatalakeSssdIpaPasswordRotationContextProviderTest extends 
         mockGetSssdPillar();
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
-        when(clusterView.getId()).thenReturn(1L);
         when(stackDto.getCluster()).thenReturn(clusterView);
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("crn");
         assertEquals(1, contexts.size());
