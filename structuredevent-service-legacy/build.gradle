@@ -11,7 +11,7 @@ jar {
 }
 
 dependencies {
-    implementation group: 'org.skyscreamer',                    name: 'jsonassert',                      version: '1.5.2'
+    implementation group: 'org.skyscreamer',                    name: 'jsonassert',                      version: '1.5.3'
 
     implementation project(':structuredevent-model')
     implementation project(':workspace')
