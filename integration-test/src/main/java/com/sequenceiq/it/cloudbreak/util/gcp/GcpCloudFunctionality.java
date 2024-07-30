@@ -161,4 +161,9 @@ public class GcpCloudFunctionality implements CloudFunctionality {
         Log.then(LOGGER, "CloudFormation is only available at AWS. So validation on GCP is not possible! ");
         return true;
     }
+
+    @Override
+    public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
+        return gcpUtil.listAvailabilityZonesForVms(instanceZoneMap);
+    }
 }

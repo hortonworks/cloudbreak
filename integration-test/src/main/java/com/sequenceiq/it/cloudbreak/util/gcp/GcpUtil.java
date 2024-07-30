@@ -84,4 +84,8 @@ public class GcpUtil {
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return gcpClientActions.getLoggingUrl(baseLocation, "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource());
     }
+
+    public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
+        return gcpClientActions.listAvailabilityZonesForVms(instanceZoneMap);
+    }
 }

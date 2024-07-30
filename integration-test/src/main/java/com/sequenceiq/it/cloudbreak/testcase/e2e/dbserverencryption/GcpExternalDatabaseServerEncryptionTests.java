@@ -4,9 +4,14 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
@@ -14,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerSslMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -118,6 +124,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
                 .when(sdxTestClient.describe())
                 .then((tc, testDto, client) -> {
                     validateEncryption(testDto, tc, client);
+                    validateAz(testDto.getResponse().getStackV4Response().getInstanceGroups(), tc, testDto.getResponse().getName());
                     return testDto;
                 })
                 .given(dx, DistroXTestDto.class)
@@ -133,6 +140,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
                 .when(distroXTestClient.get(), key(dx))
                 .then((tc, testDto, client) -> {
                     validateDistroXEncryption(testDto, tc, client);
+                    validateAz(testDto.getResponse().getInstanceGroups(), tc, testDto.getResponse().getName());
                     return testDto;
                 })
                 .validate();
@@ -175,6 +183,28 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
             if (!connectionUrlPair.getValue().contains("verify-ca")) {
                 throw new TestFailException("Connection URL for external database has SSL Mode set to 'verify-full' for instance ip: " + ip);
             }
+        }
+    }
+
+    private void validateAz(List<InstanceGroupV4Response> instanceGroups, TestContext tc, String clusterName) {
+        Map<String, String> instanceZoneMap = instanceGroups.stream()
+                .map(ig -> ig.getMetadata())
+                .filter(Objects::nonNull)
+                .flatMap(ins -> ins.stream())
+                .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getAvailabilityZone));
+        Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(instanceZoneMap);
+        List<String> instancesWithNoAz = availabilityZoneForVms.entrySet().stream()
+                .filter(entry -> StringUtils.isEmpty(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(instancesWithNoAz)) {
+            throw new TestFailException(String.format("Availability Zone is missing for instances %s in %s",
+                    instancesWithNoAz.stream().collect(Collectors.joining(",")), clusterName));
+        }
+        Set<String> zones = availabilityZoneForVms.values().stream().collect(Collectors.toSet());
+        if (zones.size() > 1) {
+            throw new TestFailException(String.format("There are multiple Availability zones %s for instances in %s",
+                    zones.stream().collect(Collectors.joining(",")), clusterName));
         }
     }
 

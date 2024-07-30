@@ -178,6 +178,10 @@ public interface CloudFunctionality {
         return Map.of();
     }
 
+    default Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
+        return Map.of();
+    }
+
     @Retryable(
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)

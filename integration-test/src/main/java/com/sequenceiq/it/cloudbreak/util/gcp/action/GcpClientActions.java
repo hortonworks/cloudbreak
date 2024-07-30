@@ -422,4 +422,21 @@ public class GcpClientActions extends GcpClient {
             return null;
         }
     }
+
+    public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
+        Map<String, String> availabilityZoneMap = new HashMap<>();
+        Compute compute = buildCompute();
+        for (Map.Entry<String, String> instanceInfo : instanceZoneMap.entrySet()) {
+            Instance instance = null;
+            try {
+                instance = compute.instances().get(getProjectId(), instanceInfo.getValue(), instanceInfo.getKey()).execute();
+            } catch (IOException e) {
+
+            }
+            if (instance != null) {
+                availabilityZoneMap.put(instance.getName(), instance.getZone());
+            }
+        }
+        return availabilityZoneMap;
+    }
 }
