@@ -248,6 +248,10 @@
               {
                 "name": "nifi.python.command",
                 "value": "python3.11"
+              },
+              {
+                "name": "nifi.components.status.repository.implementation",
+                "value": "org.apache.nifi.controller.status.history.questdb.EmbeddedQuestDbStatusHistoryRepository"
               }
             ]
           }
