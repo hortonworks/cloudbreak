@@ -33,7 +33,7 @@ ext {
   // Network
   dnsjavaVersion = '3.5.2'
   httpClientVersion = '5.2.1'
-  nettyVersion = '4.1.111.Final'
+  nettyVersion = '4.1.112.Final'
   reactorNettyHttp = '1.1.19'
   okhttpVersion = '4.12.0'
   tomcatVersion = '10.1.24'
