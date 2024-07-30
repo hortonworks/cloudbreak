@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcSdxCdlClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
@@ -60,9 +61,9 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
             try {
                 return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(crn));
             } catch (JsonProcessingException | InvalidProtocolBufferException e) {
-                LOGGER.info("Json processing failed, thus we cannot query remote data context. Crn: {}, Exception message: {}", crn, e.getMessage());
+                LOGGER.error(String.format("Json processing failed, thus we cannot query remote data context. CRN: %s.", crn), e);
             } catch (RuntimeException exception) {
-                LOGGER.info("Not able to fetch the RDC for CDL from Service Discovery. CRN: {}, Exception message: {}", crn, exception.getMessage());
+                LOGGER.error(String.format("Not able to fetch the RDC for CDL from Service Discovery. CRN: %s.", crn), exception);
             }
         }
         return Optional.empty();
@@ -79,8 +80,7 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
                 }
                 return sdxCrns;
             } catch (RuntimeException exception) {
-                LOGGER.info("Failed at listing CDL. CRN: {}. Exception: {}",
-                        environmentCrn, exception.getMessage());
+                LOGGER.error(String.format("Failed at listing CDL. CRN: %s.", environmentCrn), exception);
                 return Collections.emptySet();
             }
         }
@@ -102,10 +102,10 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
                         .withCreated(detailedCdl.getCreated())
                         .withDbServerCrn(detailedCdl.getDatabaseDetails().getCrn())
                         .withFileSystemView(describeServicesResponseToFileSystem(cdlServicesInfo, detailedCdl.getCloudStorageBaseLocation()))
+                        .withPlatform(TargetPlatform.CDL)
                         .build());
             } catch (RuntimeException exception) {
-                LOGGER.info("Exception while fetching CRN for containerized datalake with Environment:{} {}",
-                    environmentCrn, exception.getMessage());
+                LOGGER.error(String.format("Exception while fetching CRN for containerized datalake with Environment: %s.", environmentCrn), exception);
                 return Optional.empty();
             }
         }
@@ -124,6 +124,7 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
                         try {
                             return new URI(endpointInfo.getEndpointHostsList().getFirst().getUri()).getHost();
                         } catch (Exception e) {
+                            LOGGER.error("Couldn't parse URI for Ranger endpoint host.", e);
                             return StringUtils.EMPTY;
                         }
                     })
@@ -137,7 +138,7 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
 
     @Override
     public boolean isSdxClusterHA(String environmentCrn) {
-        throw new UnsupportedOperationException("Currently we cannot decide if a SDX CDL cluster is HA or not.");
+        throw new UnsupportedOperationException("Currently we cannot decide if CDL cluster is HA or not.");
     }
 
     private SdxFileSystemView describeServicesResponseToFileSystem(CdlCrudProto.DescribeServicesResponse servicesResponse, String cloudStorageLocation) {

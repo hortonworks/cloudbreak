@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
@@ -387,6 +388,7 @@ public class StackDtoService implements LocalPaasSdxService {
                         .withCreated(stackDto.getCreated())
                         .withDbServerCrn(stackDto.getCluster().getDatabaseServerCrn())
                         .withFileSystemView(getHiveRelatedFileSystem(stackDto.getCluster().getFileSystem()))
+                        .withPlatform(TargetPlatform.PAAS)
                         .build());
     }
 

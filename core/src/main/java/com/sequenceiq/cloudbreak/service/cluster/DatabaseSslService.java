@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -133,10 +132,9 @@ public class DatabaseSslService {
         if (StackType.WORKLOAD.equals(stackView.getType())) {
             Optional<SdxBasicView> sdxBasicViewOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());
             if (sdxBasicViewOptional.isPresent()) {
-                return switch (CrnResourceDescriptor.getByCrnString(sdxBasicViewOptional.get().crn())) {
-                    case VM_DATALAKE, DATAHUB -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
+                return switch (sdxBasicViewOptional.get().platform()) {
+                    case PAAS -> isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
                     case CDL -> isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicViewOptional.get());
-                    default -> false;
                 };
             }
         } else {

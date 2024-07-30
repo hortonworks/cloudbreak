@@ -35,7 +35,7 @@ public class CdlSdxStatusService extends AbstractCdlSdxService implements Platfo
                 CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(environmentCrn, StringUtils.EMPTY);
                 result.add(Pair.of(response.getCrn(), CdlCrudProto.StatusType.Value.valueOf(response.getStatus())));
             } catch (RuntimeException exception) {
-                LOGGER.info("CDL not found for environment. CRN: {}.", environmentCrn);
+                LOGGER.error(String.format("CDL not found for environment. CRN: %s.", environmentCrn), exception);
                 return Collections.emptySet();
             }
         }

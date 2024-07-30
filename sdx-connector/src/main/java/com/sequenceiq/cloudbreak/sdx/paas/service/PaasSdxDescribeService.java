@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
@@ -36,7 +37,7 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
         return localRdcSupplier.map(rdcSupplier -> rdcSupplier.getPaasSdxRemoteDataContext(crn))
-                .orElseThrow(() -> new CloudbreakServiceException("Cannot provide remote data context!"));
+                .orElseThrow(() -> new CloudbreakServiceException(String.format("Cannot provide remote data context for CRN [%s]!", crn)));
     }
 
     @Override
@@ -57,6 +58,7 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
                             .withRazEnabled(sdx.getRangerRazEnabled())
                             .withCreated(sdx.getCreated())
                             .withDbServerCrn(sdx.getDatabaseServerCrn())
+                            .withPlatform(TargetPlatform.PAAS)
                             .build())
                     .findFirst());
     }
