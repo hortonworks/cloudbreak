@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -73,10 +74,10 @@ public class RecommendImageServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage = com.sequenceiq.cloudbreak.cloud.model.catalog.Image.builder()
                         .withOs("os")
                         .build();
-        when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(statedImage);
+        when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(statedImage);
         when(statedImage.getImage()).thenReturn(catalogImage);
 
-        Image result = recommendImageService.recommendImage(workspaceId, user, imageSettings, region, platform, blueprintName, cloudPlatform);
+        Image result = recommendImageService.recommendImage(workspaceId, user, imageSettings, region, blueprintName, cloudPlatform, Architecture.ARM64);
 
         assertEquals(result.getOs(), catalogImage.getOs());
     }
@@ -95,7 +96,7 @@ public class RecommendImageServiceTest {
         when(blueprintService.findAllByWorkspaceId(anyLong())).thenReturn(blueprints);
 
         assertThrows(BadRequestException.class, () -> {
-            recommendImageService.recommendImage(workspaceId, user, imageSettings, region, platform, blueprintName, cloudPlatform);
+            recommendImageService.recommendImage(workspaceId, user, imageSettings, region, blueprintName, cloudPlatform, Architecture.X86_64);
         });
     }
 
@@ -115,11 +116,11 @@ public class RecommendImageServiceTest {
         blueprints.add(blueprint);
         when(blueprintService.findAllByWorkspaceId(anyLong())).thenReturn(blueprints);
 
-        when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any()))
+        when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any()))
                 .thenThrow(new CloudbreakImageNotFoundException("Image not found"));
 
         assertThrows(BadRequestException.class, () -> {
-            recommendImageService.recommendImage(workspaceId, user, imageSettings, region, platform, blueprintName, cloudPlatform);
+            recommendImageService.recommendImage(workspaceId, user, imageSettings, region, blueprintName, cloudPlatform, Architecture.X86_64);
         });
     }
 
@@ -139,11 +140,11 @@ public class RecommendImageServiceTest {
         blueprints.add(blueprint);
         when(blueprintService.findAllByWorkspaceId(anyLong())).thenReturn(blueprints);
 
-        when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any()))
+        when(imageService.determineImageFromCatalog(any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean(), any(), any()))
                 .thenThrow(new CloudbreakImageCatalogException("Catalog exception"));
 
         assertThrows(BadRequestException.class, () -> {
-            recommendImageService.recommendImage(workspaceId, user, imageSettings, region, platform, blueprintName, cloudPlatform);
+            recommendImageService.recommendImage(workspaceId, user, imageSettings, region, blueprintName, cloudPlatform, Architecture.X86_64);
         });
     }
 

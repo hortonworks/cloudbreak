@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.model.JsonEntity;
 
@@ -22,9 +21,6 @@ public class ImageSettingsV4Request implements JsonEntity {
 
     @Schema(description = StackModelDescription.IMAGE_OS)
     private String os;
-
-    @Schema(description = StackModelDescription.IMAGE_ARCHITECTURE)
-    private Architecture architecture;
 
     public String getCatalog() {
         return catalog;
@@ -50,21 +46,12 @@ public class ImageSettingsV4Request implements JsonEntity {
         this.os = os;
     }
 
-    public Architecture getArchitecture() {
-        return architecture;
-    }
-
-    public void setArchitecture(Architecture architecture) {
-        this.architecture = architecture;
-    }
-
     @Override
     public String toString() {
         return "ImageSettingsV4Request{" +
                 "catalog='" + catalog + '\'' +
                 ", id='" + id + '\'' +
                 ", os='" + os + '\'' +
-                ", architecture='" + architecture + '\'' +
                 '}';
     }
 }

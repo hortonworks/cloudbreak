@@ -8,6 +8,7 @@ public class ModelDescriptions {
     public static final String PUBLIC_IN_ACCOUNT = "resource is visible in account";
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
+    public static final String ARCHITECTURE = "CPU architecture";
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String RESPONSE = "response object";
     public static final String FIXINPUTS = "fixinputs object";
@@ -220,7 +221,6 @@ public class ModelDescriptions {
         public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
         public static final String IMAGE_OS = "os of the image, this property is only considered when no specific image id is provided";
-        public static final String IMAGE_ARCHITECTURE = "architecture of the image, this property is only considered when no specific image id is provided";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String TAGS = "stack related tags";
         public static final String APPLICATION_TAGS = "stack related application tags";

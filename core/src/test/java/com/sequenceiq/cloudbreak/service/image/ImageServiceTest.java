@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -186,6 +185,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -206,6 +206,7 @@ public class ImageServiceTest {
         StatedImage actual = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
@@ -226,6 +227,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -249,6 +251,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageRequest,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -268,6 +271,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -283,10 +287,11 @@ public class ImageServiceTest {
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
         when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -294,12 +299,11 @@ public class ImageServiceTest {
                         false,
                         TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
                         image -> true));
-        assertEquals("The selected architecture (arm64) is not enabled in your account", exception.getMessage());
+        assertEquals("The selected image's architecture (arm64) is not enabled in your account", exception.getMessage());
     }
 
     @Test
     public void testGivenImageIdAndDifferentArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        imageSettingsV4Request.setArchitecture(Architecture.X86_64);
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
         when(entitlementService.isDataHubArmEnabled(any())).thenReturn(true);
@@ -307,6 +311,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -315,25 +320,6 @@ public class ImageServiceTest {
                         TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
                         image -> true));
         assertEquals("The selected image's architecture (arm64) is not matching requested architecture (x86_64)", exception.getMessage());
-    }
-
-    @Test
-    public void testGivenImageNotEntitledArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
-                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
-        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
-        BadRequestException exception = assertThrows(BadRequestException.class, () ->
-                underTest.determineImageFromCatalog(
-                        WORKSPACE_ID,
-                        imageSettingsV4Request,
-                        PLATFORM,
-                        PLATFORM,
-                        TestUtil.blueprint(),
-                        false,
-                        false,
-                        TestUtil.user(USER_ID, USER_ID_STRING, USER_CRN),
-                        image -> true));
-        assertEquals("The selected architecture (arm64) is not enabled in your account", exception.getMessage());
     }
 
     @Test
@@ -349,6 +335,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        Architecture.X86_64,
                         PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
@@ -366,6 +353,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
@@ -384,6 +372,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
@@ -402,6 +391,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
@@ -422,6 +412,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
@@ -443,6 +434,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
@@ -464,6 +456,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                Architecture.X86_64,
                 PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),

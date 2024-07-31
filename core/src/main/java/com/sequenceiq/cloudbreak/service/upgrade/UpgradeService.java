@@ -255,6 +255,7 @@ public class UpgradeService {
                 .determineImageFromCatalog(
                         workspaceId,
                         toImageSettingsRequest(image),
+                        stack.getArchitecture(),
                         stack.getCloudPlatform().toLowerCase(Locale.ROOT),
                         stack.getPlatformVariant(),
                         optionalBlueprint.orElse(null),

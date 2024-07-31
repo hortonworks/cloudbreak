@@ -52,7 +52,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.produ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -213,10 +217,25 @@ public class StackCreatorServiceTest {
     @Mock
     private RecipeValidatorService recipeValidatorService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private DetailedEnvironmentResponse environment;
+
     @BeforeEach
     void before() {
         underTestSpy = spy(new StackCreatorService());
         MockitoAnnotations.openMocks(this);
+        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        lenient().when(environmentClientService.getByCrn(any())).thenReturn(environment);
+        lenient().when(environment.getRegions()).thenReturn(mock());
     }
 
     @Test
@@ -238,6 +257,32 @@ public class StackCreatorServiceTest {
         assertThrows(BadRequestException.class, () ->
                         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
                 "Cluster already exists: STACK_NAME");
+
+        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
+        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+    }
+
+    @Test
+    void shouldThrowBadRequestWhenNotEntitledToArm64() {
+        User user = new User();
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setName(STACK_NAME);
+        stackRequest.setArchitecture(Architecture.ARM64);
+        InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
+        instanceGroupV4Request.setName(INSTANCE_GROUP);
+        instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
+        stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
+        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
+
+        lenient().doNothing().when(nodeCountLimitValidator).validateProvision(any(), any());
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () ->
+                        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
+                "The selected architecture (arm64) is not enabled in your account");
 
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);

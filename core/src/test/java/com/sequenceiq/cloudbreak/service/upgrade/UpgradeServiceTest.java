@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
@@ -154,7 +155,7 @@ public class UpgradeServiceTest {
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
                 .determineImageFromCatalog(
-                        eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"),
+                        eq(WORKSPACE_ID), captor.capture(), eq(Architecture.ARM64), eq("aws"), eq("AWS"),
                         eq(blueprint), eq(false), eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
@@ -230,7 +231,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq(Architecture.ARM64), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
@@ -262,7 +263,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq(Architecture.ARM64), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
@@ -290,7 +291,7 @@ public class UpgradeServiceTest {
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq(Architecture.ARM64), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
@@ -329,7 +330,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq(Architecture.ARM64), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
@@ -408,7 +409,7 @@ public class UpgradeServiceTest {
         StatedImage currentImageFromCatalog = imageFromCatalog(prewarmedImage, oldImage);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
         StatedImage latestImage = imageFromCatalog(true, newImage);
-        when(imageService.determineImageFromCatalog(anyLong(), any(), anyString(), any(), any(), anyBoolean(),
+        when(imageService.determineImageFromCatalog(anyLong(), any(), any(), anyString(), any(), any(), anyBoolean(),
                 anyBoolean(), any(), any())).thenReturn(latestImage);
     }
 
@@ -460,6 +461,7 @@ public class UpgradeServiceTest {
         workspace.setId(WORKSPACE_ID);
         workspace.setTenant(new Tenant());
         stack.setWorkspace(workspace);
+        stack.setArchitecture(Architecture.ARM64);
         return stack;
     }
 

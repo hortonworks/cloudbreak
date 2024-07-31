@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -204,6 +205,7 @@ public class StackCreatorService {
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
+        validateArchitecture(stackRequest);
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
@@ -310,6 +312,14 @@ public class StackCreatorService {
         metricService.gauge(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private void validateArchitecture(StackV4Request stackRequest) {
+        if (stackRequest.getArchitecture() == Architecture.ARM64
+                && !entitlementService.isDataHubArmEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
+                    Architecture.ARM64.getName()));
+        }
     }
 
     private String getCrnForCreation(Optional<String> externalCrn) {
@@ -426,6 +436,7 @@ public class StackCreatorService {
                     return imageService.determineImageFromCatalog(
                             workspace.getId(),
                             stackRequest.getImage(),
+                            stackRequest.getArchitecture(),
                             platformString,
                             stackRequest.getVariant(),
                             blueprint,

@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -78,6 +79,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.domain.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.domain.converter.DnsResolverTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -259,6 +261,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     private String creatorClient;
 
     private String supportedImdsVersion;
+
+    @Convert(converter = ArchitectureConverter.class)
+    private Architecture architecture;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -1130,6 +1135,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -1180,6 +1193,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", database=" + database +
                 ", multiAz=" + multiAz +
                 ", supportedImdsVersion=" + supportedImdsVersion +
+                ", architecture=" + architecture +
                 '}';
     }
 

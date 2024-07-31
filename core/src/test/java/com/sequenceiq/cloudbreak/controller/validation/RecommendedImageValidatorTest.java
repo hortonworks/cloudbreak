@@ -10,12 +10,14 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -63,13 +65,24 @@ public class RecommendedImageValidatorTest {
     @Mock
     private Authenticator authenticator;
 
+    private ImageRecommendationV4Request request;
+
+    @BeforeEach
+    void setUp() {
+        request = new ImageRecommendationV4Request();
+        request.setImage(new ImageSettingsV4Request());
+        request.setArchitecture(null);
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        request.setRegion("");
+        request.setPlatform("AZURE");
+    }
+
     @Test
     public void testValidateWithNonAzurePlatform() {
-        String platform = "AWS";
+        request.setPlatform("AWS");
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
-        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", platform, "");
+        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(1L, cloudbreakUser, request);
 
         assertNull(result.getErrorMsg());
         assertNull(result.getWarningMsg());
@@ -80,8 +93,7 @@ public class RecommendedImageValidatorTest {
         setupAzureMocks();
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
-        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", "AZURE", "");
+        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(1L, cloudbreakUser, request);
 
         assertNull(result.getErrorMsg());
         assertNull(result.getWarningMsg());
@@ -93,8 +105,7 @@ public class RecommendedImageValidatorTest {
         doThrow(new CloudConnectorException("Error during validation")).when(imageValidator).validate(any(), any());
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
-        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", "AZURE", "");
+        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(1L, cloudbreakUser, request);
 
         assertEquals("Error during validation", result.getErrorMsg());
         assertNull(result.getWarningMsg());
@@ -106,8 +117,7 @@ public class RecommendedImageValidatorTest {
         doThrow(new CloudPlatformValidationWarningException("Warning during validation")).when(imageValidator).validate(any(), any());
 
         CloudbreakUser cloudbreakUser = new CloudbreakUser("testId", "testCrn", "testName", "testEmail", "tenant");
-        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(
-                1L, cloudbreakUser, new ImageSettingsV4Request(), ENVIRONMENT_CRN, "", "AZURE", "");
+        RecommendedImageValidator.ValidationResult result = validator.validateRecommendedImage(1L, cloudbreakUser, request);
 
         assertNull(result.getErrorMsg());
         assertEquals("Warning during validation", result.getWarningMsg());

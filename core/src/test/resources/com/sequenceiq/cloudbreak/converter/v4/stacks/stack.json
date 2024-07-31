@@ -5,6 +5,7 @@
     "catalog": "aws-catalog",
     "id": "aws-image"
   },
+  "architecture": "arm64",
   "placement": {
     "availabilityZone": "avZone",
     "region": "eu-west-1"

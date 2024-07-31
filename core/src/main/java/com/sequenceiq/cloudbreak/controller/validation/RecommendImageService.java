@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -45,16 +46,17 @@ public class RecommendImageService {
     @Inject
     private ImageUtil imageUtil;
 
-    public Image recommendImage(Long workspaceId, CloudbreakUser cloudbreakUser, ImageSettingsV4Request imageSettings, String region, String platform,
-            String blueprintName, CloudPlatformVariant cloudPlatform) {
+    public Image recommendImage(Long workspaceId, CloudbreakUser cloudbreakUser, ImageSettingsV4Request imageSettings, String region, String blueprintName,
+            CloudPlatformVariant cloudPlatform, Architecture architecture) {
+        String platform = cloudPlatform.getPlatform().getValue();
         Blueprint blueprint = determineBlueprint(workspaceId, blueprintName);
         User user = userService.getOrCreate(cloudbreakUser);
         try {
-            StatedImage statedImage =
-                    imageService.determineImageFromCatalog(workspaceId, imageSettings, platform, null, blueprint, false, false, user, image -> true);
+            StatedImage statedImage = imageService.determineImageFromCatalog(
+                    workspaceId, imageSettings, architecture, platform, null, blueprint, false, false, user, image -> true);
             LOGGER.debug("Determined stated image from catalog: {}", statedImage);
             ImageCatalogPlatform imageCatalogPlatform =
-                    platformStringTransformer.getPlatformStringForImageCatalog(cloudPlatform.getPlatform().getValue(), cloudPlatform.getVariant().getValue());
+                    platformStringTransformer.getPlatformStringForImageCatalog(platform, cloudPlatform.getVariant().getValue());
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage = statedImage.getImage();
             String imageName = imageService.determineImageName(platform, imageCatalogPlatform, region, catalogImage);
             LOGGER.debug("Recommended image name: {}", imageName);

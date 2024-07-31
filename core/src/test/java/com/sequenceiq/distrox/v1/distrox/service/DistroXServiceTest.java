@@ -371,38 +371,6 @@ class DistroXServiceTest {
     }
 
     @Test
-    void testIfImageIdAndArchitectureBothSet() {
-        String envName = "someAwesomeEnvironment";
-        DistroXV1Request request = new DistroXV1Request();
-        request.setEnvironmentName(envName);
-        DistroXImageV1Request imageRequest = new DistroXImageV1Request();
-        imageRequest.setId("id");
-        imageRequest.setArchitecture("arm64");
-        request.setImage(imageRequest);
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        envResponse.setEnvironmentStatus(AVAILABLE);
-        envResponse.setCrn("crn");
-        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
-        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
-        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
-        Workspace workspace = new Workspace();
-        Tenant tenant = new Tenant();
-        tenant.setName("test");
-        workspace.setTenant(tenant);
-        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
-                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
-
-        assertThatThrownBy(() -> underTest.post(request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Image request can not have both image id and architecture parameters set.");
-
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
-    }
-
-    @Test
     void testIfImageOsIsNotSupported() {
         String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Strings;
 
 public enum Architecture {
@@ -31,6 +32,7 @@ public enum Architecture {
         return valueOf(architecture.toUpperCase());
     }
 
+    @JsonValue
     public String getName() {
         return name().toLowerCase();
     }

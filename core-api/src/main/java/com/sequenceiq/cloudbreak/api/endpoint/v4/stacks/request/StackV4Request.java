@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.DatalakeCrn;
@@ -110,6 +112,9 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     @Schema(description = StackModelDescription.MULTIPLE_AVAILABILITY_ZONES)
     private boolean enableMultiAz;
+
+    @Schema(description = ModelDescriptions.ARCHITECTURE)
+    private Architecture architecture;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -281,5 +286,13 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setEnableMultiAz(boolean enableMultiAz) {
         this.enableMultiAz = enableMultiAz;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
     }
 }

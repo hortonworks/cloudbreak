@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests;
 
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.ARCHITECTURE;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.ENVIRONMENT_CRN;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.IMAGE_SETTINGS;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.REGION;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +33,9 @@ public class ImageRecommendationV4Request {
     @NotNull
     @Schema(description = REGION)
     private String region;
+
+    @Schema(description = ARCHITECTURE)
+    private Architecture architecture;
 
     @Schema(description = IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
@@ -67,6 +72,14 @@ public class ImageRecommendationV4Request {
         this.region = region;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+    }
+
     public void setImage(ImageSettingsV4Request image) {
         this.image = image;
     }
@@ -82,6 +95,7 @@ public class ImageRecommendationV4Request {
                 ", blueprintName='" + blueprintName + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", region='" + region + '\'' +
+                ", architecture='" + architecture + '\'' +
                 ", image=" + image +
                 '}';
     }

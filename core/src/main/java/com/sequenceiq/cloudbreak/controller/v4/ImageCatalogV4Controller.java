@@ -312,13 +312,10 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @AccountIdNotNeeded
     @DisableCheckPermissions
     public ImageRecommendationV4Response validateRecommendedImageWithProvider(Long workspaceId, ImageRecommendationV4Request request) {
-        RecommendedImageValidator.ValidationResult validationResult = recommendedImageValidator.validateRecommendedImage(workspaceId,
+        RecommendedImageValidator.ValidationResult validationResult = recommendedImageValidator.validateRecommendedImage(
+                workspaceId,
                 restRequestThreadLocalService.getCloudbreakUser(),
-                request.getImage(),
-                request.getEnvironmentCrn(),
-                request.getRegion(),
-                request.getPlatform(),
-                request.getBlueprintName());
+                request);
         ImageRecommendationV4Response response = new ImageRecommendationV4Response();
         response.setHasValidationError(StringUtils.hasText(validationResult.getErrorMsg()));
         Stream.of(validationResult.getErrorMsg(), validationResult.getWarningMsg())

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.Network
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -151,6 +152,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     @Schema(description = StackModelDescription.SUPPORTED_IMDS_VERSION)
     private String supportedImdsVersion;
+
+    @Schema(description = ModelDescriptions.ARCHITECTURE)
+    private Architecture architecture;
 
     private boolean enableMultiAz;
 
@@ -468,6 +472,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
+    public Architecture getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+    }
+
     public String getRegion() {
         return region;
     }
@@ -517,6 +529,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", multiAz=" + enableMultiAz +
                 ", resources=" + resources +
                 ", supportedImdsVersion=" + supportedImdsVersion +
+                ", architecture=" + architecture +
                 '}';
     }
 }

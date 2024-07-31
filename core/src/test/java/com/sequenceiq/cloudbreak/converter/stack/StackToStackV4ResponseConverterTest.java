@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -297,6 +298,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
         stack.setDatabase(database);
         stack.setSupportedImdsVersion("v2");
+        stack.setArchitecture(Architecture.X86_64);
         return stack;
     }
 }

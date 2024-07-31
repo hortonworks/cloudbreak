@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V1;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -138,7 +136,7 @@ public class ImageService {
 
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
-    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettings, String platformString,
+    public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettings, Architecture architecture, String platformString,
             String variant, Blueprint blueprint, boolean useBaseImage, boolean baseImageEnabled,
             User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imagePredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
@@ -151,15 +149,13 @@ public class ImageService {
                 imageSettings.setCatalog(CDP_DEFAULT_CATALOG_NAME);
             }
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
-            validateSpecifiedImage(workspaceId, user, image, clusterVersion, platform, baseImageEnabled, imageSettings.getArchitecture());
+            validateSpecifiedImage(workspaceId, user, image, clusterVersion, platform, baseImageEnabled, architecture);
             return image;
         } else if (useBaseImage && !baseImageEnabled) {
             throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
         }
 
         boolean selectBaseImage = baseImageEnabled && useBaseImage;
-        Architecture architecture = getIfNotNull(imageSettings, ImageSettingsV4Request::getArchitecture);
-        validateArchitectureEntitlement(user, architecture);
         ImageFilter imageFilter = ImageFilter.builder()
                 .withImageCatalog(getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user))
                 .withPlatforms(Set.of(platform))
@@ -202,17 +198,13 @@ public class ImageService {
 
     private void validateArchitecture(User user, StatedImage image, Architecture requestedArchitecture) throws CloudbreakImageCatalogException {
         Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
-        validateArchitectureEntitlement(user, imageArchitecture);
+        if (imageArchitecture == Architecture.ARM64 && !entitlementService.isDataHubArmEnabled(Crn.safeFromString(user.getUserCrn()).getAccountId())) {
+            throw new CloudbreakImageCatalogException(String.format("The selected image's architecture (%s) is not enabled in your account",
+                    Architecture.ARM64.getName()));
+        }
         if (requestedArchitecture != null && imageArchitecture != requestedArchitecture) {
             throw new CloudbreakImageCatalogException(String.format("The selected image's architecture (%s) is not matching requested architecture (%s)",
                     imageArchitecture.getName(), requestedArchitecture.getName()));
-        }
-    }
-
-    private void validateArchitectureEntitlement(User user, Architecture architecture) {
-        if (architecture == Architecture.ARM64 && !entitlementService.isDataHubArmEnabled(Crn.safeFromString(user.getUserCrn()).getAccountId())) {
-            throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
-                    Architecture.ARM64.getName()));
         }
     }
 

@@ -258,7 +258,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
-                        "ccmV2AgentCrn", "stackVersion", "originalName", "javaVersion", "creatorClient", "supportedImdsVersion"));
+                        "ccmV2AgentCrn", "stackVersion", "originalName", "javaVersion", "creatorClient", "supportedImdsVersion", "architecture"));
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
         assertTrue(stack.getCluster().isAutoTlsEnabled());

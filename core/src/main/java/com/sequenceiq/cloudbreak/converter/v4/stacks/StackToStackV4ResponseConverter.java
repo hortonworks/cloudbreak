@@ -183,6 +183,7 @@ public class StackToStackV4ResponseConverter {
             response.setEnableLoadBalancer(true);
         }
         response.setSupportedImdsVersion(stack.getSupportedImdsVersion());
+        response.setArchitecture(stack.getStack().getArchitecture());
         response.setRegion(stack.getRegion());
         return response;
     }

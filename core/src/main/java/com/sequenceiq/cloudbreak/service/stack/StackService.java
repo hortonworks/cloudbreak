@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -672,10 +673,13 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
         try {
             Set<Component> components = imageService.create(stack, imgFromCatalog);
-            Stack savedStackWithRuntimeAndDbVersion = setRuntimeAndDbVersion(savedStack, components, imgFromCatalog.getImage().getOs(), databaseRequest);
-            measure(() -> addTemplateForStack(savedStackWithRuntimeAndDbVersion, connector.waitGetTemplate(templateRequest)),
+            setArchitecture(stack, imgFromCatalog);
+            setRuntime(stack, components);
+            setDbVersion(stack, imgFromCatalog, databaseRequest);
+            Stack savedStackWithAllDetails = stackRepository.save(stack);
+            measure(() -> addTemplateForStack(savedStackWithAllDetails, connector.waitGetTemplate(templateRequest)),
                     LOGGER, "Save cluster template took {} ms for stack {}", stackName);
-            return savedStackWithRuntimeAndDbVersion;
+            return savedStackWithAllDetails;
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -685,19 +689,27 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 
-    private Stack setRuntimeAndDbVersion(Stack stack, Set<Component> components, String os, DatabaseRequest databaseRequest) {
+    private void setArchitecture(Stack stack, StatedImage imgFromCatalog) {
+        Architecture architecture = Architecture.fromStringWithFallback(imgFromCatalog.getImage().getArchitecture());
+        stack.setArchitecture(architecture);
+    }
+
+    private void setRuntime(Stack stack, Set<Component> components) {
         String stackVersion = calculateStackVersion(components);
         Optional.ofNullable(stackVersion).ifPresent(stack::setStackVersion);
+    }
+
+    private void setDbVersion(Stack stack, StatedImage imgFromCatalog, DatabaseRequest databaseRequest) {
         boolean flexibleServerEntitled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         boolean flexibleServerEnabled = flexibleServerEntitled && !isSingleServerRequested(stack, flexibleServerEntitled);
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
-                stackVersion, os, stack.getExternalDatabaseEngineVersion(), CloudPlatform.valueOf(stack.getCloudPlatform()),
+                stack.getStackVersion(), imgFromCatalog.getImage().getOs(), stack.getExternalDatabaseEngineVersion(),
+                CloudPlatform.valueOf(stack.getCloudPlatform()),
                 !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded(),
                 flexibleServerEnabled);
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }
-        return stackRepository.save(stack);
     }
 
     private boolean isSingleServerRequested(Stack stack, boolean flexibleServerEntitled) {

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
@@ -451,6 +452,20 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         StackV4Request result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
 
         assertThat(result.getJavaVersion()).isEqualTo(11);
+    }
+
+    @Test
+    void testArchitecture() {
+        when(environmentClientService.getByName(anyString())).thenReturn(createAwsEnvironment());
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
+
+        DistroXV1Request source = new DistroXV1Request();
+        source.setEnvironmentName("env");
+        source.setArchitecture(Architecture.ARM64);
+
+        StackV4Request result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+
+        assertThat(result.getArchitecture()).isEqualTo(Architecture.ARM64);
     }
 
     private void checkTagsV4WithV1(TagsV4Request input, TagsV1Request result) {

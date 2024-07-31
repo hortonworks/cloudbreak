@@ -107,9 +107,6 @@ public class DistroXService {
                 if (StringUtils.isNotBlank(imageRequest.getOs())) {
                     throw new BadRequestException("Image request can not have both image id and os parameters set.");
                 }
-                if (StringUtils.isNotBlank(imageRequest.getArchitecture())) {
-                    throw new BadRequestException("Image request can not have both image id and architecture parameters set.");
-                }
             }
         }
     }

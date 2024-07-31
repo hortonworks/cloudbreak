@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -324,6 +325,7 @@ class StackServiceTest {
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
         Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
@@ -353,6 +355,7 @@ class StackServiceTest {
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
         Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
@@ -387,6 +390,7 @@ class StackServiceTest {
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
         Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
@@ -421,6 +425,7 @@ class StackServiceTest {
         when(image.getOs()).thenReturn(os);
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct();
         String stackVersion = "7.2.16";
+        when(stack.getStackVersion()).thenReturn(stackVersion);
         cdhProduct.setVersion(stackVersion);
         Component cdhComponent = new Component(CDH_PRODUCT_DETAILS, CDH_PRODUCT_DETAILS.name(), new Json(cdhProduct), stack);
         when(imageService.create(stack, statedImage)).thenReturn(Set.of(cdhComponent));
@@ -531,6 +536,21 @@ class StackServiceTest {
         verify(stack, never()).setPlatformVariant(anyString());
         verify(stack).populateStackIdForComponents();
         verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, fipsEnabledExpected);
+    }
+
+    @Test
+    void testCreateSetsArchitectureFromImage() {
+        when(image.getArchitecture()).thenReturn(Architecture.ARM64.getName());
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        when(stack.getPlatformVariant()).thenReturn(VARIANT_VALUE);
+        Database database = new Database();
+        database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
+        when(stack.getDatabase()).thenReturn(database);
+
+        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.create(stack, statedImage, user, workspace, null));
+
+        verify(stack).setArchitecture(Architecture.ARM64);
     }
 
     @Test

@@ -18,8 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
-import com.sequenceiq.cloudbreak.domain.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ClusterTemplateV4TypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.DatalakeRequiredConverter;
 import com.sequenceiq.cloudbreak.domain.converter.FeatureStateConverter;
@@ -72,9 +70,6 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     private String clouderaRuntimeVersion;
 
     private boolean enableLoadBalancer;
-
-    @Convert(converter = ArchitectureConverter.class)
-    private Architecture architecture;
 
     private Long created = System.currentTimeMillis();
 
@@ -214,11 +209,4 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
         this.enableLoadBalancer = enableLoadBalancer;
     }
 
-    public Architecture getArchitecture() {
-        return architecture;
-    }
-
-    public void setArchitecture(Architecture architecture) {
-        this.architecture = architecture;
-    }
 }

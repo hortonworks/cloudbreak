@@ -58,12 +58,12 @@ public class ImageCatalogV4ControllerTest {
     void testValidateRecommendedImageWithProvider() {
         Long workspaceId = 1L;
         ImageRecommendationV4Request request = new ImageRecommendationV4Request();
-        when(recommendedImageValidator.validateRecommendedImage(anyLong(), any(), any(), any(), any(), any(), any()))
+        when(recommendedImageValidator.validateRecommendedImage(anyLong(), any(), any()))
                 .thenReturn(new RecommendedImageValidator.ValidationResult());
 
         ImageRecommendationV4Response response = victim.validateRecommendedImageWithProvider(workspaceId, request);
 
-        verify(recommendedImageValidator).validateRecommendedImage(eq(workspaceId), any(), any(), any(), any(), any(), any());
+        verify(recommendedImageValidator).validateRecommendedImage(eq(workspaceId), any(), any());
         verify(restRequestThreadLocalService).getCloudbreakUser();
 
         assertNotNull(response);
@@ -77,12 +77,12 @@ public class ImageCatalogV4ControllerTest {
         ImageRecommendationV4Request request = new ImageRecommendationV4Request();
         RecommendedImageValidator.ValidationResult validationResult = new RecommendedImageValidator.ValidationResult();
         validationResult.setErrorMsg("Validation error message");
-        when(recommendedImageValidator.validateRecommendedImage(anyLong(), any(), any(), any(), any(), any(), any()))
+        when(recommendedImageValidator.validateRecommendedImage(anyLong(), any(), any()))
                 .thenReturn(validationResult);
 
         ImageRecommendationV4Response response = victim.validateRecommendedImageWithProvider(workspaceId, request);
 
-        verify(recommendedImageValidator).validateRecommendedImage(eq(workspaceId), any(), any(), any(), any(), any(), any());
+        verify(recommendedImageValidator).validateRecommendedImage(eq(workspaceId), any(), any());
         verify(restRequestThreadLocalService).getCloudbreakUser();
 
         assertNotNull(response);

@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageRecommendationV4Request;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -48,8 +48,8 @@ public class RecommendedImageValidator {
     @Inject
     private RecommendImageService recommendImageService;
 
-    public ValidationResult validateRecommendedImage(Long workspaceId, CloudbreakUser cloudbreakUser, ImageSettingsV4Request imageSettings,
-            String environmentCrn, String region, String platform, String blueprintName) {
+    public ValidationResult validateRecommendedImage(Long workspaceId, CloudbreakUser cloudbreakUser, ImageRecommendationV4Request request) {
+        String platform = request.getPlatform();
         if (!CloudPlatform.AZURE.name().equals(platform)) {
             LOGGER.debug("Platform is not Azure. Nothing to validate.");
             return new ValidationResult();
@@ -57,16 +57,17 @@ public class RecommendedImageValidator {
         CloudPlatformVariant cloudPlatform = new CloudPlatformVariant(
                 Platform.platform(platform.toUpperCase()),
                 Variant.variant(platform.toUpperCase()));
-        Image image = recommendImageService.recommendImage(workspaceId, cloudbreakUser, imageSettings, region, platform, blueprintName, cloudPlatform);
+        Image image = recommendImageService.recommendImage(
+                workspaceId, cloudbreakUser, request.getImage(), request.getRegion(), request.getBlueprintName(), cloudPlatform, request.getArchitecture());
         LOGGER.debug("Recommended image to validate: {}", image);
 
-        Boolean accepted = azureMarketplaceTermsClientService.getAccepted(environmentCrn);
+        Boolean accepted = azureMarketplaceTermsClientService.getAccepted(request.getEnvironmentCrn());
         LOGGER.debug("Azure Marketplace automatic terms acceptance policy: {}", accepted);
         Map<String, String> parameters = Map.of(ACCEPTANCE_POLICY_PARAMETER, accepted.toString());
         CloudStack cloudStack = new CloudStack(List.of(), null, image, parameters, Map.of(), null, null, null, null, null, null, null, null);
 
         CloudConnector connector = cloudPlatformConnectors.get(cloudPlatform);
-        AuthenticatedContext ac = getAuthenticatedContext(workspaceId, environmentCrn, cloudPlatform, connector);
+        AuthenticatedContext ac = getAuthenticatedContext(workspaceId, request.getEnvironmentCrn(), cloudPlatform, connector);
         try {
             for (Validator validator : connector.validators(ValidatorType.IMAGE)) {
                 validator.validate(ac, cloudStack);
