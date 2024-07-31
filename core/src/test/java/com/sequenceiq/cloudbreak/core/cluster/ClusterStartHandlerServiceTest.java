@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.RdsSettingsMigrationService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
@@ -42,8 +43,6 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterStartHandlerServiceTest {
-
-    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:datalake:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
 
     @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
@@ -101,7 +100,7 @@ class ClusterStartHandlerServiceTest {
     @Test
     void testRefreshClusterOnStart() throws Exception {
         // GIVEN
-        SdxBasicView sdxBasicView = SdxBasicView.builder().withCrn(DATALAKE_CRN).build();
+        SdxBasicView sdxBasicView = SdxBasicView.builder().withPlatform(TargetPlatform.PAAS).build();
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(sdxBasicView));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(true);
         // WHEN
@@ -114,7 +113,7 @@ class ClusterStartHandlerServiceTest {
     void testStartClusterWithSharedRdsConfigRefresh() throws Exception {
         // GIVEN
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
-                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
+                Optional.of(SdxBasicView.builder().withPlatform(TargetPlatform.PAAS).build()));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         Set<RDSConfig> rdsConfigs = Set.of(new RDSConfig());
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
@@ -132,7 +131,7 @@ class ClusterStartHandlerServiceTest {
     void testStartClusterWithSharedRdsConfigRefreshAndException() throws Exception {
         // GIVEN
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
-                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
+                Optional.of(SdxBasicView.builder().withPlatform(TargetPlatform.PAAS).build()));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         Set<RDSConfig> rdsConfigs = Set.of(new RDSConfig());
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
@@ -151,7 +150,7 @@ class ClusterStartHandlerServiceTest {
     void testStartClusterWithoutSharedRdsConfigRefresh() throws Exception {
         // GIVEN
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
-                Optional.of(SdxBasicView.builder().withCrn(DATALAKE_CRN).build()));
+                Optional.of(SdxBasicView.builder().withPlatform(TargetPlatform.PAAS).build()));
         when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(Set.of());
         // WHEN

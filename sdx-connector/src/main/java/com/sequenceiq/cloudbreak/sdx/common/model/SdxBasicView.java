@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.sdx.common.model;
 
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+
 public record SdxBasicView(
         String name,
         String crn,
@@ -9,7 +11,8 @@ public record SdxBasicView(
         boolean razEnabled,
         Long created,
         String dbServerCrn,
-        Optional<SdxFileSystemView> fileSystemView) {
+        Optional<SdxFileSystemView> fileSystemView,
+        TargetPlatform platform) {
 
     public static Builder builder() {
         return new Builder();
@@ -29,6 +32,8 @@ public record SdxBasicView(
         private String dbServerCrn;
 
         private Optional<SdxFileSystemView> fileSystemView = Optional.empty();
+
+        private TargetPlatform platform;
 
         private Builder() {
         }
@@ -78,9 +83,14 @@ public record SdxBasicView(
             return this;
         }
 
+        public Builder withPlatform(TargetPlatform platform) {
+            this.platform = platform;
+            return this;
+        }
+
         public SdxBasicView build() {
             return new SdxBasicView(this.name, this.crn, this.runtime, this.razEnabled, this.created,
-                    this.dbServerCrn, this.fileSystemView);
+                    this.dbServerCrn, this.fileSystemView, this.platform);
         }
     }
 }

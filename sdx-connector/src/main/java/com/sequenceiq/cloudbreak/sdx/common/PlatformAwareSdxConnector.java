@@ -117,7 +117,8 @@ public class PlatformAwareSdxConnector {
                 || CrnResourceDescriptor.DATAHUB.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.PAAS;
         }
-        throw new IllegalStateException("CRNs cannot be recognized based on the list.");
+        LOGGER.error("Could not decide target SDX platform based on SDX CRN list [{}].", Joiner.on(",").join(sdxCrns));
+        throw new IllegalStateException("Invalid Data Lake CRN has been found, please contact Cloudera support!");
     }
 
     private AttemptResult<Object> getAttemptResultForPolling(Map<String, PollingResult> pollingResult, String failedPollingErrorMessageTemplate) {
@@ -128,7 +129,7 @@ public class PlatformAwareSdxConnector {
                     .collect(Collectors.toSet());
             if (!failedSdxCrns.isEmpty()) {
                 String errorMessage = String.format(failedPollingErrorMessageTemplate, Joiner.on(",").join(failedSdxCrns));
-                LOGGER.info(errorMessage);
+                LOGGER.error(errorMessage);
                 return AttemptResults.breakFor(new IllegalStateException(errorMessage));
             }
             return AttemptResults.justContinue();
