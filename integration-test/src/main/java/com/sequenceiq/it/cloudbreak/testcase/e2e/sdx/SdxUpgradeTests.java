@@ -21,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -67,7 +66,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
                 .withCloudStorage()
                 .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
-        setupRuntimeParameters(testContext, sdxTestDto);
+        setupSourceImage(testContext, sdxTestDto);
         sdxTestDto
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -103,25 +102,10 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         return sdxDatabaseRequest;
     }
 
-    private void setupRuntimeParameters(TestContext testContext, SdxTestDto sdxTestDto) {
+    private void setupSourceImage(TestContext testContext, SdxTestDto sdxTestDto) {
         if (imageValidatorE2ETestUtil.isImageValidation()) {
-            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).get();
-            String imageUnderValidationVersion = imageUnderValidation.getVersion();
-            if (imageValidatorE2ETestUtil.shouldValidateWithSameRuntime(testContext)) {
-                ImageV4Response latestImageWithSameRuntime = imageValidatorE2ETestUtil.getLatestImageWithSameRuntimeAsImageUnderValidation(testContext);
-                if (latestImageWithSameRuntime == null) {
-                    throw new TestFailException("No other image found with version " + imageUnderValidationVersion);
-                }
-                sdxTestDto.withImage(imageValidatorE2ETestUtil.getImageCatalogName(), latestImageWithSameRuntime.getUuid());
-            } else {
-                String runtimeVersion = commonClusterManagerProperties.getUpgrade().getMatrix().get(imageUnderValidationVersion);
-                if (runtimeVersion == null) {
-                    throw new TestFailException("Upgrade matrix entry is not defined for image version " + imageUnderValidationVersion);
-                }
-                sdxTestDto
-                        .withOs(imageUnderValidation.getOs())
-                        .withRuntimeVersion(runtimeVersion);
-            }
+            ImageV4Response upgradeSourceImage = imageValidatorE2ETestUtil.getUpgradeSourceImage(testContext);
+            sdxTestDto.withImage(imageValidatorE2ETestUtil.getImageCatalogName(), upgradeSourceImage.getUuid());
         } else {
             sdxTestDto.withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion());
         }

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -57,6 +58,9 @@ public class ImageValidatorE2ETestUtil {
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
@@ -182,22 +186,18 @@ public class ImageValidatorE2ETestUtil {
         }
     }
 
-    public boolean shouldValidateWithSameRuntime(TestContext testContext) {
-        ImageV4Response imageUnderValidation = getImage(testContext).get();
-        return isRhel8InitialVersion(imageUnderValidation);
-    }
-
-    private boolean isRhel8InitialVersion(ImageV4Response imageUnderValidation) {
-        return OsType.RHEL8.getOs().equalsIgnoreCase(imageUnderValidation.getOs())
-                && "7.2.17".equals(imageUnderValidation.getVersion());
-    }
-
-    public ImageV4Response getLatestImageWithSameRuntimeAsImageUnderValidation(TestContext testContext) {
+    public ImageV4Response getUpgradeSourceImage(TestContext testContext) {
         List<ImageV4Response> images = getImages(testContext).getCdhImages();
         ImageV4Response imageUnderValidation = images.stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
                 .findFirst()
                 .orElseThrow();
+        String runtimeVersion = shouldValidateWithSameRuntime(imageUnderValidation)
+                ? imageUnderValidation.getVersion()
+                : commonClusterManagerProperties.getUpgrade().getMatrix().get(imageUnderValidation.getVersion());
+        if (runtimeVersion == null) {
+            throw new TestFailException("Upgrade matrix entry is not defined for image version " + imageUnderValidation.getVersion());
+        }
         Architecture architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
         int cmBuildNumber = Integer.parseInt(imageUnderValidation.getCmBuildNumber());
         int stackBuildNumber = Integer.parseInt(imageUnderValidation.getStackDetails().getStackBuildNumber());
@@ -206,11 +206,20 @@ public class ImageValidatorE2ETestUtil {
                 .filter(img -> Objects.equals(imageUnderValidation.getImageSetsByProvider().keySet(), img.getImageSetsByProvider().keySet()))
                 .filter(img -> Objects.equals(imageUnderValidation.getOs(), img.getOs()))
                 .filter(img -> Objects.equals(architecture, Architecture.fromStringWithFallback(img.getArchitecture())))
-                .filter(img -> Objects.equals(imageUnderValidation.getVersion(), img.getVersion()))
+                .filter(img -> Objects.equals(runtimeVersion, img.getVersion()))
                 .filter(img -> cmBuildNumber > Integer.parseInt(img.getCmBuildNumber()))
                 .filter(img -> stackBuildNumber > Integer.parseInt(img.getStackDetails().getStackBuildNumber()))
                 .max(Comparator.comparing(ImageV4Response::getCreated))
-                .orElse(null);
+                .orElseThrow(() -> new TestFailException("No upgrade source image found for " + imageUnderValidation.getUuid()));
+    }
+
+    private boolean shouldValidateWithSameRuntime(ImageV4Response imageUnderValidation) {
+        return isRhel8InitialVersion(imageUnderValidation);
+    }
+
+    private boolean isRhel8InitialVersion(ImageV4Response imageUnderValidation) {
+        return OsType.RHEL8.getOs().equalsIgnoreCase(imageUnderValidation.getOs())
+                && "7.2.17".equals(imageUnderValidation.getVersion());
     }
 
     public List<XmlSuite> getSuites() {
