@@ -152,6 +152,7 @@ public class FlowLogDBService implements FlowLogService {
             });
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
             flowLog.setReason(reason);
+            flowLog.setEndTime(flowLog.getCreated());
             LOGGER.info("Persisting final FlowLog: {}", flowLog);
             return flowLogRepository.save(flowLog);
         });

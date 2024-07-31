@@ -1,11 +1,13 @@
 package com.sequenceiq.flow.service.flowlog;
 
+import static com.sequenceiq.flow.core.FlowConstants.CANCELLED_STATE;
 import static com.sequenceiq.flow.core.FlowConstants.FINISHED_STATE;
 import static com.sequenceiq.flow.core.FlowConstants.TERMINATED_STATE;
 import static com.sequenceiq.flow.domain.ClassValue.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -298,6 +300,8 @@ class FlowLogDBServiceTest {
         assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
         assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
         assertThat(savedFlowLog.getVariablesJackson()).isNull();
+        assertTrue(savedFlowLog.getCreated() > 0L);
+        assertEquals(savedFlowLog.getCreated(), savedFlowLog.getEndTime());
     }
 
     @Test
@@ -316,6 +320,29 @@ class FlowLogDBServiceTest {
         assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
         assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
         assertThat(savedFlowLog.getVariablesJackson()).isEqualTo(TypedJsonUtil.writeValueAsStringSilent(params));
+        assertTrue(savedFlowLog.getCreated() > 0L);
+        assertEquals(savedFlowLog.getCreated(), savedFlowLog.getEndTime());
+    }
+
+    @Test
+    void testCancel() throws TransactionExecutionException {
+        prepareFinalization();
+        underTest.cancel(ID, FLOW_ID);
+
+        verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
+        verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL, 123456789L, "Cancelled");
+        verify(flowLogRepository).save(savedFlowLogCaptor.capture());
+        FlowLog savedFlowLog = savedFlowLogCaptor.getValue();
+        assertThat(savedFlowLog.getResourceId()).isEqualTo(ID);
+        assertThat(savedFlowLog.getFlowId()).isEqualTo(FLOW_ID);
+        assertThat(savedFlowLog.getCurrentState()).isEqualTo(CANCELLED_STATE);
+        assertThat(savedFlowLog.getFinalized()).isTrue();
+        assertThat(savedFlowLog.getStateStatus()).isEqualTo(StateStatus.SUCCESSFUL);
+        assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
+        assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
+        assertThat(savedFlowLog.getVariablesJackson()).isNull();
+        assertTrue(savedFlowLog.getCreated() > 0L);
+        assertEquals(savedFlowLog.getCreated(), savedFlowLog.getEndTime());
     }
 
     private void prepareFinalization() throws TransactionExecutionException {
