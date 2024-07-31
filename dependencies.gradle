@@ -72,7 +72,7 @@ ext {
   // Serialization
   accessorSmartVersion = '2.4.7'
   gsonVersion = '2.8.9'
-  jacksonVersion = '2.17.1'
+  jacksonVersion = '2.17.2'
   jsonSmartVersion = '2.4.9'
   snakeYamlVersion = '2.2'
   xerces = '2.12.2'
