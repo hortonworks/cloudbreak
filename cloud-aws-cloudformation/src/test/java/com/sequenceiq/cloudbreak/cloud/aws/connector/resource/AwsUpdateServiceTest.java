@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchConfigurationUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -183,9 +182,7 @@ class AwsUpdateServiceTest {
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
         when(instanceTemplate.getFlavor()).thenReturn("m42.xxxl");
         when(gatewayGroup.getRootVolumeSize()).thenReturn(100);
-        CloudInstance cloudInstance = mock(CloudInstance.class);
-        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
-        when(gatewayGroup.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
+        when(gatewayGroup.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
 
@@ -251,9 +248,7 @@ class AwsUpdateServiceTest {
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
         when(instanceTemplate.getFlavor()).thenReturn("m42.xxxl");
         when(gatewayGroup.getRootVolumeSize()).thenReturn(100);
-        CloudInstance cloudInstance = mock(CloudInstance.class);
-        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
-        when(gatewayGroup.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
+        when(gatewayGroup.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
 
@@ -306,9 +301,7 @@ class AwsUpdateServiceTest {
         InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
         when(instanceTemplate.getFlavor()).thenReturn("m42.xxxl");
         when(gatewayGroup.getRootVolumeSize()).thenReturn(100);
-        CloudInstance cloudInstance = mock(CloudInstance.class);
-        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
-        when(gatewayGroup.getReferenceInstanceConfiguration()).thenReturn(cloudInstance);
+        when(gatewayGroup.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
         when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
         when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchConfiguration");
 

@@ -357,7 +357,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    public void testConvertWhenInstanceGroupContainsTemplateAndNodeCountIsNotZeroThenUnableToObtainSkeletonSinceNoSkeletonAndInstance() {
+    public void testConvertWhenInstanceGroupContainsTemplateAndNodeCountIsNotZeroThenObtainSkeleton() {
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         InstanceMetadataView instanceMetadata1 = mock(InstanceMetadataView.class);
@@ -379,8 +379,7 @@ public class StackToCloudStackConverterTest {
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> result.getGroups().get(0).getReferenceInstanceConfiguration());
-        assertThat(runtimeException).hasMessage("There is no skeleton and instance available for Group -> name:" + groupName);
+        assertEquals(groupName, result.getGroups().get(0).getReferenceInstanceConfiguration().getTemplate().getGroupName());
     }
 
     @Test
