@@ -32,7 +32,7 @@ public class ExternalizedComputeFlowService {
             throw new BadRequestException("Create field is disabled in externalized compute cluster request!");
         }
         ValidationResult validationResult = environmentValidatorService.validateExternalizedComputeCluster(externalizedComputeClusterDto,
-                environment.getAccountId());
+                environment.getAccountId(), environment.getNetwork().getSubnetMetas().keySet());
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
@@ -50,7 +50,7 @@ public class ExternalizedComputeFlowService {
             throw new BadRequestException("Create field is disabled in externalized compute cluster request!");
         }
         ValidationResult validationResult = environmentValidatorService.validateExternalizedComputeCluster(externalizedComputeClusterDto,
-                environment.getAccountId());
+                environment.getAccountId(), environment.getNetwork().getSubnetMetas().keySet());
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }

@@ -1,5 +1,7 @@
 package com.sequenceiq.externalizedcompute.service;
 
+import java.util.Set;
+
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,12 +69,18 @@ public class ExternalizedComputeClusterCreateService {
     private CreateClusterRequest setupLiftieCluster(ExternalizedComputeCluster externalizedComputeCluster) {
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
         CreateClusterRequest.Builder createClusterBuilder = CreateClusterRequest.newBuilder();
+        Set<String> subnets;
+        if (environment.getExternalizedComputeCluster() != null && environment.getExternalizedComputeCluster().getWorkerNodeSubnetIds() != null) {
+            subnets = environment.getExternalizedComputeCluster().getWorkerNodeSubnetIds();
+        } else {
+            subnets = environment.getNetwork().getLiftieSubnets().keySet();
+        }
         createClusterBuilder.setEnvironment(externalizedComputeCluster.getEnvironmentCrn())
                 .setName(externalizedComputeCluster.getName())
                 .setDescription("Common compute cluster")
                 .putAllTags(TagUtil.getTags(externalizedComputeCluster.getTags()))
                 .setIsDefault(externalizedComputeCluster.isDefaultCluster())
-                .getNetworkBuilder().addAllSubnets(environment.getNetwork().getLiftieSubnets().keySet());
+                .getNetworkBuilder().addAllSubnets(subnets);
         return createClusterBuilder.build();
     }
 }

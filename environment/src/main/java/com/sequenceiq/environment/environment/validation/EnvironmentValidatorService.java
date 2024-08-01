@@ -327,9 +327,11 @@ public class EnvironmentValidatorService {
         return encryptionKeyValidator.validateEncryptionKey(encryptionKey);
     }
 
-    public ValidationResult validateExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster, String accountId) {
+    public ValidationResult validateExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster, String accountId,
+            Set<String> environmentSubnets) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder().prefix("Default externalized compute cluster validation failed");
         if (externalizedComputeCluster.isCreate()) {
+            validateWorkerNodeSubnets(externalizedComputeCluster, environmentSubnets, resultBuilder);
             if (externalizedComputeCluster.isPrivateCluster() && !externalizedComputeCluster.getKubeApiAuthorizedIpRanges().isEmpty()) {
                 resultBuilder.error("The 'kubeApiAuthorizedIpRanges' parameter cannot be specified when 'privateCluster' is enabled.");
             }
@@ -344,5 +346,16 @@ public class EnvironmentValidatorService {
             }
         }
         return resultBuilder.build();
+    }
+
+    private void validateWorkerNodeSubnets(ExternalizedComputeClusterDto externalizedComputeCluster, Set<String> environmentSubnets,
+            ValidationResultBuilder resultBuilder) {
+        if (externalizedComputeCluster.getWorkerNodeSubnetIds() != null) {
+            for (String workerNodeSubnet : externalizedComputeCluster.getWorkerNodeSubnetIds()) {
+                if (!environmentSubnets.contains(workerNodeSubnet)) {
+                    resultBuilder.error("Specified compute cluster subnet '" + workerNodeSubnet + "' does not exist in the environment");
+                }
+            }
+        }
     }
 }

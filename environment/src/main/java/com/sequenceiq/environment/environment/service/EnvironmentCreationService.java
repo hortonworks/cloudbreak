@@ -2,8 +2,10 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -211,8 +213,12 @@ public class EnvironmentCreationService {
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
         if (creationDto.getExternalizedComputeCluster() != null) {
+            Set<String> environmentSubnets = Collections.emptySet();
+            if (creationDto.getNetwork() != null) {
+                environmentSubnets = creationDto.getNetwork().getSubnetMetas().keySet();
+            }
             validationBuilder.merge(validatorService.validateExternalizedComputeCluster(creationDto.getExternalizedComputeCluster(),
-                    creationDto.getAccountId()));
+                    creationDto.getAccountId(), environmentSubnets));
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {

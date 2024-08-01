@@ -514,7 +514,7 @@ class EnvironmentValidatorServiceTest {
     @Test
     void testValidateExternalizedComputeClusterWhenPrivateClusterEnabledAndKubeApiAuthorizedIpRangesSpecified() {
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(true).withKubeApiAuthorizedIpRanges(Set.of("1.1.1.1/1")).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(true).withKubeApiAuthorizedIpRanges(Set.of("1.1.1.1/1")).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertTrue(validationResult.hasError());
         assertThat(validationResult.getErrors()).hasSize(1);
         assertThat(validationResult.getErrors())
@@ -524,7 +524,7 @@ class EnvironmentValidatorServiceTest {
     @Test
     void testValidateExternalizedComputeClusterWhenPrivateClusterDisabledAndKubeApiAuthorizedIpRangesNotSpecifiedAndNotInternal() {
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(false).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(false).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertTrue(validationResult.hasError());
         assertThat(validationResult.getErrors()).hasSize(1);
         assertThat(validationResult.getErrors())
@@ -535,14 +535,14 @@ class EnvironmentValidatorServiceTest {
     void testValidateExternalizedComputeClusterWhenPrivateClusterDisabledAndKubeApiAuthorizedIpRangesNotSpecifiedAndInternal() {
         when(entitlementService.internalTenant(eq(ACCOUNT))).thenReturn(true);
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(false).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(false).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertFalse(validationResult.hasError());
     }
 
     @Test
     void testValidateExternalizedComputeClusterWhenKubeApiAuthorizedIpRangesContainsDisallowedCidrAndNotInternalTenant() {
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0")).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0")).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertTrue(validationResult.hasError());
         assertThat(validationResult.getErrors()).hasSize(1);
         assertThat(validationResult.getErrors())
@@ -553,22 +553,32 @@ class EnvironmentValidatorServiceTest {
     void testValidateExternalizedComputeClusterWhenKubeApiAuthorizedIpRangesContainsDisallowedCidrAndInternalTenant() {
         when(entitlementService.internalTenant(eq(ACCOUNT))).thenReturn(true);
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0")).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0")).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertFalse(validationResult.hasError());
     }
 
     @Test
     void testValidateExternalizedComputeClusterWhenPrivateClusterDisabledAndKubeApiAuthorizedIpRangesSpecifiedValidCidr() {
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("1.1.1.1/1")).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(false).withKubeApiAuthorizedIpRanges(Set.of("1.1.1.1/1")).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertFalse(validationResult.hasError());
     }
 
     @Test
     void testValidateExternalizedComputeClusterWhenPrivateClusterEnabledAndKubeApiAuthorizedIpRangesNotSpecified() {
         ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                .withCreate(true).withPrivateCluster(true).build(), ACCOUNT);
+                .withCreate(true).withPrivateCluster(true).withWorkerNodeSubnetIds(Set.of("subnet1")).build(), ACCOUNT, Set.of("subnet1", "subnet2"));
         assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenBadSubnetsSpecified() {
+        Set<String> environmentSubnets = Set.of("subnet1", "subnet2");
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                .withCreate(true).withPrivateCluster(true).withWorkerNodeSubnetIds(Set.of("subnet1", "subnet3")).build(), ACCOUNT, environmentSubnets);
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getErrors())
+                .containsOnly("Specified compute cluster subnet 'subnet3' does not exist in the environment");
     }
 
     private Environment aValidEnvirontmentWithParent() {

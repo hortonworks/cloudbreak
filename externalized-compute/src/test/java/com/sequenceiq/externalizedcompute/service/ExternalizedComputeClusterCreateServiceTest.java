@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.ExternalizedComputeClusterResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
 import com.sequenceiq.liftie.client.LiftieGrpcClient;
@@ -62,9 +64,44 @@ class ExternalizedComputeClusterCreateServiceTest {
         when(liftieGrpcClient.createCluster(commonCreateClusterRequestArgumentCaptor.capture(), any())).thenReturn(createClusterResponse);
         when(externalizedComputeClusterRepository.findById(any())).thenReturn(Optional.of(externalizedComputeCluster));
         DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        ExternalizedComputeClusterResponse computeClusterResponse = new ExternalizedComputeClusterResponse();
+        computeClusterResponse.setWorkerNodeSubnetIds(Set.of("subnetX", "subnetY"));
+        when(environmentResponse.getExternalizedComputeCluster()).thenReturn(computeClusterResponse);
+        when(environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn())).thenReturn(environmentResponse);
+        externalizedComputeClusterCreateService.initiateCreation(1L, USER_CRN);
+
+        CreateClusterRequest clusterRequest = commonCreateClusterRequestArgumentCaptor.getValue();
+        assertEquals("envcrn", clusterRequest.getEnvironment());
+        assertEquals("cluster-name", clusterRequest.getName());
+        assertEquals("Common compute cluster", clusterRequest.getDescription());
+        assertThat(clusterRequest.getTagsMap()).containsEntry("label1", "value1");
+        assertTrue(clusterRequest.getIsDefault());
+        assertThat(clusterRequest.getNetwork().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnetX", "subnetY");
+
+        ArgumentCaptor<ExternalizedComputeCluster> externalizedComputeClusterArgumentCaptor = ArgumentCaptor.forClass(ExternalizedComputeCluster.class);
+        verify(externalizedComputeClusterRepository, times(1)).save(externalizedComputeClusterArgumentCaptor.capture());
+        assertEquals("liftie-1", externalizedComputeClusterArgumentCaptor.getValue().getLiftieName());
+    }
+
+    @Test
+    void initiateCreationWithoutWorkerNodeSubnetIdsTest() {
+        ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
+        externalizedComputeCluster.setName("cluster-name");
+        externalizedComputeCluster.setDefaultCluster(true);
+        externalizedComputeCluster.setEnvironmentCrn("envcrn");
+        Json tags = new Json(Map.of("label1", "value1"));
+        externalizedComputeCluster.setTags(tags);
+        CreateClusterResponse createClusterResponse = mock(CreateClusterResponse.class);
+        when(createClusterResponse.getClusterId()).thenReturn("liftie-1");
+        ArgumentCaptor<CreateClusterRequest> commonCreateClusterRequestArgumentCaptor = ArgumentCaptor.forClass(
+                CreateClusterRequest.class);
+        when(liftieGrpcClient.createCluster(commonCreateClusterRequestArgumentCaptor.capture(), any())).thenReturn(createClusterResponse);
+        when(externalizedComputeClusterRepository.findById(any())).thenReturn(Optional.of(externalizedComputeCluster));
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         EnvironmentNetworkResponse networkResponse = mock(EnvironmentNetworkResponse.class);
         when(networkResponse.getLiftieSubnets()).thenReturn(Map.of("subnet1", new CloudSubnet(), "subnet2", new CloudSubnet()));
         when(environmentResponse.getNetwork()).thenReturn(networkResponse);
+        when(environmentResponse.getExternalizedComputeCluster()).thenReturn(new ExternalizedComputeClusterResponse());
         when(environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn())).thenReturn(environmentResponse);
         externalizedComputeClusterCreateService.initiateCreation(1L, USER_CRN);
 

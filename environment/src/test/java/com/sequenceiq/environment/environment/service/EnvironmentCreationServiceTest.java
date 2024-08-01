@@ -57,6 +57,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -231,6 +232,7 @@ class EnvironmentCreationServiceTest {
                 .withCrn(environmentCrn)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
+                .withExternalizedComputeCluster(ExternalizedComputeClusterDto.builder().withCreate(true).withWorkerNodeSubnetIds(Set.of("subnet1")).build())
                 .withLocation(LocationDto.builder()
                         .withName("test")
                         .withDisplayName("test")

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -27,6 +28,9 @@ public class ExternalizedComputeCreateRequest implements Serializable {
 
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_OUTBOUND_TYPE)
     private String outboundType;
+
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_WORKER_NODE_SUBNET_IDS)
+    private Set<String> workerNodeSubnetIds;
 
     public boolean isCreate() {
         return create;
@@ -60,6 +64,14 @@ public class ExternalizedComputeCreateRequest implements Serializable {
         this.outboundType = outboundType;
     }
 
+    public Set<String> getWorkerNodeSubnetIds() {
+        return workerNodeSubnetIds;
+    }
+
+    public void setWorkerNodeSubnetIds(Set<String> workerNodeSubnetIds) {
+        this.workerNodeSubnetIds = workerNodeSubnetIds;
+    }
+
     @Override
     public String toString() {
         return "ExternalizedComputeCreateRequest{" +
@@ -67,6 +79,7 @@ public class ExternalizedComputeCreateRequest implements Serializable {
                 ", privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
+                ", workerNodeSubnetIds='" + workerNodeSubnetIds + '\'' +
                 '}';
     }
 }

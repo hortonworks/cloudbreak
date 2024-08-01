@@ -23,6 +23,9 @@ public class ExternalizedComputeClusterResponse {
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_OUTBOUND_TYPE)
     private String outboundType;
 
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_WORKER_NODE_SUBNET_IDS)
+    private Set<String> workerNodeSubnetIds;
+
     public static ExternalizedComputeClusterResponse.Builder newBuilder() {
         return new Builder();
     }
@@ -51,12 +54,21 @@ public class ExternalizedComputeClusterResponse {
         this.outboundType = outboundType;
     }
 
+    public Set<String> getWorkerNodeSubnetIds() {
+        return workerNodeSubnetIds;
+    }
+
+    public void setWorkerNodeSubnetIds(Set<String> workerNodeSubnetIds) {
+        this.workerNodeSubnetIds = workerNodeSubnetIds;
+    }
+
     @Override
     public String toString() {
         return "ExternalizedComputeClusterResponse{" +
                 "privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
+                ", workerNodeSubnetIds='" + workerNodeSubnetIds + '\'' +
                 '}';
     }
 
@@ -67,6 +79,8 @@ public class ExternalizedComputeClusterResponse {
         private Set<String> kubeApiAuthorizedIpRanges = new HashSet<>();
 
         private String outboundType;
+
+        private Set<String> workerNodeSubnetIds;
 
         public Builder withPrivateCluster(boolean privateCluster) {
             this.privateCluster = privateCluster;
@@ -85,11 +99,17 @@ public class ExternalizedComputeClusterResponse {
             return this;
         }
 
+        public Builder withWorkerNodeSubnetIds(Set<String> workerNodeSubnetIds) {
+            this.workerNodeSubnetIds = workerNodeSubnetIds;
+            return this;
+        }
+
         public ExternalizedComputeClusterResponse build() {
             ExternalizedComputeClusterResponse externalizedComputeCluster = new ExternalizedComputeClusterResponse();
             externalizedComputeCluster.setPrivateCluster(privateCluster);
             externalizedComputeCluster.setOutboundType(outboundType);
             externalizedComputeCluster.setKubeApiAuthorizedIpRanges(kubeApiAuthorizedIpRanges);
+            externalizedComputeCluster.setWorkerNodeSubnetIds(workerNodeSubnetIds);
             return externalizedComputeCluster;
         }
     }

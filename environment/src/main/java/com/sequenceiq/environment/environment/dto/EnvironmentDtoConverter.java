@@ -202,6 +202,7 @@ public class EnvironmentDtoConverter {
                     .withPrivateCluster(defaultComputeCluster.isPrivateCluster())
                     .withKubeApiAuthorizedIpRanges(defaultComputeCluster.getKubeApiAuthorizedIpRanges())
                     .withOutboundType(defaultComputeCluster.getOutboundType())
+                    .withWorkerNodeSubnetIds(defaultComputeCluster.getWorkerNodeSubnetIds())
                     .build();
         } else {
             return null;
@@ -216,6 +217,7 @@ public class EnvironmentDtoConverter {
             defaultComputeCluster.setPrivateCluster(computeClusterCreation.isPrivateCluster());
             defaultComputeCluster.setKubeApiAuthorizedIpRanges(computeClusterCreation.getKubeApiAuthorizedIpRanges());
             defaultComputeCluster.setOutboundType(computeClusterCreation.getOutboundType());
+            defaultComputeCluster.setWorkerNodeSubnetIds(computeClusterCreation.getWorkerNodeSubnetIds());
         }
         environment.setDefaultComputeCluster(defaultComputeCluster);
     }

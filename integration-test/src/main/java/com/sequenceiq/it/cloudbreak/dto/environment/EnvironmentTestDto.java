@@ -322,11 +322,23 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withExternalizedComputeCluster() {
-        ExternalizedComputeCreateRequest externalizedComputeCreateRequest = new ExternalizedComputeCreateRequest();
-        externalizedComputeCreateRequest.setCreate(true);
+    public EnvironmentTestDto withExternalizedComputeCluster(Set<String> subnets) {
+        ExternalizedComputeCreateRequest externalizedComputeCreateRequest = getExternalizedComputeCreateRequest();
+        externalizedComputeCreateRequest.setWorkerNodeSubnetIds(subnets);
         getRequest().setExternalizedComputeCreateRequest(externalizedComputeCreateRequest);
         return this;
+    }
+
+    public EnvironmentTestDto withExternalizedComputeCluster() {
+        ExternalizedComputeCreateRequest externalizedComputeCreateRequest = getExternalizedComputeCreateRequest();
+        getRequest().setExternalizedComputeCreateRequest(externalizedComputeCreateRequest);
+        return this;
+    }
+
+    private ExternalizedComputeCreateRequest getExternalizedComputeCreateRequest() {
+        ExternalizedComputeCreateRequest externalizedComputeCreateRequest = new ExternalizedComputeCreateRequest();
+        externalizedComputeCreateRequest.setCreate(true);
+        return externalizedComputeCreateRequest;
     }
 
     public EnvironmentTestDto withNetwork() {

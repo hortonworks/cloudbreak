@@ -19,11 +19,14 @@ public class ExternalizedComputeClusterDto {
 
     private String outboundType;
 
+    private Set<String> workerNodeSubnetIds;
+
     private ExternalizedComputeClusterDto(ExternalizedComputeClusterDto.Builder builder) {
         create = builder.create;
         privateCluster = builder.privateCluster;
         kubeApiAuthorizedIpRanges = builder.kubeApiAuthorizedIpRanges;
         outboundType = builder.outboundType;
+        workerNodeSubnetIds = builder.workerNodeSubnetIds;
     }
 
     public static Builder builder() {
@@ -62,6 +65,14 @@ public class ExternalizedComputeClusterDto {
         this.outboundType = outboundType;
     }
 
+    public Set<String> getWorkerNodeSubnetIds() {
+        return workerNodeSubnetIds;
+    }
+
+    public void setWorkerNodeSubnetIds(Set<String> workerNodeSubnetIds) {
+        this.workerNodeSubnetIds = workerNodeSubnetIds;
+    }
+
     @Override
     public String toString() {
         return "ExternalizedComputeClusterDto{" +
@@ -69,6 +80,7 @@ public class ExternalizedComputeClusterDto {
                 ", privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
+                ", workerNodeSubnetIds='" + workerNodeSubnetIds + '\'' +
                 '}';
     }
 
@@ -82,6 +94,8 @@ public class ExternalizedComputeClusterDto {
         private Set<String> kubeApiAuthorizedIpRanges = new HashSet<>();
 
         private String outboundType;
+
+        private Set<String> workerNodeSubnetIds = new HashSet<>();
 
         private Builder() {
         }
@@ -105,6 +119,13 @@ public class ExternalizedComputeClusterDto {
 
         public ExternalizedComputeClusterDto.Builder withOutboundType(String outboundType) {
             this.outboundType = outboundType;
+            return this;
+        }
+
+        public ExternalizedComputeClusterDto.Builder withWorkerNodeSubnetIds(Set<String> workerNodeSubnetIds) {
+            if (CollectionUtils.isNotEmpty(workerNodeSubnetIds)) {
+                this.workerNodeSubnetIds = workerNodeSubnetIds;
+            }
             return this;
         }
 

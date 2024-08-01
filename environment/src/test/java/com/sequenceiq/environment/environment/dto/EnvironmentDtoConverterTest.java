@@ -720,6 +720,7 @@ class EnvironmentDtoConverterTest {
         accountTagResponse.setValue("accountValue");
         Map<String, String> defaultTags = Map.ofEntries(entry("defaultKey1", "defaultValue1"), entry("defaultKey2", "defaultValue2"));
 
+        Set<String> workerNodeSubnets = Set.of("subnet1", "subnet2");
         EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .withCreator(CREATOR)
@@ -740,6 +741,7 @@ class EnvironmentDtoConverterTest {
                         .withPrivateCluster(true)
                         .withOutboundType(OUTBOUND_TYPE)
                         .withKubeApiAuthorizedIpRanges(Set.of(KUBE_API_AUTHORIZED_IP_RANGES))
+                        .withWorkerNodeSubnetIds(workerNodeSubnets)
                         .build())
                 .build();
 
@@ -776,6 +778,7 @@ class EnvironmentDtoConverterTest {
         assertThat(defaultComputeCluster.isPrivateCluster()).isTrue();
         assertThat(defaultComputeCluster.getOutboundType()).isEqualTo(OUTBOUND_TYPE);
         assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEqualTo(Set.of(KUBE_API_AUTHORIZED_IP_RANGES));
+        assertThat(defaultComputeCluster.getWorkerNodeSubnetIds()).isEqualTo(workerNodeSubnets);
 
         EnvironmentTelemetry resultTelemetry = result.getTelemetry();
         assertThat(resultTelemetry).isNotNull();
@@ -850,6 +853,7 @@ class EnvironmentDtoConverterTest {
         assertThat(defaultComputeCluster.isPrivateCluster()).isFalse();
         assertThat(defaultComputeCluster.getOutboundType()).isNull();
         assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEmpty();
+        assertThat(defaultComputeCluster.getWorkerNodeSubnetIds()).isEmpty();
     }
 
     @Test

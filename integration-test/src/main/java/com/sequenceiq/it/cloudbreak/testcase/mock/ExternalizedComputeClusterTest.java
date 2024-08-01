@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -127,16 +128,25 @@ public class ExternalizedComputeClusterTest extends AbstractMockTest {
                     "but it should fail, then force delete",
             then = "env should delete externalized compute cluster and auxiliary clusters also, only failed should remain")
     public void testCreateExternalizedComputeClusterThenDeleteWithEnvDeleteButFailsAndForceShouldWork(MockedTestContext testContext) {
+        Set<String> workerNodeSubnets = Set.of("net1", "net2");
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class)
-                .withExternalizedComputeCluster()
+                .withExternalizedComputeCluster(workerNodeSubnets)
                 .withNetwork()
                 .withCreateFreeIpa(true)
                 .withOneFreeIpaNode()
                 .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe())
+                .then((testContext1, testDto, client) -> {
+                    Set<String> returnedSubnets = testDto.getResponse().getExternalizedComputeCluster().getWorkerNodeSubnetIds();
+                    if (!returnedSubnets.equals(workerNodeSubnets)) {
+                        throw new TestFailException("Worker subnets do not match for compute cluster!");
+                    }
+                    return testDto;
+                })
                 .given(ExternalizedComputeClusterTestDto.class)
                 .when(externalizedComputeClusterTestClient.describeDefault())
                 .await(ExternalizedComputeClusterApiStatus.AVAILABLE)

@@ -199,6 +199,7 @@ public class EnvironmentApiConverter {
             if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {
                 builder.withKubeApiAuthorizedIpRanges(CidrUtil.cidrSet(externalizedCompute.getKubeApiAuthorizedIpRanges()));
             }
+            builder.withWorkerNodeSubnetIds(externalizedCompute.getWorkerNodeSubnetIds());
         }
         return builder.build();
     }

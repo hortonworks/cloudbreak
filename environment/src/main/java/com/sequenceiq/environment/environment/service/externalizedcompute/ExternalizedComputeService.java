@@ -194,6 +194,7 @@ public class ExternalizedComputeService {
         defaultComputeCluster.setPrivateCluster(externalizedComputeClusterDto.isPrivateCluster());
         defaultComputeCluster.setKubeApiAuthorizedIpRanges(externalizedComputeClusterDto.getKubeApiAuthorizedIpRanges());
         defaultComputeCluster.setOutboundType(externalizedComputeClusterDto.getOutboundType());
+        defaultComputeCluster.setWorkerNodeSubnetIds(externalizedComputeClusterDto.getWorkerNodeSubnetIds());
         environment.setDefaultComputeCluster(defaultComputeCluster);
         environmentService.save(environment);
     }

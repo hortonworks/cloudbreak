@@ -148,6 +148,7 @@ public class EnvironmentResponseConverter {
                     .withPrivateCluster(externalizedComputeClusterDto.isPrivateCluster())
                     .withKubeApiAuthorizedIpRanges(externalizedComputeClusterDto.getKubeApiAuthorizedIpRanges())
                     .withOutboundType(externalizedComputeClusterDto.getOutboundType())
+                    .withWorkerNodeSubnetIds(externalizedComputeClusterDto.getWorkerNodeSubnetIds())
                     .build();
         } else {
             return null;

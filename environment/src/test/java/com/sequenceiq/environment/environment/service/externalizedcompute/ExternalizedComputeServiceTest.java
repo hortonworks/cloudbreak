@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.ws.rs.NotFoundException;
@@ -234,10 +235,14 @@ class ExternalizedComputeServiceTest {
         environment.setId(1L);
         environment.setResourceCrn("crn");
         String outboundType = "udr";
+        Set<String> workerNodeSubnets = Set.of("subnet1", "subnet2");
+        Set<String> kubeApiAuthorizedIpRanges = Set.of("1.1.1.1/16", "2.2.2.2/8");
         ExternalizedComputeClusterDto request = ExternalizedComputeClusterDto.builder()
                 .withCreate(true)
                 .withPrivateCluster(true)
                 .withOutboundType(outboundType)
+                .withWorkerNodeSubnetIds(workerNodeSubnets)
+                .withKubeApiAuthorizedIpRanges(kubeApiAuthorizedIpRanges)
                 .build();
 
         ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
@@ -249,6 +254,8 @@ class ExternalizedComputeServiceTest {
         DefaultComputeCluster defaultComputeCluster = environmentArgumentCaptor.getValue().getDefaultComputeCluster();
         assertTrue(defaultComputeCluster.isPrivateCluster());
         assertEquals(outboundType, defaultComputeCluster.getOutboundType());
+        assertEquals(workerNodeSubnets, defaultComputeCluster.getWorkerNodeSubnetIds());
+        assertEquals(kubeApiAuthorizedIpRanges, defaultComputeCluster.getKubeApiAuthorizedIpRanges());
     }
 
     @Test
