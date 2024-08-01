@@ -446,12 +446,7 @@ public class StackToCloudStackConverter {
 
     private CloudInstance buildCloudInstanceSkeleton(DetailedEnvironmentResponse environment, StackView stack,
             InstanceGroupDto instanceGroup) {
-        CloudInstance skeleton = null;
-        if (instanceGroup.getNodeCount() == 0) {
-            LOGGER.debug("A skeleton instances will be generated for group of {}", instanceGroup.getInstanceGroup().getGroupName());
-            skeleton = buildInstance(null, instanceGroup.getInstanceGroup(), stack, 0L, CREATE_REQUESTED, environment);
-        }
-        return skeleton;
+        return buildInstance(null, instanceGroup.getInstanceGroup(), stack, 0L, null, environment);
     }
 
     private Map<String, Object> getFields(InstanceGroupView instanceGroup) {

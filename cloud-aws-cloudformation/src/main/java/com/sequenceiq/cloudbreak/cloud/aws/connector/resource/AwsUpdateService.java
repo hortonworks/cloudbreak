@@ -107,7 +107,7 @@ public class AwsUpdateService {
             if (!groupName.isEmpty() && group.getName().equalsIgnoreCase(groupName.get())) {
                 Map<LaunchTemplateField, String> updatableFields = Map.of(
                         LaunchTemplateField.INSTANCE_TYPE,
-                        group.getReferenceInstanceConfiguration().getTemplate().getFlavor(),
+                        group.getReferenceInstanceTemplate().getFlavor(),
                         LaunchTemplateField.ROOT_DISK_SIZE,
                         String.valueOf(group.getRootVolumeSize())
                 );
