@@ -11,8 +11,12 @@
     {% set ntp_config_line_replace = 'server metadata.google.internal .*' %}
     {% set ntp_config_line = 'server metadata.google.internal prefer iburst trust'  %}
 {% elif salt['pillar.get']('platform') == 'AZURE' %}
-    {% set ntp_config_line_replace = 'refclock PHC /dev/ptp0 .*' %}
-    {% set ntp_config_line = 'refclock PHC /dev/ptp0 poll 3 dpoll -2 offset 0 trust' %}
+    {% set ntp_config_line_replace = 'refclock PHC /dev/ptp.*' %}
+    {% if salt['file.file_exists']('/dev/ptp_hyperv') %}
+      {% set ntp_config_line = 'refclock PHC /dev/ptp_hyperv poll 3 dpoll -2 offset 0 trust' %}
+    {% else %}
+      {% set ntp_config_line = 'refclock PHC /dev/ptp0 poll 3 dpoll -2 offset 0 trust' %}
+    {% endif %}
 {% else %}
     {% set ntp_config_line = '' %}
 {% endif %}
