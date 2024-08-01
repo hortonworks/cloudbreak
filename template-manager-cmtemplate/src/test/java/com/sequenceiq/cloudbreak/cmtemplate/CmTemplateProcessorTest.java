@@ -729,6 +729,30 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void testIfCustomServiceConfigsAreAddedWithSafetyValue() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        List<ApiClusterTemplateConfig> zeppelinConfig = List.of(
+                new ApiClusterTemplateConfig().name("ZEPPELIN_service_env_safety_valve")
+                        .value("HADOOP_CLIENT_OPTS=-Djdk.tls.maxHandshakeMessageSize=262144\nJAVA_OPTS=-Djdk.tls.maxHandshakeMessageSize=262144")
+        );
+        ApiClusterTemplateService zeppelin = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "ZEPPELIN".equals(service.getServiceType()))
+                .findFirst().get();
+
+        List<ApiClusterTemplateConfig> existingZeppelinConfig = zeppelin.getServiceConfigs();
+        underTest.mergeCustomServiceConfigs(zeppelin, zeppelinConfig);
+        List<String> actualValues = List.of(existingZeppelinConfig.get(3).getValue().split("\n"));
+
+        assertEquals(4, zeppelin.getServiceConfigs().size());
+        assertEquals("HADOOP_CLIENT_OPTS=-Djdk.tls.maxHandshakeMessageSize=262144\nJAVA_OPTS=-Djdk.tls.maxHandshakeMessageSize=262144",
+                existingZeppelinConfig.get(3).getValue());
+        assertEquals(2, actualValues.size());
+        assertEquals("HADOOP_CLIENT_OPTS=-Djdk.tls.maxHandshakeMessageSize=262144", actualValues.getFirst());
+        assertEquals("JAVA_OPTS=-Djdk.tls.maxHandshakeMessageSize=262144", actualValues.getLast());
+    }
+
+    @Test
     public void testIfCustomServiceConfigsAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         // config not present in template

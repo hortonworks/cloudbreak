@@ -780,6 +780,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 }
                 currentConfigs.set(currentConfigs.indexOf(configIfExists.get()), config);
             } else {
+                if (config.getName().endsWith("_safety_valve")) {
+                    String valueToBeAppended = config.getValue();
+                    String currentValue = String.join("\n", Arrays.asList(valueToBeAppended.split("\\\\n")));
+                    config.setValue(currentValue);
+                }
                 currentConfigs.add(config);
             }
         });
