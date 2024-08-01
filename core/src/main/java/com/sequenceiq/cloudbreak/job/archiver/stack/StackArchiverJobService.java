@@ -11,6 +11,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
@@ -31,8 +32,6 @@ public class StackArchiverJobService implements JobSchedulerService {
 
     private static final String TRIGGER_GROUP = "archive-stack-triggers";
 
-    private static final int ONE_HOUR_IN_MINUTES = 60;
-
     private static final int TEN_MINUTES = 10;
 
     @Inject
@@ -43,9 +42,9 @@ public class StackArchiverJobService implements JobSchedulerService {
 
     public void schedule() {
         JobDetail jobDetail = buildJobDetail();
-        Trigger trigger = buildJobTrigger(jobDetail);
+        JobKey jobKey = jobDetail.getKey();
+        Trigger trigger = buildJobTrigger(jobKey, true);
         try {
-            JobKey jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
             if (scheduler.getJobDetail(jobKey) != null) {
                 LOGGER.info("Unscheduling stack cleanup job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule();
@@ -54,6 +53,23 @@ public class StackArchiverJobService implements JobSchedulerService {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (Exception e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
+        }
+    }
+
+    public void reschedule() {
+        JobKey jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
+        Trigger trigger = buildJobTrigger(jobKey, false);
+        try {
+            if (scheduler.getJobDetail(jobKey) != null) {
+                LOGGER.info("Reschedule stack cleanup job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+                Date date = scheduler.rescheduleJob(trigger.getKey(), trigger);
+                LOGGER.info("Stack cleanup job next fire time: {}", date);
+            } else {
+                LOGGER.warn("Stack cleanup job detail does not exists for job key: '{}' and group: '{}', schedule job.", jobKey.getName(), jobKey.getGroup());
+                scheduler.scheduleJob(buildJobDetail(), trigger);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error during rescheduling stack cleanup job for job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup(), e);
         }
     }
 
@@ -67,17 +83,18 @@ public class StackArchiverJobService implements JobSchedulerService {
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail) {
-        return TriggerBuilder.newTrigger()
-                .forJob(jobDetail)
-                .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
+    private Trigger buildJobTrigger(JobKey jobKey, boolean delayedStart) {
+        TriggerBuilder<SimpleTrigger> triggerBuilder = TriggerBuilder.newTrigger()
+                .forJob(jobKey)
+                .withIdentity(jobKey.getName(), TRIGGER_GROUP)
                 .withDescription("Trigger for removing finalized stacks and stacks events")
-                .startAt(delayedFirstStart())
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInMinutes(stackArchiverConfig.getIntervalInHours() * ONE_HOUR_IN_MINUTES)
-                        .repeatForever()
-                        .withMisfireHandlingInstructionIgnoreMisfires())
-                .build();
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule());
+        if (delayedStart) {
+            triggerBuilder.startAt(delayedFirstStart());
+        } else {
+            triggerBuilder.startAt(Date.from(ZonedDateTime.now().toInstant().plusSeconds(stackArchiverConfig.getIntervalInSeconds())));
+        }
+        return triggerBuilder.build();
     }
 
     public void unschedule() {

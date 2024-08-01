@@ -50,11 +50,11 @@ public class EnvironmentArchiverJob extends MdcQuartzJob {
                 .forEach(
                     environmentCrn -> {
                         LOGGER.info("Starting to archive environment with CRN: {}", environmentCrn);
-                        Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(environmentCrn);
-                        if (exception.isEmpty()) {
+                        try {
+                            structuredEventService.deleteStructuredEventByResourceCrn(environmentCrn);
                             environmentService.deleteByResourceCrn(environmentCrn);
-                        } else {
-                            LOGGER.error("Could not completely delete environment events for {} with error {}", environmentCrn, exception.get());
+                        } catch (Exception e) {
+                            LOGGER.error("Could not completely delete environment events for {} with error {}", environmentCrn, e);
                         }
                     }
         );

@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.quartz.configuration.scheduler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,11 +42,15 @@ class DefaultTransactionalSchedulerTest {
 
     @BeforeEach
     void setUp() throws TransactionService.TransactionExecutionException {
-        doAnswer((Answer<Void>) invocation -> {
+        lenient().doAnswer((Answer<Void>) invocation -> {
             Runnable runnable = invocation.getArgument(0);
             runnable.run();
             return null;
         }).when(transactionService).required(any(Runnable.class));
+        lenient().when(transactionService.required(any(Supplier.class))).then(invocation -> {
+            Supplier supplier = invocation.getArgument(0);
+            return supplier.get();
+        });
     }
 
     @Test
@@ -59,6 +65,13 @@ class DefaultTransactionalSchedulerTest {
         Trigger trigger = TriggerBuilder.newTrigger().build();
         underTest.scheduleJob(jobDetail, trigger);
         verify(scheduler, times(1)).scheduleJob(eq(jobDetail), eq(trigger));
+    }
+
+    @Test
+    void rescheduleJob() throws TransactionService.TransactionExecutionException, SchedulerException {
+        Trigger trigger = TriggerBuilder.newTrigger().withIdentity("key", "group").build();
+        underTest.rescheduleJob(trigger.getKey(), trigger);
+        verify(scheduler, times(1)).rescheduleJob(eq(trigger.getKey()), eq(trigger));
     }
 
     @Test

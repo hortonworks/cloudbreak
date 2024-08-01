@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -46,7 +45,6 @@ class EnvironmentArchiverJobTest {
         when(environmentArchiverConfig.getRetentionPeriodInDays()).thenReturn(7);
         when(timeUtil.getTimestampThatDaysBeforeNow(anyInt())).thenReturn(new Date().getTime());
         when(environmentService.getAllForArchive(anyLong(), anyInt())).thenReturn(Set.of("crn1"));
-        when(structuredEventService.deleteStructuredEventByResourceCrn("crn1")).thenReturn(Optional.empty());
 
         environmentArchiverJob.executeTracedJob(context);
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.quartz.configuration.scheduler;
 
+import java.util.Date;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -10,6 +11,7 @@ import org.quartz.ListenerManager;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,19 @@ public abstract class TransactionalScheduler {
                 JobKey jobKey = jobDetail.getKey();
                 LOGGER.error("Scheduling job failed, jobKey: {}, jobGroup: {}", jobKey.getName(), jobKey.getGroup(), e);
                 throw new SchedulerRuntimeException("Scheduling job failed", e);
+            }
+        });
+    }
+
+    public Date rescheduleJob(TriggerKey triggerKey, Trigger trigger) throws TransactionService.TransactionExecutionException {
+        return transactionService.required(() -> {
+            try {
+                return getScheduler().rescheduleJob(triggerKey, trigger);
+            } catch (SchedulerException e) {
+                JobKey jobKey = trigger.getJobKey();
+                LOGGER.error("Rescheduling job failed, jobKey: {}, jobGroup: {}, triggerKey: {}, triggerGroup: {}",
+                        jobKey.getName(), jobKey.getGroup(), triggerKey.getName(), triggerKey.getGroup(), e);
+                throw new SchedulerRuntimeException("Rescheduling job failed", e);
             }
         });
     }

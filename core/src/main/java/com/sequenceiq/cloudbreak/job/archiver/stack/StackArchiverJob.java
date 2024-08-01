@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.job.archiver.stack;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDB
 import com.sequenceiq.cloudbreak.util.TimeUtil;
 
 @Component
+@DisallowConcurrentExecution
 public class StackArchiverJob extends MdcQuartzJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackArchiverJob.class);
@@ -36,6 +40,9 @@ public class StackArchiverJob extends MdcQuartzJob {
     @Inject
     private TimeUtil timeUtil;
 
+    @Inject
+    private StackArchiverJobService stackArchiverJobService;
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.empty();
@@ -43,28 +50,42 @@ public class StackArchiverJob extends MdcQuartzJob {
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws RuntimeException {
-        purgeFinalisedStacks(stackArchiverConfig.getRetentionPeriodInDays());
+        try {
+            purgeFinalizedStacks(stackArchiverConfig.getRetentionPeriodInDays());
+        } finally {
+            LOGGER.debug("Stack archiver job execution finished, reschedule job.");
+            stackArchiverJobService.reschedule();
+        }
     }
 
-    public void purgeFinalisedStacks(int retentionPeriodDays) {
-        LOGGER.debug("Cleaning finalised stacks");
+    public void purgeFinalizedStacks(int retentionPeriodDays) {
+        int limitForStack = stackArchiverConfig.getLimitForStack();
+        LOGGER.debug("Cleaning finalised stacks, limit: {}, retention period days: {}", limitForStack, retentionPeriodDays);
+        Map<String, String> failedDeletions = new HashMap<>();
         long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(retentionPeriodDays);
-        stackService.getAllForArchive(timestampsBefore, stackArchiverConfig.getLimitForStack()).forEach(
+        stackService.getAllForArchive(timestampsBefore, limitForStack).forEach(
                 crn -> {
-                    LOGGER.debug("Cleaning up stack object structuredEvents with crn {}.", crn);
-                    Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(crn);
-                    if (exception.isEmpty()) {
-                        LOGGER.debug("Cleaning up stack object legacy structuredEvents with crn {}.", crn);
-                        legacyStructuredEventDBService.deleteEntriesByResourceCrn(crn);
-                        LOGGER.debug("Cleaning up stack object with crn {}.", crn);
-                        stackService.deleteArchivedByResourceCrn(crn);
-                    } else {
-                        LOGGER.error("Could not completely delete stack events for {}.", crn, exception.get());
-                        throw new RuntimeException(
-                                String.format("Failed to archive terminated stack for stack: %s, exception: %s",
-                                        crn, exception.get().getMessage()));
+                    try {
+                        purgeFinalizedStack(crn, failedDeletions);
+                    } catch (Exception e) {
+                        LOGGER.error("Could not completely delete stack events for {}.", crn, e);
+                        failedDeletions.put(crn, e.getMessage());
                     }
                 }
         );
+        if (!failedDeletions.isEmpty()) {
+            throw new RuntimeException(String.format("Failed to purge finalzied stacks: %s", failedDeletions));
+        }
+    }
+
+    private void purgeFinalizedStack(String crn, Map<String, String> failedDeletions) {
+        LOGGER.debug("Cleaning up stack object structuredEvents with crn {}.", crn);
+        long start = System.currentTimeMillis();
+        structuredEventService.deleteStructuredEventByResourceCrn(crn);
+        LOGGER.debug("Cleaning up stack object legacy structuredEvents with crn {}.", crn);
+        legacyStructuredEventDBService.deleteEntriesByResourceCrn(crn);
+        LOGGER.debug("Cleaning up stack object with crn {} took {} ms.", crn, System.currentTimeMillis() - start);
+        stackService.deleteArchivedByResourceCrn(crn);
+        LOGGER.debug("Cleaning up stack finished with crn {}.", crn);
     }
 }

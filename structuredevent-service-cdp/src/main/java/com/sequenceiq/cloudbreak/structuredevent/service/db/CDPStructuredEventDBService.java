@@ -171,17 +171,15 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         return exception;
     }
 
-    public Optional<Exception> deleteStructuredEventByResourceCrn(String resourceCrn) {
-        Optional<Exception> exception = Optional.empty();
+    public void deleteStructuredEventByResourceCrn(String resourceCrn) {
         try {
             LOGGER.debug("About to delete structured event(s) for resource CRN: {}", resourceCrn);
             structuredEventRepository.deleteByResourceCrn(resourceCrn);
         } catch (Exception e) {
             LOGGER.debug("deleteByResourceCrnOlderThan() repository deletion has failed for {} due to: {}",
                     CDPStructuredEventEntity.class.getSimpleName(), e.getMessage());
-            exception = Optional.of(e);
+            throw e;
         }
-        return exception;
     }
 
     private List<StructuredEventType> getAllEventTypeIfEmpty(List<StructuredEventType> eventTypes) {
