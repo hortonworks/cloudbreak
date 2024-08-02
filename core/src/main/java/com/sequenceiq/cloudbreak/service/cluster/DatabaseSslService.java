@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -52,6 +53,9 @@ public class DatabaseSslService {
     private StackService stackService;
 
     @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
@@ -76,6 +80,10 @@ public class DatabaseSslService {
 
     public DatabaseSslDetails getDbSslDetailsForRotationAndUpdateInCluster(StackDto stackDto) {
         return getDbSslDetailsAndUpdateInClusterInternal(stackDto, false);
+    }
+
+    public DatabaseSslDetails getDbSslDetailsForRotationAndUpdateInCluster(Long stackId) {
+        return getDbSslDetailsAndUpdateInClusterInternal(stackDtoService.getById(stackId), false);
     }
 
     public DatabaseSslDetails setEmbeddedDbSslDetailsAndUpdateInClusterInternal(StackDto stackDto) {

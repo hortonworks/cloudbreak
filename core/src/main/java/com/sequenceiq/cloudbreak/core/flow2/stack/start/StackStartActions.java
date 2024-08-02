@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -66,11 +67,15 @@ public class StackStartActions {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private DatabaseSslService databaseSslService;
+
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
         return new AbstractStackStartAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackStartStopContext context, StackEvent payload, Map<Object, Object> variables) {
+                databaseSslService.getDbSslDetailsForRotationAndUpdateInCluster(payload.getResourceId());
                 stackStartStopService.startStackStart(context);
                 sendEvent(context);
             }
