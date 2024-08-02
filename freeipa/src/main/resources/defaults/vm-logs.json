@@ -134,5 +134,21 @@
   {
     "path": "/var/log/update_cnames.log",
     "label": "update_cnames"
+  },
+  {
+    "path": "/var/log/pip36.log",
+    "label": "python36_pip"
+  },
+  {
+    "path": "/var/log/pip38.log",
+    "label": "python38_pip"
+  },
+  {
+    "path": "/var/log/pip39.log",
+    "label": "python39_pip"
+  },
+  {
+    "path": "/var/log/pip311.log",
+    "label": "python311_pip"
   }
 ]
