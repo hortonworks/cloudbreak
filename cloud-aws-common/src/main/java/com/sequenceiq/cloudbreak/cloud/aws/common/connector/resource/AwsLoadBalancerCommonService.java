@@ -29,10 +29,16 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 
 @Service
 public class AwsLoadBalancerCommonService {
@@ -75,25 +81,68 @@ public class AwsLoadBalancerCommonService {
     }
 
     public void disableDeletionProtection(AmazonElasticLoadBalancingClient client, List<String> arns) {
-        arns.forEach(arn -> modifyDeletionProtection(client, arn, false));
+        arns.forEach(arn -> modifyLoadBalancerAttributes(client, arn, false));
     }
 
-    public void enableDeletionProtection(AmazonElasticLoadBalancingClient client, String arn) {
-        enableDeletionProtection(client, List.of(arn));
+    public void modifyLoadBalancerAttributes(AmazonElasticLoadBalancingClient client, String arn) {
+        modifyLoadBalancerAttributes(client, List.of(arn));
     }
 
-    public void enableDeletionProtection(AmazonElasticLoadBalancingClient client, List<String> arns) {
-        arns.forEach(arn -> modifyDeletionProtection(client, arn, true));
+    public void modifyLoadBalancerAttributes(AmazonElasticLoadBalancingClient client, List<String> arns) {
+        arns.forEach(arn -> modifyLoadBalancerAttributes(client, arn, true));
     }
 
-    private void modifyDeletionProtection(AmazonElasticLoadBalancingClient client, String arn, boolean deletionProtection) {
+    public void modifyTargetGroupAttributes(AmazonElasticLoadBalancingClient client, String arn, boolean stickySession) {
         try {
+            DescribeTargetGroupsResponse describeTargetGroupsResponse =
+                    client.describeTargetGroup(DescribeTargetGroupsRequest.builder().loadBalancerArn(arn).build());
+            for (TargetGroup targetGroup : describeTargetGroupsResponse.targetGroups()) {
+                Set<TargetGroupAttribute> targetGroupAttributes = new HashSet<>();
+                if (stickySession) {
+                    targetGroupAttributes.add(
+                            TargetGroupAttribute.builder()
+                                    .key("stickiness.enabled")
+                                    .value("true")
+                                    .build());
+                    ModifyTargetGroupAttributesRequest modifyRequest = ModifyTargetGroupAttributesRequest.builder()
+                            .targetGroupArn(targetGroup.targetGroupArn())
+                            .attributes(targetGroupAttributes)
+                            .build();
+                    client.modifyTargetGroupAttributes(modifyRequest);
+                }
+
+            }
+        } catch (LoadBalancerNotFoundException loadBalancerNotFoundException) {
+            LOGGER.info("Load balancer has already been deleted with ARN '{}', no need to modify attribute.", arn);
+        } catch (TargetGroupNotFoundException targetGroupNotFoundException) {
+            LOGGER.info("TargetGroup has already been deleted with ARN '{}', no need to modify attribute.", arn);
+        } catch (AwsServiceException amazonServiceException) {
+            LOGGER.warn("Failed to modify targetgroup flag of load balancer to value '{}'", stickySession, amazonServiceException);
+            if (amazonServiceException instanceof ElasticLoadBalancingV2Exception
+                    && ACCESS_DENIED_EXCEPTION_ERROR_CODE.equals(amazonServiceException.awsErrorDetails().errorCode())) {
+                LOGGER.info("User has no right to edit loadbalancer targetgroup to be stickysession. " +
+                        "The role needs elasticloadbalancing:ModifyLoadBalancerAttributes permission");
+            } else {
+                throw amazonServiceException;
+            }
+        }
+    }
+
+    private void modifyLoadBalancerAttributes(AmazonElasticLoadBalancingClient client, String arn, boolean deletionProtection) {
+        try {
+            Set<LoadBalancerAttribute> loadBalancerAttributes = new HashSet<>();
+            loadBalancerAttributes.add(LoadBalancerAttribute.builder()
+                    .key("deletion_protection.enabled")
+                    .value(String.valueOf(deletionProtection))
+                    .build());
+            loadBalancerAttributes.add(LoadBalancerAttribute.builder()
+                    .key("load_balancing.cross_zone.enabled")
+                    .value(String.valueOf(deletionProtection))
+                    .build());
+
             ModifyLoadBalancerAttributesRequest modifyLoadBalancerAttributesRequest = ModifyLoadBalancerAttributesRequest.builder()
                     .loadBalancerArn(arn)
-                    .attributes(LoadBalancerAttribute.builder()
-                            .key("deletion_protection.enabled")
-                            .value(String.valueOf(deletionProtection))
-                            .build())
+                    .attributes(loadBalancerAttributes)
                     .build();
             client.modifyLoadBalancerAttributes(modifyLoadBalancerAttributesRequest);
         } catch (LoadBalancerNotFoundException loadBalancerNotFoundException) {

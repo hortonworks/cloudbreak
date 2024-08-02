@@ -129,10 +129,6 @@ public class AwsLoadBalancerLaunchService {
             }
 
             setLoadBalancerMetadata(awsLoadBalancers, result);
-            loadBalancerCommonService.enableDeletionProtection(loadBalancingClient, modelContext.getLoadBalancers()
-                    .stream()
-                    .map(lb -> lb.getArn())
-                    .collect(toList()));
             LOGGER.debug("Starting CloudFormation update to create listeners.");
             if (checkForListenerResources(cfRetryClient, cFStackName, awsLoadBalancers)) {
                 LOGGER.debug("Listener resources already exist, skipping creation");
@@ -143,6 +139,13 @@ public class AwsLoadBalancerLaunchService {
 
             ListStackResourcesResponse finalResult = result;
             awsLoadBalancers.forEach(lb -> statuses.add(createLoadBalancerStatus(ac, lb, finalResult)));
+            for (AwsLoadBalancer loadBalancer : modelContext.getLoadBalancers()) {
+                loadBalancerCommonService.modifyLoadBalancerAttributes(loadBalancingClient, loadBalancer.getArn());
+                loadBalancerCommonService.modifyTargetGroupAttributes(
+                        loadBalancingClient,
+                        loadBalancer.getArn(),
+                        loadBalancer.isUseStickySessionForTargetGroup());
+            }
         } else {
             LOGGER.debug("No load balancers in stack");
         }

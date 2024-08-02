@@ -908,7 +908,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
         underTest.launchLoadBalancerResources(authenticatedContext, getCloudStack(), persistenceNotifier, loadBalancingClient, true);
 
-        verify(loadBalancingClient, never()).modifyTargetGroupAttributes(any());
+        verify(loadBalancingClient, times(0)).modifyTargetGroupAttributes(any());
     }
 
     @ParameterizedTest(name = "existingInternal: {0}")
@@ -960,7 +960,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
         underTest.launchLoadBalancerResources(authenticatedContext, getCloudStack(), persistenceNotifier, loadBalancingClient, true);
 
-        verify(loadBalancingClient, times(1)).modifyTargetGroupAttributes(any());
+        verify(loadBalancingClient, times(0)).modifyTargetGroupAttributes(any());
     }
 
     private CloudStack getCloudStack() {

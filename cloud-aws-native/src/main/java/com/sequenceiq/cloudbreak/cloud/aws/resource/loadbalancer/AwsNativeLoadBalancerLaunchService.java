@@ -61,12 +61,10 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTarg
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.IpAddressType;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerTypeEnum;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 
 @Service
@@ -132,11 +130,7 @@ public class AwsNativeLoadBalancerLaunchService {
                         String targetGroupNameTypeSchemePortPart = resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(
                                 loadBalancerScheme, targetGroup.getPort());
                         createTargetGroup(creationContext, awsNetworkView, targetGroup, targetGroupNameTypeSchemePortPart);
-                        if (targetGroup.isStickySessionEnabled()) {
-                            LOGGER.debug("Updating target group '{}' with sticky session attribute", targetGroup.getArn());
-                            updateTargetGroup(creationContext, TargetGroupAttribute.builder().key("stickiness.enabled").value("true").build(),
-                                    targetGroup.getArn());
-                        }
+                        LOGGER.debug("Updating target group '{}' with sticky session attribute", targetGroup.getArn());
                         createListener(creationContext, listener, targetGroupNameTypeSchemePortPart);
                         registerTarget(loadBalancingClient, stackId, targetGroup);
                     }
@@ -185,7 +179,11 @@ public class AwsNativeLoadBalancerLaunchService {
                     .findFirst()
                     .orElseThrow()
                     .loadBalancerArn();
-            awsLoadBalancerCommonService.enableDeletionProtection(context.getLoadBalancingClient(), loadBalancerArn);
+            awsLoadBalancerCommonService.modifyLoadBalancerAttributes(context.getLoadBalancingClient(), loadBalancerArn);
+            awsLoadBalancerCommonService.modifyTargetGroupAttributes(
+                    context.getLoadBalancingClient(),
+                    loadBalancerArn,
+                    awsLoadBalancer.isUseStickySessionForTargetGroup());
             context.setLoadBalancerArn(loadBalancerArn);
             Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
                     Enum.valueOf(LoadBalancerTypeAttribute.class, awsLoadBalancer.getScheme().getLoadBalancerType().name()));
@@ -279,15 +277,6 @@ public class AwsNativeLoadBalancerLaunchService {
         context.setTargetGroupArn(targetGroupArn);
         CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(targetGroupResource, ResourceStatus.CREATED);
         context.addResourceStatus(cloudResourceStatus);
-    }
-
-    private void updateTargetGroup(ResourceCreationContext context, TargetGroupAttribute attribute, String targetGroupArn) {
-        ModifyTargetGroupAttributesRequest modifyRequest = ModifyTargetGroupAttributesRequest.builder()
-                .targetGroupArn(targetGroupArn)
-                .attributes(attribute)
-                .build();
-        context.getLoadBalancingClient().modifyTargetGroupAttributes(modifyRequest);
-        LOGGER.debug("Target group '{}' has been updated with attribute '{}'", targetGroupArn, attribute);
     }
 
     private CreateTargetGroupResponse createOrGetTargetGroup(ResourceCreationContext context, CreateTargetGroupRequest targetGroupRequest) {
