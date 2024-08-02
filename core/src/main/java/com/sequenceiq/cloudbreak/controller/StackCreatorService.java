@@ -395,7 +395,6 @@ public class StackCreatorService {
     }
 
     private Blueprint determineBlueprint(StackV4Request stackRequest, Workspace workspace) {
-        blueprintService.updateDefaultBlueprintCollection(workspace.getId());
         if (stackRequest.getCluster() == null) {
             return null;
         }

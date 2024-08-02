@@ -339,17 +339,21 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private synchronized Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {
         blueprints.forEach(bp -> bp.setWorkspace(workspace));
         return IterableUtils.toList(blueprints).stream()
-                .map(b -> {
+                .map(blueprint -> {
                     // sometimes the blueprinttext is null during the save, but why?
                     try {
-                        return blueprintRepository.save(b);
+                        return blueprintRepository.save(blueprint);
                     } catch (DataIntegrityViolationException e) {
-                        LOGGER.debug("Blueprint already exists in the database: {}", b.getName(), e);
-                        return b;
+                        if (e.getMessage().contains("blueprintname_in_org_unique")) {
+                            LOGGER.debug("Blueprint already exists in the database: {}", blueprint.getName(), e);
+                        } else {
+                            LOGGER.warn("Cannot update the blueprint: {}, blueprinttext: {}", blueprint.getName(), blueprint.getBlueprintJsonText(), e);
+                        }
                     } catch (Exception e) {
-                        LOGGER.debug("Cannot update the blueprint: {}, blueprinttext is null: {}", b.getName(), b.getBlueprintJsonText() == null, e);
+                        LOGGER.warn("Cannot update the blueprint: {}, blueprinttext: {}", blueprint.getName(), blueprint.getBlueprintJsonText(), e);
                         throw e;
                     }
+                    return blueprint;
                 })
                 .collect(Collectors.toList());
     }

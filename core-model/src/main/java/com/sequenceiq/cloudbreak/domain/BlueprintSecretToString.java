@@ -9,7 +9,7 @@ public class BlueprintSecretToString extends SecretToString {
 
     @Override
     public String convertToDatabaseColumn(Secret attribute) {
-        if (attribute.equals(Secret.EMPTY)) {
+        if (attribute.getSecret() == null && attribute.getRaw() == null) {
             return BLANK;
         }
         return super.convertToDatabaseColumn(attribute);
