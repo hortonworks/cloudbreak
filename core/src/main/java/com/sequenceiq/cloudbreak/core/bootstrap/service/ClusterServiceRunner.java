@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -9,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -58,9 +60,8 @@ public class ClusterServiceRunner {
 
         MDCBuilder.buildMdcContext(cluster);
         hostRunner.runClusterServices(stackDto, Map.of(), runPreServiceDeploymentRecipe);
-        for (InstanceMetadataView instanceMetaData : stackDto.getRunningInstanceMetaDataSet()) {
-            instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
-        }
+        List<Long> instanceIds = stackDto.getRunningInstanceMetaDataSet().stream().map(InstanceMetadataView::getId).toList();
+        instanceMetaDataService.updateInstanceStatuses(instanceIds, SERVICES_RUNNING, null);
 
     }
 

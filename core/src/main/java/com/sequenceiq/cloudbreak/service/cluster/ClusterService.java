@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -361,17 +363,25 @@ public class ClusterService {
 
     private List<InstanceMetadataView> updateInstanceStatuses(List<InstanceMetadataView> notTerminatedInstanceMetaDatas,
             ExtendedHostStatuses extendedHostStatuses) {
-        return notTerminatedInstanceMetaDatas.stream()
+        List<Long> healthyInstanceIds = Lists.newArrayList();
+        Map<InstanceMetadataView, String> unhealthyInstancesWithReason = Maps.newHashMap();
+        List<InstanceMetadataView> runningInstances = notTerminatedInstanceMetaDatas.stream()
                 .filter(instanceMetaData -> SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
                 .map(instanceMetaData -> {
                     HostName hostName = hostName(instanceMetaData.getDiscoveryFQDN());
                     if (extendedHostStatuses.getHostsHealth().containsKey(hostName)) {
-                        InstanceStatus newState = extendedHostStatuses.isHostHealthy(hostName) ? SERVICES_HEALTHY : SERVICES_UNHEALTHY;
-                        String reason = extendedHostStatuses.statusReasonForHost(hostName);
-                        instanceMetaDataService.updateInstanceStatus(instanceMetaData, newState, reason);
+                        if (!extendedHostStatuses.isHostHealthy(hostName)) {
+                            String reason = extendedHostStatuses.statusReasonForHost(hostName);
+                            unhealthyInstancesWithReason.put(instanceMetaData, reason);
+                        } else {
+                            healthyInstanceIds.add(instanceMetaData.getId());
+                        }
                     }
                     return instanceMetaData;
                 }).collect(Collectors.toList());
+        unhealthyInstancesWithReason.forEach((imd, reason) -> instanceMetaDataService.updateInstanceStatus(imd, SERVICES_UNHEALTHY, reason));
+        instanceMetaDataService.updateInstanceStatuses(healthyInstanceIds, SERVICES_HEALTHY, null);
+        return runningInstances;
     }
 
     public void updateClusterCertExpirationState(Long stackId, boolean hostCertificateExpiring) {

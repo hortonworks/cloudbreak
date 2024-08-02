@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING2;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSION_FAILED;
@@ -28,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -71,7 +72,8 @@ class StopStartUpscaleFlowService {
     }
 
     void instancesStarted(long stackId, List<InstanceMetadataView> instancesStarted, List<InstanceMetadataView> recoveryCandidates) {
-        instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.SERVICES_RUNNING));
+        List<Long> instanceIds = instancesStarted.stream().map(InstanceMetadataView::getId).toList();
+        instanceMetaDataService.updateInstanceStatuses(instanceIds, SERVICES_RUNNING, null);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
                 "Instances: " + instancesStarted.size() + " started successfully.");
         if (recoveryCandidates.isEmpty()) {
@@ -133,7 +135,8 @@ class StopStartUpscaleFlowService {
 
     void clusterUpscaleFinished(StackDtoDelegate stack, String hostgroupName, List<InstanceMetadataView> commissioned, DetailedStackStatus finalStackStatus) {
         LOGGER.debug("StopStart upscale finished successfully. CommissionedCount={}", commissioned.size());
-        commissioned.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.SERVICES_HEALTHY));
+        List<Long> instanceIds = commissioned.stream().map(InstanceMetadataView::getId).toList();
+        instanceMetaDataService.updateInstanceStatuses(instanceIds, SERVICES_HEALTHY, null);
         stackUpdater.updateStackStatus(stack.getId(), finalStackStatus, String.format("finished starting nodes"));
         flowMessageService.fireEventAndLog(stack.getId(), finalStackStatus.getStatus().name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED,
                 hostgroupName, String.valueOf(commissioned.size()),

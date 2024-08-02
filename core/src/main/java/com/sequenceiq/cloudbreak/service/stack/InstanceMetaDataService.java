@@ -85,21 +85,15 @@ public class InstanceMetaDataService {
         LOGGER.debug("{} row was updated", modifiedRows);
     }
 
-    public void updateInstanceStatus(final InstanceMetadataView instanceMetaData, InstanceStatus newStatus) {
+    public void updateInstanceStatus(InstanceMetadataView instanceMetaData, InstanceStatus newStatus) {
         updateInstanceStatus(instanceMetaData, newStatus, null);
     }
 
-    public void updateInstanceStatus(final InstanceMetadataView instanceMetaData, InstanceStatus newStatus,
+    public void updateInstanceStatus(InstanceMetadataView instanceMetaData, InstanceStatus newStatus,
             String statusReason) {
         LOGGER.info("Update {} status to {} with statusReason {}", instanceMetaData.getInstanceId(), newStatus, statusReason);
         int modifiedRows = repository.updateStatusIfNotTerminated(instanceMetaData.getId(), newStatus, statusReason);
         LOGGER.debug("{} row was updated", modifiedRows);
-    }
-
-    public void updateAllInstancesToTerminated(List<Long> instanceMetadataIds) {
-        String reason = "Instances terminated successfully";
-        int modifiedRows = repository.updateAllInstancesToTerminated(instanceMetadataIds, InstanceStatus.TERMINATED, System.currentTimeMillis(), reason);
-        LOGGER.debug("Instances {} ({} row) was updated to {}. Reason: {}", instanceMetadataIds, modifiedRows, InstanceStatus.TERMINATED, reason);
     }
 
     public void updateAllInstancesToStatus(Collection<Long> instanceMetadataIds, InstanceStatus newStatus, String reason) {

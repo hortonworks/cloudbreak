@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -156,13 +155,19 @@ class ClusterServiceTest {
         StackDto stack = setupStack(STACK_ID);
         setupClusterApi(healthCheckResult, expectedStatusReason);
         setupInstanceMetadata(stack);
-        ArgumentCaptor<InstanceMetadataView> captor = ArgumentCaptor.forClass(InstanceMetadataView.class);
 
         underTest.updateClusterMetadata(STACK_ID);
 
-        verify(instanceMetaDataService, times(expectedCount)).updateInstanceStatus(captor.capture(), eq(expectedInstanceStatus), eq(expectedStatusReason));
-        if (expectedCount > 0) {
-            Assertions.assertEquals(FQDN1, captor.getValue().getDiscoveryFQDN());
+        if (expectedInstanceStatus == InstanceStatus.SERVICES_HEALTHY) {
+            ArgumentCaptor<List<Long>> captor = ArgumentCaptor.forClass(List.class);
+            verify(instanceMetaDataService).updateInstanceStatuses(captor.capture(), eq(expectedInstanceStatus), any());
+            assertEquals(INSTANCE_ID, captor.getValue().getFirst());
+        } else {
+            ArgumentCaptor<InstanceMetadataView> captor = ArgumentCaptor.forClass(InstanceMetadataView.class);
+            verify(instanceMetaDataService, times(expectedCount)).updateInstanceStatus(captor.capture(), eq(expectedInstanceStatus), eq(expectedStatusReason));
+            if (expectedCount > 0) {
+                assertEquals(FQDN1, captor.getValue().getDiscoveryFQDN());
+            }
         }
     }
 

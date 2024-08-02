@@ -74,18 +74,24 @@ public class InstanceMetaDataToCloudInstanceConverter {
                     Joiner.on(",").join(fetchedInstanceGroupNames),
                     Joiner.on(",").join(instanceGroupNames));
         }
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
         for (InstanceMetadataView instanceMetadataView : instanceMetadataViews) {
             InstanceGroupView instanceGroupView = instanceGroupViews.stream()
                     .filter(ig -> ig.getGroupName().equals(instanceMetadataView.getInstanceGroupName()))
                     .findFirst()
                     .orElseThrow(NotFoundException.notFound("InstanceGroup", instanceMetadataView.getInstanceGroupName()));
-            cloudInstances.add(convert(instanceMetadataView, instanceGroupView, stack));
+            cloudInstances.add(convert(instanceMetadataView, instanceGroupView, stack, environment));
         }
         return cloudInstances;
     }
 
     public CloudInstance convert(InstanceMetadataView metaDataEntity, InstanceGroupView group, StackView stackView) {
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stackView.getEnvironmentCrn());
+        return convert(metaDataEntity, group, stackView, environment);
+    }
+
+    private CloudInstance convert(InstanceMetadataView metaDataEntity, InstanceGroupView group, StackView stackView,
+            DetailedEnvironmentResponse environment) {
         Template template = group.getTemplate();
         InstanceStatus status = getInstanceStatus(metaDataEntity);
         String imageId = instanceMetadataToImageIdConverter.convert(metaDataEntity);
