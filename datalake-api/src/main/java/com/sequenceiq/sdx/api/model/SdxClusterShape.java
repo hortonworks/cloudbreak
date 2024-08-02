@@ -1,20 +1,23 @@
 package com.sequenceiq.sdx.api.model;
 
 public enum SdxClusterShape {
-    CUSTOM(Boolean.FALSE, "-cus"),
-    LIGHT_DUTY(Boolean.FALSE, "-ld"),
-    MEDIUM_DUTY_HA(Boolean.TRUE, "-md"),
-    ENTERPRISE(Boolean.TRUE, "-ent"),
-    MICRO_DUTY(Boolean.FALSE, "-mic"),
-    CONTAINERIZED(Boolean.FALSE, "-con");
+    CUSTOM(Boolean.FALSE, "-cus", Boolean.TRUE),
+    LIGHT_DUTY(Boolean.FALSE, "-ld", Boolean.TRUE),
+    MEDIUM_DUTY_HA(Boolean.TRUE, "-md", Boolean.TRUE),
+    ENTERPRISE(Boolean.TRUE, "-ent", Boolean.TRUE),
+    MICRO_DUTY(Boolean.FALSE, "-mic", Boolean.TRUE),
+    CONTAINERIZED(Boolean.FALSE, "-con", Boolean.FALSE);
 
     private final boolean multiAzEnabledByDefault;
 
     private final String resizeSuffix;
 
-    SdxClusterShape(Boolean multiAzEnabledByDefault, String resizeSuffix) {
+    private final boolean dbConfigSupported;
+
+    SdxClusterShape(Boolean multiAzEnabledByDefault, String resizeSuffix, Boolean dbConfigSupported) {
         this.multiAzEnabledByDefault = multiAzEnabledByDefault;
         this.resizeSuffix = resizeSuffix;
+        this.dbConfigSupported = dbConfigSupported;
     }
 
     public boolean isMultiAzEnabledByDefault() {
@@ -23,6 +26,10 @@ public enum SdxClusterShape {
 
     public String getResizeSuffix() {
         return resizeSuffix;
+    }
+
+    public boolean isDbConfigUnsupported() {
+        return !dbConfigSupported;
     }
 
     public boolean isHA() {

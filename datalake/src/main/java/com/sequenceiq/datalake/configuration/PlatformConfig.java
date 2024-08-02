@@ -116,8 +116,11 @@ public class PlatformConfig {
         ImmutableMap.Builder<DatabaseConfigKey, DatabaseConfig> builder = new ImmutableMap.Builder<>();
 
         for (CloudPlatform cloudPlatform : allPossibleExternalDbPlatforms) {
+            Set<? extends DatabaseType> databaseTypes = databaseTypeMap.getOrDefault(cloudPlatform, Set.of());
             for (SdxClusterShape sdxClusterShape : SdxClusterShape.values()) {
-                Set<? extends DatabaseType> databaseTypes = databaseTypeMap.getOrDefault(cloudPlatform, Set.of());
+                if (sdxClusterShape.isDbConfigUnsupported()) {
+                    continue;
+                }
                 if (databaseTypes.isEmpty()) {
                     readDbConfig(cloudPlatform, sdxClusterShape, null)
                             .ifPresent(dbc -> builder.put(new DatabaseConfigKey(cloudPlatform, sdxClusterShape, null), dbc));

@@ -2,10 +2,13 @@ package com.sequenceiq.datalake.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseConfig;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseConfigKey;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -24,6 +28,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 class PlatformConfigTest {
 
     private PlatformConfig underTest;
+
+    private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));
 
     @BeforeEach
     void setUp() {
@@ -60,6 +66,27 @@ class PlatformConfigTest {
                 new DatabaseConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY, AzureDatabaseType.FLEXIBLE_SERVER));
         assertNull(flexibleDatabaseStackConfig.getInstanceType());
         assertEquals(128, flexibleDatabaseStackConfig.getVolumeSize());
+    }
+
+    @Test
+    void testDatabaseConfigsNotReturnedForUnsupportedShapes() throws IOException {
+        List<SdxClusterShape> unsupportedShapes = Arrays.stream(SdxClusterShape.values())
+                .filter(SdxClusterShape::isDbConfigUnsupported)
+                .toList();
+
+        Map<DatabaseConfigKey, DatabaseConfig> actualResult = underTest.databaseConfigs();
+        for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
+            Set<? extends DatabaseType> databaseTypes = databaseTypeMap.getOrDefault(cloudPlatform, Set.of());
+            for (SdxClusterShape shape : unsupportedShapes) {
+                if (databaseTypes.isEmpty()) {
+                    assertFalse(actualResult.containsKey(new DatabaseConfigKey(cloudPlatform, shape, null)));
+                } else {
+                    for (DatabaseType databaseType : databaseTypes) {
+                        assertFalse(actualResult.containsKey(new DatabaseConfigKey(cloudPlatform, shape, databaseType)));
+                    }
+                }
+            }
+        }
     }
 
     @Test
