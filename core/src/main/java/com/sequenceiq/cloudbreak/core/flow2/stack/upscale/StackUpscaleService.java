@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEN
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_IMAGE_FALLBACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_ISSUE;
 import static java.lang.String.format;
 
 import java.util.Collection;
@@ -261,7 +262,8 @@ public class StackUpscaleService {
 
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
             CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type, String group) throws Exception {
-        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        LOGGER.error("Failed to vertically scale the stack", e);
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_VERTICALSCALE_ISSUE,
                 e.getMessage());
         return connector.resources().update(ac, cloudStack, request.getResourceList(), type, Optional.ofNullable(group));
     }

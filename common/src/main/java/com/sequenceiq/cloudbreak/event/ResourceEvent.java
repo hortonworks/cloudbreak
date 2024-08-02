@@ -245,6 +245,7 @@ public enum ResourceEvent {
     STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
     STACK_DOWNSCALE_FAILED("stack.downscale.failed"),
     STACK_UPSCALE_QUOTA_ISSUE("stack.upscale.quota.issue"),
+    STACK_VERTICALSCALE_ISSUE("stack.verticalscale.issue"),
     STACK_SELECT_FOR_DOWNSCALE("stack.select.for.downscale"),
     STACK_REPAIR_COMPLETE_CLEAN("stack.repair.complete.clean"),
     STACK_REPAIR_ATTEMPTING("stack.repair.attempting"),
