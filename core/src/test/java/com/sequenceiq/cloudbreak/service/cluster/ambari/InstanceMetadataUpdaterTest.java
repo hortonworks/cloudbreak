@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.cluster.PackageName;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -72,9 +71,6 @@ public class InstanceMetadataUpdaterTest {
 
     @Mock
     private StackService stackService;
-
-    @Mock
-    private UserDataService userDataService;
 
     @InjectMocks
     private InstanceMetadataUpdater underTest;
@@ -118,7 +114,6 @@ public class InstanceMetadataUpdaterTest {
         underTest.updatePackageVersionsOnAllInstances(1L);
 
         verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class));
-        verify(userDataService, times(2)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -142,7 +137,6 @@ public class InstanceMetadataUpdaterTest {
                         .anyMatch(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd")))
                 .findFirst()
                 .get().getInstanceMetaData().iterator().next().getInstanceStatus());
-        verify(userDataService, times(1)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -159,7 +153,6 @@ public class InstanceMetadataUpdaterTest {
 
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
                 eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING), anyCollection());
-        verify(userDataService, times(2)).makeSureUserDataIsMigrated(anyLong());
     }
 
     @Test
@@ -176,7 +169,6 @@ public class InstanceMetadataUpdaterTest {
 
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
                 eq(ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT), anyCollection());
-        verify(userDataService, times(2)).makeSureUserDataIsMigrated(anyLong());
     }
 
     private Map<String, String> packageMap() {

@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -73,9 +72,6 @@ public class InstanceMetadataUpdater {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private UserDataService userDataService;
 
     public void updatePackageVersionsOnAllInstances(Long stackId) throws Exception {
         Stack stack = getStackForFreshInstanceStatuses(stackId);
@@ -136,7 +132,7 @@ public class InstanceMetadataUpdater {
                     pkgVersionsMMap.putAll(Multimaps.forMap(Maps.transformValues(image.getPackageVersions(), this::removeBuildVersion)));
                     changedVersionsByHost.put(im.getDiscoveryFQDN(), pkgVersionsMMap);
                 }
-                image = updatePackageVersions(stackId, image, packageVersionsOnHost);
+                image = getImageWithPackageVersions(stackId, image, packageVersionsOnHost);
                 im.setImage(new Json(image));
                 instanceMetaDataService.save(im);
             }
@@ -322,8 +318,7 @@ public class InstanceMetadataUpdater {
         return version.split("-")[0];
     }
 
-    private Image updatePackageVersions(Long stackId, Image image, Map<String, String> packageVersionsOnHost) {
-        userDataService.makeSureUserDataIsMigrated(stackId);
+    private Image getImageWithPackageVersions(Long stackId, Image image, Map<String, String> packageVersionsOnHost) {
         return new Image(image.getImageName(), new HashMap<>(), image.getOs(), image.getOsType(), image.getArchitecture(), image.getImageCatalogUrl(),
                 image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost, image.getDate(), image.getCreated());
     }

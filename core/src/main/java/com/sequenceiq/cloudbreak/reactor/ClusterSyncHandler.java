@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.ClusterStatusUpdater;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -34,6 +35,9 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
     @Inject
     private InstanceMetadataUpdater instanceMetadataUpdater;
 
+    @Inject
+    private UserDataService userDataService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterSyncRequest.class);
@@ -49,6 +53,7 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
             clusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster != null && (stack.isAvailable() || stack.isMaintenanceModeEnabled())) {
                 instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack.getId());
+                userDataService.makeSureUserDataIsMigrated(stack.getId());
             }
             result = new ClusterSyncResult(request);
         } catch (Exception e) {
