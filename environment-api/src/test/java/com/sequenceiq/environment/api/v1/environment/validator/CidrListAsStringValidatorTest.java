@@ -34,7 +34,7 @@ class CidrListAsStringValidatorTest {
                 { "fe80:0000:0000:0000:0204:61ff:fe9d:f156/128",    true },
                 { "fe80::0204:61ff:fe9d:f156/9",                    true },
                 { null,                                             true },
-                { "",                                               false },
+                { "",                                               true },
                 { "0.0.0.0/0,",                                     false },
                 { "0.0.0.0/0 ",                                     false },
                 { ",",                                              false },

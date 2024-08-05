@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.validation.CidrValidatorHelper.isCidrPat
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.CharMatcher;
 
 public class CidrListAsStringValidator implements ConstraintValidator<ValidCidrListAsString, String> {
@@ -16,7 +18,7 @@ public class CidrListAsStringValidator implements ConstraintValidator<ValidCidrL
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         boolean result = true;
-        if (value != null) {
+        if (StringUtils.isNotEmpty(value)) {
             String[] cidrs = value.split(",");
             int numberOfCommas = CharMatcher.is(',').countIn(value);
             int count = 0;
