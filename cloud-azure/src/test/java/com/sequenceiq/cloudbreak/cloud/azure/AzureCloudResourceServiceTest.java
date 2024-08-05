@@ -22,6 +22,7 @@ import org.mockito.stubbing.Answer;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.resourcemanager.compute.models.ManagedDiskParameters;
 import com.azure.resourcemanager.compute.models.OSDisk;
+import com.azure.resourcemanager.compute.models.StorageAccountTypes;
 import com.azure.resourcemanager.compute.models.StorageProfile;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.resources.models.Deployment;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -203,6 +205,8 @@ public class AzureCloudResourceServiceTest {
         when(vm.storageProfile()).thenReturn(storageProfile);
         when(vm.storageProfile().osDisk()).thenReturn(osDisk);
         when(osDisk.managedDisk()).thenReturn(managedDiskParameters);
+        when(osDisk.diskSizeGB()).thenReturn(200);
+        when(managedDiskParameters.storageAccountType()).thenReturn(StorageAccountTypes.STANDARD_SSD_LRS);
         when(managedDiskParameters.id()).thenReturn("diskId1");
         when(osDisk.name()).thenReturn("diskName1");
 
@@ -212,8 +216,11 @@ public class AzureCloudResourceServiceTest {
 
         assertEquals(1, osDiskResources.size());
         CloudResource diskResource = osDiskResources.get(0);
+        VolumeSetAttributes volumeSetAttributes = diskResource.getParameter("attributes", VolumeSetAttributes.class);
         assertEquals("diskName1", diskResource.getName());
         assertEquals("diskId1", diskResource.getReference());
+        assertEquals(200, volumeSetAttributes.getVolumes().get(0).getSize());
+        assertEquals("StandardSSD_LRS", volumeSetAttributes.getVolumes().get(0).getType());
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {

@@ -33,8 +33,10 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -216,7 +218,7 @@ public class AzureCloudResourceService {
     }
 
     // OS disks are not part of the deployment as separate deployment operations meaning they should be collected
-    private CloudResource collectOsDisk(String instanceId, VirtualMachine virtualMachine) {
+    private CloudResource collectOsDisk(String instanceId, VirtualMachine virtualMachine, String availabilityZone) {
         StorageProfile storageProfile = virtualMachine.storageProfile();
         OSDisk osDisk = storageProfile.osDisk();
         LOGGER.debug("OS disk {} found for VM {}", osDisk.name(), virtualMachine.name());
@@ -227,6 +229,12 @@ public class AzureCloudResourceService {
                 .withPersistent(true)
                 .withReference(osDisk.managedDisk().id())
                 .withType(ResourceType.AZURE_DISK)
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                                .withAvailabilityZone(availabilityZone)
+                                .withDeleteOnTermination(Boolean.TRUE)
+                                .withVolumes(List.of(new VolumeSetAttributes.Volume(osDisk.name(), null, osDisk.diskSizeGB(),
+                                        osDisk.managedDisk().storageAccountType().toString(), CloudVolumeUsageType.GENERAL)))
+                                .build()))
                 .build();
     }
 
@@ -244,7 +252,7 @@ public class AzureCloudResourceService {
                 .reduce(new ArrayList<>(), (acc, azureInstance) -> {
                     if (instancesByName.containsKey(azureInstance.name())) {
                         CloudResource vm = instancesByName.remove(azureInstance.name());
-                        acc.add(collectOsDisk(vm.getInstanceId(), azureInstance));
+                        acc.add(collectOsDisk(vm.getInstanceId(), azureInstance, vm.getAvailabilityZone()));
                     }
                     return acc;
                 }, this::mergeLists);
