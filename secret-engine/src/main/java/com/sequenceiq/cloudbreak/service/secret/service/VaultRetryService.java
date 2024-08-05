@@ -24,6 +24,8 @@ public class VaultRetryService {
 
     private static final String FORBIDDEN_ERROR_MESSAGE = "Status 403 Forbidden";
 
+    private static final String CONNECTION_POOL_SHUT_DOWN = "Connection pool shut down";
+
     @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
@@ -58,7 +60,8 @@ public class VaultRetryService {
             throw e;
         } catch (RuntimeException e) {
             LOGGER.warn("Exception during vault " + operation, e);
-            if (e.getMessage() != null && e.getMessage().contains(FORBIDDEN_ERROR_MESSAGE)) {
+            if (e.getMessage() != null
+                    && (e.getMessage().contains(FORBIDDEN_ERROR_MESSAGE) || e.getMessage().equals(CONNECTION_POOL_SHUT_DOWN))) {
                 throw e;
             } else {
                 throw new VaultRetryException(e.getMessage(), e, operation, metricType);

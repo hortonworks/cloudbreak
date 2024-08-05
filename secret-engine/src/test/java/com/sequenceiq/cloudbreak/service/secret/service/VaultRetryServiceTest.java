@@ -78,4 +78,11 @@ class VaultRetryServiceTest {
         assertEquals("error", exception.getMessage());
         verify(metricService, never()).incrementMetricCounter(any(MetricType.class));
     }
+
+    @Test
+    void testRecoverNonRetryableConnectionPoolShutDownException() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.recover(new IllegalStateException("Connection pool shut down")));
+        assertEquals("Connection pool shut down", exception.getMessage());
+        verify(metricService, never()).incrementMetricCounter(any(MetricType.class));
+    }
 }
