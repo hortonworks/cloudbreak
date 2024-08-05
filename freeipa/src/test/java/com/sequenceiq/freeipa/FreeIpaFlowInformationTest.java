@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
@@ -54,7 +55,8 @@ class FreeIpaFlowInformationTest {
             FreeIpaProvisionEvent.FREEIPA_PROVISION_EVENT.event(),
             StackProvisionEvent.START_CREATION_EVENT.event(),
             FreeIpaRebuildFlowEvent.REBUILD_EVENT.event(),
-            FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_EVENT.event()
+            FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_EVENT.event(),
+            FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event()
     );
 
     @Mock

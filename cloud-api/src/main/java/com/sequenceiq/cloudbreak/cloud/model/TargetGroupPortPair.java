@@ -23,23 +23,34 @@ public class TargetGroupPortPair {
 
     private final int trafficPort;
 
+    private final NetworkProtocol trafficProtocol;
+
     private final int healthCheckPort;
+
+    private final String healthCheckPath;
+
+    private final NetworkProtocol healthCheckProtocol;
+
+    public TargetGroupPortPair(int trafficPort, int healthCheckPort) {
+        this.trafficPort = trafficPort;
+        this.healthCheckPort = healthCheckPort;
+        this.healthCheckPath = null;
+        this.trafficProtocol = null;
+        this.healthCheckProtocol = null;
+    }
 
     @JsonCreator
     public TargetGroupPortPair(
             @JsonProperty("trafficPort") int trafficPort,
-            @JsonProperty("healthCheckPort") int healthCheckPort) {
-
+            @JsonProperty("trafficProtocol") NetworkProtocol trafficProtocol,
+            @JsonProperty("healthCheckPort") int healthCheckPort,
+            @JsonProperty("healthCheckPath") String healthCheckPath,
+            @JsonProperty("healthCheckProtocol") NetworkProtocol healthCheckProtocol) {
         this.trafficPort = trafficPort;
+        this.trafficProtocol = trafficProtocol;
         this.healthCheckPort = healthCheckPort;
-    }
-
-    public Integer getTrafficPort() {
-        return trafficPort;
-    }
-
-    public Integer getHealthCheckPort() {
-        return healthCheckPort;
+        this.healthCheckPath = healthCheckPath;
+        this.healthCheckProtocol = healthCheckProtocol;
     }
 
     @Override
@@ -52,20 +63,46 @@ public class TargetGroupPortPair {
         }
         TargetGroupPortPair portPair = (TargetGroupPortPair) o;
         return trafficPort == portPair.trafficPort &&
-            healthCheckPort == portPair.healthCheckPort;
+                healthCheckPort == portPair.healthCheckPort &&
+                Objects.equals(healthCheckPath, portPair.healthCheckPath) &&
+                Objects.equals(trafficProtocol, portPair.trafficProtocol) &&
+                Objects.equals(healthCheckProtocol, portPair.healthCheckProtocol);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trafficPort, healthCheckPort);
+        return Objects.hash(trafficPort, healthCheckPort, healthCheckPath, trafficProtocol, healthCheckProtocol);
     }
 
     @Override
     public String toString() {
         return "TargetGroupPortPair{" +
                 "trafficPort=" + trafficPort +
+                ", trafficProtocol=" + trafficProtocol +
                 ", healthCheckPort=" + healthCheckPort +
+                ", healthCheckPath=" + healthCheckPath +
+                ", healthCheckProtocol=" + healthCheckProtocol +
                 '}';
+    }
+
+    public Integer getTrafficPort() {
+        return trafficPort;
+    }
+
+    public NetworkProtocol getTrafficProtocol() {
+        return trafficProtocol;
+    }
+
+    public Integer getHealthCheckPort() {
+        return healthCheckPort;
+    }
+
+    public String getHealthCheckPath() {
+        return healthCheckPath;
+    }
+
+    public NetworkProtocol getHealthCheckProtocol() {
+        return healthCheckProtocol;
     }
 
     public static class TargetGroupPortPairDeserializer extends KeyDeserializer {

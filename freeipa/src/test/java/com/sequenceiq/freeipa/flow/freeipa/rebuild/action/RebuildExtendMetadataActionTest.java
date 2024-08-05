@@ -61,13 +61,14 @@ class RebuildExtendMetadataActionTest {
     @Test
     void doExecute() throws Exception {
         Stack stack = new Stack();
+        stack.setId(4L);
         CloudContext cloudContext = mock(CloudContext.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         CloudStack cloudStack = mock(CloudStack.class);
         when(cloudContext.getId()).thenReturn(4L);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(cloudResources);
         List<CloudInstance> allInstance = List.of(mock(CloudInstance.class), mock(CloudInstance.class));
         when(cloudStackConverter.buildInstances(stack)).thenReturn(allInstance);
 

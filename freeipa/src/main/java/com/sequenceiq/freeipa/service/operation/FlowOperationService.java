@@ -12,6 +12,7 @@ import com.sequenceiq.flow.api.model.operation.OperationResource;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.flow.converter.OperationDetailsPopulator;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 
@@ -33,7 +34,7 @@ public class FlowOperationService {
             com.sequenceiq.flow.api.model.operation.OperationType operationType = operationFlowsView.getOperationType();
             if (com.sequenceiq.flow.api.model.operation.OperationType.PROVISION.equals(operationType)) {
                 operationView = operationDetailsPopulator.createOperationView(operationFlowsView, operationResource,
-                        List.of(StackProvisionFlowConfig.class, FreeIpaProvisionFlowConfig.class));
+                        List.of(StackProvisionFlowConfig.class, FreeIpaLoadBalancerProvisionFlowConfig.class, FreeIpaProvisionFlowConfig.class));
             } else {
                 operationView = operationDetailsPopulator.createOperationView(operationFlowsView, operationResource);
             }

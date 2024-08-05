@@ -34,7 +34,7 @@ public class RebuildExtendMetadataAction extends AbstractRebuildAction<StackEven
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
         stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Extending metadata");
-        List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack());
+        List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack().getId());
         List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
         CollectMetadataRequest request = new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,
                 allKnownInstances, allKnownInstances);

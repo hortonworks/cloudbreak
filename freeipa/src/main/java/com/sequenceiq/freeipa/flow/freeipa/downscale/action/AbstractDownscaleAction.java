@@ -100,7 +100,7 @@ public abstract class AbstractDownscaleAction<P extends Payload> extends Abstrac
     }
 
     protected List<CloudResource> getCloudResources(Stack stack) {
-        return resourceService.getAllCloudResource(stack);
+        return resourceService.getAllCloudResource(stack.getId());
     }
 
     protected List<CloudInstance> getCloudInstances(Stack stack, List<String> instanceIds) {

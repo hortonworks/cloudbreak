@@ -69,7 +69,7 @@ public class RebuildAddInstanceAction extends AbstractRebuildAction<StackEvent> 
 
     private void addNewInstances(StackContext context, List<CloudInstance> newInstances) {
         Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), newInstances, List.of());
-        List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack());
+        List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack().getId());
         CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
         UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
                 context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, cloudResources,

@@ -35,7 +35,7 @@ public class RebuildCollectResourcesAction extends AbstractRebuildAction<StackEv
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
         stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Collecting resources");
-        List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack());
+        List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack().getId());
         List<CloudInstance> cloudInstances = context.getStack().getAllInstanceMetaDataList().stream()
                 .filter(im -> !im.isTerminated())
                 .map(instanceMetaData -> instanceConverter.convert(instanceMetaData))

@@ -16,7 +16,6 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.entity.Resource;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.ResourceRepository;
 
 @Service
@@ -100,8 +99,8 @@ public class ResourceService {
         return repository.findFirstByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
     }
 
-    public List<CloudResource> getAllCloudResource(Stack stack) {
-        return findAllByStackId(stack.getId()).stream()
+    public List<CloudResource> getAllCloudResource(Long stackId) {
+        return findAllByStackId(stackId).stream()
                 .map(resource -> resourceToCloudResourceConverter.convert(resource))
                 .collect(Collectors.toList());
     }

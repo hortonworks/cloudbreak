@@ -159,6 +159,16 @@ freeipa:
   permission.polling:
     interval: 20
     delaymin: 15
+  loadbalancer:
+    health-check:
+      port: 5080
+      path: /lb-health-check
+      protocol: HTTPS
+    targets:
+      53: TCP_UDP
+      88: TCP_UDP
+      749: TCP
+      4444: UDP
 info:
   app:
     capabilities:

@@ -399,7 +399,7 @@ class RebuildFlowIntegrationTest {
     @Test
     public void testRebuildWhenSuccessful() throws Exception {
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(STACK_ID)).thenReturn(cloudResources);
         ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
         Stack updatedStack = new Stack();
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
@@ -492,7 +492,7 @@ class RebuildFlowIntegrationTest {
     @Test
     public void testHealthValidateFails() throws Exception {
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(STACK_ID)).thenReturn(cloudResources);
         ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
         Stack updatedStack = new Stack();
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
@@ -585,7 +585,7 @@ class RebuildFlowIntegrationTest {
     @Test
     public void testPostInstallFails() throws Exception {
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(STACK_ID)).thenReturn(cloudResources);
         ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
         Stack updatedStack = new Stack();
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
@@ -673,7 +673,7 @@ class RebuildFlowIntegrationTest {
     @Test
     public void testCleanupFails() throws Exception {
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(STACK_ID)).thenReturn(cloudResources);
         ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
         Stack updatedStack = new Stack();
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
@@ -759,7 +759,7 @@ class RebuildFlowIntegrationTest {
     @Test
     public void testRestoreFails() throws Exception {
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(STACK_ID)).thenReturn(cloudResources);
         ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
         Stack updatedStack = new Stack();
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);
@@ -838,7 +838,7 @@ class RebuildFlowIntegrationTest {
     @Test
     public void testBackupValidationFails() throws Exception {
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(STACK_ID)).thenReturn(cloudResources);
         ArgumentCaptor<List<CloudInstance>> instancesCaptor = ArgumentCaptor.forClass(List.class);
         Stack updatedStack = new Stack();
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(eq(stack), instancesCaptor.capture(), eq(List.of()))).thenReturn(updatedStack);

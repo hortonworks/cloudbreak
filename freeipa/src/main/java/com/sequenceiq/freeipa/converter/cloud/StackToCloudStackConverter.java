@@ -36,10 +36,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -114,28 +113,28 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private LoadBalancerToCloudLoadBalancerConverter loadBalancerToCloudLoadBalancerConverter;
+
     @Override
     public CloudStack convert(Stack stack) {
-        return convert(stack, Collections.emptySet());
-    }
-
-    public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         ImageEntity imageEntity = imageService.getByStack(stack);
         Image image = imageConverter.convert(imageEntity);
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> instanceGroups = buildInstanceGroups(
                 stack,
-                Lists.newArrayList(stack.getInstanceGroups()),
-                deleteRequestedInstances,
+                new ArrayList<>(stack.getInstanceGroups()),
+                Collections.emptyList(),
                 image.getImageName(),
                 fileSystemView);
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         Map<String, String> parameters = buildCloudStackParameters(stack.getCloudPlatform(), stack.getEnvironmentCrn());
+        List<CloudLoadBalancer> loadBalancer = loadBalancerToCloudLoadBalancerConverter.convertLoadBalancer(stack.getId(), new HashSet<>(instanceGroups));
 
         return new CloudStack(instanceGroups, network, image, parameters,
                 getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), null,
+                instanceAuthentication.getPublicKey(), null, loadBalancer,
                 imageEntity.getUserdataWrapper(), null, stack.isMultiAz(), stack.getSupportedImdsVersion());
     }
 
@@ -175,7 +174,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
         List<Group> groups = buildInstanceGroups(
                 stack,
-                Lists.newArrayList(stack.getInstanceGroups()),
+                new ArrayList<>(stack.getInstanceGroups()),
                 Collections.emptySet(),
                 imageEntity.getImageName(),
                 fileSystemView);
@@ -208,7 +207,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private Map<String, String> getUserDefinedTags(Stack stack) {
-        Map<String, String> result = Maps.newHashMap();
+        Map<String, String> result = new HashMap<>();
         try {
             if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
                 StackTags stackTag = stack.getTags().get(StackTags.class);

@@ -116,6 +116,9 @@ public class StackToCloudStackConverterTest {
     private ResourceService resourceService;
 
     @Mock
+    private LoadBalancerToCloudLoadBalancerConverter loadBalancerToCloudLoadBalancerConverter;
+
+    @Mock
     private ImageConverter imageConverter;
 
     @Test

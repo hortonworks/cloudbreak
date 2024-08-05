@@ -79,6 +79,7 @@ class RebuildAddInstanceActionTest {
     @Test
     void doExecute() throws Exception {
         Stack stack = new Stack();
+        stack.setId(4L);
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("ipa.test");
@@ -91,7 +92,7 @@ class RebuildAddInstanceActionTest {
         CloudStack cloudStack = mock(CloudStack.class);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(cloudResources);
         ArgumentCaptor<InstanceMetaData> instanceMetaDataArgumentCaptor = ArgumentCaptor.forClass(InstanceMetaData.class);
         CloudInstance cloudInstance = mock(CloudInstance.class);
         when(cloudStackConverter.buildInstance(eq(stack), instanceMetaDataArgumentCaptor.capture(), any(InstanceGroup.class), any(),

@@ -58,9 +58,9 @@ public class CloudStack {
 
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            String gatewayUserData, String coreUserData, boolean multiAz, String supportedImdsVersion) {
+            List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData, boolean multiAz, String supportedImdsVersion) {
         this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                Collections.emptyList(), null, gatewayUserData, coreUserData, multiAz, supportedImdsVersion);
+                loadBalancers, null, gatewayUserData, coreUserData, multiAz, supportedImdsVersion);
     }
 
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,

@@ -313,7 +313,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true, null);
+                null, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true, null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -372,7 +372,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true, null);
+                null, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true, null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN

@@ -65,12 +65,13 @@ class RebuildCollectResourcesActionTest {
     @Test
     void doExecute() throws Exception {
         Stack stack = new Stack();
+        stack.setId(4L);
         CloudContext cloudContext = mock(CloudContext.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         CloudStack cloudStack = mock(CloudStack.class);
         StackContext context = new StackContext(mock(FlowParameters.class), stack, cloudContext, cloudCredential, cloudStack);
         List<CloudResource> cloudResources = List.of(mock(CloudResource.class));
-        when(resourceService.getAllCloudResource(stack)).thenReturn(cloudResources);
+        when(resourceService.getAllCloudResource(stack.getId())).thenReturn(cloudResources);
         InstanceGroup instanceGroup = new InstanceGroup();
         stack.setInstanceGroups(Set.of(instanceGroup));
         InstanceMetaData im1 = new InstanceMetaData();
