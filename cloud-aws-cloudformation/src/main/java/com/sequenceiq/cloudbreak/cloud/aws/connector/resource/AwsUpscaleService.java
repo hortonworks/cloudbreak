@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -94,6 +95,9 @@ public class AwsUpscaleService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private PersistenceNotifier resourceNotifier;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         LOGGER.info("Upscale AWS cluster with adjustment and threshold: {}. Resources: {}", adjustmentTypeWithThreshold, resources);
@@ -145,8 +149,13 @@ public class AwsUpscaleService {
                 throw new RuntimeException("Additional resource creation failed: " + failedResources);
             }
             cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, true, ac.getCloudContext());
-            awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+            List<CloudResource> rootVolumeResources = awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
             awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView, stack.getTags());
+
+            //Delete root volume resources if persisted and create for all instances
+            resourceNotifier.notifyDeletions(rootVolumeResources, ac.getCloudContext());
+            // Save Root Volume Resources
+            resourceNotifier.notifyAllocations(rootVolumeResources, ac.getCloudContext());
 
             for (CloudLoadBalancer loadBalancer : stack.getLoadBalancers()) {
                 cfStackUtil.addLoadBalancerTargets(ac, loadBalancer, newInstances);

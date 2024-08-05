@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -114,10 +115,15 @@ class AwsUpscaleServiceTest {
     @InjectMocks
     private AwsUpscaleService awsUpscaleService;
 
+    @Mock
+    private PersistenceNotifier resourceNotifier;
+
     @Test
     void upscaleTest() throws AmazonAutoscalingFailedException {
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
+        List<CloudResource> rootVolumeResources = List.of(mock(CloudResource.class));
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
                 .autoScalingGroups(
                         newAutoScalingGroup("masterASG", List.of("i-master1", "i-master2")),
@@ -128,7 +134,7 @@ class AwsUpscaleServiceTest {
                 .thenReturn(describeAutoScalingGroupsResult);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
-        when(awsClient.createEc2Client(any(), any())).thenReturn(mock(AmazonEc2Client.class));
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
 
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("worker")))
                 .thenReturn("workerASG");
@@ -171,6 +177,7 @@ class AwsUpscaleServiceTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
+        when(awsTaggingService.tagRootVolumes(authenticatedContext, ec2Client, allInstances, tags)).thenReturn(rootVolumeResources);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold);
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
@@ -192,6 +199,8 @@ class AwsUpscaleServiceTest {
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
         verify(syncUserDataService).syncUserData(any(), any(), any());
+        verify(resourceNotifier).notifyDeletions(rootVolumeResources, cloudContext);
+        verify(resourceNotifier).notifyAllocations(rootVolumeResources, cloudContext);
     }
 
     @Test
