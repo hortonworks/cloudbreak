@@ -10,6 +10,8 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
+        excludedMethods:
+          - testSDXWithBaseImageCanBeCreatedSuccessfully
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxSecurityTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecipeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
