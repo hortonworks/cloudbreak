@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -69,6 +70,9 @@ public class GcpConnector implements CloudConnector {
 
     @Inject
     private GcpObjectStorageConnector gcpObjectStorageConnector;
+
+    @Inject
+    private GcpAvailabilityZoneConnector gcpAvailabilityZoneConnector;
 
     @Override
     public Authenticator authentication() {
@@ -156,5 +160,10 @@ public class GcpConnector implements CloudConnector {
     @Override
     public EncryptionResources encryptionResources() {
         return null;
+    }
+
+    @Override
+    public AvailabilityZoneConnector availabilityZoneConnector() {
+        return gcpAvailabilityZoneConnector;
     }
 }

@@ -60,6 +60,9 @@ public class GcpConnectorTest {
     @Mock
     private GcpObjectStorageConnector gcpObjectStorageConnector;
 
+    @Mock
+    private GcpAvailabilityZoneConnector gcpAvailabilityZoneConnector;
+
     @Test
     public void testAuthentication() {
         Assert.assertEquals(authenticator, underTest.authentication());
@@ -138,6 +141,11 @@ public class GcpConnectorTest {
     @Test
     public void testPlatformResources() {
         Assert.assertEquals(gcpPlatformResources, underTest.platformResources());
+    }
+
+    @Test
+    public void testAvailabilityZoneConnector() {
+        Assert.assertEquals(gcpAvailabilityZoneConnector, underTest.availabilityZoneConnector());
     }
 
 }

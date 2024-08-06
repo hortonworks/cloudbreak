@@ -587,6 +587,28 @@ public class GcpPlatformResources implements PlatformResources {
         }
     }
 
+    public Map<String, Set<String>> getAvailabilityZonesForVmTypes(ExtendedCloudCredential cloudCredential, Region region) {
+        Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
+
+        Map<String, Set<String>> availabilityZonesForVmTypes = new HashMap<>();
+
+        try {
+            CloudRegions regions = regions(cloudCredential, region, null, true);
+            for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
+                MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();
+                for (MachineType machineType : machineTypeList.getItems()) {
+                    availabilityZonesForVmTypes.putIfAbsent(machineType.getName(), new HashSet<>());
+                    availabilityZonesForVmTypes.get(machineType.getName()).add(availabilityZone.value());
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to get availability zones: {}", e);
+        }
+
+        return availabilityZonesForVmTypes;
+    }
+
     private List<KeyRing> getKeyRingList(CloudKMS cloudKMS, String projectId, String regionName) {
         String keyRingPath = String.format("projects/%s/locations/%s", projectId, regionName);
         try {
