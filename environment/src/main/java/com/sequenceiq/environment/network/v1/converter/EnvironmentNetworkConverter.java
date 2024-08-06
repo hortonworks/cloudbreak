@@ -36,4 +36,8 @@ public interface EnvironmentNetworkConverter {
     default void updateProviderSpecificParameters(BaseNetwork baseNetwork, NetworkDto networkDto) {
 
     }
+
+    default Set<String> getAvailabilityZones(BaseNetwork baseNetwork) {
+        return Set.of();
+    }
 }

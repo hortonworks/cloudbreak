@@ -49,7 +49,7 @@ public class FreeIpaGcpNetworkProvider implements FreeIpaNetworkProvider {
         GcpParams gcpParams = environment.getNetwork()
                 .getGcp();
         String selectedZone = availabilityZoneOfSubnet;
-        if (gcpParams != null) {
+        if (gcpParams != null && gcpParams.getAvailabilityZones().size() == 1) {
             selectedZone = gcpParams
                     .getAvailabilityZones()
                     .stream()

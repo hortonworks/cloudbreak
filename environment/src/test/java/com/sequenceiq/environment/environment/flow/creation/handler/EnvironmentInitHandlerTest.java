@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,17 +13,20 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
@@ -37,7 +41,9 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.domain.PemBasedEnvironmentDomainProvider;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
@@ -80,11 +86,12 @@ class EnvironmentInitHandlerTest {
             = new EnvironmentInitHandler(eventSender, environmentService, environmentNetworkService,
             eventBus, virtualGroupService, environmentNetworkConverterMap, domainProvider);
 
-    @Test
-    void testInitFailure() {
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
+    void testInitFailure(CloudPlatform cloudPlatform) {
         EnvironmentDto dto = getEnvironmentDto();
         Event<EnvironmentDto> event = new Event<>(dto);
-        Environment environment = getEnvironment();
+        Environment environment = getEnvironment(cloudPlatform);
 
         when(environmentService.findEnvironmentById(dto.getId())).thenReturn(Optional.of(environment));
         when(virtualGroupService.createVirtualGroups(anyString(), anyString())).thenThrow(IllegalStateException.class);
@@ -94,26 +101,30 @@ class EnvironmentInitHandlerTest {
         verify(eventBus, times(1)).notify(eq(FAILED_ENV_CREATION_EVENT.name()), any(Event.class));
     }
 
-    @Test
-    void testInitSuccess() {
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
+    void testInitSuccess(CloudPlatform cloudPlatform) {
         EnvironmentDto dto = getEnvironmentDto();
         NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
                 .build();
         dto.setNetwork(networkDto);
         Event<EnvironmentDto> event = new Event<>(dto);
-        Environment environment = getEnvironment();
+        Environment environment = getEnvironment(cloudPlatform);
         EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
         Network network = mock(Network.class);
         String cidr = "10.0.0.0/16";
+        String availabilityZone = "us-west2-a";
 
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(environmentNetworkConverter);
         when(environmentNetworkConverter.convertToNetwork(environment.getNetwork())).thenReturn(network);
         when(environmentNetworkService.getNetworkCidr(any(), anyString(), any())).thenReturn(new NetworkCidr(cidr));
         when(environmentService.findEnvironmentById(dto.getId())).thenReturn(Optional.of(environment));
-        Map<UmsVirtualGroupRight, String> virtualGroups = Map.of(UmsVirtualGroupRight.HBASE_ADMIN, "apple1", UmsVirtualGroupRight.ENVIRONMENT_ACCESS, "apple2");
+        Map<UmsVirtualGroupRight, String> virtualGroups = Map.of(UmsVirtualGroupRight.HBASE_ADMIN, "apple1", UmsVirtualGroupRight.ENVIRONMENT_ACCESS,
+                "apple2");
         when(virtualGroupService.createVirtualGroups(ACCOUNT_ID, CRN)).thenReturn(virtualGroups);
-        CloudRegions cloudRegions = new CloudRegions(Collections.emptyMap(), Collections.emptyMap(),
+        CloudRegions cloudRegions = new CloudRegions(Map.of(region(REGION), List.of(AvailabilityZone.availabilityZone(availabilityZone))),
+                Collections.emptyMap(),
                 Collections.emptyMap(), "apple", true);
         when(environmentService.getRegionsByEnvironment(environment)).thenReturn(cloudRegions);
 
@@ -121,11 +132,14 @@ class EnvironmentInitHandlerTest {
 
         assertEquals(cidr, environment.getNetwork().getNetworkCidr());
         verify(environmentNetworkService, times(1))
-                .getNetworkCidr(eq(network), eq(CloudPlatform.AWS.name()), eq(environment.getCredential()));
+                .getNetworkCidr(eq(network), eq(cloudPlatform.name()), eq(environment.getCredential()));
         verify(environmentService, times(0)).setAdminGroupName(environment, null);
         verify(environmentService, times(1)).assignEnvironmentAdminRole(CREATOR, CRN);
         verify(environmentService, times(1)).setLocation(environment, environment.getRegionWrapper(), cloudRegions);
         verify(environmentService, times(1)).setRegions(environment, environment.getRegionWrapper().getRegions(), cloudRegions);
+        if (cloudPlatform == CloudPlatform.GCP) {
+            verify(environmentNetworkConverter, times(1)).updateAvailabilityZones(environment.getNetwork(), Set.of(availabilityZone));
+        }
         verify(environmentService, times(1)).save(environment);
         verify(eventSender, times(1)).sendEvent(any(), any());
     }
@@ -138,7 +152,7 @@ class EnvironmentInitHandlerTest {
                     .build();
     }
 
-    private Environment getEnvironment() {
+    private Environment getEnvironment(CloudPlatform cloudPlatform) {
         Environment environment = new Environment();
         environment.setId(ENV_ID);
         environment.setResourceCrn(CRN);
@@ -149,11 +163,24 @@ class EnvironmentInitHandlerTest {
         environment.setLocationDisplayName(LOCATION_DISPLAY_NAME);
         environment.setLocation(LOCATION);
         environment.setAccountId(ACCOUNT_ID);
-        BaseNetwork baseNetwork = new AwsNetwork();
+        BaseNetwork baseNetwork = getEnvironmentNetwork(cloudPlatform);
         baseNetwork.setRegistrationType(RegistrationType.EXISTING);
         environment.setNetwork(baseNetwork);
-        environment.setCloudPlatform(CloudPlatform.AWS.name());
+        environment.setCloudPlatform(cloudPlatform.name());
         environment.setCredential(new Credential());
         return environment;
+    }
+
+    private BaseNetwork getEnvironmentNetwork(CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AWS:
+                return new AwsNetwork();
+            case AZURE:
+                return new AzureNetwork();
+            case GCP:
+                return new GcpNetwork();
+            default:
+                return null;
+        }
     }
 }

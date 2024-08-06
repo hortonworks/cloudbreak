@@ -84,4 +84,28 @@ class FreeIpaGcpNetworkProviderTest {
 
         Assertions.assertEquals(result, customAvailabilityZone);
     }
+
+    @Test
+    void testAvailabilityZoneMultipleAvailabilityZoneAreSpecifiedShouldSelectSubnetMetaBasedAz() {
+        String subnetId = "subnetId";
+        Set<String> envAvailabilityZones = Set.of("gcp-region1-zone3", "gcp-region1-zone4");
+        String subnetAvailabilityZone = "gcp-region1-zone4";
+        NetworkDto networkDto = NetworkDto.builder()
+                .withSubnetMetas(Map.of(subnetId, new CloudSubnet("id", "name", subnetAvailabilityZone, "cidr")))
+                .withGcp(GcpParams.builder()
+                        .withAvailabilityZones(envAvailabilityZones)
+                        .build())
+                .build();
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withNetwork(networkDto)
+                .build();
+        GcpNetworkParameters gcpNetworkParameters = new GcpNetworkParameters();
+        gcpNetworkParameters.setSubnetId(subnetId);
+        NetworkRequest networkRequest = new NetworkRequest();
+        networkRequest.setGcp(gcpNetworkParameters);
+
+        String result = underTest.availabilityZone(networkRequest, environmentDto);
+
+        Assertions.assertEquals(result, subnetAvailabilityZone);
+    }
 }

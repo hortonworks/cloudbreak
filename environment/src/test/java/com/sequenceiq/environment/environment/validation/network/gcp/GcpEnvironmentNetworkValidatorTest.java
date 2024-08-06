@@ -40,9 +40,6 @@ import com.sequenceiq.environment.platformresource.PlatformParameterService;
 @ExtendWith(MockitoExtension.class)
 class GcpEnvironmentNetworkValidatorTest {
 
-    private static final String MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG = "The multiple availability zones feature isn't available for GCP yet. "
-            + "Please configure only one zone on field 'availabilityZones'";
-
     private static final String INVALID_ZONE_PATTERN = "The requested region '%s' doesn't contain the requested '%s' availability zone(s), "
             + "available zones: '%s'";
 
@@ -79,7 +76,7 @@ class GcpEnvironmentNetworkValidatorTest {
     }
 
     @Test
-    void testValidateDuringRequestWhenGcpParamContainsMultipleAvailabilityZones() {
+    void testValidateDuringRequestWhenGcpParamContainsAvailabilityZones() {
         GcpParams gcpParams = GcpParams.builder()
                 .withAvailabilityZones(Set.of("gcp-region-zone-1", "gcp-region-zone-2"))
                 .build();
@@ -88,22 +85,6 @@ class GcpEnvironmentNetworkValidatorTest {
                 .build();
 
         underTest.validateDuringRequest(networkDto, validationResultBuilder);
-
-        verify(validationResultBuilder, Mockito.times(1)).error(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
-    }
-
-    @Test
-    void testValidateDuringRequestWhenGcpParamContainsOnlyOneAvailabilityZone() {
-        GcpParams gcpParams = GcpParams.builder()
-                .withAvailabilityZones(Set.of("gcp-region-zone-1"))
-                .build();
-        NetworkDto networkDto = NetworkDto.builder()
-                .withGcp(gcpParams)
-                .build();
-
-        underTest.validateDuringRequest(networkDto, validationResultBuilder);
-
-        verify(validationResultBuilder, Mockito.times(0)).error(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
     }
 
     @Test

@@ -33,9 +33,6 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 @Component
 public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
 
-    private static final String MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG = "The multiple availability zones feature isn't available for GCP yet. "
-            + "Please configure only one zone on field 'availabilityZones'";
-
     private static final String INVALID_ZONE_PATTERN = "The requested region '%s' doesn't contain the requested '%s' availability zone(s), "
             + "available zones: '%s'";
 
@@ -91,7 +88,6 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             checkSubnetsProvidedWhenExistingNetwork(resultBuilder, gcpParams, networkDto.getSubnetMetas());
             checkExistingNetworkParamsProvidedWhenSubnetsPresent(networkDto, resultBuilder);
             checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(resultBuilder, gcpParams, networkDto);
-            checkAvailabilityZones(resultBuilder, gcpParams);
         } else if (StringUtils.isEmpty(networkDto.getNetworkCidr())) {
             resultBuilder.error(missingParamsErrorMsg(GCP));
         }
@@ -144,14 +140,6 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         }
     }
 
-    private void checkAvailabilityZones(ValidationResult.ValidationResultBuilder resultBuilder, GcpParams gcpParams) {
-        Set<String> availabilityZones = gcpParams.getAvailabilityZones();
-        if (CollectionUtils.isNotEmpty(availabilityZones) && availabilityZones.size() > 1) {
-            LOGGER.info(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
-            resultBuilder.error(MULTIPLE_AVAILABILITY_ZONES_PROVIDED_ERROR_MSG);
-        }
-    }
-
     private void checkAvailabilityZones(ValidationResult.ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
         platformResourceRequest.setCredential(environmentDto.getCredential());
@@ -171,7 +159,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
                         .filter(Predicate.not(zonesInRegion::contains))
                         .map(AvailabilityZone::value)
                         .collect(Collectors.toSet());
-                if (CollectionUtils.isNotEmpty(zonesInRegion) && !invalidZones.isEmpty()) {
+                if (!invalidZones.isEmpty()) {
                     String msg = String.format(INVALID_ZONE_PATTERN,
                             requestedRegion.getRegionName(),
                             String.join(",", invalidZones),

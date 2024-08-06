@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
@@ -32,8 +34,12 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Component
 public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
-    protected GcpEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService) {
+    private final AvailabilityZoneConverter availabilityZoneConverter;
+
+    protected GcpEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService,
+            AvailabilityZoneConverter availabilityZoneConverter) {
         super(environmentViewConverter, entitlementService);
+        this.availabilityZoneConverter = availabilityZoneConverter;
     }
 
     @Override
@@ -155,4 +161,19 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         param.put(GcpStackUtil.REGION, baseNetwork.getEnvironments().stream().findFirst().get().getLocation());
         return new Network(null, param);
     }
+
+    @Override
+    public void updateAvailabilityZones(BaseNetwork baseNetwork, Set<String> availabilityZones) {
+        if (CollectionUtils.isNotEmpty(availabilityZones)) {
+            GcpNetwork gcpNetwork = (GcpNetwork) baseNetwork;
+            gcpNetwork.setZoneMetas(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones, gcpNetwork.getZoneMetas()));
+        }
+    }
+
+    @Override
+    public Set<String> getAvailabilityZones(BaseNetwork baseNetwork) {
+        GcpNetwork gcpNetwork = (GcpNetwork) baseNetwork;
+        return availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(gcpNetwork.getZoneMetas());
+    }
+
 }

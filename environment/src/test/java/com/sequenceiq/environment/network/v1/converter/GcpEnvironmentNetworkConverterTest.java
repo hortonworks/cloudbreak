@@ -1,6 +1,11 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,8 +20,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
@@ -35,6 +42,9 @@ class GcpEnvironmentNetworkConverterTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private AvailabilityZoneConverter availabilityZoneConverter;
 
     @InjectMocks
     private GcpEnvironmentNetworkConverter underTest;
@@ -80,5 +90,33 @@ class GcpEnvironmentNetworkConverterTest {
                             v2 -> assertThat(v2).isEqualTo("subnet4"));
                 })
                 .containsEntry(NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
+    }
+
+    @Test
+    void testUpdateAvailabilityZonesWithEmptyZones() {
+        GcpNetwork gcpNetwork = new GcpNetwork();
+        underTest.updateAvailabilityZones(gcpNetwork, null);
+        verify(availabilityZoneConverter, times(0)).getJsonAttributesWithAvailabilityZones(any(), any());
+    }
+
+    @Test
+    void testUpdateAvailabilityZonesWithNonEmptyZones() {
+        GcpNetwork gcpNetwork = new GcpNetwork();
+        Set<String> availabilityZones = Set.of("us-west2-a", "us-west2-b", "us-west2-c");
+        Json expectedAttributes = new Json(Map.of(NetworkConstants.AVAILABILITY_ZONES, availabilityZones));
+        when(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones, null)).thenReturn(expectedAttributes);
+        underTest.updateAvailabilityZones(gcpNetwork, availabilityZones);
+        assertEquals(gcpNetwork.getZoneMetas().getMap(), expectedAttributes.getMap());
+    }
+
+    @Test
+    void testGetAvailabilityZones() {
+        GcpNetwork gcpNetwork = new GcpNetwork();
+        Set<String> availabilityZones = Set.of("us-west2-a", "us-west2-b", "us-west2-c");
+        Json jsonAttributes = new Json(Map.of(NetworkConstants.AVAILABILITY_ZONES, availabilityZones));
+        gcpNetwork.setZoneMetas(jsonAttributes);
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(jsonAttributes)).thenReturn(availabilityZones);
+        Set<String> expectedZones = underTest.getAvailabilityZones(gcpNetwork);
+        assertEquals(expectedZones, availabilityZones);
     }
 }

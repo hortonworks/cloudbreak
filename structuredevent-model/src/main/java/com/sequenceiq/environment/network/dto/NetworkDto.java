@@ -252,7 +252,12 @@ public class NetworkDto {
     }
 
     public Set<String> getAvailabilityZones() {
-        return azure != null && CollectionUtils.isNotEmpty(azure.getAvailabilityZones()) ? azure.getAvailabilityZones() : Collections.emptySet();
+        if (azure != null && CollectionUtils.isNotEmpty(azure.getAvailabilityZones())) {
+            return azure.getAvailabilityZones();
+        } else if (gcp != null && CollectionUtils.isNotEmpty(gcp.getAvailabilityZones())) {
+            return gcp.getAvailabilityZones();
+        }
+        return Collections.emptySet();
     }
 
     public PrivateDatabaseVariant getPrivateDatabaseVariant() {
