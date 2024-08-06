@@ -1,21 +1,20 @@
-package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
+package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
-import com.sequenceiq.redbeams.doc.ModelDescriptions;
-import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
+import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = ModelDescriptions.DATABASE_SERVER_CERTIFICATE_RESPONSE)
+@Schema(description = EnvironmentModelDescription.DATABASE_SERVER_CERTIFICATE_RESPONSE)
 @JsonInclude(Include.NON_NULL)
-public class DatabaseServerCertificateStatusV4Response {
+public class EnvironmentDatabaseServerCertificateStatusV4Response {
 
-    @Schema(description = DatabaseServer.ENVIRONMENT_CRN)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_CRN)
     private String environmentCrn;
 
-    @Schema(description = DatabaseServer.SSL_CERTIFICATE_STATUS)
+    @Schema(description = EnvironmentModelDescription.SSL_CERTIFICATE_STATUS)
     private SslCertStatus sslStatus;
 
     public String getEnvironmentCrn() {

@@ -31,9 +31,9 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 
 @Configuration
 public class DatabaseServerSslCertificateConfig {

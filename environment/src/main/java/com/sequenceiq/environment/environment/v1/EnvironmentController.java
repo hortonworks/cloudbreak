@@ -54,12 +54,15 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
@@ -89,6 +92,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmServi
 import com.sequenceiq.environment.environment.service.EnvironmentVerticalScaleService;
 import com.sequenceiq.environment.environment.service.SupportedOperatingSystemService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.environment.service.database.RedBeamsService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeFlowService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
@@ -97,6 +101,8 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.service.FlowProgressService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -122,6 +128,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     private final EnvironmentStopService environmentStopService;
 
     private final FreeIpaService freeIpaService;
+
+    private final RedBeamsService redBeamsService;
 
     private final CredentialService credentialService;
 
@@ -172,7 +180,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
             SupportedOperatingSystemService supportedOperatingSystemService,
             ExternalizedComputeFlowService externalizedComputeFlowService,
-            EnvironmentReactorFlowManager environmentReactorFlowManager) {
+            EnvironmentReactorFlowManager environmentReactorFlowManager,
+            RedBeamsService redBeamsService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -195,6 +204,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.supportedOperatingSystemService = supportedOperatingSystemService;
         this.externalizedComputeFlowService = externalizedComputeFlowService;
+        this.redBeamsService = redBeamsService;
     }
 
     @Override
@@ -541,5 +551,22 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public SupportedOperatingSystemResponse listSupportedOperatingSystem(String cloudPlatform) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return supportedOperatingSystemService.listSupportedOperatingSystem(accountId, cloudPlatform);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
+    public EnvironmentDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            EnvironmentDatabaseServerCertificateStatusV4Request request) {
+        EnvironmentDatabaseServerCertificateStatusV4Responses responses = new EnvironmentDatabaseServerCertificateStatusV4Responses();
+
+        DatabaseServerCertificateStatusV4Responses databaseServerCertificateStatusV4Responses = redBeamsService.listDatabaseServersCertificateStatus(request);
+        for (DatabaseServerCertificateStatusV4Response response : databaseServerCertificateStatusV4Responses.getResponses()) {
+            EnvironmentDatabaseServerCertificateStatusV4Response databaseServerCertificateStatusV4Response
+                    = new EnvironmentDatabaseServerCertificateStatusV4Response();
+            databaseServerCertificateStatusV4Response.setSslStatus(response.getSslStatus());
+            databaseServerCertificateStatusV4Response.setEnvironmentCrn(response.getEnvironmentCrn());
+            responses.getResponses().add(databaseServerCertificateStatusV4Response);
+        }
+        return responses;
     }
 }

@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 import java.io.Serializable;
 import java.util.Set;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
+import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;

@@ -39,7 +39,8 @@ public class ConstructorTest {
     }
 
     private boolean requestOrResponse(String clazz) {
-        return clazz.endsWith("Request") || clazz.endsWith("Response") || clazz.endsWith("Params") || clazz.endsWith("Parameters");
+        return (clazz.endsWith("Request") || clazz.endsWith("Response") || clazz.endsWith("Params") || clazz.endsWith("Parameters"))
+                && !clazz.contains("GeneralCollectionV4Response");
     }
 
 }

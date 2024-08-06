@@ -784,6 +784,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL = "If credentialName is not specified, the credential is used to create the new credential for the environment.";
         public static final String INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL = "The url provided by Azure where the user have to use the given user code "
                 + "to sign in";
+        public static final String DATABASE_SERVER_CERTIFICATE_REQUEST = "Request containing information about a database server SSL certificate";
         public static final String INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE = "The user code what has to be used for the sign-in process on the Azure portal";
         public static final String CREDENTIAL_DESCRIPTION = "Credential request related data";
         public static final String PROXY_CONFIGS = "Name of the proxy configurations to be attached to the environment.";
