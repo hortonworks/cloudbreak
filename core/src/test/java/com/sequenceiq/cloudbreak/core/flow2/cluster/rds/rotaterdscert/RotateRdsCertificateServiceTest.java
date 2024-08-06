@@ -267,7 +267,7 @@ class RotateRdsCertificateServiceTest {
         when(stackDtoService.getByCrn(any())).thenReturn(stackDto);
         doNothing().when(externalDatabaseService).updateToLatestSslCert(any());
 
-        when(databaseSslService.getDbSslDetailsForRotationAndUpdateInCluster(any())).thenReturn(new DatabaseSslDetails(Set.of(), false));
+        when(databaseSslService.getDbSslDetailsForRotationAndUpdateInCluster(any(StackDto.class))).thenReturn(new DatabaseSslDetails(Set.of(), false));
 
         underTest.getLatestRdsCertificate(stackId);
 
