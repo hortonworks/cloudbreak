@@ -17,13 +17,13 @@ public class EnvironmentModelDescription {
     public static final String PRIVATE_SUBNET_CREATION = "A flag to enable or disable the private subnet creation.";
     public static final String SERVICE_ENDPOINT_CREATION = "A flag to enable or disable the service endpoint creation.";
     public static final String PUBLIC_ENDPOINT_ACCESS_GATEWAY = "A flag to enable the Public Endpoint Access Gateway, which provides public UI/API " +
-        "access to private data lakes and data hubs.";
+            "access to private data lakes and data hubs.";
     public static final String ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "Subnet ids for the Public Endpoint Access Gateway. If provided, these " +
-        "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
-        "selected from the subnet list provided for environment creation. (Optional)";
+            "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
+            "selected from the subnet list provided for environment creation. (Optional)";
     public static final String ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS = "Subnet metadata for the Public Endpoint Access Gateway. If provided, these " +
-        "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
-        "selected from the subnet list provided for environment creation. (Optional)";
+            "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
+            "selected from the subnet list provided for environment creation. (Optional)";
     public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
     public static final String AWS_SPECIFIC_PARAMETERS = "AWS-specific properties of the network";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Azure-specific properties of the network";
@@ -162,7 +162,6 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";
 
-    public static final String ENVIRONMENT_VERSION = "The version of the environment. Default is V1.";
     public static final String CREATE_EXTERNALIZED_COMPUTE_CLUSTER = "Create externalized compute cluster for environment";
     public static final String EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER = "Externalized compute cluster private flag";
     public static final String EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES = "Externalized compute cluster Kubernetes API authorized IP ranges";
@@ -184,6 +183,8 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_NODE_COUNT = "FreeIPA node count of the environment";
 
     public static final String ENVIRONMENT_ENABLE_SECRET_ENCRYPTION = "True if the secret encryption feature is enabled for the environment.";
+
+    public static final String ENVIRONMENT_ENABLE_COMPUTE_CLUSTER = "True if externalized compute cluster is enabled for the environment.";
 
     private EnvironmentModelDescription() {
     }

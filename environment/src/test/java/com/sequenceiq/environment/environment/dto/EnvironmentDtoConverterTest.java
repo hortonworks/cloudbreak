@@ -204,7 +204,7 @@ class EnvironmentDtoConverterTest {
         Environment source = new Environment();
         source.setCloudPlatform("AWS");
         EnvironmentDto environmentDto = underTest.environmentToDto(source);
-        assertEquals("v1", environmentDto.getEnvironmentVersion());
+        assertThat(environmentDto.isEnableComputeCluster()).isFalse();
     }
 
     @Test
@@ -213,7 +213,7 @@ class EnvironmentDtoConverterTest {
         source.setCloudPlatform("AWS");
         source.setDefaultComputeCluster(new DefaultComputeCluster());
         EnvironmentDto environmentDto = underTest.environmentToDto(source);
-        assertEquals("v1", environmentDto.getEnvironmentVersion());
+        assertThat(environmentDto.isEnableComputeCluster()).isFalse();
     }
 
     @Test
@@ -224,7 +224,7 @@ class EnvironmentDtoConverterTest {
         defaultComputeCluster.setCreate(true);
         source.setDefaultComputeCluster(defaultComputeCluster);
         EnvironmentDto environmentDto = underTest.environmentToDto(source);
-        assertEquals("v2", environmentDto.getEnvironmentVersion());
+        assertThat(environmentDto.isEnableComputeCluster()).isTrue();
     }
 
     @Test
@@ -319,7 +319,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getEnvironmentServiceVersion()).isEqualTo(ENVIRONMENT_SERVICE_VERSION);
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
         assertThat(result.isEnableSecretEncryption()).isTrue();
-        assertThat(result.getEnvironmentVersion()).isEqualTo("v2");
+        assertThat(result.isEnableComputeCluster()).isTrue();
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();
@@ -551,7 +551,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getEnvironmentServiceVersion()).isEqualTo(ENVIRONMENT_SERVICE_VERSION);
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
         assertThat(result.isEnableSecretEncryption()).isTrue();
-        assertThat(result.getEnvironmentVersion()).isEqualTo("v2");
+        assertThat(result.isEnableComputeCluster()).isTrue();
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();

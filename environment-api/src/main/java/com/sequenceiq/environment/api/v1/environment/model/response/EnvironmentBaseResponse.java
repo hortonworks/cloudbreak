@@ -137,8 +137,8 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_SECRET_ENCRYPTION)
     private boolean enableSecretEncryption;
 
-    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_VERSION)
-    private String environmentVersion;
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_COMPUTE_CLUSTER)
+    private boolean enableComputeCluster;
 
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
@@ -467,12 +467,12 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.enableSecretEncryption = enableSecretEncryption;
     }
 
-    public String getEnvironmentVersion() {
-        return environmentVersion;
+    public boolean isEnableComputeCluster() {
+        return enableComputeCluster;
     }
 
-    public void setEnvironmentVersion(String environmentVersion) {
-        this.environmentVersion = environmentVersion;
+    public void setEnableComputeCluster(boolean enableComputeCluster) {
+        this.enableComputeCluster = enableComputeCluster;
     }
 
     @Override
@@ -514,7 +514,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", environmentDomain='" + environmentDomain + '\'' +
                 ", dataServices=" + dataServices +
                 ", enableSecretEncryption=" + enableSecretEncryption +
-                ", environmentVersion=" + environmentVersion +
+                ", enableComputeCluster=" + enableComputeCluster +
                 '}';
     }
 }

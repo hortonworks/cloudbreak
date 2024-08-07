@@ -172,7 +172,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(dataServicesResponse, actual.getDataServices());
         assertSecurityAccess(environment.getSecurityAccess(), actual.getSecurityAccess());
         assertThat(actual.isEnableSecretEncryption()).isTrue();
-        assertEquals(environment.getEnvironmentVersion(), actual.getEnvironmentVersion());
+        assertThat(actual.isEnableComputeCluster()).isTrue();
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -232,7 +232,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(environmentNetworkResponse, actual.getNetwork());
         assertEquals(dataServicesResponse, actual.getDataServices());
         assertThat(actual.isEnableSecretEncryption()).isTrue();
-        assertEquals(environmentDto.getEnvironmentVersion(), actual.getEnvironmentVersion());
+        assertThat(actual.isEnableComputeCluster()).isTrue();
 
         verify(credentialViewConverter).convertResponse(environmentDto.getCredential());
         verify(freeIpaConverter).convert(environmentDto.getFreeIpaCreation());
@@ -292,7 +292,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(environmentNetworkResponse, actual.getNetwork());
         assertEquals(dataServicesResponse, actual.getDataServices());
         assertThat(actual.isEnableSecretEncryption()).isTrue();
-        assertEquals(environmentViewDto.getEnvironmentVersion(), actual.getEnvironmentVersion());
+        assertThat(actual.isEnableComputeCluster()).isTrue();
 
         verify(credentialViewConverter).convert(environmentViewDto.getCredentialView());
         verify(freeIpaConverter).convert(environmentViewDto.getFreeIpaCreation());
@@ -378,7 +378,7 @@ class EnvironmentResponseConverterTest {
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .withEnableSecretEncryption(true)
-                .withEnvironmentVersion("v2")
+                .withEnableComputeCluster(true)
                 .build();
     }
 
@@ -411,7 +411,7 @@ class EnvironmentResponseConverterTest {
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .withEnableSecretEncryption(true)
-                .withEnvironmentVersion("v2")
+                .withEnableComputeCluster(true)
                 .build();
     }
 

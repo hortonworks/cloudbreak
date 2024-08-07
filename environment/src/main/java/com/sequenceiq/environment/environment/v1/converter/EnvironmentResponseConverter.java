@@ -130,7 +130,7 @@ public class EnvironmentResponseConverter {
                 .withEnvironmentDomain(environmentDto.getDomain())
                 .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
                 .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
-                .withEnvironmentVersion(environmentDto.getEnvironmentVersion());
+                .withEnableComputeCluster(environmentDto.isEnableComputeCluster());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -189,7 +189,7 @@ public class EnvironmentResponseConverter {
                 .withEnvironmentDomain(environmentViewDto.getDomain())
                 .withDataServices(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices()))
                 .withEnableSecretEncryption(environmentViewDto.isEnableSecretEncryption())
-                .withEnvironmentVersion(environmentViewDto.getEnvironmentVersion());
+                .withEnableComputeCluster(environmentViewDto.isEnableComputeCluster());
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -228,7 +228,7 @@ public class EnvironmentResponseConverter {
                 .withEnvironmentDomain(environmentDto.getDomain())
                 .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
                 .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption())
-                .withEnvironmentVersion(environmentDto.getEnvironmentVersion());
+                .withEnableComputeCluster(environmentDto.isEnableComputeCluster());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

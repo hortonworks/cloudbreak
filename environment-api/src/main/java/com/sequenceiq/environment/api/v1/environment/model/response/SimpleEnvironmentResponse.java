@@ -120,7 +120,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private boolean enableSecretEncryption;
 
-        private String environmentVersion;
+        private boolean enableComputeCluster;
 
         private Builder() {
         }
@@ -290,8 +290,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withEnvironmentVersion(String environmentVersion) {
-            this.environmentVersion = environmentVersion;
+        public Builder withEnableComputeCluster(boolean enableComputeCluster) {
+            this.enableComputeCluster = enableComputeCluster;
             return this;
         }
 
@@ -329,7 +329,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setEnvironmentDomain(environmentDomain);
             simpleEnvironmentResponse.setDataServices(dataServices);
             simpleEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
-            simpleEnvironmentResponse.setEnvironmentVersion(environmentVersion);
+            simpleEnvironmentResponse.setEnableComputeCluster(enableComputeCluster);
             return simpleEnvironmentResponse;
         }
     }

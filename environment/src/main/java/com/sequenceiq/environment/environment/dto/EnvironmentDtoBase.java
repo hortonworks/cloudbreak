@@ -94,7 +94,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String creatorClient = "No Info";
 
-    private String environmentVersion;
+    private boolean enableComputeCluster;
 
     @Override
     public Long getResourceId() {
@@ -418,12 +418,12 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.creatorClient = creatorClient;
     }
 
-    public String getEnvironmentVersion() {
-        return environmentVersion;
+    public boolean isEnableComputeCluster() {
+        return enableComputeCluster;
     }
 
-    public void setEnvironmentVersion(String environmentVersion) {
-        this.environmentVersion = environmentVersion;
+    public void setEnableComputeCluster(boolean enableComputeCluster) {
+        this.enableComputeCluster = enableComputeCluster;
     }
 
     @Override
@@ -514,7 +514,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
         private boolean enableSecretEncryption;
 
-        private String environmentVersion;
+        private boolean enableComputeCluster;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -694,8 +694,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
-        public B withEnvironmentVersion(String environmentVersion) {
-            this.environmentVersion = environmentVersion;
+        public B withEnableComputeCluster(boolean enableComputeCluster) {
+            this.enableComputeCluster = enableComputeCluster;
             return (B) this;
         }
 
@@ -734,7 +734,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setDataServices(dataServices);
             environmentDto.setEnableSecretEncryption(enableSecretEncryption);
             environmentDto.setCreatorClient(creatorClient);
-            environmentDto.setEnvironmentVersion(environmentVersion);
+            environmentDto.setEnableComputeCluster(enableComputeCluster);
         }
 
         public abstract T build();

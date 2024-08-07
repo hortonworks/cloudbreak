@@ -93,7 +93,7 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentServiceVersion(environmentView.getEnvironmentServiceVersion())
                 .withEnvironmentDomain(environmentView.getDomain())
                 .withEnableSecretEncryption(environmentView.isEnableSecretEncryption())
-                .withEnvironmentVersion(environmentVersion(environmentView.getDefaultComputeCluster()));
+                .withEnableComputeCluster(isComputeClusterEnabled(environmentView.getDefaultComputeCluster()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -141,7 +141,7 @@ public class EnvironmentDtoConverter {
                 .withDataServices(environment.getDataServices())
                 .withEnableSecretEncryption(environment.isEnableSecretEncryption())
                 .withCreatorClient(environment.getCreatorClient())
-                .withEnvironmentVersion(environmentVersion(environment.getDefaultComputeCluster()));
+                .withEnableComputeCluster(isComputeClusterEnabled(environment.getDefaultComputeCluster()));
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));
@@ -315,8 +315,8 @@ public class EnvironmentDtoConverter {
         return builder.build();
     }
 
-    private String environmentVersion(DefaultComputeCluster defaultComputeCluster) {
-        return defaultComputeCluster != null && defaultComputeCluster.isCreate() ? "v2" : "v1";
+    private boolean isComputeClusterEnabled(DefaultComputeCluster defaultComputeCluster) {
+        return defaultComputeCluster != null && defaultComputeCluster.isCreate();
     }
 
 }
