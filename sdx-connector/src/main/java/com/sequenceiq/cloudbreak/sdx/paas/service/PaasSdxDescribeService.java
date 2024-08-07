@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.sdx.paas.service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -51,6 +52,7 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
         return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxBasicView(environmentCrn)).or(() ->
                 sdxEndpoint.getByEnvCrn(environmentCrn)
                     .stream()
+                    .filter(Predicate.not(SdxClusterResponse::isDetached))
                     .map(sdx -> SdxBasicView.builder()
                             .withName(sdx.getName())
                             .withCrn(sdx.getCrn())

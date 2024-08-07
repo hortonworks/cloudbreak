@@ -15,10 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,7 +64,7 @@ public class PaasSdxDescribeServiceTest {
     @Test
     public void testDlServiceListCrn() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
-        when(sdxEndpoint.getByEnvCrn(any())).thenReturn(List.of(getSdxClusterResponse()));
+        when(sdxEndpoint.getByEnvCrn(any())).thenReturn(List.of(getSdxClusterResponse(false)));
         Set<String> sdxCrns = underTest.listSdxCrns(ENV_CRN);
         assertTrue(sdxCrns.contains(PAAS_CRN));
         verify(sdxEndpoint).getByEnvCrn(eq(ENV_CRN));
@@ -81,7 +85,7 @@ public class PaasSdxDescribeServiceTest {
     @Test
     void testGetPaasSdxUsingDlService() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
-        when(sdxEndpoint.getByEnvCrn(anyString())).thenReturn(List.of(getSdxClusterResponse()));
+        when(sdxEndpoint.getByEnvCrn(anyString())).thenReturn(List.of(getSdxClusterResponse(false)));
 
         underTest.getSdxByEnvironmentCrn("envCrn");
 
@@ -126,11 +130,31 @@ public class PaasSdxDescribeServiceTest {
         assertEquals(Map.of(HIVE_METASTORE_DATABASE_HOST, "host"), underTest.getHmsServiceConfig(PAAS_CRN));
     }
 
-    private SdxClusterResponse getSdxClusterResponse() {
+    @ParameterizedTest
+    @MethodSource("detachedDatalakeSource")
+    void testGetPaasSdxUsingDlServiceUsingFilterOutDetached(boolean detachedDatalake, boolean datalakeFound) throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "localPaasSdxService", Optional.empty(), true);
+        when(sdxEndpoint.getByEnvCrn(anyString())).thenReturn(List.of(getSdxClusterResponse(detachedDatalake)));
+
+        Optional<SdxBasicView> response = underTest.getSdxByEnvironmentCrn("envCrn");
+
+        verify(sdxEndpoint).getByEnvCrn(anyString());
+        assertEquals(response.isPresent(), datalakeFound);
+    }
+
+    private static Stream<Arguments> detachedDatalakeSource() {
+        return Stream.of(
+                Arguments.of(false, true),
+                Arguments.of(true, false)
+        );
+    }
+
+    private SdxClusterResponse getSdxClusterResponse(boolean detached) {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setCrn(PAAS_CRN);
         sdxClusterResponse.setEnvironmentCrn(ENV_CRN);
         sdxClusterResponse.setStatus(SdxClusterStatusResponse.RUNNING);
+        sdxClusterResponse.setDetached(detached);
         return sdxClusterResponse;
     }
 }
