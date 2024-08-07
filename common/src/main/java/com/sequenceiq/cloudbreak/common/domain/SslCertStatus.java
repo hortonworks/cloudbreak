@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
+package com.sequenceiq.cloudbreak.common.domain;
 
 /**
  * SSL enforcement mode used by a database server.

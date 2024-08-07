@@ -106,6 +106,13 @@ public class EnvironmentModelDescription {
 
     public static final String LOG_CLOUD_STORAGE = "Cloud storage configuration for this environment. Service logs will be stored in the defined location.";
 
+    public static final String ENVIRONMENT_CRN = "CRN of the environment of the database server";
+    public static final String SSL_CERTIFICATE_STATUS =
+            "Current status of the set of relevant SSL certificates for the database server";
+    public static final String DATABASE_SERVER_CERTIFICATE_REQUEST = "Request containing information about a database server SSL certificate";
+    public static final String DATABASE_SERVER_CERTIFICATE_RESPONSE = "Response containing information about a database server SSL certificate";
+    public static final String DATABASE_SERVER_CERTIFICATE_RESPONSES = "A set of multiple database server SSL certificate responses";
+
     public static final String IDBROKER_MAPPING_SOURCE = "IDBroker mapping source.";
 
     public static final String CLOUD_STORAGE_VALIDATION = "Cloud storage validation enabled or not.";
