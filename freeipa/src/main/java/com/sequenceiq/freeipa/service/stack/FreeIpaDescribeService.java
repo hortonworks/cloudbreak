@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -63,6 +64,11 @@ public class FreeIpaDescribeService {
                 .collect(Collectors.toList());
         LOGGER.trace("FreeIPA describe all response: {}", response);
         return response;
+    }
+
+    public Image getImage(String environmentCrn, String accountId) {
+        Stack stack = stackService.getFreeIpaStackWithMdcContext(environmentCrn, accountId);
+        return imageService.getImageForStack(stack);
     }
 
     private DescribeFreeIpaResponse getResponseForStack(Stack stack, Boolean includeAllInstances) {

@@ -31,6 +31,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String BIND_USER_CREATE = "Creates kerberos and ldap bind users for cluster";
     public static final String UPDATE_SALT = "Update salt states on FreeIPA instances";
     public static final String CHANGE_IMAGE = "Changes the image used for creating instances";
+    public static final String GET_IMAGE = "Get current image used for creating instances";
     public static final String UPGRADE_FREEIPA = "Upgrades FreeIPA to the latest or defined image";
     public static final String UPGRADE_OPTIONS = "Get available images for FreeIPA upgrade. If catalog is defined use the catalog as image source.";
     public static final String UPSCALE_FREEIPA = "Upscales FreeIPA instances";
@@ -49,7 +50,6 @@ public final class FreeIpaOperationDescriptions {
 
     public static final String IMD_UPDATE = "Stacks' instances metadata update.";
     public static final String ROTATE_SECRETS_BY_CRN = "Rotate secrets by environment CRN.";
-    public static final String ROTATE_MULTI_SECRETS_BY_CRN = "Rotate multi secrets by environment CRN.";
     public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";
 
     private FreeIpaOperationDescriptions() {

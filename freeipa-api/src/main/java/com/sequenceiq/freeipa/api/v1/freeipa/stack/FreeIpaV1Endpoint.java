@@ -42,6 +42,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommend
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
@@ -328,6 +329,14 @@ public interface FreeIpaV1Endpoint {
             operationId = "generateImageCatalog",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     GenerateImageCatalogResponse generateImageCatalog(@QueryParam("environment") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("image")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.GET_IMAGE, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "getImageV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    Image getImage(@QueryParam("environment") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn);
 
     @PUT
     @Path("/internal/upgrade_ccm")

@@ -56,6 +56,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommend
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
@@ -446,6 +447,14 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public GenerateImageCatalogResponse generateImageCatalog(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return imageCatalogGeneratorService.generate(environmentCrn, accountId);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public Image getImage(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam
+        String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return freeIpaDescribeService.getImage(environmentCrn, accountId);
     }
 
     @Override
