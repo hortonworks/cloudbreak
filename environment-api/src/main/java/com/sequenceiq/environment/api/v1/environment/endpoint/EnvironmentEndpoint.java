@@ -31,12 +31,14 @@ import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SupportedOperatingSystemResponse;
@@ -45,6 +47,7 @@ import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -387,5 +390,17 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.LIST_SUPPORTED_OS, description = ENVIRONMENT_NOTES, operationId = "listSupportedOperatingSystemV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SupportedOperatingSystemResponse listSupportedOperatingSystem(@QueryParam("cloudPlatform") String cloudPlatform);
+
+    @POST
+    @Path("get_certificate_status")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EnvironmentOpDescription.LIST_CERTIFICATE_STATUS, description = ENVIRONMENT_NOTES,
+            operationId = "listDatabaseServersCertificateStatus",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    EnvironmentDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            @Valid @NotNull @Parameter(description = ENVIRONMENT_NOTES)
+            EnvironmentDatabaseServerCertificateStatusV4Request request
+    );
 
 }

@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
+import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;

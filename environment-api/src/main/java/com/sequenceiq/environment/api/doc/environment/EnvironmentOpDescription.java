@@ -46,6 +46,9 @@ public class EnvironmentOpDescription {
     public static final String VERTICAL_SCALING = "Initiates the vertical scaling on FreeIPA";
     public static final String LIST_SUPPORTED_OS = "LIst supported operating systems by environment.";
     public static final String VALIDATE_CLOUD_STORAGE = "Validates cloud storage";
+    public static final String LIST_CERTIFICATE_STATUS =
+            "Lists all database servers certificate status that are known, either because they were registered or because this service "
+                    + "created them.";
 
     private EnvironmentOpDescription() {
     }

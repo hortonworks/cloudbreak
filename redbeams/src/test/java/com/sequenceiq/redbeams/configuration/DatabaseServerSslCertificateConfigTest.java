@@ -16,9 +16,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 
 class DatabaseServerSslCertificateConfigTest {
 
