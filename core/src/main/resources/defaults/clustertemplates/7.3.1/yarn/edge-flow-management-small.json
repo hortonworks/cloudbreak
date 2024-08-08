@@ -1,0 +1,29 @@
+{
+  "name": "7.3.1 - Edge Flow Management Light Duty for YCloud",
+  "description": "",
+  "type": "FLOW_MANAGEMENT",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Edge Flow Management Light Duty"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "management",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 100
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          }
+        }
+      }
+    ]
+  }
+}
