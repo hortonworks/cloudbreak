@@ -4,8 +4,19 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
-{% set cdp_logging_agent_version = '0.2.16' %}
-{% set cdp_logging_agent_rpm = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-logging-agent/' + cdp_logging_agent_version + '/cdp_logging_agent-'+ cdp_logging_agent_version + '.x86_64.rpm' %}
+{% set os = salt['grains.get']('os') %}
+{% set cpuarch = salt['grains.get']('cpuarch') %}
+{% if os == "RedHat" %}
+    {% if cpuarch != 'aarch64' %}
+        {% set rpm_os = 'redhat8' %}
+    {% else %}
+        {% set rpm_os = 'redhat8arm64' %}
+    {% endif %}
+{% elif os == "CentOS" %}
+    {% set rpm_os = 'centos7' %}
+{% endif %}
+{% set cdp_logging_agent_build_version = '1.3.2_b1' %}
+{% set cdp_logging_agent_rpm = 'https://archive.cloudera.com/cdp-infra-tools/latest/' + rpm_os + '/yum/cdp_logging_agent-' + cdp_logging_agent_build_version + '.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}

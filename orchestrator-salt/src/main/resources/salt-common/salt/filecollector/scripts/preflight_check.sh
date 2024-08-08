@@ -247,19 +247,19 @@ EOF
     local full_error_msg=$(cat << EOF
 PreFlight diagnostics check FAILED
 Diagnostics log collection has been interrupted in order to avoid memory pressure on VM nodes that could shut down the machines, as some files are too large to process (300 MB > per log file).
-Please upgrade cdp-telemetry binary to workaround the issue (min version $EXPECTED_MIN_VERSION) or filter out affected hosts (by CDP cli / UI) or labels (by only CDP cli).
+Please upgrade cdp-telemetry binary to workaround the issue or filter out affected hosts (by CDP cli / UI) or labels (by only CDP cli).
 The following logs/nodes are affected: $error_msg
 
-You can upgrade the cdp-telemetry binary by using --update-package option by CDP cli (for environment/datalake/datahub collect-XX-diagnostics commands). But note that requires network access for https://cloudera-service-delivery-cache.s3.amazonaws.com (on the VM nodes).
-Alternatively, the binary can be updated manually by the following steps (e.g. for version $EXPECTED_MIN_VERSION):
-1. Download rpm from https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/cdp_telemetry-$EXPECTED_MIN_VERSION.x86_64.rpm
+You can upgrade the cdp-telemetry binary by using --update-package option by CDP cli (for environment/datalake/datahub collect-XX-diagnostics commands).
+Alternatively, the binary can be updated manually by the following steps:
+1. Download/collect rpm from Cloudera
 2. Scp the rpm file to a salt-master node. (e.g. into /home/cloudbreak folder)
 3. Execute the following commands as root on the salt-master node:
   - mkdir -p /srv/salt/distribution
-  - cp /home/cloudbreak/cdp_telemetry-${EXPECTED_MIN_VERSION}.x86_64.rpm /srv/salt/distribution/
-  - $SALT_BIN_PREFIX/salt '*' cp.get_file salt:///distribution/cdp_telemetry-${EXPECTED_MIN_VERSION}.x86_64.rpm /tmp/cdp_telemetry-${EXPECTED_MIN_VERSION}.x86_64.rpm
-  - $SALT_BIN_PREFIX/salt '*' cmd.run 'yum remove -y cdp-telemetry && rpm -i /tmp/cdp_telemetry-${EXPECTED_MIN_VERSION}.x86_64.rpm'
-  - $SALT_BIN_PREFIX/salt '*' cmd.run 'rm -r /tmp/cdp_telemetry-${EXPECTED_MIN_VERSION}.x86_64.rpm'
+  - cp /home/cloudbreak/cdp_telemetry.rpm /srv/salt/distribution/
+  - $SALT_BIN_PREFIX/salt '*' cp.get_file salt:///distribution/cdp_telemetry.rpm /tmp/cdp_telemetry.rpm
+  - $SALT_BIN_PREFIX/salt '*' cmd.run 'yum remove -y cdp-telemetry && rpm -i /tmp/cdp_telemetry.rpm'
+  - $SALT_BIN_PREFIX/salt '*' cmd.run 'rm -r /tmp/cdp_telemetry.rpm'
   - rm -rf /srv/salt/distribution/
 EOF
     )
