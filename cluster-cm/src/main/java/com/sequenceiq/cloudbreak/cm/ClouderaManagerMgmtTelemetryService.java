@@ -120,6 +120,8 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String SMON_PROMETHEUS_ADAPTER_ENABLED = "prometheus_adapter_enabled";
 
+    private static final String IGNORE_CM_EXCEPTION = "Could not find config to delete with template name";
+
     @Inject
     private ClouderaManagerExternalAccountService externalAccountService;
 
@@ -192,16 +194,26 @@ public class ClouderaManagerMgmtTelemetryService {
                 String monitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword();
                 Integer exporterPort = monitoringConfiguration.getClouderaManagerExporter().getPort();
                 Map<String, String> configsToUpdate = new HashMap<>();
-                configsToUpdate.put(SMON_PROMETHEUS_USERNAME, monitoringUser);
-                configsToUpdate.put(SMON_PROMETHEUS_PASSWORD, monitoringPassword);
-                configsToUpdate.put(SMON_PROMETHEUS_PORT, String.valueOf(exporterPort));
-                if (allConfigKeys.contains(SMON_PROMETHEUS_ADAPTER_ENABLED)) {
-                    LOGGER.debug("Prometheus adapter is enabled for service monitor.");
-                    configsToUpdate.put(SMON_PROMETHEUS_ADAPTER_ENABLED, "true");
+                if (monitoringUser != null && monitoringPassword != null) {
+                    configsToUpdate.put(SMON_PROMETHEUS_USERNAME, monitoringUser);
+                    configsToUpdate.put(SMON_PROMETHEUS_PASSWORD, monitoringPassword);
+                    configsToUpdate.put(SMON_PROMETHEUS_PORT, String.valueOf(exporterPort));
+                    if (allConfigKeys.contains(SMON_PROMETHEUS_ADAPTER_ENABLED)) {
+                        LOGGER.debug("Prometheus adapter is enabled for service monitor.");
+                        configsToUpdate.put(SMON_PROMETHEUS_ADAPTER_ENABLED, "true");
+                    }
+                    ApiConfigList configList = makeApiConfigList(configsToUpdate);
+                    try {
+                        mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR),
+                                "Set service monitoring configs for CM metrics exporter by CB", configList);
+                    } catch (ApiException e) {
+                        if (e.getMessage() != null && e.getMessage().contains(IGNORE_CM_EXCEPTION)) {
+                            LOGGER.info("Could not configure smon telemetry, because: {}", e.getMessage());
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
-                ApiConfigList configList = makeApiConfigList(configsToUpdate);
-                mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR),
-                        "Set service monitoring configs for CM metrics exporter by CB", configList);
             }
         }
     }
