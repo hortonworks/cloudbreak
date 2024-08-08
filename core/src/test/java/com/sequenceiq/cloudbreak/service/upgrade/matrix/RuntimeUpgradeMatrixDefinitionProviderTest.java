@@ -36,7 +36,7 @@ public class RuntimeUpgradeMatrixDefinitionProviderTest {
         UpgradeMatrixDefinition actual = underTest.getUpgradeMatrix();
 
         assertNotNull(actual);
-        assertEquals(8, actual.getRuntimeUpgradeMatrix().size());
+        assertEquals(9, actual.getRuntimeUpgradeMatrix().size());
         assertTrue(actual.getRuntimeUpgradeMatrix().stream().allMatch(matrix -> containsSourceVersions(matrix) && containsTargetVersions(matrix)));
     }
 
