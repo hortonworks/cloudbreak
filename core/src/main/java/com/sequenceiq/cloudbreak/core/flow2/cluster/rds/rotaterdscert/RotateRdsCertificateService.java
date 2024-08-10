@@ -9,7 +9,9 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.PAAS;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.check.DatahubCertificateChecker;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -98,6 +101,9 @@ public class RotateRdsCertificateService {
     @Inject
     private SaltStateParamsService saltStateParamsService;
 
+    @Inject
+    private DatahubCertificateChecker datahubCertificateChecker;
+
     void checkPrerequisitesState(Long stackId) {
         String statusReason = "Checking cluster prerequisites for RDS certificate rotation";
         LOGGER.debug(statusReason);
@@ -157,6 +163,14 @@ public class RotateRdsCertificateService {
     public void checkPrerequisites(Long stackId) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (AWS.name().equalsIgnoreCase(stack.getCloudPlatform())) {
+            List<String> datahubsWhichMustBeUpdated = datahubCertificateChecker.collectDatahubsWhichMustBeUpdated(stack);
+            if (!datahubsWhichMustBeUpdated.isEmpty()) {
+                String errorMessage = String.format("Data Hub with name: '%s' is not on the latest certificate version. " +
+                                "Please update certificate on the Data Hub side before update the Data Lake",
+                        String.join(", ", datahubsWhichMustBeUpdated.stream().sorted().collect(Collectors.toList())));
+                LOGGER.info(errorMessage);
+                throw new CloudbreakServiceException(errorMessage);
+            }
             Cluster cluster = clusterService.getCluster(stack.getClusterId());
             if (cluster != null && cluster.getDbSslRootCertBundle() != null && cluster.getDbSslEnabled()) {
                 LOGGER.info("{} with name {} is applicable for rotation", getType(stack), stack.getName());

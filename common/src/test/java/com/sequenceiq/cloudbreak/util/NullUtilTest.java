@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +37,18 @@ class NullUtilTest {
     @Test
     void testAllNullWhenAllTheMultipleInputsAreNullThenTrueShouldReturn() {
         assertTrue(NullUtil.allNull(null, null));
+    }
+
+    @Test
+    void testGetIfNotNullOtherwiseWhenValueIsNullThenReturnDefault() {
+        String expected = "something";
+        assertEquals(expected, NullUtil.getIfNotNullOtherwise(null, expected));
+    }
+
+    @Test
+    void testGetIfNotNullOtherwiseWhenValueIsNotNullThenReturnIt() {
+        String expected = "something";
+        assertEquals(expected, NullUtil.getIfNotNullOtherwise(expected, "default"));
     }
 
 }
