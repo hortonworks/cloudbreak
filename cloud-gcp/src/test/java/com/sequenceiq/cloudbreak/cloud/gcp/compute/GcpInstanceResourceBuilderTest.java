@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -108,6 +109,10 @@ public class GcpInstanceResourceBuilderTest {
 
     private static final String ENCRYPTION_KEY = "theKey";
 
+    private static final String PROJECT_ID = "projectId";
+
+    private static final String AVAILABILITY_ZONE = "az1";
+
     @InjectMocks
     private GcpInstanceResourceBuilder builder;
 
@@ -187,12 +192,11 @@ public class GcpInstanceResourceBuilderTest {
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
-        cloudCredential.putParameter("projectId", "projectId");
-        String projectId = "projectId";
+        cloudCredential.putParameter("projectId", PROJECT_ID);
         String serviceAccountId = "serviceAccountId";
-        lenient().when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(projectId);
+        lenient().when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(PROJECT_ID);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
+        context = new GcpContext(cloudContext.getName(), location, PROJECT_ID, serviceAccountId, compute, false, 30, false);
         List<CloudResource> networkResources =
                 singletonList(CloudResource.builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
@@ -405,10 +409,11 @@ public class GcpInstanceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-master-1")
                 .withGroup(group.getName())
+                .withAvailabilityZone(AVAILABILITY_ZONE)
                 .build();
         context.addGroupResources(group.getName(), singletonList(instanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
-        when(instanceGroups.addInstances(anyString(), anyString(), anyString(), any())).thenReturn(addInstances);
+        when(instanceGroups.addInstances(eq(PROJECT_ID), eq(AVAILABILITY_ZONE), eq("test-master-1"), any())).thenReturn(addInstances);
         InstanceGroups.Get get = mock(InstanceGroups.Get.class);
         get.setInstanceGroup("test-master-1");
         InstanceGroup ig = new InstanceGroup();
@@ -446,29 +451,33 @@ public class GcpInstanceResourceBuilderTest {
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-master-1")
                 .withGroup("master")
+                .withAvailabilityZone(AVAILABILITY_ZONE)
                 .build();
         CloudResource gatewayInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-gateway-1")
                 .withGroup("gateway")
+                .withAvailabilityZone(AVAILABILITY_ZONE)
                 .build();
         CloudResource idBrokerInstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-idbroker-1")
                 .withGroup("idbroker")
+                .withAvailabilityZone(AVAILABILITY_ZONE)
                 .build();
         CloudResource master0InstanceGroup = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withName("test-master0-1")
                 .withGroup("master0")
+                .withAvailabilityZone(AVAILABILITY_ZONE)
                 .build();
         context.addGroupResources(group.getName(), List.of(master0InstanceGroup, gatewayInstanceGroup, masterInstanceGroup, idBrokerInstanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         ArgumentCaptor<String> groupName = ArgumentCaptor.forClass(String.class);
-        when(instanceGroups.addInstances(anyString(), anyString(), groupName.capture(), any())).thenReturn(addInstances);
+        when(instanceGroups.addInstances(eq(PROJECT_ID), eq(AVAILABILITY_ZONE), groupName.capture(), any())).thenReturn(addInstances);
         InstanceGroups.Get get = mock(InstanceGroups.Get.class);
         InstanceGroup ig = new InstanceGroup();
         ig.setName(masterInstanceGroup.getName());
@@ -562,7 +571,7 @@ public class GcpInstanceResourceBuilderTest {
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
-        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1", params);
+        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", AVAILABILITY_ZONE, params);
     }
 
     @Test

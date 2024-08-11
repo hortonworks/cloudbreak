@@ -132,6 +132,6 @@ public class ParameterGenerator {
     }
 
     private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashMap<>());
     }
 }

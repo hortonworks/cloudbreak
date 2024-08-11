@@ -34,9 +34,14 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
     private static final int ORDER = 1;
 
     @Override
+    public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network, String availabilityZone) {
+        String resourceName = getResourceNameService().group(context.getName(), group.getName(), auth.getCloudContext().getId(), availabilityZone);
+        return createNamedResource(resourceType(), resourceName, availabilityZone);
+    }
+
+    @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network) {
-        String resourceName = getResourceNameService().group(context.getName(), group.getName(), auth.getCloudContext().getId());
-        return createNamedResource(resourceType(), resourceName, context.getLocation().getAvailabilityZone().value());
+        return create(context, auth, group, network, null);
     }
 
     @Override
@@ -46,7 +51,7 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
         LOGGER.info("Building GCP instancegroup {} for project {}", group.getName(), context.getProjectId());
 
         Insert insert = context.getCompute().instanceGroups().insert(context.getProjectId(),
-                context.getLocation().getAvailabilityZone().value(), new InstanceGroup().setName(resource.getName()));
+                resource.getAvailabilityZone(), new InstanceGroup().setName(resource.getName()));
 
         return executeOperationalRequest(resource, insert);
     }
@@ -56,7 +61,7 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
         LOGGER.info("Deleting GCP instancegroup {} for project {}", resource.getName(), context.getProjectId());
 
         Delete delete = context.getCompute().instanceGroups().delete(context.getProjectId(),
-                context.getLocation().getAvailabilityZone().value(), resource.getName());
+                resource.getAvailabilityZone(), resource.getName());
         try {
             Operation operation = delete.execute();
             return createOperationAwareCloudResource(resource, operation);
@@ -75,5 +80,10 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
     @Override
     public int order() {
         return ORDER;
+    }
+
+    @Override
+    public boolean isZonalResource() {
+        return true;
     }
 }

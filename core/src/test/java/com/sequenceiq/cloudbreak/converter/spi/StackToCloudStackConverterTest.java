@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
@@ -281,8 +282,16 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenInstanceGroupContainsTemplateButThereIsNoNotDeletedInstanceMetaThenInstancesShouldBeEmpty() {
+        List<String> az1 = List.of("us-west2-a", "us-west2-b");
+        Json attributes1 = mock(Json.class);
+        when(attributes1.getMap()).thenReturn(Map.of(NetworkConstants.AVAILABILITY_ZONES, az1));
+        InstanceGroupNetwork instanceGroupNetwork1 = mock(InstanceGroupNetwork.class);
+        when(instanceGroupNetwork1.getAttributes()).thenReturn(attributes1);
+
+
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
+        when(instanceGroup.getInstanceGroupNetwork()).thenReturn(instanceGroupNetwork1);
         instanceGroups.add(new InstanceGroupDto(instanceGroup, emptyList()));
         Template template = mock(Template.class);
         when(template.getCloudPlatform()).thenReturn("AWS");
@@ -295,6 +304,7 @@ public class StackToCloudStackConverterTest {
 
         assertEquals(1L, result.getGroups().size());
         assertTrue(result.getGroups().get(0).getInstances().isEmpty());
+        assertEquals(new HashSet<>(az1), result.getGroups().get(0).getNetwork().getAvailabilityZones());
     }
 
     @Test

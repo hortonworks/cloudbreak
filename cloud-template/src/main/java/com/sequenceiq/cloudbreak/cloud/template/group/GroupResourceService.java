@@ -5,13 +5,16 @@ import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
@@ -63,24 +66,26 @@ public class GroupResourceService {
                 break;
             }
             for (Group group : getOrderedCopy(groups)) {
-                try {
-                    CloudResource buildableResource = builder.create(context, auth, group, network);
-                    if (buildableResource != null) {
-                        buildableResource = CloudResource.builder().cloudResource(buildableResource).withGroup(group.getName()).build();
-                        createResource(auth, buildableResource);
-                        CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
-                        updateResource(auth, resource);
-                        PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
-                                context, true);
-                        List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                        context.addGroupResources(group.getName(), Collections.singletonList(resource));
-                        results.addAll(pollerResult);
-                    } else {
-                        LOGGER.debug("CloudResource is null for {} with resourceType: {} and builder: {}, build is skipped.",
-                                group.getName(), builder.resourceType(), builder.getClass().getSimpleName());
+                for (String availabilityZone : getAvailabilityZones(builder, group, context)) {
+                    try {
+                        CloudResource buildableResource = builder.create(context, auth, group, network, availabilityZone);
+                        if (buildableResource != null) {
+                            buildableResource = CloudResource.builder().cloudResource(buildableResource).withGroup(group.getName()).build();
+                            createResource(auth, buildableResource);
+                            CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
+                            updateResource(auth, resource);
+                            PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
+                                    context, true);
+                            List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                            context.addGroupResources(group.getName(), Collections.singletonList(resource));
+                            results.addAll(pollerResult);
+                        } else {
+                            LOGGER.debug("CloudResource is null for {} with resourceType: {} and builder: {}, build is skipped.",
+                                    group.getName(), builder.resourceType(), builder.getClass().getSimpleName());
+                        }
+                    } catch (ResourceNotNeededException e) {
+                        LOGGER.debug("Skipping resource creation: {}", e.getMessage());
                     }
-                } catch (ResourceNotNeededException e) {
-                    LOGGER.debug("Skipping resource creation: {}", e.getMessage());
                 }
             }
         }
@@ -172,5 +177,14 @@ public class GroupResourceService {
             }
         };
         return byLengthOrdering.sortedCopy(groups);
+    }
+
+    private Set<String> getAvailabilityZones(GroupResourceBuilder<ResourceBuilderContext> builder, Group group, ResourceBuilderContext context) {
+        Set<String> availabilityZones = new HashSet<>();
+        availabilityZones.add(context.getLocation().getAvailabilityZone().value());
+        if (builder.isZonalResource() && !CollectionUtils.isEmpty(group.getNetwork().getAvailabilityZones())) {
+            return group.getNetwork().getAvailabilityZones();
+        }
+        return availabilityZones;
     }
 }

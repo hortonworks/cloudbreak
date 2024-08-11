@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,6 +25,9 @@ public class InstanceGroupGcpNetworkV4Parameters extends MappableBase implements
     @Schema
     private List<String> subnetIds = new ArrayList<>();
 
+    @Schema
+    private Set<String> availabilityZones = new HashSet<>();
+
     public List<String> getSubnetIds() {
         return subnetIds;
     }
@@ -31,10 +36,19 @@ public class InstanceGroupGcpNetworkV4Parameters extends MappableBase implements
         this.subnetIds = subnetIds;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
+    public void setAvailabilityZones(Set<String> availabilityZones) {
+        this.availabilityZones = availabilityZones;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, NetworkConstants.SUBNET_IDS, subnetIds);
+        putIfValueNotNull(map, NetworkConstants.AVAILABILITY_ZONES, availabilityZones);
         return map;
     }
 
@@ -48,5 +62,6 @@ public class InstanceGroupGcpNetworkV4Parameters extends MappableBase implements
     @Override
     public void parse(Map<String, Object> parameters) {
         subnetIds = getStringList(parameters, NetworkConstants.SUBNET_IDS);
+        availabilityZones = getStringSet(parameters, NetworkConstants.AVAILABILITY_ZONES);
     }
 }

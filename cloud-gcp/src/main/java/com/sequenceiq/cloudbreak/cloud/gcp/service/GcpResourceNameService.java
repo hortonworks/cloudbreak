@@ -112,12 +112,15 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         return subnetName;
     }
 
-    public String group(String stackName, String groupName, Long stackId) {
+    public String group(String stackName, String groupName, Long stackId, String zone) {
         String name;
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(groupName));
         name = appendPart(name, normalize(stackId));
+        if (!StringUtils.isEmpty(zone)) {
+            name = appendPart(name, zone.substring(zone.lastIndexOf('-') + 1));
+        }
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }

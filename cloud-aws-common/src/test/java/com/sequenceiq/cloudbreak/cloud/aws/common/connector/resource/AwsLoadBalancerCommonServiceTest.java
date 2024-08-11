@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -499,7 +500,7 @@ class AwsLoadBalancerCommonServiceTest {
         Set<GroupSubnet> endpointGatewaySubnets = endpointGatewaySubnetIds.stream()
                 .map(GroupSubnet::new)
                 .collect(Collectors.toSet());
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, groupSubnets, endpointGatewaySubnets, new HashMap<>());
+        return new GroupNetwork(OutboundInternetTraffic.DISABLED, groupSubnets, endpointGatewaySubnets, new HashSet<>(), new HashMap<>());
     }
 
     private AwsNetworkView createNetworkView(String subnetId, String endpointGatewaSubnetId) {

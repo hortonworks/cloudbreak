@@ -205,7 +205,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             Operation operation = insert.execute();
             verifyOperation(operation, buildableResource);
             updateDiskSetWithInstanceName(auth, computeResources, instance);
-            assignToExistingInstanceGroup(context, group, instance, buildableResource);
+            assignToExistingInstanceGroup(context, group, instance, buildableResource, cloudInstance.getAvailabilityZone());
             return singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
@@ -235,13 +235,12 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
      * also provides aggrigated monitoring
      */
     private void assignToExistingInstanceGroup(GcpContext context,
-        Group group, Instance instance, List<CloudResource> buildableResource) throws IOException {
+        Group group, Instance instance, List<CloudResource> buildableResource, String zone) throws IOException {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
-        String zone = context.getLocation().getAvailabilityZone().value();
 
-        List<CloudResource> instanceGroupResources = filterGroupFromName(filterResourcesByType(context.getGroupResources(group.getName()),
-                ResourceType.GCP_INSTANCE_GROUP), group.getName());
+        List<CloudResource> instanceGroupResources = filterGroupFromNameAndAz(filterResourcesByType(context.getGroupResources(group.getName()),
+                ResourceType.GCP_INSTANCE_GROUP), group.getName(), zone);
 
         if (!instanceGroupResources.isEmpty() && doesGcpInstanceGroupExist(compute, projectId, zone, instanceGroupResources.get(0))) {
             LOGGER.info("adding instance {} to group {} in project {}", instance.getName(), group.getName(), projectId);
@@ -542,9 +541,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 .collect(Collectors.toList());
     }
 
-    private List<CloudResource> filterGroupFromName(List<CloudResource> resources, String filterString) {
+    private List<CloudResource> filterGroupFromNameAndAz(List<CloudResource> resources, String filterString, String zone) {
         return Optional.ofNullable(resources).orElseGet(List::of).stream()
-                .filter(resource -> resource.getGroup().equals(filterString))
+                .filter(resource -> resource.getGroup().equals(filterString) && resource.getAvailabilityZone().equals(zone))
                 .collect(Collectors.toList());
     }
 

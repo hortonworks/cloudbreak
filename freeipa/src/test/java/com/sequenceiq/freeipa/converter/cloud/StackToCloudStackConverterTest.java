@@ -11,6 +11,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -27,11 +29,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -48,9 +53,12 @@ import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
@@ -107,6 +115,9 @@ public class StackToCloudStackConverterTest {
     @Mock
     private ResourceService resourceService;
 
+    @Mock
+    private ImageConverter imageConverter;
+
     @Test
     void testBuildInstance() {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
@@ -122,6 +133,30 @@ public class StackToCloudStackConverterTest {
         when(resourceService.findResourceById(anyLong())).thenReturn(Optional.of(resource));
         CloudInstance cloudInstance = underTest.buildInstance(stack, instanceMetaData, instanceGroup, stackAuthentication, 0L, InstanceStatus.CREATED);
         assertEquals(INSTANCE_ID, cloudInstance.getInstanceId());
+    }
+
+    @Test
+    void testConvert() {
+        ImageEntity imageEntity = mock(ImageEntity.class);
+        Image image = mock(Image.class);
+        when(image.getImageName()).thenReturn(IMAGE_NAME);
+        when(imageService.getByStack(stack)).thenReturn(imageEntity);
+        when(imageConverter.convert(imageEntity)).thenReturn(image);
+        when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        Template template = mock(Template.class);
+        when(instanceGroup.getTemplate()).thenReturn(template);
+        List<String> az = List.of("us-west2-a", "us-west2-b");
+        Json attributes = mock(Json.class);
+        when(attributes.getMap()).thenReturn(Map.of(NetworkConstants.AVAILABILITY_ZONES, az));
+        InstanceGroupNetwork instanceGroupNetwork = mock(InstanceGroupNetwork.class);
+        when(instanceGroupNetwork.getAttributes()).thenReturn(attributes);
+        when(instanceGroup.getInstanceGroupNetwork()).thenReturn(instanceGroupNetwork);
+        when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
+        Network network = mock(Network.class);
+        when(stack.getNetwork()).thenReturn(network);
+        CloudStack cloudStack = underTest.convert(stack);
+        assertEquals(new HashSet<>(az), cloudStack.getGroups().get(0).getNetwork().getAvailabilityZones());
     }
 
     @Test

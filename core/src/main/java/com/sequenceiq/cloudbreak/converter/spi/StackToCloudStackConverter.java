@@ -493,6 +493,7 @@ public class StackToCloudStackConverter {
             Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
             Set<GroupSubnet> subnets = new HashSet<>();
             Set<GroupSubnet> endpointGatewaySubnets = new HashSet<>();
+            Set<String> availabilityZones = new HashSet<>();
             if (params != null) {
                 List<String> subnetIds = (List<String>) params.getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
                 for (String subnetId : subnetIds) {
@@ -505,8 +506,11 @@ public class StackToCloudStackConverter {
                     GroupSubnet groupSubnet = new GroupSubnet(endpointGatewaySubnetId);
                     endpointGatewaySubnets.add(groupSubnet);
                 }
+                List<String> zoneIds = (List<String>) params.getOrDefault(NetworkConstants.AVAILABILITY_ZONES,
+                        new ArrayList<>());
+                availabilityZones.addAll(zoneIds);
             }
-            groupNetwork = new GroupNetwork(getOutboundInternetTraffic(stackNetwork), subnets, endpointGatewaySubnets, params);
+            groupNetwork = new GroupNetwork(getOutboundInternetTraffic(stackNetwork), subnets, endpointGatewaySubnets, availabilityZones, params);
         }
         return groupNetwork;
     }

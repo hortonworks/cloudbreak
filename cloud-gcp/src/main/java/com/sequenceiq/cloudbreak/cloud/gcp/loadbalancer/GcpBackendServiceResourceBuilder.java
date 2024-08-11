@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,12 +15,16 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.RegionBackendServices.Delete;
 import com.google.api.services.compute.Compute.RegionBackendServices.Insert;
 import com.google.api.services.compute.model.Backend;
 import com.google.api.services.compute.model.BackendService;
+import com.google.api.services.compute.model.InstanceGroupsListInstances;
+import com.google.api.services.compute.model.InstanceGroupsListInstancesRequest;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -28,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
@@ -61,7 +67,6 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
             CloudLoadBalancer loadBalancer, CloudStack cloudStack) throws Exception {
         List<CloudResource> results = new ArrayList<>();
         String projectId = context.getProjectId();
-        String zone = context.getLocation().getAvailabilityZone().value();
         List<CloudResource> healthResources = filterResourcesByType(context.getLoadBalancerResources(loadBalancer.getType()), ResourceType.GCP_HEALTH_CHECK);
 
         for (CloudResource buildableResource : buildableResources) {
@@ -93,7 +98,7 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                 TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(trafficPort, hcPort);
                 groups.addAll(loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair));
             }
-            makeBackendForTargetGroup(context, auth, loadBalancer, projectId, zone, groups, backends);
+            makeBackendForTargetGroup(context, auth, projectId, groups, backends);
 
             backendService.setBackends(backends);
             backendService.setName(buildableResource.getName());
@@ -126,17 +131,29 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
                 .collect(Collectors.toList());
     }
 
-    private void makeBackendForTargetGroup(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, String projectId, String zone,
-            Set<Group> groups, List<Backend> backends) {
+    private void makeBackendForTargetGroup(GcpContext context, AuthenticatedContext auth, String projectId, Set<Group> groups,
+            List<Backend> backends) throws IOException {
         for (Group group : groups) {
-            Backend backend = new Backend();
-            String groupname = getResourceNameService()
-                    .group(context.getName(), group.getName(), auth.getCloudContext().getId());
-            backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
-                    projectId, zone, groupname));
-            backend.setBalancingMode(CONNECTION);
-            backends.add(backend);
+            for (String availabilityZone : getAvailabilityZones(group, context)) {
+                String instanceGroupName = getResourceNameService()
+                        .group(context.getName(), group.getName(), auth.getCloudContext().getId(), availabilityZone);
+                if (!isInstanceGroupEmpty(context.getCompute(), projectId, availabilityZone, instanceGroupName)) {
+                    Backend backend = new Backend();
+                    backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
+                            projectId, availabilityZone, instanceGroupName));
+                    backend.setBalancingMode(CONNECTION);
+                    backends.add(backend);
+                } else {
+                    LOGGER.info("Instance group {} does not have any instances. Do not add it to backend", instanceGroupName);
+                }
+            }
         }
+    }
+
+    private boolean isInstanceGroupEmpty(Compute compute, String projectId, String zone, String instanceGroupName) throws IOException {
+        InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupName,
+                new InstanceGroupsListInstancesRequest()).execute();
+        return CollectionUtils.isEmpty(instances.getItems());
     }
 
     @Override
@@ -147,5 +164,14 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
     @Override
     public int order() {
         return ORDER;
+    }
+
+    private Set<String> getAvailabilityZones(Group group, ResourceBuilderContext context) {
+        Set<String> availabilityZones = new HashSet<>();
+        availabilityZones.add(context.getLocation().getAvailabilityZone().value());
+        if (!CollectionUtils.isEmpty(group.getNetwork().getAvailabilityZones())) {
+            return group.getNetwork().getAvailabilityZones();
+        }
+        return availabilityZones;
     }
 }

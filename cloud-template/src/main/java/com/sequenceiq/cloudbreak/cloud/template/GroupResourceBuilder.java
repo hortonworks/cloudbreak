@@ -52,6 +52,28 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
     CloudResource create(C context, AuthenticatedContext auth, Group group, Network network);
 
     /**
+     * Create the reference {@link CloudResource} objects with proper resource naming to persist them into the DB. In the next phase these objects
+     * will be provided to the {@link #build(C, AuthenticatedContext, Group, Network, Security, CloudResource)} method to actually create these
+     * resources on the cloud provider in the specific availability zone. In case the resource creation fails the whole deployment fails, because the
+     * network type resources are not replaceable. In that case the only option is to remove the stack.
+     * <br>
+     * There are some cases where you don't want to create some of the resources from the network stack, like when you use custom network or vpc or subnet. In
+     * that case return the cloud resource with the existing resource id.
+     *
+     * @param context Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
+     * @param auth    Authenticated context is provided to be able to send the requests to the cloud provider.
+     * @param group   Compute resources which are required for a deployment. Each group represents an instance group in Cloudbreak. One group contains
+     *                  multiple instance templates for the same instance type so this method supposed to create for 1 template at a time, because it will
+     *                  be called as many times as there are templates in the group.
+     * @param network Network object provided which contains all the necessary information to create the proper network and subnet or the existing ones id.
+     * @param availabilityZone Availability zone for the resource.
+     * @return Returns the buildable cloud resources.
+     */
+    default CloudResource create(C context, AuthenticatedContext auth, Group group, Network network, String availabilityZone) {
+        return create(context, auth, group, network);
+    }
+
+    /**
      * This method will be called after the {@link #create(C, AuthenticatedContext, Group, Network)} method with the constructed
      * cloud resources. It's purpose to actually create these resources on the cloud provider side.
      * <br>
@@ -103,5 +125,9 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
      * @return Return the resource type.
      */
     ResourceType resourceType();
+
+    default boolean isZonalResource() {
+        return false;
+    }
 
 }

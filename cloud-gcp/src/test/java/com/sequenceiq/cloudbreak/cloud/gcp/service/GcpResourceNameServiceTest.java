@@ -84,8 +84,14 @@ public class GcpResourceNameServiceTest {
 
     @Test
     void testGroup() {
-        String resourceName = underTest.group(STACK_NAME, GROUP_NAME, STACK_ID);
+        String resourceName = underTest.group(STACK_NAME, GROUP_NAME, STACK_ID, "");
         assertEquals("stackname-groupname-123", resourceName);
+    }
+
+    @Test
+    void testGroupWithAz() {
+        String resourceName = underTest.group(STACK_NAME, GROUP_NAME, STACK_ID, "us-west2-c");
+        assertEquals("stackname-groupname-123-c", resourceName);
     }
 
     @Test
@@ -196,7 +202,7 @@ public class GcpResourceNameServiceTest {
 
     @Test
     void shouldGenerateGcpInstanceGroupResourceWehenPartsProvided() {
-        String resourceName = underTest.group("stack", "group", 1234L);
+        String resourceName = underTest.group("stack", "group", 1234L, "");
 
         assertEquals(
                 "stack-group-1234", resourceName, "The instance group resource name should include stack name, stack id and a group name");

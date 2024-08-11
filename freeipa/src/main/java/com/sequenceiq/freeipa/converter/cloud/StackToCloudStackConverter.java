@@ -293,14 +293,18 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             Json attributes = instanceGroupNetwork.getAttributes();
             Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
             Set<GroupSubnet> subnets = new HashSet<>();
+            Set<String> availabilityZones = new HashSet<>();
             if (params != null) {
                 List<String> subnetIds = (List<String>) params.getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
                 for (String subnetId : subnetIds) {
                     GroupSubnet groupSubnet = new GroupSubnet(subnetId);
                     subnets.add(groupSubnet);
                 }
+                List<String> zoneIds = (List<String>) params.getOrDefault(NetworkConstants.AVAILABILITY_ZONES,
+                        new ArrayList<>());
+                availabilityZones.addAll(zoneIds);
             }
-            groupNetwork = new GroupNetwork(network.getOutboundInternetTraffic(), subnets, params);
+            groupNetwork = new GroupNetwork(network.getOutboundInternetTraffic(), subnets, params, availabilityZones);
         }
         return groupNetwork;
     }
