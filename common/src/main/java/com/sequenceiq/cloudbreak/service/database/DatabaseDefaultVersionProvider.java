@@ -25,24 +25,24 @@ public class DatabaseDefaultVersionProvider {
     private final VersionComparator versionComparator = new VersionComparator();
 
     public String calculateDbVersionBasedOnRuntimeAndOsIfMissing(String runtime, String os, String requestedDbEngineVersion, CloudPlatform cloudPlatform,
-            boolean externalDb, boolean flexibleEnabled) {
+            boolean externalDb, boolean flexibleServer) {
         if (StringUtils.isNotBlank(requestedDbEngineVersion)) {
             LOGGER.debug("DB engine version already requested to be [{}]", requestedDbEngineVersion);
             return requestedDbEngineVersion;
         } else if (StringUtils.isNotBlank(runtime)) {
             if (0 <= versionComparator.compare(() -> runtime, () -> minRuntimeVersion)) {
                 LOGGER.debug("Setting DB engine version to [{}] for runtime [{}]", dbEngineVersion, runtime);
-                return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleEnabled);
+                return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleServer);
             } else {
                 LOGGER.debug("Setting DB engine version to 'null' for runtime [{}]", runtime);
-                return choosePg11InCaseOfAzureExternalDb(null, cloudPlatform, externalDb, flexibleEnabled);
+                return choosePg11InCaseOfAzureExternalDb(null, cloudPlatform, externalDb, flexibleServer);
             }
         } else if (RHEL8.getOs().equalsIgnoreCase(os)) {
             LOGGER.debug("Setting DB engine version to [{}] for os [{}]", dbEngineVersion, os);
-            return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleEnabled);
+            return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleServer);
         } else {
             LOGGER.warn("Setting DB engine version to 'null' for runtime [{}] and os [{}]", runtime, os);
-            return choosePg11InCaseOfAzureExternalDb(null, cloudPlatform, externalDb, flexibleEnabled);
+            return choosePg11InCaseOfAzureExternalDb(null, cloudPlatform, externalDb, flexibleServer);
         }
     }
 

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
 
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 class DatabaseRequestToDatabaseConverterTest {
@@ -30,13 +28,10 @@ class DatabaseRequestToDatabaseConverterTest {
     @InjectMocks
     private DatabaseRequestToDatabaseConverter service;
 
-    private DetailedEnvironmentResponse environmentResponse;
-
     @BeforeEach
     void setup() {
-        environmentResponse = new DetailedEnvironmentResponse();
-        lenient().when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(eq(environmentResponse), nullable(AzureDatabaseType.class)))
-                .thenAnswer(invocation -> invocation.getArgument(1));
+        lenient().when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(nullable(AzureDatabaseType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -44,7 +39,7 @@ class DatabaseRequestToDatabaseConverterTest {
         DatabaseRequest databaseRequest = new DatabaseRequest();
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
 
-        Database database = service.convert(environmentResponse, CloudPlatform.AZURE, databaseRequest);
+        Database database = service.convert(CloudPlatform.AZURE, databaseRequest);
 
         assertNull(database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
         assertNull(database.getDatalakeDatabaseAvailabilityType());
@@ -54,7 +49,7 @@ class DatabaseRequestToDatabaseConverterTest {
     void testConvertWithAws() {
         DatabaseRequest databaseRequest = new DatabaseRequest();
 
-        Database database = service.convert(environmentResponse, CloudPlatform.AWS, databaseRequest);
+        Database database = service.convert(CloudPlatform.AWS, databaseRequest);
 
         assertNull(database.getAttributes());
         assertEquals(DatabaseAvailabilityType.NONE, database.getExternalDatabaseAvailabilityType());
@@ -69,7 +64,7 @@ class DatabaseRequestToDatabaseConverterTest {
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
 
-        Database database = service.convert(environmentResponse, CloudPlatform.AZURE, databaseRequest);
+        Database database = service.convert(CloudPlatform.AZURE, databaseRequest);
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER.name(), database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
     }
@@ -82,7 +77,7 @@ class DatabaseRequestToDatabaseConverterTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NONE);
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
 
-        Database result = service.convert(null, CloudPlatform.AZURE, databaseRequest);
+        Database result = service.convert(CloudPlatform.AZURE, databaseRequest);
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER.name(), result.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
         assertEquals(DatabaseAvailabilityType.NONE, result.getExternalDatabaseAvailabilityType());

@@ -88,7 +88,6 @@ auth:
     cost.calculation.enable: true
     co2.calculation.enable: true
     enforce.aws.native.single.az.enabled: false
-    azure.database.flexibleserver.enabled: true
     azure.database.flexibleserver.upgrade.enabled: true
     secret.rotation.enabled: true
     secret.encryption.enabled: false

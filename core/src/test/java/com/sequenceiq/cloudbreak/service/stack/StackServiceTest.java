@@ -57,8 +57,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -310,7 +308,7 @@ class StackServiceTest {
                 .when(imageService)
                 .create(eq(stack), nullable(StatedImage.class));
 
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null)))
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace)))
                 .hasCause(imageNotFound);
         verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
         verify(stack).populateStackIdForComponents();
@@ -335,10 +333,10 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false, false))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, false, true))
                 .thenReturn(calculatedDbVersion);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setStackVersion(stackVersion);
         verify(stackRepository, times(2)).save(stack);
@@ -367,13 +365,8 @@ class StackServiceTest {
         String calculatedDbVersion = "11";
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, false))
                 .thenReturn(calculatedDbVersion);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-        DatabaseRequest databaseRequest = new DatabaseRequest();
-        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
-        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
-        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
         when(azureDatabaseServerParameterDecorator.getDatabaseType(anyMap())).thenReturn(Optional.of(AzureDatabaseType.SINGLE_SERVER));
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setStackVersion(stackVersion);
         verify(stack).populateStackIdForComponents();
@@ -402,13 +395,8 @@ class StackServiceTest {
         String calculatedDbVersion = "11";
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, true))
                 .thenReturn(calculatedDbVersion);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-        DatabaseRequest databaseRequest = new DatabaseRequest();
-        DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
-        databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
-        databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setStackVersion(stackVersion);
         verify(stack).populateStackIdForComponents();
@@ -437,9 +425,8 @@ class StackServiceTest {
         String calculatedDbVersion = "11";
         when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(stackVersion, os, dbVersion, CloudPlatform.MOCK, true, true))
                 .thenReturn(calculatedDbVersion);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setStackVersion(stackVersion);
         verify(stack).populateStackIdForComponents();
@@ -461,10 +448,10 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
         String calculatedDbVersion = "11";
-        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false, false))
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(null, os, dbVersion, CloudPlatform.MOCK, false, true))
                 .thenReturn(calculatedDbVersion);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack, never()).setStackVersion(any());
         verify(stack).populateStackIdForComponents();
@@ -482,8 +469,7 @@ class StackServiceTest {
         when(stack.getDatabase()).thenReturn(database);
 
         try {
-            stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                    () -> underTest.create(stack, statedImage, user, workspace, null));
+            stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(stack).populateStackIdForComponents();
@@ -502,8 +488,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
 
-        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace, null));
+        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
@@ -529,8 +514,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
 
-        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace, null));
+        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
@@ -547,8 +531,7 @@ class StackServiceTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NONE);
         when(stack.getDatabase()).thenReturn(database);
 
-        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.create(stack, statedImage, user, workspace, null));
+        stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace));
 
         verify(stack).setArchitecture(Architecture.ARM64);
     }

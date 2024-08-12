@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -44,18 +43,14 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private final AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
-    private final EntitlementService entitlementService;
-
     @Value("${cb.multiaz.azure.availabilityZones}")
     private Set<String> azureAvailabilityZones;
 
     public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService,
-            AzurePrivateEndpointValidator azurePrivateEndpointValidator, AzureCloudSubnetParametersService azureCloudSubnetParametersService,
-            EntitlementService entitlementService) {
+            AzurePrivateEndpointValidator azurePrivateEndpointValidator, AzureCloudSubnetParametersService azureCloudSubnetParametersService) {
         this.cloudNetworkService = cloudNetworkService;
         this.azurePrivateEndpointValidator = azurePrivateEndpointValidator;
         this.azureCloudSubnetParametersService = azureCloudSubnetParametersService;
-        this.entitlementService = entitlementService;
     }
 
     @Override
@@ -240,41 +235,39 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private void checkFlexibleServerSubnetIds(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
-        if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId())) {
-            Set<String> originalFlexibleSubnets = Optional.ofNullable(environmentDto.getNetwork())
-                    .map(NetworkDto::getAzure)
-                    .map(AzureParams::getFlexibleServerSubnetIds)
-                    .orElse(Set.of());
-            Set<String> newFlexibleSubnets = Optional.ofNullable(networkDto.getAzure())
-                    .map(AzureParams::getFlexibleServerSubnetIds)
-                    .orElse(Set.of());
-            if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
-                LOGGER.info("Flexible server subnet validation is not needed during environment edit as subnet ids has not changed.");
-            } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
-                String message = "Deletion of all Flexible server delegated subnets is not supported";
+        Set<String> originalFlexibleSubnets = Optional.ofNullable(environmentDto.getNetwork())
+                .map(NetworkDto::getAzure)
+                .map(AzureParams::getFlexibleServerSubnetIds)
+                .orElse(Set.of());
+        Set<String> newFlexibleSubnets = Optional.ofNullable(networkDto.getAzure())
+                .map(AzureParams::getFlexibleServerSubnetIds)
+                .orElse(Set.of());
+        if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
+            LOGGER.info("Flexible server subnet validation is not needed during environment edit as subnet ids has not changed.");
+        } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
+            String message = "Deletion of all Flexible server delegated subnets is not supported";
+            LOGGER.warn(message);
+            resultBuilder.error(message);
+        } else if (!newFlexibleSubnets.isEmpty()) {
+            checkPrivateEndpointSetting(networkDto, resultBuilder);
+            Set<String> flexibleServerSubnetIds = convertFlexibleServerSubnetIds(newFlexibleSubnets);
+            Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
+            if (flexibleSubnets.size() != flexibleServerSubnetIds.size()) {
+                String message = String.format("The following flexible server delegated subnets are not found on the provider side: %s",
+                        newFlexibleSubnets.stream()
+                                .filter(subnetId -> !flexibleSubnets.containsKey(convertFlexibleServerSubnetId(subnetId)))
+                                .collect(Collectors.joining(",")));
                 LOGGER.warn(message);
                 resultBuilder.error(message);
-            } else if (!newFlexibleSubnets.isEmpty()) {
-                checkPrivateEndpointSetting(networkDto, resultBuilder);
-                Set<String> flexibleServerSubnetIds = convertFlexibleServerSubnetIds(newFlexibleSubnets);
-                Map<String, CloudSubnet> flexibleSubnets = cloudNetworkService.getSubnetMetadata(environmentDto, networkDto, flexibleServerSubnetIds);
-                if (flexibleSubnets.size() != flexibleServerSubnetIds.size()) {
-                    String message = String.format("The following flexible server delegated subnets are not found on the provider side: %s",
-                            newFlexibleSubnets.stream()
-                                    .filter(subnetId -> !flexibleSubnets.containsKey(convertFlexibleServerSubnetId(subnetId)))
-                                    .collect(Collectors.joining(",")));
+            } else {
+                String invalidSubnets = flexibleSubnets.entrySet().stream()
+                        .filter(entry -> !azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(entry.getValue()))
+                        .map(Entry::getKey)
+                        .collect(Collectors.joining(","));
+                if (StringUtils.isNotEmpty(invalidSubnets)) {
+                    String message = String.format("The following subnets are not delegated to flexible servers: %s", invalidSubnets);
                     LOGGER.warn(message);
                     resultBuilder.error(message);
-                } else {
-                    String invalidSubnets = flexibleSubnets.entrySet().stream()
-                            .filter(entry -> !azureCloudSubnetParametersService.isFlexibleServerDelegatedSubnet(entry.getValue()))
-                            .map(Entry::getKey)
-                            .collect(Collectors.joining(","));
-                    if (StringUtils.isNotEmpty(invalidSubnets)) {
-                        String message = String.format("The following subnets are not delegated to flexible servers: %s", invalidSubnets);
-                        LOGGER.warn(message);
-                        resultBuilder.error(message);
-                    }
                 }
             }
         }
@@ -283,7 +276,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     private void checkPrivateEndpointSetting(NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         if (networkDto.isPrivateEndpointEnabled(AZURE)) {
             String message = "Both Private Endpoint and Flexible Server delegated subnet(s) are specified in the request. " +
-                            "As they are mutually exclusive, please specify only one of them and retry.";
+                    "As they are mutually exclusive, please specify only one of them and retry.";
             LOGGER.warn(message);
             resultBuilder.error(message);
         }

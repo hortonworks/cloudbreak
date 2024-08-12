@@ -197,7 +197,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(SdxBasicView.builder().withCrn("crn").build()));
         lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
-        lenient().when(databaseRequestToDatabaseConverter.convert(any(DetailedEnvironmentResponse.class), any(CloudPlatform.class), isNull()))
+        lenient().when(databaseRequestToDatabaseConverter.convert(any(CloudPlatform.class), isNull()))
                 .thenReturn(new Database());
         // GIVEN
         InstanceGroup instanceGroup = new InstanceGroup();

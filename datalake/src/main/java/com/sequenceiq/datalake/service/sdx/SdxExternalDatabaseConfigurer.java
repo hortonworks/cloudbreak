@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.DatabaseBase;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -65,14 +64,12 @@ public class SdxExternalDatabaseConfigurer {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(internalDatabaseRequest, databaseRequest, cloudPlatform, sdxCluster);
         String requestedDbEngineVersion = getDbEngineVersion(internalDatabaseRequest, databaseRequest);
-        boolean flexibleServerEnabled = entitlementService.isAzureDatabaseFlexibleServerEnabled(ThreadBasedUserCrnProvider.getAccountId());
-        AzureDatabaseType azureDatabaseType = getAzureDatabaseType(environment, cloudPlatform, internalDatabaseRequest, databaseRequest,
+        AzureDatabaseType azureDatabaseType = getAzureDatabaseType(cloudPlatform, internalDatabaseRequest, databaseRequest,
                 databaseAvailabilityType);
         boolean singleServerRequested = azureDatabaseType != null && azureDatabaseType.isSingleServer();
         String dbEngineVersion =
                 databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(sdxCluster.getRuntime(), os, requestedDbEngineVersion,
-                        cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType),
-                        flexibleServerEnabled && !singleServerRequested);
+                        cloudPlatform, SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType), !singleServerRequested);
         SdxDatabase sdxDatabase = DatabaseParameterFallbackUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, azureDatabaseType, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),
@@ -149,10 +146,10 @@ public class SdxExternalDatabaseConfigurer {
         }
     }
 
-    private AzureDatabaseType getAzureDatabaseType(DetailedEnvironmentResponse environment, CloudPlatform cloudPlatform, DatabaseRequest internalDatabaseRequest,
+    private AzureDatabaseType getAzureDatabaseType(CloudPlatform cloudPlatform, DatabaseRequest internalDatabaseRequest,
             SdxDatabaseRequest databaseRequest, SdxDatabaseAvailabilityType databaseAvailabilityType) {
         if (CloudPlatform.AZURE == cloudPlatform && SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType)) {
-            return azureDatabaseAttributesService.determineAzureDatabaseType(environment, internalDatabaseRequest, databaseRequest);
+            return azureDatabaseAttributesService.determineAzureDatabaseType(internalDatabaseRequest, databaseRequest);
         } else {
             return null;
         }

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -51,7 +50,7 @@ public class AzureDatabaseAttributesService {
                 .orElse(null);
     }
 
-    public AzureDatabaseType determineAzureDatabaseType(DetailedEnvironmentResponse environment, DatabaseRequest internalDatabaseRequest,
+    public AzureDatabaseType determineAzureDatabaseType(DatabaseRequest internalDatabaseRequest,
             SdxDatabaseRequest databaseRequest) {
         AzureDatabaseType azureDatabaseType = Optional.ofNullable(databaseRequest)
                 .map(SdxDatabaseRequest::getSdxDatabaseAzureRequest)
@@ -60,7 +59,7 @@ public class AzureDatabaseAttributesService {
                         .map(DatabaseRequest::getDatabaseAzureRequest)
                         .map(DatabaseAzureRequest::getAzureDatabaseType)
                         .orElse(null));
-        azureDatabaseType = environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(environment, azureDatabaseType);
+        azureDatabaseType = environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(azureDatabaseType);
         return azureDatabaseType;
     }
 

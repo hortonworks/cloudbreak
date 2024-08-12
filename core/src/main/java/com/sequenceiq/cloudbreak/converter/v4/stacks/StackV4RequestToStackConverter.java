@@ -227,7 +227,7 @@ public class StackV4RequestToStackConverter {
         if (!isTemplate(source) && environment != null) {
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
-        convertDatabase(environment, source, stack);
+        convertDatabase(source, stack);
         stack.setDomainDnsResolver(targetedUpscaleSupportService.isUnboundEliminationSupported(Crn.safeFromString(source.getEnvironmentCrn()).getAccountId()) ?
                 DnsResolverType.FREEIPA_FOR_ENV : DnsResolverType.LOCAL_UNBOUND);
         determineServiceTypeTag(stack, source.getTags());
@@ -240,8 +240,8 @@ public class StackV4RequestToStackConverter {
         return stack;
     }
 
-    private void convertDatabase(DetailedEnvironmentResponse environment, StackV4Request source, Stack stack) {
-        stack.setDatabase(databaseRequestToDatabaseConverter.convert(environment, source.getCloudPlatform(), source.getExternalDatabase()));
+    private void convertDatabase(StackV4Request source, Stack stack) {
+        stack.setDatabase(databaseRequestToDatabaseConverter.convert(source.getCloudPlatform(), source.getExternalDatabase()));
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {

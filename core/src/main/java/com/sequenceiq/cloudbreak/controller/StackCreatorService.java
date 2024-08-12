@@ -269,7 +269,7 @@ public class StackCreatorService {
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
                 Stack newStack = measure(
-                        () -> stackService.create(stack, imgFromCatalog, user, workspace, stackRequest.getExternalDatabase()),
+                        () -> stackService.create(stack, imgFromCatalog, user, workspace),
                         LOGGER,
                         "Save the remaining stack data took {} ms"
                 );

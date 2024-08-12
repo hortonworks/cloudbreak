@@ -163,9 +163,6 @@ class EntitlementServiceTest {
                 {"CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED", (EntitlementCheckFunction) EntitlementService::isFedRampExternalDatabaseForceDisabled, false},
                 {"CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED", (EntitlementCheckFunction) EntitlementService::isFedRampExternalDatabaseForceDisabled, true},
 
-                {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER", (EntitlementCheckFunction) EntitlementService::isAzureDatabaseFlexibleServerEnabled, false},
-                {"CDP_AZURE_DATABASE_FLEXIBLE_SERVER", (EntitlementCheckFunction) EntitlementService::isAzureDatabaseFlexibleServerEnabled, true},
-
                 {"CDP_CB_AZURE_MULTIAZ", (EntitlementCheckFunction) EntitlementService::isAzureMultiAzEnabled, false},
                 {"CDP_CB_AZURE_MULTIAZ", (EntitlementCheckFunction) EntitlementService::isAzureMultiAzEnabled, true},
 

@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -621,7 +620,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace, DatabaseRequest databaseRequest) {
+    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -675,7 +674,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             Set<Component> components = imageService.create(stack, imgFromCatalog);
             setArchitecture(stack, imgFromCatalog);
             setRuntime(stack, components);
-            setDbVersion(stack, imgFromCatalog, databaseRequest);
+            setDbVersion(stack, imgFromCatalog);
             Stack savedStackWithAllDetails = stackRepository.save(stack);
             measure(() -> addTemplateForStack(savedStackWithAllDetails, connector.waitGetTemplate(templateRequest)),
                     LOGGER, "Save cluster template took {} ms for stack {}", stackName);
@@ -699,24 +698,22 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         Optional.ofNullable(stackVersion).ifPresent(stack::setStackVersion);
     }
 
-    private void setDbVersion(Stack stack, StatedImage imgFromCatalog, DatabaseRequest databaseRequest) {
-        boolean flexibleServerEntitled = entitlementService.isAzureDatabaseFlexibleServerEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
-        boolean flexibleServerEnabled = flexibleServerEntitled && !isSingleServerRequested(stack, flexibleServerEntitled);
+    private void setDbVersion(Stack stack, StatedImage imgFromCatalog) {
+        boolean flexibleServerRequested = !isSingleServerRequested(stack);
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntimeAndOsIfMissing(
                 stack.getStackVersion(), imgFromCatalog.getImage().getOs(), stack.getExternalDatabaseEngineVersion(),
                 CloudPlatform.valueOf(stack.getCloudPlatform()),
                 !Optional.ofNullable(stack.getDatabase().getExternalDatabaseAvailabilityType()).orElse(DatabaseAvailabilityType.NONE).isEmbedded(),
-                flexibleServerEnabled);
+                flexibleServerRequested);
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }
     }
 
-    private boolean isSingleServerRequested(Stack stack, boolean flexibleServerEntitled) {
-        AzureDatabaseType defaultAzureDatabaseType = flexibleServerEntitled ? AzureDatabaseType.FLEXIBLE_SERVER : AzureDatabaseType.SINGLE_SERVER;
+    private boolean isSingleServerRequested(Stack stack) {
         return Optional.ofNullable(stack.getDatabase())
                 .map(Database::getAttributesMap)
-                .map(attributeMap -> azureDatabaseServerParameterDecorator.getDatabaseType(attributeMap).orElse(defaultAzureDatabaseType))
+                .map(attributeMap -> azureDatabaseServerParameterDecorator.getDatabaseType(attributeMap).orElse(AzureDatabaseType.FLEXIBLE_SERVER))
                 .map(AzureDatabaseType::isSingleServer)
                 .orElse(Boolean.FALSE);
     }

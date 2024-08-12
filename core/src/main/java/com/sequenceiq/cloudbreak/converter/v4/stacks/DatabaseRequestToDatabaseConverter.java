@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.common.model.AzureDatabaseType;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class DatabaseRequestToDatabaseConverter {
@@ -30,25 +29,25 @@ public class DatabaseRequestToDatabaseConverter {
     @Inject
     private EnvironmentDatabaseService environmentDatabaseService;
 
-    public Database convert(DetailedEnvironmentResponse environment, CloudPlatform cloudPlatform, DatabaseRequest source) {
+    public Database convert(CloudPlatform cloudPlatform, DatabaseRequest source) {
         Database database = new Database();
         if (source != null) {
             database.setExternalDatabaseAvailabilityType(Optional.ofNullable(source.getAvailabilityType()).orElse(DatabaseAvailabilityType.NONE));
             database.setExternalDatabaseEngineVersion(source.getDatabaseEngineVersion());
-            database.setAttributes(configureAzureDatabaseIfNeeded(environment, cloudPlatform, source, source.getAvailabilityType()).orElse(null));
+            database.setAttributes(configureAzureDatabaseIfNeeded(cloudPlatform, source, source.getAvailabilityType()).orElse(null));
             database.setDatalakeDatabaseAvailabilityType(source.getDatalakeDatabaseAvailabilityType());
         }
         return database;
     }
 
-    private Optional<Json> configureAzureDatabaseIfNeeded(DetailedEnvironmentResponse environment, CloudPlatform cloudPlatform, DatabaseRequest databaseRequest,
+    private Optional<Json> configureAzureDatabaseIfNeeded(CloudPlatform cloudPlatform, DatabaseRequest databaseRequest,
             DatabaseAvailabilityType availabilityType) {
         if (cloudPlatform == CloudPlatform.AZURE && availabilityType != null && !availabilityType.isEmbedded()) {
             AzureDatabaseType azureDatabaseType = Optional.ofNullable(databaseRequest)
                     .map(DatabaseRequest::getDatabaseAzureRequest)
                     .map(DatabaseAzureRequest::getAzureDatabaseType)
                     .orElse(null);
-            azureDatabaseType = environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(environment, azureDatabaseType);
+            azureDatabaseType = environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(azureDatabaseType);
             Optional<String> delegatedSubnetID = Optional.ofNullable(databaseRequest)
                     .map(DatabaseRequest::getDatabaseAzureRequest)
                     .map(DatabaseAzureRequest::getFlexibleServerDelegatedSubnetId);

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.database.EnvironmentDatabaseService;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.entity.SdxDatabase;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAzureRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
@@ -87,61 +85,57 @@ public class AzureDatabaseAttributesServiceTest {
 
     @Test
     void testDetermineAzureDatabaseTypeWithNoDB() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
-        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(eq(environmentResponse), isNull(AzureDatabaseType.class)))
-                .thenAnswer(invocation -> invocation.getArgument(1));
+        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(isNull(AzureDatabaseType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AzureDatabaseType actualResult = ThreadBasedUserCrnProvider.doAs(
-                ACTOR, () -> service.determineAzureDatabaseType(environmentResponse, null, databaseRequest));
+                ACTOR, () -> service.determineAzureDatabaseType(null, databaseRequest));
 
         assertNull(actualResult);
     }
 
     @Test
     void testDetermineAzureDatabaseTypeWithSingleServer() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
         SdxDatabaseAzureRequest azureRequest = new SdxDatabaseAzureRequest();
         azureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
         databaseRequest.setSdxDatabaseAzureRequest(azureRequest);
-        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(eq(environmentResponse), any(AzureDatabaseType.class)))
-                .thenAnswer(invocation -> invocation.getArgument(1));
+        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(any(AzureDatabaseType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AzureDatabaseType actualResult = ThreadBasedUserCrnProvider.doAs(
-                ACTOR, () -> service.determineAzureDatabaseType(environmentResponse, null, databaseRequest));
+                ACTOR, () -> service.determineAzureDatabaseType(null, databaseRequest));
 
         assertEquals(AzureDatabaseType.SINGLE_SERVER, actualResult);
     }
 
     @Test
     void testDetermineAzureDatabaseTypeWithFlexibleServer() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
         SdxDatabaseAzureRequest azureRequest = new SdxDatabaseAzureRequest();
         azureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         databaseRequest.setSdxDatabaseAzureRequest(azureRequest);
-        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(eq(environmentResponse), any(AzureDatabaseType.class)))
-                .thenAnswer(invocation -> invocation.getArgument(1));
+        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(any(AzureDatabaseType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AzureDatabaseType actualResult = ThreadBasedUserCrnProvider.doAs(
-                ACTOR, () -> service.determineAzureDatabaseType(environmentResponse, null, databaseRequest));
+                ACTOR, () -> service.determineAzureDatabaseType(null, databaseRequest));
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, actualResult);
     }
 
     @Test
     void testDetermineAzureDatabaseTypeWithFlexibleServerInternal() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         DatabaseRequest internalDatabaseRequest = new DatabaseRequest();
         DatabaseAzureRequest azureRequest = new DatabaseAzureRequest();
         azureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         internalDatabaseRequest.setDatabaseAzureRequest(azureRequest);
-        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(eq(environmentResponse), any(AzureDatabaseType.class)))
-                .thenAnswer(invocation -> invocation.getArgument(1));
+        when(environmentDatabaseService.validateOrModifyDatabaseTypeIfNeeded(any(AzureDatabaseType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AzureDatabaseType actualResult = ThreadBasedUserCrnProvider.doAs(
-                ACTOR, () -> service.determineAzureDatabaseType(environmentResponse, internalDatabaseRequest, null));
+                ACTOR, () -> service.determineAzureDatabaseType(internalDatabaseRequest, null));
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, actualResult);
     }

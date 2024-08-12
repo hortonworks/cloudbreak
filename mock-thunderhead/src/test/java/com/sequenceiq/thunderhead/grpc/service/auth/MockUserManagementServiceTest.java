@@ -243,9 +243,6 @@ public class MockUserManagementServiceTest {
                 {"enableUsersyncSplitFreeIPAUserRetrieval true", "enableUsersyncSplitFreeIPAUserRetrieval", true,
                         "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", true},
 
-                {"azureDatabaseFlexibleServerEnabled false", "azureDatabaseFlexibleServerEnabled", false, "CDP_AZURE_DATABASE_FLEXIBLE_SERVER", false},
-                {"azureDatabaseFlexibleServerEnabled true", "azureDatabaseFlexibleServerEnabled", true, "CDP_AZURE_DATABASE_FLEXIBLE_SERVER", true},
-
                 {"secretEncryptionEnabled false", "secretEncryptionEnabled", false, "CDP_CB_SECRET_ENCRYPTION", false},
                 {"secretEncryptionEnabled true", "secretEncryptionEnabled", true, "CDP_CB_SECRET_ENCRYPTION", true},
         };

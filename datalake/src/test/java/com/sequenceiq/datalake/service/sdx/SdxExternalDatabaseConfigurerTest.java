@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAzureRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
@@ -52,9 +50,6 @@ public class SdxExternalDatabaseConfigurerTest {
 
     @Mock
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @InjectMocks
     private SdxExternalDatabaseConfigurer underTest;
@@ -123,7 +118,7 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseRequest dbRequest = new SdxDatabaseRequest();
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
-        when(azureDatabaseAttributesService.determineAzureDatabaseType(environmentResponse, null, dbRequest)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
+        when(azureDatabaseAttributesService.determineAzureDatabaseType(null, dbRequest)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.configure(environmentResponse, null, null, dbRequest, sdxCluster));
 
@@ -232,9 +227,7 @@ public class SdxExternalDatabaseConfigurerTest {
         DatabaseRequest internalDatabaseRequest = new DatabaseRequest();
         DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
         databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-        when(azureDatabaseAttributesService.determineAzureDatabaseType(environmentResponse, internalDatabaseRequest, null))
-                .thenReturn(AzureDatabaseType.SINGLE_SERVER);
+        when(azureDatabaseAttributesService.determineAzureDatabaseType(internalDatabaseRequest, null)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
         internalDatabaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR,
@@ -259,9 +252,7 @@ public class SdxExternalDatabaseConfigurerTest {
         DatabaseAzureRequest databaseAzureRequest = new DatabaseAzureRequest();
         databaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         internalDatabaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-        when(azureDatabaseAttributesService.determineAzureDatabaseType(environmentResponse, internalDatabaseRequest, null))
-                .thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
+        when(azureDatabaseAttributesService.determineAzureDatabaseType(internalDatabaseRequest, null)).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR,
                 () -> underTest.configure(environmentResponse, "sles", internalDatabaseRequest, null, sdxCluster));
@@ -285,9 +276,7 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseAzureRequest sdxDatabaseAzureRequest = new SdxDatabaseAzureRequest();
         sdxDatabaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.SINGLE_SERVER);
         databaseRequest.setSdxDatabaseAzureRequest(sdxDatabaseAzureRequest);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-        when(azureDatabaseAttributesService.determineAzureDatabaseType(environmentResponse, null, databaseRequest))
-                .thenReturn(AzureDatabaseType.SINGLE_SERVER);
+        when(azureDatabaseAttributesService.determineAzureDatabaseType(null, databaseRequest)).thenReturn(AzureDatabaseType.SINGLE_SERVER);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR,
                 () -> underTest.configure(environmentResponse, "sles", null, databaseRequest, sdxCluster));
@@ -313,9 +302,7 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxDatabaseAzureRequest sdxDatabaseAzureRequest = new SdxDatabaseAzureRequest();
         sdxDatabaseAzureRequest.setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
         databaseRequest.setSdxDatabaseAzureRequest(sdxDatabaseAzureRequest);
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
-        when(azureDatabaseAttributesService.determineAzureDatabaseType(environmentResponse, null, databaseRequest))
-                .thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
+        when(azureDatabaseAttributesService.determineAzureDatabaseType(null, databaseRequest)).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR,
                 () -> underTest.configure(environmentResponse, "sles", null, databaseRequest, sdxCluster));
@@ -336,7 +323,6 @@ public class SdxExternalDatabaseConfigurerTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("clusterName");
         sdxCluster.setRuntime("7.2.0");
-        when(entitlementService.isAzureDatabaseFlexibleServerEnabled(anyString())).thenReturn(true);
 
         SdxDatabase sdxDatabase = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.configure(environmentResponse, "sles", null, null, sdxCluster));
 
