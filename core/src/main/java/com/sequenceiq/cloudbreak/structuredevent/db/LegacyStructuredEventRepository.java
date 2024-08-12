@@ -66,5 +66,6 @@ public interface LegacyStructuredEventRepository extends WorkspaceResourceReposi
     void deleteRecordsByResourceIdOlderThan(@Param("resourceId") Long resourceid, @Param("timestamp") Long timestamp);
 
     @Modifying
+    @Query("DELETE FROM StructuredEventEntity se WHERE se.resourceCrn = :resourceCrn")
     void deleteByResourceCrn(String resourceCrn);
 }

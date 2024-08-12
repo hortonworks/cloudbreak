@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
@@ -22,5 +23,6 @@ public interface StackPatchRepository extends JpaRepository<StackPatch, Long> {
     List<StackPatch> findByTypeAndStackIdIn(StackPatchType stackPatchType, Collection<Long> stackIds);
 
     @Modifying
+    @Query("DELETE FROM StackPatch se WHERE se.stackId = :stackId")
     void deleteByStackId(Long stackId);
 }
