@@ -123,6 +123,58 @@ public class AzureDatabaseResourceService {
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
         String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
 
+        createResourceGroupIfNotExists(ac, stack, client, resourceGroupName, resourceGroupUsage, persistenceNotifier);
+
+        createTemplateResource(persistenceNotifier, cloudContext, stackName);
+        Deployment deployment = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, cloudContext);
+
+        String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
+        List<CloudResource> databaseResources = createCloudResources(fqdn);
+        databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
+        return databaseResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .collect(Collectors.toList());
+    }
+
+    private Deployment createOrFetchDeployment(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName, String template,
+            AzureClient client, CloudContext cloudContext) {
+        Optional<RuntimeException> exception = Optional.empty();
+        try {
+            deployDatabaseServer(stackName, resourceGroupName, template, client);
+        } catch (ManagementException e) {
+            exception = Optional.ofNullable(azureUtils.convertToCloudConnectorException(e, "Database stack provisioning"));
+        } catch (Exception e) {
+            exception = Optional.of(new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e));
+        }
+        try {
+            Deployment deployment = fetchDeploymentWithRetry(stackName, resourceGroupName, client);
+            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
+            if (exception.isPresent()) {
+                throw exception.get();
+            } else {
+                return deployment;
+            }
+        } catch (Retry.ActionFailedException e) {
+            LOGGER.warn("Error during fetching database deployment", e);
+            throw exception.orElse(e);
+        }
+    }
+
+    private Deployment fetchDeploymentWithRetry(String stackName, String resourceGroupName, AzureClient client) {
+        return retryService.testWith2SecDelayMax5Times(() -> {
+            Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+            if (templateDeployment == null || templateDeployment.outputs() == null) {
+                LOGGER.warn("Template deployment or it's output not found: {}", templateDeployment);
+                throw new Retry.ActionFailedException("Deployment or it's output not found");
+            } else {
+                return templateDeployment;
+            }
+        });
+    }
+
+    private void createResourceGroupIfNotExists(AuthenticatedContext ac, DatabaseStack stack, AzureClient client, String resourceGroupName,
+            ResourceGroupUsage resourceGroupUsage, PersistenceNotifier persistenceNotifier) {
         if (!client.resourceGroupExists(resourceGroupName)) {
             if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
                 LOGGER.warn("Resource group with name {} does not exist", resourceGroupName);
@@ -133,29 +185,7 @@ public class AzureDatabaseResourceService {
                 client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
         }
-        createResourceGroupResource(persistenceNotifier, cloudContext, resourceGroupName);
-        createTemplateResource(persistenceNotifier, cloudContext, stackName);
-        Deployment deployment;
-        try {
-            deployDatabaseServer(stackName, resourceGroupName, template, client);
-        } catch (ManagementException e) {
-            throw azureUtils.convertToCloudConnectorException(e, "Database stack provisioning");
-        } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e);
-        } finally {
-            deployment = client.getTemplateDeployment(resourceGroupName, stackName);
-            if (deployment != null) {
-                List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
-                cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
-            }
-        }
-
-        String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
-        List<CloudResource> databaseResources = createCloudResources(fqdn);
-        databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
-        return databaseResources.stream()
-                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
-                .collect(Collectors.toList());
+        createResourceGroupResource(persistenceNotifier, ac.getCloudContext(), resourceGroupName);
     }
 
     private void createTemplateResource(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, String stackName) {

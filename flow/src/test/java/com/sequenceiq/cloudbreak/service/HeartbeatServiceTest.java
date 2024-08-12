@@ -450,8 +450,8 @@ public class HeartbeatServiceTest {
             }
 
             @Override
-            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) {
-                return Boolean.TRUE;
+            public <T> T testWith2SecDelayMax5Times(Supplier<T> action) {
+                return (T) Boolean.TRUE;
             }
 
             @Override
@@ -500,7 +500,7 @@ public class HeartbeatServiceTest {
             }
 
             @Override
-            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) {
+            public <T> T testWith2SecDelayMax5Times(Supplier<T> action) {
                 throw new ActionFailedException("Test failed");
             }
 

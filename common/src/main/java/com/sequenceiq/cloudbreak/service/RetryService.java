@@ -17,7 +17,7 @@ public class RetryService implements Retry {
 
     @Override
     @Retryable(value = ActionFailedException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000))
-    public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionFailedException {
+    public <T> T testWith2SecDelayMax5Times(Supplier<T> action) throws ActionFailedException {
         return action.get();
     }
 

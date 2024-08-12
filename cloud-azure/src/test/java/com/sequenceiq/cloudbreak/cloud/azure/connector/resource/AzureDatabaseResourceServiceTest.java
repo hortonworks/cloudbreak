@@ -565,6 +565,8 @@ class AzureDatabaseResourceServiceTest {
             invocation.getArgument(0, Runnable.class).run();
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+        doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
+
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -612,6 +614,7 @@ class AzureDatabaseResourceServiceTest {
             invocation.getArgument(0, Runnable.class).run();
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+        doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -637,6 +640,7 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
+        doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -659,10 +663,12 @@ class AzureDatabaseResourceServiceTest {
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+        doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         ManagementException managementException = new ManagementException("Error", mock(HttpResponse.class));
         doThrow(managementException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         String exceptionMessage = "Database stack provisioning";
@@ -696,10 +702,12 @@ class AzureDatabaseResourceServiceTest {
         when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
         }).when(retryService).testWith2SecDelayMax5Times(any(Runnable.class));
+        doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
         AzureException azureException = new AzureException("Error");
         doThrow(azureException).when(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(mock(CloudResource.class)));
