@@ -67,7 +67,7 @@ ext {
   // Logging
   logbackVersion = '1.5.6'
   logbackJsonClassicVersion = '0.1.5'
-  slf4jApiVersion = '2.0.15'
+  slf4jApiVersion = '2.0.16'
 
   // Serialization
   accessorSmartVersion = '2.4.7'
