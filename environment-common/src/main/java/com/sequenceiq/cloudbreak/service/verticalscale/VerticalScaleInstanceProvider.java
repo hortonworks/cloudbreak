@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -108,6 +109,7 @@ public class VerticalScaleInstanceProvider {
             VmTypeMeta currentInstanceTypeMetaData = currentInstanceType.getMetaData();
             VmTypeMeta requestedInstanceTypeMetaData = requestedInstanceType.getMetaData();
 
+            validateArchitecture(currentInstanceType, requestedInstanceType);
             validateCPU(requestedInstanceTypeName, requestedInstanceTypeMetaData);
             validateMemory(requestedInstanceTypeName, requestedInstanceTypeMetaData);
             validateEphemeral(currentInstanceTypeName, requestedInstanceTypeName,
@@ -123,6 +125,14 @@ public class VerticalScaleInstanceProvider {
             }
         } else {
             throw new BadRequestException("The requested instancetype does not exist on provider side.");
+        }
+    }
+
+    private void validateArchitecture(VmType currentInstanceType, VmType requestedInstanceType) {
+        Architecture currentArchitecture = currentInstanceType.getMetaData().getArchitecture();
+        Architecture requestedArchitecture = requestedInstanceType.getMetaData().getArchitecture();
+        if (currentArchitecture != requestedArchitecture) {
+            throw new BadRequestException("Unable to resize since changing CPU architecture is not supported.");
         }
     }
 

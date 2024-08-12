@@ -27,6 +27,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
@@ -107,6 +108,7 @@ public class TemplateValidatorTest {
         stack = TestUtil.stack(Status.AVAILABLE, credential);
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
+        stack.setArchitecture(Architecture.X86_64);
 
         String location = "fake location";
         VmTypeMeta.VmTypeMetaBuilder vmMetaBuilder = VmTypeMeta.VmTypeMetaBuilder.builder()

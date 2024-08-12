@@ -24,6 +24,8 @@ public class VmTypeMeta {
 
     public static final String ENHANCED_NETWORK = "EnhancedNetwork";
 
+    public static final String ARCHITECTURE = "Architecture";
+
     private VolumeParameterConfig magneticConfig;
 
     private VolumeParameterConfig autoAttachedConfig;
@@ -118,6 +120,10 @@ public class VmTypeMeta {
     public boolean getHostEncryptionSupported() {
         Object hostEncryptionSupported = properties.get(HOST_ENCRYPTION_SUPPORTED);
         return hostEncryptionSupported != null ? Boolean.parseBoolean(hostEncryptionSupported.toString()) : true;
+    }
+
+    public Architecture getArchitecture() {
+        return (Architecture) properties.getOrDefault(ARCHITECTURE, Architecture.X86_64);
     }
 
     public void setProperties(Map<String, Object> properties) {
@@ -276,6 +282,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withEnhancedNetwork(boolean enhancedNetwork) {
             properties.put(ENHANCED_NETWORK, enhancedNetwork);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withArchitecture(Architecture architecture) {
+            properties.put(ARCHITECTURE, architecture);
             return this;
         }
 

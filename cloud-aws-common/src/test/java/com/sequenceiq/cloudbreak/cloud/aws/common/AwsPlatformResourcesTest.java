@@ -71,6 +71,7 @@ import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesRequest;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
+import software.amazon.awssdk.services.ec2.model.ArchitectureType;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsResponse;
@@ -88,6 +89,7 @@ import software.amazon.awssdk.services.ec2.model.InstanceStorageInfo;
 import software.amazon.awssdk.services.ec2.model.InstanceTypeInfo;
 import software.amazon.awssdk.services.ec2.model.InstanceTypeOffering;
 import software.amazon.awssdk.services.ec2.model.MemoryInfo;
+import software.amazon.awssdk.services.ec2.model.ProcessorInfo;
 import software.amazon.awssdk.services.ec2.model.Region;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.VCpuInfo;
@@ -217,6 +219,9 @@ public class AwsPlatformResourcesTest {
                         .encryptionSupport(EbsEncryptionSupport.SUPPORTED).build())
                 .vCpuInfo(VCpuInfo.builder()
                         .defaultCores(6).build())
+                .processorInfo(ProcessorInfo.builder()
+                        .supportedArchitectures(ArchitectureType.X86_64)
+                        .build())
                 .memoryInfo(MemoryInfo.builder()
                         .sizeInMiB(1024L).build())
                 .build();

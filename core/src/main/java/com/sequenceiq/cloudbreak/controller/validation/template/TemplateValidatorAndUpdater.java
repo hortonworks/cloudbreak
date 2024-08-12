@@ -24,6 +24,7 @@ import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -129,6 +130,8 @@ public class TemplateValidatorAndUpdater {
                     LOGGER.info("Instance type not found {} at location {}. Available instances: {}", template.getInstanceType(), locationString,
                             machines.get(locationString).stream().map(StringType::value).toList());
                     validationBuilder.error(getInvalidVmTypeErrorMessage(template.getInstanceType(), platform.value(), stack.getRegion()));
+                } else {
+                    validateArchitecture(vmType, stack, validationBuilder);
                 }
             }
             template = emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(instanceGroup.getTemplate());
@@ -136,6 +139,16 @@ public class TemplateValidatorAndUpdater {
             template = hostEncryptionProvider.updateWithHostEncryption(environment, credential, template, vmType);
             validateVolumeTemplates(template, vmType, platform, validationBuilder, instanceGroup, stack);
             validateMaximumVolumeSize(template, vmType, validationBuilder);
+        }
+    }
+
+    private void validateArchitecture(VmType vmType, Stack stack, ValidationResult.ValidationResultBuilder validationBuilder) {
+        Architecture vmArchitecture = vmType.getMetaData().getArchitecture();
+        Architecture stackArchitecture = stack.getArchitecture();
+        if (vmArchitecture != stackArchitecture) {
+            validationBuilder.error(
+                    String.format("The '%s' instance type's architecture '%s' is not matching requested architecture '%s'",
+                            vmType.value(), vmArchitecture.getName(), stackArchitecture.getName()));
         }
     }
 

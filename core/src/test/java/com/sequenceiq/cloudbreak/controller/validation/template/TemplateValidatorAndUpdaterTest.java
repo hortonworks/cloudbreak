@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -78,6 +80,53 @@ class TemplateValidatorAndUpdaterTest {
 
     @InjectMocks
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
+
+    @Test
+    void testValidateArchitecture() {
+        Credential credential = Credential.builder()
+                .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setAttributes(new Json(Map.of()));
+        template.setCloudPlatform(CloudPlatform.AWS.name());
+        template.setInstanceType("m5xlarge");
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder().withArchitecture(Architecture.X86_64).create();
+        VmType m5xlarge = vmTypeWithMeta("m5xlarge", vmTypeMeta, true);
+        cloudVmTypes.setCloudVmResponses(Map.of("eu-west-1", Set.of(m5xlarge)));
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.ARM64);
+
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(
+                        new CloudCredential(),
+                        "MOCK",
+                        "",
+                        "account",
+                        new ArrayList<>()));
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any()))
+                .thenReturn(cloudVmTypes);
+        when(locationService.location(any(), any())).thenReturn("eu-west-1");
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(template)).thenReturn(template);
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, template, m5xlarge)).thenReturn(template);
+        when(hostEncryptionProvider.updateWithHostEncryption(environmentResponse, credential, template, m5xlarge)).thenReturn(template);
+
+        // Create a ValidationResult.ValidationResultBuilder
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+
+        // Call the validate method
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+
+        // Assert that there are no errors in the ValidationResult
+        ValidationResult validationResult = validationBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().getFirst(),
+                "The 'm5xlarge' instance type's architecture 'x86_64' is not matching requested architecture 'arm64'");
+    }
 
     @Test
     void testValidateCustomInstanceTypeWhenNotSupportShouldComeValidationError() {
@@ -277,6 +326,7 @@ class TemplateValidatorAndUpdaterTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
         Cluster cluster = new Cluster();
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
@@ -346,6 +396,7 @@ class TemplateValidatorAndUpdaterTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
         Cluster cluster = new Cluster();
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);

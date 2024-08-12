@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -767,6 +768,7 @@ public class AwsPlatformResources implements PlatformResources {
             if (!instanceType.bareMetal()) {
                 VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(instanceType.vCpuInfo().defaultVCpus(), getMemory(instanceType))
+                        .withArchitecture(getArchitecture(instanceType))
                         .withMagneticConfig(new VolumeParameterConfig(
                                 MAGNETIC,
                                 MINIMUM_MAGNETIC_SIZE,
@@ -821,6 +823,15 @@ public class AwsPlatformResources implements PlatformResources {
 
     private List<InstanceType> getInstanceTypes(List<InstanceType> instanceTypes, int i) {
         return instanceTypes.subList(i, (i + SEGMENT) < instanceTypes.size() ? (i + SEGMENT) : instanceTypes.size());
+    }
+
+    private Architecture getArchitecture(InstanceTypeInfo instanceType) {
+        Architecture architecture = instanceType.processorInfo().supportedArchitectures().stream()
+                .map(architectureType -> Architecture.fromStringWithFallback(architectureType.name()))
+                .filter(arch -> arch != Architecture.UNKOWN)
+                .findFirst()
+                .orElse(Architecture.UNKOWN);
+        return architecture;
     }
 
     @Override

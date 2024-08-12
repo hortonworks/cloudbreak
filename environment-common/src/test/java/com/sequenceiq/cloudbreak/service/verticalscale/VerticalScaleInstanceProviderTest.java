@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -115,6 +116,34 @@ public class VerticalScaleInstanceProviderTest {
 
         assertEquals("Unable to resize since changing from host encrypted m3.xlarge instance type " +
                         "to m2.xlarge instance type which does not support host encryption.",
+                badRequestException.getMessage());
+    }
+
+    @Test
+    public void testRequestWhenWeAreRequestedDifferentArchitectureInstancesShouldDropBadRequest() {
+        String instanceTypeNameInStack = "m3.xlarge";
+        String instanceTypeNameInRequest = "r7gd.2xlarge";
+        Optional<VmType> current = vmTypeOptional(
+                instanceTypeNameInStack,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+        Optional<VmType> requested = vmTypeOptional(
+                instanceTypeNameInRequest,
+                1,
+                0,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
+        );
+        requested.get().getMetaData().getProperties().put(VmTypeMeta.ARCHITECTURE, Architecture.ARM64);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+        });
+
+        assertEquals("Unable to resize since changing CPU architecture is not supported.",
                 badRequestException.getMessage());
     }
 
@@ -484,6 +513,7 @@ public class VerticalScaleInstanceProviderTest {
                         .withResourceDiskAttached(resourceDisk)
                         .withAvailabilityZones(availabilityZones)
                         .withHostEncryptionSupport(hostEncryptionSupported)
+                        .withArchitecture(Architecture.X86_64)
                         .create(),
                 false);
     }
