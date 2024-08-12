@@ -2,7 +2,6 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.service.CloudResourceValidationService;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -52,8 +51,6 @@ import com.sequenceiq.redbeams.service.stack.DBStackService;
 public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<AllocateDatabaseServerRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseServerHandler.class);
-
-    private static final String ERROR_FAILED_TO_LAUNCH_THE_DATABASE_STACK = "Failed to launch the database stack for %s due to: %s";
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -84,6 +81,9 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
 
     @Inject
     private DatabaseCapabilityService databaseCapabilityService;
+
+    @Inject
+    private CloudResourceValidationService cloudResourceValidationService;
 
     @Override
     public String selector() {
@@ -117,7 +117,7 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             if (!task.completed(statePollerResult)) {
                 statePollerResult = syncPollingScheduler.schedule(task);
             }
-            validateResourcesState(cloudContext, statePollerResult);
+            cloudResourceValidationService.validateResourcesState(cloudContext, statePollerResult);
             response = new AllocateDatabaseServerSuccess(request.getResourceId());
             LOGGER.debug("Launching the database stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
@@ -170,23 +170,4 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
         LOGGER.warn("Error launching the database stack:", e);
         return failure;
     }
-
-    private void validateResourcesState(CloudContext cloudContext, ResourcesStatePollerResult statePollerResult) {
-        if (statePollerResult == null || statePollerResult.getResults() == null) {
-            throw new IllegalStateException(String.format("%s is null, cannot check launch status of database stack for %s",
-                    statePollerResult == null ? "ResourcesStatePollerResult" : "ResourcesStatePollerResult.results", cloudContext));
-        }
-
-        List<CloudResourceStatus> results = statePollerResult.getResults();
-        if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
-            throw new OperationException(String.format(ERROR_FAILED_TO_LAUNCH_THE_DATABASE_STACK, cloudContext, results.get(0).getStatusReason()));
-        }
-        List<CloudResourceStatus> failedResources = results.stream()
-                .filter(r -> r.isFailed() || r.isDeleted())
-                .collect(Collectors.toList());
-        if (!failedResources.isEmpty()) {
-            throw new OperationException(String.format(ERROR_FAILED_TO_LAUNCH_THE_DATABASE_STACK, cloudContext, failedResources));
-        }
-    }
-
 }

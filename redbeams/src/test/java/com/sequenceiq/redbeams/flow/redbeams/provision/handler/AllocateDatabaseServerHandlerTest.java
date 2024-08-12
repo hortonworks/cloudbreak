@@ -6,20 +6,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,13 +37,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.service.CloudResourceValidationService;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
@@ -142,6 +140,9 @@ class AllocateDatabaseServerHandlerTest {
     @Mock
     private DatabaseCapabilityService databaseCapabilityService;
 
+    @Mock
+    private CloudResourceValidationService cloudResourceValidationService;
+
     private DBStack dbStack;
 
     private DatabaseStack databaseStack;
@@ -215,85 +216,18 @@ class AllocateDatabaseServerHandlerTest {
     }
 
     @Test
-    void doAcceptTestWhenFailureNullPollerResult() throws Exception {
-        initCommon();
-
-        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
-        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(false);
-        when(syncPollingScheduler.schedule(task)).thenReturn(null);
-
-        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
-
-        verifyFailureEvent(selectable);
-        Exception e = extractException(selectable);
-        assertThat(e).isInstanceOf(IllegalStateException.class);
-        assertThat(e).hasMessageStartingWith("ResourcesStatePollerResult is null, cannot check launch status of database stack for ");
-    }
-
-    @Test
-    void doAcceptTestWhenFailureNullPollerResultResults() throws Exception {
+    void doAcceptTestWhenFailureDuringValidation() throws Exception {
         initCommon();
 
         when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
         when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(false);
         when(syncPollingScheduler.schedule(task)).thenReturn(statePollerResult);
-        when(statePollerResult.getResults()).thenReturn(null);
+        Exception e = new RuntimeException();
+        doThrow(e).when(cloudResourceValidationService).validateResourcesState(cloudContext, statePollerResult);
 
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
-        verifyFailureEvent(selectable);
-        Exception e = extractException(selectable);
-        assertThat(e).isInstanceOf(IllegalStateException.class);
-        assertThat(e).hasMessageStartingWith("ResourcesStatePollerResult.results is null, cannot check launch status of database stack for ");
-    }
-
-    static Object[][] doAcceptTestWhenFailureBadPollerResultDataProvider() {
-        return new Object[][]{
-                // testCaseName resourceStatus
-                {"ResourceStatus.DELETED", ResourceStatus.DELETED},
-                {"ResourceStatus.FAILED", ResourceStatus.FAILED},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("doAcceptTestWhenFailureBadPollerResultDataProvider")
-    void doAcceptTestWhenFailureBadPollerResultSingleResource(String testCaseName, ResourceStatus resourceStatus) throws Exception {
-        initCommon();
-
-        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
-        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(false);
-        when(syncPollingScheduler.schedule(task)).thenReturn(statePollerResult);
-        CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(null, resourceStatus, STATUS_REASON_ERROR, PRIVATE_ID_1);
-        when(statePollerResult.getResults()).thenReturn(List.of(cloudResourceStatus));
-
-        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
-
-        verifyFailureEvent(selectable);
-        Exception e = extractException(selectable);
-        assertThat(e).isInstanceOf(OperationException.class);
-        assertThat(e).hasMessageStartingWith("Failed to launch the database stack for ");
-        assertThat(e).hasMessageEndingWith(" due to: " + STATUS_REASON_ERROR);
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("doAcceptTestWhenFailureBadPollerResultDataProvider")
-    void doAcceptTestWhenFailureBadPollerResultMultipleResources(String testCaseName, ResourceStatus resourceStatus) throws Exception {
-        initCommon();
-
-        when(statusCheckFactory.newPollResourcesStateTask(eq(authenticatedContext), anyList(), eq(true))).thenReturn(task);
-        when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(false);
-        when(syncPollingScheduler.schedule(task)).thenReturn(statePollerResult);
-        CloudResourceStatus cloudResourceStatusSuccess = new CloudResourceStatus(null, ResourceStatus.CREATED, STATUS_REASON_SUCCESS, PRIVATE_ID_2);
-        CloudResourceStatus cloudResourceStatusError = new CloudResourceStatus(null, resourceStatus, STATUS_REASON_ERROR, PRIVATE_ID_1);
-        when(statePollerResult.getResults()).thenReturn(List.of(cloudResourceStatusSuccess, cloudResourceStatusError));
-
-        Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
-
-        verifyFailureEvent(selectable);
-        Exception e = extractException(selectable);
-        assertThat(e).isInstanceOf(OperationException.class);
-        assertThat(e).hasMessageStartingWith("Failed to launch the database stack for ");
-        assertThat(e).hasMessageEndingWith(String.format(" due to: [%s]", cloudResourceStatusError.toString()));
+        verifyFailureEvent(e, selectable);
     }
 
     @Test
@@ -329,7 +263,6 @@ class AllocateDatabaseServerHandlerTest {
         when(task.completed(any(ResourcesStatePollerResult.class))).thenReturn(false);
         when(syncPollingScheduler.schedule(task)).thenReturn(statePollerResult);
         CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(null, ResourceStatus.CREATED, STATUS_REASON_ERROR, PRIVATE_ID_1);
-        when(statePollerResult.getResults()).thenReturn(List.of(cloudResourceStatus));
 
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 

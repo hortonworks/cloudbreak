@@ -76,7 +76,12 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.service.CloudResourceValidationService;
+import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -139,6 +144,15 @@ class AzureDatabaseResourceServiceTest {
 
     @Mock
     private AzureFlexibleServerPermissionValidator azureFlexibleServerPermissionValidator;
+
+    @Mock
+    private PollTaskFactory statusCheckFactory;
+
+    @Mock
+    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
+    @Mock
+    private CloudResourceValidationService cloudResourceValidationService;
 
     @InjectMocks
     private AzureDatabaseResourceService underTest;
@@ -631,7 +645,7 @@ class AzureDatabaseResourceServiceTest {
     }
 
     @Test
-    void testBuildDatabaseResourcesForLaunchWhenTheTemplateDeploymentIsAlreadyExists() {
+    void testBuildDatabaseResourcesForLaunchWhenTheTemplateDeploymentIsAlreadyExists() throws Exception {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
@@ -641,6 +655,7 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(deployment.outputs()).thenReturn(Map.of("databaseServerFQDN", Map.of("value", "fqdn")));
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(retryService).testWith2SecDelayMax5Times(any(Supplier.class));
+        when(syncPollingScheduler.schedule(null)).thenReturn(new ResourcesStatePollerResult(null));
 
         List<CloudResourceStatus> actual = underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier);
 
@@ -652,6 +667,41 @@ class AzureDatabaseResourceServiceTest {
         verify(client).resourceGroupExists(RESOURCE_GROUP_NAME);
         verify(persistenceNotifier, times(4)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
         verify(client).getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchWhenTheTemplateDeploymentIsAlreadyExistsAndFailed() throws Exception {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
+        ResourcesStatePollerResult resourcesStatePollerResult = new ResourcesStatePollerResult(
+                null, ResourceStatus.FAILED, "", List.of(new CloudResourceStatus(null, ResourceStatus.FAILED)));
+        when(syncPollingScheduler.schedule(null)).thenReturn(resourcesStatePollerResult);
+        CloudConnectorException cloudConnectorException = new CloudConnectorException("msg");
+        doThrow(cloudConnectorException).when(cloudResourceValidationService).validateResourcesState(cloudContext, resourcesStatePollerResult);
+
+        CloudConnectorException actualException = assertThrows(CloudConnectorException.class,
+                () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
+
+        assertEquals(cloudConnectorException, actualException);
+    }
+
+    @Test
+    void testBuildDatabaseResourcesForLaunchWhenTheTemplateDeploymentIsAlreadyExistsAndException() throws Exception {
+        when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(databaseStack)).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureDatabaseTemplateBuilder.build(cloudContext, databaseStack)).thenReturn(TEMPLATE);
+        when(client.resourceGroupExists(RESOURCE_GROUP_NAME)).thenReturn(true);
+        when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(IN_PROGRESS);
+        doThrow(new Exception("msg")).when(syncPollingScheduler).schedule(null);
+
+        Exception exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.buildDatabaseResourcesForLaunch(ac, databaseStack, persistenceNotifier));
+        assertEquals("msg", exception.getMessage());
     }
 
     @Test

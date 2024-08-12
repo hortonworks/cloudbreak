@@ -51,6 +51,11 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.service.CloudResourceValidationService;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -60,7 +65,6 @@ import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Service
 public class AzureDatabaseResourceService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseResourceService.class);
 
     // PostgreSQL server port is fixed for now
@@ -113,6 +117,15 @@ public class AzureDatabaseResourceService {
     @Qualifier("DefaultRetryService")
     private Retry retryService;
 
+    @Inject
+    private PollTaskFactory statusCheckFactory;
+
+    @Inject
+    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
+    @Inject
+    private CloudResourceValidationService cloudResourceValidationService;
+
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -126,7 +139,7 @@ public class AzureDatabaseResourceService {
         createResourceGroupIfNotExists(ac, stack, client, resourceGroupName, resourceGroupUsage, persistenceNotifier);
 
         createTemplateResource(persistenceNotifier, cloudContext, stackName);
-        Deployment deployment = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, cloudContext);
+        Deployment deployment = createOrFetchDeployment(persistenceNotifier, stackName, resourceGroupName, template, client, ac);
 
         String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
         List<CloudResource> databaseResources = createCloudResources(fqdn);
@@ -137,19 +150,21 @@ public class AzureDatabaseResourceService {
     }
 
     private Deployment createOrFetchDeployment(PersistenceNotifier persistenceNotifier, String stackName, String resourceGroupName, String template,
-            AzureClient client, CloudContext cloudContext) {
+            AzureClient client, AuthenticatedContext ac) {
         Optional<RuntimeException> exception = Optional.empty();
         try {
-            deployDatabaseServer(stackName, resourceGroupName, template, client);
+            deployDatabaseServer(stackName, resourceGroupName, template, client, ac);
         } catch (ManagementException e) {
             exception = Optional.ofNullable(azureUtils.convertToCloudConnectorException(e, "Database stack provisioning"));
+        } catch (CloudConnectorException cce) {
+            exception = Optional.of(cce);
         } catch (Exception e) {
             exception = Optional.of(new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e));
         }
         try {
             Deployment deployment = fetchDeploymentWithRetry(stackName, resourceGroupName, client);
             List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
-            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
+            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext()));
             if (exception.isPresent()) {
                 throw exception.get();
             } else {
@@ -409,7 +424,7 @@ public class AzureDatabaseResourceService {
 
             stack.getDatabaseServer().putParameter(DB_VERSION, targetMajorVersion.getMajorVersion());
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
-            deployDatabaseServer(stackName, resourceGroupName, template, client);
+            deployDatabaseServer(stackName, resourceGroupName, template, client, authenticatedContext);
         } catch (ManagementException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Database stack upgrade");
         } catch (CloudConnectorException e) {
@@ -482,7 +497,8 @@ public class AzureDatabaseResourceService {
                 .collect(Collectors.toList());
     }
 
-    private void deployDatabaseServer(String stackName, String resourceGroupName, String template, AzureClient client) {
+    private void deployDatabaseServer(String stackName, String resourceGroupName, String template, AzureClient client,
+            AuthenticatedContext ac) {
         if (client.getTemplateDeploymentStatus(resourceGroupName, stackName).isPermanent()) {
             LOGGER.debug("Re-deploying database server {} in resource group {}", stackName, resourceGroupName);
             String parametersMapAsString = new Json(Map.of()).getValue();
@@ -492,7 +508,24 @@ public class AzureDatabaseResourceService {
                 throw (ManagementException) e.getCause();
             }
         } else {
-            LOGGER.debug("The database server template deployment is in progress with name {}", stackName);
+            waitForDeployment(stackName, resourceGroupName, ac);
+        }
+    }
+
+    private void waitForDeployment(String stackName, String resourceGroupName, AuthenticatedContext ac) {
+        try {
+            LOGGER.debug("The database server template deployment is in progress with name {}, let's wait for it...", stackName);
+            CloudResource templateResource = createCloudResource(ARM_TEMPLATE, resourceGroupName);
+            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, List.of(templateResource), true);
+            ResourcesStatePollerResult statePollerResult = syncPollingScheduler.schedule(task);
+            cloudResourceValidationService.validateResourcesState(ac.getCloudContext(), statePollerResult);
+            LOGGER.debug("The database server template deployment is done with name {}", stackName);
+        } catch (CloudConnectorException cce) {
+            LOGGER.debug("Cloud connector exception during waiting for template deployment with name {}", stackName, cce);
+            throw cce;
+        } catch (Exception ex) {
+            LOGGER.debug("Exception during waiting for template deployment with name {}", stackName, ex);
+            throw new CloudConnectorException(ex.getMessage(), ex);
         }
     }
 
