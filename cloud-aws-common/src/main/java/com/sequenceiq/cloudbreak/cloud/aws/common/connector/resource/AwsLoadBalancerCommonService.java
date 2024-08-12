@@ -99,11 +99,15 @@ public class AwsLoadBalancerCommonService {
             for (TargetGroup targetGroup : describeTargetGroupsResponse.targetGroups()) {
                 Set<TargetGroupAttribute> targetGroupAttributes = new HashSet<>();
                 if (stickySession) {
-                    targetGroupAttributes.add(
+                    targetGroupAttributes.addAll(Set.of(
                             TargetGroupAttribute.builder()
                                     .key("stickiness.enabled")
                                     .value("true")
-                                    .build());
+                                    .build(),
+                            TargetGroupAttribute.builder()
+                                    .key("load_balancing.cross_zone.enabled")
+                                    .value("true")
+                                    .build()));
                     ModifyTargetGroupAttributesRequest modifyRequest = ModifyTargetGroupAttributesRequest.builder()
                             .targetGroupArn(targetGroup.targetGroupArn())
                             .attributes(targetGroupAttributes)
@@ -133,10 +137,6 @@ public class AwsLoadBalancerCommonService {
             Set<LoadBalancerAttribute> loadBalancerAttributes = new HashSet<>();
             loadBalancerAttributes.add(LoadBalancerAttribute.builder()
                     .key("deletion_protection.enabled")
-                    .value(String.valueOf(deletionProtection))
-                    .build());
-            loadBalancerAttributes.add(LoadBalancerAttribute.builder()
-                    .key("load_balancing.cross_zone.enabled")
                     .value(String.valueOf(deletionProtection))
                     .build());
 

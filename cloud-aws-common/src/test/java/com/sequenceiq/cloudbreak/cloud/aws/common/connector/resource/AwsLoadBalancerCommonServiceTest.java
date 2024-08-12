@@ -379,12 +379,10 @@ class AwsLoadBalancerCommonServiceTest {
 
         assertEquals(arn, capturedRequest.loadBalancerArn());
         List<LoadBalancerAttribute> attributes = capturedRequest.attributes();
-        assertEquals(2, attributes.size());
+        assertEquals(1, attributes.size());
 
         attributes.forEach(attribute -> {
             if ("deletion_protection.enabled".equals(attribute.key())) {
-                assertEquals("true", attribute.value());
-            } else if ("load_balancing.cross_zone.enabled".equals(attribute.key())) {
                 assertEquals("true", attribute.value());
             }
         });
