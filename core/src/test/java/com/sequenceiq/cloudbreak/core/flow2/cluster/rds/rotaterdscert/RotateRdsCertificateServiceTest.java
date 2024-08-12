@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.check.DatahubCertificateChecker;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -90,6 +92,9 @@ class RotateRdsCertificateServiceTest {
 
     @Mock
     private SaltStateParamsService saltStateParamsService;
+
+    @Mock
+    private DatahubCertificateChecker datahubCertificateChecker;
 
     @InjectMocks
     private RotateRdsCertificateService underTest;
@@ -249,6 +254,7 @@ class RotateRdsCertificateServiceTest {
         when(cluster.getDbSslEnabled()).thenReturn(true);
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
         when(clusterService.getCluster(any())).thenReturn(cluster);
+        when(datahubCertificateChecker.collectDatahubsWhichMustBeUpdated(any())).thenReturn(List.of());
 
         underTest.checkPrerequisites(stackId);
     }
