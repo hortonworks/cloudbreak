@@ -1,4 +1,5 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
+{% set cpuarch = salt['grains.get']('cpuarch') %}
 # CONFIGURED BY SALT - do not edit
 <system>
   workers {{ numberOfWorkers }}
@@ -11,14 +12,16 @@
 {% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 @include input.conf
 {% endif %}
-{% if monitorFilesForDbusProcessing == "true" %}
+{% if monitorFilesForDbusProcessing == "true" and cpuarch != 'aarch64' %}
 @include input_databus.conf
 {% endif %}
+{% if cpuarch != 'aarch64' %}
 @include databus_metering.conf
+{% endif %}
 {% if fluent.cloudLoggingServiceEnabled %}
 @include filter.conf
 {% endif %}
-{% if fluent.dbusClusterLogsCollection %}
+{% if fluent.dbusClusterLogsCollection and cpuarch != 'aarch64' %}
 @include input_databus_stream.conf
 @include filter_databus.conf
 @include output_databus.conf
