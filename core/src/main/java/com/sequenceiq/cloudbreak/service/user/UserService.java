@@ -92,10 +92,6 @@ public class UserService extends InternalUserModifier {
         return userRepository.findById(id);
     }
 
-    public Optional<User> getByUserIdAndTenant(String userId, String tenant) {
-        return userRepository.findByTenantNameAndUserId(tenant, userId);
-    }
-
     public Optional<User> getByUserIdAndTenantId(String userId, Long tenantId) {
         return userRepository.findByTenantIdAndUserId(tenantId, userId);
     }

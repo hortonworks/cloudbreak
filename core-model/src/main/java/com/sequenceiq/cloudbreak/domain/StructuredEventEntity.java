@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.converter.StructuredEventTypeConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
@@ -51,9 +49,7 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
-    @ManyToOne
-    @JoinColumn(name = "users_user_id")
-    private User user;
+    private String userCrn;
 
     public Long getId() {
         return id;
@@ -118,12 +114,12 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
         this.workspace = workspace;
     }
 
-    public User getUser() {
-        return user;
+    public String getUserCrn() {
+        return userCrn;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
     }
 
     public String getResourceCrn() {

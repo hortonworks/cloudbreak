@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
@@ -38,9 +37,7 @@ public class StructuredEventToStructuredEventEntityConverter {
             if (operationDetails.getWorkspaceId() != null) {
                 structuredEventEntity.setWorkspace(workspaceService.getByIdWithoutAuth(operationDetails.getWorkspaceId()));
             }
-            if (StringUtils.hasLength(operationDetails.getUserId())) {
-                structuredEventEntity.setUser(userService.getByUserIdAndTenant(operationDetails.getTenant(), operationDetails.getUserId()).orElse(null));
-            }
+            structuredEventEntity.setUserCrn(operationDetails.getUserCrn());
 
             return structuredEventEntity;
         } catch (IllegalArgumentException e) {
