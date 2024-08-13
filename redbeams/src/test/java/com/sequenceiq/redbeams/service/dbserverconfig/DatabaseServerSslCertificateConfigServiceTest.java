@@ -2,9 +2,14 @@ package com.sequenceiq.redbeams.service.dbserverconfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.Set;
 
@@ -66,10 +71,28 @@ class DatabaseServerSslCertificateConfigServiceTest {
 
     @Test
     void testListDatabaseServersCertificateStatusWhenMultipleEnvProvided() {
-        String environmentCrn1 = "env-123";
-        String environmentCrn2 = "env-567";
+        String environmentCrn1 = "env-1";
+        String environmentCrn2 = "env-2";
+        String environmentCrn3 = "env-3";
+        String environmentCrn4 = "env-4";
+        String environmentCrn5 = "env-5";
+        String environmentCrn6 = "env-6";
+        String environmentCrn7 = "env-7";
+        String environmentCrn8 = "env-8";
+        long time = Instant.now().getEpochSecond() * 1000 + Duration.ofDays(30).toMillis();
+        long notExpired = Instant.now().getEpochSecond() * 1000 + Duration.ofDays(60).toMillis();
+        long expireIn20Days = Instant.now().getEpochSecond() * 1000 + Duration.ofDays(20).toMillis();
+
         DatabaseServerCertificateStatusV4Request request = new DatabaseServerCertificateStatusV4Request();
-        request.setEnvironmentCrns(Set.of(environmentCrn1, environmentCrn2));
+        request.setEnvironmentCrns(Set.of(
+                environmentCrn1,
+                environmentCrn2,
+                environmentCrn3,
+                environmentCrn4,
+                environmentCrn5,
+                environmentCrn6,
+                environmentCrn7,
+                environmentCrn8));
 
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
@@ -85,17 +108,17 @@ class DatabaseServerSslCertificateConfigServiceTest {
         sslConfigV4Response1.setSslCertificateHighestAvailableVersion(2);
 
         DatabaseServerConfig databaseServerConfig2 = new DatabaseServerConfig();
-        databaseServerConfig2.setEnvironmentId(environmentCrn1);
+        databaseServerConfig2.setEnvironmentId(environmentCrn2);
         databaseServerConfig2.setId(2L);
         databaseServerConfig2.setDbStack(dbStack);
 
         SslConfigV4Response sslConfigV4Response2 = new SslConfigV4Response();
-        sslConfigV4Response2.setSslMode(SslMode.ENABLED);
+        sslConfigV4Response2.setSslMode(SslMode.DISABLED);
         sslConfigV4Response2.setSslCertificateActiveVersion(1);
         sslConfigV4Response2.setSslCertificateHighestAvailableVersion(2);
 
         DatabaseServerConfig databaseServerConfig3 = new DatabaseServerConfig();
-        databaseServerConfig3.setEnvironmentId(environmentCrn2);
+        databaseServerConfig3.setEnvironmentId(environmentCrn3);
         databaseServerConfig3.setId(3L);
         databaseServerConfig3.setDbStack(dbStack);
 
@@ -103,21 +126,86 @@ class DatabaseServerSslCertificateConfigServiceTest {
         sslConfigV4Response3.setSslMode(SslMode.ENABLED);
         sslConfigV4Response3.setSslCertificateActiveVersion(1);
         sslConfigV4Response3.setSslCertificateHighestAvailableVersion(1);
-        sslConfigV4Response3.setSslCertificateExpirationDate(2);
+        sslConfigV4Response3.setSslCertificateExpirationDate(notExpired);
 
         DatabaseServerConfig databaseServerConfig4 = new DatabaseServerConfig();
-        databaseServerConfig4.setEnvironmentId(environmentCrn2);
+        databaseServerConfig4.setEnvironmentId(environmentCrn4);
         databaseServerConfig4.setId(4L);
         databaseServerConfig4.setDbStack(dbStack);
 
         SslConfigV4Response sslConfigV4Response4 = new SslConfigV4Response();
-        sslConfigV4Response4.setSslMode(SslMode.ENABLED);
+        sslConfigV4Response4.setSslMode(SslMode.DISABLED);
         sslConfigV4Response4.setSslCertificateActiveVersion(1);
         sslConfigV4Response4.setSslCertificateHighestAvailableVersion(1);
-        sslConfigV4Response4.setSslCertificateExpirationDate(2);
+        sslConfigV4Response4.setSslCertificateExpirationDate(notExpired);
 
-        when(databaseServerConfigService.findAll(DatabaseServerSslCertificateConfigService.DEFAULT_WORKSPACE, Set.of(environmentCrn1, environmentCrn2)))
-                .thenReturn(Set.of(databaseServerConfig1, databaseServerConfig2, databaseServerConfig3, databaseServerConfig4));
+        DatabaseServerConfig databaseServerConfig5 = new DatabaseServerConfig();
+        databaseServerConfig5.setEnvironmentId(environmentCrn5);
+        databaseServerConfig5.setId(5L);
+        databaseServerConfig5.setDbStack(dbStack);
+
+        SslConfigV4Response sslConfigV4Response5 = new SslConfigV4Response();
+        sslConfigV4Response5.setSslMode(SslMode.DISABLED);
+        sslConfigV4Response5.setSslCertificateActiveVersion(1);
+        sslConfigV4Response5.setSslCertificateHighestAvailableVersion(1);
+        sslConfigV4Response5.setSslCertificateExpirationDate(LocalDateTime
+                .of(2000, 1, 1, 0, 0)
+                .toEpochSecond(ZoneOffset.UTC));
+
+        DatabaseServerConfig databaseServerConfig6 = new DatabaseServerConfig();
+        databaseServerConfig6.setEnvironmentId(environmentCrn6);
+        databaseServerConfig6.setId(6L);
+        databaseServerConfig6.setDbStack(dbStack);
+
+        SslConfigV4Response sslConfigV4Response6 = new SslConfigV4Response();
+        sslConfigV4Response6.setSslMode(SslMode.ENABLED);
+        sslConfigV4Response6.setSslCertificateActiveVersion(1);
+        sslConfigV4Response6.setSslCertificateHighestAvailableVersion(1);
+        sslConfigV4Response6.setSslCertificateExpirationDate(LocalDateTime
+                .of(2000, 1, 1, 0, 0)
+                .toEpochSecond(ZoneOffset.UTC));
+
+        DatabaseServerConfig databaseServerConfig7 = new DatabaseServerConfig();
+        databaseServerConfig7.setEnvironmentId(environmentCrn7);
+        databaseServerConfig7.setId(7L);
+        databaseServerConfig7.setDbStack(dbStack);
+
+        SslConfigV4Response sslConfigV4Response7 = new SslConfigV4Response();
+        sslConfigV4Response7.setSslMode(SslMode.ENABLED);
+        sslConfigV4Response7.setSslCertificateActiveVersion(1);
+        sslConfigV4Response7.setSslCertificateHighestAvailableVersion(1);
+        sslConfigV4Response7.setSslCertificateExpirationDate(expireIn20Days);
+
+        DatabaseServerConfig databaseServerConfig8 = new DatabaseServerConfig();
+        databaseServerConfig8.setEnvironmentId(environmentCrn8);
+        databaseServerConfig8.setId(8L);
+        databaseServerConfig8.setDbStack(dbStack);
+
+        SslConfigV4Response sslConfigV4Response8 = new SslConfigV4Response();
+        sslConfigV4Response8.setSslMode(SslMode.ENABLED);
+        sslConfigV4Response8.setSslCertificateActiveVersion(1);
+        sslConfigV4Response8.setSslCertificateHighestAvailableVersion(1);
+        sslConfigV4Response8.setSslCertificateExpirationDate(time);
+
+        when(databaseServerConfigService.findAll(DatabaseServerSslCertificateConfigService.DEFAULT_WORKSPACE,
+                Set.of(
+                        environmentCrn1,
+                        environmentCrn2,
+                        environmentCrn3,
+                        environmentCrn4,
+                        environmentCrn5,
+                        environmentCrn6,
+                        environmentCrn7,
+                        environmentCrn8)))
+                .thenReturn(Set.of(
+                        databaseServerConfig1,
+                        databaseServerConfig2,
+                        databaseServerConfig3,
+                        databaseServerConfig4,
+                        databaseServerConfig5,
+                        databaseServerConfig6,
+                        databaseServerConfig7,
+                        databaseServerConfig8));
         when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig1))
                 .thenReturn(sslConfigV4Response1);
         when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig2))
@@ -126,13 +214,21 @@ class DatabaseServerSslCertificateConfigServiceTest {
                 .thenReturn(sslConfigV4Response3);
         when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig4))
                 .thenReturn(sslConfigV4Response4);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig5))
+                .thenReturn(sslConfigV4Response5);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig6))
+                .thenReturn(sslConfigV4Response6);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig7))
+                .thenReturn(sslConfigV4Response7);
+        when(databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig8))
+                .thenReturn(sslConfigV4Response8);
 
-        when(timeUtil.getTimestampThatDaysBeforeNow(90)).thenReturn(1L);
+        when(timeUtil.getTimestampThatDaysAfterNow(anyInt())).thenReturn(time);
 
         DatabaseServerCertificateStatusV4Responses response = service.listDatabaseServersCertificateStatus(request);
 
         assertNotNull(response);
-        assertEquals(2, response.getResponses().size());
+        assertEquals(8, response.getResponses().size());
         Optional<DatabaseServerCertificateStatusV4Response> env1 = response.getResponses()
                 .stream()
                 .filter(e -> e.getEnvironmentCrn().equals(environmentCrn1))
@@ -142,6 +238,36 @@ class DatabaseServerSslCertificateConfigServiceTest {
                 .stream()
                 .filter(e -> e.getEnvironmentCrn().equals(environmentCrn2))
                 .findFirst();
-        assertEquals(SslCertStatus.OUTDATED, env2.get().getSslStatus());
+        assertEquals(SslCertStatus.UP_TO_DATE, env2.get().getSslStatus());
+        Optional<DatabaseServerCertificateStatusV4Response> env3 = response.getResponses()
+                .stream()
+                .filter(e -> e.getEnvironmentCrn().equals(environmentCrn3))
+                .findFirst();
+        assertEquals(SslCertStatus.UP_TO_DATE, env3.get().getSslStatus());
+        Optional<DatabaseServerCertificateStatusV4Response> env4 = response.getResponses()
+                .stream()
+                .filter(e -> e.getEnvironmentCrn().equals(environmentCrn4))
+                .findFirst();
+        assertEquals(SslCertStatus.UP_TO_DATE, env4.get().getSslStatus());
+        Optional<DatabaseServerCertificateStatusV4Response> env5 = response.getResponses()
+                .stream()
+                .filter(e -> e.getEnvironmentCrn().equals(environmentCrn5))
+                .findFirst();
+        assertEquals(SslCertStatus.UP_TO_DATE, env5.get().getSslStatus());
+        Optional<DatabaseServerCertificateStatusV4Response> env6 = response.getResponses()
+                .stream()
+                .filter(e -> e.getEnvironmentCrn().equals(environmentCrn6))
+                .findFirst();
+        assertEquals(SslCertStatus.OUTDATED, env6.get().getSslStatus());
+        Optional<DatabaseServerCertificateStatusV4Response> env7 = response.getResponses()
+                .stream()
+                .filter(e -> e.getEnvironmentCrn().equals(environmentCrn7))
+                .findFirst();
+        assertEquals(SslCertStatus.OUTDATED, env7.get().getSslStatus());
+        Optional<DatabaseServerCertificateStatusV4Response> env8 = response.getResponses()
+                .stream()
+                .filter(e -> e.getEnvironmentCrn().equals(environmentCrn8))
+                .findFirst();
+        assertEquals(SslCertStatus.OUTDATED, env8.get().getSslStatus());
     }
 }
