@@ -32,9 +32,6 @@ public class Tenant implements Serializable {
     private String description;
 
     @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<User> users = new HashSet<>();
-
-    @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Workspace> workspaces = new HashSet<>();
 
     public Long getId() {
@@ -51,14 +48,6 @@ public class Tenant implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
     }
 
     public Set<Workspace> getWorkspaces() {
