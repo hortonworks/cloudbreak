@@ -133,7 +133,7 @@ public class RdsUpgradeService {
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId, boolean forced) {
-        StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
+        StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn, accountId);
         validateRdsIsNotUpgraded(databaseServer, targetMajorVersion, forced);
         validateRuntimeEligibleForUpgrade(stack, accountId);
         validateStackStatus(stack);

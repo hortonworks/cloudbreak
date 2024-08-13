@@ -100,7 +100,7 @@ class DatabaseCertificateRotationOutdatedDatahubsCollectorTest {
 
         assertNotNull(response);
         verify(stackService, times(2)).getByCrn(anyString());
-        verify(databaseService, times(2)).getDatabaseServer(any());
+        verify(databaseService, times(2)).getDatabaseServer(any(), any());
     }
 
     private void setupSDXAndDatahubFetch(String dlCrn, String latestCert, Set<String> stacksWithWrongCerts) {
@@ -149,7 +149,7 @@ class DatabaseCertificateRotationOutdatedDatahubsCollectorTest {
                 databaseServerSslConfig.setSslCertificateActiveVersion(3);
             }
             response.setSslConfig(databaseServerSslConfig);
-            when(databaseService.getDatabaseServer(eq(NameOrCrn.ofCrn(crn)))).thenReturn(response);
+            when(databaseService.getDatabaseServer(eq(NameOrCrn.ofCrn(crn)), any())).thenReturn(response);
         }
         return stackDtoMock;
     }
