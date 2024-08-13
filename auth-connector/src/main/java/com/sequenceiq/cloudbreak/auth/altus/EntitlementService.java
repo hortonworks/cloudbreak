@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RES
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
@@ -244,7 +243,7 @@ public class EntitlementService {
     }
 
     public boolean azureMarketplaceImagesEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_AZURE_IMAGE_MARKETPLACE);
+        return true;
     }
 
     public boolean azureOnlyMarketplaceImagesEnabled(String accountId) {
