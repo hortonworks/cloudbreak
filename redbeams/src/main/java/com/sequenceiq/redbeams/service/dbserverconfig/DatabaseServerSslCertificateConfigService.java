@@ -69,14 +69,14 @@ public class DatabaseServerSslCertificateConfigService {
                         databaseServerConfig.getClusterCrn());
                 if (sslConfig.getSslMode().equals(SslMode.ENABLED)) {
                     LOGGER.info("Ssl enabled for cluster {}", databaseServerConfig.getClusterCrn());
-                    long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(THREE_MONTH_IN_DAY);
+                    long certExpirationDeadLine = timeUtil.getTimestampThatDaysAfterNow(THREE_MONTH_IN_DAY);
                     if (sslConfig.getSslCertificateActiveVersion() != sslConfig.getSslCertificateHighestAvailableVersion()) {
                         LOGGER.info("Database certificate active version {} and highest version {} for cluster",
                                 sslConfig.getSslCertificateActiveVersion(),
                                 sslConfig.getSslCertificateHighestAvailableVersion(),
                                 databaseServerConfig.getClusterCrn());
                         result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
-                    } else if (sslConfig.getSslCertificateExpirationDate() > timestampsBefore) {
+                    } else if (sslConfig.getSslCertificateExpirationDate() <= certExpirationDeadLine) {
                         LOGGER.info("Database expiration date {} which will expire less than 3 month {} for cluster",
                                 sslConfig.getSslCertificateExpirationDate(),
                                 databaseServerConfig.getClusterCrn());
