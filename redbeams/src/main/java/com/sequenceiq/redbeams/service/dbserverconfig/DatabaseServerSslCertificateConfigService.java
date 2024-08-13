@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,27 +62,34 @@ public class DatabaseServerSslCertificateConfigService {
     private Map<String, SslCertStatus> getSslCertStatus(Set<String> environmentCrns, Set<DatabaseServerConfig> databaseServerConfigs) {
         Map<String, SslCertStatus> result = initializeResultMap(environmentCrns);
         for (DatabaseServerConfig databaseServerConfig : databaseServerConfigs) {
-            SslConfigV4Response sslConfig = databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig);
-            LOGGER.info("Checking databases for environment {} and cluster {}", databaseServerConfig.getEnvironmentId(), databaseServerConfig.getClusterCrn());
-            if (sslConfig.getSslMode().equals(SslMode.ENABLED)) {
-                LOGGER.info("Ssl enabled for cluster {}", databaseServerConfig.getClusterCrn());
-                long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(THREE_MONTH_IN_DAY);
-
-                if (sslConfig.getSslCertificateActiveVersion() != sslConfig.getSslCertificateHighestAvailableVersion()) {
-                    LOGGER.info("Database certificate active version {} and highest version {} for cluster",
-                            sslConfig.getSslCertificateActiveVersion(),
-                            sslConfig.getSslCertificateHighestAvailableVersion(),
-                            databaseServerConfig.getClusterCrn());
-                    result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
-                } else if (sslConfig.getSslCertificateExpirationDate() > timestampsBefore) {
-                    LOGGER.info("Database expiration date {} which will expire less than 3 month {} for cluster",
-                            sslConfig.getSslCertificateExpirationDate(),
-                            databaseServerConfig.getClusterCrn());
-                    result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
+            if (isAwsDBStack(databaseServerConfig)) {
+                SslConfigV4Response sslConfig = databaseServerConfigToDatabaseServerV4ResponseConverter.convertSslConfig(databaseServerConfig);
+                LOGGER.info("Checking databases for environment {} and cluster {}",
+                        databaseServerConfig.getEnvironmentId(),
+                        databaseServerConfig.getClusterCrn());
+                if (sslConfig.getSslMode().equals(SslMode.ENABLED)) {
+                    LOGGER.info("Ssl enabled for cluster {}", databaseServerConfig.getClusterCrn());
+                    long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(THREE_MONTH_IN_DAY);
+                    if (sslConfig.getSslCertificateActiveVersion() != sslConfig.getSslCertificateHighestAvailableVersion()) {
+                        LOGGER.info("Database certificate active version {} and highest version {} for cluster",
+                                sslConfig.getSslCertificateActiveVersion(),
+                                sslConfig.getSslCertificateHighestAvailableVersion(),
+                                databaseServerConfig.getClusterCrn());
+                        result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
+                    } else if (sslConfig.getSslCertificateExpirationDate() > timestampsBefore) {
+                        LOGGER.info("Database expiration date {} which will expire less than 3 month {} for cluster",
+                                sslConfig.getSslCertificateExpirationDate(),
+                                databaseServerConfig.getClusterCrn());
+                        result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
+                    }
                 }
             }
         }
         return result;
+    }
+
+    private boolean isAwsDBStack(DatabaseServerConfig databaseServerConfig) {
+        return databaseServerConfig.getDbStack().isPresent() && AWS.name().equals(databaseServerConfig.getDbStack().get().getCloudPlatform());
     }
 
     private Map<String, SslCertStatus> initializeResultMap(Set<String> environmentCrns) {
