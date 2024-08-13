@@ -16,7 +16,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.DatabaseRepository;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DatabaseServerConverter;
 import com.sequenceiq.flow.api.model.operation.OperationView;
@@ -47,8 +49,11 @@ public class DatabaseService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public StackDatabaseServerResponse getDatabaseServer(NameOrCrn nameOrCrn) {
-        Stack stack = stackOperations.getStackByNameOrCrn(nameOrCrn);
+    @Inject
+    private StackDtoService stackDtoService;
+
+    public StackDatabaseServerResponse getDatabaseServer(NameOrCrn nameOrCrn, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         if (stack.getCluster() == null) {
             throw notFound("Data Hub with id:", nameOrCrn.getNameOrCrn()).get();
         }

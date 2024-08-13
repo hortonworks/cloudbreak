@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.service.database;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +31,8 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DatabaseServerConverter;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
@@ -60,6 +64,9 @@ class DatabaseServiceTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
+    @Mock
+    private StackDtoService stackDtoService;
+
     @InjectMocks
     private DatabaseService underTest;
 
@@ -72,9 +79,11 @@ class DatabaseServiceTest {
     @ParameterizedTest
     @MethodSource("nameOrCrnProvider")
     public void testGetDatabaseServerShouldReturnDatabaseServer(NameOrCrn nameOrCrn) {
-        when(stackOperations.getStackByNameOrCrn(nameOrCrn)).thenReturn(createStack());
+        StackDto stackDto = createStackDto();
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(createDatabaseServerV4Response());
-        StackDatabaseServerResponse response = underTest.getDatabaseServer(nameOrCrn);
+        when(stackDtoService.getByNameOrCrn(any(), any())).thenReturn(stackDto);
+
+        StackDatabaseServerResponse response = underTest.getDatabaseServer(nameOrCrn, "accountId");
 
         assertThat(response.getClusterCrn()).isEqualTo(CLUSTER_CRN);
         assertThat(response.getCrn()).isEqualTo(DATABASE_CRN);
@@ -85,10 +94,12 @@ class DatabaseServiceTest {
     @ParameterizedTest
     @MethodSource("nameOrCrnProvider")
     public void testGetDatabaseServerWhenNoClusterShouldThrowNotFoundException(NameOrCrn nameOrCrn) {
-        when(stackOperations.getStackByNameOrCrn(nameOrCrn)).thenReturn(new Stack());
+        StackDto stackDto = createStackDtoWithoutDatabaseServerCrn();
+
+        when(stackDtoService.getByNameOrCrn(any(), any())).thenReturn(stackDto);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> underTest.getDatabaseServer(nameOrCrn));
+                () -> underTest.getDatabaseServer(nameOrCrn, "accountId"));
 
         assertThat(exception.getMessage()).isEqualTo(String.format("Data Hub with id: '%s' not found.", nameOrCrn.getNameOrCrn()));
         verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
@@ -97,12 +108,12 @@ class DatabaseServiceTest {
     @ParameterizedTest
     @MethodSource("nameOrCrnProvider")
     public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException(NameOrCrn nameOrCrn) {
-        Stack stack = createStack();
-        stack.getCluster().setDatabaseServerCrn(null);
-        when(stackOperations.getStackByNameOrCrn(nameOrCrn)).thenReturn(stack);
+        StackDto stack = createStackDto();
+        when(stack.getCluster().getDatabaseServerCrn()).thenReturn(null);
+        when(stackDtoService.getByNameOrCrn(any(), any())).thenReturn(stack);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> underTest.getDatabaseServer(nameOrCrn));
+                () -> underTest.getDatabaseServer(nameOrCrn, "accountId"));
 
         assertThat(exception.getMessage()).isEqualTo(String.format("Database for Data Hub with Data Hub id: '%s' not found.", nameOrCrn.getNameOrCrn()));
         verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
@@ -136,6 +147,20 @@ class DatabaseServiceTest {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(DATABASE_CRN);
         stack.setCluster(cluster);
+        return stack;
+    }
+
+    private StackDto createStackDto() {
+        StackDto stack = mock(StackDto.class);
+        Cluster cluster = mock(Cluster.class);
+        when(cluster.getDatabaseServerCrn()).thenReturn(DATABASE_CRN);
+        when(stack.getCluster()).thenReturn(cluster);
+        return stack;
+    }
+
+    private StackDto createStackDtoWithoutDatabaseServerCrn() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getCluster()).thenReturn(null);
         return stack;
     }
 }
