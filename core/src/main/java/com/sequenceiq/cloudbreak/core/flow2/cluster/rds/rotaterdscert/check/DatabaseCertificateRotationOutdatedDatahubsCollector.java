@@ -62,7 +62,7 @@ public class DatabaseCertificateRotationOutdatedDatahubsCollector {
         for (StackDto response : stackViewV4Responses) {
             if (externalDbConfigured(response)) {
                 StackDatabaseServerResponse databaseServerByCrn =
-                        databaseService.getDatabaseServer(NameOrCrn.ofCrn(response.getResourceCrn()));
+                        databaseService.getDatabaseServer(NameOrCrn.ofCrn(response.getResourceCrn()), response.getAccountId());
                 int currentVersion = databaseServerByCrn.getSslConfig().getSslCertificateActiveVersion();
                 int expectedVersion = latestCertificate.getVersion();
                 if (currentVersion != latestCertificate.getVersion()) {
