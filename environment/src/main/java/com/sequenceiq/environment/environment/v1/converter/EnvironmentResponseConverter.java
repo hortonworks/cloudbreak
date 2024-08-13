@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityG
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -138,21 +140,32 @@ public class EnvironmentResponseConverter {
                 network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel(), true)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
         NullUtil.doIfNotNull(environmentDto.getExternalizedComputeCluster(),
-                externalizedComputeCluster -> builder.withExternalizedComputeCluster(externalizedComputeClusterDtoToResponse(externalizedComputeCluster)));
+                externalizedComputeCluster -> builder.withExternalizedComputeCluster(externalizedComputeClusterDtoToResponse(externalizedComputeCluster,
+                        environmentDto.getNetwork())));
         return builder.build();
     }
 
-    private ExternalizedComputeClusterResponse externalizedComputeClusterDtoToResponse(ExternalizedComputeClusterDto externalizedComputeClusterDto) {
+    private ExternalizedComputeClusterResponse externalizedComputeClusterDtoToResponse(ExternalizedComputeClusterDto externalizedComputeClusterDto,
+            NetworkDto networkDto) {
         if (externalizedComputeClusterDto != null) {
+            Set<String> workerNodeSubnetIds = getWorkerNodeSubnetIds(externalizedComputeClusterDto, networkDto);
             return ExternalizedComputeClusterResponse.newBuilder()
                     .withPrivateCluster(externalizedComputeClusterDto.isPrivateCluster())
                     .withKubeApiAuthorizedIpRanges(externalizedComputeClusterDto.getKubeApiAuthorizedIpRanges())
                     .withOutboundType(externalizedComputeClusterDto.getOutboundType())
-                    .withWorkerNodeSubnetIds(externalizedComputeClusterDto.getWorkerNodeSubnetIds())
+                    .withWorkerNodeSubnetIds(workerNodeSubnetIds)
                     .build();
         } else {
             return null;
         }
+    }
+
+    private Set<String> getWorkerNodeSubnetIds(ExternalizedComputeClusterDto externalizedComputeClusterDto, NetworkDto networkDto) {
+        Set<String> workerNodeSubnetIds = externalizedComputeClusterDto.getWorkerNodeSubnetIds();
+        if (CollectionUtils.isEmpty(workerNodeSubnetIds) && networkDto != null) {
+            workerNodeSubnetIds = networkDto.getSubnetIds();
+        }
+        return workerNodeSubnetIds;
     }
 
     private EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {

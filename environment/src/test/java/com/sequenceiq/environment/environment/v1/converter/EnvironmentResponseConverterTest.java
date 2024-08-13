@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -59,6 +60,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoBase;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -118,7 +120,7 @@ class EnvironmentResponseConverterTest {
     @ParameterizedTest
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testDtoToDetailedResponse(CloudPlatform cloudPlatform) {
-        EnvironmentDto environment = createEnvironmentDto(cloudPlatform);
+        EnvironmentDto environment = createEnvironmentDtoBuilder(cloudPlatform).build();
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -184,9 +186,84 @@ class EnvironmentResponseConverterTest {
     }
 
     @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
+    void testDtoToDetailedResponseWhenComputeClusterEnabled(CloudPlatform cloudPlatform) {
+        EnvironmentDto environment = createEnvironmentDtoBuilder(cloudPlatform)
+                .withExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                        .withCreate(true).withKubeApiAuthorizedIpRanges(Set.of("10.0.0.0/8", "172.0.0.0/16")).withPrivateCluster(true)
+                        .withOutboundType("outbound").build()).build();
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
+        CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
+        TelemetryResponse telemetryResponse = mock(TelemetryResponse.class);
+        BackupResponse backupResponse = mock(BackupResponse.class);
+        ProxyResponse proxyResponse = mock(ProxyResponse.class);
+        EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
+
+        when(credentialConverter.convert(environment.getCredential())).thenReturn(credentialResponse);
+        when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
+        when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
+        when(telemetryApiConverter.convert(eq(environment.getTelemetry()), any())).thenReturn(telemetryResponse);
+        when(backupConverter.convert(environment.getBackup())).thenReturn(backupResponse);
+        when(proxyConfigToProxyResponseConverter.convert(environment.getProxyConfig())).thenReturn(proxyResponse);
+        when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
+                .thenReturn(environmentNetworkResponse);
+        when(dataServicesConverter.convertToResponse(environment.getDataServices())).thenReturn(dataServicesResponse);
+
+        DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
+
+        assertEquals(environment.getResourceCrn(), actual.getCrn());
+        assertEquals(environment.getName(), actual.getName());
+        assertEquals(environment.getOriginalName(), actual.getOriginalName());
+        assertEquals(environment.getDescription(), actual.getDescription());
+        assertEquals(environment.getCloudPlatform(), actual.getCloudPlatform());
+        assertEquals(credentialResponse, actual.getCredential());
+        assertEquals(environment.getStatus().getResponseStatus(), actual.getEnvironmentStatus());
+        assertLocation(environment.getLocation(), actual.getLocation());
+        assertTrue(actual.getCreateFreeIpa());
+        assertEquals(freeIpaResponse, actual.getFreeIpa());
+        assertEquals(compactRegionResponse, actual.getRegions());
+        assertEquals(environment.getCreator(), actual.getCreator());
+        assertAuthentication(environment.getAuthentication(), actual.getAuthentication());
+        assertEquals(environment.getStatusReason(), actual.getStatusReason());
+        assertEquals(environment.getCreated(), actual.getCreated());
+        assertEquals(environment.getTags().getUserDefinedTags(), actual.getTags().getUserDefined());
+        assertEquals(environment.getTags().getDefaultTags(), actual.getTags().getDefaults());
+        assertEquals(telemetryResponse, actual.getTelemetry());
+        assertEquals(environment.getExperimentalFeatures().getTunnel(), actual.getTunnel());
+        assertEquals(environment.getExperimentalFeatures().getIdBrokerMappingSource(), actual.getIdBrokerMappingSource());
+        assertEquals(environment.getExperimentalFeatures().getCloudStorageValidation(), actual.getCloudStorageValidation());
+        assertEquals(environment.getExperimentalFeatures().getCcmV2TlsType(), actual.getCcmV2TlsType());
+        assertEquals(environment.getAdminGroupName(), actual.getAdminGroupName());
+        assertParameters(environment, actual, cloudPlatform);
+        assertEquals(environment.getParentEnvironmentCrn(), actual.getParentEnvironmentCrn());
+        assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
+        assertEquals(environment.getParentEnvironmentCloudPlatform(), actual.getParentEnvironmentCloudPlatform());
+        assertEquals(proxyResponse, actual.getProxyConfig());
+        assertEquals(environmentNetworkResponse, actual.getNetwork());
+        assertEquals(dataServicesResponse, actual.getDataServices());
+        assertSecurityAccess(environment.getSecurityAccess(), actual.getSecurityAccess());
+        assertThat(actual.isEnableSecretEncryption()).isTrue();
+        assertThat(actual.isEnableComputeCluster()).isTrue();
+        assertThat(actual.getExternalizedComputeCluster().getWorkerNodeSubnetIds()).contains("subnet1");
+        assertThat(actual.getExternalizedComputeCluster().getKubeApiAuthorizedIpRanges()).contains("10.0.0.0/8", "172.0.0.0/16");
+        assertTrue(actual.getExternalizedComputeCluster().isPrivateCluster());
+        assertEquals("outbound", actual.getExternalizedComputeCluster().getOutboundType());
+
+        verify(credentialConverter).convert(environment.getCredential());
+        verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
+        verify(regionConverter).convertRegions(environment.getRegions());
+        verify(telemetryApiConverter).convert(eq(environment.getTelemetry()), any());
+        verify(proxyConfigToProxyResponseConverter).convert(environment.getProxyConfig());
+        verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true);
+        verify(dataServicesConverter).convertToResponse(environment.getDataServices());
+    }
+
+    @ParameterizedTest
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testDtoToSimpleResponse(CloudPlatform cloudPlatform) {
-        EnvironmentDto environmentDto = createEnvironmentDto(cloudPlatform);
+        EnvironmentDto environmentDto = createEnvironmentDtoBuilder(cloudPlatform).build();
         CredentialViewResponse credentialResponse = mock(CredentialViewResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -349,7 +426,7 @@ class EnvironmentResponseConverterTest {
                 gcpEnvironmentParameters.getGcpResourceEncryptionParameters().getEncryptionKey());
     }
 
-    private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
+    private EnvironmentDto.Builder createEnvironmentDtoBuilder(CloudPlatform cloudPlatform) {
         return EnvironmentDto.builder()
                 .withProxyConfig(new ProxyConfig())
                 .withCredential(new Credential())
@@ -374,12 +451,11 @@ class EnvironmentResponseConverterTest {
                 .withParentEnvironmentCrn("environment crn")
                 .withParentEnvironmentName("parent-env")
                 .withParentEnvironmentCloudPlatform("AWS")
-                .withNetwork(NetworkDto.builder().build())
+                .withNetwork(NetworkDto.builder().withSubnetMetas(Map.of("subnet1", new CloudSubnet("subnet1-id", "subnet1"))).build())
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
                 .withEnableSecretEncryption(true)
-                .withEnableComputeCluster(true)
-                .build();
+                .withEnableComputeCluster(true);
     }
 
     private EnvironmentViewDto createEnvironmentViewDto(CloudPlatform cloudPlatform) {
