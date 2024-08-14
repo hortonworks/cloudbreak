@@ -900,7 +900,7 @@ public abstract class TestContext implements ApplicationContextAware {
             String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
                     expectedException, actualException.getClass());
             getExceptionMap().put(stepKey, new TestFailException(message));
-            LOGGER.error(message);
+            LOGGER.error(message, actualException);
             htmlLoggerForExceptionValidation(message, stepKey);
         } else if (!isMessageEquals(actualException, runningParameter) || !isPayloadEquals(actualException, runningParameter)) {
             List<String> messages = new ArrayList<>();
@@ -914,7 +914,7 @@ public abstract class TestContext implements ApplicationContextAware {
             }
             String message = String.join("\n", messages);
             getExceptionMap().put(stepKey, new TestFailException(message));
-            LOGGER.error(message);
+            LOGGER.error(message, actualException);
             htmlLoggerForExceptionValidation(message, stepKey);
         } else {
             String message = String.format("Expected exception conditions have met, exception: %s, message: %s",
