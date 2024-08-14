@@ -16,6 +16,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
@@ -292,10 +295,12 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(originalAzureParams.getDatabasePrivateDnsZoneId(), actualNetworkDto.getAzure().getDatabasePrivateDnsZoneId());
         assertEquals(originalAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
         assertEquals(originalAzureParams.isUsePublicDnsForPrivateAks(), actualNetworkDto.getAzure().isUsePublicDnsForPrivateAks());
+        assertEquals(orignalNetworkDto.getServiceEndpointCreation(), actualNetworkDto.getServiceEndpointCreation());
     }
 
-    @Test
-    void testExtendBuilderWithProviderSpecificParameters() {
+    @ParameterizedTest
+    @EnumSource(ServiceEndpointCreation.class)
+    void testExtendBuilderWithProviderSpecificParameters(ServiceEndpointCreation serviceEndpointCreation) {
         NetworkDto originalNetworkDto = NetworkDto.builder().withAzure(AzureParams.builder()
                         .withFlexibleServerSubnetIds(Set.of("orignalsubnetid"))
                         .withDatabasePrivateDnsZoneId("originalDnsZone")
@@ -308,11 +313,16 @@ class AzureEnvironmentNetworkConverterTest {
                 .build();
         NetworkDto newNetworkDto = NetworkDto.builder()
                 .withAzure(newAzureParams)
+                .withServiceEndpointCreation(serviceEndpointCreation)
                 .build();
         NetworkDto.Builder networkDtoBuilder = NetworkDto.builder();
         NetworkDto actualNetworkDto = underTest.extendBuilderWithProviderSpecificParameters(networkDtoBuilder, originalNetworkDto, newNetworkDto).build();
         assertEquals(newAzureParams.getDatabasePrivateDnsZoneId(), actualNetworkDto.getAzure().getDatabasePrivateDnsZoneId());
-        assertEquals(newAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+        if (serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
+            assertNull(actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+        } else {
+            assertEquals(newAzureParams.getFlexibleServerSubnetIds(), actualNetworkDto.getAzure().getFlexibleServerSubnetIds());
+        }
         assertTrue(actualNetworkDto.getAzure().isUsePublicDnsForPrivateAks());
     }
 

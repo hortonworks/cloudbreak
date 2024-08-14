@@ -381,6 +381,15 @@ class NetworkServiceTest {
     }
 
     @Test
+    void testClonedNetworkDtoHasServiceEndpointCreation() {
+        NetworkDto editNetworkDto = NetworkDto.builder()
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
+                .build();
+        NetworkDto capturedNetwork = captureNetworkFromSubnetEditValidate(editNetworkDto);
+        assertEquals(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT, capturedNetwork.getServiceEndpointCreation());
+    }
+
+    @Test
     @DisplayName("Test saveNetwork when networkDto and converter are not null and both - the converted - base network's and the networkDTO's CRN is null")
     void testSaveNetworkNetworkDtoAndConverterNotNullBaseNwCrnIsNull() {
         NetworkDto networkDto = mock(NetworkDto.class);

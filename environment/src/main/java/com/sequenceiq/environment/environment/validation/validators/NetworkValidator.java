@@ -52,7 +52,7 @@ public class NetworkValidator {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         resultBuilder.prefix("Cannot edit environment");
         subnetUsageValidator.validate(environment, network, resultBuilder);
-        validateNetworkToEdit(environment, network, resultBuilder);
+        validateNetworkEdit(environment, network, resultBuilder);
         return resultBuilder;
     }
 
@@ -69,7 +69,7 @@ public class NetworkValidator {
         }
     }
 
-    private void validateNetworkToEdit(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
+    private void validateNetworkEdit(Environment environment, NetworkDto network, ValidationResultBuilder resultBuilder) {
         if (network != null) {
             EnvironmentNetworkValidator environmentNetworkValidator =
                     environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.ROOT)));

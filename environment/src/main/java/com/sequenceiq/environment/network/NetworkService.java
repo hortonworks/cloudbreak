@@ -141,6 +141,9 @@ public class NetworkService {
         if (MapUtils.isNotEmpty(editNetworkDto.getEndpointGatewaySubnetMetas())) {
             cloneNetworkDtoBuilder.withEndpointGatewaySubnetMetas(editDto.getNetworkDto().getEndpointGatewaySubnetMetas());
         }
+        if (editNetworkDto.getServiceEndpointCreation() != null) {
+            cloneNetworkDtoBuilder.withServiceEndpointCreation(editNetworkDto.getServiceEndpointCreation());
+        }
         environmentNetworkConverter.extendBuilderWithProviderSpecificParameters(cloneNetworkDtoBuilder, originalNetworkDto, editDto.getNetworkDto());
         return cloneNetworkDtoBuilder.build();
     }

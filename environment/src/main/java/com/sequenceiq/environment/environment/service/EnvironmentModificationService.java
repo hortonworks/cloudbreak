@@ -294,9 +294,9 @@ public class EnvironmentModificationService {
 
     private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (networkChanged(editDto)) {
-            BaseNetwork network = networkService.refreshProviderSpecificParameters(environment.getNetwork(), editDto, environment);
-            network = networkService.validate(network, editDto, environment);
+            BaseNetwork network = networkService.validate(environment.getNetwork(), editDto, environment);
             network = networkService.refreshMetadataFromCloudProvider(network, editDto, environment);
+            network = networkService.refreshProviderSpecificParameters(network, editDto, environment);
             network = networkService.refreshServiceEndpointCreation(network, editDto, environment);
             if (network != null) {
                 environment.setNetwork(network);
