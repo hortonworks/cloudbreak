@@ -169,9 +169,11 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             throws CloudbreakOrchestratorFailedException, CloudbreakException {
         try {
             // running it first time in order to decommission hosts before stopping agents
+            updateInstanceStatuses(hostsToRemove.values(), InstanceStatus.UNDER_DECOMMISSION, "decomissioning instance in cluster manager");
             clusterDecomissionService.removeHostsFromCluster(Lists.newArrayList(hostsToRemove.values()));
             stopClusterManagerAgent(stackDto, hostsToRemove.keySet(), forced);
             // running it second time after agent stop to delete hosts from CM before they are appearing again in CM
+            updateInstanceStatuses(hostsToRemove.values(), InstanceStatus.REMOVING_FROM_CLUSTER_MANAGER, "removing instance from cluster manager");
             clusterDecomissionService.removeHostsFromCluster(Lists.newArrayList(hostsToRemove.values()));
             cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
             cleanUpAfterRemoval(forced, clusterDecomissionService, hostsToRemove.values());
@@ -189,11 +191,13 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         if (hostsToRemove.isEmpty() || forced) {
             decommissionedHostNames = hostNames;
         } else {
+            updateInstanceStatuses(hostsToRemove.values(), InstanceStatus.UNDER_DECOMMISSION, "decomissioning instance in cluster manager");
             decommissionedHostNames = clusterDecomissionService.decommissionClusterNodes(hostsToRemove);
         }
         if (!decommissionedHostNames.isEmpty()) {
             stopClusterManagerAgent(stackDto, decommissionedHostNames, forced);
             cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
+            updateInstanceStatuses(hostsToRemove.values(), InstanceStatus.REMOVING_FROM_CLUSTER_MANAGER, "removing instance from cluster manager");
             List<InstanceMetadataView> deletedHosts = deleteHosts(decommissionedHostNames, clusterDecomissionService, hostsToRemove);
             cleanUpAfterRemoval(forced, clusterDecomissionService, deletedHosts);
             LOGGER.info("Removed hostnames from CM and IPA : {}", decommissionedHostNames);

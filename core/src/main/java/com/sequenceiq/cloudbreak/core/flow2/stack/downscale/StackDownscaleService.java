@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETING_FROM_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DOWNSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DOWNSCALE_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DOWNSCALE_SUCCESS;
@@ -75,28 +76,29 @@ public class StackDownscaleService {
     private InstanceMetadataProcessor instanceMetadataProcessor;
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
-        LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
-        stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
+        StackView stack = context.getStack();
+        LOGGER.debug("Downscaling of stack {}", stack.getId());
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         List<Long> privateIds = null;
         if (MapUtils.isNotEmpty(stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds())) {
-            privateIds = stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+            privateIds = stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds().values().stream().flatMap(Collection::stream).toList();
         } else if (MapUtils.isNotEmpty(context.getHostGroupWithPrivateIds())) {
-            privateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+            privateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).toList();
         }
-        String msgParam;
         if (CollectionUtils.isNotEmpty(privateIds)) {
-            List<String> instanceIdList = instanceMetaDataService
-                    .getInstanceMetadataViewsByStackIdAndPrivateIds(context.getStackId(), privateIds).stream()
-                    .map(InstanceMetadataView::getInstanceId)
-                    .collect(toList());
-            msgParam = String.join(",", instanceIdList);
+            List<InstanceMetadataView> instanceMetadataViews = instanceMetaDataService
+                    .getInstanceMetadataViewsByStackIdAndPrivateIds(stack.getId(), privateIds);
+            List<String> instanceIdList = instanceMetadataViews.stream().map(InstanceMetadataView::getInstanceId).toList();
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_DOWNSCALE_INSTANCES, String.join(",", instanceIdList));
+            instanceMetaDataService.updateAllInstancesToStatus(instanceMetadataViews.stream().map(InstanceMetadataView::getId).toList(),
+                    DELETING_FROM_PROVIDER_SIDE, "Deleting from provider side");
         } else if (stackDownscaleTriggerEvent.getHostGroupsWithAdjustment() != null) {
             Integer adjustmentSize = stackDownscaleTriggerEvent.getHostGroupsWithAdjustment().values().stream().reduce(0, Integer::sum);
-            msgParam = String.valueOf(adjustmentSize);
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_DOWNSCALE_INSTANCES, String.valueOf(adjustmentSize));
         } else {
             throw new CloudbreakRuntimeException("No adjustment was defined");
         }
-        flowMessageService.fireEventAndLog(context.getStack().getId(), UPDATE_IN_PROGRESS.name(), STACK_DOWNSCALE_INSTANCES, msgParam);
+
     }
 
     public void finishStackDownscale(StackScalingFlowContext context, Collection<Long> privateIds)
