@@ -120,8 +120,6 @@ curl -k http://${PUBLIC_IP}:8086/dl/api/openapi.json -o ./apidefinitions/datalak
 curl -k http://${PUBLIC_IP}:8085/as/api/openapi.json -o ./apidefinitions/autoscale.json
 curl -k http://${PUBLIC_IP}:8091/externalizedcompute/api/openapi.json -o ./apidefinitions/externalizedcompute.json
 
-docker rm -f cbreak_periscope_1
-
 date
 echo -e "\n\033[1;96m--- Setting ACCESSKEY/SECRETKEY for test variables:\033[0m\n"
 export INTEGRATIONTEST_USER_ACCESSKEY=$INTEGRATIONTEST_USER_ACCESSKEY
