@@ -145,6 +145,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
+    @Inject
+    private ClouderaManagerCommandsService clouderaManagerCommandsService;
+
     private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
@@ -298,6 +301,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
                 importCommand = Optional.of(clusterCommandService.save(clusterCommand));
                 LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+            } else if (importCommand.isPresent() && !clouderaManagerCommandsService.getApiCommand(apiClient, importCommand.get().getCommandId()).getSuccess()) {
+                ApiCommand apiCommand = clouderaManagerCommandsService.retryApiCommand(apiClient, importCommand.get().getCommandId());
+                importCommand.get().setCommandId(apiCommand.getId());
+                clusterCommandService.save(importCommand.get());
             }
             importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
         } catch (ApiException e) {
