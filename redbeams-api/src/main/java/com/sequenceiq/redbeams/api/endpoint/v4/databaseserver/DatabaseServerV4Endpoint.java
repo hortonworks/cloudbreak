@@ -30,11 +30,13 @@ import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
@@ -324,7 +326,20 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
             @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.DATABASE_SERVER_CERTIFICATE_REQUEST)
-            DatabaseServerCertificateStatusV4Request request
+            DatabaseServerCertificateStatusV4Request request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+    );
+
+    @POST
+    @Path("internal/get_database_certificate_status_by_stack_crns")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerOpDescription.LIST_CERTIFICATE_STATUS, description = DatabaseServerNotes.LIST_CERTIFICATE_STATUS,
+            operationId = "listDatabaseServersCertificateStatusByStackCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ClusterDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatusByStackCrns(
+            @Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.DATABASE_SERVER_CERTIFICATE_REQUEST)
+            ClusterDatabaseServerCertificateStatusV4Request request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn
     );
 
 }

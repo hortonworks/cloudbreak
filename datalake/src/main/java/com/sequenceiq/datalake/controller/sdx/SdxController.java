@@ -5,6 +5,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
 import java.util.List;
@@ -30,6 +31,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -84,6 +86,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxInstanceMetadataUpdateRequest;
@@ -569,6 +572,13 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
     public SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn @TenantAwareParam String crn) {
         return certificateRotationService.rotateCertificate(crn);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "crns", type = CRN_LIST, action = DESCRIBE_DATALAKE)
+    public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            @RequestObject SdxDatabaseServerCertificateStatusV4Request request) {
+        return certificateRotationService.getDatabaseCertificateStatus(request);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

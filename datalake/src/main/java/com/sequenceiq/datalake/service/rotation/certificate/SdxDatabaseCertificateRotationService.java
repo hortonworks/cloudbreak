@@ -7,8 +7,10 @@ import static com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertRespons
 import static com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertResponseType.SKIP;
 import static com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertResponseType.TRIGGERED;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -17,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
@@ -34,6 +38,11 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
+import com.sequenceiq.sdx.api.model.SdxDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertificateV1Response;
 
 @Service
@@ -62,6 +71,9 @@ public class SdxDatabaseCertificateRotationService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private DatabaseServerV4Endpoint databaseServerV4Endpoint;
+
     public SdxRotateRdsCertificateV1Response rotateCertificate(String dlCrn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(dlCrn);
         if (sdxCluster == null) {
@@ -70,6 +82,24 @@ public class SdxDatabaseCertificateRotationService {
         sdxService.validateRdsSslCertRotation(dlCrn);
         StackV4Response stack = sdxService.getDetail(sdxCluster.getClusterName(), null, sdxService.getAccountIdFromCrn(dlCrn));
         return checkPrerequisitesAndTrigger(sdxCluster, stack);
+    }
+
+    public StackDatabaseServerCertificateStatusV4Responses getDatabaseCertificateStatus(SdxDatabaseServerCertificateStatusV4Request request) {
+        ClusterDatabaseServerCertificateStatusV4Request clusterDatabaseServerCertificateStatusV4Request = new ClusterDatabaseServerCertificateStatusV4Request();
+        clusterDatabaseServerCertificateStatusV4Request.setCrns(request.getCrns());
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        ClusterDatabaseServerCertificateStatusV4Responses clusterDatabaseServerCertificateStatusV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> databaseServerV4Endpoint.listDatabaseServersCertificateStatusByStackCrns(clusterDatabaseServerCertificateStatusV4Request, userCrn)
+        );
+        Set<StackDatabaseServerCertificateStatusV4Response> responses = new HashSet<>();
+        for (ClusterDatabaseServerCertificateStatusV4Response response : clusterDatabaseServerCertificateStatusV4Responses.getResponses()) {
+            StackDatabaseServerCertificateStatusV4Response stackDatabaseServerCertificateStatusV4Response = new StackDatabaseServerCertificateStatusV4Response();
+            stackDatabaseServerCertificateStatusV4Response.setSslStatus(response.getSslStatus());
+            stackDatabaseServerCertificateStatusV4Response.setCrn(response.getCrn());
+            responses.add(stackDatabaseServerCertificateStatusV4Response);
+        }
+        return new StackDatabaseServerCertificateStatusV4Responses(responses);
     }
 
     public void initAndWaitForStackCertificateRotation(SdxCluster sdxCluster, PollingConfig pollingConfig) {

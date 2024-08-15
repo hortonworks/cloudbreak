@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +36,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -55,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
@@ -70,6 +77,9 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 
 @Service
 public class StackOperationService {
@@ -126,6 +136,15 @@ public class StackOperationService {
 
     @Inject
     private SaltPasswordStatusService saltPasswordStatusService;
+
+    @Inject
+    private RedbeamsClientService redbeamsClient;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -486,5 +505,31 @@ public class StackOperationService {
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return flowManager.triggerStackUpdateDisks(stack, updateRequest);
+    }
+
+    public StackDatabaseServerCertificateStatusV4Responses
+        listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request, String userCrn) {
+        try {
+            StackDatabaseServerCertificateStatusV4Responses responses = new StackDatabaseServerCertificateStatusV4Responses();
+            ClusterDatabaseServerCertificateStatusV4Request databaseServerCertificateStatusV4Request = new ClusterDatabaseServerCertificateStatusV4Request();
+            databaseServerCertificateStatusV4Request.setCrns(request.getCrns());
+
+            ClusterDatabaseServerCertificateStatusV4Responses clusterDatabaseServerCertificateStatusV4Responses =
+                    redbeamsClient.listDatabaseServersCertificateStatusByStackCrns(databaseServerCertificateStatusV4Request, userCrn);
+
+            for (ClusterDatabaseServerCertificateStatusV4Response response : clusterDatabaseServerCertificateStatusV4Responses.getResponses()) {
+                StackDatabaseServerCertificateStatusV4Response databaseServerCertificateStatusV4Response
+                        = new StackDatabaseServerCertificateStatusV4Response();
+                databaseServerCertificateStatusV4Response.setSslStatus(response.getSslStatus());
+                databaseServerCertificateStatusV4Response.setCrn(response.getCrn());
+                responses.getResponses().add(databaseServerCertificateStatusV4Response);
+            }
+            return responses;
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to get DatabaseServersCertificateStatus for clusters '%s' due to: '%s'",
+                    request.getCrns(), errorMessage), e);
+            throw new BadRequestException("Could not query database certificate status for clusters. " + errorMessage);
+        }
     }
 }

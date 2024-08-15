@@ -23,7 +23,9 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4SecretRotationRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
@@ -702,4 +704,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     public void validateRotateRdsCertificateByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
         rotateRdsCertificateService.validateThatRotationIsTriggerable(ThreadBasedUserCrnProvider.getAccountId(), crn);
     }
+
+    @Override
+    @InternalOnly
+    public StackDatabaseServerCertificateStatusV4Responses internalListDatabaseServersCertificateStatus(
+            Long workspaceId,
+            StackDatabaseServerCertificateStatusV4Request request,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.listDatabaseServersCertificateStatus(request, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
 }
