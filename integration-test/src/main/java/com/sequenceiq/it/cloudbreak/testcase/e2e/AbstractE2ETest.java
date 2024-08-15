@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 
 import com.azure.resourcemanager.resources.models.ResourceGroup;
@@ -65,6 +64,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         boolean shouldUseSpotInstances = spotUtil.shouldUseSpotInstancesForTest(testResult.getMethod().getConstructorOrMethod().getMethod());
         boolean retried = spotRetryUtil.isRetried(testResult.getMethod());
         spotUtil.setUseSpotInstances(shouldUseSpotInstances && !retried);
+        createResourceGroup((TestContext) testResult.getParameters()[0]);
     }
 
     @Override
@@ -171,15 +171,6 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     protected String getBaseLocationForPreTermination(TestContext testContext) {
         return testContext.getCloudProvider().getBaseLocationForPreTermination();
-    }
-
-    /**
-     * Creating new temporary Azure resource group for E2E tests.
-     */
-    @BeforeMethod(alwaysRun = true)
-    protected void createResourceGroup(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        createResourceGroup(testContext);
     }
 
     private void createResourceGroup(TestContext testContext) {
