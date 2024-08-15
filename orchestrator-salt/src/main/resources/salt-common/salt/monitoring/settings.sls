@@ -39,6 +39,8 @@
 {% set blackbox_exporter_cloud_interval_seconds = salt['pillar.get']('monitoring:blackboxExporterCloudIntervalSeconds', 600) %}
 {% set blackbox_exporter_cloudera_interval_seconds = salt['pillar.get']('monitoring:blackboxExporterClouderaIntervalSeconds', 1800) %}
 {% set blackbox_exporter_check_on_all_nodes = salt['pillar.get']('monitoring:blackboxExporterCheckOnAllNodes', false) %}
+{% set blackbox_exporter_cloud_links = salt['pillar.get']('monitoring:blackboxExporterCloudLinks', []) %}
+{% set blackbox_exporter_cloudera_links = salt['pillar.get']('monitoring:blackboxExporterClouderaLinks', []) %}
 {% set local_password = salt['pillar.get']('monitoring:localPassword') %}
 {% set scrape_interval_seconds = salt['pillar.get']('monitoring:scrapeIntervalSeconds') %}
 {% set cm_metrics_exporter_port = salt['pillar.get']('monitoring:cmMetricsExporterPort', 61010) %}
@@ -100,6 +102,8 @@
     "blackboxExporterClouderaIntervalSeconds": blackbox_exporter_cloudera_interval_seconds,
     "blackboxExporterCheckOnAllNodes": blackbox_exporter_check_on_all_nodes,
     "blackboxExporterExists" : blackbox_exporter_exists,
+    "blackboxExporterCloudLinks" : blackbox_exporter_cloud_links,
+    "blackboxExporterClouderaLinks" : blackbox_exporter_cloudera_links,
     "localPassword": local_password,
     "requestSignerEnabled" : request_signer_enabled,
     "requestSignerPort" : request_signer_port,

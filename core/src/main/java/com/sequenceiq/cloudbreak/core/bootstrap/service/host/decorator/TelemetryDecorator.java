@@ -107,6 +107,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         DataBusCredential dataBusCredential = convertOrReturnNull(cluster.getDatabusCredential(), DataBusCredential.class);
         MonitoringCredential monitoringCredential = convertOrReturnNull(cluster.getMonitoringCredential(), MonitoringCredential.class);
         TelemetryContext telemetryContext = new TelemetryContext();
+        telemetryContext.setRegion(stack.getRegion());
+        telemetryContext.setCloudPlatform(stack.getCloudPlatform());
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
 

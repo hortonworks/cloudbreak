@@ -64,6 +64,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final boolean blackboxCheckOnAllNodes;
 
+    private List<String> blackboxExporterCloudLinks;
+
+    private List<String> blackboxExporterClouderaLinks;
+
     private final Integer agentPort;
 
     private final String agentUser;
@@ -121,6 +125,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.blackboxCloudInvervalSeconds = builder.cloudIntervalSeconds;
         this.blackboxClouderaIntervalSeconds = builder.clouderaIntervalSeconds;
         this.blackboxCheckOnAllNodes = builder.checkOnAllNodes;
+        this.blackboxExporterCloudLinks = builder.blackboxExporterCloudLinks;
+        this.blackboxExporterClouderaLinks = builder.blackboxExporterClouderaLinks;
         this.agentUser = builder.agentUser;
         this.agentPort = builder.agentPort;
         this.agentMaxDiskUsage = builder.agentMaxDiskUsage;
@@ -201,6 +207,14 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return blackboxExporterPort;
     }
 
+    public List<String> getBlackboxExporterCloudLinks() {
+        return blackboxExporterCloudLinks;
+    }
+
+    public List<String> getBlackboxExporterClouderaLinks() {
+        return blackboxExporterClouderaLinks;
+    }
+
     public String getAgentUser() {
         return agentUser;
     }
@@ -275,6 +289,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("blackboxExporterUser", defaultIfNull(this.blackboxExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("blackboxExporterPort", this.blackboxExporterPort);
         map.put("blackboxExporterCloudIntervalSeconds", this.blackboxCloudInvervalSeconds);
+        map.put("blackboxExporterCloudLinks", this.blackboxExporterCloudLinks);
+        map.put("blackboxExporterClouderaLinks", this.blackboxExporterClouderaLinks);
         map.put("blackboxExporterClouderaIntervalSeconds", this.blackboxClouderaIntervalSeconds);
         map.put("blackboxExporterCheckOnAllNodes", this.blackboxCheckOnAllNodes);
         map.put("agentUser", defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
@@ -338,6 +354,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String blackboxExporterUser;
 
         private Integer blackboxExporterPort;
+
+        private List<String> blackboxExporterCloudLinks;
+
+        private List<String> blackboxExporterClouderaLinks;
 
         private Integer clouderaIntervalSeconds;
 
@@ -468,6 +488,16 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withBlackboxExporterPort(Integer blackboxExporterPort) {
             this.blackboxExporterPort = blackboxExporterPort;
+            return this;
+        }
+
+        public Builder withBlackboxExporterCloudLinks(List<String> cloudLinks) {
+            this.blackboxExporterCloudLinks = cloudLinks;
+            return this;
+        }
+
+        public Builder withBlackboxExporterClouderaLinks(List<String> clouderaLinks) {
+            this.blackboxExporterClouderaLinks = clouderaLinks;
             return this;
         }
 

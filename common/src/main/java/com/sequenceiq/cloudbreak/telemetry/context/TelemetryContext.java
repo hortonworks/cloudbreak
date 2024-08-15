@@ -32,6 +32,10 @@ public class TelemetryContext {
 
     private Map<String, Object> paywallConfigs;
 
+    private String region;
+
+    private String cloudPlatform;
+
     public <T extends TelemetryConfigView> void addConfigView(T configView) {
         configs.put(configView.getClass(), configView);
     }
@@ -120,6 +124,22 @@ public class TelemetryContext {
         this.paywallConfigs = paywallConfigs;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
     @Override
     public String toString() {
         return "TelemetryContext{" +
@@ -133,6 +153,8 @@ public class TelemetryContext {
                 ", nodeStatusContext=" + nodeStatusContext +
                 ", clusterDetails=" + clusterDetails +
                 ", paywallConfigs=******" +
+                ", region=" + region +
+                ", cloudPlatform=" + cloudPlatform +
                 '}';
     }
 }

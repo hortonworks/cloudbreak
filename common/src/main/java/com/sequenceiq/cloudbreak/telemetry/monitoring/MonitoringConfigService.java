@@ -1,14 +1,27 @@
 package com.sequenceiq.cloudbreak.telemetry.monitoring;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.fromName;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.UMSSecretKeyFormatter;
+import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView.Builder;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.model.Logging;
 
 @Service
 public class MonitoringConfigService implements TelemetryPillarConfigGenerator<MonitoringConfigView> {
@@ -19,19 +32,25 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
 
     private static final String SALT_STATE = "monitoring";
 
+    private static final String AWS_SERVICE_DOMAIN = "amazonaws.com";
+
     private final MonitoringConfiguration monitoringConfiguration;
 
     private final MonitoringGlobalAuthConfig monitoringGlobalAuthConfig;
 
-    public MonitoringConfigService(MonitoringConfiguration monitoringConfiguration, MonitoringGlobalAuthConfig monitoringGlobalAuthConfig) {
+    private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
+
+    public MonitoringConfigService(MonitoringConfiguration monitoringConfiguration, MonitoringGlobalAuthConfig monitoringGlobalAuthConfig,
+            AdlsGen2ConfigGenerator adlsGen2ConfigGenerator) {
         this.monitoringConfiguration = monitoringConfiguration;
         this.monitoringGlobalAuthConfig = monitoringGlobalAuthConfig;
+        this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
     }
 
     @Override
     public MonitoringConfigView createConfigs(TelemetryContext context) {
         final MonitoringContext monitoringContext = context.getMonitoringContext();
-        final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
+        final Builder builder = new Builder();
         LOGGER.debug("Tyring to set monitoring configurations.");
         if (monitoringContext.getClusterType() != null) {
             builder.withType(monitoringContext.getClusterType().value());
@@ -57,7 +76,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
                     .withPrivateKey(UMSSecretKeyFormatter.formatSecretKey(accessKeyType, monitoringContext.getCredential().getPrivateKey()).toCharArray())
                     .withAccessKeyType(accessKeyType);
         }
-        fillExporterConfigs(builder, monitoringContext.getSharedPassword());
+        fillExporterConfigs(builder, monitoringContext.getSharedPassword(), context);
         fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
         if (monitoringGlobalAuthConfig.isEnabled()) {
             builder.withUsername(monitoringGlobalAuthConfig.getUsername());
@@ -83,7 +102,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         return SALT_STATE;
     }
 
-    private void fillExporterConfigs(MonitoringConfigView.Builder builder, String localPassword) {
+    private void fillExporterConfigs(Builder builder, String localPassword, TelemetryContext telemetryContext) {
         builder.withLocalPassword(localPassword);
         if (monitoringConfiguration.getNodeExporter() != null) {
             builder.withNodeExporterUser(monitoringConfiguration.getNodeExporter().getUser())
@@ -95,11 +114,70 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
                     .withBlackboxExporterPort(monitoringConfiguration.getBlackboxExporter().getPort())
                     .withBlackboxExporterCheckOnAllNodes(monitoringConfiguration.getBlackboxExporter().isCheckOnAllNodes())
                     .withBlackboxExporterClouderaIntervalSeconds(monitoringConfiguration.getBlackboxExporter().getClouderaIntervalSeconds())
-                    .withBlackboxExporterCloudIntervalSeconds(monitoringConfiguration.getBlackboxExporter().getCloudIntervalSeconds());
+                    .withBlackboxExporterCloudIntervalSeconds(monitoringConfiguration.getBlackboxExporter().getCloudIntervalSeconds())
+                    .withBlackboxExporterCloudLinks(generateCloudLinks(fromName(telemetryContext.getCloudPlatform()),
+                            telemetryContext.getRegion(), telemetryContext.getTelemetry().getLogging()))
+                    .withBlackboxExporterClouderaLinks(generateClouderaLinks(telemetryContext.getDatabusContext()));
         }
     }
 
-    private void fillCMAuthConfigs(MonitoringClusterType clusterType, MonitoringAuthConfig cmAuthConfig, MonitoringConfigView.Builder builder) {
+    private List<String> generateCloudLinks(CloudPlatform platform, String region, Logging telemetryLogging) {
+        List<String> result = new ArrayList<>();
+        if (platform != null) {
+            switch (platform) {
+                case AWS:
+                    result.add(formatServiceLink("s3", region));
+                    result.add(formatServiceLink("sls", region));
+                    break;
+                case AZURE:
+                    result.add("https://management.azure.com");
+                    extractStorageAccount(telemetryLogging)
+                            .ifPresent(storageAccount -> result.add(String.format("https://%s.dfs.core.windows.net", storageAccount)));
+                    break;
+                case GCP:
+                    result.add("https://storage.googleapis.com");
+                    break;
+                default:
+            }
+        }
+        return result;
+    }
+
+    private Optional<String> extractStorageAccount(Logging logging) {
+        Optional<String> storageAccountOptional = Optional.empty();
+        if (logging.getAdlsGen2() != null) {
+            String storageLocation = logging.getStorageLocation();
+            AdlsGen2CloudStorageV1Parameters parameters = logging.getAdlsGen2();
+            AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(storageLocation);
+            String storageAccount = StringUtils.isNotEmpty(adlsGen2Config.getAccount())
+                    ? adlsGen2Config.getAccount() : parameters.getAccountName();
+            storageAccountOptional = Optional.ofNullable(storageAccount);
+        }
+        return storageAccountOptional;
+    }
+
+    private String formatServiceLink(String service, String region) {
+        String serviceName = service;
+        if (region != null && region.contains("-gov-")) {
+            serviceName += "-fips";
+        }
+        return String.format("https://%s.%s.%s", serviceName, region, AWS_SERVICE_DOMAIN);
+    }
+
+    private List<String> generateClouderaLinks(DatabusContext databusContext) {
+        List<String> result = new ArrayList<>();
+        result.add("https://archive.cloudera.com");
+        result.add("https://cloudera-service-delivery-cache.s3.amazonaws.com");
+        if (StringUtils.isNotBlank(databusContext.getEndpoint())) {
+            result.add(databusContext.getEndpoint());
+        }
+        if (StringUtils.isNotBlank(databusContext.getS3Endpoint())) {
+            result.add(databusContext.getS3Endpoint());
+        }
+        return result;
+    }
+
+    private void fillCMAuthConfigs(MonitoringClusterType clusterType, MonitoringAuthConfig cmAuthConfig, Builder builder) {
         if (MonitoringClusterType.CLOUDERA_MANAGER.equals(clusterType)) {
             LOGGER.debug("Setting up monitoring configurations for Cloudera Manager");
             if (areAuthConfigsValid(cmAuthConfig)) {
@@ -114,7 +192,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         }
     }
 
-    private void fillRequestSignerConfigs(RequestSignerConfiguration config, MonitoringConfigView.Builder builder) {
+    private void fillRequestSignerConfigs(RequestSignerConfiguration config, Builder builder) {
         if (config.isEnabled()) {
             RequestSignerConfigView requestSignerConfigView = RequestSignerConfigView.newBuilder()
                     .withEnabled(config.isEnabled())

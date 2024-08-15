@@ -11,14 +11,8 @@
     {%- set instance_name = instance_cmd_output %}
   {%- endif %}
   {%- if salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.29-1') >= 0 %}
-    {%- if salt['file.file_exists'](network_addresses_file) %}
-      {%- set network_address_content = salt['cmd.run']('cat ' + network_addresses_file) %}
-      {%- if network_address_content is defined and network_address_content and network_address_content|length > 0 %}
-        {%- set doctorNetworkAddresses = network_address_content | load_json %}
-        {%- set blackboxClouderaUrls = doctorNetworkAddresses.get('cloudera', []) %}
-        {%- set blackboxCloudUrls = doctorNetworkAddresses.get('cloud', []) %}
-      {%- endif %}
-    {%- endif %}
+        {%- set blackboxClouderaUrls = monitoring.blackboxExporterClouderaLinks %}
+        {%- set blackboxCloudUrls = monitoring.blackboxExporterCloudLinks %}
   {%- endif %}
 {%- endif %}
 global:
