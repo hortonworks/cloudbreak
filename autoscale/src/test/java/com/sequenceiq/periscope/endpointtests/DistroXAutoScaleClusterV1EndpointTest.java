@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRe
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsClient;
 import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
@@ -119,6 +120,9 @@ class DistroXAutoScaleClusterV1EndpointTest {
 
     @MockBean
     private AutoscaleRecommendationService recommendationService;
+
+    @MockBean
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @MockBean
     private NodeDeletionService nodeDeletionService;

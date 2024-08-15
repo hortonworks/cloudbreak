@@ -847,3 +847,12 @@ cdp:
   structuredevent:
     rest:
       contentlogging: false
+
+vm:
+  default:
+    javaVersions:
+      - version: 8
+        maxRuntimeVersion: 7.3.0
+        minRuntimeVersion: 7.1.0
+      - version: 17
+        minRuntimeVersion: 7.3.1

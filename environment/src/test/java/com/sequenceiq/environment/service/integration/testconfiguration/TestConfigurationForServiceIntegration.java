@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.environment.environment.service.LoadBalancerPollerConfig;
 import com.sequenceiq.environment.service.integration.DummySecretService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -34,6 +35,9 @@ public class TestConfigurationForServiceIntegration {
 
     @MockBean
     private LoadBalancerPollerConfig loadBalancerPollerConfig;
+
+    @MockBean
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @Bean
     public SecretService secretService() {

@@ -265,6 +265,19 @@ public class CMRepositoryVersionUtil {
         return versionComparator.compare(currentVersion, limitedAPIVersion) < 0;
     }
 
+    public static boolean isVersionOlderOrEqualThanLimited(String currentVersion, Versioned limitedAPIVersion) {
+        LOGGER.info("isVersionOlderOrEqualThanLimited Compared: String version {} with Versioned {}",
+                currentVersion, limitedAPIVersion.getVersion());
+        return isVersionOlderOrEqualThanLimited(() -> currentVersion, limitedAPIVersion);
+    }
+
+    public static boolean isVersionOlderOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
+        LOGGER.info("isVersionOlderOrEqualThanLimited Compared: Versioned {} with Versioned {}",
+                currentVersion.getVersion(), limitedAPIVersion.getVersion());
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(currentVersion, limitedAPIVersion) <= 0;
+    }
+
     public static boolean isVersionOlderThanLimited(String currentVersion, Versioned limitedAPIVersion) {
         LOGGER.info("isVersionOlderThanLimited Compared: String version {} with Versioned {}",
                 currentVersion, limitedAPIVersion.getVersion());

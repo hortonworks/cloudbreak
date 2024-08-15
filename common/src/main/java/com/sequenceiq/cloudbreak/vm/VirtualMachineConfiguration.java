@@ -13,7 +13,8 @@ public class VirtualMachineConfiguration {
 
     private final Set<Integer> supportedJavaVersions;
 
-    public VirtualMachineConfiguration(@Value("${vm.supportedJavaVersions}") String supportedJavaVersions) {
+    public VirtualMachineConfiguration(
+            @Value("${vm.supportedJavaVersions}") String supportedJavaVersions) {
         this.supportedJavaVersions = Arrays.stream(supportedJavaVersions.split(","))
                 .map(String::trim)
                 .filter(Predicate.not(String::isEmpty))

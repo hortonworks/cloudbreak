@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
-import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -77,6 +76,8 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.java.JavaDefaultVersionCalculator;
+import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
@@ -174,6 +175,9 @@ public class StackCreatorService {
     private JavaVersionValidator javaVersionValidator;
 
     @Inject
+    private JavaDefaultVersionCalculator javaDefaultVersionCalculator;
+
+    @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Inject
@@ -265,9 +269,13 @@ public class StackCreatorService {
                 StatedImage imgFromCatalog = measure(() -> getImageFromCatalog(imgFromCatalogFuture),
                         LOGGER,
                         "Select the correct image took {} ms");
+                int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), blueprint.getStackVersion());
+                setJavaVersion(stackRequest, stack, javaVersion);
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
+
+
                 Stack newStack = measure(
                         () -> stackService.create(stack, imgFromCatalog, user, workspace),
                         LOGGER,
@@ -312,6 +320,11 @@ public class StackCreatorService {
         metricService.gauge(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private void setJavaVersion(StackV4Request stackRequest, Stack stack, int javaVersion) {
+        stackRequest.setJavaVersion(javaVersion);
+        stack.setJavaVersion(javaVersion);
     }
 
     private void validateArchitecture(StackV4Request stackRequest) {

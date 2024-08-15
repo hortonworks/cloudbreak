@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsClient;
 import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
+import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleScalingActivityV1Endpoint;
 import com.sequenceiq.periscope.api.model.ActivityStatus;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -86,6 +87,9 @@ public class DistroXAutoScaleScalingActivityV1EndpointTest {
 
     @MockBean
     private ResourceAuthorizationService resourceAuthorizationService;
+
+    @MockBean
+    private VirtualMachineConfiguration virtualMachineConfiguration;
 
     @MockBean
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
