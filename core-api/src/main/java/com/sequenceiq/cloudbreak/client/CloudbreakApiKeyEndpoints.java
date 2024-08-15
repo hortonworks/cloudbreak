@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoi
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXDatabaseServerV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1EventEndpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -130,6 +131,11 @@ public class CloudbreakApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint() {
         return getEndpoint(DistroXUpgradeV1Endpoint.class);
+    }
+
+    @Override
+    public DistroXV1EventEndpoint distroXV1EventEndpoint() {
+        return getEndpoint(DistroXV1EventEndpoint.class);
     }
 
     @Override

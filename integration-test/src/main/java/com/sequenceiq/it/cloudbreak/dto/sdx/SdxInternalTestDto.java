@@ -343,13 +343,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return SDX_RESOURCE_NAME;
     }
 
-    public SdxInternalTestDto withImageCatalogNameOnly(String imageCatalogName) {
-        ImageSettingsV4Request image = new ImageSettingsV4Request();
-        image.setCatalog(imageCatalogName);
-        getRequest().getStackV4Request().setImage(image);
-        return this;
-    }
-
     public SdxInternalTestDto withImageCatalogNameAndImageId(String imageCatalogName, String imageId) {
         if (!Strings.isNullOrEmpty(imageCatalogName) && !Strings.isNullOrEmpty(imageId)) {
             ImageSettingsV4Request image = new ImageSettingsV4Request();
@@ -365,6 +358,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withImageValidationCatalogAndImageIfPresent() {
         return withImageCatalogNameAndImageId(commonCloudProperties.getImageValidation().getSourceCatalogName(),
                 commonCloudProperties.getImageValidation().getImageUuid());
+    }
+
+    public SdxInternalTestDto withDefaultImage() {
+        getRequest().getStackV4Request().setImage(null);
+        return this;
     }
 
     public SdxInternalTestDto withEnableMultiAz(boolean enableMultiAz) {

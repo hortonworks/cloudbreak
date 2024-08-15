@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
 
@@ -22,15 +21,12 @@ import org.testng.util.Strings;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
-import com.dyngr.Polling;
-import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
-import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.OsType;
+import com.sequenceiq.it.cloudbreak.assertion.image.ImageAssertions;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -54,8 +50,6 @@ public class ImageValidatorE2ETestUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageValidatorE2ETestUtil.class);
 
-    private static final int IMAGE_WAIT_SLEEP_TIME_IN_SECONDS = 10;
-
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
@@ -68,8 +62,8 @@ public class ImageValidatorE2ETestUtil {
     @Inject
     private TestNGUtil testNGUtil;
 
-    @Value("${integrationtest.imageValidation.imageWait.timeoutInMinutes:15}")
-    private int imageWaitTimeoutInMinutes;
+    @Inject
+    private ImageAssertions imageAssertions;
 
     @Value("${integrationtest.imageValidation.type:}")
     private ImageValidationType imageValidationType;
@@ -108,16 +102,6 @@ public class ImageValidatorE2ETestUtil {
             createImageValidationSourceCatalog(testContext,
                     commonCloudProperties.getImageValidation().getSourceCatalogUrl(),
                     getImageCatalogName());
-
-            try {
-                Polling.waitPeriodly(IMAGE_WAIT_SLEEP_TIME_IN_SECONDS, TimeUnit.SECONDS)
-                        .stopAfterDelay(imageWaitTimeoutInMinutes, TimeUnit.MINUTES)
-                        .stopIfException(true)
-                        .run(() -> containsImageAttempt(testContext));
-            } catch (PollerStoppedException e) {
-                String message = String.format("%s image is missing from the '%s' catalog.", imageUuid, testContext.get(ImageCatalogTestDto.class).getName());
-                throw new TestFailException(message, e);
-            }
         }
     }
 
@@ -137,13 +121,6 @@ public class ImageValidatorE2ETestUtil {
         return images.stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
                 .findFirst();
-    }
-
-    private AttemptResult<ImageV4Response> containsImageAttempt(TestContext testContext) {
-        Optional<ImageV4Response> image = getImage(testContext);
-        return image.isPresent()
-                ? AttemptResults.finishWith(image.get())
-                : AttemptResults.justContinue();
     }
 
     private ImagesV4Response getImages(TestContext testContext) {
@@ -174,6 +151,7 @@ public class ImageValidatorE2ETestUtil {
                     .withName(name)
                     .withoutCleanup()
                 .when(imageCatalogTestClient.createIfNotExistV4())
+                .then(imageAssertions.validateContainsImage(getImageUuid()))
                 .validate();
     }
 
@@ -234,7 +212,7 @@ public class ImageValidatorE2ETestUtil {
                 if (CloudPlatform.YARN.equalsIgnoreCase(commonCloudProperties.getCloudProvider())) {
                     testNGUtil.addTestCase(basicTests, YarnImageValidatorE2ETest.class, "testHybridSDXWithBaseImage");
                 } else {
-                    testNGUtil.addTestCase(basicTests, BaseImageValidatorE2ETest.class, "testSDXWithBaseImage");
+                    testNGUtil.addTestCase(basicTests, BaseImageValidatorE2ETest.class, "testProvisioningWithBaseImage");
                 }
             }
             case FREEIPA -> {
