@@ -28,6 +28,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_DAT
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_FREEIPA_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
+import static com.sequenceiq.it.cloudbreak.util.StructuredEventUtil.getAuditEvents;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,9 +105,9 @@ public class EnvironmentListStructuredEventAssertions {
     private EventAssertionCommon eventAssertionCommon;
 
     public EnvironmentTestDto checkCreateEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_CREATE_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
@@ -114,9 +115,9 @@ public class EnvironmentListStructuredEventAssertions {
     }
 
     public EnvironmentTestDto checkDeleteEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_DELETE_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
@@ -124,9 +125,9 @@ public class EnvironmentListStructuredEventAssertions {
     }
 
     public EnvironmentTestDto checkStopEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_STOP_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
@@ -134,9 +135,9 @@ public class EnvironmentListStructuredEventAssertions {
     }
 
     public EnvironmentTestDto checkStartEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_START_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);

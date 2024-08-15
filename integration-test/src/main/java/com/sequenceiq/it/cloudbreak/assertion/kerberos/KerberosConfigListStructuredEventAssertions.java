@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion.kerberos;
 
-import java.util.Collections;
+import static com.sequenceiq.it.cloudbreak.util.StructuredEventUtil.getAuditEvents;
+
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -20,9 +21,9 @@ public class KerberosConfigListStructuredEventAssertions {
     private EventAssertionCommon eventAssertionCommon;
 
     public KerberosTestDto checkDeleteEvents(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
     }

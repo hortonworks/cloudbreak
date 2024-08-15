@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion.ldap;
 
-import java.util.Collections;
+import static com.sequenceiq.it.cloudbreak.util.StructuredEventUtil.getAuditEvents;
+
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -20,17 +21,17 @@ public class LdapListStructuredEventAssertions {
     private EventAssertionCommon eventAssertionCommon;
 
     public LdapTestDto checkCreateEvents(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
     }
 
     public LdapTestDto checkDeleteEvents(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
-                .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
+        List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                client.getDefaultClient().structuredEventsV1Endpoint(),
+                testDto.getCrn());
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
     }

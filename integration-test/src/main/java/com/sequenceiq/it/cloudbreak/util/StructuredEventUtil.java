@@ -10,14 +10,14 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEven
 
 public class StructuredEventUtil {
 
-    private static final int MAX_EVENT_NUMBER = 1000;
+    public static final int MAX_EVENT_NUMBER = 100;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventUtil.class);
 
     private StructuredEventUtil() {
     }
 
-    public static List<CDPStructuredEvent> getStructuredEvents(CDPStructuredEventV1Endpoint endpoint, String resourceCrn) {
+    public static List<CDPStructuredEvent> getAuditEvents(CDPStructuredEventV1Endpoint endpoint, String resourceCrn) {
         try {
             return endpoint.getAuditEvents(resourceCrn, List.of(), 0, MAX_EVENT_NUMBER);
         } catch (Exception e) {

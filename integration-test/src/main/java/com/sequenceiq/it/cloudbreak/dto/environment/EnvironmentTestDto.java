@@ -537,7 +537,7 @@ public class EnvironmentTestDto
         if (getResponse() != null && getResponse().getCrn() != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
                     getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
-            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
+            structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
         }
         List<Searchable> listOfSearchables = List.of(this);
         return new Clue(

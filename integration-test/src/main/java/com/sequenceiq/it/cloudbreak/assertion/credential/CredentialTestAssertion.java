@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion.credential;
 
-import java.util.Collections;
+import static com.sequenceiq.it.cloudbreak.util.StructuredEventUtil.getAuditEvents;
+
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -21,8 +22,9 @@ public class CredentialTestAssertion {
 
     public Assertion<CredentialTestDto, EnvironmentClient> checkStructuredEvents() {
         return (testContext, entity, client) -> {
-            List<CDPStructuredEvent> auditEvents = client.getDefaultClient().structuredEventsV1Endpoint()
-                    .getAuditEvents(entity.getCrn(), Collections.emptyList(), 0, 100);
+            List<CDPStructuredEvent> auditEvents = getAuditEvents(
+                    client.getDefaultClient().structuredEventsV1Endpoint(),
+                    entity.getCrn());
             eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
             return entity;
         };

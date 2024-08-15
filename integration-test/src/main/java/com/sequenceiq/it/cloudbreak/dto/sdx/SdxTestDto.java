@@ -447,7 +447,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         if (getResponse() != null && resourceCrn != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
                     getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient().structuredEventsV1Endpoint();
-            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, resourceCrn);
+            structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
         List<Searchable> listOfSearchables = List.of(this);
         return new Clue(
