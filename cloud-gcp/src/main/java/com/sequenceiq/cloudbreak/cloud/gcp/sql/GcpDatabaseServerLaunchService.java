@@ -22,6 +22,7 @@ import com.google.api.services.sqladmin.model.BackupConfiguration;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.DiskEncryptionConfiguration;
 import com.google.api.services.sqladmin.model.IpConfiguration;
+import com.google.api.services.sqladmin.model.LocationPreference;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
 import com.google.common.base.Strings;
@@ -172,7 +173,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         databaseInstance.setConnectionName(databaseServerView.getAdminLoginName());
         databaseInstance.setGceZone(databaseNetworkView.getAvailabilityZone());
         databaseInstance.setDatabaseVersion(databaseServerView.getDatabaseVersion());
-        databaseInstance.setSettings(getSettings(stack, databaseServerView, subnetworkForRedbeams));
+        databaseInstance.setSettings(getSettings(stack, databaseServerView, subnetworkForRedbeams, databaseNetworkView.getAvailabilityZone()));
         String keyName = databaseServer.getStringParameter(VOLUME_ENCRYPTION_KEY_ID);
         if (keyName != null && !keyName.isEmpty()) {
             DiskEncryptionConfiguration diskEncryptionConfiguration = new DiskEncryptionConfiguration();
@@ -182,7 +183,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return databaseInstance;
     }
 
-    public Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams) {
+    public Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams, String availabilityZone) {
         return new Settings()
                 .setTier(stack.getDatabaseServer().getFlavor())
                 .setActivationPolicy("ALWAYS")
@@ -200,6 +201,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                         new BackupConfiguration()
                                 .setEnabled(true)
                                 .setBinaryLogEnabled(false)
-                );
+                )
+                .setLocationPreference(new LocationPreference().setZone(availabilityZone));
     }
 }

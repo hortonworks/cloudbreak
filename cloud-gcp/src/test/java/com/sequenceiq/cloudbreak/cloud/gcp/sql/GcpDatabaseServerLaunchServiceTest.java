@@ -64,6 +64,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 @ExtendWith(MockitoExtension.class)
 public class GcpDatabaseServerLaunchServiceTest {
 
+    private static final String AVAILABILITY_ZONE = "us-west2-c";
+
     @Mock
     private DatabasePollerService databasePollerService;
 
@@ -377,9 +379,10 @@ public class GcpDatabaseServerLaunchServiceTest {
         GcpDatabaseServerView gcpDatabaseServerView = mock(GcpDatabaseServerView.class);
         Subnetwork subnetwork = mock(Subnetwork.class);
 
-        Settings settings = underTest.getSettings(databaseStack, gcpDatabaseServerView, subnetwork);
+        Settings settings = underTest.getSettings(databaseStack, gcpDatabaseServerView, subnetwork, AVAILABILITY_ZONE);
 
         assertEquals("ENCRYPTED_ONLY", settings.getIpConfiguration().getSslMode());
+        assertEquals(AVAILABILITY_ZONE, settings.getLocationPreference().getZone());
     }
 
     @Test
@@ -391,8 +394,9 @@ public class GcpDatabaseServerLaunchServiceTest {
         GcpDatabaseServerView gcpDatabaseServerView = mock(GcpDatabaseServerView.class);
         Subnetwork subnetwork = mock(Subnetwork.class);
 
-        Settings settings = underTest.getSettings(databaseStack, gcpDatabaseServerView, subnetwork);
+        Settings settings = underTest.getSettings(databaseStack, gcpDatabaseServerView, subnetwork, null);
 
         assertEquals("ALLOW_UNENCRYPTED_AND_ENCRYPTED", settings.getIpConfiguration().getSslMode());
+        assertNull(settings.getLocationPreference().getZone());
     }
 }
