@@ -43,7 +43,7 @@ public class DatabaseServerSslCertificateConfigService {
     public DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(DatabaseServerCertificateStatusV4Request request) {
         DatabaseServerCertificateStatusV4Responses databaseServerCertificateStatusV4Responses = new DatabaseServerCertificateStatusV4Responses();
         Set<DatabaseServerConfig> databaseServerConfigs = databaseServerConfigService.findAll(DEFAULT_WORKSPACE,  request.getEnvironmentCrns());
-        Map<String, SslCertStatus> sslCertStatus = getSslCertStatus(request.getEnvironmentCrns(), databaseServerConfigs);
+        Map<String, SslCertStatus> sslCertStatus = getSslCertStatusByEnvironment(request.getEnvironmentCrns(), databaseServerConfigs);
 
         sslCertStatus.entrySet().forEach(actualEnvironment -> {
             LOGGER.info("Checking databases for environment {}", actualEnvironment.getKey());
@@ -59,7 +59,7 @@ public class DatabaseServerSslCertificateConfigService {
         return databaseServerCertificateStatusV4Response;
     }
 
-    private Map<String, SslCertStatus> getSslCertStatus(Set<String> environmentCrns, Set<DatabaseServerConfig> databaseServerConfigs) {
+    private Map<String, SslCertStatus> getSslCertStatusByEnvironment(Set<String> environmentCrns, Set<DatabaseServerConfig> databaseServerConfigs) {
         Map<String, SslCertStatus> result = initializeResultMap(environmentCrns);
         for (DatabaseServerConfig databaseServerConfig : databaseServerConfigs) {
             if (isAwsDBStack(databaseServerConfig)) {
@@ -71,20 +71,23 @@ public class DatabaseServerSslCertificateConfigService {
                     LOGGER.info("Ssl enabled for cluster {}", databaseServerConfig.getClusterCrn());
                     long certExpirationDeadLine = timeUtil.getTimestampThatDaysAfterNow(THREE_MONTH_IN_DAY);
                     if (sslConfig.getSslCertificateActiveVersion() != sslConfig.getSslCertificateHighestAvailableVersion()) {
-                        LOGGER.info("Database certificate active version {} and highest version {} for cluster",
+                        LOGGER.info("Database certificate active version {} and highest version {} for cluster {} and environment {}",
                                 sslConfig.getSslCertificateActiveVersion(),
                                 sslConfig.getSslCertificateHighestAvailableVersion(),
-                                databaseServerConfig.getClusterCrn());
+                                databaseServerConfig.getClusterCrn(),
+                                databaseServerConfig.getEnvironmentId());
                         result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
                     } else if (sslConfig.getSslCertificateExpirationDate() <= certExpirationDeadLine) {
-                        LOGGER.info("Database expiration date {} which will expire less than 3 month {} for cluster",
+                        LOGGER.info("Database expiration date {} which will expire less than 3 month for cluster {} and environment {}",
                                 sslConfig.getSslCertificateExpirationDate(),
-                                databaseServerConfig.getClusterCrn());
+                                databaseServerConfig.getClusterCrn(),
+                                databaseServerConfig.getEnvironmentId());
                         result.put(databaseServerConfig.getEnvironmentId(), SslCertStatus.OUTDATED);
                     }
                 }
             }
         }
+        LOGGER.info("Database server certificate status: {}", result);
         return result;
     }
 
@@ -92,10 +95,10 @@ public class DatabaseServerSslCertificateConfigService {
         return databaseServerConfig.getDbStack().isPresent() && AWS.name().equals(databaseServerConfig.getDbStack().get().getCloudPlatform());
     }
 
-    private Map<String, SslCertStatus> initializeResultMap(Set<String> environmentCrns) {
+    private Map<String, SslCertStatus> initializeResultMap(Set<String> crns) {
         Map<String, SslCertStatus> result = new HashMap<>();
-        for (String environmentCrn : environmentCrns) {
-            result.put(environmentCrn, SslCertStatus.UP_TO_DATE);
+        for (String crn : crns) {
+            result.put(crn, SslCertStatus.UP_TO_DATE);
         }
         return result;
     }
