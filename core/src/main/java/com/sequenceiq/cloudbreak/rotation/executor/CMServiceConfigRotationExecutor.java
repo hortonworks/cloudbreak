@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.executor;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
 
 import jakarta.inject.Inject;
@@ -46,7 +47,9 @@ public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CM
 
     private void updateCMConfigByContext(CMServiceConfigRotationContext rotationContext) throws Exception {
         StackDto stack = stackService.getByCrn(rotationContext.getResourceCrn());
-        clusterApiConnectors.getConnector(stack).clusterModificationService().updateConfig(rotationContext.getCmServiceConfigTable());
+        clusterApiConnectors.getConnector(stack)
+                .clusterModificationService()
+                .updateConfig(rotationContext.getCmServiceConfigTable(), FALLBACK_TO_ROLLCONFIG);
     }
 
     @Override

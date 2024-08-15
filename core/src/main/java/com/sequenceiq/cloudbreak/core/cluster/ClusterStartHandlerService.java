@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
 import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.PAAS;
 
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class ClusterStartHandlerService {
                 LOGGER.info("Update rds configs which are using the datalake's shared database for services {}",
                         rdsConfigs.stream().map(RDSConfig::getType).collect(Collectors.toSet()));
                 Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
-                rdsSettingsMigrationService.updateCMServiceConfigs(stack, cmServiceConfigs, false);
+                rdsSettingsMigrationService.updateCMServiceConfigs(stack, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);
             } else {
                 LOGGER.info("No rds config update is needed on datahub {}", stack.getName());
             }

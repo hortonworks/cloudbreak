@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
+
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -58,7 +60,7 @@ public class MigrateServicesDBSettingsHandler extends ExceptionCatcherEventHandl
             Set<RDSConfig> rdsConfigs = rdsSettingsMigrationService.collectRdsConfigs(cluster.getId(), this::isClouderaManagerService);
             rdsConfigs = rdsSettingsMigrationService.updateRdsConfigs(stackDto, rdsConfigs);
             Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
-            rdsSettingsMigrationService.updateCMServiceConfigs(stackDto, cmServiceConfigs, false);
+            rdsSettingsMigrationService.updateCMServiceConfigs(stackDto, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);
         } catch (Exception e) {
             LOGGER.error("Migration of services' database settings is failed. {}", e.getMessage());
             return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);

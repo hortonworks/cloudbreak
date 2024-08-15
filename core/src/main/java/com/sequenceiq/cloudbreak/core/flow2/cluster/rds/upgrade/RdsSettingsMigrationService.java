@@ -19,6 +19,7 @@ import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
@@ -109,12 +110,13 @@ public class RdsSettingsMigrationService {
         return cmServiceConfigTable;
     }
 
-    public void updateCMServiceConfigs(StackDtoDelegate stackDto, Table<String, String, String> cmServiceConfigs, boolean withRestart) throws Exception {
+    public void updateCMServiceConfigs(StackDtoDelegate stackDto, Table<String, String, String> cmServiceConfigs,
+        CMConfigUpdateStrategy cmConfigUpdateStrategy, boolean withRestart) throws Exception {
         ClusterModificationService clusterModificationService = clusterApiConnectors.getConnector(stackDto).clusterModificationService();
         if (withRestart) {
-            clusterModificationService.updateConfig(cmServiceConfigs);
+            clusterModificationService.updateConfig(cmServiceConfigs, cmConfigUpdateStrategy);
         } else {
-            clusterModificationService.updateConfigWithoutRestart(cmServiceConfigs);
+            clusterModificationService.updateConfigWithoutRestart(cmServiceConfigs, cmConfigUpdateStrategy);
         }
     }
 

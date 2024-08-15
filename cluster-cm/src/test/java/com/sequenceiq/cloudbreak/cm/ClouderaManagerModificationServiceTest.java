@@ -85,6 +85,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -1410,10 +1411,10 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testUpdateConfig() throws Exception {
-        doNothing().when(clouderaManagerConfigModificationService).updateConfigs(any(), any(), any());
+        doNothing().when(clouderaManagerConfigModificationService).updateConfigs(any(), any(), any(), any());
         when(clouderaManagerConfigModificationService.getServiceNames(any(), any(), any())).thenReturn(List.of("test"));
 
-        underTest.updateConfig(HashBasedTable.create());
+        underTest.updateConfig(HashBasedTable.create(), CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG);
 
         verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), eq(Optional.of(List.of("test"))));
     }

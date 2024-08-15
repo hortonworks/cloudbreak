@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.config.modification;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -18,6 +20,7 @@ import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerConfigService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerServiceManagementService;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -41,7 +44,7 @@ public class ClouderaManagerConfigModificationService {
                 .toList();
     }
 
-    public void updateConfigs(List<CmConfig> newConfigs, ApiClient client, StackDtoDelegate stack) {
+    public void updateConfigs(List<CmConfig> newConfigs, ApiClient client, StackDtoDelegate stack, CMConfigUpdateStrategy cmConfigUpdateStrategy) {
         List<CmServiceMetadata> cmServiceMetadata = clouderaManagerServiceManagementService.readServices(client, stack.getName()).getItems()
                 .stream()
                 .map(apiService -> new CmServiceMetadata(apiService.getName(), new CmServiceType(apiService.getType())))
@@ -50,30 +53,72 @@ public class ClouderaManagerConfigModificationService {
         Map<String, ApiServiceConfig> serviceConfigCache = Maps.newHashMap();
         Map<String, ApiRoleConfigGroupList> roleConfigGroupCache = Maps.newHashMap();
         newConfigs.forEach(newConfig -> {
-            updateConfig(client, stack, newConfig, cmServiceMetadata, serviceConfigCache, roleConfigGroupCache);
+            updateConfig(
+                    ClusterConfigModificationDto.builder()
+                            .withNewConfig(newConfig)
+                            .withClient(client)
+                            .withRoleConfigGroupCache(roleConfigGroupCache)
+                            .withServiceConfigCache(serviceConfigCache)
+                            .withStack(stack)
+                            .withCmServiceMetadata(cmServiceMetadata)
+                            .withCmConfigUpdateStrategy(cmConfigUpdateStrategy)
+                            .build());
         });
     }
 
-    private void updateConfig(ApiClient client, StackDtoDelegate stack, CmConfig newConfig, List<CmServiceMetadata> cmServiceMetadata,
-            Map<String, ApiServiceConfig> serviceConfigCache, Map<String, ApiRoleConfigGroupList> roleConfigGroupCache) {
-        List<String> serviceNames = getServiceNames(newConfig, cmServiceMetadata);
-        Predicate<ApiConfig> cmApiConfigPredicate = cmApiConfig -> StringUtils.equals(cmApiConfig.getName(), newConfig.key());
-        Map<String, String> newConfigMap = Map.of(newConfig.key(), newConfig.value());
+    private void updateConfig(ClusterConfigModificationDto clusterConfigModificationDto) {
+        List<String> serviceNames = getServiceNames(
+                clusterConfigModificationDto.getNewConfig(),
+                clusterConfigModificationDto.getCmServiceMetadata());
+        Predicate<ApiConfig> cmApiConfigPredicate = cmApiConfig -> StringUtils.equals(
+                cmApiConfig.getName(),
+                clusterConfigModificationDto.getNewConfig().key()
+        );
+        Map<String, String> newConfigMap = Map.of(
+                clusterConfigModificationDto.getNewConfig().key(),
+                clusterConfigModificationDto.getNewConfig().value()
+        );
         if (!serviceNames.isEmpty()) {
             serviceNames.forEach(serviceName -> {
                 ApiServiceConfig apiServiceConfig =
-                        serviceConfigCache.computeIfAbsent(serviceName, sn -> configService.readServiceConfig(client, stack.getName(), sn));
+                        clusterConfigModificationDto.getServiceConfigCache()
+                                .computeIfAbsent(serviceName,
+                                        sn -> configService.readServiceConfig(
+                                                clusterConfigModificationDto.getClient(),
+                                                clusterConfigModificationDto.getStack().getName(),
+                                                sn));
                 if (apiServiceConfig.getItems().stream().anyMatch(cmApiConfigPredicate)) {
-                    configService.modifyServiceConfigs(client, stack.getName(), newConfigMap, serviceName);
-                } else {
+                    configService.modifyServiceConfigs(
+                            clusterConfigModificationDto.getClient(),
+                            clusterConfigModificationDto.getStack().getName(),
+                            newConfigMap,
+                            serviceName);
+                } else if (FALLBACK_TO_ROLLCONFIG.equals(clusterConfigModificationDto.getCmConfigUpdateStrategy())) {
                     LOGGER.info("Config key {} cannot be found in service configs for service {}, searching for it in role group configs.",
-                            newConfig.key(), serviceName);
-                    updateRoleConfigGroupIfConfigPresent(roleConfigGroupCache, client, stack, newConfig,
-                            serviceName, cmApiConfigPredicate, newConfigMap);
+                            clusterConfigModificationDto.getNewConfig().key(),
+                            serviceName);
+                    updateRoleConfigGroupIfConfigPresent(
+                            clusterConfigModificationDto.getRoleConfigGroupCache(),
+                            clusterConfigModificationDto.getClient(),
+                            clusterConfigModificationDto.getStack(),
+                            clusterConfigModificationDto.getNewConfig(),
+                            serviceName,
+                            cmApiConfigPredicate,
+                            newConfigMap);
+                } else {
+                    LOGGER.info("Config key {} cannot be found in service configs for service {}, adding as new config.",
+                            clusterConfigModificationDto.getNewConfig().key(),
+                            serviceName);
+                    configService.modifyServiceConfigs(
+                            clusterConfigModificationDto.getClient(),
+                            clusterConfigModificationDto.getStack().getName(),
+                            newConfigMap,
+                            serviceName);
                 }
             });
         } else {
-            LOGGER.warn("Provided service name by service type {} cannot be found in CM.", newConfig.serviceType().type());
+            LOGGER.warn("Provided service name by service type {} cannot be found in CM.",
+                    clusterConfigModificationDto.getNewConfig().serviceType().type());
         }
     }
 

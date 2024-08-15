@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.config.modification;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.NO_FALLBACK;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,7 +60,7 @@ public class ClouderaManagerConfigModificationServiceTest {
         mockConfigServiceCalls();
 
         List<CmConfig> configs = getConfigs();
-        underTest.updateConfigs(configs, null, new Stack());
+        underTest.updateConfigs(configs, null, new Stack(), FALLBACK_TO_ROLLCONFIG);
 
         verify(configService, times(3)).readServiceConfig(any(), any(), any());
         verify(configService, times(2)).readRoleConfigGroupConfigs(any(), any(), any());
@@ -91,7 +93,7 @@ public class ClouderaManagerConfigModificationServiceTest {
                 new ApiRoleConfigGroup().name("roleConfigGroup3").config(new ApiConfigList().addItemsItem(apiConfig("other", "old")))));
 
         List<CmConfig> configs = getConfigs();
-        underTest.updateConfigs(configs, null, new Stack());
+        underTest.updateConfigs(configs, null, new Stack(), FALLBACK_TO_ROLLCONFIG);
 
         verify(configService, times(3)).readServiceConfig(any(), any(), any());
         verify(configService, times(3)).readRoleConfigGroupConfigs(any(), any(), any());
@@ -105,7 +107,7 @@ public class ClouderaManagerConfigModificationServiceTest {
 
         List<CmConfig> configs = getConfigs();
         configs.add(new CmConfig(new CmServiceType("unknownService"), "anycolumn", "anyconfigvalue"));
-        underTest.updateConfigs(configs, null, new Stack());
+        underTest.updateConfigs(configs, null, new Stack(), FALLBACK_TO_ROLLCONFIG);
 
         verify(configService, times(3)).readServiceConfig(any(), any(), any());
         verify(configService, times(2)).readRoleConfigGroupConfigs(any(), any(), any());
@@ -113,6 +115,19 @@ public class ClouderaManagerConfigModificationServiceTest {
         verify(configService, times(2)).modifyRoleConfigGroup(any(), any(), any(), any(), any());
         verify(configService, times(0)).modifyServiceConfigs(any(), any(), any(), eq("unknownService"));
         verify(configService, times(0)).modifyRoleConfigGroup(any(), any(), eq("unknownService"), any(), any());
+    }
+
+    @Test
+    void testUpdateConfigWhenServiceMissingWithoutFallback() throws Exception {
+        mockConfigServiceCallsWithoutFallback();
+
+        List<CmConfig> configs = getConfigs();
+        configs.add(new CmConfig(new CmServiceType("unknownService"), "anycolumn", "anyconfigvalue"));
+        underTest.updateConfigs(configs, null, new Stack(), NO_FALLBACK);
+
+        verify(configService, times(3)).readServiceConfig(any(), any(), any());
+        verify(configService, times(4)).modifyServiceConfigs(any(), any(), any(), any());
+        verify(configService, times(0)).modifyServiceConfigs(any(), any(), any(), eq("unknownService"));
     }
 
     private void mockConfigServiceCalls() {
@@ -129,6 +144,17 @@ public class ClouderaManagerConfigModificationServiceTest {
                 new ApiRoleConfigGroup().name("roleConfigGroup3").config(new ApiConfigList().addItemsItem(apiConfig("roleConfigGroupConfig3", "old")))));
         lenient().doNothing().when(configService).modifyServiceConfigs(any(), any(), any(Map.class), any());
         lenient().doNothing().when(configService).modifyRoleConfigGroup(any(), any(), any(), any(), any());
+    }
+
+    private void mockConfigServiceCallsWithoutFallback() {
+        mockReadServices();
+        when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()
+                .addItemsItem(apiConfig("serviceConfig1", "old")));
+        lenient().when(configService.readServiceConfig(any(), any(), eq("service2"))).thenReturn(new ApiServiceConfig()
+                .addItemsItem(apiConfig("serviceConfig2", "old")));
+        when(configService.readServiceConfig(any(), any(), eq("service3"))).thenReturn(new ApiServiceConfig()
+                .addItemsItem(apiConfig("serviceConfig3", "old")));
+        lenient().doNothing().when(configService).modifyServiceConfigs(any(), any(), any(Map.class), any());
     }
 
     private void mockReadServices() {

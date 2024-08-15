@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,7 +74,7 @@ class MigrateServicesDBSettingsHandlerTest {
         assertEquals(1L, response.getResourceId());
 
         verify(stackDtoService, times(1)).getById(anyLong());
-        verify(rdsSettingsMigrationService, times(1)).updateCMServiceConfigs(stackDto, cmServiceConfigs, false);
+        verify(rdsSettingsMigrationService, times(1)).updateCMServiceConfigs(stackDto, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);
     }
 
     @Test

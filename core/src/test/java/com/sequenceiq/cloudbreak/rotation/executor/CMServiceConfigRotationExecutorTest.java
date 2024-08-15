@@ -42,7 +42,7 @@ public class CMServiceConfigRotationExecutorTest {
 
         underTest.rotate(new CMServiceConfigRotationContext("resource", HashBasedTable.create()));
 
-        verify(clusterModificationService).updateConfig(any());
+        verify(clusterModificationService).updateConfig(any(), any());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class CMServiceConfigRotationExecutorTest {
 
         underTest.rollback(new CMServiceConfigRotationContext("resource", HashBasedTable.create()));
 
-        verify(clusterModificationService).updateConfig(any());
+        verify(clusterModificationService).updateConfig(any(), any());
     }
 
     private ClusterModificationService setup() throws Exception {
@@ -60,7 +60,7 @@ public class CMServiceConfigRotationExecutorTest {
         ClusterApi clusterApi = mock(ClusterApi.class);
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
-        doNothing().when(clusterModificationService).updateConfig(any());
+        doNothing().when(clusterModificationService).updateConfig(any(), any());
         return clusterModificationService;
     }
 }

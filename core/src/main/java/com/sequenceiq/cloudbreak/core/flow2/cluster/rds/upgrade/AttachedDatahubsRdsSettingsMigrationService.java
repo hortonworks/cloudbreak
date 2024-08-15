@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +142,7 @@ public class AttachedDatahubsRdsSettingsMigrationService {
                         InMemoryStateStore.putCluster(datahub.getCluster().getId(), PollGroup.POLLABLE);
                         Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
                         LOGGER.debug("The following db params will be updated in {}: {}", datahub.getName(), cmServiceConfigs);
-                        rdsSettingsMigrationService.updateCMServiceConfigs(datahub, cmServiceConfigs, true);
+                        rdsSettingsMigrationService.updateCMServiceConfigs(datahub, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, true);
                     } finally {
                         InMemoryStateStore.deleteCluster(datahub.getCluster().getId());
                         InMemoryStateStore.deleteStack(datahub.getStack().getId());

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -123,7 +124,7 @@ class ClusterStartHandlerServiceTest {
         underTest.startCluster(stack, cmTemplateProcessor, false);
         // THEN
         verify(connector).startClusterManagerAndAgents();
-        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs, false);
+        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);
         verify(connector).startCluster(true);
     }
 
@@ -137,12 +138,12 @@ class ClusterStartHandlerServiceTest {
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
         Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
         when(rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs)).thenReturn(cmServiceConfigs);
-        doThrow(new RuntimeException("msg")).when(rdsSettingsMigrationService).updateCMServiceConfigs(any(), any(), eq(false));
+        doThrow(new RuntimeException("msg")).when(rdsSettingsMigrationService).updateCMServiceConfigs(any(), any(), any(), eq(false));
         // WHEN
         underTest.startCluster(stack, cmTemplateProcessor, false);
         // THEN
         verify(connector).startClusterManagerAndAgents();
-        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs, false);
+        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);
         verify(connector).startCluster(true);
     }
 
@@ -158,7 +159,7 @@ class ClusterStartHandlerServiceTest {
         // THEN
         verify(connector).startClusterManagerAndAgents();
         verify(rdsSettingsMigrationService, never()).collectCMServiceConfigs(any());
-        verify(rdsSettingsMigrationService, never()).updateCMServiceConfigs(any(), any(), anyBoolean());
+        verify(rdsSettingsMigrationService, never()).updateCMServiceConfigs(any(), any(), any(), anyBoolean());
         verify(connector).startCluster(true);
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -101,7 +102,7 @@ class AttachedDatahubsRdsSettingsMigrationServiceTest {
         // WHEN
         underTest.migrate(1L);
         // THEN
-        verify(rdsSettingsMigrationService, times(3)).updateCMServiceConfigs(datahub, cmConfigTable, true);
+        verify(rdsSettingsMigrationService, times(3)).updateCMServiceConfigs(datahub, cmConfigTable, FALLBACK_TO_ROLLCONFIG, true);
         verify(cloudbreakEventService).fireCloudbreakEvent(1L, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_DBSETTINGS_FINISHED, List.of("name1, name2, name3", ""));
     }
@@ -138,7 +139,7 @@ class AttachedDatahubsRdsSettingsMigrationServiceTest {
         // WHEN
         underTest.migrate(1L);
         // THEN
-        verify(rdsSettingsMigrationService, times(1)).updateCMServiceConfigs(datahub, cmConfigTable, true);
+        verify(rdsSettingsMigrationService, times(1)).updateCMServiceConfigs(datahub, cmConfigTable, FALLBACK_TO_ROLLCONFIG, true);
         verify(cloudbreakEventService).fireCloudbreakEvent(1L, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_DBSETTINGS_FINISHED, List.of("name1",
                         "name2 [stackStatus: STOPPED, clusterStatus: AVAILABLE], name3 [stackStatus: AVAILABLE, clusterStatus: STOPPED]"));
@@ -179,13 +180,13 @@ class AttachedDatahubsRdsSettingsMigrationServiceTest {
         when(cmTemplateProcessor.doesCMComponentExistsInBlueprint(anyString())).thenReturn(true, true, false);
         Table<String, String, String> cmConfigTable = HashBasedTable.create();
         when(rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs)).thenReturn(cmConfigTable);
-        doNothing().when(rdsSettingsMigrationService).updateCMServiceConfigs(datahub1, cmConfigTable, true);
+        doNothing().when(rdsSettingsMigrationService).updateCMServiceConfigs(datahub1, cmConfigTable, FALLBACK_TO_ROLLCONFIG, true);
         Exception exception = new Exception("exception");
-        doThrow(exception).when(rdsSettingsMigrationService).updateCMServiceConfigs(datahub2, cmConfigTable, true);
+        doThrow(exception).when(rdsSettingsMigrationService).updateCMServiceConfigs(datahub2, cmConfigTable, FALLBACK_TO_ROLLCONFIG, true);
         // WHEN
         underTest.migrate(1L);
         // THEN
-        verify(rdsSettingsMigrationService, times(2)).updateCMServiceConfigs(any(), eq(cmConfigTable), eq(true));
+        verify(rdsSettingsMigrationService, times(2)).updateCMServiceConfigs(any(), eq(cmConfigTable), any(), eq(true));
         verify(cloudbreakEventService).fireCloudbreakEvent(1L, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_SETTINGS_FAILED, List.of("name1, name4",
                         "name3 [stackStatus: AVAILABLE, clusterStatus: STOPPED]", "name2: exception"));

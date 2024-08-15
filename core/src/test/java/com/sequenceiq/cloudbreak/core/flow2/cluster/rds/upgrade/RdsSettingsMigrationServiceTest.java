@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
+import static com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy.FALLBACK_TO_ROLLCONFIG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -215,8 +216,8 @@ class RdsSettingsMigrationServiceTest {
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
-        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs, false);
-        verify(clusterModificationService, times(1)).updateConfigWithoutRestart(cmServiceConfigs);
+        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, false);
+        verify(clusterModificationService, times(1)).updateConfigWithoutRestart(cmServiceConfigs, FALLBACK_TO_ROLLCONFIG);
     }
 
     @Test
@@ -227,8 +228,8 @@ class RdsSettingsMigrationServiceTest {
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
-        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs, true);
-        verify(clusterModificationService, times(1)).updateConfig(cmServiceConfigs);
+        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, true);
+        verify(clusterModificationService, times(1)).updateConfig(cmServiceConfigs, FALLBACK_TO_ROLLCONFIG);
     }
 
     @Test

@@ -8,6 +8,7 @@ import java.util.Set;
 import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -99,11 +100,11 @@ public interface ClusterModificationService {
 
     void rollingRestartServices();
 
-    void updateConfig(Table<String, String, String> configTable) throws Exception;
+    void updateConfig(Table<String, String, String> configTable, CMConfigUpdateStrategy cmConfigUpdateStrategy) throws Exception;
+
+    void updateConfigWithoutRestart(Table<String, String, String> configTable, CMConfigUpdateStrategy cmConfigUpdateStrategy) throws Exception;
 
     void stopClouderaManagerService(String serviceType, boolean waitForExecution) throws Exception;
-
-    void updateConfigWithoutRestart(Table<String, String, String> configTable) throws Exception;
 
     void deleteClouderaManagerService(String serviceType) throws Exception;
 

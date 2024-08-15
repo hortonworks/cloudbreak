@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
@@ -1186,11 +1187,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void updateConfig(Table<String, String, String> configTable) throws Exception {
+    public void updateConfig(Table<String, String, String> configTable, CMConfigUpdateStrategy cmConfigUpdateStrategy) throws Exception {
         List<CmConfig> newConfigs = configTable.cellSet().stream()
                 .map(cell -> new CmConfig(new CmServiceType(cell.getRowKey()), cell.getColumnKey(), cell.getValue()))
                 .toList();
-        clouderaManagerConfigModificationService.updateConfigs(newConfigs, v31Client, stack);
+        clouderaManagerConfigModificationService.updateConfigs(newConfigs, v31Client, stack, cmConfigUpdateStrategy);
         LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services.", stack.getName());
         clouderaManagerRoleRefreshService.refreshClusterRoles(v31Client, stack);
         List<String> serviceNames = clouderaManagerConfigModificationService.getServiceNames(newConfigs, v31Client, stack);
@@ -1203,11 +1204,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void updateConfigWithoutRestart(Table<String, String, String> configTable) throws Exception {
+    public void updateConfigWithoutRestart(Table<String, String, String> configTable, CMConfigUpdateStrategy cmConfigUpdateStrategy) throws Exception {
         List<CmConfig> newConfigs = configTable.cellSet().stream()
                 .map(cell -> new CmConfig(new CmServiceType(cell.getRowKey()), cell.getColumnKey(), cell.getValue()))
                 .toList();
-        clouderaManagerConfigModificationService.updateConfigs(newConfigs, v31Client, stack);
+        clouderaManagerConfigModificationService.updateConfigs(newConfigs, v31Client, stack, cmConfigUpdateStrategy);
         LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services is skipped.", stack.getName());
     }
 
