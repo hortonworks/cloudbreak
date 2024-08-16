@@ -25,6 +25,10 @@ public class SyncPollingScheduler<T> {
         return schedule(task, POLLING_INTERVAL, MAX_POLLING_ATTEMPT, FAILURE_TOLERANT_ATTEMPT);
     }
 
+    public T schedule(PollTask<T> task, int maxPollingAttempt) throws Exception {
+        return schedule(task, POLLING_INTERVAL, maxPollingAttempt, FAILURE_TOLERANT_ATTEMPT);
+    }
+
     public T schedule(PollTask<T> task, int interval, int maxAttempt, int maxFailureTolerant) throws Exception {
         AtomicInteger actualFailureTolerant = new AtomicInteger(0);
 

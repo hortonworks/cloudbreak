@@ -58,6 +58,8 @@ public class ComputeResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputeResourceService.class);
 
+    private static final int MAX_POLLING_ATTEMPT = 100;
+
     @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
 
@@ -182,7 +184,7 @@ public class ComputeResourceService {
                     List<CloudInstance> checkInstances = allVmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
                     PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory.newPollComputeStatusTask(builder, auth, context, checkInstances);
                     try {
-                        List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask);
+                        List<CloudVmInstanceStatus> statuses = syncVMPollingScheduler.schedule(pollTask, MAX_POLLING_ATTEMPT);
                         results.addAll(statuses);
                     } catch (Exception e) {
                         LOGGER.debug("Failed to poll the instances status of {}, set the status to failed", checkInstances, e);

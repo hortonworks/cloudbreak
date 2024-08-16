@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,6 +64,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 class ComputeResourceServiceTest {
 
     private static final Variant AWS_VARIANT = Variant.variant("AWS");
+
+    private static final int MAX_POLLING_ATTEMPT = 100;
 
     @InjectMocks
     private ComputeResourceService underTest;
@@ -141,7 +144,7 @@ class ComputeResourceServiceTest {
         ResourceStopStartCallablePayload resourceStopStartCallablePayload = resourceStopStartCallablePayloadArgumentCaptor.getValue();
         assertThat(resourceStopStartCallablePayload.getInstances()).containsExactlyInAnyOrder(cloudInstance1, cloudInstance2);
         verify(resourceBuilderExecutor, times(1)).submit(resourceStopStartCallable);
-        verify(syncVMPollingScheduler, times(1)).schedule(pollTask);
+        verify(syncVMPollingScheduler, times(1)).schedule(pollTask, MAX_POLLING_ATTEMPT);
     }
 
     @ParameterizedTest
@@ -180,7 +183,7 @@ class ComputeResourceServiceTest {
         ResourceStopStartCallablePayload resourceStopStartCallablePayload = resourceStopStartCallablePayloadArgumentCaptor.getValue();
         assertThat(resourceStopStartCallablePayload.getInstances()).containsExactlyInAnyOrder(cloudInstance1, cloudInstance2);
         verify(resourceBuilderExecutor, times(1)).submit(resourceStopStartCallable);
-        verify(syncVMPollingScheduler, times(0)).schedule(any());
+        verify(syncVMPollingScheduler, times(0)).schedule(any(), anyInt());
     }
 
     @Test
