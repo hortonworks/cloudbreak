@@ -29,7 +29,6 @@ import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpLoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -240,13 +239,17 @@ public class GcpMetadataCollector implements MetadataCollector {
     @Override
     public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
         CloudContext cloudContext = ac.getCloudContext();
-        CloudResource instanceResource = resourceRetriever.findByStatusAndTypeAndStack(CREATED, GCP_INSTANCE, cloudContext.getId())
-                .orElseThrow(() -> new CloudConnectorException(String.format("No GCP_INSTANCE resource found: %s", cloudContext.getId())));
-        String instanceNamePrefix = gcpInstanceProvider.getInstanceNamePrefix(List.of(instanceResource));
-        List<Instance> instances = gcpInstanceProvider.getInstances(ac, instanceNamePrefix);
-        Map<String, String> instanceTypes = instances.stream()
-                .filter(instance -> instanceIds.contains(instance.getName()))
-                .collect(Collectors.toMap(Instance::getName, instance -> StringUtils.substringAfterLast(instance.getMachineType(), "/")));
+        Map<String, String> instanceTypes = new HashMap<>();
+        List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CREATED, GCP_INSTANCE, cloudContext.getId());
+        for (String instanceId : instanceIds) {
+            CloudResource instanceResource = cloudResources.stream().filter(cloudResource -> cloudResource.getName().equals(instanceId))
+                    .findFirst().orElse(null);
+            if (instanceResource != null) {
+                Optional<Instance> instanceOptional = gcpInstanceProvider.getInstance(ac, instanceResource.getName(), instanceResource.getAvailabilityZone());
+                instanceOptional.ifPresent(instance -> instanceTypes.put(instance.getName(),
+                        StringUtils.substringAfterLast(instance.getMachineType(), "/")));
+            }
+        }
         return new InstanceTypeMetadata(instanceTypes);
     }
 }

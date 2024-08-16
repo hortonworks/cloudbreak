@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,8 +23,12 @@ public class GcpNetworkInterfaceProvider {
     private GcpInstanceProvider gcpInstanceProvider;
 
     Map<String, Optional<NetworkInterface>> provide(AuthenticatedContext authenticatedContext, List<CloudResource> instances) {
-        String instanceNamePrefix = gcpInstanceProvider.getInstanceNamePrefix(instances);
-        List<Instance> gcpInstances = gcpInstanceProvider.getInstances(authenticatedContext, instanceNamePrefix);
+        List<Instance> gcpInstances = new ArrayList<>();
+        for (CloudResource cloudResource : instances) {
+            Optional<Instance> instanceOptional = gcpInstanceProvider.getInstance(authenticatedContext, cloudResource.getName(),
+                    cloudResource.getAvailabilityZone());
+            instanceOptional.ifPresent(instance -> gcpInstances.add(instance));
+        }
         return getNetworkMap(gcpInstances, instances);
     }
 

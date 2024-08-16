@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,14 +26,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 @ExtendWith(MockitoExtension.class)
 public class GcpNetworkInterfaceProviderTest {
 
-    private static final String INSTANCE_NAME_PREFIX = "testcluster";
-
-    private static final String INSTANCE_NAME_1 = "testcluster-w-1";
-
-    private static final String INSTANCE_NAME_2 = "testcluster-w-2";
-
-    private static final String INSTANCE_NAME_3 = "testcluster-w-3";
-
     @InjectMocks
     private GcpNetworkInterfaceProvider underTest;
 
@@ -43,74 +35,55 @@ public class GcpNetworkInterfaceProviderTest {
     @Mock
     private AuthenticatedContext authenticatedContext;
 
-    @Test
-    public void testProvideShouldReturnsTheNetworkInterfaces() {
-        List<CloudResource> instances = createCloudResources();
-        when(gcpInstanceProvider.getInstanceNamePrefix(eq(instances))).thenReturn(INSTANCE_NAME_PREFIX);
-        List<Instance> gcpInstances = List.of(createInstance(INSTANCE_NAME_1), createInstance(INSTANCE_NAME_2), createInstance(INSTANCE_NAME_3));
-        when(gcpInstanceProvider.getInstances(eq(authenticatedContext), eq(INSTANCE_NAME_PREFIX))).thenReturn(gcpInstances);
-
-        Map<String, Optional<NetworkInterface>> actual = underTest.provide(authenticatedContext, instances);
-
-        assertEquals(3, actual.size());
-        assertEquals(getNetworkForInstance(gcpInstances, INSTANCE_NAME_1), actual.get(INSTANCE_NAME_1));
-        assertEquals(getNetworkForInstance(gcpInstances, INSTANCE_NAME_2), actual.get(INSTANCE_NAME_2));
-        assertEquals(getNetworkForInstance(gcpInstances, INSTANCE_NAME_3), actual.get(INSTANCE_NAME_3));
+    static Object [] [] dataForInstances() {
+        return new Object[] [] {
+                {Map.of("instance1", true, "instance2", true, "instance3", true)},
+                {Map.of("instance1", true, "instance2", true, "instance3", false)},
+                {Map.of("instance1", false, "instance2", false, "instance3", false)},
+                {Map.of()}
+        };
     }
 
-    @Test
-    public void testProvideShouldReturnsMapWithoutNetworkWhenTheThereAreMissingNodes() {
-        List<CloudResource> instances = createCloudResources();
-        when(gcpInstanceProvider.getInstanceNamePrefix(eq(instances))).thenReturn(INSTANCE_NAME_PREFIX);
-        List<Instance> gcpInstances = createGcpInstancesWithMissingNode();
-        when(gcpInstanceProvider.getInstances(eq(authenticatedContext), eq(INSTANCE_NAME_PREFIX))).thenReturn(gcpInstances);
+    @ParameterizedTest(name = "testProvideShouldReturnTheNetworkInterfaces{index}")
+    @MethodSource("dataForInstances")
+    public void testProvideShouldReturnTheNetworkInterfaces(Map<String, Boolean> instances) {
+        List<String> instancesOnCloudProvider = instances.entrySet().stream().filter(Map.Entry::getValue).map(entry -> entry.getKey()).
+        collect(Collectors.toList());
+        List<Instance> gcpInstances = instancesOnCloudProvider.stream().
+                map(instanceOnCloudProvider -> createInstance(instanceOnCloudProvider, instanceOnCloudProvider + "-az"))
+                .collect(Collectors.toList());
+        List<CloudResource> cloudResources = instances.entrySet().stream().map(entry ->
+                        createCloudResource(entry.getKey(), entry.getKey() + "-az"))
+                .collect(Collectors.toList());
+        instances.entrySet().stream().forEach(entry -> {
+            when(gcpInstanceProvider.getInstance(authenticatedContext, entry.getKey(), entry.getKey() + "-az"))
+                    .thenReturn(gcpInstances.stream().filter(gcpInstance -> gcpInstance.getName().equals(entry.getKey())).findFirst());
+        });
 
-        Map<String, Optional<NetworkInterface>> actual = underTest.provide(authenticatedContext, instances);
+        Map<String, Optional<NetworkInterface>> actual = underTest.provide(authenticatedContext, cloudResources);
 
-        assertEquals(3, actual.size());
-        assertEquals(getNetworkForInstance(gcpInstances, INSTANCE_NAME_1), actual.get(INSTANCE_NAME_1));
-        assertEquals(getNetworkForInstance(gcpInstances, INSTANCE_NAME_2), actual.get(INSTANCE_NAME_2));
-        assertEquals(getNetworkForInstance(gcpInstances, INSTANCE_NAME_3), actual.get(INSTANCE_NAME_3));
+        assertEquals(instances.size(), actual.size());
+        instances.entrySet().stream().forEach(entry -> {
+            assertEquals(getNetworkForInstance(gcpInstances, entry.getKey()), actual.get(entry.getKey()));
+            assertEquals(entry.getValue(), actual.get(entry.getKey()).isPresent());
+        });
     }
 
-    @Test
-    public void testProvideShouldReturnsMapWithoutNetworkWhenTheThereAreNoResponseFromGcp() {
-        List<CloudResource> instances = createCloudResources();
-        when(gcpInstanceProvider.getInstanceNamePrefix(eq(instances))).thenReturn(INSTANCE_NAME_PREFIX);
-        when(gcpInstanceProvider.getInstances(eq(authenticatedContext), eq(INSTANCE_NAME_PREFIX))).thenReturn(List.of());
-
-        Map<String, Optional<NetworkInterface>> actual = underTest.provide(authenticatedContext, instances);
-
-        assertEquals(3, actual.size());
-        assertFalse(actual.get(INSTANCE_NAME_1).isPresent());
-        assertFalse(actual.get(INSTANCE_NAME_2).isPresent());
-        assertFalse(actual.get(INSTANCE_NAME_3).isPresent());
-    }
-
-    private List<CloudResource> createCloudResources() {
-        return List.of(
-                createCloudResource(INSTANCE_NAME_1),
-                createCloudResource(INSTANCE_NAME_2),
-                createCloudResource(INSTANCE_NAME_3));
-    }
-
-    private CloudResource createCloudResource(String name) {
+    private CloudResource createCloudResource(String name, String availabilityZone) {
         return CloudResource.builder()
                 .withName(name)
                 .withType(ResourceType.GCP_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withParameters(Collections.emptyMap())
+                .withAvailabilityZone(availabilityZone)
                 .build();
     }
 
-    private List<Instance> createGcpInstancesWithMissingNode() {
-        return List.of(createInstance(INSTANCE_NAME_1), createInstance(INSTANCE_NAME_3));
-    }
-
-    private Instance createInstance(String name) {
+    private Instance createInstance(String name, String availabilityZone) {
         Instance instance = new Instance();
         instance.setName(name);
         instance.setNetworkInterfaces(List.of(new NetworkInterface()));
+        instance.setZone(availabilityZone);
         return instance;
     }
 

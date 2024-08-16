@@ -5,7 +5,6 @@ import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -14,15 +13,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -260,26 +264,39 @@ class GcpMetadataCollectorTest {
         assertThat(result).map(CloudLoadBalancerMetadata::getType).containsExactlyInAnyOrder(LoadBalancerType.GATEWAY_PRIVATE, LoadBalancerType.PRIVATE);
     }
 
-    @Test
-    void testCollectInstanceTypes() {
-        CloudResource cloudResource = CloudResource.builder().withName(INSTANCE_NAME_1).withType(GCP_INSTANCE).withStatus(CREATED)
-                .withParameters(new HashMap<>()).build();
-        when(resourceRetriever.findByStatusAndTypeAndStack(eq(CREATED), eq(GCP_INSTANCE), eq(STACK_ID))).thenReturn(Optional.of(cloudResource));
-        when(gcpInstanceProvider.getInstanceNamePrefix(anyList())).thenReturn(INSTANCE_NAME_PREFIX);
-        when(gcpInstanceProvider.getInstances(eq(authenticatedContext), eq(INSTANCE_NAME_PREFIX)))
-                .thenReturn(List.of(instance("instanceId1"), instance("instanceId2"), instance("instanceId3")));
-        InstanceTypeMetadata result = underTest.collectInstanceTypes(authenticatedContext, List.of("instanceId1", "instanceId2"));
-
-        Map<String, String> instanceTypes = result.getInstanceTypes();
-        assertThat(instanceTypes).hasSize(2);
-        assertThat(instanceTypes).containsEntry("instanceId1", "large");
-        assertThat(instanceTypes).containsEntry("instanceId2", "large");
+    static Object [] [] dataForInstances() {
+        return new Object[][]{
+                {Map.of("instance1", "gcp/test/small", "instance2", "gcp/test/large")},
+                {Map.of("instance1", "gcp/test/large", "instance2", "NA")},
+                {Map.of("instance1", "NA", "instance2", "NA")},
+                {Map.of()}
+        };
     }
 
-    private Instance instance(String instanceId) {
+    @ParameterizedTest(name = "testCollectInstanceTypes{index}")
+    @MethodSource("dataForInstances")
+    void testCollectInstanceTypes(Map<String, String> instances) {
+        List<CloudResource> cloudResources = instances.entrySet().stream().map(entry -> CloudResource.builder().withName(entry.getKey())
+                .withType(GCP_INSTANCE).withStatus(CREATED).withParameters(new HashMap<>()).withAvailabilityZone(entry.getKey() + "-az").build())
+                .collect(Collectors.toList());
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CREATED, GCP_INSTANCE, STACK_ID)).thenReturn(cloudResources);
+        instances.entrySet().stream().forEach(entry -> when(gcpInstanceProvider.getInstance(authenticatedContext, entry.getKey(),
+                entry.getKey() + "-az")).thenReturn(Optional.ofNullable(!"NA".equals(entry.getValue()) ? instance(entry.getKey(),
+                entry.getValue()) : null)));
+
+        InstanceTypeMetadata result = underTest.collectInstanceTypes(authenticatedContext, new ArrayList<>(instances.keySet()));
+
+        Map<String, String> instanceTypes = result.getInstanceTypes();
+        assertThat(instanceTypes).hasSize((int) instances.entrySet().stream().filter(entry -> !"NA".equals(entry.getValue())).count());
+        instances.entrySet().stream().filter(entry -> !"NA".equals(entry.getValue())).forEach(entry -> {
+            assertThat(instanceTypes).containsEntry(entry.getKey(), StringUtils.substringAfterLast(entry.getValue(), "/"));
+        });
+    }
+
+    private Instance instance(String instanceId, String instanceType) {
         Instance instance = new Instance();
         instance.setName(instanceId);
-        instance.setMachineType("gcp/test/large");
+        instance.setMachineType(instanceType);
         return instance;
     }
 
