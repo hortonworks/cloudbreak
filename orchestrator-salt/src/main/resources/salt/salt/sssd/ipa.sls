@@ -152,20 +152,14 @@ restore_systemctl:
     - mode: 755
     - force: True
 
-dns_resolution_fix:
-  file.append:
-    - name: /etc/resolv.conf
-    - text: "domain {{ salt['grains.get']('domain') }}"
-{% else %}
-java11_dns_resolution_fix:
+{% endif %}
+
+resolv_conf_domain_config:
   file.replace:
     - name: /etc/resolv.conf
     - pattern: "^domain .*"
     - repl: "domain {{ salt['grains.get']('domain') }}"
     - append_if_not_found: True
-    - onlyif:
-      - java -version |& grep 'openjdk version "11.0'
-{% endif %}
 
 include:
     - sssd.ssh
