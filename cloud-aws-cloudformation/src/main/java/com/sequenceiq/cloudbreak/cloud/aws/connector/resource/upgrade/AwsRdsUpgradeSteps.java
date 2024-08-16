@@ -71,7 +71,7 @@ public class AwsRdsUpgradeSteps {
         String dbParameterGroupName;
         List<CloudResource> cloudResources = new ArrayList<>();
         if (isCustomParameterGroupNeeded(databaseServer)) {
-            dbParameterGroupName = awsRdsParameterGroupService.createParameterGroupWithCustomSettings(rdsClient, databaseServer, upgradeTargetVersion);
+            dbParameterGroupName = awsRdsParameterGroupService.createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, upgradeTargetVersion);
             cloudResources.add(createParamGroupResource(ac, dbParameterGroupName));
         } else {
             dbParameterGroupName = null;

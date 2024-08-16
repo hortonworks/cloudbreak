@@ -89,4 +89,14 @@ class AwsResourceConnectorTest {
         assertThat(result).isSameAs(sslCertificate);
     }
 
+    @Test
+    public void testMigrateDatabaseFromNonSslToSsl() {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+
+        underTest.migrateDatabaseFromNonSslToSsl(authenticatedContext, databaseStack);
+
+        verify(awsRdsModifyService, times(1)).migrateNonSslToSsl(any(), any());
+    }
+
 }

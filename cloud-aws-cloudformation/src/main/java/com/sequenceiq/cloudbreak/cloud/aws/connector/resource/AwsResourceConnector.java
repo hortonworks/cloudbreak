@@ -264,6 +264,11 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public void migrateDatabaseFromNonSslToSsl(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack) {
+        awsRdsModifyService.migrateNonSslToSsl(authenticatedContext, databaseStack.getDatabaseServer());
+    }
+
+    @Override
     public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
         awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
     }

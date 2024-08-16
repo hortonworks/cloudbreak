@@ -352,6 +352,16 @@ public interface ResourceConnector {
     }
 
     /**
+     * Migrate database from non ssl to ssl
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param databaseStack contains the full description of infrastructure
+     */
+    default void migrateDatabaseFromNonSslToSsl(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack) {
+        LOGGER.warn("Update database ssl is not implemented!");
+    }
+
+    /**
      * Modifies attached volumes on an instance.
      *
      * @param authenticatedContext the authenticated context which holds the client object

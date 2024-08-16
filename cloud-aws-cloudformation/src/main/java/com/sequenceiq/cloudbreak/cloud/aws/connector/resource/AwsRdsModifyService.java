@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 
 import software.amazon.awssdk.core.waiters.Waiter;
@@ -31,6 +32,9 @@ public class AwsRdsModifyService {
 
     @Inject
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
+
+    @Inject
+    private AwsRdsParameterGroupService awsRdsParameterGroupService;
 
     public void disableDeleteProtection(AuthenticatedContext ac, DatabaseStack dbStack) {
         AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
@@ -68,6 +72,19 @@ public class AwsRdsModifyService {
             LOGGER.info("Master user password modified for database: {}", dbInstanceIdentifier);
         } catch (RuntimeException e) {
             LOGGER.warn("Master user password modification failed for database: {}, reason: {}", dbInstanceIdentifier, e.getMessage());
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
+    }
+
+    public void migrateNonSslToSsl(AuthenticatedContext ac, DatabaseServer databaseServer) {
+        AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
+        String dbInstanceIdentifier = databaseServer.getServerId();
+        try {
+            awsRdsParameterGroupService.applySslEnforcement(ac, rdsClient, databaseServer);
+            waitUntilModifyFinishes(dbInstanceIdentifier, rdsClient, "Failed to do group assignement");
+            LOGGER.info("Ssl enforcement modified for database: {}", dbInstanceIdentifier);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Ssl enforcement modification failed for database: {}, reason: {}", dbInstanceIdentifier, e.getMessage());
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }

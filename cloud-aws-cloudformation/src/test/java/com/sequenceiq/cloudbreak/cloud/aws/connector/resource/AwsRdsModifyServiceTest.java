@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -79,8 +80,11 @@ public class AwsRdsModifyServiceTest {
     @Mock
     private CustomAmazonWaiterProvider provider;
 
+    @Mock
+    private AwsRdsParameterGroupService awsRdsParameterGroupService;
+
     @InjectMocks
-    private AwsRdsModifyService victim;
+    private AwsRdsModifyService undertest;
 
     @BeforeEach
     void initTests() {
@@ -90,7 +94,6 @@ public class AwsRdsModifyServiceTest {
         when(location.getRegion()).thenReturn(region);
         when(region.value()).thenReturn(REGION);
         when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
-        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
     }
 
@@ -99,8 +102,9 @@ public class AwsRdsModifyServiceTest {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
         when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        victim.disableDeleteProtection(authenticatedContext, dbStack);
+        undertest.disableDeleteProtection(authenticatedContext, dbStack);
 
         assertEquals(DB_INSTANCE_IDENTIFIER, modifyDBInstanceRequestArgumentCaptor.getValue().dbInstanceIdentifier());
         verify(rdsWaiter, times(1)).run(any());
@@ -111,8 +115,9 @@ public class AwsRdsModifyServiceTest {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
 
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        assertThrows(CloudConnectorException.class, () -> victim.disableDeleteProtection(authenticatedContext, dbStack));
+        assertThrows(CloudConnectorException.class, () -> undertest.disableDeleteProtection(authenticatedContext, dbStack));
     }
 
     @Test
@@ -120,30 +125,60 @@ public class AwsRdsModifyServiceTest {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
         when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
+
         doThrow(SdkException.class).when(rdsWaiter).run(any());
 
-        assertThrows(CloudConnectorException.class, () -> victim.disableDeleteProtection(authenticatedContext, dbStack));
+        assertThrows(CloudConnectorException.class, () -> undertest.disableDeleteProtection(authenticatedContext, dbStack));
     }
 
     @Test
     void updateMasterUserPasswordShouldThrowCloudConnectorExceptionInCaseOfRdsClientException() {
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        assertThrows(CloudConnectorException.class, () -> victim.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD));
+        assertThrows(CloudConnectorException.class, () -> undertest.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD));
         verify(rdsWaiter, never()).run(any());
     }
 
     @Test
     void updateMasterUserPasswordShouldSucceed() {
+        Waiter<DescribeDbInstancesResponse> waiter = mock(Waiter.class);
+
         ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(ModifyDbInstanceResponse.builder().build());
         when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
         when(provider.getDbMasterPasswordStartWaiter()).thenReturn(rdsWaiter);
+        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        victim.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD);
+        undertest.updateMasterUserPassword(authenticatedContext, dbStack, NEW_PASSWORD);
 
         assertEquals(DB_INSTANCE_IDENTIFIER, modifyDBInstanceRequestArgumentCaptor.getValue().dbInstanceIdentifier());
         verify(rdsWaiter, times(2)).run(any());
+    }
+
+    @Test
+    public void testMigrateNonSslToSslSuccess() {
+        when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
+
+        undertest.migrateNonSslToSsl(authenticatedContext, databaseServer);
+
+        verify(awsRdsParameterGroupService, times(1)).applySslEnforcement(any(), any(), any());
+    }
+
+    @Test
+    public void testMigrateNonSslToSslRuntimeException() {
+        RuntimeException runtimeException = new RuntimeException("Modification error");
+
+        doThrow(runtimeException).when(awsRdsParameterGroupService)
+                .applySslEnforcement(authenticatedContext, amazonRDS, databaseServer);
+
+        CloudConnectorException thrown = assertThrows(CloudConnectorException.class, () -> {
+            undertest.migrateNonSslToSsl(authenticatedContext, databaseServer);
+        });
+
+        assertEquals(thrown.getMessage(), "Modification error");
+        verify(awsRdsParameterGroupService, times(1)).applySslEnforcement(authenticatedContext, amazonRDS, databaseServer);
     }
 }

@@ -73,6 +73,9 @@ public class AwsRdsUpgradeStepsTest {
     private AmazonRdsClient rdsClient;
 
     @Mock
+    private AuthenticatedContext ac;
+
+    @Mock
     private DatabaseServer databaseServer;
 
     @Mock
@@ -108,12 +111,15 @@ public class AwsRdsUpgradeStepsTest {
     void testUpgradeRds() {
         RdsEngineVersion currentVersion = new RdsEngineVersion(CURRENT_VERSION);
         RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
-        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
-        when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenReturn(DB_PARAMETER_GROUP_NAME);
-        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion))
+                .thenReturn(targetVersion);
+        when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, targetVersion))
+                .thenReturn(DB_PARAMETER_GROUP_NAME);
         CloudContext cloudContext = mock(CloudContext.class);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         Location location = mock(Location.class);
@@ -135,7 +141,7 @@ public class AwsRdsUpgradeStepsTest {
 
         underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
-        verify(awsRdsParameterGroupService, never()).createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion);
+        verify(awsRdsParameterGroupService, never()).createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, targetVersion);
         verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, null);
     }
 
@@ -149,7 +155,7 @@ public class AwsRdsUpgradeStepsTest {
                 underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
         );
 
-        verify(awsRdsParameterGroupService, never()).createParameterGroupWithCustomSettings(any(), any(), any());
+        verify(awsRdsParameterGroupService, never()).createParameterGroupWithCustomSettings(any(), any(), any(), any());
         verify(awsRdsUpgradeOperations, never()).upgradeRds(any(), any(), anyString(), any());
     }
 
@@ -160,7 +166,8 @@ public class AwsRdsUpgradeStepsTest {
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
-        when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenThrow(RuntimeException.class);
+        when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, targetVersion))
+                .thenThrow(RuntimeException.class);
 
         Assertions.assertThrows(RuntimeException.class, () ->
                 underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
