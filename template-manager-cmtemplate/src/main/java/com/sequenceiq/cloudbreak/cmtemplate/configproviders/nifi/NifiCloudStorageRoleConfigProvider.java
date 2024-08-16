@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiRoles.NIFI_NODE;
 
@@ -43,7 +45,11 @@ public class NifiCloudStorageRoleConfigProvider extends AbstractRoleConfigProvid
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
+        boolean is730OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_0);
         return source.getFileSystemConfigurationView().isPresent()
-                && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+                && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
+                && is730OrNewer;
     }
 }

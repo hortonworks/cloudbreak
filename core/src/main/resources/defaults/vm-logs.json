@@ -408,7 +408,7 @@
     "label": "dl_dry_run_restore"
   },
   {
-    "path": "${serviceLogFolderPrefix}/nifi-log/nifi*.log",
+    "path": "/hadoopfs/*/nifi-log/nifi*.log",
     "label": "NIFI_NODE"
   }
 ]
