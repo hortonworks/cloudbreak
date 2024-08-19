@@ -19,6 +19,8 @@ public class DistroXScaleTestParameters {
 
     private static final String AZURE_SCALING_TIME = "azure_scaling_time";
 
+    private static final String GCP_SCALING_TIME = "gcp_scaling_time";
+
     private static final String SCALE_DOWN_TARGET = "scale_down_target";
 
     private static final String IRRELEVANT_HOST_GROUP = "irrelevant_host_group";
@@ -49,6 +51,8 @@ public class DistroXScaleTestParameters {
 
     private long azureScalingTime;
 
+    private long gcpScalingTime;
+
     private int scaleUpTarget;
 
     private int scaleDownTarget;
@@ -71,6 +75,7 @@ public class DistroXScaleTestParameters {
         setThreshold(Long.parseLong(allParameters.getOrDefault(THRESHOLD, DEFAULT_THRESHOLD)));
         setAwsScalingTime(Long.parseLong(allParameters.getOrDefault(AWS_SCALING_TIME, DEFAULT_SCALING_TIME)));
         setAzureScalingTime(Long.parseLong(allParameters.getOrDefault(AZURE_SCALING_TIME, DEFAULT_SCALING_TIME)));
+        setGcpScalingTime(Long.parseLong(allParameters.getOrDefault(GCP_SCALING_TIME, DEFAULT_SCALING_TIME)));
     }
 
     public int getScaleUpTarget() {
@@ -85,12 +90,20 @@ public class DistroXScaleTestParameters {
         return azureScalingTime;
     }
 
+    public long getGcpScalingTime() {
+        return gcpScalingTime;
+    }
+
     public void setScaleUpTarget(int scaleUpTarget) {
         this.scaleUpTarget = scaleUpTarget;
     }
 
     public void setAwsScalingTime(long awsScalingTime) {
         this.awsScalingTime = awsScalingTime;
+    }
+
+    public void setGcpScalingTime(long gcpScalingTime) {
+        this.gcpScalingTime = gcpScalingTime;
     }
 
     public void setAzureScalingTime(long azureScalingTime) {

@@ -10,7 +10,6 @@ import jakarta.inject.Inject;
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.DistroxStopStartScaleDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -30,9 +29,6 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        // GCP are not supported right now.
-        // - GCP does not support stopping instances with ephemeral storage.
-        assertNotSupportedCloudPlatform(CloudPlatform.GCP);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
@@ -59,6 +55,8 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
         long expectedNumber;
         if (testContext.commonCloudProperties().getCloudProvider().equalsIgnoreCase("AZURE")) {
             expectedNumber = params.getAzureScalingTime();
+        } else if (testContext.commonCloudProperties().getCloudProvider().equalsIgnoreCase("GCP")) {
+            expectedNumber = params.getGcpScalingTime();
         } else {
             expectedNumber = params.getAwsScalingTime();
         }
