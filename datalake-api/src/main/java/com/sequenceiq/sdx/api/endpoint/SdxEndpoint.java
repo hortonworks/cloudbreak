@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -52,6 +53,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxInstanceMetadataUpdateRequest;
@@ -479,6 +481,17 @@ public interface SdxEndpoint {
             operationId = "rotateRdsCertificateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+
+    @POST
+    @Path("get_database_certificate_status")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Lists all database servers certificate status that are known, either because they were " +
+            "registered or because this service created them.",
+            operationId = "listDataHubDatabaseServersCertificateStatus",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            @Valid @NotNull SdxDatabaseServerCertificateStatusV4Request request);
 
 }
 

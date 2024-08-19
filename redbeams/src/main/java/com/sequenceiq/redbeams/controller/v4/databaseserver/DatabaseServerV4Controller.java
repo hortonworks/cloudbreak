@@ -46,11 +46,13 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
@@ -145,9 +147,17 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
-    public DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(DatabaseServerCertificateStatusV4Request request) {
-        return databaseServerSslCertificateConfigService.listDatabaseServersCertificateStatus(request);
+    @InternalOnly
+    public DatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            @Valid @NotNull DatabaseServerCertificateStatusV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+        return databaseServerSslCertificateConfigService.listDatabaseServersCertificateStatus(request, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @InternalOnly
+    public ClusterDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatusByStackCrns(
+            @Valid @NotNull ClusterDatabaseServerCertificateStatusV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+        return databaseServerSslCertificateConfigService.listDatabaseServersCertificateStatus(request, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

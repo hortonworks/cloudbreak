@@ -78,6 +78,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.DatahubDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
@@ -740,4 +742,15 @@ public interface DistroXV1Endpoint {
     @Operation(summary = IMD_UPDATE, operationId = "imdUpdate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier instanceMetadataUpdate(@Valid @NotNull DistroXInstanceMetadataUpdateV1Request request);
+
+    @POST
+    @Path("get_database_certificate_status")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Lists all database servers certificate status that are known, either because they were " +
+            "registered or because this service created them.",
+            operationId = "listDataHubDatabaseServersCertificateStatus",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            @Valid @NotNull DatahubDatabaseServerCertificateStatusV4Request request);
 }
