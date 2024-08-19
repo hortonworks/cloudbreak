@@ -33,6 +33,14 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
 
     Set<DatabaseServerConfig> findByResourceCrnIn(Set<Crn> resourceCrns);
 
+    @Query("SELECT d FROM DatabaseServerConfig d WHERE d.clusterCrn IN (:clusterCrns) AND d.accountId = :accountId")
+    Set<DatabaseServerConfig> findByAccountIdAndClusterCrns(@Param("accountId") String accountId,
+        @Param("clusterCrns") Collection<String> clusterCrns);
+
+    @Query("SELECT d FROM DatabaseServerConfig d WHERE d.environmentId IN (:environmentIds) AND d.accountId = :accountId")
+    Set<DatabaseServerConfig> findByAccountIdAndEnvironmentIds(@Param("accountId") String accountId,
+        @Param("environmentIds") Collection<String> environmentIds);
+
     Optional<DatabaseServerConfig> findByName(String name);
 
     @Query("SELECT c.resourceCrn FROM DatabaseServerConfig c WHERE c.name = :name")
