@@ -59,6 +59,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setEnableRangerRms(cluster.isRangerRmsEnabled());
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         generalClusterConfigs.setCreatorWorkloadUserCrn(stack.getCreator().getUserCrn());
+        generalClusterConfigs.setResourceCrn(stack.getResourceCrn());
         return generalClusterConfigs;
     }
 
@@ -91,6 +92,7 @@ public class GeneralClusterConfigsProvider {
                 .orElse(Boolean.FALSE);
         generalClusterConfigs.setAutoTlsEnabled(autoTlsEnabled);
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
+        generalClusterConfigs.setResourceCrn(stack.getResourceCrn());
         return generalClusterConfigs;
     }
 

@@ -57,6 +57,8 @@ public class GeneralClusterConfigs {
 
     private String creatorWorkloadUserCrn;
 
+    private String resourceCrn;
+
     private Set<String> otherGatewayInstancesDiscoveryFQDN;
 
     public OrchestratorType getOrchestratorType() {
@@ -225,6 +227,14 @@ public class GeneralClusterConfigs {
 
     public void setAccountId(Optional<String> accountId) {
         this.accountId = accountId;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public boolean isMultiAzEnabled() {
