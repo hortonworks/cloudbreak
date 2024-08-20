@@ -343,7 +343,7 @@ public class AwsInstanceConnector implements InstanceConnector {
             }
             DescribeInstancesResponse result = new AuthenticatedContextView(ac).getAmazonEC2Client()
                     .describeInstances(describeInstancesRequestBuilder.build());
-            LOGGER.debug("Response from AWS: {}", result);
+            LOGGER.debug("Response received from AWS for the following instances: {}", instanceIds);
             return fillCloudVmInstanceStatuses(ac, cloudInstancesWithInstanceId, region, result);
         } catch (Ec2Exception e) {
             handleEC2Exception(vms, e);

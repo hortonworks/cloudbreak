@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+
 public class AwsLoadBalancer {
 
     private static final String LOAD_BALANCER_NAME_PREFIX = "LoadBalancer";
@@ -40,14 +42,14 @@ public class AwsLoadBalancer {
         return listeners;
     }
 
-    public AwsListener getOrCreateListener(int port, int healthCheckPort) {
+    public AwsListener getOrCreateListener(int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort, ProtocolEnum healthCheckProtocol) {
         return listeners.stream()
             .filter(l -> l.getPort() == port)
-            .findFirst().orElseGet(() -> createListener(port, healthCheckPort));
+            .findFirst().orElseGet(() -> createListener(port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol));
     }
 
-    private AwsListener createListener(int port, int healthCheckPort) {
-        AwsListener listener = new AwsListener(scheme, port, healthCheckPort, useStickySessionForTargetGroup);
+    private AwsListener createListener(int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort, ProtocolEnum healthCheckProtocol) {
+        AwsListener listener = new AwsListener(scheme, port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol, useStickySessionForTargetGroup);
         listeners.add(listener);
         return listener;
     }

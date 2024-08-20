@@ -14,7 +14,6 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
 import com.sequenceiq.flow.api.model.operation.OperationType;
@@ -27,16 +26,13 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
-import com.sequenceiq.freeipa.util.CrnService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 
 @Component
 public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<StackEvent>, FreeIpaUseCaseAware {
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private CrnService crnService;
+    private FreeIpaLoadBalancerProvisionCondition loadBalancerProvisionCondition;
 
     @Override
     public String initEvent() {
@@ -57,15 +53,6 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         return OperationType.PROVISION;
     }
 
-    private Optional<StackEvent> createLoadBalancerCreationFlowIfNecessary(StackEvent event) {
-        String accountId = crnService.getCurrentAccountId();
-        if (entitlementService.isFreeIpaLoadBalancerEnabled(accountId)) {
-            return Optional.of(new StackEvent(FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId()));
-        } else {
-            return Optional.empty();
-        }
-    }
-
     @Override
     public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
         if (StackProvisionState.INIT_STATE.equals(flowState)) {
@@ -77,5 +64,11 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         } else {
             return UNSET;
         }
+    }
+
+    private Optional<StackEvent> createLoadBalancerCreationFlowIfNecessary(StackEvent event) {
+        return loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId()) ?
+                Optional.of(new StackEvent(FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId())) :
+                Optional.empty();
     }
 }

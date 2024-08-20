@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer;
 import java.util.HashSet;
 import java.util.Set;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+
 public class AwsTargetGroup {
 
     private static final String TARGET_GROUP_NAME_PREFIX = "TargetGroupPort";
@@ -11,17 +13,27 @@ public class AwsTargetGroup {
 
     private final int port;
 
+    private ProtocolEnum protocol;
+
     private final String name;
 
     private final String healthCheckPort;
+
+    private final String healthCheckPath;
+
+    private final ProtocolEnum healthCheckProtocol;
 
     private String arn;
 
     private boolean stickySessionEnabled;
 
-    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port, int healthCheckPort, boolean stickySessionEnabled) {
+    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort,
+            ProtocolEnum healthCheckProtocol, boolean stickySessionEnabled) {
         this.port = port;
+        this.protocol = protocol;
+        this.healthCheckPath = healthCheckPath;
         this.healthCheckPort = String.valueOf(healthCheckPort);
+        this.healthCheckProtocol = healthCheckProtocol;
         name = getTargetGroupName(port, scheme);
         this.stickySessionEnabled = stickySessionEnabled;
     }
@@ -52,6 +64,18 @@ public class AwsTargetGroup {
 
     public String getHealthCheckPort() {
         return healthCheckPort;
+    }
+
+    public ProtocolEnum getProtocol() {
+        return protocol;
+    }
+
+    public String getHealthCheckPath() {
+        return healthCheckPath;
+    }
+
+    public ProtocolEnum getHealthCheckProtocol() {
+        return healthCheckProtocol;
     }
 
     public static String getTargetGroupName(int port, AwsLoadBalancerScheme scheme) {

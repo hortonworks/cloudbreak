@@ -120,13 +120,14 @@ public class AwsNativeLoadBalancerLaunchService {
                 authenticatedContext.getCloudContext());
         try {
             for (AwsLoadBalancer awsLoadBalancer : loadBalancers) {
+
                 createLoadBalancer(creationContext, awsLoadBalancer);
+
                 if (registerTargetGroups) {
                     for (AwsListener listener : awsLoadBalancer.getListeners()) {
                         AwsTargetGroup targetGroup = listener.getTargetGroup();
                         String loadBalancerScheme = awsLoadBalancer.getScheme().resourceName();
-                        creationContext.setTargetGroupName(resourceNameService.loadBalancerTargetGroup(stackName,
-                                loadBalancerScheme, targetGroup.getPort()));
+                        creationContext.setTargetGroupName(resourceNameService.loadBalancerTargetGroup(stackName, loadBalancerScheme, targetGroup.getPort()));
                         String targetGroupNameTypeSchemePortPart = resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(
                                 loadBalancerScheme, targetGroup.getPort());
                         createTargetGroup(creationContext, awsNetworkView, targetGroup, targetGroupNameTypeSchemePortPart);
@@ -246,19 +247,20 @@ public class AwsNativeLoadBalancerLaunchService {
             String loadBalancerArn = context.getLoadBalancerArn();
             LOGGER.info("Creating target group for load balancer('{}') with name: '{}' port: '{}'", loadBalancerArn, targetGroupName,
                     targetGroupPort);
-            CreateTargetGroupRequest targetGroupRequest = CreateTargetGroupRequest.builder()
+            CreateTargetGroupRequest.Builder targetGroupRequestBuilder = CreateTargetGroupRequest.builder()
                     .name(targetGroupName)
                     .port(targetGroupPort)
-                    .protocol(ProtocolEnum.TCP)
+                    .protocol(Optional.ofNullable(targetGroup.getProtocol()).orElse(ProtocolEnum.TCP))
                     .targetType(TargetTypeEnum.INSTANCE)
                     .healthCheckPort(targetGroup.getHealthCheckPort())
                     .healthCheckIntervalSeconds(TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS)
                     .healthyThresholdCount(HEALTHY_THRESHOLD_COUNT)
                     .unhealthyThresholdCount(UNHEALTHY_THRESHOLD_COUNT)
                     .vpcId(awsNetworkView.getExistingVpc())
-                    .tags(context.getTags())
-                    .build();
-            CreateTargetGroupResponse targetGroupResponse = createOrGetTargetGroup(context, targetGroupRequest);
+                    .tags(context.getTags());
+            Optional.ofNullable(targetGroup.getHealthCheckPath()).ifPresent(targetGroupRequestBuilder::healthCheckPath);
+            Optional.ofNullable(targetGroup.getHealthCheckProtocol()).ifPresent(targetGroupRequestBuilder::healthCheckProtocol);
+            CreateTargetGroupResponse targetGroupResponse = createOrGetTargetGroup(context, targetGroupRequestBuilder.build());
             targetGroupArn = targetGroupResponse.targetGroups()
                     .stream()
                     .findFirst()
@@ -324,7 +326,7 @@ public class AwsNativeLoadBalancerLaunchService {
                     .build();
             CreateListenerRequest listenerRequest = CreateListenerRequest.builder()
                     .loadBalancerArn(loadBalancerArn)
-                    .protocol(ProtocolEnum.TCP)
+                    .protocol(Optional.ofNullable(listener.getProtocol()).orElse(ProtocolEnum.TCP))
                     .port(listener.getPort())
                     .defaultActions(defaultAction)
                     .tags(context.getTags())

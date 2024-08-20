@@ -79,6 +79,7 @@ import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudFormationTemplateBuilderTest {
@@ -1567,7 +1568,7 @@ public class CloudFormationTemplateBuilderTest {
     private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(scheme);
         loadBalancer.addSubnets(Set.of("subnet1"));
-        AwsListener listener = loadBalancer.getOrCreateListener(port, 8443);
+        AwsListener listener = loadBalancer.getOrCreateListener(port, ProtocolEnum.TCP, "/", 8443, ProtocolEnum.HTTPS);
         listener.addInstancesToTargetGroup(Set.of("instance1-" + port, "instance2-" + port));
 
         if (setArn) {

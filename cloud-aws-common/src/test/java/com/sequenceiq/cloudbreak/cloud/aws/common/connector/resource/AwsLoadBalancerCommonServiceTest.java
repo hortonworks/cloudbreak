@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol.HTTPS;
+import static com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol.TCP_UDP;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
@@ -13,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,6 +69,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadB
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 
 @ExtendWith(MockitoExtension.class)
 class AwsLoadBalancerCommonServiceTest {
@@ -89,6 +93,10 @@ class AwsLoadBalancerCommonServiceTest {
     private static final String PUBLIC_SUBNET_ID_1 = "publicSubnetId";
 
     private static final String PUBLIC_SUBNET_ID_2 = "anotherPublicSubnetId";
+
+    private static final int HEALTH_CHECK_PORT = 8080;
+
+    private static final String HEALTH_CHECK_PATH = "/";
 
     private boolean targetGroupStickyness;
 
@@ -296,6 +304,56 @@ class AwsLoadBalancerCommonServiceTest {
     }
 
     @Test
+    void testConvertLoadBalancerCloudLBWithoutHealthCheckSettings() {
+        AwsLoadBalancer existingLoadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
+        when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PUBLIC))).thenReturn(AwsLoadBalancerScheme.INTERNET_FACING);
+
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(LoadBalancerType.PUBLIC);
+
+        AwsLoadBalancer result = underTest.convertLoadBalancer(cloudLoadBalancer, Map.of(INSTANCE_NAME, List.of(INSTANCE_ID)), createNetworkView(PUBLIC_ID_1,
+                        null),
+                List.of(existingLoadBalancer));
+
+        assertNotNull(result);
+        assertFalse(result.getListeners().isEmpty());
+        AwsListener awsListener = result.getListeners().getFirst();
+        AwsTargetGroup targetGroup = awsListener.getTargetGroup();
+        assertNotNull(targetGroup);
+        assertFalse(targetGroup.isStickySessionEnabled());
+        assertNull(awsListener.getProtocol());
+        assertEquals(PORT, awsListener.getPort());
+        assertEquals(HEALTH_CHECK_PORT, Integer.parseInt(targetGroup.getHealthCheckPort()));
+        assertNull(targetGroup.getProtocol());
+        assertNull(targetGroup.getHealthCheckPath());
+        assertNull(targetGroup.getHealthCheckProtocol());
+    }
+
+    @Test
+    void testConvertLoadBalancerCloudLBHealthCheckSettings() {
+        AwsLoadBalancer existingLoadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
+        when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PUBLIC))).thenReturn(AwsLoadBalancerScheme.INTERNET_FACING);
+
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancerWithHealthCheckSettings(LoadBalancerType.PUBLIC, List.of());
+
+        AwsLoadBalancer result = underTest.convertLoadBalancer(cloudLoadBalancer, Map.of(INSTANCE_NAME, List.of(INSTANCE_ID)), createNetworkView(PUBLIC_ID_1,
+                        null),
+                List.of(existingLoadBalancer));
+
+        assertNotNull(result);
+        assertFalse(result.getListeners().isEmpty());
+        AwsListener awsListener = result.getListeners().getFirst();
+        AwsTargetGroup targetGroup = awsListener.getTargetGroup();
+        assertNotNull(targetGroup);
+        assertFalse(targetGroup.isStickySessionEnabled());
+        assertEquals(ProtocolEnum.TCP_UDP, awsListener.getProtocol());
+        assertEquals(PORT, awsListener.getPort());
+        assertEquals(HEALTH_CHECK_PORT, Integer.parseInt(targetGroup.getHealthCheckPort()));
+        assertEquals(ProtocolEnum.TCP_UDP, targetGroup.getProtocol());
+        assertEquals(ProtocolEnum.HTTPS, targetGroup.getHealthCheckProtocol());
+        assertEquals(HEALTH_CHECK_PATH, targetGroup.getHealthCheckPath());
+    }
+
+    @Test
     void testEnableDeletionProtectionWhenLoadBalancerNotFoundExceptionWasThrown() {
         AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient = mock(AmazonElasticLoadBalancingClient.class);
         when(amazonElasticLoadBalancingClient.modifyLoadBalancerAttributes(any())).thenThrow(LoadBalancerNotFoundException.builder().build());
@@ -369,7 +427,6 @@ class AwsLoadBalancerCommonServiceTest {
     void testModifyLoadBalancerAttributesSuccess() {
         String arn = "test-arn";
         AmazonElasticLoadBalancingClient client = mock(AmazonElasticLoadBalancingClient.class);
-        boolean deletionProtection = true;
 
         ArgumentCaptor<ModifyLoadBalancerAttributesRequest> captor = ArgumentCaptor.forClass(ModifyLoadBalancerAttributesRequest.class);
 
@@ -473,7 +530,15 @@ class AwsLoadBalancerCommonServiceTest {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
                 null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
-        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, HEALTH_CHECK_PORT), Set.of(group));
+        return cloudLoadBalancer;
+    }
+
+    private CloudLoadBalancer createCloudLoadBalancerWithHealthCheckSettings(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
+        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap());
+        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, TCP_UDP, HEALTH_CHECK_PORT, HEALTH_CHECK_PATH, HTTPS), Set.of(group));
         return cloudLoadBalancer;
     }
 
@@ -482,7 +547,7 @@ class AwsLoadBalancerCommonServiceTest {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
                 null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
-        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, HEALTH_CHECK_PORT), Set.of(group));
         return cloudLoadBalancer;
     }
 

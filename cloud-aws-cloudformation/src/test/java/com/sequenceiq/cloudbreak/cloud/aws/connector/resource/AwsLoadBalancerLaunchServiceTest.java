@@ -73,6 +73,7 @@ import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRe
 import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
 import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
 import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 
 @ExtendWith(MockitoExtension.class)
 class AwsLoadBalancerLaunchServiceTest {
@@ -323,7 +324,7 @@ class AwsLoadBalancerLaunchServiceTest {
     @Test
     void testSetLoadBalancerMetadata() {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNAL);
-        loadBalancer.getOrCreateListener(PORT, PORT);
+        loadBalancer.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
 
         underTest.setLoadBalancerMetadata(List.of(loadBalancer), createListStackResourcesResponse(createFullSummaries(Set.of(LoadBalancerType.PRIVATE))));
 
@@ -583,7 +584,7 @@ class AwsLoadBalancerLaunchServiceTest {
                 scheme = AwsLoadBalancerScheme.INTERNAL;
             }
             AwsLoadBalancer awsLoadBalancer = new AwsLoadBalancer(scheme);
-            awsLoadBalancer.getOrCreateListener(PORT, PORT);
+            awsLoadBalancer.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
             awsLoadBalancers.add(awsLoadBalancer);
         }
         when(cfStackUtil.getCfStackName(any())).thenReturn(STACK_NAME);
@@ -606,9 +607,9 @@ class AwsLoadBalancerLaunchServiceTest {
 
     private List<AwsLoadBalancer> setupAwsLoadBalancers() {
         AwsLoadBalancer privateLb = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNAL);
-        privateLb.getOrCreateListener(PORT, PORT);
+        privateLb.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
         AwsLoadBalancer publicLb = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
-        publicLb.getOrCreateListener(PORT, PORT);
+        publicLb.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
         return List.of(privateLb, publicLb);
     }
 

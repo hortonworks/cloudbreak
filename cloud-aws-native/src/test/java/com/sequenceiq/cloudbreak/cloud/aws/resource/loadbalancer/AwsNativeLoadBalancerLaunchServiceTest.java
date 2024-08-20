@@ -68,6 +68,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTarg
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ElasticLoadBalancingV2Exception;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Listener;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
@@ -974,7 +975,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
     private AwsLoadBalancer getAwsLoadBalancer(AwsLoadBalancerScheme scheme) {
         AwsLoadBalancer awsLoadBalancer = new AwsLoadBalancer(scheme);
-        awsLoadBalancer.getOrCreateListener(USER_FACING_PORT, HEALTH_CHECK_PORT);
+        awsLoadBalancer.getOrCreateListener(USER_FACING_PORT, ProtocolEnum.TCP, "/health", HEALTH_CHECK_PORT, ProtocolEnum.HTTPS);
         return awsLoadBalancer;
     }
 

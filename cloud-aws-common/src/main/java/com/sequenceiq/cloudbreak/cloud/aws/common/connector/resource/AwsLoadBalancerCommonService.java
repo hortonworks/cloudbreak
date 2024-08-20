@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerNotFoundException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyLoadBalancerAttributesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ModifyTargetGroupAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
@@ -235,11 +237,18 @@ public class AwsLoadBalancerCommonService {
         return multiAzSubnets;
     }
 
-    private void setupLoadBalancer(CloudLoadBalancer cloudLoadBalancer, Map<String, List<String>> instanceIdsByGroupName,
-            AwsLoadBalancer awsLoadBalancer) {
+    private void setupLoadBalancer(CloudLoadBalancer cloudLoadBalancer, Map<String, List<String>> instanceIdsByGroupName, AwsLoadBalancer awsLoadBalancer) {
         LOGGER.debug("Configuring target instances for listeners.");
         for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
-            AwsListener listener = awsLoadBalancer.getOrCreateListener(entry.getKey().getTrafficPort(), entry.getKey().getHealthCheckPort());
+            TargetGroupPortPair targetGroup = entry.getKey();
+            ProtocolEnum protocol = Optional.ofNullable(targetGroup.getTrafficProtocol()).map(p -> ProtocolEnum.fromValue(p.name())).orElse(null);
+            ProtocolEnum healthCheckProtocol = Optional.ofNullable(targetGroup.getHealthCheckProtocol()).map(p -> ProtocolEnum.fromValue(p.name())).orElse(null);
+            AwsListener listener = awsLoadBalancer.getOrCreateListener(
+                    targetGroup.getTrafficPort(),
+                    protocol,
+                    targetGroup.getHealthCheckPath(),
+                    targetGroup.getHealthCheckPort(),
+                    healthCheckProtocol);
             Set<String> instanceIds = entry.getValue()
                     .stream()
                     .flatMap(tg -> instanceIdsByGroupName.get(tg.getName()).stream())

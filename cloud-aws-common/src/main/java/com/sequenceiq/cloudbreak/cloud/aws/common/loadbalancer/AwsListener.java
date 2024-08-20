@@ -2,24 +2,34 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer;
 
 import java.util.Set;
 
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+
 public class AwsListener {
 
     public static final String LISTENER_NAME_PREFIX = "ListenerPort";
 
     private final int port;
 
+    private final ProtocolEnum protocol;
+
     private final AwsTargetGroup targetGroup;
 
     private final String name;
 
-    public AwsListener(AwsLoadBalancerScheme scheme, int port, int healthCheckPort, boolean stickySessionEnabledForTargetGroup) {
+    public AwsListener(AwsLoadBalancerScheme scheme, int port, ProtocolEnum protocol, String healthCheckPath, int healthCheckPort,
+            ProtocolEnum healthCheckProtocol, boolean stickySessionEnabledForTargetGroup) {
         this.port = port;
+        this.protocol = protocol;
         this.name = getListenerName(port, scheme);
-        this.targetGroup = new AwsTargetGroup(scheme, port, healthCheckPort, stickySessionEnabledForTargetGroup);
+        this.targetGroup = new AwsTargetGroup(scheme, port, protocol, healthCheckPath, healthCheckPort, healthCheckProtocol, stickySessionEnabledForTargetGroup);
     }
 
     public int getPort() {
         return port;
+    }
+
+    public ProtocolEnum getProtocol() {
+        return protocol;
     }
 
     public AwsTargetGroup getTargetGroup() {

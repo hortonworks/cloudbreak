@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.api.model.operation.OperationResource;
 import com.sequenceiq.flow.api.model.operation.OperationType;
@@ -29,12 +28,12 @@ import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvi
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
-import com.sequenceiq.freeipa.util.CrnService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerProvisionCondition;
 
 @ExtendWith(MockitoExtension.class)
 public class FlowOperationServiceTest {
 
-    private static final String ACCOUNT = "cloudera";
+    private static final long STACK_ID = 1L;
 
     private static final String TEST_ENV_CRN = "crn:cdp:environments:us-west-1:autoscale:cluster:ffff";
 
@@ -57,17 +56,13 @@ public class FlowOperationServiceTest {
     private OperationFlowsView operationFlowsView;
 
     @Mock
-    private CrnService crnService;
-
-    @Mock
-    private EntitlementService entitlementService;
+    private FreeIpaLoadBalancerProvisionCondition freeIpaLoadBalancerProvisionCondition;
 
     @Test
     public void testGetOperationProgressByResourceCrnWithoutLoadBalancerFlow() {
         // GIVEN
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT);
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT)).thenReturn(false);
-        FlowTriggerEventQueue eventQueue = provisionFlowEventChainFactory.createFlowTriggerEventQueue(new StackEvent(null, null));
+        when(freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(STACK_ID)).thenReturn(false);
+        FlowTriggerEventQueue eventQueue = provisionFlowEventChainFactory.createFlowTriggerEventQueue(new StackEvent(null, STACK_ID));
         given(flowOperationStatisticsService.getLastFlowOperationByResourceCrn(anyString()))
                 .willReturn(Optional.of(operationFlowsView));
         given(operationFlowsView.getOperationType()).willReturn(OperationType.PROVISION);
@@ -85,9 +80,8 @@ public class FlowOperationServiceTest {
     @Test
     public void testGetOperationProgressByResourceCrnWithLoadBalancerFlow() {
         // GIVEN
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT);
-        when(entitlementService.isFreeIpaLoadBalancerEnabled(ACCOUNT)).thenReturn(true);
-        FlowTriggerEventQueue eventQueue = provisionFlowEventChainFactory.createFlowTriggerEventQueue(new StackEvent(null, null));
+        when(freeIpaLoadBalancerProvisionCondition.loadBalancerProvisionEnabled(STACK_ID)).thenReturn(true);
+        FlowTriggerEventQueue eventQueue = provisionFlowEventChainFactory.createFlowTriggerEventQueue(new StackEvent(null, STACK_ID));
         given(flowOperationStatisticsService.getLastFlowOperationByResourceCrn(anyString()))
                 .willReturn(Optional.of(operationFlowsView));
         given(operationFlowsView.getOperationType()).willReturn(OperationType.PROVISION);
