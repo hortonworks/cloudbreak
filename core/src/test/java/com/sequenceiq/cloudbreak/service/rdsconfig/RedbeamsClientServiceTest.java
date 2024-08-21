@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -31,7 +32,9 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 
@@ -162,5 +165,21 @@ class RedbeamsClientServiceTest {
                 "Failed to rotate DatabaseServer secret %s with CRN %s due to error: %s", SECRET, DATABASE_SERVER_CRN, "bad request"),
                 cloudbreakServiceException.getMessage());
         verify(redbeamsServerEndpoint, times(1)).rotateSecret(eq(request), any());
+    }
+
+    @Test
+    public void testListDatabaseServersCertificateStatusByStackCrns() {
+        ClusterDatabaseServerCertificateStatusV4Request request = new ClusterDatabaseServerCertificateStatusV4Request();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        ClusterDatabaseServerCertificateStatusV4Responses mockResponse = new ClusterDatabaseServerCertificateStatusV4Responses();
+
+        when(redbeamsServerEndpoint.listDatabaseServersCertificateStatusByStackCrns(request, "usercrn")).thenReturn(mockResponse);
+
+        ClusterDatabaseServerCertificateStatusV4Responses result = underTest.listDatabaseServersCertificateStatusByStackCrns(request, "usercrn");
+
+        assertNotNull(result);
+        assertEquals(mockResponse, result);
+        verify(redbeamsServerEndpoint, times(1)).listDatabaseServersCertificateStatusByStackCrns(request, "usercrn");
     }
 }

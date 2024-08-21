@@ -4,6 +4,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
@@ -554,12 +555,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
+    @CheckPermissionByRequestProperty(path = "environmentCrns", type = CRN_LIST, action = DESCRIBE_ENVIRONMENT, skipOnNull = true)
     public EnvironmentDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
-            EnvironmentDatabaseServerCertificateStatusV4Request request) {
+            @RequestObject EnvironmentDatabaseServerCertificateStatusV4Request request) {
         EnvironmentDatabaseServerCertificateStatusV4Responses responses = new EnvironmentDatabaseServerCertificateStatusV4Responses();
-
-        DatabaseServerCertificateStatusV4Responses databaseServerCertificateStatusV4Responses = redBeamsService.listDatabaseServersCertificateStatus(request);
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        DatabaseServerCertificateStatusV4Responses databaseServerCertificateStatusV4Responses =
+                redBeamsService.listDatabaseServersCertificateStatusByEnvironmentCrns(request, userCrn);
         for (DatabaseServerCertificateStatusV4Response response : databaseServerCertificateStatusV4Responses.getResponses()) {
             EnvironmentDatabaseServerCertificateStatusV4Response databaseServerCertificateStatusV4Response
                     = new EnvironmentDatabaseServerCertificateStatusV4Response();

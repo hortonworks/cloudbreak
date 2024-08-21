@@ -79,12 +79,30 @@ public class RestUrlParserTest {
 
     private static final String SLASH = "/";
 
-    private static final String[] EXCLUDES = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale", "/restart_instances",
-            "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation",
-            "/v4/custom_configurations"};
+    private static final String[] EXCLUDES = {
+            "/v1/distrox",
+            "/v1/internal/distrox",
+            "/flow-public",
+            "/autoscale",
+            "/restart_instances",
+            "cluster_templates",
+            "/v4/events",
+            "/v4/diagnostics",
+            "/v4/progress",
+            "/v4/operation",
+            "/v4/custom_configurations",
+            "internal/get_database_certificate_status"
+    };
 
-    private static final String[] EXCLUDEPATHS = {"/stacks/internal/crn", "/govCloud", "stacks/internal/used_subnets",
-            "stacks/internal/rotate_secret", "/singleimage/internal", "/imd_update"};
+    private static final String[] EXCLUDEPATHS = {
+            "/stacks/internal/crn",
+            "/govCloud",
+            "stacks/internal/used_subnets",
+            "stacks/internal/rotate_secret",
+            "/singleimage/internal",
+            "/imd_update",
+            "internal/get_database_certificate_status"
+    };
 
     @Mock
     private ContainerRequestContext containerRequestContext;

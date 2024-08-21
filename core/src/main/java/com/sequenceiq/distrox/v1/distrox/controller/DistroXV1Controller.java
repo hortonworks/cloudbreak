@@ -48,6 +48,9 @@ import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.DatahubDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
@@ -823,5 +826,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByRequestProperty(action = UPGRADE_DATAHUB, type = CRN, path = "crn")
     public FlowIdentifier instanceMetadataUpdate(@RequestObject DistroXInstanceMetadataUpdateV1Request request) {
         return instanceMetadataUpdateService.updateInstanceMetadata(request.getCrn(), request.getUpdateType());
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "crns", type = CRN_LIST, action = DESCRIBE_DATAHUB)
+    public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
+            @RequestObject DatahubDatabaseServerCertificateStatusV4Request request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+
+        StackDatabaseServerCertificateStatusV4Request stackDatabaseServerCertificateStatusV4Request = new StackDatabaseServerCertificateStatusV4Request();
+        stackDatabaseServerCertificateStatusV4Request.setCrns(request.getCrns());
+        return stackOperationService.listDatabaseServersCertificateStatus(stackDatabaseServerCertificateStatusV4Request, userCrn);
     }
 }

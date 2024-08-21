@@ -6,6 +6,8 @@ import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentDatabaseServerCertificateStatusV4Request {
 
     @NotNull
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     private Set<String> environmentCrns = new HashSet<>();
 
     public Set<String> getEnvironmentCrns() {
