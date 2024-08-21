@@ -152,7 +152,12 @@ restore_systemctl:
     - mode: 755
     - force: True
 
-{% endif %}
+dns_resolution_fix:
+  file.append:
+    - name: /etc/resolv.conf
+    - text: "domain {{ salt['grains.get']('domain') }}"
+
+{% else %}
 
 resolv_conf_domain_config:
   file.replace:
@@ -160,6 +165,8 @@ resolv_conf_domain_config:
     - pattern: "^domain .*"
     - repl: "domain {{ salt['grains.get']('domain') }}"
     - append_if_not_found: True
+
+{% endif %}
 
 include:
     - sssd.ssh
