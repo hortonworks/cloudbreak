@@ -21,6 +21,8 @@ import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClust
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse.Builder;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialResponse;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.mock.experience.LiftieExperienceStoreService;
 import com.sequenceiq.mock.experience.response.liftie.LiftieClusterView;
@@ -107,6 +109,13 @@ public class LiftieService extends LiftiePublicImplBase {
             }
         }
         responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void validateCredential(ValidateCredentialRequest request,
+            StreamObserver<ValidateCredentialResponse> responseObserver) {
+        responseObserver.onNext(ValidateCredentialResponse.newBuilder().setResult("PASSED").build());
         responseObserver.onCompleted();
     }
 

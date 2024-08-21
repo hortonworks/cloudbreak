@@ -141,6 +141,16 @@ class EnvironmentValidationHandlerTest {
     }
 
     @Test
+    void testValidateCredentialForExternalizedComputeClusterIsCalled() {
+        EnvironmentValidationDto environmentValidationDto = createEnvironmentValidationDto();
+        Environment environment = new Environment();
+        when(environmentService.findEnvironmentById(anyLong())).thenReturn(Optional.of(environment));
+        when(validatorService.validateRegionsAndLocation(any(), any(), eq(environment), any())).thenReturn(new ValidationResultBuilder());
+        underTest.accept(Event.wrap(environmentValidationDto));
+        verify(validatorService, times(1)).validateCredentialForExternalizedComputeCluster(environmentValidationDto);
+    }
+
+    @Test
     void sendWarningNotificationWhenValidationHasWarnings() {
         EnvironmentValidationDto environmentValidationDto = createEnvironmentValidationDto();
         Environment environment = new Environment();

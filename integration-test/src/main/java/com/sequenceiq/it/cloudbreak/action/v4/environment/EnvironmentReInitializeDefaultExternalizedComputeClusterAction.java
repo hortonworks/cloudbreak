@@ -26,7 +26,7 @@ public class EnvironmentReInitializeDefaultExternalizedComputeClusterAction impl
         request.setCreate(true);
         request.setPrivateCluster(privateCluster);
         client.getDefaultClient()
-                .defaultComputeClusterEndpoint().reinitializeDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request, true);
+                .defaultComputeClusterEndpoint().createDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request, true);
         return testDto;
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service.externalizedcompute;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -26,23 +30,8 @@ public class ExternalizedComputeFlowService {
     @Inject
     private EnvironmentValidatorService environmentValidatorService;
 
-    public FlowIdentifier reinitializeDefaultExternalizedComputeCluster(Environment environment, ExternalizedComputeClusterDto externalizedComputeClusterDto,
+    public FlowIdentifier initializeDefaultExternalizedComputeCluster(Environment environment, ExternalizedComputeClusterDto externalizedComputeClusterDto,
             boolean force) {
-        if (!externalizedComputeClusterDto.isCreate()) {
-            throw new BadRequestException("Create field is disabled in externalized compute cluster request!");
-        }
-        ValidationResult validationResult = environmentValidatorService.validateExternalizedComputeCluster(externalizedComputeClusterDto,
-                environment.getAccountId(), environment.getNetwork().getSubnetMetas().keySet());
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-        externalizedComputeService.checkDefaultCluster(environment, force);
-        externalizedComputeService.updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
-        return environmentReactorFlowManager.triggerExternalizedComputeReinitializationFlow(ThreadBasedUserCrnProvider.getUserCrn(), environment, force);
-    }
-
-    public FlowIdentifier createDefaultExternalizedComputeClusterForExistingEnv(Environment environment,
-            ExternalizedComputeClusterDto externalizedComputeClusterDto) {
         if (!EnvironmentStatus.AVAILABLE.equals(environment.getStatus())) {
             throw new BadRequestException("Environment is not in AVAILABLE state");
         }
@@ -54,11 +43,15 @@ public class ExternalizedComputeFlowService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
-        if (externalizedComputeService.getDefaultCluster(environment).isPresent()) {
-            throw new BadRequestException("You can only have one default externalized compute cluster for an environment");
-        } else {
-            externalizedComputeService.updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
+        Optional<ExternalizedComputeClusterResponse> defaultCluster = externalizedComputeService.getDefaultCluster(environment);
+        if (defaultCluster.isPresent() && ExternalizedComputeClusterApiStatus.AVAILABLE.equals(defaultCluster.get().getStatus()) && !force) {
+            throw new BadRequestException("Your default compute cluster is in Available state!");
         }
-        return environmentReactorFlowManager.triggerExternalizedComputeClusterCreationFlow(ThreadBasedUserCrnProvider.getUserCrn(), environment);
+        externalizedComputeService.updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
+        if (defaultCluster.isPresent()) {
+            return environmentReactorFlowManager.triggerExternalizedComputeReinitializationFlow(ThreadBasedUserCrnProvider.getUserCrn(), environment, force);
+        } else {
+            return environmentReactorFlowManager.triggerExternalizedComputeClusterCreationFlow(ThreadBasedUserCrnProvider.getUserCrn(), environment);
+        }
     }
 }

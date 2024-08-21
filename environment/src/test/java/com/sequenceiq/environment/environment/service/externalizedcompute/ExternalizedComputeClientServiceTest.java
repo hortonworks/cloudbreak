@@ -118,4 +118,12 @@ class ExternalizedComputeClientServiceTest {
         });
         verify(endpoint, times(1)).delete(ENVIRONMENT_CRN, USER_CRN, COMPUTE_NAME, true);
     }
+
+    @Test
+    void validateCredential() {
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            underTest.validateCredential("credential", "region");
+        });
+        verify(endpoint, times(1)).validateCredential("credential", "region", USER_CRN);
+    }
 }

@@ -10,6 +10,8 @@ import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeC
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialResponse;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -45,6 +47,10 @@ public class LiftieServiceClient {
 
     public DeleteClusterResponse deleteCluster(DeleteClusterRequest deleteClusterRequest, String envCrn) {
         return newStubWithEnvCrnHeader(envCrn).deleteCluster(deleteClusterRequest);
+    }
+
+    public ValidateCredentialResponse validateCredential(ValidateCredentialRequest validateCredentialRequest) {
+        return newStub().validateCredential(validateCredentialRequest);
     }
 
     private LiftiePublicBlockingStub newStubWithEnvCrnHeader(String envCrn) {

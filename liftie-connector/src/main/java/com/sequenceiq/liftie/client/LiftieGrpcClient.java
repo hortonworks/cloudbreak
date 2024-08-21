@@ -18,6 +18,8 @@ import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeC
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersRequest;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClustersResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -57,6 +59,12 @@ public class LiftieGrpcClient {
     public CreateClusterResponse createCluster(CreateClusterRequest createClusterRequest, String actorCrn) {
         LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
         return liftieServiceClient.createCluster(createClusterRequest);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public ValidateCredentialResponse validateCredential(ValidateCredentialRequest validateCredentialRequest, String actorCrn) {
+        LiftieServiceClient liftieServiceClient = makeClient(channelWrapper.getChannel(), actorCrn);
+        return liftieServiceClient.validateCredential(validateCredentialRequest);
     }
 
     private LiftieServiceClient makeClient(ManagedChannel channel, String actorCrn) {

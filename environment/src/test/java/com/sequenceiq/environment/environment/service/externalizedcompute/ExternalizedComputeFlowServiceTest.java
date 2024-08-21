@@ -30,6 +30,7 @@ import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -53,10 +54,12 @@ class ExternalizedComputeFlowServiceTest {
     @Test
     void testReinitializeDefaultExternalizedComputeCluster() {
         Environment environment = new Environment();
+        environment.setStatus(EnvironmentStatus.AVAILABLE);
         BaseNetwork baseNetwork = mock(BaseNetwork.class);
         Map<String, CloudSubnet> subnetMap = new HashMap<>();
         subnetMap.put("subnet1", new CloudSubnet());
         when(baseNetwork.getSubnetMetas()).thenReturn(subnetMap);
+        when(externalizedComputeService.getDefaultCluster(environment)).thenReturn(Optional.of(mock(ExternalizedComputeClusterResponse.class)));
         environment.setNetwork(baseNetwork);
         ExternalizedComputeClusterDto externalizedComputeClusterDto = ExternalizedComputeClusterDto.builder().withCreate(true).build();
         FlowIdentifier flowIdentifierMock = mock(FlowIdentifier.class);
@@ -64,9 +67,8 @@ class ExternalizedComputeFlowServiceTest {
         when(environmentValidatorService.validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any(), any()))
                 .thenReturn(ValidationResult.builder().build());
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true));
         verify(environmentValidatorService, times(1)).validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any(), any());
-        verify(externalizedComputeService, times(1)).checkDefaultCluster(environment, true);
         verify(externalizedComputeService, times(1)).updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         verify(environmentReactorFlowManager, times(1)).triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
         assertEquals(flowIdentifierMock, flowIdentifier);
@@ -75,12 +77,12 @@ class ExternalizedComputeFlowServiceTest {
     @Test
     void testReinitializeDefaultExternalizedComputeClusterWhenCreateIsFalse() {
         Environment environment = new Environment();
+        environment.setStatus(EnvironmentStatus.AVAILABLE);
         ExternalizedComputeClusterDto externalizedComputeClusterDto = ExternalizedComputeClusterDto.builder().withCreate(false).build();
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true)));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true)));
         assertEquals("Create field is disabled in externalized compute cluster request!", badRequestException.getMessage());
         verify(environmentValidatorService, never()).validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any(), any());
-        verify(externalizedComputeService, never()).checkDefaultCluster(environment, false);
         verify(externalizedComputeService, never()).updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         verify(environmentReactorFlowManager, never()).triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
     }
@@ -93,14 +95,14 @@ class ExternalizedComputeFlowServiceTest {
         subnetMap.put("subnet1", new CloudSubnet());
         when(baseNetwork.getSubnetMetas()).thenReturn(subnetMap);
         environment.setNetwork(baseNetwork);
+        environment.setStatus(EnvironmentStatus.AVAILABLE);
         ExternalizedComputeClusterDto externalizedComputeClusterDto = ExternalizedComputeClusterDto.builder().withCreate(true).build();
         when(environmentValidatorService.validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any(), any()))
                 .thenReturn(ValidationResult.builder().error("error").build());
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true)));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, true)));
         assertEquals("error", badRequestException.getMessage());
         verify(environmentValidatorService, times(1)).validateExternalizedComputeCluster(eq(externalizedComputeClusterDto), any(), any());
-        verify(externalizedComputeService, never()).checkDefaultCluster(environment, false);
         verify(externalizedComputeService, never()).updateDefaultComputeClusterProperties(environment, externalizedComputeClusterDto);
         verify(environmentReactorFlowManager, never()).triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
     }
@@ -130,7 +132,7 @@ class ExternalizedComputeFlowServiceTest {
                 .thenReturn(mock(FlowIdentifier.class));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> externalizedComputeFlowService.createDefaultExternalizedComputeClusterForExistingEnv(environment, request));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, request, false));
 
         verify(environmentValidatorService, times(1)).validateExternalizedComputeCluster(eq(request), any(), any());
         verify(externalizedComputeService, times(1)).updateDefaultComputeClusterProperties(environment, request);
@@ -154,14 +156,15 @@ class ExternalizedComputeFlowServiceTest {
 
         ExternalizedComputeClusterResponse externalizedComputeClusterResponse = new ExternalizedComputeClusterResponse();
         externalizedComputeClusterResponse.setName("default-env-compute-cluster");
+        externalizedComputeClusterResponse.setStatus(ExternalizedComputeClusterApiStatus.AVAILABLE);
 
         when(environmentValidatorService.validateExternalizedComputeCluster(eq(request), any(), any())).thenReturn(ValidationResult.builder().build());
         when(externalizedComputeService.getDefaultCluster(environment)).thenReturn(Optional.of(externalizedComputeClusterResponse));
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> externalizedComputeFlowService.createDefaultExternalizedComputeClusterForExistingEnv(environment, request));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, request, false));
 
-        assertEquals("You can only have one default externalized compute cluster for an environment", badRequestException.getMessage());
+        assertEquals("Your default compute cluster is in Available state!", badRequestException.getMessage());
 
         verify(environmentValidatorService, times(1)).validateExternalizedComputeCluster(eq(request), any(), any());
         verify(externalizedComputeService, times(0)).updateDefaultComputeClusterProperties(any(), any());
@@ -183,7 +186,7 @@ class ExternalizedComputeFlowServiceTest {
                 .build();
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> externalizedComputeFlowService.createDefaultExternalizedComputeClusterForExistingEnv(environment, request));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, request, false));
 
         assertEquals("Environment is not in AVAILABLE state", badRequestException.getMessage());
 
@@ -207,7 +210,7 @@ class ExternalizedComputeFlowServiceTest {
                 .build();
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> externalizedComputeFlowService.createDefaultExternalizedComputeClusterForExistingEnv(environment, request));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, request, false));
 
         assertEquals("Create field is disabled in externalized compute cluster request!", badRequestException.getMessage());
 
@@ -239,7 +242,7 @@ class ExternalizedComputeFlowServiceTest {
                 .thenReturn(ValidationResult.builder().error("error").build());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> externalizedComputeFlowService.createDefaultExternalizedComputeClusterForExistingEnv(environment, request));
+                () -> externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, request, false));
 
         assertEquals("error", badRequestException.getMessage());
 

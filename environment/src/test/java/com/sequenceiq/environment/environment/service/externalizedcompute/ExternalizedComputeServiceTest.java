@@ -27,9 +27,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -37,10 +37,12 @@ import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterCreationRetrievalTask;
 import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterPollerObject;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 
@@ -63,12 +65,16 @@ class ExternalizedComputeServiceTest {
     @Mock
     private EnvironmentService environmentService;
 
+    @Mock
+    private EnvironmentFlowValidatorService validatorService;
+
     @InjectMocks
     private ExternalizedComputeService underTest;
 
     @Test
     void createComputeClusterWhenEnvironmentRequestContainsRequestCallToExtShouldHappen() {
         when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
+        when(validatorService.validateCredentialForExternalizedComputeCluster(any())).thenReturn(ValidationResult.builder().build());
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         Environment environment = new Environment();
         DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
@@ -90,6 +96,7 @@ class ExternalizedComputeServiceTest {
         environment.setDefaultComputeCluster(defaultComputeCluster);
         when(externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), "default-environmentName-compute-cluster"))
                 .thenReturn(Optional.of(new ExternalizedComputeClusterResponse()));
+        when(validatorService.validateCredentialForExternalizedComputeCluster(any())).thenReturn(ValidationResult.builder().build());
         underTest.createComputeCluster(environment);
         verify(externalizedComputeClientService, times(0)).createComputeCluster(any());
     }
@@ -97,6 +104,7 @@ class ExternalizedComputeServiceTest {
     @Test
     void createComputeClusterWhenExtComputeThrowErrorShouldThrowException() {
         when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
+        when(validatorService.validateCredentialForExternalizedComputeCluster(any())).thenReturn(ValidationResult.builder().build());
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         when(externalizedComputeClientService.createComputeCluster(any())).thenThrow(new NotFoundException("HTTP 404 Not Found localhost:1111/faultyurl"));
         Environment environment = new Environment();
@@ -294,52 +302,12 @@ class ExternalizedComputeServiceTest {
     }
 
     @Test
-    public void checkDefaultClusterButAvailable() {
-        Environment environment = new Environment();
-        String environmentName = "environmentName";
-        environment.setName(environmentName);
-        String envCrn = "envCrn";
-        environment.setResourceCrn(envCrn);
-        ExternalizedComputeClusterResponse externalizedComputeClusterResponse = new ExternalizedComputeClusterResponse();
-        externalizedComputeClusterResponse.setStatus(ExternalizedComputeClusterApiStatus.AVAILABLE);
-        String defaultComputeClusterName = "default-environmentName-compute-cluster";
-        when(externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), defaultComputeClusterName))
-                .thenReturn(Optional.of(externalizedComputeClusterResponse));
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.checkDefaultCluster(environment, false));
-        assertEquals("Your default compute cluster is in Available state!", badRequestException.getMessage());
-        verify(externalizedComputeClientService, times(1)).getComputeCluster(environment.getResourceCrn(), defaultComputeClusterName);
-    }
-
-    @Test
-    public void checkDefaultClusterAndAvailableAndForce() {
-        Environment environment = new Environment();
-        String environmentName = "environmentName";
-        environment.setName(environmentName);
-        String envCrn = "envCrn";
-        environment.setResourceCrn(envCrn);
-        ExternalizedComputeClusterResponse externalizedComputeClusterResponse = new ExternalizedComputeClusterResponse();
-        externalizedComputeClusterResponse.setStatus(ExternalizedComputeClusterApiStatus.AVAILABLE);
-        String defaultComputeClusterName = "default-environmentName-compute-cluster";
-        when(externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), defaultComputeClusterName))
-                .thenReturn(Optional.of(externalizedComputeClusterResponse));
-        underTest.checkDefaultCluster(environment, true);
-        verify(externalizedComputeClientService, times(1)).getComputeCluster(environment.getResourceCrn(), defaultComputeClusterName);
-    }
-
-    @Test
-    public void checkDefaultClusterAndNotAvailable() {
-        Environment environment = new Environment();
-        String environmentName = "environmentName";
-        environment.setName(environmentName);
-        String envCrn = "envCrn";
-        environment.setResourceCrn(envCrn);
-        ExternalizedComputeClusterResponse externalizedComputeClusterResponse = new ExternalizedComputeClusterResponse();
-        externalizedComputeClusterResponse.setStatus(ExternalizedComputeClusterApiStatus.CREATE_FAILED);
-        String defaultComputeClusterName = "default-environmentName-compute-cluster";
-        when(externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), defaultComputeClusterName))
-                .thenReturn(Optional.of(externalizedComputeClusterResponse));
-        underTest.checkDefaultCluster(environment, false);
-        verify(externalizedComputeClientService, times(1)).getComputeCluster(environment.getResourceCrn(), defaultComputeClusterName);
+    public void testCredentialValidation() {
+        String region = "region";
+        String credential = "credential";
+        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResponse = underTest.validateCredential(credential, region);
+        verify(externalizedComputeClientService, times(1)).validateCredential(
+                credential, region);
     }
 
 }

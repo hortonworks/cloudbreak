@@ -74,7 +74,7 @@ public class EventSenderService {
             Collection<?> messageArgs) {
         CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
-        notificationService.send(resourceEvent, payload, userCrn);
+        notificationService.send(resourceEvent, messageArgs, payload, userCrn);
     }
 
     public void sendEventAndNotificationForMissingEnv(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {

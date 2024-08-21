@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidateCredentialResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ValidationResult;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatus;
@@ -257,6 +261,14 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     public String getLiftieClusterCrn(ExternalizedComputeCluster externalizedComputeCluster) {
         return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.COMPUTE_CLUSTER,
                 externalizedComputeCluster.getLiftieName(), externalizedComputeCluster.getAccountId());
+    }
+
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region, String actorCrn) {
+        ValidateCredentialResponse validateCredentialResponse = liftieGrpcClient.validateCredential(
+                ValidateCredentialRequest.newBuilder().setCredential(credentialName).setRegion(region).build(), actorCrn);
+        List<String> validationResults = validateCredentialResponse.getValidationsList().stream().map(ValidationResult::getDetailedMessage).toList();
+        boolean successful = "PASSED".equals(validateCredentialResponse.getResult());
+        return new ExternalizedComputeClusterCredentialValidationResponse(successful, validateCredentialResponse.getMessage(), validationResults);
     }
 
     private void setTagsSafe(DetailedEnvironmentResponse environment, Map<String, String> userDefinedTags,

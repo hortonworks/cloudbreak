@@ -19,7 +19,7 @@ public class EnvironmentCreateDefaultExternalizedComputeClusterAction implements
         ExternalizedComputeCreateRequest request = new ExternalizedComputeCreateRequest();
         request.setCreate(true);
         client.getDefaultClient()
-                .defaultComputeClusterEndpoint().createDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request);
+                .defaultComputeClusterEndpoint().createDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request, false);
         return testDto;
     }
 }

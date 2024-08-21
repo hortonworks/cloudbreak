@@ -35,8 +35,14 @@ public interface EnvironmentDefaultComputeClusterEndpoint {
             operationId = "createDefaultExternalizedComputeCluster",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier createDefaultExternalizedComputeCluster(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-            @NotNull ExternalizedComputeCreateRequest request);
+            @NotNull ExternalizedComputeCreateRequest request, @QueryParam("force") boolean force);
 
+    /**
+     * It will be removed because I realized it is unnecessary and only complicates things. The create endpoint can be used instead.
+     *
+     * @deprecated use {@link #createDefaultExternalizedComputeCluster(String, ExternalizedComputeCreateRequest, boolean)} instead.
+     */
+    @Deprecated
     @PUT
     @Path("/reinitialize")
     @Produces(MediaType.APPLICATION_JSON)

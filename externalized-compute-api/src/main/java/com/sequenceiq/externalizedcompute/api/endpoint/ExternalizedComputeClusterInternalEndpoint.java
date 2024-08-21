@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
@@ -82,4 +83,10 @@ public interface ExternalizedComputeClusterInternalEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<ExternalizedComputeClusterResponse> list(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn);
+
+    @GET
+    @Path("validate_credential/{credentialName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    ExternalizedComputeClusterCredentialValidationResponse validateCredential(@NotEmpty @PathParam("credentialName") String credentialName,
+            @NotEmpty @QueryParam("region") String region, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

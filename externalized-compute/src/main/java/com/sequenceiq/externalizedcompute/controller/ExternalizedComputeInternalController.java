@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
@@ -83,6 +84,11 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
                 .stream()
                 .map(externalizedComputeClusterConverterService::convertToResponse)
                 .toList();
+    }
+
+    @Override
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region, String initiatorUserCrn) {
+        return externalizedComputeClusterService.validateCredential(credentialName, region, initiatorUserCrn);
     }
 
     private ExternalizedComputeCluster getExternalizedComputeCluster(String environmentCrn, String name) {

@@ -33,6 +33,14 @@ service LiftiePublic {
     option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
   }
 
+  // Validate credential :: Run cross-account and IAM validations based on passed in credential.
+  rpc ValidateCredential(ValidateCredentialRequest)
+      returns (ValidateCredentialResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
   // Delete compute cluster :: Deletes compute cluster.
   rpc DeleteCluster(DeleteClusterRequest)
       returns (DeleteClusterResponse) {
@@ -197,40 +205,31 @@ service LiftiePublic {
     option (options.MethodExtension.hidden) = true;
     option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
   }
-}
 
-// Kubernetes specs. Deprecated.
-message CommonKubernetes {
-  option (options.MessageExtension.deprecated) = true;
-  // Kubernetes version (default 1.28).
-  string version = 1;
-}
-
-// Network topology structure. Deprecated.
-message CommonNetworkTopology {
-  option (options.MessageExtension.deprecated) = true;
-  // Subnets.
-  repeated string subnets = 1;
+  // Suspend Cluster :: Suspends the kubernetes cluster
+  rpc SuspendCluster(SuspendClusterRequest) returns (SuspendClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+  // Resume Cluster :: Resumes the kubernetes cluster
+  rpc ResumeCluster(ResumeClusterRequest) returns (ResumeClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
 }
 
 // Network structure.
 message CommonNetwork {
-  // VPC CIDR. Deprecated.
-  string cidr = 1 [(options.FieldExtension.deprecated) = true];
-  // Network plugin (default multus). Deprecated.
-  string plugin = 2 [(options.FieldExtension.deprecated) = true];
-  // Network topology. Deprecated.
-  CommonNetworkTopology topology = 3 [(options.FieldExtension.deprecated) = true];
-  // Allow these CIDR for inbound communication when using environment proxy settings. Only if backend supports it. Deprecated.
-  repeated string inboundProxyCidr = 4 [(options.FieldExtension.deprecated) = true];
-  // The pod CIDR to use if the backend provider supports setting this.
-  string podCidr = 5;
-  // The CIDR for services declared inside of Kubernetes if the backend provider supports setting this.
-  string serviceCidr = 6;
   // Subnets.
-  repeated string subnets = 7;
+  repeated string subnets = 1;
+  // The pod CIDR to use if the backend provider supports setting this.
+  string podCidr = 2;
+  // The CIDR for services declared inside of Kubernetes if the backend provider supports setting this.
+  string serviceCidr = 3;
   // Cluster outbound type. Currently supported is udr.
-  string outboundType = 8;
+  string outboundType = 4;
 }
 
 // API server request structure.
@@ -385,103 +384,8 @@ message CommonInstanceGroup {
   CommonAccelerator accelerator = 19;
   // AWS specific configuration used only for EKS InstanceGroups
   CommonAwsInstanceGroupConfig aws = 21;
-}
-
-// YuniKorn request structure. Deprecated.
-message CommonYuniKorn {
-  option (options.MessageExtension.deprecated) = true;
-  // Flag to enable yunikorn (default true).
-  bool enabled = 1;
-  // Version is ignored for overrides will be removed soon.
-  string version = 2;
-  // The app sorting policy is ignored for overrides will be removed soon.
-  string appSortingPolicy = 3;
-  // The node sorting policy is ignored for overrides will be removed soon.
-  string nodeSortingPolicy = 4;
-}
-
-// Nvidia request structure. Deprecated.
-message CommonNvidia {
-  option (options.MessageExtension.deprecated) = true;
-  // GPU label key.
-  string gpuLabelKey = 1;
-  // GPU label value.
-  string gpuLabelValue = 2;
-}
-
-// Alertmanager request structure. Deprecated.
-message CommonAlertmanager {
-  option (options.MessageExtension.deprecated) = true;
-  // Flag to enable alertmanager.
-  bool enabled = 1;
-}
-
-// Resource limits request structure. Deprecated.
-message CommonResourceLimit {
-  option (options.MessageExtension.deprecated) = true;
-  // Prometheus server CPU limit (default 1000m).
-  string cpu = 1;
-  // Prometheus server memory limit (default 2048M).
-  string memory = 2;
-}
-
-// Monitoring request structure. Deprecated.
-message CommonMonitoring {
-  option (options.MessageExtension.deprecated) = true;
-  // Flag to enable Monitoring installation.
-  bool enabled = 1;
-  // Alertmanager.
-  CommonAlertmanager alertmanager = 2;
-  // Server resource limits.
-  CommonResourceLimit serverResourceLimit = 3;
-}
-
-// Metering service request structure. Deprecated.
-message CommonMeteringService {
-  option (options.MessageExtension.deprecated) = true;
-  // Service type.
-  string serviceType = 1;
-  // Service version.
-  string serviceVersion = 2;
-  // Workload CRN.
-  string workloadCrn = 3;
-  // Cluster CRN.
-  string clusterCrn = 4;
-  // Service configuration.
-  string serviceConfiguration = 5;
-}
-
-// Metering request structure. Deprecated.
-message CommonMetering {
-  option (options.MessageExtension.deprecated) = true;
-  // Flag to enable metering installation.
-  bool enabled = 1;
-  // Array of services.
-  repeated CommonMeteringService services = 2;
-}
-
-// Logging request structure. Deprecated.
-message CommonLogging {
-  option (options.MessageExtension.deprecated) = true;
-  // True to enable logging installation (default false).
-  bool enabled = 1;
-}
-
-// Istio request structure. Deprecated.
-message CommonIstio {
-  option (options.MessageExtension.deprecated) = true;
-  reserved 2,3,4;
-  // True to enable istio installation (default true).
-  bool enabled = 1;
-  // Deployment profile to use. Currently supported are common, cml and cde (default common).
-  string deploymentProfile = 5;
-}
-
-// Horizontal pod autoscaler request structure. Deprecated.
-message CommonHorizontalPodAutoScaler {
-  option (options.MessageExtension.deprecated) = true;
-  // Enable flag.
-  bool enabled = 1;
+  // Custom user data script.
+  string userData = 22;
 }
 
 // Autoscaler request structure.
@@ -528,31 +432,6 @@ message CommonAutoscaler {
   string scaleDownUnreadyTime = 12;
 }
 
-// Deployments request structure. Deprecated.
-message CommonDeployments {
-  option (options.MessageExtension.deprecated) = true;
-  // Autoscaler specs.
-  CommonAutoscaler autoscaler = 1;
-  // Horizontal pod autoscaler specs.
-  CommonHorizontalPodAutoScaler horizontalPodAutoscaler = 2;
-  // Istio specs.
-  CommonIstio istio = 3;
-  // Logging specs.
-  CommonLogging logging = 4;
-  // Metering specs.
-  CommonMetering metering = 5;
-  // Monitoring specs.
-  CommonMonitoring monitoring = 6;
-  // Nvidia specs.
-  CommonNvidia nvidia = 7;
-  // Repository for images.
-  string repository = 8;
-  // Yunikorn specs.
-  CommonYuniKorn yunikorn = 9;
-  // Telemetry KMS key ARN.
-  string telemetryKmsKeyArn = 10;
-}
-
 
 // Image catalog request structure.
 message CommonImageCatalog {
@@ -568,50 +447,6 @@ message CommonStorageSpec {
   bool csiEnabled = 1;
 }
 
-// Cluster spec request structure. Deprecated.
-message CommonClusterSpec {
-  option (options.MessageExtension.deprecated) = true;
-  // Bootstrap script.
-  string bootstrapScript = 1;
-  // Deployments.
-  CommonDeployments deployments = 2;
-  // Instance groups.
-  repeated CommonInstanceGroup instanceGroups = 3;
-  // K8s details.
-  CommonKubernetes kubernetes = 4;
-  // Network.
-  CommonNetwork network = 5;
-  // Security.
-  CommonSecurity security = 6;
-  // SSH keypair.
-  string sshKeypairName = 7;
-  // Array of egress rules of the form protocol:fromPort[:toPort[:CIDR]].
-  repeated string workerEgressRules = 8;
-  // Array of ingress rules of the form protocol:fromPort[:toPort[:CIDR]].
-  repeated string workerIngressRules = 9;
-  // The image catalog details.
-  CommonImageCatalog imageCatalog = 10;
-  // The storage specifications.
-  CommonStorageSpec storage = 11;
-}
-
-// Cluster owner structure. Deprecated.
-message CommonClusterOwner {
-  option (options.MessageExtension.deprecated) = true;
-  // Owner's email.
-  string email = 1;
-  // Owner's firstname.
-  string firstName = 2;
-  // Owner's lastname.
-  string lastName = 3;
-  // Owner's user ID.
-  string userId = 4;
-  // Owner's account ID.
-  string accountId = 5;
-  // Owner's actor CRN.
-  string crn = 6;
-}
-
 // Experimental structure.
 message CommonExperimental {
   // Example: node.role.kubernetes.io/liftie-infra or foo.bar.baz/liftie-infra.
@@ -620,62 +455,71 @@ message CommonExperimental {
   string kubernetesVersion = 2;
 }
 
-// Cluster metadata structure. Deprecated.
-message CommonClusterMetadata {
-  option (options.MessageExtension.deprecated) = true;
-  // Environment CRN.
-  string environmentCrn = 1;
-  // Cluster name.
-  string name = 2;
-  // Cluster owner.
-  CommonClusterOwner clusterOwner = 3;
-  // Cluster type. Supported values are Dedicated and Shared. Default is Shared.
-  string clusterType = 4;
-  // Cluster description.
-  string description = 5;
-  // Labels.
-  map<string,string> labels = 6;
-  // Cluster workloads.
-  repeated string workloads = 7;
-  // Experimental.
-  CommonExperimental experimental = 8;
-  // Experience Type.
-  string experienceType = 9;
-}
-
 // Cluster status structure.
 message CommonStatusMessage {
   // Message.
   string message = 1;
   // Status.
   string status = 2;
+  // Cloud Provider Details.
+  CloudProviderDetails cloudProviderDetails = 3;
 }
+
+// Cloud provider details structure.
+message CloudProviderDetails {
+  // List of Azure Activity Logs.
+  repeated AzureActivityLog azureLogs = 1;
+  // Message specific to cloud provider.
+  string message = 2;
+}
+
+// Azure activity log structure.
+message AzureActivityLog {
+  // Event timestamp.
+  string eventTimestamp = 1;
+  // Operation ID.
+  string operationId = 2;
+  // Operation name.
+  string operationName = 3;
+  // Status.
+  string status = 4;
+  // Log level.
+  string logLevel = 5;
+  // Status message.
+  string statusMessage = 6;
+  // Resource group name.
+  string resourceGroupName = 7;
+  // Resource type.
+  string resourceType = 8;
+  // Resource ID.
+  string resourceId = 9;
+  // Correlation ID.
+  string correlationId = 10;
+}
+
 
 // Request object for creating a cluster.
 message CreateClusterRequest {
   option (options.MessageExtension.formFactor) = "public";
   option (options.MessageExtension.hidden) = true;
   option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // Specifies the metadata. Deprecated.
-  CommonClusterMetadata metadata = 1 [(options.FieldExtension.deprecated) = true];
-  // Specifies the spec. Deprecated.
-  CommonClusterSpec spec = 2 [(options.FieldExtension.deprecated) = true];
+  reserved 1, 2;
+  // Environment CRN. Required.
+  string environment = 5 [(options.FieldExtension.required) = true];
+  // Cluster name. Required.
+  string name = 6 [(options.FieldExtension.required) = true];
+  // Cluster description.
+  string description = 7;
+  // Cluster level tags.
+  map<string, string> tags = 8;
+  // Experimental. (internal field).
+  CommonExperimental experimental = 10;
+  // Network.
+  CommonNetwork network = 9;
   // Skip validation.
   bool skipValidation = 3;
   // Is default compute cluster. (internal field).
   bool isDefault = 4;
-  // Environment CRN. Required.
-  string environment = 5;
-  // Cluster name. Required.
-  string name = 6;
-  // Cluster description.
-  string description = 7;
-  // Cluster level tags.
-  map<string,string> tags = 8;
-  // Network.
-  CommonNetwork network = 9;
-  // Experimental. (internal field).
-  CommonExperimental experimental = 10;
 }
 
 // Request object for validating a cluster.
@@ -683,24 +527,34 @@ message ValidateClusterRequest {
   option (options.MessageExtension.formFactor) = "public";
   option (options.MessageExtension.hidden) = true;
   option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // Specifies the metadata. Deprecated.
-  CommonClusterMetadata metadata = 1 [(options.FieldExtension.deprecated) = true];
-  // Specifies the spec. Deprecated.
-  CommonClusterSpec spec = 2 [(options.FieldExtension.deprecated) = true];
-  // Is default compute cluster. (internal field).
-  bool isDefault = 3;
+  reserved 1, 2;
   // Environment CRN. Required.
-  string environment = 4 ;
+  string environment = 4 [(options.FieldExtension.required) = true];
   // Cluster name. Required.
-  string name = 5 ;
+  string name = 5 [(options.FieldExtension.required) = true];
   // Cluster description.
   string description = 6;
   // Cluster level tags.
-  map<string,string> tags = 7;
-  // Network.
-  CommonNetwork network = 8;
+  map<string, string> tags = 7;
   // Experimental. (internal field).
   CommonExperimental experimental = 9;
+  // Network.
+  CommonNetwork network = 8;
+  // Is default compute cluster. (internal field).
+  bool isDefault = 3;
+}
+
+// Request object for validating a credential.
+message ValidateCredentialRequest {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Credential name or CRN.
+  string credential = 1;
+  // Region.
+  string region = 2;
+  // Experimental. (internal field).
+  CommonExperimental experimental = 3;
 }
 
 // Validation summary structure.
@@ -766,6 +620,18 @@ message CreateClusterResponse {
 
 // Response object for validating a cluster.
 message ValidateClusterResponse {
+  // Validation result.
+  string result = 1;
+  // Numerical summary of the validations.
+  ValidationSummary summary = 2;
+  // A message describing the end result of the validations.
+  string message = 3;
+  // The list of detailed validation results.
+  repeated ValidationResult validations = 4;
+}
+
+// Response object for validating a credential.
+message ValidateCredentialResponse {
   // Validation result.
   string result = 1;
   // Numerical summary of the validations.
@@ -943,6 +809,12 @@ message CommonDeploymentProfileDetailsResp {
   string deploymentProfile = 2;
 }
 
+// Dashboard response structure.
+message CommonDashboardResp {
+  // False to disable dashboard installation (default true).
+  bool enabled = 1;
+}
+
 // Horizontal pod autoscaler response structure.
 message CommonHorizontalPodAutoScalerResp {
   // Enable flag.
@@ -1017,6 +889,8 @@ message CommonDeploymentsResp {
   string telemetryKmsKeyArn = 10;
   // Knox specs.
   CommonDeploymentProfileDetailsResp knox = 11;
+  // Dashboard specs.
+  CommonDashboardResp dashboard = 12;
 }
 
 // Instance state counts response structure.
@@ -1175,6 +1049,14 @@ message AksState {
   string userData = 30;
   // Security.
   CommonSecurityResp security = 31;
+  // EgressType specifies the outbound type used by the cluster.
+  string egressType = 32;
+  // AksManagedIdentity is the user-assigned managed identity to be used by the AKS control plane.
+  string aksManagedIdentity = 33;
+  // PrivateDNSZone for the AKS cluster.
+  string privateDnsZone = 34;
+  // URL of the OIDCIssuer attached to the cluster.
+  string oidcIssuerURL = 35;
 }
 
 // Event response structure.
@@ -1377,12 +1259,14 @@ message EksState {
   CommonSecurityResp security = 31;
   // Suspended processes.
   repeated string suspendedProcesses = 32;
-  // Whether to stop deletion on error.
-  bool stopDeleteOnError = 33;
+  // Whether to delete cluster on error.
+  bool deleteClusterOnError = 33;
   // Whether CSI is enabled.
   bool csiEnabled = 34;
-  // Whether lacework is enabled.
-  bool laceworkEnabled = 35;
+  // Whether fips mode is enabled.
+  bool fipsModeEnabled = 35;
+  // End point Gateway subnets.
+  repeated string endpointGatewaySubnets = 36;
 }
 
 // Image catalog response structure.
@@ -1492,6 +1376,8 @@ message DescribeClusterResponse {
   bool isDefault = 35 [(options.FieldExtension.formFactor) = "public"];
   // The clusterShape represents the shape of the cluster, which can be "Embedded" or "Externalized".
   string clusterShape = 36 [(options.FieldExtension.formFactor) = "public"];
+  // BOM version of the cluster.
+  string bomVersion = 37;
 }
 
 // Object representing sorting filters.
@@ -1608,6 +1494,16 @@ message ListClusterItem {
   bool isDefault = 30 [(options.FieldExtension.formFactor) = "public"];
   // The clusterShape represents the shape of the cluster, which can be "Embedded" or "Externalized".
   string clusterShape = 31 [(options.FieldExtension.formFactor) = "public"];
+  // BOM version of the cluster.
+  string bomVersion = 32;
+  // Map of services proxied through this cluster.
+  map<string, ProxiedService> proxiedServices = 33;
+}
+
+// Exposes any LoadBalancer services that we register with the cluster proxy service.
+message ProxiedService {
+  // Proxied service.
+  map<string, string> proxiedService = 1;
 }
 
 // List clusters response.
@@ -1676,6 +1572,12 @@ message InstallDeploymentResponse {
   string overrides = 5;
   // Chart that the deployment was created from.
   Chart chart = 6;
+  // History.
+  Deployment history = 7;
+  // The latest deployment operation in Liftie.
+  string latestOperation = 8;
+  // The status of the deployment operation in Liftie.
+  string operationStatus = 9;
 }
 
 // Request structure for deleting a deployment.
@@ -1752,6 +1654,10 @@ message Deployment {
   repeated AvailableDeploymentUpgrade upgrades = 7;
   // JSON overrides for the deployment's properties.
   string overrides = 8;
+  // The latest deployment operation in Liftie.
+  string latestOperation = 9;
+  // The status of the deployment operation in Liftie.
+  string operationStatus = 10;
 }
 
 // History structure.
@@ -1900,12 +1806,28 @@ message CommonUpdateClusterSpec {
   bool refreshInstanceGroups = 6;
   // Azure specific update options.
   CommonAzureUpdateClusterSpec azure = 7;
+  // Update Bootstrap Script.
+  UpdateBootstrapScriptSpec bootstrapScript = 8;
+}
+
+// Update Bootstrap Script.
+message UpdateBootstrapScriptSpec {
+  // Bootstrap script.
+  string script = 1;
 }
 
 // Update cluster metadata structure.
 message CommonUpdateClusterMetadata {
   // Description of compute cluster update.
   string description = 1;
+  // Experimental (Internal).
+  UpdateClusterExperimental experimental = 2;
+}
+
+// Update Cluster Experimental structure.
+message UpdateClusterExperimental {
+  // BOM version.
+  string bomVersion = 1;
 }
 
 // Update cluster deployments structure.
@@ -2199,7 +2121,7 @@ message RecommendInstanceTypesRequest{
 message RecommendInstanceTypesRequirements {
   option (options.MessageExtension.hidden) = true;
   option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // CPU Architechture
+  // CPU Architechture 
   repeated CpuArch.Value cpuArchs = 1;
   // Minimum CPU count.
   int64 cpuMin = 2;
@@ -2257,4 +2179,44 @@ message InstanceTypeInfo {
   int64 memory = 4;
   // Number of GPUs available in instance types.
   int64 gpus = 5;
+}
+
+// Request structure to suspend the k8s cluster
+message SuspendClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Whether to skip validation.
+  bool skipValidation = 4;
+}
+
+// Response structure for suspending the k8s cluster
+message SuspendClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 1;
+  // Pre-flight validation check response. Only given on a validation failure and `skipValidation` is false.
+  ValidationResponse validationResponse = 2;
+}
+
+// Request structure to resume the k8s cluster
+message ResumeClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Whether to skip validation.
+  bool skipValidation = 4;
+}
+
+// Response structure for resuming the k8s cluster
+message ResumeClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 1;
+  // Pre-flight validation check response. Only given on a validation failure and `skipValidation` is false.
+  ValidationResponse validationResponse = 2;
 }

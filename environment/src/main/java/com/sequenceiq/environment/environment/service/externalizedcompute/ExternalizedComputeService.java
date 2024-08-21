@@ -21,18 +21,22 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterCreationRetrievalTask;
 import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterPollerObject;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterBase;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 
@@ -58,10 +62,14 @@ public class ExternalizedComputeService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private EnvironmentFlowValidatorService validatorService;
+
     public void createComputeCluster(Environment environment) {
         try {
             if (environment.getDefaultComputeCluster().isCreate()) {
                 externalizedComputeValidation(environment.getAccountId());
+                credentialValidation(environment);
                 String computeClusterName = getDefaultComputeClusterName(environment.getName());
                 if (externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), computeClusterName).isPresent()) {
                     LOGGER.info("Externalized compute cluster already exists with name: {}", computeClusterName);
@@ -111,6 +119,18 @@ public class ExternalizedComputeService {
         }
     }
 
+    public void credentialValidation(Environment environment) {
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                .withEnvironmentDto(environmentService.getEnvironmentDto(environment))
+                .build();
+        ValidationResult validationResult = validatorService.validateCredentialForExternalizedComputeCluster(environmentValidationDto);
+        if (validationResult.hasError()) {
+            String formattedErrors = validationResult.getFormattedErrors();
+            LOGGER.debug("Externalized compute cluster credential validation failed for environment {} with {}.", environment.getId(), formattedErrors);
+            throw new EnvironmentServiceException(formattedErrors);
+        }
+    }
+
     public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {
         return externalizedComputeClientService.getComputeCluster(environmentCrn, name);
     }
@@ -119,14 +139,6 @@ public class ExternalizedComputeService {
         String defaultComputeClusterName = getDefaultComputeClusterName(environment.getName());
         return externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(),
                 defaultComputeClusterName);
-    }
-
-    public void checkDefaultCluster(Environment environment, boolean force) {
-        ExternalizedComputeClusterResponse externalizedComputeClusterResponse = getDefaultCluster(environment).orElseThrow(
-                () -> new BadRequestException("Default compute cluster does not exists for this environment."));
-        if (!force && ExternalizedComputeClusterApiStatus.AVAILABLE.equals(externalizedComputeClusterResponse.getStatus())) {
-            throw new BadRequestException("Your default compute cluster is in Available state!");
-        }
     }
 
     public String getDefaultComputeClusterName(String environmentName) {
@@ -214,5 +226,12 @@ public class ExternalizedComputeService {
                 throw new ExternalizedComputeOperationFailedException("Polling result was: " + pollWithTimeout.getPollingResult());
             });
         }
+    }
+
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region) {
+        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult = externalizedComputeClientService.validateCredential(
+                credentialName, region);
+        LOGGER.debug("Validate credential result: {}", validateCredentialResult);
+        return validateCredentialResult;
     }
 }

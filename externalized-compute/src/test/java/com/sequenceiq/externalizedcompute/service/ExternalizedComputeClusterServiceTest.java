@@ -5,6 +5,7 @@ import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClust
 import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +32,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.ListClusterItem;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatus;
@@ -370,6 +373,58 @@ class ExternalizedComputeClusterServiceTest {
         clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
         doThrow(new RuntimeException("existing operation 'Delete'")).when(liftieGrpcClient).deleteCluster("clusterCrn2", internalCrn, ENV_CRN);
         clusterService.initiateAuxClusterDelete(externalizedComputeClusterId, USER_CRN);
+    }
+
+    @Test
+    public void testValidateCredential() {
+        String actorCrn = "actorCrn";
+        String credential = "credential";
+        String region = "region";
+        when(liftieGrpcClient.validateCredential(any(LiftiePublicProto.ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
+                LiftiePublicProto.ValidateCredentialResponse.newBuilder().setResult("PASSED").build());
+        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult =
+                clusterService.validateCredential(credential, region, actorCrn);
+        ArgumentCaptor<LiftiePublicProto.ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
+                LiftiePublicProto.ValidateCredentialRequest.class);
+        verify(liftieGrpcClient, times(1))
+                .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(actorCrn));
+        LiftiePublicProto.ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
+        assertEquals(credential, capturedRequest.getCredential());
+        assertEquals(region, capturedRequest.getRegion());
+        assertTrue(validateCredentialResult.isSuccessful());
+    }
+
+    @Test
+    public void testValidateCredentialFailed() {
+        String actorCrn = "actorCrn";
+        String credential = "credential";
+        String region = "region";
+        when(liftieGrpcClient.validateCredential(any(LiftiePublicProto.ValidateCredentialRequest.class), eq(actorCrn))).thenReturn(
+                LiftiePublicProto.ValidateCredentialResponse.newBuilder().setResult("FAILED")
+                        .addValidations(LiftiePublicProto.ValidationResult.newBuilder().setStatus("FAILED")
+                                .setName("IAM Policy Permissions Check")
+                                .setDescription("For a given role, the attached policies should have all the necessary permissions " +
+                                        "of a default cross account role in AWS ")
+                                .setCategory("IAM")
+                                .setMessage("IAM Policy validation failed.")
+                                .setDetailedMessage("CrossAccount role does not have permissions for these operations : ssm:GetParameter, ssm:GetParameters, " +
+                                        "ssm:GetParameterHistory, ssm:GetParametersByPath. Please check if any Service Control Policies are in place. " +
+                                        "Documentation:  https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html.").build())
+                        .build());
+        ExternalizedComputeClusterCredentialValidationResponse validateCredentialResult =
+                clusterService.validateCredential(credential, region, actorCrn);
+        ArgumentCaptor<LiftiePublicProto.ValidateCredentialRequest> validateCredentialRequestArgumentCaptor = ArgumentCaptor.forClass(
+                LiftiePublicProto.ValidateCredentialRequest.class);
+        verify(liftieGrpcClient, times(1))
+                .validateCredential(validateCredentialRequestArgumentCaptor.capture(), eq(actorCrn));
+        LiftiePublicProto.ValidateCredentialRequest capturedRequest = validateCredentialRequestArgumentCaptor.getValue();
+        assertEquals(credential, capturedRequest.getCredential());
+        assertEquals(region, capturedRequest.getRegion());
+        assertFalse(validateCredentialResult.isSuccessful());
+        assertThat(validateCredentialResult.getValidationResults())
+                .containsOnly("CrossAccount role does not have permissions for these operations : ssm:GetParameter, ssm:GetParameters, " +
+                        "ssm:GetParameterHistory, ssm:GetParametersByPath. Please check if any Service Control Policies are in place. " +
+                        "Documentation:  https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html.");
     }
 
 }

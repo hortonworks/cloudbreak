@@ -48,9 +48,9 @@ class EnvironmentDefaultComputeClusterControllerTest {
         ExternalizedComputeClusterDto dto = ExternalizedComputeClusterDto.builder().build();
         when(environmentApiConverter.requestToExternalizedComputeClusterDto(eq(request), any())).thenReturn(dto);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createDefaultExternalizedComputeCluster(envCrn, request));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createDefaultExternalizedComputeCluster(envCrn, request, false));
         verify(environmentModificationService, times(1)).getEnvironment(any(), eq(NameOrCrn.ofCrn(envCrn)));
-        verify(externalizedComputeFlowService, times(1)).createDefaultExternalizedComputeClusterForExistingEnv(environment, dto);
+        verify(externalizedComputeFlowService, times(1)).initializeDefaultExternalizedComputeCluster(environment, dto, false);
     }
 
     @Test
@@ -64,7 +64,7 @@ class EnvironmentDefaultComputeClusterControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitializeDefaultExternalizedComputeCluster(envCrn, request, true));
         verify(environmentModificationService, times(1)).getEnvironment(any(), eq(NameOrCrn.ofCrn(envCrn)));
-        verify(externalizedComputeFlowService, times(1)).reinitializeDefaultExternalizedComputeCluster(environment, dto, true);
+        verify(externalizedComputeFlowService, times(1)).initializeDefaultExternalizedComputeCluster(environment, dto, true);
     }
 
 }

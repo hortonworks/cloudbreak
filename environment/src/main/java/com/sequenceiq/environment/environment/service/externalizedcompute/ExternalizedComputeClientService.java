@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterCredentialValidationResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -51,6 +52,13 @@ public class ExternalizedComputeClientService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, initiatorUserCrn, name, force), "Failed to delete compute cluster"));
+    }
+
+    public ExternalizedComputeClusterCredentialValidationResponse validateCredential(String credentialName, String region) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> handleException(() -> endpoint.validateCredential(credentialName, region, initiatorUserCrn),
+                        "Failed to validate credential"));
     }
 
     public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {

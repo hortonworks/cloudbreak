@@ -43,21 +43,28 @@ public class EnvironmentDefaultComputeClusterController implements EnvironmentDe
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     public FlowIdentifier createDefaultExternalizedComputeCluster(@ResourceCrn @TenantAwareParam String crn,
-            ExternalizedComputeCreateRequest request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(crn));
-        ExternalizedComputeClusterDto externalizedComputeClusterDto = environmentApiConverter.requestToExternalizedComputeClusterDto(request, accountId);
-        return externalizedComputeFlowService.createDefaultExternalizedComputeClusterForExistingEnv(environment, externalizedComputeClusterDto);
+            ExternalizedComputeCreateRequest request, boolean force) {
+        return triggerInitializeFlow(crn, request, force);
     }
 
+    /**
+     * It will be removed because I realized it is unnecessary and only complicates things. The create endpoint can be used instead.
+     *
+     * @deprecated use {@link #createDefaultExternalizedComputeCluster(String, ExternalizedComputeCreateRequest, boolean)} instead.
+     */
+    @Deprecated
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     public FlowIdentifier reinitializeDefaultExternalizedComputeCluster(@ResourceCrn @TenantAwareParam String crn,
             ExternalizedComputeCreateRequest request, boolean force) {
+        return triggerInitializeFlow(crn, request, force);
+    }
+
+    private FlowIdentifier triggerInitializeFlow(String crn, ExternalizedComputeCreateRequest request, boolean force) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         ExternalizedComputeClusterDto externalizedComputeClusterDto = environmentApiConverter.requestToExternalizedComputeClusterDto(request, accountId);
-        return externalizedComputeFlowService.reinitializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, force);
+        return externalizedComputeFlowService.initializeDefaultExternalizedComputeCluster(environment, externalizedComputeClusterDto, force);
     }
 
 }
