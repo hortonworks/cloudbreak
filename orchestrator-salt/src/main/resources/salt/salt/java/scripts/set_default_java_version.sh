@@ -21,8 +21,11 @@ if [ -n "$TARGET_JAVA_VERSION" ]; then
     ln -sfn /etc/pki/java/cacerts /etc/alternatives/java_sdk_11/jre/lib/security/cacerts
   elif [ $CURRENT_JAVA_VERSION -eq 8 ] && [ $TARGET_JAVA_VERSION -eq 17 ]; then
     echo "Change java version from $CURRENT_JAVA_VERSION to $TARGET_JAVA_VERSION"
-
-    alternatives --set java java-17-openjdk.x86_64
+    if [[ $CPU_ARCH =~ ^aarch64 ]]; then
+      alternatives --set java java-17-openjdk.aarch64
+    else
+      alternatives --set java java-17-openjdk.x86_64
+    fi
     ln -sfn /etc/alternatives/java_sdk_17 /usr/lib/jvm/java
     mkdir -p /etc/alternatives/java_sdk_17/jre/lib/security
     ln -sfn /etc/alternatives/java_sdk_17/conf/security/java.security /etc/alternatives/java_sdk_17/jre/lib/security/java.security

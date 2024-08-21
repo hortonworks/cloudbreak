@@ -10,6 +10,7 @@ set_default_java_version:
     - name: /opt/salt/scripts/set_default_java_version.sh 2>&1 | tee -a /var/log/set-default-java-version.log && [[ 0 -eq ${PIPESTATUS[0]} ]] && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/set-default-java-version-executed || exit ${PIPESTATUS[0]}
     - runas: root
     - env:
+        - CPU_ARCH: {{salt['grains.get']('cpuarch')}}
         - TARGET_JAVA_VERSION: {{salt['pillar.get']('java:version')}}
     - failhard: True
     - require:
