@@ -1,14 +1,19 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
+import static com.sequenceiq.cloudbreak.common.domain.SslCertStatus.OUTDATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +25,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
@@ -172,5 +180,48 @@ class StackV4ControllerTest {
         StackRotateRdsCertificateV4Response result = doAs(USER_CRN, () ->
                 underTest.rotateRdsCertificateByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN));
         Assertions.assertSame(actual, result);
+    }
+
+    @Test
+    public void testListDatabaseServersCertificateStatus() {
+        StackDatabaseServerCertificateStatusV4Request request = new StackDatabaseServerCertificateStatusV4Request();
+
+        StackDatabaseServerCertificateStatusV4Response mockResponse1 = new StackDatabaseServerCertificateStatusV4Response();
+        mockResponse1.setSslStatus(OUTDATED);
+        mockResponse1.setCrn("crn-1");
+
+        StackDatabaseServerCertificateStatusV4Response mockResponse2 = new StackDatabaseServerCertificateStatusV4Response();
+        mockResponse2.setSslStatus(OUTDATED);
+        mockResponse2.setCrn("crn-2");
+
+        List<StackDatabaseServerCertificateStatusV4Response> mockResponsesList = Arrays.asList(mockResponse1, mockResponse2);
+        StackDatabaseServerCertificateStatusV4Responses mockClusterResponses = new StackDatabaseServerCertificateStatusV4Responses();
+        mockClusterResponses.setResponses(mockResponsesList);
+
+        when(stackOperationService.listDatabaseServersCertificateStatus(request, "usercrn")).thenReturn(mockClusterResponses);
+
+        StackDatabaseServerCertificateStatusV4Responses result = doAs("usercrn", () ->
+                underTest.internalListDatabaseServersCertificateStatus(0L, request, "usercrn"));
+
+        assertNotNull(result);
+        assertEquals(2, result.getResponses().size());
+
+        StackDatabaseServerCertificateStatusV4Response resultResponse1 = result.getResponses()
+                .stream()
+                .filter(e -> e.getCrn().equals("crn-1"))
+                .findFirst()
+                .get();
+        assertEquals(OUTDATED, resultResponse1.getSslStatus());
+        assertEquals("crn-1", resultResponse1.getCrn());
+
+        StackDatabaseServerCertificateStatusV4Response resultResponse2 = result.getResponses()
+                .stream()
+                .filter(e -> e.getCrn().equals("crn-2"))
+                .findFirst()
+                .get();
+        assertEquals(OUTDATED, resultResponse2.getSslStatus());
+        assertEquals("crn-2", resultResponse2.getCrn());
+
+        verify(stackOperationService, times(1)).listDatabaseServersCertificateStatus(request, "usercrn");
     }
 }

@@ -110,6 +110,22 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByWorkspaceIdAndEnvironmentIds(workspaceId, environmentCrns);
     }
 
+    public Set<DatabaseServerConfig> findAllByEnvironmentCrns(String accountId, Set<String> environmentCrns) {
+        if (CollectionUtils.isEmpty(environmentCrns)) {
+            throw new IllegalArgumentException("No environment CRNs supplied.");
+        }
+
+        return repository.findByAccountIdAndEnvironmentIds(accountId, environmentCrns);
+    }
+
+    public Set<DatabaseServerConfig> findAllByClusterCrns(String accountId, Set<String> clusterCrns) {
+        if (CollectionUtils.isEmpty(clusterCrns)) {
+            throw new IllegalArgumentException("No cluster CRNs supplied.");
+        }
+
+        return repository.findByAccountIdAndClusterCrns(accountId, clusterCrns);
+    }
+
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {
 
         if (repository.findByName(resource.getName()).isPresent()) {
