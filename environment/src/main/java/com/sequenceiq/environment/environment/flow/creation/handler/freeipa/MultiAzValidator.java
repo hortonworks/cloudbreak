@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,23 +18,16 @@ public class MultiAzValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzValidator.class);
 
-    @Value("${cb.multiaz.supported.platform:AWS,AZURE}")
+    @Value("${cb.multiaz.supported.platform:AWS,AZURE,GCP}")
     private Set<String> supportedMultiAzPlatforms;
 
     private Map<CloudPlatform, Set<Entitlement>> entitlementForPlatformMap = new HashMap<>() {
         {
             put(CloudPlatform.AWS, Set.of(Entitlement.CDP_CB_AWS_NATIVE_FREEIPA));
             put(CloudPlatform.AZURE, Set.of(Entitlement.CDP_CB_AZURE_MULTIAZ));
+            put(CloudPlatform.GCP, Set.of(Entitlement.CDP_CB_GCP_MULTIAZ));
         }
     };
-
-    @PostConstruct
-    public void initSupportedPlatforms() {
-        if (supportedMultiAzPlatforms.isEmpty()) {
-            supportedMultiAzPlatforms = Set.of(
-                    CloudPlatform.AWS.name(), CloudPlatform.AZURE.name());
-        }
-    }
 
     public boolean suportedMultiAzForEnvironment(String platform) {
         return supportedMultiAzPlatforms.contains(platform);

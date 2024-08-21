@@ -155,7 +155,7 @@ public class InstanceMetaDataService {
                         LOGGER.debug("Calculate new subnet and AZ for private id: {}", privateId);
                         Map<String, String> filteredSubnetsByLeastUsedAz = multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap);
                         multiAzCalculatorService.updateSubnetIdForSingleInstanceIfEligible(filteredSubnetsByLeastUsedAz, currentSubnetUsage, instanceMetaData,
-                                instanceGroup);
+                                instanceGroup, stack);
                     } else if (StringUtils.isNoneBlank(instanceMetaData.getSubnetId())) {
                         LOGGER.debug("Subnet and AZ calculation skipped, because the AZ/subnet already set: {}/{}",
                                 instanceMetaData.getAvailabilityZone(), instanceMetaData.getSubnetId());

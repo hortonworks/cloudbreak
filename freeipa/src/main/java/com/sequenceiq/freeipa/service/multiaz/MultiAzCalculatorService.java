@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.multiaz;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 
 import java.util.ArrayList;
@@ -48,6 +49,8 @@ public class MultiAzCalculatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzCalculatorService.class);
 
+    private static final Set<CloudPlatform> ZONAL_SUBNET_CLOUD_PLATFORMS = Set.of(CloudPlatform.AWS);
+
     @Inject
     private MultiAzValidator multiAzValidator;
 
@@ -78,11 +81,11 @@ public class MultiAzCalculatorService {
         return subnetAzPairs;
     }
 
-    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {
+    public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, Stack stack) {
         Map<String, Integer> subnetUsage = calculateCurrentSubnetUsage(subnetAzPairs, instanceGroup);
         if (!subnetUsage.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                updateSubnetIdForInstanceIfEmpty(subnetAzPairs, subnetUsage, instanceMetaData);
+                updateSubnetIdForInstanceIfEmpty(subnetAzPairs, subnetUsage, instanceMetaData, stack);
             }
         } else {
             LOGGER.warn("Couldn't set subnetId for instances");
@@ -90,11 +93,11 @@ public class MultiAzCalculatorService {
     }
 
     public void updateSubnetIdForSingleInstanceIfEligible(Map<String, String> subnetAzPairs, Map<String, Integer> subnetUsage,
-            InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {
+            InstanceMetaData instanceMetaData, InstanceGroup instanceGroup, Stack stack) {
         Map<String, Integer> filteredUsage = subnetUsage.entrySet().stream().filter(e -> subnetAzPairs.containsKey(e.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (!filteredUsage.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
-            updateSubnetIdForInstanceIfEmpty(subnetAzPairs, filteredUsage, instanceMetaData);
+            updateSubnetIdForInstanceIfEmpty(subnetAzPairs, filteredUsage, instanceMetaData, stack);
         }
         subnetUsage.putAll(filteredUsage);
     }
@@ -148,7 +151,8 @@ public class MultiAzCalculatorService {
         LOGGER.debug("Current availability zone usage of instance group '{}': '{}'", instanceGroup.getGroupName(), azUsage);
     }
 
-    private void updateSubnetIdForInstanceIfEmpty(Map<String, String> subnetAzPairs, Map<String, Integer> subnetUsage, InstanceMetaData instanceMetaData) {
+    private void updateSubnetIdForInstanceIfEmpty(Map<String, String> subnetAzPairs, Map<String, Integer> subnetUsage, InstanceMetaData instanceMetaData,
+            Stack stack) {
         if (StringUtils.isBlank(instanceMetaData.getSubnetId())) {
             Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
             String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
@@ -156,7 +160,9 @@ public class MultiAzCalculatorService {
                     leastUsedSubnetId, numberOfInstanceInASubnet, instanceMetaData.getInstanceId());
 
             instanceMetaData.setSubnetId(leastUsedSubnetId);
-            instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+            if (isSubnetAzNeeded(stack)) {
+                instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
+            }
 
             subnetUsage.put(leastUsedSubnetId, numberOfInstanceInASubnet + 1);
         }
@@ -232,10 +238,11 @@ public class MultiAzCalculatorService {
                     if (CollectionUtils.isEmpty(availabilityZones)) {
                         LOGGER.warn("There are no availability zones configured");
                         throw new BadRequestException(String.format("The %s region does not support Multi AZ configuration. " +
-                                        "Please check https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support " +
+                                        "Please check %s " +
                                         "for more details. " +
                                         "It is also possible that the given %s instances on %s group are not supported in any specified %s zones.",
                                 environment.getLocation().getName(),
+                                getDocumentationLink(CloudPlatform.valueOf(stack.getCloudPlatform())),
                                 instanceGroup.getTemplate().getInstanceType(),
                                 instanceGroup.getGroupName(),
                                 environmentZones.stream().sorted().collect(Collectors.toList())));
@@ -314,5 +321,17 @@ public class MultiAzCalculatorService {
                             "Please modify the environment and configure Availability Zones", detailedEnvironmentResponse.getName()));
         }
         return environmentZones;
+    }
+
+    private String getDocumentationLink(CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AZURE : return "https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support";
+            case GCP :  return "https://cloud.google.com/docs/geography-and-regions";
+            default : return "";
+        }
+    }
+
+    private boolean isSubnetAzNeeded(Stack stack) {
+        return !stack.isMultiAz() || ZONAL_SUBNET_CLOUD_PLATFORMS.contains(CloudPlatform.valueOf(stack.getCloudPlatform()));
     }
 }

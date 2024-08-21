@@ -26,6 +26,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -1049,6 +1050,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS))
                                 .addEntitlements(createEntitlement(CDP_GCP_RAZ))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_MULTIAZ))
+                                .addEntitlements(createEntitlement(CDP_CB_GCP_MULTIAZ))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_RESIZE_DISK))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_DELETE_DISK))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_ADD_DISK))

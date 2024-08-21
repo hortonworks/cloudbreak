@@ -154,7 +154,7 @@ public class InstanceMetaDataServiceTest {
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
         verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
-        verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup);
+        verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup, stack);
         verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup);
     }
 
@@ -191,7 +191,8 @@ public class InstanceMetaDataServiceTest {
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
         assertEquals(image.getImageId(), instanceMetaData.getImage().getSilent(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId());
         verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
-        verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup);
+        verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData,
+                actualInstanceGroup, null);
         verify(multiAzCalculatorService).populateAvailabilityZonesForInstances(stack, instanceGroup);
     }
 

@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +21,11 @@ public class MultiAzValidatorTest {
     @InjectMocks
     private MultiAzValidator underTest;
 
-    static Object[][] supportedCloudPlarformForMultiAz() {
+    static Object[][] supportedCloudPlatformForMultiAz() {
         return new Object[][]{
                 {"AWS", true},
                 {"AZURE", true},
-                {"GCP", false}
+                {"GCP", true}
         };
     }
 
@@ -34,19 +33,18 @@ public class MultiAzValidatorTest {
         return new Object[][]{
                 {CloudPlatform.AWS, Set.of(Entitlement.CDP_CB_AWS_NATIVE_FREEIPA)},
                 {CloudPlatform.AZURE, Set.of(Entitlement.CDP_CB_AZURE_MULTIAZ)},
-                {CloudPlatform.GCP, Collections.emptySet()}
+                {CloudPlatform.GCP, Set.of(Entitlement.CDP_CB_GCP_MULTIAZ)}
         };
     }
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(underTest, "supportedMultiAzPlatforms", Set.of("AWS", "AZURE"));
-        underTest.initSupportedPlatforms();
+        ReflectionTestUtils.setField(underTest, "supportedMultiAzPlatforms", Set.of("AWS", "AZURE", "GCP"));
     }
 
-    @ParameterizedTest(name = "testSuportedMultiAzForEnvironmetFor{0}")
-    @MethodSource("supportedCloudPlarformForMultiAz")
-    public void testSuportedMultiAzForEnvironment(String cloudPlatform, boolean supportedMultiAz) {
+    @ParameterizedTest(name = "testSupportedMultiAzForEnvironment{0}")
+    @MethodSource("supportedCloudPlatformForMultiAz")
+    public void testSupportedMultiAzForEnvironment(String cloudPlatform, boolean supportedMultiAz) {
         assertEquals(supportedMultiAz, underTest.suportedMultiAzForEnvironment(cloudPlatform));
     }
 

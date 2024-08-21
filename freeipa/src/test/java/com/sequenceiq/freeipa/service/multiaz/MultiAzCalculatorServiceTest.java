@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,7 +33,6 @@ import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -60,6 +60,10 @@ class MultiAzCalculatorServiceTest {
     private static final String SUB_2 = "SUB2";
 
     private static final Map<String, String> SUBNET_AZ_PAIRS = Map.of(SUB_1, "AZ1", SUB_2, "AZ2", "ONLYINAZMAP", "AZ3");
+
+    private static final Set<String> ENVIRONMENT_ZONES = Set.of("zone-1", "zone-2", "zone-3");
+
+    private static final Set<String> INSTANCE_GROUP_ZONES = Set.of("zone-1", "zone-2");
 
     @Mock
     private MultiAzValidator multiAzValidator;
@@ -103,7 +107,8 @@ class MultiAzCalculatorServiceTest {
         when(multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)).thenReturn(Boolean.TRUE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
-        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(Map.of(SUB_1, 2, SUB_2, 1)), instanceMetaData, instanceGroup);
+        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(Map.of(SUB_1, 2, SUB_2, 1)), instanceMetaData,
+                instanceGroup, mock(Stack.class));
 
         assertEquals(SUB_2, instanceMetaData.getSubnetId());
     }
@@ -114,7 +119,7 @@ class MultiAzCalculatorServiceTest {
         when(multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)).thenReturn(Boolean.FALSE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
-        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(Map.of(SUB_1, 2, SUB_2, 1)), instanceMetaData, instanceGroup);
+        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(Map.of(SUB_1, 2, SUB_2, 1)), instanceMetaData, instanceGroup, null);
 
         assertNull(instanceMetaData.getSubnetId());
     }
@@ -124,7 +129,7 @@ class MultiAzCalculatorServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
-        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(), instanceMetaData, instanceGroup);
+        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(), instanceMetaData, instanceGroup, null);
 
         assertNull(instanceMetaData.getSubnetId());
     }
@@ -136,7 +141,7 @@ class MultiAzCalculatorServiceTest {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setSubnetId("ASDF");
 
-        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(Map.of(SUB_1, 2, SUB_2, 1)), instanceMetaData, instanceGroup);
+        underTest.updateSubnetIdForSingleInstanceIfEligible(SUBNET_AZ_PAIRS, new HashMap<>(Map.of(SUB_1, 2, SUB_2, 1)), instanceMetaData, instanceGroup, null);
 
         assertEquals("ASDF", instanceMetaData.getSubnetId());
     }
@@ -154,7 +159,7 @@ class MultiAzCalculatorServiceTest {
                 deletedInstance));
         when(multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)).thenReturn(Boolean.TRUE);
 
-        underTest.calculateByRoundRobin(SUBNET_AZ_PAIRS, instanceGroup);
+        underTest.calculateByRoundRobin(SUBNET_AZ_PAIRS, instanceGroup, mock(Stack.class));
 
         assertEquals(3, instanceGroup.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(im -> SUB_1.equals(im.getSubnetId()) && "AZ1".equals(im.getAvailabilityZone())).count());
@@ -165,14 +170,15 @@ class MultiAzCalculatorServiceTest {
         assertEquals(1, instanceGroup.getNotDeletedInstanceMetaDataSet().stream().filter(im -> "IGNORED".equals(im.getSubnetId())).count());
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
     @MockitoSettings(strictness = Strictness.LENIENT)
-    public void testPopulateAvailabilityZonesNonMultiAz() {
+    public void testPopulateAvailabilityZonesNonMultiAz(CloudPlatform cloudPlatform) {
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
-        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse);
+        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse, cloudPlatform);
         stack.setMultiAz(false);
 
         underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup);
@@ -184,21 +190,22 @@ class MultiAzCalculatorServiceTest {
         assertNull(instanceGroup.getAvailabilityZones());
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
     @MockitoSettings(strictness = Strictness.LENIENT)
-    public void testPopulateAvailabilityZonesWithEnvironmentZonesNotAvailable() {
+    public void testPopulateAvailabilityZonesWithEnvironmentZonesNotAvailable(CloudPlatform cloudPlatform) {
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
         stack.setMultiAz(true);
-        stack.setPlatformvariant(AzureConstants.VARIANT.value());
-        stack.setCloudPlatform(AzureConstants.PLATFORM.value());
+        stack.setPlatformvariant(cloudPlatform.name());
+        stack.setCloudPlatform(cloudPlatform.name());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         when(cloudConnector.availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
-        when(environmentNetworkResponse.getAvailabilityZones(CloudPlatform.AZURE)).thenReturn(Set.of());
+        when(environmentNetworkResponse.getAvailabilityZones(cloudPlatform)).thenReturn(Set.of());
         when(detailedEnvironmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
         when(detailedEnvironmentResponse.getName()).thenReturn("test-env");
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -207,29 +214,31 @@ class MultiAzCalculatorServiceTest {
                 "Please modify the environment and configure Availability Zones", badRequestException.getMessage());
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
     @MockitoSettings(strictness = Strictness.LENIENT)
-    public void testPopulateAvailabilityZonesWithZonesinRequest() {
+    public void testPopulateAvailabilityZonesWithZonesInRequest(CloudPlatform cloudPlatform) {
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
-        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse);
-        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(any())).thenReturn(Set.of("1", "2"));
+        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse, cloudPlatform);
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(any())).thenReturn(INSTANCE_GROUP_ZONES);
 
         underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup);
 
         verify(availabilityZoneConnector, times(0)).getAvailabilityZones(any(), any(), any(), any());
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
     @MockitoSettings(strictness = Strictness.LENIENT)
-    public void testPopulateAvailabilityZonesWithAvailabilityZoneConnectorNotExist() {
+    public void testPopulateAvailabilityZonesWithAvailabilityZoneConnectorNotExist(CloudPlatform cloudPlatform) {
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
-        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse);
+        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse, cloudPlatform);
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         when(cloudConnector.availabilityZoneConnector()).thenReturn(null);
@@ -240,43 +249,42 @@ class MultiAzCalculatorServiceTest {
         assertNull(instanceGroup.getAvailabilityZones());
     }
 
-    @Test
-    public void testPopulateAvailabilityZonesWithZonesLessThanMinZones() {
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
+    public void testPopulateAvailabilityZonesWithNoZones(CloudPlatform cloudPlatform) {
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
-        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse);
+        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse, cloudPlatform);
         instanceGroup.getTemplate().setInstanceType("instance0");
         when(availabilityZoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup));
 
-        assertEquals("The westus2 region does not support Multi AZ configuration. " +
-                "Please check https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support " +
-                "for more details. It is also possible that the given instance0 instances " +
-                "on master group are not supported in any specified [1, 2, 3] zones.", badRequestException.getMessage());
+        assertEquals(getErrorMessage(cloudPlatform), badRequestException.getMessage());
         verify(availabilityZoneConnector).getAvailabilityZones(any(), any(), any(), any());
     }
 
-    @Test
-    public void testPopulateAvailabilityZones() {
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
+    public void testPopulateAvailabilityZones(CloudPlatform cloudPlatform) {
         AvailabilityZoneConnector availabilityZoneConnector = mock(AvailabilityZoneConnector.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
-        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse);
-        Json expectedAttribute = new Json(Map.of(NetworkConstants.AVAILABILITY_ZONES, Set.of("1", "2", "3")));
-        when(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(Set.of("1", "2", "3"), null)).thenReturn(expectedAttribute);
+        setUpForPopulateAvailabilityZones(stack, instanceGroup, availabilityZoneConnector, detailedEnvironmentResponse, cloudPlatform);
+        Json expectedAttribute = new Json(Map.of(NetworkConstants.AVAILABILITY_ZONES, ENVIRONMENT_ZONES));
+        when(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(ENVIRONMENT_ZONES, null)).thenReturn(expectedAttribute);
 
         underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup);
 
         verify(availabilityZoneConnector).getAvailabilityZones(any(), any(), any(), any());
 
         assertEquals(expectedAttribute.getMap(), instanceGroup.getInstanceGroupNetwork().getAttributes().getMap());
-        assertEquals(Set.of("1", "2", "3"),
+        assertEquals(ENVIRONMENT_ZONES,
                 instanceGroup.getAvailabilityZones().stream().map(InstanceGroupAvailabilityZone::getAvailabilityZone).collect(Collectors.toSet()));
     }
 
@@ -304,13 +312,14 @@ class MultiAzCalculatorServiceTest {
         assertNull(deletedInstance.getAvailabilityZone());
     }
 
-    @Test
-    public void testPopulateAvailabilityZonesForInstancesWithOnlyDeletedInstances() {
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AZURE", "GCP"})
+    public void testPopulateAvailabilityZonesForInstancesWithOnlyDeletedInstances(CloudPlatform cloudPlatform) {
         Stack stack = new Stack();
         stack.setMultiAz(true);
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
-        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(null)).thenReturn(Set.of("1", "2", "3"));
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(null)).thenReturn(ENVIRONMENT_ZONES);
         instanceGroup.setTemplate(new Template());
         instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
         InstanceMetaData deletedInstance = createInstanceMetadata(null, "instance-deleted");
@@ -331,7 +340,7 @@ class MultiAzCalculatorServiceTest {
         stack.setMultiAz(true);
         InstanceGroup instanceGroup = new InstanceGroup();
         InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
-        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(null)).thenReturn(Set.of("1", "2", "3"));
+        when(availabilityZoneConverter.getAvailabilityZonesFromJsonAttributes(null)).thenReturn(ENVIRONMENT_ZONES);
         instanceGroup.setTemplate(new Template());
         instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
         InstanceMetaData deletedInstance = createInstanceMetadata(null, "instance-deleted");
@@ -339,10 +348,10 @@ class MultiAzCalculatorServiceTest {
         Set<InstanceMetaData> instances = new HashSet<>();
         instances.add(deletedInstance);
         InstanceMetaData instanceMetaData0 = createInstanceMetadata(null, "instance-0");
-        instanceMetaData0.setAvailabilityZone("1");
+        instanceMetaData0.setAvailabilityZone("zone-1");
         instances.add(instanceMetaData0);
-        InstanceMetaData instanceMetaData1 = createInstanceMetadata(null, "instance-0");
-        instanceMetaData1.setAvailabilityZone("2");
+        InstanceMetaData instanceMetaData1 = createInstanceMetadata(null, "instance-1");
+        instanceMetaData1.setAvailabilityZone("zone-2");
         instances.add(instanceMetaData1);
         instances.add(createInstanceMetadata(null, "instance-2"));
         instances.add(createInstanceMetadata(null, "instance-3"));
@@ -426,7 +435,7 @@ class MultiAzCalculatorServiceTest {
     }
 
     private void setUpForPopulateAvailabilityZones(Stack stack, InstanceGroup instanceGroup, AvailabilityZoneConnector availabilityZoneConnector,
-            DetailedEnvironmentResponse detailedEnvironmentResponse) {
+            DetailedEnvironmentResponse detailedEnvironmentResponse, CloudPlatform cloudPlatform) {
         InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
         instanceGroup.setTemplate(new Template());
         instanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
@@ -436,18 +445,34 @@ class MultiAzCalculatorServiceTest {
                 createInstanceMetadata(null), createInstanceMetadata(null), createInstanceMetadata(null), createInstanceMetadata(null),
                 deletedInstance));
         stack.setMultiAz(true);
-        stack.setPlatformvariant(AzureConstants.VARIANT.value());
-        stack.setCloudPlatform(AzureConstants.PLATFORM.value());
+        stack.setPlatformvariant(cloudPlatform.name());
+        stack.setCloudPlatform(cloudPlatform.name());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         when(cloudConnector.availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
-        when(availabilityZoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(Set.of("1", "2", "3"));
+        when(availabilityZoneConnector.getAvailabilityZones(any(), any(), any(), any())).thenReturn(ENVIRONMENT_ZONES);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
-        when(environmentNetworkResponse.getAvailabilityZones(CloudPlatform.AZURE)).thenReturn(Set.of("1", "2", "3"));
+        when(environmentNetworkResponse.getAvailabilityZones(cloudPlatform)).thenReturn(ENVIRONMENT_ZONES);
         LocationResponse locationResponse = mock(LocationResponse.class);
         when(detailedEnvironmentResponse.getLocation()).thenReturn(locationResponse);
         when(locationResponse.getName()).thenReturn("westus2");
 
         when(detailedEnvironmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
+    }
+
+    private String getErrorMessage(CloudPlatform cloudPlatform) {
+        return String.format("The westus2 region does not support Multi AZ configuration. " +
+                "Please check %s " +
+                "for more details. It is also possible that the given instance0 instances " +
+                "on master group are not supported in any specified %s zones.", getDocumentationLink(cloudPlatform),
+                ENVIRONMENT_ZONES.stream().sorted().collect(Collectors.toList()));
+    }
+
+    private String getDocumentationLink(CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AZURE : return "https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support";
+            case GCP :  return "https://cloud.google.com/docs/geography-and-regions";
+            default : return "";
+        }
     }
 }
