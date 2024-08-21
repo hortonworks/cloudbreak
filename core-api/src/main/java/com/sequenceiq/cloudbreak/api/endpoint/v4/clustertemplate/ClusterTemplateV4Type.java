@@ -16,5 +16,6 @@ public enum ClusterTemplateV4Type {
     FLOW_MANAGEMENT_HA,
     OPERATIONALDATABASE,
     DISCOVERY_DATA_AND_EXPLORATION,
-    OTHER
+    OTHER,
+    DLM
 }

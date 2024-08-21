@@ -499,7 +499,8 @@ cb:
           7.2.18 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.2.18 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.18 - COD Edge Node=cdp-cod-edge-node;
-          7.2.18 - Edge Flow Management Light Duty=cdp-edge-flow-management-small
+          7.2.18 - Edge Flow Management Light Duty=cdp-edge-flow-management-small;
+          7.2.18 - Data Lifecycle Manager=cdp-dlm
         7.3.0: >
           7.3.0 - SDX Micro Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-micro;
           7.3.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
