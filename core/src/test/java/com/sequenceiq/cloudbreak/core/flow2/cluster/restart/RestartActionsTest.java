@@ -30,8 +30,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -144,18 +144,18 @@ class RestartActionsTest {
         verify(restartService).startInstanceRestart(eq(context));
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
-        verify(eventBus).notify("REBOOTINSTANCESREQUEST", event);
-        assertThat(argumentCaptor.getValue()).isInstanceOf(RebootInstancesRequest.class);
+        verify(eventBus).notify("RESTARTINSTANCESREQUEST", event);
+        assertThat(argumentCaptor.getValue()).isInstanceOf(RestartInstancesRequest.class);
 
         verify(instanceMetaDataToCloudInstanceConverter, times(1)).convert(anyCollection(), any());
-        RebootInstancesRequest req = (RebootInstancesRequest) argumentCaptor.getValue();
+        RestartInstancesRequest req = (RestartInstancesRequest) argumentCaptor.getValue();
         Assert.assertEquals(5, req.getCloudInstances().size());
     }
 
     @Test
     void testRestartInstancesFinishedAction() throws Exception {
-        AbstractRestartActions<RebootInstancesResult> action =
-                (AbstractRestartActions<RebootInstancesResult>) underTest.restartFinishedAction();
+        AbstractRestartActions<RestartInstancesResult> action =
+                (AbstractRestartActions<RestartInstancesResult>) underTest.restartFinishedAction();
         initActionPrivateFields(action);
         List<InstanceMetadataView> instancesToRestart =
                 generateInstances(5, 100, InstanceStatus.SERVICES_HEALTHY);
@@ -171,7 +171,7 @@ class RestartActionsTest {
         }
         InstancesStatusResult results = new InstancesStatusResult(cloudContext, cloudVmInstanceStatusList);
 
-        RebootInstancesResult payload = new RebootInstancesResult(STACK_ID, results, instanceIds);
+        RestartInstancesResult payload = new RestartInstancesResult(STACK_ID, results, instanceIds);
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, Collections.emptyMap());
 
@@ -179,7 +179,7 @@ class RestartActionsTest {
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
         verify(eventBus).notify("RESTARTFINALIZED", event);
-        assertThat(argumentCaptor.getValue()).isInstanceOf(RebootInstancesResult.class);
+        assertThat(argumentCaptor.getValue()).isInstanceOf(RestartInstancesResult.class);
     }
 
     @Test

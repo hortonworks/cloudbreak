@@ -21,8 +21,8 @@ import org.springframework.statemachine.action.Action;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -92,7 +92,7 @@ public class RestartActions {
 
                 List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(instances, stack.getStack());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
-                return new RebootInstancesRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                return new RestartInstancesRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
 
             private List<CloudResource> getCloudResources(Long stackId) {
@@ -106,10 +106,10 @@ public class RestartActions {
 
     @Bean(name = "RESTART_FINISHED_STATE")
     public Action<?, ?> restartFinishedAction() {
-        return new AbstractRestartActions<>(RebootInstancesResult.class) {
+        return new AbstractRestartActions<>(RestartInstancesResult.class) {
 
             @Override
-            protected void doExecute(RestartContext context, RebootInstancesResult payload,
+            protected void doExecute(RestartContext context, RestartInstancesResult payload,
                     Map<Object, Object> variables) throws Exception {
                 List<String> successOnRestartInstanceIds = payload.getResults().getResults()
                         .stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList())

@@ -474,7 +474,7 @@ class StackCommonServiceTest {
         when(stackView.isStopped()).thenReturn(FALSE);
         when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(allInstanceMetadataView);
         when(stack.getAllAvailableInstances()).thenReturn(allInstanceMetadataView);
-        when(stack.getPlatformVariant()).thenReturn("GCP");
+        when(stack.getCloudPlatform()).thenReturn("GCP");
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds));
         assertEquals("Restart instances is not supported for GCP Cloud Platform", exception.getMessage());
@@ -492,7 +492,7 @@ class StackCommonServiceTest {
         when(stackView.isStopped()).thenReturn(FALSE);
         when(stack.getAllNotTerminatedInstanceMetaData()).thenReturn(allInstanceMetadataView);
         when(stack.getAllAvailableInstances()).thenReturn(allInstanceMetadataView);
-        when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getCloudPlatform()).thenReturn("AWS");
         underTest.restartMultipleInstances(STACK_CRN, ACCOUNT_ID, instanceIds);
         verify(stackOperationService).restartInstances(stack, instanceIds);
     }
