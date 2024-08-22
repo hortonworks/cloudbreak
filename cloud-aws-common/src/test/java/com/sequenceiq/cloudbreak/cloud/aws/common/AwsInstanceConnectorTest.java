@@ -185,6 +185,20 @@ class AwsInstanceConnectorTest {
     }
 
     @Test
+    void testCheckIfInstanceMissing() {
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(getDescribeInstancesResult("running", 16));
+        List<CloudInstance> extistingInstances = getCloudInstances();
+        List<CloudInstance> list = new ArrayList<>(extistingInstances);
+        CloudInstance nonExistingInstance = new CloudInstance("i-xxxx", null, null, "subnet-123", "az1");
+        list.add(nonExistingInstance);
+        List<CloudVmInstanceStatus> cloudVmInstanceStatuses = underTest.check(authenticatedContext, list);
+        assertThat(cloudVmInstanceStatuses, hasSize(3));
+        assertThat(cloudVmInstanceStatuses, hasItem(new CloudVmInstanceStatus(extistingInstances.get(0), InstanceStatus.STARTED)));
+        assertThat(cloudVmInstanceStatuses, hasItem(new CloudVmInstanceStatus(extistingInstances.get(1), InstanceStatus.STARTED)));
+        assertThat(cloudVmInstanceStatuses, hasItem(new CloudVmInstanceStatus(nonExistingInstance, InstanceStatus.TERMINATED)));
+    }
+
+    @Test
     void testCheckException() {
         mockDescribeInstancesException("silence of the lambs", "would you ...");
         List<CloudInstance> list = getCloudInstances();

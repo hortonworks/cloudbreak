@@ -357,18 +357,19 @@ public class AwsInstanceConnector implements InstanceConnector {
     private List<CloudVmInstanceStatus> fillCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> cloudIntancesWithInstanceId, String region,
             DescribeInstancesResponse result) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
-        for (Reservation reservation : result.reservations()) {
-            for (Instance instance : reservation.instances()) {
-                Optional<CloudInstance> cloudInstanceForInstanceId = cloudIntancesWithInstanceId.stream()
-                        .filter(cloudInstance -> cloudInstance.getInstanceId().equals(instance.instanceId()))
-                        .findFirst();
-                if (cloudInstanceForInstanceId.isPresent()) {
-                    CloudInstance cloudInstance = cloudInstanceForInstanceId.get();
-                    LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
-                            instance.instanceId(), instance.state().name(), region, ac.getCloudContext().getId());
-                    cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance,
-                            AwsInstanceStatusMapper.getInstanceStatusByAwsStateAndReason(instance.state(), instance.stateReason())));
-                }
+        for (CloudInstance cloudInstance : cloudIntancesWithInstanceId) {
+            Optional<Instance> instanceForInstanceId = result.reservations().stream()
+                    .flatMap(reservation -> reservation.instances().stream())
+                    .filter(instance -> instance.instanceId().equals(cloudInstance.getInstanceId()))
+                    .findFirst();
+            if (instanceForInstanceId.isPresent()) {
+                Instance instance = instanceForInstanceId.get();
+                LOGGER.debug("AWS instance [{}] is in {} state, region: {}, stack: {}",
+                        instance.instanceId(), instance.state().name(), region, ac.getCloudContext().getId());
+                cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance,
+                        AwsInstanceStatusMapper.getInstanceStatusByAwsStateAndReason(instance.state(), instance.stateReason())));
+            } else {
+                cloudVmInstanceStatuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));
             }
         }
         return cloudVmInstanceStatuses;
