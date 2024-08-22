@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordType;
@@ -100,7 +99,7 @@ public class RotateSaltPasswordService {
     public void rotateSaltPassword(Stack stack) {
         validateRotateSaltPassword(stack);
         try {
-            String oldPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
+            String oldPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPasswordVault();
             String newPassword = PasswordUtil.generatePassword();
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
             hostOrchestrator.changePassword(gatewayConfigs, newPassword, oldPassword);
@@ -116,8 +115,6 @@ public class RotateSaltPasswordService {
         tryRemoveSaltuserFromGateways(stack, allGatewayConfig);
 
         String newPassword = PasswordUtil.generatePassword();
-        SecurityConfig securityConfig = stack.getSecurityConfig();
-        securityConfig.getSaltSecurityConfig().setSaltPassword(newPassword);
         try {
             bootstrapService.reBootstrap(stack);
             securityConfigService.changeSaltPassword(stack, newPassword);

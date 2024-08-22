@@ -135,7 +135,7 @@ class RotateSaltPasswordServiceTest {
         lenient().when(stack.getAllFunctioningNodes()).thenReturn(Set.of(node));
 
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
-        saltSecurityConfig.setSaltPassword(OLD_PASSWORD);
+        saltSecurityConfig.setSaltPasswordVault(OLD_PASSWORD);
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);

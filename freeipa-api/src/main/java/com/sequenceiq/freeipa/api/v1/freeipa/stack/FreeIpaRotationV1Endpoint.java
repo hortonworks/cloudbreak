@@ -45,7 +45,7 @@ public interface FreeIpaRotationV1Endpoint {
     @GET
     @Path("list_secret_types")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "List rotatable secret types for Free IPA", operationId = "listRotatableFreeipaSecretType",
+    @Operation(summary = "List rotatable secret types for FreeIPA", operationId = "listRotatableFreeipaSecretType",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);

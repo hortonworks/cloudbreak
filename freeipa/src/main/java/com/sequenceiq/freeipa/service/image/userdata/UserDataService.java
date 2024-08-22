@@ -142,11 +142,11 @@ public class UserDataService {
                 intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack, credential));
         SecurityConfig securityConfig = stack.getSecurityConfig();
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKey();
+        String cbPrivKey = saltSecurityConfig.getSaltBootSignPrivateKeyVault();
         byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(new String(Base64.decodeBase64(cbPrivKey)));
         String sshUser = stack.getStackAuthentication().getLoginUserName();
         String cbCert = securityConfig.getClientCert();
-        String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
+        String saltBootPassword = saltSecurityConfig.getSaltBootPasswordVault();
         try {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmConnectivityParameters ccmParameters = ccmParametersSupplier.get();

@@ -69,7 +69,6 @@ public class TlsSecurityService {
         String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
         saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
         String saltBootSignPrivateKey = BaseEncoding.base64().encode(privateKey.getBytes());
-        saltSecurityConfig.setSaltBootSignPrivateKey(saltBootSignPrivateKey);
         saltSecurityConfig.setSaltBootSignPrivateKeyVault(saltBootSignPrivateKey);
     }
 
@@ -80,19 +79,16 @@ public class TlsSecurityService {
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
         String saltSignPrivateKey = BaseEncoding.base64().encode(privateKey.getBytes());
-        saltSecurityConfig.setSaltSignPrivateKey(saltSignPrivateKey);
         saltSecurityConfig.setSaltSignPrivateKeyVault(saltSignPrivateKey);
     }
 
     private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {
         String saltBootPassword = PasswordUtil.generatePassword();
-        saltSecurityConfig.setSaltBootPassword(saltBootPassword);
         saltSecurityConfig.setSaltBootPasswordVault(saltBootPassword);
     }
 
     private void generateSaltPassword(SaltSecurityConfig saltSecurityConfig) {
         String saltPassword = PasswordUtil.generatePassword();
-        saltSecurityConfig.setSaltPassword(saltPassword);
         saltSecurityConfig.setSaltPasswordVault(saltPassword);
     }
 

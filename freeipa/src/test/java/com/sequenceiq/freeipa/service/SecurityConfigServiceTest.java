@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,13 +66,13 @@ class SecurityConfigServiceTest {
     void changePasswordSuccess() {
         SecurityConfig securityConfig = new SecurityConfig();
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
-        saltSecurityConfig.setSaltPassword("old-" + PASSWORD);
+        saltSecurityConfig.setSaltPasswordVault("old" + PASSWORD);
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         stack.setSecurityConfig(securityConfig);
 
         underTest.changeSaltPassword(stack, PASSWORD);
 
-        assertThat(saltSecurityConfig.getSaltPassword()).isEqualTo(PASSWORD);
+        assertEquals(PASSWORD, saltSecurityConfig.getSaltPasswordVault());
         verify(saltSecurityConfigRepository).save(saltSecurityConfig);
     }
 
