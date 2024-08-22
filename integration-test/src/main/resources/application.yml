@@ -106,13 +106,13 @@ integrationtest:
       7.2.17: 7.2.16
       7.2.18: 7.2.17
       7.3.0: 7.2.18
-    currentHARuntimeVersion: 7.2.18
-    currentRuntimeVersion: 7.2.18
-    targetRuntimeVersion: 7.3.0
-    distroXUpgradeCurrentVersion: 7.2.18
-    distroXUpgradeTargetVersion: 7.3.0
-    distroXUpgrade3rdPartyCurrentVersion: 7.2.18
-    distroXUpgrade3rdPartyTargetVersion: 7.3.0
+    currentHARuntimeVersion: 7.2.16
+    currentRuntimeVersion: 7.2.16
+    targetRuntimeVersion: 7.2.17
+    distroXUpgradeCurrentVersion: 7.2.16
+    distroXUpgradeTargetVersion: 7.2.17
+    distroXUpgrade3rdPartyCurrentVersion: 7.2.16
+    distroXUpgrade3rdPartyTargetVersion: 7.2.17
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-cb-image-catalog.json
   upgradeDatabaseServer:
     originalDatabaseMajorVersion: 11
