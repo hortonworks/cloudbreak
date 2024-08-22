@@ -47,6 +47,8 @@ class MultiAzDecoratorTest {
 
     private static final String PLATFORM_AZURE = CloudPlatform.AZURE.name();
 
+    private static final String PLATFORM_GCP = CloudPlatform.GCP.name();
+
     private MultiAzDecorator underTest;
 
     @BeforeEach
@@ -193,7 +195,7 @@ class MultiAzDecoratorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = CloudPlatform.class, mode = Mode.EXCLUDE, names = {"AWS", "AZURE"})
+    @EnumSource(value = CloudPlatform.class, mode = Mode.EXCLUDE, names = {"AWS", "AZURE", "GCP"})
     void decorateStackRequestWithMultiAzTestWhenUnsupportedCloudPlatform(CloudPlatform cloudPlatform) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(cloudPlatform.name());
@@ -214,7 +216,20 @@ class MultiAzDecoratorTest {
                 () -> underTest.decorateStackRequestWithMultiAz(new StackV4Request(), environment, clusterShape));
 
         assertThat(illegalStateException).hasMessage(
-                String.format("Encountered clusterShape=%s with isMultiAzEnabledByDefault()==false. Azure multi AZ is unsupported for such shapes.",
+                String.format("Multi Az on Azure is not unsupported for Cluster Shape '%s'", clusterShape));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    void decorateStackRequestWithMultiAzTestWhenGcpAndBadClusterShape(SdxClusterShape clusterShape) {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform(PLATFORM_GCP);
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+                () -> underTest.decorateStackRequestWithMultiAz(new StackV4Request(), environment, clusterShape));
+
+        assertThat(illegalStateException).hasMessage(
+                String.format("Multi Az on GCP is not unsupported for Cluster Shape '%s'",
                         clusterShape));
     }
 
@@ -224,6 +239,18 @@ class MultiAzDecoratorTest {
         StackV4Request stackV4Request = new StackV4Request();
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(PLATFORM_AZURE);
+
+        underTest.decorateStackRequestWithMultiAz(stackV4Request, environment, clusterShape);
+
+        assertThat(stackV4Request.isEnableMultiAz()).isTrue();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    void decorateStackRequestWithMultiAzTestWhenGcpAndSuccess(SdxClusterShape clusterShape) {
+        StackV4Request stackV4Request = new StackV4Request();
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform(PLATFORM_GCP);
 
         underTest.decorateStackRequestWithMultiAz(stackV4Request, environment, clusterShape);
 

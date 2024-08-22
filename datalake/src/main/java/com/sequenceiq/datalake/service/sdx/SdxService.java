@@ -45,7 +45,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
@@ -904,7 +903,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             Set<CloudPlatform> multiAzSupportedPlatforms = platformConfig.getMultiAzSupportedPlatforms();
             if (!multiAzSupportedPlatforms.contains(cloudPlatform)) {
                 validationBuilder.error(String.format("Provisioning a multi AZ cluster is only enabled for the following cloud platforms: %s.",
-                        Joiner.on(", ").join(multiAzSupportedPlatforms)));
+                        multiAzSupportedPlatforms.stream().map(CloudPlatform::name).sorted().collect(Collectors.joining(","))));
             }
             if (AZURE.equals(cloudPlatform) && !entitlementService.isAzureMultiAzEnabled(environmentResponse.getAccountId())) {
                 validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure requires entitlement %s.",
@@ -913,6 +912,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             if (AZURE.equals(cloudPlatform) && !clusterShape.isMultiAzEnabledByDefault()) {
                 validationBuilder.error(String.format("Provisioning a multi AZ cluster on Azure is not supported for cluster shape %s.",
                         clusterShape.name()));
+            }
+            if (GCP.equals(cloudPlatform)) {
+                validateMultiAzForGcp(environmentResponse.getAccountId(), clusterShape, validationBuilder);
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -1745,6 +1747,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             String msg = "Failed to validate RDS SSL certificate rotation for SDX";
             LOGGER.warn(msg, wae);
             throw new IllegalStateException(msg, wae);
+        }
+    }
+
+    private void validateMultiAzForGcp(String accountId, SdxClusterShape clusterShape, ValidationResultBuilder validationBuilder) {
+        if (!entitlementService.isGcpMultiAzEnabled(accountId)) {
+            validationBuilder.error(String.format("Provisioning a multi AZ cluster on GCP requires entitlement %s.",
+                    Entitlement.CDP_CB_GCP_MULTIAZ.name()));
+        }
+
+        if (!clusterShape.isMultiAzEnabledByDefault()) {
+            validationBuilder.error(String.format("Provisioning a multi AZ cluster on GCP is not supported for cluster shape %s.",
+                    clusterShape.name()));
         }
     }
 }

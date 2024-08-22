@@ -41,6 +41,7 @@ public class MultiAzDecorator {
         switch (cloudPlatform) {
             case AWS -> decorateStackRequestWithMultiAzAws(stackV4Request, environment, clusterShape);
             case AZURE -> decorateStackRequestWithMultiAzAzure(stackV4Request, clusterShape);
+            case GCP -> decorateStackRequestWithMultiAzGcp(stackV4Request, clusterShape);
             default -> throw new IllegalStateException("Encountered enableMultiAz==true for unsupported cloud platform " + cloudPlatform);
         }
     }
@@ -65,8 +66,16 @@ public class MultiAzDecorator {
     private void decorateStackRequestWithMultiAzAzure(StackV4Request stackV4Request, SdxClusterShape clusterShape) {
         if (!clusterShape.isMultiAzEnabledByDefault()) {
             throw new IllegalStateException(
-                    String.format("Encountered clusterShape=%s with isMultiAzEnabledByDefault()==false. Azure multi AZ is unsupported for such shapes.",
+                    String.format("Multi Az on Azure is not unsupported for Cluster Shape '%s'",
                             clusterShape));
+        }
+        stackV4Request.setEnableMultiAz(true);
+    }
+
+    private void decorateStackRequestWithMultiAzGcp(StackV4Request stackV4Request, SdxClusterShape clusterShape) {
+        if (!clusterShape.isMultiAzEnabledByDefault()) {
+            throw new IllegalStateException(
+                    String.format("Multi Az on GCP is not unsupported for Cluster Shape '%s'", clusterShape));
         }
         stackV4Request.setEnableMultiAz(true);
     }

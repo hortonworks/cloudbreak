@@ -27,6 +27,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 class PlatformConfigTest {
 
+    private static final EnumSet<CloudPlatform> MULTI_AZ_CLOUD_PLATFORM = EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE, CloudPlatform.GCP);
+
     private PlatformConfig underTest;
 
     private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));
@@ -36,6 +38,7 @@ class PlatformConfigTest {
         underTest = new PlatformConfig();
         ReflectionTestUtils.setField(underTest, "dbServiceSslEnforcementSupportedPlatforms", EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE));
         ReflectionTestUtils.setField(underTest, "allPossibleExternalDbPlatforms", Set.of(CloudPlatform.AZURE));
+        ReflectionTestUtils.setField(underTest, "multiAzSupportedPlatforms", MULTI_AZ_CLOUD_PLATFORM);
     }
 
     static Object[][] sslEnforcementPlatformsDataProvider() {
@@ -92,16 +95,20 @@ class PlatformConfigTest {
     @Test
     void initPlatformsTest() {
         assertThat(underTest.getAllPossibleExternalDbPlatforms()).isEqualTo(Set.of(CloudPlatform.AZURE));
-        assertThat(underTest.getMultiAzSupportedPlatforms()).isNull();
 
         ReflectionTestUtils.setField(underTest, "dbServiceSupportedPlatforms", EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE));
         ReflectionTestUtils.setField(underTest, "dbServiceExperimentalPlatforms", EnumSet.of(CloudPlatform.OPENSTACK, CloudPlatform.YARN));
+
 
         underTest.initPlatforms();
 
         assertThat(underTest.getAllPossibleExternalDbPlatforms()).isEqualTo(EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE, CloudPlatform.OPENSTACK,
                 CloudPlatform.YARN));
-        assertThat(underTest.getMultiAzSupportedPlatforms()).isEqualTo(EnumSet.of(CloudPlatform.AWS, CloudPlatform.AZURE));
+    }
+
+    @Test
+    void testMultiAzCloudPlatforms() {
+        assertThat(underTest.getMultiAzSupportedPlatforms()).isEqualTo(MULTI_AZ_CLOUD_PLATFORM);
     }
 
 }

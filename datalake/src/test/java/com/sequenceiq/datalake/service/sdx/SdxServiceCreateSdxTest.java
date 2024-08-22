@@ -592,7 +592,7 @@ class SdxServiceCreateSdxTest {
         sdxClusterRequest.setEnableRangerRaz(false);
         sdxClusterRequest.setEnableMultiAz(multiAz);
         if (multiAz) {
-            when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE));
+            when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
         }
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -611,7 +611,7 @@ class SdxServiceCreateSdxTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = CloudPlatform.class, mode = Mode.EXCLUDE, names = {"AWS", "AZURE"})
+    @EnumSource(value = CloudPlatform.class, mode = Mode.EXCLUDE, names = {"AWS", "AZURE", "GCP"})
     void testSdxCreateRazNotRequestedAndMultiAzRequestedAndBadCloudPlatform(CloudPlatform cloudPlatform) {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
         withCloudStorage(sdxClusterRequest);
@@ -619,12 +619,12 @@ class SdxServiceCreateSdxTest {
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
         sdxClusterRequest.setEnableRangerRaz(false);
         sdxClusterRequest.setEnableMultiAz(true);
-        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE));
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
 
-        assertThat(badRequestException).hasMessage("Provisioning a multi AZ cluster is only enabled for the following cloud platforms: AWS, AZURE.");
+        assertThat(badRequestException).hasMessage("Provisioning a multi AZ cluster is only enabled for the following cloud platforms: AWS,AZURE,GCP.");
         verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
     }
 
@@ -637,12 +637,30 @@ class SdxServiceCreateSdxTest {
         when(entitlementService.isAzureMultiAzEnabled(detailedEnvironmentResponse.getAccountId())).thenReturn(false);
         sdxClusterRequest.setEnableRangerRaz(false);
         sdxClusterRequest.setEnableMultiAz(true);
-        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE));
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
 
         assertThat(badRequestException).hasMessage("Provisioning a multi AZ cluster on Azure requires entitlement CDP_CB_AZURE_MULTIAZ.");
+        verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
+    }
+
+    @Test
+    void testSdxCreateRazNotRequestedAndMultiAzRequestedAndGcpAndNotEntitled() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", MEDIUM_DUTY_HA);
+        withCloudStorage(sdxClusterRequest);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mockEnvironmentCall(sdxClusterRequest, GCP, null);
+        when(entitlementService.isGcpMultiAzEnabled(detailedEnvironmentResponse.getAccountId())).thenReturn(false);
+        sdxClusterRequest.setEnableRangerRaz(false);
+        sdxClusterRequest.setEnableMultiAz(true);
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+
+        assertThat(badRequestException).hasMessage("Provisioning a multi AZ cluster on GCP requires entitlement CDP_CB_GCP_MULTIAZ.");
         verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
     }
 
@@ -659,7 +677,7 @@ class SdxServiceCreateSdxTest {
         }
         sdxClusterRequest.setEnableRangerRaz(false);
         sdxClusterRequest.setEnableMultiAz(true);
-        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE));
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
 
         StackV4Request internalStackV4Request;
         if (CUSTOM.equals(clusterShape)) {
@@ -672,6 +690,36 @@ class SdxServiceCreateSdxTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, internalStackV4Request)));
 
         assertThat(badRequestException).hasMessage(String.format("Provisioning a multi AZ cluster on Azure is not supported for cluster shape %s.",
+                clusterShape.name()));
+        verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    void testSdxCreateRazNotRequestedAndMultiAzRequestedAndGcpAndBadClusterShape(SdxClusterShape clusterShape) {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", clusterShape);
+        withCloudStorage(sdxClusterRequest);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mockEnvironmentCall(sdxClusterRequest, GCP, null);
+        when(entitlementService.isGcpMultiAzEnabled(detailedEnvironmentResponse.getAccountId())).thenReturn(true);
+        if (clusterShape == MICRO_DUTY) {
+            when(entitlementService.microDutySdxEnabled(Crn.safeFromString(detailedEnvironmentResponse.getCreator()).getAccountId())).thenReturn(true);
+        }
+        sdxClusterRequest.setEnableRangerRaz(false);
+        sdxClusterRequest.setEnableMultiAz(true);
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
+
+        StackV4Request internalStackV4Request;
+        if (CUSTOM.equals(clusterShape)) {
+            internalStackV4Request = new StackV4Request();
+            internalStackV4Request.setCluster(new ClusterV4Request());
+        } else {
+            internalStackV4Request = null;
+        }
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, internalStackV4Request)));
+
+        assertThat(badRequestException).hasMessage(String.format("Provisioning a multi AZ cluster on GCP is not supported for cluster shape %s.",
                 clusterShape.name()));
         verify(sdxClusterRepository, never()).save(any(SdxCluster.class));
     }
@@ -697,7 +745,7 @@ class SdxServiceCreateSdxTest {
         when(entitlementService.isAzureMultiAzEnabled(detailedEnvironmentResponse.getAccountId())).thenReturn(true);
         sdxClusterRequest.setEnableRangerRaz(false);
         sdxClusterRequest.setEnableMultiAz(true);
-        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE));
+        when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE, GCP));
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
