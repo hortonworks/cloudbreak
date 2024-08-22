@@ -113,6 +113,7 @@ public class ImagesToImagesV4ResponseConverter {
         json.setDescription(source.getDescription());
         json.setOs(source.getOs());
         json.setOsType(source.getOsType());
+        json.setArchitecture(source.getArchitecture());
         json.setUuid(source.getUuid());
         json.setVersion(source.getVersion());
         json.setDefaultImage(source.isDefaultImage());

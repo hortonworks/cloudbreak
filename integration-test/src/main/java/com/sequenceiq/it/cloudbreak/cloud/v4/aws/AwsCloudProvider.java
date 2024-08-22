@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -100,10 +101,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template, Architecture architecture) {
         AwsInstanceTemplateV1Parameters awsParameters = new AwsInstanceTemplateV1Parameters();
         awsParameters.setSpot(getAwsInstanceTemplateV1SpotParameters());
-        return template.withInstanceType(awsProperties.getInstance().getType())
+        AwsProperties.Instance instance = architecture == Architecture.X86_64 ? awsProperties.getInstance() : awsProperties.getArm64Instance();
+        return template.withInstanceType(instance.getType())
                 .withAws(awsParameters);
     }
 

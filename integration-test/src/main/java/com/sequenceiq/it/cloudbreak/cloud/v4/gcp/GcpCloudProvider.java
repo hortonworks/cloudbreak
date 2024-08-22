@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -122,7 +123,10 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template, Architecture architecture) {
+        if (architecture != Architecture.X86_64) {
+            throw new NotImplementedException(String.format("Architecture %s is not implemented", architecture.getName()));
+        }
         return template.withInstanceType(gcpProperties.getInstance().getType());
     }
 

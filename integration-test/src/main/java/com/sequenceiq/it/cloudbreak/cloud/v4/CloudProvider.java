@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
@@ -78,7 +79,7 @@ public interface CloudProvider {
 
     InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template);
 
-    DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template);
+    DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template, Architecture architecture);
 
     VolumeV4TestDto attachedVolume(VolumeV4TestDto volume);
 
