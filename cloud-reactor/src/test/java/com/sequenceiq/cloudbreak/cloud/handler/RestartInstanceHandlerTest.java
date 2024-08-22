@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -91,13 +91,13 @@ class RestartInstanceHandlerTest {
 
     @Test
     void testType() {
-        assertEquals(RebootInstancesRequest.class, underTest.type());
+        assertEquals(RestartInstancesRequest.class, underTest.type());
     }
 
     @Test
     void testInstanceRestartWithoutError() {
         List<CloudInstance> instancesToRestart = generateCloudInstances(10);
-        RebootInstancesRequest request = new RebootInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
+        RestartInstancesRequest request = new RestartInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
 
         List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(instancesToRestart);
         when(instanceConnector.
@@ -118,15 +118,15 @@ class RestartInstanceHandlerTest {
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
-        assertEquals(RebootInstancesResult.class, resultEvent.getData().getClass());
-        RebootInstancesResult result = (RebootInstancesResult) resultEvent.getData();
+        assertEquals(RestartInstancesResult.class, resultEvent.getData().getClass());
+        RestartInstancesResult result = (RestartInstancesResult) resultEvent.getData();
         verifyAffectedInstancesInResult(startedInstanceStatusList, result.getResults().getResults());
     }
 
     @Test
     void testInstanceRestartWithSomeInstancesFailToRestart() {
         List<CloudInstance> instancesToRestart = generateCloudInstances(10);
-        RebootInstancesRequest request = new RebootInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
+        RestartInstancesRequest request = new RestartInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
         List<CloudVmInstanceStatus> halfStartedInstanceStatusList = generateHalfStartedHalfStoppedCloudVmInstanceStatuses(instancesToRestart);
 
         when(instanceConnector.
@@ -147,8 +147,8 @@ class RestartInstanceHandlerTest {
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
-        assertEquals(RebootInstancesResult.class, resultEvent.getData().getClass());
-        RebootInstancesResult result = (RebootInstancesResult) resultEvent.getData();
+        assertEquals(RestartInstancesResult.class, resultEvent.getData().getClass());
+        RestartInstancesResult result = (RestartInstancesResult) resultEvent.getData();
         assertEquals(halfStartedInstanceStatusList.size() / 2, result.getResults().getResults().size());
     }
 
@@ -166,7 +166,7 @@ class RestartInstanceHandlerTest {
                         any(AuthenticatedContext.class), any(List.class), any(List.class), any(Long.class), any(List.class)))
                 .thenThrow(new RuntimeException("CloudProviderStartError"));
 
-        RebootInstancesRequest request = new RebootInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
+        RestartInstancesRequest request = new RestartInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
 
         Event event = new Event(request);
 
@@ -178,8 +178,8 @@ class RestartInstanceHandlerTest {
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
-        RebootInstancesResult result = (RebootInstancesResult) resultEvent.getData();
-        assertEquals(RebootInstancesResult.class, resultEvent.getData().getClass());
+        RestartInstancesResult result = (RestartInstancesResult) resultEvent.getData();
+        assertEquals(RestartInstancesResult.class, resultEvent.getData().getClass());
         assertEquals(result.getResults().getResults().size(), 0);
         assertEquals(EventStatus.OK, result.getStatus());
     }
@@ -198,7 +198,7 @@ class RestartInstanceHandlerTest {
                 any(AuthenticatedContext.class), any(List.class)))
                 .thenThrow(new RuntimeException("CloudProviderCheckStateError"));
 
-        RebootInstancesRequest request = new RebootInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
+        RestartInstancesRequest request = new RestartInstancesRequest(cloudContext, cloudCredential, null, instancesToRestart);
 
         Event event = new Event(request);
 
@@ -210,12 +210,12 @@ class RestartInstanceHandlerTest {
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
-        RebootInstancesResult result = (RebootInstancesResult) resultEvent.getData();
+        RestartInstancesResult result = (RestartInstancesResult) resultEvent.getData();
 
         assertEquals("Error while attempting to restart instances", result.getErrorDetails().getMessage());
         assertNull(result.getResults());
         assertEquals(EventStatus.FAILED, result.getStatus());
-        assertEquals("REBOOTINSTANCESRESULT_ERROR", result.selector());
+        assertEquals("RESTARTINSTANCESRESULT_ERROR", result.selector());
     }
 
     private void verifyAffectedInstancesInResult(List<CloudVmInstanceStatus> srcList, List<CloudVmInstanceStatus> listFromResult) {

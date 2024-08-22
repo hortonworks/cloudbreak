@@ -278,7 +278,7 @@ public class StackCommonService {
         validateAllInstancesInSameStack(stack, instanceIds);
         validateNumberOfInstancesToRestart(instanceIds);
         validateAllInstancesAreNotTerminatedAndZombie(stack, instanceIds);
-        validateCloudProvider(stack.getPlatformVariant());
+        validateCloudProvider(stack.getCloudPlatform());
         return stackOperationService.restartInstances(stack, instanceIds);
     }
 

@@ -200,10 +200,18 @@ public class AwsInstanceConnector implements InstanceConnector {
         try {
             if (!vms.isEmpty()) {
                 List<CloudVmInstanceStatus> statuses = check(ac, vms);
-                stop(ac, null, getStarted(statuses));
-                statuses = check(ac, vms);
+                List<CloudInstance> startedInstances = getStarted(statuses);
+                LOGGER.info("Already Stopped Vms on cloudProvider: {}", getNotStarted(statuses));
+                if (!startedInstances.isEmpty()) {
+                    stop(ac, null, startedInstances);
+                    statuses = check(ac, vms);
+                }
                 logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
-                rebootedVmsStatus = start(ac, null, getStopped(statuses));
+                List<CloudInstance> stoppedInstances = getStopped(statuses);
+                LOGGER.info("Already Started Vms on cloudProvider: {}", getNotStopped(statuses));
+                if (!stoppedInstances.isEmpty()) {
+                    rebootedVmsStatus = start(ac, null, stoppedInstances);
+                }
                 logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
             }
         } catch (SdkClientException e) {
@@ -226,10 +234,18 @@ public class AwsInstanceConnector implements InstanceConnector {
         try {
             if (!vms.isEmpty()) {
                 List<CloudVmInstanceStatus> statuses = check(ac, vms);
-                stopWithLimitedRetry(ac, null, getNotExcludedStatusInstances(statuses, excludedStatuses), timeboundInMs);
-                statuses = check(ac, vms);
+                List<CloudInstance> notExcludedStartedInstances = getNotExcludedStatusInstances(statuses, excludedStatuses);
+                LOGGER.info("Vms of excluded statuses on cloudProvider: {}", getExcludedStatusInstances(statuses, excludedStatuses));
+                if (!notExcludedStartedInstances.isEmpty()) {
+                    stopWithLimitedRetry(ac, null, notExcludedStartedInstances, timeboundInMs);
+                    statuses = check(ac, vms);
+                }
                 logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
-                rebootedVmsStatus = startWithLimitedRetry(ac, null, getStopped(statuses), timeboundInMs);
+                List<CloudInstance> stoppedInstances = getStopped(statuses);
+                LOGGER.info("Already Started Vms on cloudProvider: {}", getNotStopped(statuses));
+                if (!stoppedInstances.isEmpty()) {
+                    rebootedVmsStatus = startWithLimitedRetry(ac, null, stoppedInstances, timeboundInMs);
+                }
                 logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
             }
         } catch (SdkClientException e) {
@@ -261,6 +277,11 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     private List<CloudInstance> getNotExcludedStatusInstances(List<CloudVmInstanceStatus> statuses, List<InstanceStatus> excludedStatuses) {
         return statuses.stream().filter(status -> !excludedStatuses.contains(status.getStatus()))
+                .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
+    }
+
+    private List<CloudInstance> getExcludedStatusInstances(List<CloudVmInstanceStatus> statuses, List<InstanceStatus> excludedStatuses) {
+        return statuses.stream().filter(status -> excludedStatuses.contains(status.getStatus()))
                 .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
     }
 

@@ -7,14 +7,15 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RestartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -24,7 +25,8 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 
-public class RestartInstanceHandler implements CloudPlatformEventHandler<RebootInstancesRequest> {
+@Component
+public class RestartInstanceHandler implements CloudPlatformEventHandler<RestartInstancesRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestartInstanceHandler.class);
 
@@ -45,14 +47,14 @@ public class RestartInstanceHandler implements CloudPlatformEventHandler<RebootI
     private EventBus eventBus;
 
     @Override
-    public Class<RebootInstancesRequest> type() {
-        return RebootInstancesRequest.class;
+    public Class<RestartInstancesRequest> type() {
+        return RestartInstancesRequest.class;
     }
 
     @Override
-    public void accept(Event<RebootInstancesRequest> event) {
+    public void accept(Event<RestartInstancesRequest> event) {
         LOGGER.info("RestartInstancesHandler: {}", event.getData().getResourceId());
-        RebootInstancesRequest<RebootInstancesResult> request = event.getData();
+        RestartInstancesRequest<RestartInstancesResult> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
@@ -67,13 +69,13 @@ public class RestartInstanceHandler implements CloudPlatformEventHandler<RebootI
             LOGGER.info("Restarted instances. Result: Successfully Restarted:[{}]. Failed to Restart:[{}]", succesfullyRestartedCloudInstance,
                     failedToRestartCloudInstance);
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
-            RebootInstancesResult result = new RebootInstancesResult(request.getResourceId(), statusResult, getInstances(request));
+            RestartInstancesResult result = new RestartInstancesResult(request.getResourceId(), statusResult, getInstances(request));
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
             String message = "Failed while attempting to restart instances";
             LOGGER.error(e.getMessage());
-            RebootInstancesResult failure = new RebootInstancesResult(message, e, request.getResourceId(),
+            RestartInstancesResult failure = new RestartInstancesResult(message, e, request.getResourceId(),
                     getInstances(request));
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
@@ -110,7 +112,7 @@ public class RestartInstanceHandler implements CloudPlatformEventHandler<RebootI
         }
     }
 
-    private List<String> getInstances(RebootInstancesRequest<RebootInstancesResult> request) {
+    private List<String> getInstances(RestartInstancesRequest<RestartInstancesResult> request) {
         return request.getCloudInstances().stream().map(CloudInstance::getInstanceId).collect(Collectors.toList());
     }
 }
