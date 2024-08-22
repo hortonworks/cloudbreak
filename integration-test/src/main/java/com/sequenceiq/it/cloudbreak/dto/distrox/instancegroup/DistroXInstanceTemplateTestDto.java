@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -27,7 +28,7 @@ public class DistroXInstanceTemplateTestDto
     public DistroXInstanceTemplateTestDto valid() {
         return getCloudProvider().template(
                 withRootVolume(getTestContext().given(DistroXRootVolumeTestDto.class))
-                        .withAttachedVolume(getTestContext().init(DistroXVolumeTestDto.class)));
+                        .withAttachedVolume(getTestContext().init(DistroXVolumeTestDto.class)), Architecture.X86_64);
     }
 
     public DistroXInstanceTemplateTestDto withAws(AwsInstanceTemplateV1Parameters awsParameters) {

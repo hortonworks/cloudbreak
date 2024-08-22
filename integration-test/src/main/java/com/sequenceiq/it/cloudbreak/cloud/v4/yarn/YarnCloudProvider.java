@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.Y
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.OsType;
@@ -139,7 +140,10 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template) {
+    public DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template, Architecture architecture) {
+        if (architecture != Architecture.X86_64) {
+            throw new NotImplementedException(String.format("Architecture %s is not implemented", architecture.getName()));
+        }
         return template.withYarn(distroxInstanceParameters());
     }
 

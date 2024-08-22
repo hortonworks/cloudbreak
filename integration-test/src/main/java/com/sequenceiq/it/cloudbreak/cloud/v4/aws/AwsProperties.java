@@ -38,6 +38,8 @@ public class AwsProperties {
 
     private final Instance storageOptimizedInstance = new Instance();
 
+    private final Instance arm64Instance = new Instance();
+
     private final Credential credential = new Credential();
 
     private final Cloudstorage cloudstorage = new Cloudstorage();
@@ -142,6 +144,10 @@ public class AwsProperties {
 
     public Instance getStorageOptimizedInstance() {
         return storageOptimizedInstance;
+    }
+
+    public Instance getArm64Instance() {
+        return arm64Instance;
     }
 
     public Credential getCredential() {

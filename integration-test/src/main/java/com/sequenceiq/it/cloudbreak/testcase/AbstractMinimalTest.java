@@ -53,6 +53,9 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     public static final Map<String, Status> STACK_NODE_FAILURE = Map.of("status", Status.NODE_FAILURE, "clusterStatus", Status.NODE_FAILURE);
 
+    public static final Map<String, Status> STACK_CREATE_IN_PROGRESS =
+            Map.of("status", Status.CREATE_IN_PROGRESS, "clusterStatus", Status.CREATE_IN_PROGRESS);
+
     protected static final Map<String, Status> STACK_CREATED = Map.of("status", Status.UPDATE_IN_PROGRESS, "clusterStatus", Status.REQUESTED);
 
     protected static final Map<String, Status> STACK_FAILED = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.CREATE_FAILED);

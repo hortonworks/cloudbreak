@@ -1,45 +1,32 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
-import com.dyngr.Polling;
-import com.dyngr.core.AttemptMaker;
-import com.dyngr.core.AttemptResults;
-import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
+import com.sequenceiq.it.cloudbreak.assertion.image.ImageAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
-import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
-
-    private static final int IMAGE_SETUP_SLEEP_TIME_IN_SECONDS = 10;
-
-    @Value("${integrationtest.imageValidation.imagesetup.timeoutInMinutes:60}")
-    private int imageSetupTimeoutInMinutes;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -49,6 +36,9 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
+    @Inject
+    private ImageAssertions imageAssertions;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -65,44 +55,29 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
             when = "a SDX internal create request is sent",
             then = "the SDX cluster and the corresponding DistroX cluster is created")
     public void testCreateInternalSdxAndDistrox(TestContext testContext) {
+        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+
         testContext.given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs();
+        setupSdxImage(testContext, imageUnderValidation);
         testContext.given(SdxInternalTestDto.class)
                 .withoutDatabase()
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
-                .withImageCatalogNameAndImageId(commonCloudProperties().getImageValidation().getSourceCatalogName(),
-                        commonCloudProperties().getImageValidation().getImageUuid())
                 .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
-                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, RunningParameter.emptyRunningParameter().withoutWaitForFlow())
-                .then((tc, testDto, client) -> {
-                    try {
-                        Polling.waitPeriodly(IMAGE_SETUP_SLEEP_TIME_IN_SECONDS, TimeUnit.SECONDS)
-                                .stopAfterDelay(imageSetupTimeoutInMinutes, TimeUnit.MINUTES)
-                                .stopIfException(true)
-                                .run(imageSetupResultAttemptMaker(testDto, client));
-                    } catch (PollerStoppedException e) {
-                        throw new TestFailException(String.format("Image setup exceeded %d minutes", imageSetupTimeoutInMinutes), e);
-                    }
-                    return testDto;
-                })
+                .then(imageAssertions.validateSdxInternalImageSetupTime())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
                 .validate();
-        testContext.given(DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime())
-                .withImageSettings(testContext
-                        .given(DistroXImageTestDto.class)
-                        .withImageCatalog(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getCatalogName())
-                        .withImageId(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId()))
+        testContext
+                .given(DistroXTestDto.class)
+                .withArchitecture(Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()))
+                .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(imageUnderValidation.getVersion()))
                 .when(distroXTestClient.create())
+                .then(imageAssertions.validateDistroXImageSetupTime())
                 .await(STACK_AVAILABLE)
-                .then((context, distrox, client) -> {
-                    distrox.getResponse();
-                    return distrox;
-                })
                 .when(distroXTestClient.get())
                 .validate();
         testContext.given(SdxInternalTestDto.class)
@@ -117,24 +92,27 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
                 .validate();
     }
 
-    private AttemptMaker<Boolean> imageSetupResultAttemptMaker(SdxInternalTestDto testDto, SdxClient client) {
-        SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
-        SdxEventEndpoint sdxEventEndpoint = client.getDefaultClient().sdxEventEndpoint();
-        String environmentCrn = testDto.getResponse().getEnvironmentCrn();
-        List<StructuredEventType> eventTypes = List.of(StructuredEventType.NOTIFICATION);
-        return () -> {
-            SdxClusterResponse sdxClusterResponse = sdxEndpoint.get(testDto.getName());
-            if (SdxClusterStatusResponse.PROVISIONING_FAILED.equals(sdxClusterResponse.getStatus())) {
-                // provisioning failed, do not also fail for image setup
-                return AttemptResults.finishWith(true);
-            }
-            List<CDPStructuredEvent> auditEvents = sdxEventEndpoint.getAuditEvents(environmentCrn, eventTypes, null, null);
-            boolean imageSetupFinished = auditEvents.subList(1, auditEvents.size()).stream()
-                    .anyMatch(auditEvent -> "Setting up CDP image".equals(auditEvent.getStatusReason()));
-            if (imageSetupFinished) {
-                return AttemptResults.finishWith(true);
-            }
-            return AttemptResults.justContinue();
-        };
+    private void setupSdxImage(TestContext testContext, ImageV4Response imageUnderValidation) {
+        if (Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()) == Architecture.ARM64) {
+            // arm64 is not supported for SDX, so a default image selected by CB should be used
+            testContext.given(SdxInternalTestDto.class)
+                    .withDefaultImage();
+        }
+    }
+
+    @Override
+    public String getCbImageId(TestContext testContext) {
+        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+        return Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()) == Architecture.ARM64
+                ? getDistroXImage(testContext)
+                : ImageValidatorE2ETest.super.getCbImageId(testContext);
+    }
+
+    private String getDistroXImage(TestContext testContext) {
+        return Optional.ofNullable(testContext.get(DistroXTestDto.class))
+                .map(AbstractTestDto::getResponse)
+                .map(StackV4Response::getImage)
+                .map(StackImageV4Response::getId)
+                .orElse(null);
     }
 }
