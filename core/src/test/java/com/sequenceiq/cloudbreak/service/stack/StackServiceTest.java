@@ -30,8 +30,10 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +60,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -97,6 +100,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -116,6 +120,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
@@ -261,6 +266,15 @@ class StackServiceTest {
 
     @Mock
     private StatedImage statedImage;
+
+    @Mock
+    private StackUtil stackUtil;
+
+    @Mock
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private ServiceEndpointCollector serviceEndpointCollector;
 
     @Mock
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image image;
@@ -947,5 +961,27 @@ class StackServiceTest {
         verify(loadBalancerPersistenceService, times(1)).deleteByStackId(anyLong());
         verify(stackPatchService, times(1)).deleteByStackId(anyLong());
         verify(componentConfigProviderService, times(1)).deleteComponentsForStack(anyLong());
+    }
+
+    @Test
+    void testGetEndpointsByCrn() {
+        String crn = "test-crn";
+        String accountId = "test-account-id";
+
+        StackDto mockStackDto = mock(StackDto.class);
+        String managerAddress = "test-manager-address";
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> expectedResponse = mock(Map.class);
+
+        when(stackDtoService.getByNameOrCrn(NameOrCrn.ofCrn(crn), accountId)).thenReturn(mockStackDto);
+        when(stackUtil.extractClusterManagerAddress(mockStackDto)).thenReturn(managerAddress);
+        when(serviceEndpointCollector.prepareClusterExposedServices(mockStackDto, managerAddress)).thenReturn(expectedResponse);
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> actualResponse = underTest.getEndpointsByCrn(crn, accountId);
+        assertEquals(expectedResponse, actualResponse);
+
+        verify(stackDtoService).getByNameOrCrn(NameOrCrn.ofCrn(crn), accountId);
+        verify(stackUtil).extractClusterManagerAddress(mockStackDto);
+        verify(serviceEndpointCollector).prepareClusterExposedServices(mockStackDto, managerAddress);
     }
 }

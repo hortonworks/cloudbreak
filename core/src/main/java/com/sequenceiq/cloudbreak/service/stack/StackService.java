@@ -400,7 +400,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public Map<String, Collection<ClusterExposedServiceV4Response>> getEndpointsByCrn(String crn, String accountId) {
         StackDto stackDto = stackDtoService.getByNameOrCrn(NameOrCrn.ofCrn(crn), accountId);
-        return serviceEndpointCollector.prepareClusterExposedServices(stackDto, stackUtil.extractClusterManagerIp(stackDto));
+        String managerAddress = stackUtil.extractClusterManagerAddress(stackDto);
+        return serviceEndpointCollector.prepareClusterExposedServices(stackDto, managerAddress);
     }
 
     public List<StackClusterStatusView> getStatusesByCrnsInternal(List<String> crns, StackType stackType) {
