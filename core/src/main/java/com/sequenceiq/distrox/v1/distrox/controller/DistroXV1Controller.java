@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.migraterds.MigrateDatabaseV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -451,6 +452,18 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return rotateRdsCertificateConverter.convert(
                 rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(crn),
                 ThreadBasedUserCrnProvider.getAccountId()));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public MigrateDatabaseV1Response migrateDatabaseToSslByName(@ResourceName String name) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public MigrateDatabaseV1Response migrateDatabaseToSslByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
+        return null;
     }
 
     @Override

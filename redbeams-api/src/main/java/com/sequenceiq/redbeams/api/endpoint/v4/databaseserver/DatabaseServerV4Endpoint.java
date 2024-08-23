@@ -248,6 +248,28 @@ public interface DatabaseServerV4Endpoint {
     );
 
     @PUT
+    @Path("internal/crn/{crn}/migrate_database_to_ssl")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerOpDescription.MIGRATE_DATABASE_TO_SSL, description = DatabaseServerNotes.MIGRATE_DATABASE_TO_SSL,
+            operationId = "migrateDatabaseToSslByCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/enforce_ssl_on_database")
+    @Operation(summary = DatabaseServerOpDescription.ENFORCE_SSL_ON_DATABASE, description = DatabaseServerNotes.ENFORCE_SSL_ON_DATABASE,
+            operationId = "enforceSslOnDatabaseByCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void enforceSslOnDatabaseByCrnInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
     @Path("{crn}/rotate_ssl_cert")
     @Operation(summary = DatabaseServerOpDescription.ROTATE_SSL_CERT, description = DatabaseServerNotes.ROTATE_SSL_CERT,
             operationId = "rotateDatabaseServerSSLCert",

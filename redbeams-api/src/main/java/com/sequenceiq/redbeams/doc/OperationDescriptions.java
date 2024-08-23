@@ -50,8 +50,10 @@ public final class OperationDescriptions {
         public static final String LATEST_CERTIFICATE_LIST = "query latest certificate for a specific provider and region";
         public static final String STOP = "stop database server";
         public static final String CERT_SWAP = "change certificate on mock provider";
-
-
+        public static final String MIGRATE_DATABASE_TO_SSL =
+                "Migrate database to ssl.";
+        public static final String ENFORCE_SSL_ON_DATABASE =
+                "Enforce ssl on database.";
         private DatabaseServerOpDescription() {
         }
     }

@@ -97,6 +97,7 @@ import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.migraterds.SdxMigrateDatabaseV1Response;
 import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertificateV1Response;
 
 @Controller
@@ -579,6 +580,18 @@ public class SdxController implements SdxEndpoint {
     public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
             @RequestObject SdxDatabaseServerCertificateStatusV4Request request) {
         return certificateRotationService.getDatabaseCertificateStatus(request);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public SdxMigrateDatabaseV1Response migrateDatabaseToSslByName(@ResourceName String name) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public SdxMigrateDatabaseV1Response migrateDatabaseToSslByCrn(@TenantAwareParam @ResourceCrn String crn) {
+        return null;
     }
 
     private SdxCluster getSdxClusterByName(String name) {

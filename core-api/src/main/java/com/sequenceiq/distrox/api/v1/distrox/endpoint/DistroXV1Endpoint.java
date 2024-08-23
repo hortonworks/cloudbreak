@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
@@ -38,6 +39,8 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.IMD_UPDATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_FLOW_PROGRESS;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MIGRATE_DATABASE_TO_SSL_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MIGRATE_DATABASE_TO_SSL_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RDS_CERTIFICATE_ROTATION_BY_CRN;
@@ -95,6 +98,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.migraterds.MigrateDatabaseV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -171,7 +175,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = GET_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "getDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StackV4Response getByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
+    StackV4Response getByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
 
     @DELETE
     @Path("name/{name}")
@@ -185,7 +189,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DELETE_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "deleteDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    void deleteByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
@@ -207,7 +211,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = SYNC_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "syncDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    void syncByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("name/{name}/retry")
@@ -229,7 +233,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = RETRY_BY_CRN, description = Notes.RETRY_STACK_NOTES,
             operationId = "retryDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void retryByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    void retryByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/stop")
@@ -243,7 +247,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = STOP_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "stopDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier putStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier putStopByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/stop")
@@ -271,7 +275,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = START_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "startDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier putStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier putStartByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/start")
@@ -307,7 +311,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = UPDATE_SALT, operationId = "updateSaltDistroxV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/scaling")
@@ -321,7 +325,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = SCALE_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "putScalingDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void putScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
+    void putScalingByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
 
     @PUT
     @Path("name/{name}/vertical_scaling")
@@ -338,7 +342,7 @@ public interface DistroXV1Endpoint {
             operationId = "verticalScalingByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier verticalScalingByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXVerticalScaleV1Request updateRequest);
 
     @POST
@@ -353,7 +357,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = REPAIR_CLUSTER_BY_CRN, description = Notes.CLUSTER_REPAIR_NOTES,
             operationId = "repairDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier repairClusterByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    FlowIdentifier repairClusterByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @PUT
@@ -370,7 +374,25 @@ public interface DistroXV1Endpoint {
     @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_CRN, description = Notes.ROTATE_RDS_CERTIFICATE_NOTES,
             operationId = "rotateRdsCertificateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/migrate_database_to_ssl")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = MIGRATE_DATABASE_TO_SSL_BY_NAME, description = Notes.MIGRATE_DATABASE_TO_SSL_NOTES,
+            operationId = "migrateDatabaseToSslByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    MigrateDatabaseV1Response migrateDatabaseToSslByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/migrate_database_to_ssl")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = MIGRATE_DATABASE_TO_SSL_BY_CRN, description = Notes.MIGRATE_DATABASE_TO_SSL_NOTES,
+            operationId = "migrateDatabaseToSslByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    MigrateDatabaseV1Response migrateDatabaseToSslByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @GET
     @Path("name/{name}/cli_create")
@@ -384,7 +406,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = GET_STACK_REQUEST_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "getDistroXRequestV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    Object getRequestfromCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    Object getRequestfromCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @GET
     @Path("name/{name}/status")
@@ -398,7 +420,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = GET_STATUS_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "statusDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StackStatusV4Response getStatusByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    StackStatusV4Response getStatusByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @GET
     @Path("crn/endpoints")
@@ -422,7 +444,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DELETE_INSTANCE_BY_ID_BY_CRN, description = Notes.STACK_NOTES,
             operationId = "deleteInstanceDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    FlowIdentifier deleteInstanceByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
@@ -441,7 +463,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, description = Notes.STACK_NOTES,
             operationId = "deleteInstancesDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier deleteInstancesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    FlowIdentifier deleteInstancesByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @QueryParam("id") List<String> instances,
             MultipleInstanceDeleteRequest request,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
@@ -459,7 +481,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = SET_MAINTENANCE_MODE_BY_CRN, description = Notes.MAINTENANCE_NOTES,
             operationId = "setDistroXMaintenanceModeByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void setClusterMaintenanceModeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    void setClusterMaintenanceModeByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
 
     @DELETE
@@ -474,7 +496,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DELETE_WITH_KERBEROS_BY_CRN, description = Notes.CLUSTER_NOTES,
             operationId = "deleteWithKerberosDistroXV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void deleteWithKerberosByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    void deleteWithKerberosByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @POST
@@ -515,7 +537,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DiagnosticsOperationDescriptions.LIST_COLLECTIONS,
             operationId = "listDistroxDiagnosticsCollectionsV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    ListDiagnosticsCollectionResponse listCollections(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    ListDiagnosticsCollectionResponse listCollections(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/{crn}/collections/cancel")
@@ -523,7 +545,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS,
             operationId = "cancelDistroxDiagnosticsCollectionsV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void cancelCollections(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    void cancelCollections(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/cm")
@@ -539,7 +561,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = DiagnosticsOperationDescriptions.GET_CM_ROLES,
             operationId = "getDistroxCmRoles",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    List<String> getCmRoles(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("stackCrn") String stackCrn);
+    List<String> getCmRoles(@ValidCrn(resource = DATAHUB) @PathParam("stackCrn") String stackCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}/last")
@@ -547,7 +569,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = GET_LAST_FLOW_PROGRESS, description = Notes.FLOW_OPERATION_PROGRESS_NOTES,
             operationId = "getDistroXLastFlowLogProgressByResourceCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn);
+    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ValidCrn(resource = DATAHUB) @PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}")
@@ -556,7 +578,7 @@ public interface DistroXV1Endpoint {
             operationId = "getDistroXFlowLogsProgressByResourceCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn);
+            @ValidCrn(resource = DATAHUB) @PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("operation/resource/crn/{resourceCrn}")
@@ -564,7 +586,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = GET_OPERATION, description = Notes.FLOW_OPERATION_PROGRESS_NOTES,
             operationId = "getDistroXOperationProgressByResourceCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    OperationView getOperationProgressByResourceCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn,
+    OperationView getOperationProgressByResourceCrn(@ValidCrn(resource = DATAHUB) @PathParam("resourceCrn") String resourceCrn,
             @DefaultValue("false") @QueryParam("detailed") boolean detailed);
 
     @POST
@@ -573,7 +595,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = RENEW_CERTIFICATE, description = Notes.RENEW_CERTIFICATE_NOTES,
             operationId = "renewDistroXCertificate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier renewCertificate(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    FlowIdentifier renewCertificate(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/rotate_autotls_certificates")
@@ -588,7 +610,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = ROTATE_CERTIFICATES, operationId = "rotateAutoTlsCertificatesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
     @PUT
@@ -603,7 +625,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = REFRESH_RECIPES_BY_CRN, operationId = "refreshRecipesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    UpdateRecipesV4Response refreshRecipesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    UpdateRecipesV4Response refreshRecipesByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid UpdateRecipesV4Request request);
 
     @POST
@@ -611,7 +633,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = ATTACH_RECIPE_BY_CRN, operationId = "attachRecipesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    AttachRecipeV4Response attachRecipeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    AttachRecipeV4Response attachRecipeByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid AttachRecipeV4Request request);
 
     @POST
@@ -626,7 +648,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = DETACH_RECIPE_BY_CRN, operationId = "detachRecipesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DetachRecipeV4Response detachRecipeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    DetachRecipeV4Response detachRecipeByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid DetachRecipeV4Request request);
 
     @POST
@@ -648,7 +670,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "syncs from distrox cluster CM the CM and parcel versions", operationId = "syncDistroxCmByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/change_image_catalog")
@@ -676,14 +698,14 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "validates if the distrox cluster is recoverable or not", operationId = "getClusterRecoverableByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RecoveryValidationV4Response getClusterRecoverableByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+    RecoveryValidationV4Response getClusterRecoverableByCrn(@ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("crn/{crn}/modify_proxy")
     @Operation(summary = MODIFY_PROXY_CONFIG_INTERNAL, description = Notes.MODIFY_PROXY_CONFIG_NOTES,
             operationId = "modifyProxyConfigDistroXInternalV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier modifyProxyInternal(@ValidCrn(resource = {CrnResourceDescriptor.DATAHUB}) @PathParam("crn") String crn,
+    FlowIdentifier modifyProxyInternal(@ValidCrn(resource = {DATAHUB}) @PathParam("crn") String crn,
             @ValidCrn(resource = {CrnResourceDescriptor.PROXY}) @QueryParam("previousProxyConfigCrn") String previousProxyConfigCrn,
             String initiatorUserCrn);
 
@@ -702,7 +724,7 @@ public interface DistroXV1Endpoint {
             operationId = "deleteVolumesByStackCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier deleteVolumesByStackCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid StackDeleteVolumesRequest deleteRequest);
 
     @PUT
@@ -718,7 +740,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = "Updates disk type and resizes DH", operationId = "diskUpdateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier diskUpdateByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
+            @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
 
     @PUT
     @Path("name/{name}/add_volumes")
@@ -733,7 +755,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = ADD_VOLUMES_BY_STACK_CRN, operationId = "addVolumesByStackCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier addVolumesByStackCrn(
-            @ValidCrn(resource = { CrnResourceDescriptor.VM_DATALAKE, CrnResourceDescriptor.DATAHUB }) @PathParam("crn") String crn,
+            @ValidCrn(resource = { CrnResourceDescriptor.VM_DATALAKE, DATAHUB }) @PathParam("crn") String crn,
             @Valid StackAddVolumesRequest addVolumesRequest);
 
     @PUT

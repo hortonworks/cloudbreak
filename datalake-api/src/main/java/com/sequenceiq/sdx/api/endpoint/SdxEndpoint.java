@@ -5,6 +5,9 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
+import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.MIGRATE_DATABASE_TO_SSL_BY_CRN;
+import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.MIGRATE_DATABASE_TO_SSL_BY_NAME;
+import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.MIGRATE_DATABASE_TO_SSL_NOTES;
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.RDS_CERTIFICATE_ROTATION_BY_CRN;
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.RDS_CERTIFICATE_ROTATION_BY_NAME;
 import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.ROTATE_RDS_CERTIFICATE_NOTES;
@@ -64,6 +67,7 @@ import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.migraterds.SdxMigrateDatabaseV1Response;
 import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertificateV1Response;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -492,6 +496,24 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
             @Valid @NotNull SdxDatabaseServerCertificateStatusV4Request request);
+
+    @PUT
+    @Path("name/{name}/migrate_database_to_ssl")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = MIGRATE_DATABASE_TO_SSL_BY_NAME, description = MIGRATE_DATABASE_TO_SSL_NOTES,
+            operationId = "migrateToSslDatabaseToSslByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxMigrateDatabaseV1Response migrateDatabaseToSslByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/migrate_database_to_ssl")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = MIGRATE_DATABASE_TO_SSL_BY_CRN, description = MIGRATE_DATABASE_TO_SSL_NOTES,
+            operationId = "migrateToSslDatabaseToSslByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxMigrateDatabaseV1Response migrateDatabaseToSslByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 
 }
 

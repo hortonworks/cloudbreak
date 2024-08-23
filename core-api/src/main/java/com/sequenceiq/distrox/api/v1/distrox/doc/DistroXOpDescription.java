@@ -44,6 +44,8 @@ public class DistroXOpDescription {
     public static final String REPAIR_CLUSTER_BY_CRN = "repairs the stack by crn";
     public static final String RDS_CERTIFICATE_ROTATION_BY_NAME = "rotate rds certificate of the stack by name";
     public static final String RDS_CERTIFICATE_ROTATION_BY_CRN = "rotate rds certificate of the stack by crn";
+    public static final String MIGRATE_DATABASE_TO_SSL_BY_NAME = "migrate database from non ssl to ssl of the stack by name";
+    public static final String MIGRATE_DATABASE_TO_SSL_BY_CRN = "migrate database from non ssl to ssl  of the stack by crn";
     public static final String DELETE_WITH_KERBEROS_BY_NAME = "deletes the stack (with kerberos cluster) by name";
     public static final String DELETE_WITH_KERBEROS_BY_CRN = "deletes the stack (with kerberos cluster) by crn";
     public static final String GET_STACK_REQUEST_BY_NAME = "gets StackRequest by name";

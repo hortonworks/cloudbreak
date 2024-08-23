@@ -869,4 +869,10 @@ public class ModelDescriptions {
         public static final String ROTATE_RDS_CERTIFICATE_ERROR_REASON = "Reason of the error if Rotate RDS Certificate could not be started.";
     }
 
+    public static class MigrateRdsDescription {
+        public static final String FLOW_ID = "Flow identifier for the Migrate Database to SSL operation.";
+        public static final String MIGRATE_DATABASE_TO_SSL_RESPONSE_TYPE = "Information about the Migrate Database to SSL operation acceptance.";
+        public static final String MIGRATE_DATABASE_TO_SSL_ERROR_REASON = "Reason of the error if Migrate Database to SSL could not be started.";
+    }
+
 }

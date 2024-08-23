@@ -84,6 +84,10 @@ public final class Notes {
             + "separate from the database server's administrative user is also created, with full rights to the new database.";
         public static final String START =
                 "Start a previosly stopped database server.";
+        public static final String MIGRATE_DATABASE_TO_SSL =
+                "Migrate database to ssl.";
+        public static final String ENFORCE_SSL_ON_DATABASE =
+                "Enforce ssl on database.";
         public static final String ROTATE_SSL_CERT =
                 "Rotate the root cert of a database server.";
         public static final String UPDATE_SSL_CERT =

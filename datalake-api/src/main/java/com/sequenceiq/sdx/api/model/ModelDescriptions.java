@@ -238,9 +238,14 @@ public class ModelDescriptions {
     public static class SdxRotateRdsCertificateDescription {
         public static final String FLOW_ID = "Flow identifier for the current Rotate Database Certificate operation.";
         public static final String ROTATE_RDS_CERTIFICATE_RESPONSE_TYPE = "Information about the Rotate Database Certificate operation acceptance.";
+        public static final String MIGRATE_DATABASE_TO_SSL_RESPONSE_TYPE = "Information about the Migrate Database operation acceptance.";
         public static final String ROTATE_RDS_CERTIFICATE_ERROR_REASON = "Reason of the error if Rotate Database Certificate could not be started.";
+        public static final String MIGRATE_DATABASE_TO_SSL_ERROR_REASON = "Reason of the error if Migrate Database could not be started.";
         public static final String RDS_CERTIFICATE_ROTATION_BY_NAME = "rotate Database certificate of the data lake by name";
         public static final String RDS_CERTIFICATE_ROTATION_BY_CRN = "rotate Database certificate of the data lake by crn";
         public static final String ROTATE_RDS_CERTIFICATE_NOTES = "Rotate the public certificate of the Database";
+        public static final String MIGRATE_DATABASE_TO_SSL_BY_NAME = "Migrate database to ssl of the data lake by name";
+        public static final String MIGRATE_DATABASE_TO_SSL_BY_CRN = "Migrate database to ssl of the data lake by crn";
+        public static final String MIGRATE_DATABASE_TO_SSL_NOTES = "Migrate non ssl to ssl based Database";
     }
 }

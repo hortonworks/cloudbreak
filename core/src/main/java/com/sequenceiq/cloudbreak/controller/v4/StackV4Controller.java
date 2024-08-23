@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.migraterds.MigrateDatabaseV1Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -697,6 +698,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public StackRotateRdsCertificateV4Response rotateRdsCertificateByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @InternalOnly
+    public MigrateDatabaseV1Response migrateDatabaseByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return null;
     }
 
     @Override

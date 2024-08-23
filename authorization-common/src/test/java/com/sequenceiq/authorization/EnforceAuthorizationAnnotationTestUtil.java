@@ -195,7 +195,7 @@ public class EnforceAuthorizationAnnotationTestUtil {
 
     private static Optional<String> evaluateResult(Method method, long count, String errorMessageCommon) {
         if (count == 0) {
-            return Optional.of(invalid(method, "Misssing" + errorMessageCommon));
+            return Optional.of(invalid(method, "Missing" + errorMessageCommon));
         } else if (count > 1) {
             return Optional.of(invalid(method, "Multiple" + errorMessageCommon));
         } else {

@@ -206,6 +206,21 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
+    public DatabaseServerStatusV4Response migrateDatabaseToSslByCrnInternal(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return null;
+    }
+
+    @Override
+    @InternalOnly
+    public void enforceSslOnDatabaseByCrnInternal(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn,
+            @InitiatorUserCrn String initiatorUserCrn) {
+    }
+
+    @Override
+    @InternalOnly
     public DatabaseServerStatusV4Response createNonUniqueInternal(AllocateDatabaseServerV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
         return createDatabaseServer(request, true);
     }
