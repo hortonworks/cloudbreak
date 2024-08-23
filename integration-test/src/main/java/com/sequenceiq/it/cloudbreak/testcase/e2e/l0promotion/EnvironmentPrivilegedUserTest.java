@@ -91,7 +91,8 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         testContext.as(L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createRecipeAndApplyOnFreeIpaAndMasterNodes(testContext);
-        createDefaultDatalake(testContext);
+        createEnvironmentWithFreeIpa(testContext);
+        createDatalakeWithoutDatabase(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -105,8 +106,8 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
         testContext
                 .given(UmsTestDto.class)
-                .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .withEnvironmentAdmin()
+                    .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .withEnvironmentAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR))
                 .validate();
 
@@ -122,7 +123,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .given(UmsTestDto.class)
-                .withEnvironmentPrivilegedUser()
+                    .withEnvironmentPrivilegedUser()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR))
                 .then((tc, dto, client) -> {
                     environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
@@ -138,17 +139,20 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                     sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, tc.getWorkloadPassword(), LIST_RULES_FLAG);
                     return testDto;
                 })
+                .validate();
+
+        testContext
+                .as(L0UserKeys.USER_ENV_CREATOR)
+                .given(FreeIpaTestDto.class)
                 .thenException((tc, testDto, client) -> {
                     sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, tc.getWorkloadPassword(),
                             CHANGE_USER_TO_ROOT_COMMAND);
                     return testDto;
-                }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'.")
-                        .withWho(testContext.getTestUsers().getUserByLabel(L0UserKeys.USER_ENV_CREATOR)))
+                }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .validate();
 
-        testContext.as(L0UserKeys.ENV_CREATOR_A);
-
         testContext
+                .as(L0UserKeys.ENV_CREATOR_A)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.findUsers(Set.of(workloadUsernameEnvCreator), true))
                 .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
@@ -176,9 +180,9 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         String recipeName = resourcePropertyProvider().getName();
         context
                 .given(recipeName, RecipeTestDto.class)
-                .withName(recipeName)
-                .withContent(SSHD_CONFIG_RECIPE_CONTENT)
-                .withRecipeType(RecipeV4Type.PRE_SERVICE_DEPLOYMENT)
+                    .withName(recipeName)
+                    .withContent(SSHD_CONFIG_RECIPE_CONTENT)
+                    .withRecipeType(RecipeV4Type.PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName));
         context.given("master", InstanceGroupTestDto.class).withRecipes(recipeName);
         context.given(EnvironmentTestDto.class).withFreeIpaRecipe(Collections.singleton(recipeName));
