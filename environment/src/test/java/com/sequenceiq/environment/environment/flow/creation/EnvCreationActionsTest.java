@@ -44,6 +44,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.scheduled.sync.EnvironmentJobService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -176,6 +177,18 @@ class EnvCreationActionsTest {
         testCreationActionHappyPath(underTest::resourceEncryptionInitializationAction, INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
                 EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
                 ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
+    }
+
+    @Test
+    void testFailedActionIfComputeClusterFailed() {
+        Environment environment = mock(Environment.class);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        EnvCreationFailureEvent envCreationFailureEvent = new EnvCreationFailureEvent(ENVIRONMENT_ID, ENVIRONMENT_NAME,
+                new Exception("Compute cluster failed", new ExternalizedComputeOperationFailedException("Liftie cluster failed")), ENVIRONMENT_CRN);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(envCreationFailureEvent);
+        Action<?, ?> action = configureAction(() -> underTest.failedAction());
+        action.execute(stateContext);
+        verify(environment).setStatus(EnvironmentStatus.AVAILABLE);
     }
 
     private void testFailure(Supplier<Action<?, ?>> creationAction) {

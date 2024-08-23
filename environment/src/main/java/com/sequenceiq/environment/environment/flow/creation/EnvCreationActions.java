@@ -49,6 +49,7 @@ import com.sequenceiq.environment.environment.scheduled.sync.EnvironmentJobServi
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
@@ -345,7 +346,11 @@ public class EnvCreationActions {
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
                             environment.setStatusReason(exception.getMessage());
-                            environment.setStatus(EnvironmentStatus.CREATE_FAILED);
+                            if (exception.getCause() != null && ExternalizedComputeOperationFailedException.class.equals(exception.getCause().getClass())) {
+                                environment.setStatus(EnvironmentStatus.AVAILABLE);
+                            } else {
+                                environment.setStatus(EnvironmentStatus.CREATE_FAILED);
+                            }
                             environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FAILED, environmentDto, exception);
