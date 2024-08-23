@@ -7,10 +7,10 @@ import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVEN
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreState.DATALAKE_RESTORE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationState.DATALAKE_BACKUP_VALIDATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationEvent.DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT;
+import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationState.DATALAKE_RESTORE_VALIDATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
 import java.util.Collections;
@@ -108,7 +108,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         } else if (FlowChainFinalizeState.FLOWCHAIN_FINALIZE_FINISHED_STATE.equals(flowState)) {
             return Value.DATALAKE_RESIZE_FINISHED;
         } else if (flowState.name().equals(DATALAKE_BACKUP_VALIDATION_FAILED_STATE.name())
-            || flowState.name().equals(DATALAKE_RESTORE_FAILED_STATE.name())) {
+            || flowState.name().equals(DATALAKE_RESTORE_VALIDATION_FAILED_STATE.name())) {
             return Value.DATALAKE_RESIZE_VALIDATION_FAILED;
         } else if (flowState.toString().contains("_FAIL")) {
             return Value.DATALAKE_RESIZE_FAILED;
