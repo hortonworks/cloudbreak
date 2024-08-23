@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
@@ -57,7 +58,7 @@ public class CreateCredentialRequestToCredentialConverter {
 
     private void convertAttributes(CredentialRequest source, Credential credential) {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
-        doIfNotNull(source.getAws(), param -> credentialAttributes.setAws(awsConverter.convert(param)));
+        doIfNotNull(source.getAws(), param -> credentialAttributes.setAws(awsConverter.convert(param, Optional.empty())));
         doIfNotNull(source.getAzure(), param -> credentialAttributes.setAzure(azureConverter.convertCreate(param)));
         doIfNotNull(source.getGcp(), param -> credentialAttributes.setGcp(gcpConverter.convert(param)));
         doIfNotNull(source.getMock(), param -> credentialAttributes.setMock(mockConverter.convert(param)));

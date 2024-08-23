@@ -137,8 +137,8 @@ public class CredentialPrerequisiteService {
         if (isRoleArnSet(credentialAttributes)) {
             if (credentialAttributes.getAws().getRoleBased().getExternalId() == null) {
                 credentialAttributes.getAws().getRoleBased().setExternalId(getExternalId(credential.getType()));
-                saveNewAttributesToCredential(credential, credentialAttributes);
             }
+            saveNewAttributesToCredential(credential, credentialAttributes);
         }
         return credential;
     }
