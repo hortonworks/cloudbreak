@@ -9,6 +9,7 @@ public enum LoggerContextKey {
     REQUEST_ID("requestId"),
     ENVIRONMENT_CRN("environmentCrn"),
     ENV_CRN("envCrn"),
+    ENVIRONMENT_ID("environmentId"),
     RESOURCE_TYPE("resourceType"),
     RESOURCE_NAME("resourceName"),
     CLIENT_ID("clientId"),

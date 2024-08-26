@@ -24,9 +24,6 @@ class RedbeamsRotateSslServiceTest {
     private DBStackService dbStackService;
 
     @Mock
-    private DBStackStatusUpdater dbStackStatusUpdater;
-
-    @Mock
     private RedbeamsFlowManager flowManager;
 
     @InjectMocks
@@ -37,7 +34,6 @@ class RedbeamsRotateSslServiceTest {
         DBStack dbStack = mock(DBStack.class);
         String crn = "crn:test";
         when(dbStackService.getByCrn(crn)).thenReturn(dbStack);
-        when(dbStack.getEnvironmentId()).thenReturn("envId");
         when(dbStack.getId()).thenReturn(1L);
 
         redbeamsRotateSslService.rotateDatabaseServerSslCert(crn);
@@ -53,7 +49,6 @@ class RedbeamsRotateSslServiceTest {
         DBStack dbStack = mock(DBStack.class);
         String crn = "crn:test";
         when(dbStackService.getByCrn(crn)).thenReturn(dbStack);
-        when(dbStack.getEnvironmentId()).thenReturn("envId");
         when(dbStack.getId()).thenReturn(1L);
 
         redbeamsRotateSslService.updateToLatestDatabaseServerSslCert(crn);

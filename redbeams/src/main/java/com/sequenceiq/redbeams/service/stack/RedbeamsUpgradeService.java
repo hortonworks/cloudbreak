@@ -82,7 +82,6 @@ public class RedbeamsUpgradeService {
     public UpgradeDatabaseResponse validateUpgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.buildMdcContext(dbStack);
-        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
 
         MajorVersion currentVersion = dbStack.getMajorVersion();
         TargetMajorVersion targetVersion = upgradeDatabaseRequest.getTargetMajorVersion();
@@ -119,7 +118,7 @@ public class RedbeamsUpgradeService {
 
     public UpgradeDatabaseResponse upgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) {
         DBStack dbStack = dbStackService.getByCrn(crn);
-        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
+        MDCBuilder.buildMdcContext(dbStack);
 
         MajorVersion currentVersion = dbStack.getMajorVersion();
         TargetMajorVersion targetVersion = upgradeDatabaseRequest.getTargetMajorVersion();

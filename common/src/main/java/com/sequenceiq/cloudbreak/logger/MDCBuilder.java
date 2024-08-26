@@ -73,7 +73,7 @@ public class MDCBuilder {
     }
 
     public static void addEnvCrn(String env) {
-        MDC.put(LoggerContextKey.ENV_CRN.toString(), env);
+        MDC.put(LoggerContextKey.ENVIRONMENT_ID.toString(), env);
     }
 
     public static void addEnvironmentCrn(String env) {
@@ -122,7 +122,8 @@ public class MDCBuilder {
                     .resourceCrn(getFieldValues(object, LoggerContextKey.RESOURCE_CRN.toString(), LoggerContextKey.CRN.toString()))
                     .resourceType(getResourceType(object))
                     .resourceName(getFieldValues(object, LoggerContextKey.NAME.toString(), LoggerContextKey.CLUSTER_NAME.toString()))
-                    .environmentCrn(getFieldValues(object, LoggerContextKey.ENVIRONMENT_CRN.toString(), LoggerContextKey.ENV_CRN.toString()))
+                    .environmentCrn(getFieldValues(object, LoggerContextKey.ENVIRONMENT_CRN.toString(), LoggerContextKey.ENVIRONMENT_ID.toString(),
+                            LoggerContextKey.ENVIRONMENT_ID.toString()))
                     .tenant(getFieldValue(object, LoggerContextKey.ACCOUNT_ID.toString()))
                     .clientId(getFieldValue(object, LoggerContextKey.CLIENT_ID.toString()))
                     .buildMdc();

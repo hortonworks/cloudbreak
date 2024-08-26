@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -22,22 +21,12 @@ public class RedbeamsStopService {
     private DBStackService dbStackService;
 
     @Inject
-    private DBStackStatusUpdater dbStackStatusUpdater;
-
-    @Inject
     private RedbeamsFlowManager flowManager;
 
     public void stopDatabaseServer(String crn) {
         DBStack dbStack = dbStackService.getByCrn(crn);
-        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
-
+        MDCBuilder.buildMdcContext(dbStack);
         LOGGER.debug("Stop called for: {}", dbStack);
-        if (dbStack.getStatus().isStopInProgressOrCompleted()) {
-            LOGGER.debug("DatabaseServer with crn {} is already being stopped", dbStack.getResourceCrn());
-            return;
-        }
-
-        dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.STOP_REQUESTED);
 
         flowManager.notify(RedbeamsStopEvent.REDBEAMS_STOP_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsStopEvent.REDBEAMS_STOP_EVENT.selector(), dbStack.getId()));

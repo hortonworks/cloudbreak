@@ -61,7 +61,7 @@ public class RedbeamsTerminationService {
             return databaseServerConfigService.deleteByCrn(crn);
         } else {
             DBStack dbStack = dbStackService.getByCrn(crn);
-            MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
+            MDCBuilder.buildMdcContext(dbStack);
             LOGGER.debug("Terminate called for: {} with force: {}", dbStack, force);
 
             if (flowLogService.isFlowConfigAlreadyRunning(dbStack.getId(), RedbeamsTerminationFlowConfig.class) || isAlreadyDeleted(server, dbStack)) {

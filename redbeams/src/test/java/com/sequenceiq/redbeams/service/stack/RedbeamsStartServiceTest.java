@@ -3,10 +3,7 @@ package com.sequenceiq.redbeams.service.stack;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -39,9 +34,6 @@ public class RedbeamsStartServiceTest {
     private DBStackService dbStackService;
 
     @Mock
-    private DBStackStatusUpdater dbStackStatusUpdater;
-
-    @Mock
     private RedbeamsFlowManager flowManager;
 
     @Mock
@@ -58,8 +50,6 @@ public class RedbeamsStartServiceTest {
     @Test
     public void shouldSetStartRequestedStatusAndNotifyTheFlowManager() {
         when(dbStack.getId()).thenReturn(1L);
-        when(dbStack.getStatus()).thenReturn(Status.STOPPED);
-        when(dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.START_REQUESTED)).thenReturn(Optional.of(dbStack));
         ArgumentCaptor<RedbeamsEvent> redbeamsEventArgumentCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);
 
         victim.startDatabaseServer(CRN_STRING);
@@ -68,14 +58,5 @@ public class RedbeamsStartServiceTest {
 
         assertEquals(dbStack.getId(), redbeamsEventArgumentCaptor.getValue().getResourceId());
         assertEquals(RedbeamsStartEvent.REDBEAMS_START_EVENT.selector(), redbeamsEventArgumentCaptor.getValue().selector());
-    }
-
-    @Test
-    public void shouldReturnWithoutAnyActionWhenStartInProgress() {
-        when(dbStack.getStatus()).thenReturn(Status.START_IN_PROGRESS);
-
-        victim.startDatabaseServer(CRN_STRING);
-
-        verifyNoInteractions(dbStackStatusUpdater, flowManager);
     }
 }

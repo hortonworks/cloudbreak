@@ -3,10 +3,7 @@ package com.sequenceiq.redbeams.service.stack;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -38,9 +33,6 @@ public class RedbeamsStopServiceTest {
     private DBStackService dbStackService;
 
     @Mock
-    private DBStackStatusUpdater dbStackStatusUpdater;
-
-    @Mock
     private RedbeamsFlowManager flowManager;
 
     @Mock
@@ -57,9 +49,6 @@ public class RedbeamsStopServiceTest {
     @Test
     public void shouldSetStopRequestedStatusAndNotifyTheFlowManager() {
         when(dbStack.getId()).thenReturn(1L);
-        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
-        Optional<DBStack> dbStackOptional = Optional.of(dbStack);
-        when(dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.STOP_REQUESTED)).thenReturn(dbStackOptional);
         ArgumentCaptor<RedbeamsEvent> redbeamsEventArgumentCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);
 
         victim.stopDatabaseServer(CRN_STRING);
@@ -68,14 +57,5 @@ public class RedbeamsStopServiceTest {
 
         assertEquals(dbStack.getId(), redbeamsEventArgumentCaptor.getValue().getResourceId());
         assertEquals(RedbeamsStopEvent.REDBEAMS_STOP_EVENT.selector(), redbeamsEventArgumentCaptor.getValue().selector());
-    }
-
-    @Test
-    public void shouldReturnWithoutAnyActionWhenStopInProgress() {
-        when(dbStack.getStatus()).thenReturn(Status.STOP_IN_PROGRESS);
-
-        victim.stopDatabaseServer(CRN_STRING);
-
-        verifyNoInteractions(dbStackStatusUpdater, flowManager);
     }
 }
