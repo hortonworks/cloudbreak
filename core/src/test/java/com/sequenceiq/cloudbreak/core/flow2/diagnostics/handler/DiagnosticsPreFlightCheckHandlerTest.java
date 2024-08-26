@@ -6,28 +6,32 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowException;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
+import com.sequenceiq.cloudbreak.core.flow2.diagnostics.PreFlightCheckValidationService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -42,29 +46,46 @@ public class DiagnosticsPreFlightCheckHandlerTest {
     @Mock
     private DiagnosticsFlowService diagnosticsFlowService;
 
-    @BeforeEach
-    public void setUp() {
-        underTest = new DiagnosticsPreFlightCheckHandler();
-        MockitoAnnotations.openMocks(this);
-    }
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private PreFlightCheckValidationService preFlightCheckValidationService;
 
     @Test
     public void testDoAccept() {
         // GIVEN
-        doNothing().when(diagnosticsFlowService).nodeStatusNetworkReport(anyLong());
-        doNothing().when(diagnosticsFlowService).nodeStatusMeteringReport(anyLong());
+        doNothing().when(diagnosticsFlowService).nodeStatusNetworkReport(any());
+        doNothing().when(diagnosticsFlowService).nodeStatusMeteringReport(any());
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(new Stack());
+        when(preFlightCheckValidationService.preFlightCheckSupported(any(), any())).thenReturn(Boolean.TRUE);
         // WHEN
         DiagnosticsCollectionEvent event = new DiagnosticsCollectionEvent(SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT.selector(), STACK_ID, "crn",
                 new DiagnosticParameters(), Set.of(), Set.of(), Set.of());
         underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         // THEN
-        verify(diagnosticsFlowService, times(1)).nodeStatusNetworkReport(anyLong());
+        verify(diagnosticsFlowService, times(1)).nodeStatusNetworkReport(any());
+    }
+
+    @Test
+    public void testDoAcceptSkipChecks() {
+        // GIVEN
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(new Stack());
+        when(preFlightCheckValidationService.preFlightCheckSupported(any(), any())).thenReturn(Boolean.FALSE);
+        // WHEN
+        DiagnosticsCollectionEvent event = new DiagnosticsCollectionEvent(SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT.selector(), STACK_ID, "crn",
+                new DiagnosticParameters(), Set.of(), Set.of(), Set.of());
+        underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
+        // THEN
+        verifyNoInteractions(diagnosticsFlowService);
     }
 
     @Test
     public void testDoAcceptOnError() {
         // GIVEN
-        doThrow(new IllegalArgumentException("ex")).when(diagnosticsFlowService).nodeStatusNetworkReport(anyLong());
+        doThrow(new IllegalArgumentException("ex")).when(diagnosticsFlowService).nodeStatusNetworkReport(any());
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(new Stack());
+        when(preFlightCheckValidationService.preFlightCheckSupported(any(), any())).thenReturn(Boolean.TRUE);
         // WHEN
         DiagnosticsCollectionEvent event = new DiagnosticsCollectionEvent(SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT.selector(),
                 STACK_ID, "crn", new DiagnosticParameters(), Set.of(), Set.of(), Set.of());

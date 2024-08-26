@@ -243,7 +243,7 @@ public class AltusMachineUserService {
     }
 
     public boolean isAnyDataBusBasedFeatureSupported(Telemetry telemetry) {
-        return telemetry != null && telemetry.isAnyDataBusBasedFeatureEnablred();
+        return telemetry != null && telemetry.isAnyDataBusBasedFeatureEnabled();
     }
 
     public boolean isAnyMonitoringFeatureSupported(Telemetry telemetry) {

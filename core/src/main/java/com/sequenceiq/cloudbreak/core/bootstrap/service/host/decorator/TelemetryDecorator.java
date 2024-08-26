@@ -152,7 +152,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
         DatabusContext.Builder builder = DatabusContext.builder();
         DataBusCredential dbusCredential = getOrRefreshDataBusCredential(stack, accountId, telemetry, dataBusCredential, cdpAccessKeyType);
-        if (telemetry.isAnyDataBusBasedFeatureEnablred()) {
+        if (telemetry.isAnyDataBusBasedFeatureEnabled()) {
             builder.enabled();
         }
         if (dbusCredential != null && dbusCredential.isValid()) {

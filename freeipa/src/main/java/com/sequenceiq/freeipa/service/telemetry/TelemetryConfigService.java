@@ -217,7 +217,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         if (telemetry == null) {
             return builder.build();
         }
-        if (telemetry.isAnyDataBusBasedFeatureEnablred()) {
+        if (telemetry.isAnyDataBusBasedFeatureEnabled()) {
             LOGGER.debug("Apply DataBus related configurations.");
             builder.enabled();
             if (entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId())) {

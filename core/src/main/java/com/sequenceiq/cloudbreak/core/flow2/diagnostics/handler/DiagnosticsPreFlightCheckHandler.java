@@ -5,20 +5,33 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
+import com.sequenceiq.cloudbreak.core.flow2.diagnostics.PreFlightCheckValidationService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class DiagnosticsPreFlightCheckHandler extends AbstractDiagnosticsOperationHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsPreFlightCheckHandler.class);
+
     @Inject
     private DiagnosticsFlowService diagnosticsFlowService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private PreFlightCheckValidationService preFlightCheckValidationService;
 
     @Override
     public Selectable executeOperation(HandlerEvent<DiagnosticsCollectionEvent> event) throws Exception {
@@ -26,8 +39,13 @@ public class DiagnosticsPreFlightCheckHandler extends AbstractDiagnosticsOperati
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
-        diagnosticsFlowService.nodeStatusNetworkReport(resourceId);
-        diagnosticsFlowService.nodeStatusMeteringReport(resourceId);
+        Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
+        if (preFlightCheckValidationService.preFlightCheckSupported(stack.getId(), stack.getEnvironmentCrn())) {
+            diagnosticsFlowService.nodeStatusNetworkReport(stack);
+            diagnosticsFlowService.nodeStatusMeteringReport(stack);
+        } else {
+            LOGGER.info("Preflight checks will fail based on current setup of the cluster, skipping.");
+        }
         return DiagnosticsCollectionEvent.builder()
                 .withResourceCrn(resourceCrn)
                 .withResourceId(resourceId)

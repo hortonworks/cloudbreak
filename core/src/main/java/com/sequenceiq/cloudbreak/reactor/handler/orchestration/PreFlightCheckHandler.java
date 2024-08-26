@@ -7,10 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
+import com.sequenceiq.cloudbreak.core.flow2.diagnostics.PreFlightCheckValidationService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -25,6 +28,12 @@ public class PreFlightCheckHandler implements EventHandler<PreFlightCheckRequest
     @Inject
     private DiagnosticsFlowService diagnosticsFlowService;
 
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private PreFlightCheckValidationService preFlightCheckValidationService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(PreFlightCheckRequest.class);
@@ -35,10 +44,15 @@ public class PreFlightCheckHandler implements EventHandler<PreFlightCheckRequest
         PreFlightCheckRequest data = event.getData();
         Long resourceId = data.getResourceId();
         try {
-            diagnosticsFlowService.nodeStatusNetworkReport(resourceId);
-            diagnosticsFlowService.nodeStatusMeteringReport(resourceId);
+            Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
+            if (preFlightCheckValidationService.preFlightCheckSupported(stack.getId(), stack.getEnvironmentCrn())) {
+                diagnosticsFlowService.nodeStatusNetworkReport(stack);
+                diagnosticsFlowService.nodeStatusMeteringReport(stack);
+            } else {
+                LOGGER.info("Preflight checks will fail based on current setup of the cluster, skipping.");
+            }
         } catch (Exception e) {
-            LOGGER.debug("Error occurred during pre-flight node status checks (skipping): {}", e.getMessage());
+            LOGGER.error("Error occurred during pre-flight node status checks (skipping): {}", e.getMessage());
         }
         PreFlightCheckSuccess result = new PreFlightCheckSuccess(resourceId);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

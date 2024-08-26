@@ -118,7 +118,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationC
             Telemetry telemetry = componentConfigProviderService.getTelemetry(stackDto.getId());
             boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(ThreadBasedUserCrnProvider.getAccountId());
             String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
-            boolean enabled = telemetry.isAnyDataBusBasedFeatureEnablred();
+            boolean enabled = telemetry.isAnyDataBusBasedFeatureEnabled();
             DataBusCredential dataBusCredential = JsonUtil.readValue(stackDto.getCluster().getDatabusCredential(), DataBusCredential.class);
             String accessKeySecretAlgorithm = StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
             return new DatabusConfigView.Builder()
