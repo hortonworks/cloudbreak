@@ -271,7 +271,7 @@ public class StackCreatorService {
                         "Select the correct image took {} ms");
                 int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), blueprint.getStackVersion());
                 setJavaVersion(stackRequest, stack, javaVersion);
-                javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
+                javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
 

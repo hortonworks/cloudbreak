@@ -23,6 +23,7 @@ public enum ImagePackageVersion {
     SPARK3("spark3", "Spark 3"),
     STACK("stack"),
     IMDS_VERSION("imds"),
+    JAVA("java"),
     CDP_PROMETHEUS("cdp-prometheus"),
     PSQL10("psql10", "PostgreSQL 10"),
     PSQL11("psql11", "PostgreSQL 11"),
