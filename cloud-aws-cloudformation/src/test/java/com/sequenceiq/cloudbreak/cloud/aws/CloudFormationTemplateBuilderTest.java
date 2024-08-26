@@ -782,8 +782,13 @@ public class CloudFormationTemplateBuilderTest {
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
-        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .image(image)
+                .network(new Network(new Subnet(CIDR)))
+                .template("template")
+                .instanceAuthentication(instanceAuthentication)
+                .build();
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -815,8 +820,13 @@ public class CloudFormationTemplateBuilderTest {
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
-        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .image(image)
+                .network(new Network(new Subnet(CIDR)))
+                .template("template")
+                .instanceAuthentication(instanceAuthentication)
+                .build();
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -845,8 +855,13 @@ public class CloudFormationTemplateBuilderTest {
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
-        CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .image(image)
+                .network(new Network(new Subnet(CIDR)))
+                .template("template")
+                .instanceAuthentication(instanceAuthentication)
+                .build();
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -1604,8 +1619,14 @@ public class CloudFormationTemplateBuilderTest {
 
     private CloudStack createDefaultCloudStack(Collection<Group> groups, Map<String, String> parameters, Map<String, String> tags) {
         Network network = new Network(new Subnet("testSubnet"));
-        return new CloudStack(groups, network, image, parameters, tags, null, instanceAuthentication,
-                instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
+        return CloudStack.builder()
+                .network(network)
+                .groups(groups)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .build();
     }
 
     private Group createDefaultGroupMasterGroup(Optional<CloudFileSystemView> cloudFileSystemView) {

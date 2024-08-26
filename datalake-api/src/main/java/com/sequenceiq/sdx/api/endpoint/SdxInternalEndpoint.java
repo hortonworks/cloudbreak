@@ -1,7 +1,6 @@
 package com.sequenceiq.sdx.api.endpoint;
 
 import static com.sequenceiq.cloudbreak.common.database.DatabaseCommon.POSTGRES_VERSION_REGEX;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE_INTERNAL;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -43,7 +42,8 @@ public interface SdxInternalEndpoint {
     @POST
     @Path("crn/{crn}/renew_certificate")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = RENEW_CERTIFICATE_INTERNAL, description = Notes.RENEW_CERTIFICATE_NOTES, operationId = "renewInternalSdxCertificate",
+    @Operation(summary = "Trigger a certificate renewal on the desired cluster which is identified via crn",
+            description = Notes.RENEW_CERTIFICATE_NOTES, operationId = "renewInternalSdxCertificate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier renewCertificate(@PathParam("crn") String crn);
 

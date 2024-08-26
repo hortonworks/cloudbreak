@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
 
-import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -64,7 +63,10 @@ public class RecommendedImageValidator {
         Boolean accepted = azureMarketplaceTermsClientService.getAccepted(request.getEnvironmentCrn());
         LOGGER.debug("Azure Marketplace automatic terms acceptance policy: {}", accepted);
         Map<String, String> parameters = Map.of(ACCEPTANCE_POLICY_PARAMETER, accepted.toString());
-        CloudStack cloudStack = new CloudStack(List.of(), null, image, parameters, Map.of(), null, null, null, null, null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .image(image)
+                .parameters(parameters)
+                .build();
 
         CloudConnector connector = cloudPlatformConnectors.get(cloudPlatform);
         AuthenticatedContext ac = getAuthenticatedContext(workspaceId, request.getEnvironmentCrn(), cloudPlatform, connector);

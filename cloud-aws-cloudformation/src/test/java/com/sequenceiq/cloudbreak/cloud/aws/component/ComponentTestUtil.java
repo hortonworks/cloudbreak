@@ -122,7 +122,14 @@ public class ComponentTestUtil {
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), null, null);
 
         String template = configuration.getTemplate(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH, "UTF-8").toString();
-        return new CloudStack(groups, network, image, Map.of(), Map.of(), template, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY, null, null, null, null);
+        return CloudStack.builder()
+                .network(network)
+                .groups(groups)
+                .image(image)
+                .template(template)
+                .instanceAuthentication(instanceAuthentication)
+                .instanceAuthentication(instanceAuthentication)
+                .build();
     }
 
     public CloudStack getStackForLaunch(InstanceStatus createRequested, InstanceStatus createRequested1) throws IOException {
@@ -146,8 +153,15 @@ public class ComponentTestUtil {
 
         SpiFileSystem efsFileSystem = getEfsFileSystem();
 
-        return new CloudStack(groups, network, image, Map.of(), Map.of(), template, instanceAuthentication,
-                LOGIN_USER_NAME, PUBLIC_KEY, efsFileSystem, null, null, null);
+        return CloudStack.builder()
+                .network(network)
+                .groups(groups)
+                .image(image)
+                .template(template)
+                .instanceAuthentication(instanceAuthentication)
+                .instanceAuthentication(instanceAuthentication)
+                .fileSystem(efsFileSystem)
+                .build();
     }
 
     private SpiFileSystem getEfsFileSystem() {

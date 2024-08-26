@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
@@ -98,7 +97,9 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testImageHasValidVhdFormat() {
         Image image = Image.builder().withImageName(VALID_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .build();
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack));
@@ -111,7 +112,9 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testVhdImageOnlyAzureMarketplaceImageAllowed() {
         Image image = Image.builder().withImageName(VALID_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .build();
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
@@ -128,7 +131,9 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testImageHasValidMarketplaceFormatNoEntitlement() {
         Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .build();
 
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
@@ -141,7 +146,9 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testImageHasValidMarketplaceFormatEntitlementTermsAccepted() {
         Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .build();
 
         setupAuthenticatedContext();
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
@@ -156,7 +163,9 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testImageHasValidMarketplaceFormatEntitlementNoTermsAccepted() {
         Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .build();
         setupAuthenticatedContext();
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(azureImageTermsSignerService.getImageTermStatus(anyString(), any(), any())).thenReturn(NOT_ACCEPTED);
@@ -173,8 +182,10 @@ public class AzureImageFormatValidatorTest {
     @MethodSource("marketplaceSettingsDataProvider")
     void testMarketplaceImageScenarios(boolean marketplaceOnly, boolean autoAccept, AzureImageTermStatus termStatus, String expectedResult) {
         Image image = Image.builder().withImageName(MARKETPLACE_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.toString(autoAccept)), Map.of(), null, null, null,
-                null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .parameters(Map.of(ACCEPTANCE_POLICY_PARAMETER, Boolean.toString(autoAccept)))
+                .build();
         setupAuthenticatedContext();
 
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
@@ -230,7 +241,9 @@ public class AzureImageFormatValidatorTest {
     @Test
     void testImageHasInvalidFormat() {
         Image image = Image.builder().withImageName(INVALID_IMAGE_NAME).build();
-        cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .build();
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));

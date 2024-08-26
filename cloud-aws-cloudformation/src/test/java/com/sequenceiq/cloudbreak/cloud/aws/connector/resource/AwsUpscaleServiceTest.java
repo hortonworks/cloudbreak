@@ -173,8 +173,12 @@ class AwsUpscaleServiceTest {
         Map<String, String> tags = new HashMap<>();
         tags.put("owner", "cbuser");
         tags.put("created", "yesterday");
-        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(getNetwork())
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .build();
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
         when(awsTaggingService.tagRootVolumes(authenticatedContext, ec2Client, allInstances, tags)).thenReturn(rootVolumeResources);
@@ -239,8 +243,11 @@ class AwsUpscaleServiceTest {
         Group worker = getWorkerGroup(instanceAuthentication);
         groups.add(worker);
 
-        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(getNetwork())
+                .instanceAuthentication(instanceAuthentication)
+                .build();
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
 
@@ -317,8 +324,11 @@ class AwsUpscaleServiceTest {
         Group worker = getWorkerGroup(instanceAuthentication);
         groups.add(worker);
 
-        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(getNetwork())
+                .instanceAuthentication(instanceAuthentication)
+                .build();
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
 
@@ -405,8 +415,13 @@ class AwsUpscaleServiceTest {
         Map<String, String> tags = new HashMap<>();
         tags.put("owner", "cbuser");
         tags.put("created", "yesterday");
-        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(getNetwork())
+                .tags(tags)
+                .loadBalancers(loadBalancers)
+                .instanceAuthentication(instanceAuthentication)
+                .build();
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);

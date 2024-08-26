@@ -59,7 +59,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -191,8 +190,7 @@ public class ClusterUpgradeValidationActions {
                 LOGGER.info("Starting cluster upgrade image validation.");
                 UpgradeImageInfo upgradeImageInfo = (UpgradeImageInfo) variables.get(UPGRADE_IMAGE_INFO);
                 Image targetImage = (Image) variables.get(TARGET_IMAGE);
-                Database database = context.getStack().getDatabase();
-                CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
+                CloudStack cloudStack = CloudStack.replaceImage(context.getCloudStack(), targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
                         context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.targetStatedImage().getImage());
                 sendEvent(context, event.selector(), event);

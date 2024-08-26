@@ -49,27 +49,6 @@ public class CloudStack {
 
     private final String supportedImdsVersion;
 
-    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            String gatewayUserData, String coreUserData, String supportedImdsVersion) {
-        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                Collections.emptyList(), gatewayUserData, coreUserData, supportedImdsVersion);
-    }
-
-    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
-            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData, boolean multiAz, String supportedImdsVersion) {
-        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                loadBalancers, null, gatewayUserData, coreUserData, multiAz, supportedImdsVersion);
-    }
-
-    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
-            String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData, String supportedImdsVersion) {
-        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                loadBalancers, null, gatewayUserData, coreUserData, false, supportedImdsVersion);
-    }
-
     @JsonCreator
     public CloudStack(
             @JsonProperty("groups") Collection<Group> groups,
@@ -106,9 +85,42 @@ public class CloudStack {
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
-    public CloudStack replaceImage(Image newImage) {
-        return new CloudStack(groups, network, newImage, parameters, tags, template, instanceAuthentication, loginUserName, publicKey,
-                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null), gatewayUserData, coreUserData, multiAz, supportedImdsVersion);
+    private CloudStack(Builder builder) {
+        this.groups = builder.groups;
+        this.network = builder.network;
+        this.image = builder.image;
+        this.template = builder.template;
+        this.loginUserName = builder.instanceAuthentication != null ? builder.instanceAuthentication.getLoginUserName() : null;
+        this.publicKey = builder.instanceAuthentication != null ? builder.instanceAuthentication.getPublicKey() : null;
+        this.parameters = builder.parameters;
+        this.tags = builder.tags;
+        this.instanceAuthentication = builder.instanceAuthentication;
+        this.fileSystem = Optional.ofNullable(builder.fileSystem);
+        this.additionalFileSystem = Optional.ofNullable(builder.additionalFileSystem);
+        this.loadBalancers = builder.loadBalancers != null ? builder.loadBalancers : Collections.emptyList();
+        this.gatewayUserData = builder.gatewayUserData;
+        this.coreUserData = builder.coreUserData;
+        this.multiAz = builder.multiAz;
+        this.supportedImdsVersion = builder.supportedImdsVersion;
+    }
+
+    public static CloudStack replaceImage(CloudStack cloudStack, Image newImage) {
+        return builder()
+                .groups(cloudStack.getGroups())
+                .network(cloudStack.getNetwork())
+                .image(newImage)
+                .template(cloudStack.getTemplate())
+                .parameters(cloudStack.getParameters())
+                .tags(cloudStack.getTags())
+                .instanceAuthentication(cloudStack.getInstanceAuthentication())
+                .fileSystem(cloudStack.getFileSystem().orElse(null))
+                .additionalFileSystem(cloudStack.getAdditionalFileSystem().orElse(null))
+                .loadBalancers(cloudStack.getLoadBalancers())
+                .gatewayUserData(cloudStack.getGatewayUserData())
+                .coreUserData(cloudStack.getCoreUserData())
+                .multiAz(cloudStack.multiAz)
+                .supportedImdsVersion(cloudStack.getSupportedImdsVersion())
+                .build();
     }
 
     public List<Group> getGroups() {
@@ -204,5 +216,113 @@ public class CloudStack {
                 ", multiAz=" + multiAz +
                 ", supportedImdsVersion=" + supportedImdsVersion +
                 '}';
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private List<Group> groups = Collections.emptyList();
+
+        private Network network;
+
+        private Image image;
+
+        private String template;
+
+        private Map<String, String> parameters = Collections.emptyMap();
+
+        private Map<String, String> tags = Collections.emptyMap();
+
+        private InstanceAuthentication instanceAuthentication;
+
+        private SpiFileSystem fileSystem;
+
+        private SpiFileSystem additionalFileSystem;
+
+        private List<CloudLoadBalancer> loadBalancers = Collections.emptyList();
+
+        private String gatewayUserData;
+
+        private String coreUserData;
+
+        private boolean multiAz;
+
+        private String supportedImdsVersion;
+
+        public Builder groups(Collection<Group> groups) {
+            this.groups = List.copyOf(groups);
+            return this;
+        }
+
+        public Builder network(Network network) {
+            this.network = network;
+            return this;
+        }
+
+        public Builder image(Image image) {
+            this.image = image;
+            return this;
+        }
+
+        public Builder template(String template) {
+            this.template = template;
+            return this;
+        }
+
+        public Builder parameters(Map<String, String> parameters) {
+            this.parameters = Map.copyOf(parameters);
+            return this;
+        }
+
+        public Builder tags(Map<String, String> tags) {
+            this.tags = Map.copyOf(tags);
+            return this;
+        }
+
+        public Builder instanceAuthentication(InstanceAuthentication instanceAuthentication) {
+            this.instanceAuthentication = instanceAuthentication;
+            return this;
+        }
+
+        public Builder fileSystem(SpiFileSystem fileSystem) {
+            this.fileSystem = fileSystem;
+            return this;
+        }
+
+        public Builder additionalFileSystem(SpiFileSystem additionalFileSystem) {
+            this.additionalFileSystem = additionalFileSystem;
+            return this;
+        }
+
+        public Builder loadBalancers(List<CloudLoadBalancer> loadBalancers) {
+            this.loadBalancers = loadBalancers;
+            return this;
+        }
+
+        public Builder gatewayUserData(String gatewayUserData) {
+            this.gatewayUserData = gatewayUserData;
+            return this;
+        }
+
+        public Builder coreUserData(String coreUserData) {
+            this.coreUserData = coreUserData;
+            return this;
+        }
+
+        public Builder multiAz(boolean multiAz) {
+            this.multiAz = multiAz;
+            return this;
+        }
+
+        public Builder supportedImdsVersion(String supportedImdsVersion) {
+            this.supportedImdsVersion = supportedImdsVersion;
+            return this;
+        }
+
+        public CloudStack build() {
+            return new CloudStack(this);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -119,8 +118,10 @@ class GcpForwardingRuleResourceBuilderTest {
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
         Network network = new Network(null);
-        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .image(image)
+                .network(network)
+                .build();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);

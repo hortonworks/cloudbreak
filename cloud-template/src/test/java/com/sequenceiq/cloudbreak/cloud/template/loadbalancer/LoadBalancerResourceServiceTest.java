@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.template.loadbalancer;
 
 import static com.sequenceiq.common.api.type.ResourceType.GCP_HEALTH_CHECK;
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -96,8 +95,11 @@ public class LoadBalancerResourceServiceTest {
                 .withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
         Network network = new Network(null);
-        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .groups(Collections.emptyList())
+                .network(network)
+                .image(image)
+                .build();
     }
 
     @Test

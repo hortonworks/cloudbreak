@@ -263,10 +263,17 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
-        cloudStack = new CloudStack(groups, network, image, parameters, tags,
-                freemarkerConfigurationHelper.getTemplate(noMarketplaceTemplate, "UTF-8").toString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .template(freemarkerConfigurationHelper.getTemplate(noMarketplaceTemplate, "UTF-8").toString())
+                .instanceAuthentication(instanceAuthentication)
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
@@ -326,10 +333,18 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
         loadBalancers.add(privateLb);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags,
-                freemarkerConfigurationHelper.getTemplate(noMarketplaceTemplate, "UTF-8").toString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .loadBalancers(loadBalancers)
+                .tags(tags)
+                .template(freemarkerConfigurationHelper.getTemplate(noMarketplaceTemplate, "UTF-8").toString())
+                .instanceAuthentication(instanceAuthentication)
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -390,10 +405,18 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
         loadBalancers.add(privateLb);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags,
-                freemarkerConfigurationHelper.getTemplate(noMarketplaceTemplate, "UTF-8").toString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .loadBalancers(loadBalancers)
+                .tags(tags)
+                .template(freemarkerConfigurationHelper.getTemplate(noMarketplaceTemplate, "UTF-8").toString())
+                .instanceAuthentication(instanceAuthentication)
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -453,10 +476,17 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
         loadBalancers.add(privateLb);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags,
-                freemarkerConfigurationHelper.getTemplate(marketplaceTemplate, "UTF-8").toString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .template(freemarkerConfigurationHelper.getTemplate(marketplaceTemplate, "UTF-8").toString())
+                .instanceAuthentication(instanceAuthentication)
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN

@@ -256,9 +256,17 @@ public class AzureTemplateBuilderFreeIpaTest {
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .template(azureTemplateBuilder.getTemplateString())
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -311,9 +319,18 @@ public class AzureTemplateBuilderFreeIpaTest {
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .template(azureTemplateBuilder.getTemplateString())
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .multiAz(true)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -370,9 +387,18 @@ public class AzureTemplateBuilderFreeIpaTest {
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, true, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .template(azureTemplateBuilder.getTemplateString())
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .multiAz(true)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -421,9 +447,17 @@ public class AzureTemplateBuilderFreeIpaTest {
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
+        cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .template(azureTemplateBuilder.getTemplateString())
+                .gatewayUserData(GATEWAY_CUSTOM_DATA)
+                .coreUserData(CORE_CUSTOM_DATA)
+                .build();
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN

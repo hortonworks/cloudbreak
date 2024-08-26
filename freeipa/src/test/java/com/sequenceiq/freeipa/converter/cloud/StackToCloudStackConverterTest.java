@@ -230,22 +230,9 @@ public class StackToCloudStackConverterTest {
                 new GroupNetwork(OutboundInternetTraffic.DISABLED, Set.of(), Map.of()),
                 Map.of());
 
-        CloudStack cloudStack = new CloudStack(
-                Set.of(group),
-                null,
-                null,
-                Map.of(),
-                Map.of(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(Set.of(group))
+                .build();
 
         VerticalScaleRequest freeIPAVerticalScaleRequest = new VerticalScaleRequest();
         freeIPAVerticalScaleRequest.setGroup(GROUP_NAME);
@@ -274,8 +261,9 @@ public class StackToCloudStackConverterTest {
         CloudInstance skeleton = new CloudInstance("skeleton", skeletonTemplate, null, null, null);
         Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of());
         Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
-        CloudStack cloudStack = new CloudStack(Set.of(group1, group2), null, null, Map.of(), Map.of(), null, null, null,
-                null, null, null, null, null, false, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(Set.of(group1, group2))
+                .build();
         VerticalScaleRequest verticalScaleRequest = getVerticalScaleRequest();
 
         CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);

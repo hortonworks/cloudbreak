@@ -190,10 +190,22 @@ public class StackToCloudStackConverter {
 
         Map<InstanceGroupType, String> userData = userDataService.getUserData(stack.getId());
 
-        return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack.getStack()), template,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem,
-                userData.get(InstanceGroupType.GATEWAY), userData.get(InstanceGroupType.CORE), stack.getStack().isMultiAz(), stack.getSupportedImdsVersion());
+        return CloudStack.builder()
+                .groups(instanceGroups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(getUserDefinedTags(stack.getStack()))
+                .template(template)
+                .instanceAuthentication(instanceAuthentication)
+                .fileSystem(cloudFileSystem)
+                .loadBalancers(cloudLoadBalancers)
+                .additionalFileSystem(additionalCloudFileSystem)
+                .coreUserData(userData.get(InstanceGroupType.CORE))
+                .gatewayUserData(userData.get(InstanceGroupType.GATEWAY))
+                .multiAz(stack.getStack().isMultiAz())
+                .supportedImdsVersion(stack.getSupportedImdsVersion())
+                .build();
     }
 
     public List<CloudInstance> buildInstances(StackDtoDelegate stack, DetailedEnvironmentResponse environment) {

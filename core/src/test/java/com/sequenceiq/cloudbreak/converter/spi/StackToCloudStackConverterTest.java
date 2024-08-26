@@ -1356,8 +1356,9 @@ public class StackToCloudStackConverterTest {
         CloudInstance instance2 = new CloudInstance("instance2", instanceTemplate2, null, null, null);
         Group group1 = new Group("group1", null, Set.of(instance1, instance2), null, null, null, null, null, 100, null, null, Map.of());
         Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
-        CloudStack cloudStack = new CloudStack(Set.of(group1, group2), null, null, Map.of(), Map.of(), null, null, null,
-                null, null, null, null, null, false, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(Set.of(group1, group2))
+                .build();
         StackVerticalScaleV4Request verticalScaleRequest = getStackVerticalScaleV4Request();
 
         CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);
@@ -1374,8 +1375,9 @@ public class StackToCloudStackConverterTest {
         CloudInstance skeleton = new CloudInstance("skeleton", skeletonTemplate, null, null, null);
         Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of());
         Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
-        CloudStack cloudStack = new CloudStack(Set.of(group1, group2), null, null, Map.of(), Map.of(), null, null, null,
-                null, null, null, null, null, false, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(Set.of(group1, group2))
+                .build();
         StackVerticalScaleV4Request verticalScaleRequest = getStackVerticalScaleV4Request();
 
         CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);

@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -208,8 +207,10 @@ public class GcpInstanceResourceBuilderTest {
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
         Network network = new Network(null);
-        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .network(network)
+                .image(image)
+                .build();
     }
 
     @Test
@@ -307,9 +308,12 @@ public class GcpInstanceResourceBuilderTest {
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, ipaserver));
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
-        cloudStack = new CloudStack(singletonList(group), new Network(null), image,
-                ImmutableMap.of(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE), emptyMap(), null,
-                null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .groups(singletonList(group))
+                .network(new Network(null))
+                .image(image)
+                .parameters(ImmutableMap.of(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE))
+                .build();
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
@@ -361,9 +365,11 @@ public class GcpInstanceResourceBuilderTest {
         CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
         cloudGcsView.setServiceAccountEmail(email);
 
-        CloudStack cloudStack = new CloudStack(emptyList(), new Network(null), image,
-                emptyMap(), emptyMap(), null, null, null, null,
-                new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .fileSystem(new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)))
+                .network(new Network(null))
+                .image(image)
+                .build();
 
         Group group = newGroupWithParams(ImmutableMap.of(), cloudGcsView);
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer.GcpBackendServiceResourceBuilder.GCP_INSTANCEGROUP_REFERENCE_FORMAT;
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -118,8 +117,10 @@ class GcpBackendServiceResourceBuilderTest {
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
         Network network = new Network(null);
-        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null, null);
+        cloudStack = CloudStack.builder()
+                .network(network)
+                .image(image)
+                .build();
     }
 
     @Test

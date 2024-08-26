@@ -10,9 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -76,8 +73,9 @@ class LaunchTemplateRotationExecutorTest {
         imageEntity.setGatewayUserdata("userdata");
         stack.setImage(imageEntity);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(ENVIRONMENT_CRN), anyString())).thenReturn(stack);
-        CloudStack cloudStack = new CloudStack(new HashSet<>(), null, null, new HashMap<>(), new HashMap<>(), "AWS::EC2::LaunchTemplate",
-                null, null, null, null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .template("AWS::EC2::LaunchTemplate")
+                .build();
         when(stackToCloudStackConverter.convert(eq(stack))).thenReturn(cloudStack);
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);

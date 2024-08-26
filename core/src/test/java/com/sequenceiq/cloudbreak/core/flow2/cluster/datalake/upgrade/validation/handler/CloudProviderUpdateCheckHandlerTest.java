@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,8 @@ class CloudProviderUpdateCheckHandlerTest {
     @Test
     void doAcceptShouldCallPlatformConnectorsGet() {
         when(cloudPlatformConnectors.get(any(), any())).thenReturn(cloudConnector);
-        CloudStack cloudStack = new CloudStack(List.of(), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .build();
         CloudContext cloudContext = CloudContext.Builder.builder().withId(0L).build();
         ClusterUpgradeUpdateCheckRequest checkRequest = new ClusterUpgradeUpdateCheckRequest(0L, cloudStack, new CloudCredential(), cloudContext, List.of());
 
@@ -58,7 +58,8 @@ class CloudProviderUpdateCheckHandlerTest {
 
     @Test
     void testDefaultFailureEvent() {
-        CloudStack cloudStack = new CloudStack(List.of(), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .build();
         CloudContext cloudContext = CloudContext.Builder.builder().withId(0L).build();
         ClusterUpgradeUpdateCheckRequest checkRequest = new ClusterUpgradeUpdateCheckRequest(0L, cloudStack, new CloudCredential(), cloudContext, List.of());
         Exception exception = new Exception("bumm");

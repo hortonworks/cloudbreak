@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.UpdateType.INSTANCE_METADATA_UPDAT
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -60,6 +59,8 @@ class AwsImdsUtilTest {
 
     private CloudStack cloudStack(Map<String, String> packageVersions) {
         Image image = new Image(null, Map.of(), null, null, null, null, null, null, packageVersions, null, null);
-        return new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null, null, null, null);
+        return CloudStack.builder()
+                .image(image)
+                .build();
     }
 }

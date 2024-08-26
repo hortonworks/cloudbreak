@@ -134,7 +134,9 @@ class AwsGatewaySubnetMultiAzValidatorTest {
     }
 
     private CloudStack getCloudStack(Collection<Group> groups) {
-        return new CloudStack(groups, null, null, Map.of(), Map.of(), "", null, "", "", null, null, null, null);
+        return CloudStack.builder()
+                .groups(groups)
+                .build();
     }
 
     private Group getGroup(String groupName, InstanceGroupType groupType, GroupNetwork groupNetwork) {

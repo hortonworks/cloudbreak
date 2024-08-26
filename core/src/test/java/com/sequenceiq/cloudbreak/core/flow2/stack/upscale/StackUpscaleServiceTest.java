@@ -169,8 +169,14 @@ class StackUpscaleServiceTest {
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap()));
 
-        CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
-                mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(mock(Network.class))
+                .image(mock(Image.class))
+                .instanceAuthentication(mock(InstanceAuthentication.class))
+                .template("template")
+                .fileSystem(mock(SpiFileSystem.class))
+                .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
@@ -217,8 +223,14 @@ class StackUpscaleServiceTest {
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap()));
 
-        CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
-                mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(mock(Network.class))
+                .image(mock(Image.class))
+                .instanceAuthentication(mock(InstanceAuthentication.class))
+                .template("template")
+                .fileSystem(mock(SpiFileSystem.class))
+                .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
@@ -259,8 +271,14 @@ class StackUpscaleServiceTest {
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap()));
 
-        CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
-                mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(mock(Network.class))
+                .image(mock(Image.class))
+                .instanceAuthentication(mock(InstanceAuthentication.class))
+                .template("template")
+                .fileSystem(mock(SpiFileSystem.class))
+                .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
@@ -303,8 +321,14 @@ class StackUpscaleServiceTest {
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap()));
 
-        CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
-                mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(mock(Network.class))
+                .image(mock(Image.class))
+                .instanceAuthentication(mock(InstanceAuthentication.class))
+                .template("template")
+                .fileSystem(mock(SpiFileSystem.class))
+                .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
@@ -351,8 +375,14 @@ class StackUpscaleServiceTest {
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap()));
 
-        CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
-                mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(mock(Network.class))
+                .image(mock(Image.class))
+                .instanceAuthentication(mock(InstanceAuthentication.class))
+                .template("template")
+                .fileSystem(mock(SpiFileSystem.class))
+                .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
@@ -394,8 +424,14 @@ class StackUpscaleServiceTest {
         groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap()));
 
-        CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
-                mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class), null, null, null);
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(mock(Network.class))
+                .image(mock(Image.class))
+                .instanceAuthentication(mock(InstanceAuthentication.class))
+                .template("template")
+                .fileSystem(mock(SpiFileSystem.class))
+                .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);

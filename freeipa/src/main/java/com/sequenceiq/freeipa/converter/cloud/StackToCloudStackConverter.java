@@ -132,10 +132,19 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         Map<String, String> parameters = buildCloudStackParameters(stack.getCloudPlatform(), stack.getEnvironmentCrn());
         List<CloudLoadBalancer> loadBalancer = loadBalancerToCloudLoadBalancerConverter.convertLoadBalancer(stack.getId(), new HashSet<>(instanceGroups));
 
-        return new CloudStack(instanceGroups, network, image, parameters,
-                getUserDefinedTags(stack), stack.getTemplate(), instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), null, loadBalancer,
-                imageEntity.getUserdataWrapper(), null, stack.isMultiAz(), stack.getSupportedImdsVersion());
+        return CloudStack.builder()
+                .groups(instanceGroups)
+                .network(network)
+                .image(image)
+                .parameters(parameters)
+                .tags(getUserDefinedTags(stack))
+                .template(stack.getTemplate())
+                .instanceAuthentication(instanceAuthentication)
+                .loadBalancers(loadBalancer)
+                .gatewayUserData(imageEntity.getUserdataWrapper())
+                .multiAz(stack.isMultiAz())
+                .supportedImdsVersion(stack.getSupportedImdsVersion())
+                .build();
     }
 
     public CloudInstance buildInstance(Stack stack, InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
