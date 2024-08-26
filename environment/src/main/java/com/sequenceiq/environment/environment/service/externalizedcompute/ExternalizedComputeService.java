@@ -31,6 +31,7 @@ import com.sequenceiq.environment.environment.flow.creation.handler.computeclust
 import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterPollerObject;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
@@ -64,6 +65,9 @@ public class ExternalizedComputeService {
 
     @Inject
     private EnvironmentFlowValidatorService validatorService;
+
+    @Inject
+    private EventSenderService eventSenderService;
 
     public void createComputeCluster(Environment environment) {
         try {
@@ -213,7 +217,7 @@ public class ExternalizedComputeService {
 
     public void awaitComputeClusterCreation(Environment environment, String computeClusterName) {
         ExtendedPollingResult pollWithTimeout = computeClusterPollingService.pollWithTimeout(
-                new ComputeClusterCreationRetrievalTask(this),
+                new ComputeClusterCreationRetrievalTask(this, eventSenderService, environmentService),
                 new ComputeClusterPollerObject(environment.getId(), environment.getResourceCrn(), computeClusterName),
                 ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_RETRYING_INTERVAL,
                 ComputeClusterCreationRetrievalTask.COMPUTE_CLUSTER_RETRYING_COUNT,

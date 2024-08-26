@@ -4,6 +4,7 @@ public enum ExternalizedComputeClusterStatusEnum {
 
     CREATE_IN_PROGRESS,
     REINITIALIZE_IN_PROGRESS,
+    LIFTIE_CLUSTER_CREATION_IN_PROGRESS,
     DELETE_IN_PROGRESS,
     DELETED,
     AVAILABLE,
@@ -24,6 +25,7 @@ public enum ExternalizedComputeClusterStatusEnum {
     }
 
     public boolean isInProgress() {
-        return CREATE_IN_PROGRESS.equals(this) || REINITIALIZE_IN_PROGRESS.equals(this) || DELETE_IN_PROGRESS.equals(this);
+        return CREATE_IN_PROGRESS.equals(this) || REINITIALIZE_IN_PROGRESS.equals(this) ||
+                LIFTIE_CLUSTER_CREATION_IN_PROGRESS.equals(this) || DELETE_IN_PROGRESS.equals(this);
     }
 }

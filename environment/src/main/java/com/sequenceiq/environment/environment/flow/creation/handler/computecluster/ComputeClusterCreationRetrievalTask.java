@@ -1,13 +1,20 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.computecluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
+import static com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus.LIFTIE_CLUSTER_CREATION_IN_PROGRESS;
+
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
@@ -25,14 +32,22 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
 
     private final ExternalizedComputeService externalizedComputeService;
 
-    public ComputeClusterCreationRetrievalTask(ExternalizedComputeService externalizedComputeService) {
+    private final EventSenderService eventService;
+
+    private final EnvironmentService environmentService;
+
+    public ComputeClusterCreationRetrievalTask(ExternalizedComputeService externalizedComputeService, EventSenderService eventService,
+            EnvironmentService environmentService) {
         this.externalizedComputeService = externalizedComputeService;
+        this.eventService = eventService;
+        this.environmentService = environmentService;
     }
 
     @Override
     public boolean checkStatus(ComputeClusterPollerObject pollerObject) {
         String environmentCrn = pollerObject.getEnvironmentCrn();
         String name = pollerObject.getName();
+
         try {
             LOGGER.debug("Checking the state of compute cluster creation progress: '{}'", name);
             Optional<ExternalizedComputeClusterResponse> response = externalizedComputeService.getComputeCluster(environmentCrn, name);
@@ -42,6 +57,7 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
             ExternalizedComputeClusterResponse computeCluster = response.get();
             ExternalizedComputeClusterApiStatus status = computeCluster.getStatus();
             if (status.isCreationInProgress()) {
+                sendNotificationIfNeeded(pollerObject, status, environmentCrn);
                 return false;
             } else if (status.isAvailable()) {
                 return true;
@@ -61,6 +77,15 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
             throw e;
         } catch (Exception e) {
             throw new ExternalizedComputeOperationFailedException(String.format("Compute cluster %s creation failed. Reason: %s", name, e.getMessage()), e);
+        }
+    }
+
+    private void sendNotificationIfNeeded(ComputeClusterPollerObject pollerObject, ExternalizedComputeClusterApiStatus status, String environmentCrn) {
+        if (!pollerObject.isCreationInProgressNotificationSent() && LIFTIE_CLUSTER_CREATION_IN_PROGRESS.equals(status)) {
+            EnvironmentDto environmentDto = environmentService.internalGetByCrn(environmentCrn);
+            eventService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(),
+                    ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED);
+            pollerObject.creationInProgressNotificationSent();
         }
     }
 

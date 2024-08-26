@@ -8,6 +8,8 @@ public class ComputeClusterPollerObject {
 
     private final String name;
 
+    private boolean creationInProgressNotificationSent;
+
     public ComputeClusterPollerObject(Long environmentId, String environmentCrn, String name) {
         this.environmentId = environmentId;
         this.environmentCrn = environmentCrn;
@@ -24,5 +26,13 @@ public class ComputeClusterPollerObject {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isCreationInProgressNotificationSent() {
+        return creationInProgressNotificationSent;
+    }
+
+    public void creationInProgressNotificationSent() {
+        creationInProgressNotificationSent = true;
     }
 }

@@ -7,6 +7,7 @@ public enum ExternalizedComputeClusterApiStatus {
 
     CREATE_IN_PROGRESS,
     REINITIALIZE_IN_PROGRESS,
+    LIFTIE_CLUSTER_CREATION_IN_PROGRESS,
     DELETE_IN_PROGRESS,
     DELETED,
     AVAILABLE,
@@ -21,7 +22,7 @@ public enum ExternalizedComputeClusterApiStatus {
     }
 
     public boolean isCreationInProgress() {
-        return CREATE_IN_PROGRESS.equals(this) || REINITIALIZE_IN_PROGRESS.equals(this);
+        return CREATE_IN_PROGRESS.equals(this) || REINITIALIZE_IN_PROGRESS.equals(this) || LIFTIE_CLUSTER_CREATION_IN_PROGRESS.equals(this);
     }
 
     public boolean isDeletionInProgress() {

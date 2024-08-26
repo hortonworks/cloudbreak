@@ -29,6 +29,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.ExternalizedComputeClusterResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
 import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
@@ -45,6 +46,9 @@ class ExternalizedComputeClusterCreateServiceTest {
 
     @Mock
     private ExternalizedComputeClusterRepository externalizedComputeClusterRepository;
+
+    @Mock
+    private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
 
     @InjectMocks
     private ExternalizedComputeClusterCreateService externalizedComputeClusterCreateService;
@@ -80,7 +84,10 @@ class ExternalizedComputeClusterCreateServiceTest {
 
         ArgumentCaptor<ExternalizedComputeCluster> externalizedComputeClusterArgumentCaptor = ArgumentCaptor.forClass(ExternalizedComputeCluster.class);
         verify(externalizedComputeClusterRepository, times(1)).save(externalizedComputeClusterArgumentCaptor.capture());
-        assertEquals("liftie-1", externalizedComputeClusterArgumentCaptor.getValue().getLiftieName());
+        ExternalizedComputeCluster cluster = externalizedComputeClusterArgumentCaptor.getValue();
+        assertEquals("liftie-1", cluster.getLiftieName());
+        verify(externalizedComputeClusterStatusService, times(1))
+                .setStatus(cluster, ExternalizedComputeClusterStatusEnum.LIFTIE_CLUSTER_CREATION_IN_PROGRESS, "Liftie cluster creation in progress");
     }
 
     @Test
@@ -115,7 +122,10 @@ class ExternalizedComputeClusterCreateServiceTest {
 
         ArgumentCaptor<ExternalizedComputeCluster> externalizedComputeClusterArgumentCaptor = ArgumentCaptor.forClass(ExternalizedComputeCluster.class);
         verify(externalizedComputeClusterRepository, times(1)).save(externalizedComputeClusterArgumentCaptor.capture());
-        assertEquals("liftie-1", externalizedComputeClusterArgumentCaptor.getValue().getLiftieName());
+        ExternalizedComputeCluster cluster = externalizedComputeClusterArgumentCaptor.getValue();
+        assertEquals("liftie-1", cluster.getLiftieName());
+        verify(externalizedComputeClusterStatusService, times(1))
+                .setStatus(cluster, ExternalizedComputeClusterStatusEnum.LIFTIE_CLUSTER_CREATION_IN_PROGRESS, "Liftie cluster creation in progress");
     }
 
     @Test

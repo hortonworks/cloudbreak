@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.computecluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,10 +14,13 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
@@ -31,9 +37,14 @@ class ComputeClusterCreationRetrievalTaskTest {
 
     private static final String COMPUTE_CLUSTER_NAME = "computeClusterName";
 
-    private final ExternalizedComputeService externalizedComputeService = Mockito.mock(ExternalizedComputeService.class);
+    private final ExternalizedComputeService externalizedComputeService = mock(ExternalizedComputeService.class);
 
-    private final ComputeClusterCreationRetrievalTask underTest = new ComputeClusterCreationRetrievalTask(externalizedComputeService);
+    private final EventSenderService eventSenderService = mock(EventSenderService.class);
+
+    private final EnvironmentService environmentService = mock(EnvironmentService.class);
+
+    private final ComputeClusterCreationRetrievalTask underTest =
+            new ComputeClusterCreationRetrievalTask(externalizedComputeService, eventSenderService, environmentService);
 
     @AfterEach
     void cleanup() {
@@ -111,6 +122,28 @@ class ComputeClusterCreationRetrievalTaskTest {
         boolean result = underTest.checkStatus(computeClusterPollerObject);
         assertTrue(result);
         verify(externalizedComputeService, times(1)).getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME));
+    }
+
+    @Test
+    void testCheckStatusWithLiftieClusterCreationInProgresstate() {
+        ComputeClusterPollerObject computeClusterPollerObject = new ComputeClusterPollerObject(ENV_ID, ENV_CRN, COMPUTE_CLUSTER_NAME);
+        ExternalizedComputeClusterResponse response = new ExternalizedComputeClusterResponse();
+        response.setStatus(ExternalizedComputeClusterApiStatus.LIFTIE_CLUSTER_CREATION_IN_PROGRESS);
+        response.setName(COMPUTE_CLUSTER_NAME);
+        when(externalizedComputeService.getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
+        EnvironmentDto environmentDto = mock(EnvironmentDto.class);
+        when(environmentService.internalGetByCrn(ENV_CRN)).thenReturn(environmentDto);
+
+        String userCrn = "userCrn";
+        boolean result = ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.checkStatus(computeClusterPollerObject));
+        assertFalse(result);
+        ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.checkStatus(computeClusterPollerObject));
+        response.setStatus(ExternalizedComputeClusterApiStatus.AVAILABLE);
+        result = ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.checkStatus(computeClusterPollerObject));
+        assertTrue(result);
+
+        verify(externalizedComputeService, times(3)).getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME));
+        verify(eventSenderService, times(1)).sendEventAndNotification(environmentDto, userCrn, ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED);
     }
 
 }

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
 import com.sequenceiq.externalizedcompute.util.LiftieValidationResponseUtil;
 import com.sequenceiq.externalizedcompute.util.TagUtil;
@@ -33,6 +34,9 @@ public class ExternalizedComputeClusterCreateService {
 
     @Inject
     private ExternalizedComputeClusterRepository externalizedComputeClusterRepository;
+
+    @Inject
+    private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
 
     @Inject
     private LiftieValidationResponseUtil liftieValidationResponseUtil;
@@ -59,6 +63,8 @@ public class ExternalizedComputeClusterCreateService {
             }
             externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
             externalizedComputeClusterRepository.save(externalizedComputeCluster);
+            externalizedComputeClusterStatusService.setStatus(externalizedComputeCluster,
+                    ExternalizedComputeClusterStatusEnum.LIFTIE_CLUSTER_CREATION_IN_PROGRESS, "Liftie cluster creation in progress");
             LOGGER.info("Liftie create response: {}", clusterResponse);
         } catch (Exception e) {
             LOGGER.error("Externalized compute cluster creation failed", e);
