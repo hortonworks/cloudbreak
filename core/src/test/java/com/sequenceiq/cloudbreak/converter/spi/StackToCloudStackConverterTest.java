@@ -45,6 +45,9 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -1343,5 +1346,54 @@ public class StackToCloudStackConverterTest {
         assertThat(parameters.get(SUBNET_ID)).isEqualTo(subnetIdExpected);
         assertThat(parameters.get(CloudInstance.INSTANCE_NAME)).isEqualTo("worker3");
         assertThat(parameters.get(CloudInstance.FQDN)).isEqualTo("vm.empire.com");
+    }
+
+    @Test
+    void testUpdateWithVerticalScaleRequest() {
+        InstanceTemplate instanceTemplate1 = new InstanceTemplate("small", null, 1L, Set.of(), null, null, 0L, null, null, 0L);
+        InstanceTemplate instanceTemplate2 = new InstanceTemplate("small", null, 2L, Set.of(), null, null, 0L, null, null, 0L);
+        CloudInstance instance1 = new CloudInstance("instance1", instanceTemplate1, null, null, null);
+        CloudInstance instance2 = new CloudInstance("instance2", instanceTemplate2, null, null, null);
+        Group group1 = new Group("group1", null, Set.of(instance1, instance2), null, null, null, null, null, 100, null, null, Map.of());
+        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
+        CloudStack cloudStack = new CloudStack(Set.of(group1, group2), null, null, Map.of(), Map.of(), null, null, null,
+                null, null, null, null, null, false, null);
+        StackVerticalScaleV4Request verticalScaleRequest = getStackVerticalScaleV4Request();
+
+        CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);
+
+        assertEquals("very_large", instanceTemplate1.getFlavor());
+        assertEquals("very_large", instanceTemplate2.getFlavor());
+        assertEquals(200, group1.getRootVolumeSize());
+        assertEquals(100, group2.getRootVolumeSize());
+    }
+
+    @Test
+    void testUpdateWithVerticalScaleRequestWithZeroInstanceGroup() {
+        InstanceTemplate skeletonTemplate = new InstanceTemplate("small", null, 0L, Set.of(), null, null, 0L, null, null, 0L);
+        CloudInstance skeleton = new CloudInstance("skeleton", skeletonTemplate, null, null, null);
+        Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of());
+        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
+        CloudStack cloudStack = new CloudStack(Set.of(group1, group2), null, null, Map.of(), Map.of(), null, null, null,
+                null, null, null, null, null, false, null);
+        StackVerticalScaleV4Request verticalScaleRequest = getStackVerticalScaleV4Request();
+
+        CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, verticalScaleRequest);
+
+        assertEquals("very_large", skeletonTemplate.getFlavor());
+        assertEquals(200, group1.getRootVolumeSize());
+        assertEquals(100, group2.getRootVolumeSize());
+    }
+
+    private static StackVerticalScaleV4Request getStackVerticalScaleV4Request() {
+        StackVerticalScaleV4Request verticalScaleRequest = new StackVerticalScaleV4Request();
+        verticalScaleRequest.setGroup("group1");
+        InstanceTemplateV4Request instanceTemplateRequest = new InstanceTemplateV4Request();
+        instanceTemplateRequest.setInstanceType("very_large");
+        RootVolumeV4Request rootVolumeRequest = new RootVolumeV4Request();
+        rootVolumeRequest.setSize(200);
+        instanceTemplateRequest.setRootVolume(rootVolumeRequest);
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        return verticalScaleRequest;
     }
 }

@@ -337,17 +337,16 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         if (template != null) {
             cloudStack.getGroups()
                     .stream()
-                    .filter(group -> group.getName().equals(request.getGroup()))
-                    .flatMap(group -> group.getInstances().stream())
-                    .filter(instance -> StringUtils.isNotBlank(template.getInstanceType()))
-                    .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
-            if (request.getTemplate().getRootVolume() != null
-                    && request.getTemplate().getRootVolume().getSize() != null) {
-                cloudStack.getGroups()
-                        .stream()
-                        .filter(group -> group.getName().equals(request.getGroup()))
-                        .forEach(group -> group.setRootVolumeSize(request.getTemplate().getRootVolume().getSize()));
-            }
+                    .filter(g -> g.getName().equals(request.getGroup()))
+                    .findFirst().ifPresent(group -> {
+                        group.getReferenceInstanceTemplate().setFlavor(template.getInstanceType());
+                        group.getInstances().stream()
+                                .filter(instance -> StringUtils.isNotBlank(template.getInstanceType()))
+                                .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
+                        if (request.getTemplate().getRootVolume() != null && request.getTemplate().getRootVolume().getSize() != null) {
+                            group.setRootVolumeSize(request.getTemplate().getRootVolume().getSize());
+                        }
+                    });
         }
         return cloudStack;
     }

@@ -533,6 +533,7 @@ public class StackToCloudStackConverter {
                     .stream()
                     .filter(group -> group.getName().equals(request.getGroup()))
                     .findFirst().ifPresent(group -> {
+                        group.getReferenceInstanceTemplate().setFlavor(template.getInstanceType());
                         group.getInstances().stream()
                                 .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
                                 .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
