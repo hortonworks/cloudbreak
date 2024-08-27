@@ -126,6 +126,7 @@ public class CleanupService {
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
                 request.getHosts(), request.getRoles(), request.getIps(), statesToSkip, accountId, operation.getOperationId(),
                 request.getClusterName(), environmentCrn);
+        LOGGER.debug("Initiating cleanup flow with event: {}", cleanupEvent);
         try {
             flowManager.notify(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), cleanupEvent);
             return operationToOperationStatusConverter.convert(operation);

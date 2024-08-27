@@ -169,7 +169,7 @@ public class FreeIpaCleanupActions {
                 successDetails.getAdditionalDetails().put("Roles", payload.getRoles() == null ? List.of() : new ArrayList<>(payload.getRoles()));
                 successDetails.getAdditionalDetails().put("IPs", payload.getIps() == null ? List.of() : new ArrayList<>(payload.getIps()));
                 operationService.completeOperation(payload.getAccountId(), payload.getOperationId(), List.of(successDetails), Collections.emptyList());
-                LOGGER.info("Cleanup successfully finished with: " + successDetails);
+                LOGGER.info("Cleanup successfully finished with: {} States skipped: {}", successDetails, cleanupEvent.getStatesToSkip());
                 sendEvent(context, cleanupEvent);
             }
         };
