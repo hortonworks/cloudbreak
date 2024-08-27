@@ -72,7 +72,8 @@ public class RestLoggerFilter extends OncePerRequestFilter {
                             logContent(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding(), isUberSensitive(requestPath))))
                     .append(appendLine(RestLoggerField.RESPONSE_STATUS, String.valueOf(response.getStatus())))
                     .append(appendLine(RestLoggerField.RESPONSE,
-                            logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding(), isUberSensitive(requestPath))))
+                            logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding(), isSuccessfulGet(request, response) ||
+                                    isUberSensitive(requestPath))))
                     .toString();
             loggerWrapper().atLevel(calculateLogLevel(request, response)).log(log);
         }
@@ -86,9 +87,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
     private Level calculateLogLevel(HttpServletRequest request, HttpServletResponse response) {
         if (isRemoteEnvironmentGet(request)) {
             return Level.INFO;
-        } else if (isGet(request) && response.getStatus() != SUCCESS) {
-            return Level.DEBUG;
-        } else if (isPost(request) || isPut(request) || isDelete(request)) {
+        } else if (isGet(request) || isPost(request) || isPut(request) || isDelete(request)) {
             return Level.DEBUG;
         }
         return Level.TRACE;
@@ -104,6 +103,10 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private boolean isGet(HttpServletRequest request) {
         return isRequestMethodEqualWith(request, "GET");
+    }
+
+    private boolean isSuccessfulGet(HttpServletRequest request, HttpServletResponse response) {
+        return isRequestMethodEqualWith(request, "GET") && response.getStatus() == SUCCESS;
     }
 
     private boolean isRemoteEnvironmentGet(HttpServletRequest request) {

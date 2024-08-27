@@ -80,7 +80,23 @@ class RestLoggerFilterTest {
     }
 
     @Test
-    void doFilterWhenGetSuccessMustReturnTraceLogging() throws ServletException, IOException {
+    void doFilterWhenGetFailMustReturnDebugLogging() throws ServletException, IOException {
+        ArgumentCaptor<Level> requestArgumentCaptor = ArgumentCaptor.forClass(Level.class);
+
+        when(request.getRequestURI()).thenReturn("env/something");
+        when(request.getMethod()).thenReturn("get");
+        when(response.getStatus()).thenReturn(404);
+        when(request.getCharacterEncoding()).thenReturn("UTF8");
+        when(logger.atLevel(requestArgumentCaptor.capture())).thenReturn(loggingEventBuilder);
+        underTest.doFilterInternal(request, response, filterChain);
+
+        verify(loggingEventBuilder, times(1)).log(anyString());
+        verify(loggingEventBuilder).log(not(contains("REDACTED COMPLETELY")));
+        assertEquals(Level.DEBUG, requestArgumentCaptor.getValue());
+    }
+
+    @Test
+    void doFilterWhenGetSuccessMustReturnDebugLoggingWithRedactedResponse() throws ServletException, IOException {
         ArgumentCaptor<Level> requestArgumentCaptor = ArgumentCaptor.forClass(Level.class);
 
         when(request.getRequestURI()).thenReturn("env/something");
@@ -91,8 +107,8 @@ class RestLoggerFilterTest {
         underTest.doFilterInternal(request, response, filterChain);
 
         verify(loggingEventBuilder, times(1)).log(anyString());
-        verify(loggingEventBuilder).log(not(contains("REDACTED COMPLETELY")));
-        assertEquals(Level.TRACE, requestArgumentCaptor.getValue());
+        verify(loggingEventBuilder).log(contains("REDACTED COMPLETELY"));
+        assertEquals(Level.DEBUG, requestArgumentCaptor.getValue());
     }
 
     @Test
