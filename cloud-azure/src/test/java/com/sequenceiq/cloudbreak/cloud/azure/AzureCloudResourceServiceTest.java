@@ -219,6 +219,7 @@ public class AzureCloudResourceServiceTest {
         VolumeSetAttributes volumeSetAttributes = diskResource.getParameter("attributes", VolumeSetAttributes.class);
         assertEquals("diskName1", diskResource.getName());
         assertEquals("diskId1", diskResource.getReference());
+        assertEquals("test", diskResource.getGroup());
         assertEquals(200, volumeSetAttributes.getVolumes().get(0).getSize());
         assertEquals("StandardSSD_LRS", volumeSetAttributes.getVolumes().get(0).getType());
     }
@@ -233,6 +234,7 @@ public class AzureCloudResourceServiceTest {
                 .withStatus(status)
                 .withType(resourceType)
                 .withInstanceId(instanceId)
+                .withGroup("test")
                 .build();
     }
 
