@@ -11,6 +11,8 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -117,20 +119,8 @@ public class GcpProvisionSetup implements Setup {
             final String destKey,
             Storage storage) {
         try {
-            Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
-            RewriteResponse rewriteResponse = rewrite.execute();
-            GcpImageAttemptMaker gcpImageAttemptMaker = gcpImageAttemptMakerFactory.create(
-                    rewriteResponse.getRewriteToken(),
-                    sourceBucket,
-                    sourceKey,
-                    destBucket,
-                    destKey,
-                    storage
-            );
-            Polling.stopAfterAttempt(ATTEMPT_COUNT)
-                    .stopIfException(true)
-                    .waitPeriodly(SLEEPTIME, TimeUnit.SECONDS)
-                    .run(gcpImageAttemptMaker);
+            RewriteResponse rewriteResponse = gcpRewriteImage(sourceBucket, sourceKey, destBucket, destKey, storage);
+            gcpRewriteImagePoll(sourceBucket, sourceKey, destBucket, destKey, storage, rewriteResponse);
             LOGGER.info("Image copy has been finished successfully for {}/{}.", destBucket, destKey);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Poller stopped for image copy: ", pollerStoppedException);
@@ -144,6 +134,30 @@ public class GcpProvisionSetup implements Setup {
             throw new CloudbreakServiceException("Copying the image could not be started, "
                     + "please check whether you have given access to CDP for storage API.");
         }
+    }
+
+    private void gcpRewriteImagePoll(String sourceBucket, String sourceKey, String destBucket, String destKey, Storage storage,
+            RewriteResponse rewriteResponse) {
+        GcpImageAttemptMaker gcpImageAttemptMaker = gcpImageAttemptMakerFactory.create(
+                rewriteResponse.getRewriteToken(),
+                sourceBucket,
+                sourceKey,
+                destBucket,
+                destKey,
+                storage
+        );
+        Polling.stopAfterAttempt(ATTEMPT_COUNT)
+                .stopIfException(true)
+                .waitPeriodly(SLEEPTIME, TimeUnit.SECONDS)
+                .run(gcpImageAttemptMaker);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    private static RewriteResponse gcpRewriteImage(String sourceBucket, String sourceKey, String destBucket, String destKey,
+            Storage storage) throws IOException {
+        Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
+
+        return rewrite.execute();
     }
 
     @Override

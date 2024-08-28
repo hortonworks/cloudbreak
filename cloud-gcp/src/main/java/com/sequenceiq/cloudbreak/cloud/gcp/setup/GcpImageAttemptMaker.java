@@ -15,6 +15,8 @@ public class GcpImageAttemptMaker implements AttemptMaker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpImageAttemptMaker.class);
 
+    private static final int PASS = 5;
+
     private String rewriteToken;
 
     private final String sourceBucket;
@@ -26,6 +28,8 @@ public class GcpImageAttemptMaker implements AttemptMaker {
     private final String destKey;
 
     private final Storage storage;
+
+    private int errorCount;
 
     public GcpImageAttemptMaker(String rewriteToken, String sourceBucket, String sourceKey, String destBucket, String destKey, Storage storage) {
         this.sourceBucket = sourceBucket;
@@ -48,7 +52,17 @@ public class GcpImageAttemptMaker implements AttemptMaker {
     public AttemptResult process() throws Exception {
         Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
         rewrite.setRewriteToken(rewriteToken);
-        RewriteResponse rewriteResponse = rewrite.execute();
+        RewriteResponse rewriteResponse = null;
+        try {
+            rewriteResponse = rewrite.execute();
+        } catch (Exception e) {
+            if (omitException()) {
+                LOGGER.debug("Rewriting throw exception {}. time. {}", errorCount, e.getMessage());
+                return AttemptResults.justContinue();
+            } else {
+                throw e;
+            }
+        }
         String newRewriteToken = rewriteResponse.getRewriteToken();
         Long totalBytesRewritten = rewriteResponse.getTotalBytesRewritten();
         Long currentSize = rewriteResponse.getObjectSize();
@@ -62,5 +76,9 @@ public class GcpImageAttemptMaker implements AttemptMaker {
         } else {
             return AttemptResults.finishWith(null);
         }
+    }
+
+    private boolean omitException() {
+        return errorCount++ < PASS;
     }
 }

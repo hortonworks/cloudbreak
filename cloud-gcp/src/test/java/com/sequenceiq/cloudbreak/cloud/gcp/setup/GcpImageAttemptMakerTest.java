@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -86,5 +87,36 @@ public class GcpImageAttemptMakerTest {
 
         Assert.assertEquals("token", underTest.getRewriteToken());
         Assert.assertEquals(AttemptState.CONTINUE, process.getState());
+    }
+
+    @Test
+    public void testProcessThrowExceptionFirstTime() throws Exception {
+        Storage.Objects objects = mock(Storage.Objects.class);
+        Storage.Objects.Rewrite rewrite = mock(Storage.Objects.Rewrite.class);
+        RewriteResponse rewriteResponse = mock(RewriteResponse.class);
+
+        when(storage.objects()).thenReturn(objects);
+        when(objects.rewrite(anyString(), anyString(), anyString(), anyString(), any(StorageObject.class))).thenReturn(rewrite);
+        when(rewrite.execute()).thenThrow(new NullPointerException());
+
+        AttemptResult process = underTest.process();
+
+        Assert.assertEquals(AttemptState.CONTINUE, process.getState());
+    }
+
+    @Test
+    public void testProcessThrowExceptionManyTimes() throws Exception {
+        Storage.Objects objects = mock(Storage.Objects.class);
+        Storage.Objects.Rewrite rewrite = mock(Storage.Objects.Rewrite.class);
+        RewriteResponse rewriteResponse = mock(RewriteResponse.class);
+
+        when(storage.objects()).thenReturn(objects);
+        when(objects.rewrite(anyString(), anyString(), anyString(), anyString(), any(StorageObject.class))).thenReturn(rewrite);
+        when(rewrite.execute()).thenThrow(new NullPointerException());
+
+        for (int i = 0; i < 5; i++) {
+            underTest.process();
+        }
+        Assertions.assertThrows(NullPointerException.class, () -> underTest.process());
     }
 }
