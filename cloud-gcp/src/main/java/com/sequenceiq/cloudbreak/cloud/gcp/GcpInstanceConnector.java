@@ -51,11 +51,49 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         try {
             if (!vms.isEmpty()) {
                 List<CloudVmInstanceStatus> statuses = check(ac, vms);
-                stop(ac, resources, getStarted(statuses));
-                statuses = check(ac, vms);
+                List<CloudInstance> startedInstances = getStarted(statuses);
+                LOGGER.info("Already Stopped Vms on cloudProvider: {}", getNotStarted(statuses));
+                if (!startedInstances.isEmpty()) {
+                    stop(ac, resources, getStarted(statuses));
+                    statuses = check(ac, vms);
+                }
                 logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
-                rebootedVmsStatus = start(ac, resources, getStopped(statuses));
+                List<CloudInstance> stoppedInstances = getStopped(statuses);
+                LOGGER.info("Already Started Vms on cloudProvider: {}", getNotStopped(statuses));
+                if (!stoppedInstances.isEmpty()) {
+                    rebootedVmsStatus = start(ac, resources, getStopped(statuses));
+                }
                 logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to send reboot request to Google Cloud: ", e);
+            throw e;
+        }
+        return rebootedVmsStatus;
+    }
+
+    @Override
+    public List<CloudVmInstanceStatus> restartWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
+            Long timeboundInMs, List<InstanceStatus> excludedStatuses) {
+        LOGGER.info("Restarting vms on GCP: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
+
+        try {
+            if (!vms.isEmpty()) {
+                List<CloudVmInstanceStatus> statuses = check(ac, vms);
+                List<CloudInstance> notExcludedStartedInstances = getNotExcludedStatusInstances(statuses, excludedStatuses);
+                LOGGER.info("Vms of excluded statuses on cloudProvider: {}", getExcludedStatusInstances(statuses, excludedStatuses));
+                if (!notExcludedStartedInstances.isEmpty()) {
+                    stop(ac, resources, getStarted(statuses));
+                    statuses = check(ac, vms);
+                }
+                logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
+                List<CloudInstance> stoppedInstances = getStopped(statuses);
+                LOGGER.info("Already Started Vms on cloudProvider: {}", getNotStopped(statuses));
+                if (!stoppedInstances.isEmpty()) {
+                    rebootedVmsStatus = start(ac, resources, getStopped(statuses));
+                }
+                logInvalidStatuses(getNotStarted(rebootedVmsStatus), InstanceStatus.STARTED);
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to send reboot request to Google Cloud: ", e);
@@ -72,6 +110,16 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
             warnMessage.append(String.format(". Instances should be in %s state.", targetStatus.toString()));
             LOGGER.warn(warnMessage.toString());
         }
+    }
+
+    private List<CloudInstance> getNotExcludedStatusInstances(List<CloudVmInstanceStatus> statuses, List<InstanceStatus> excludedStatuses) {
+        return statuses.stream().filter(status -> !excludedStatuses.contains(status.getStatus()))
+                .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
+    }
+
+    private List<CloudInstance> getExcludedStatusInstances(List<CloudVmInstanceStatus> statuses, List<InstanceStatus> excludedStatuses) {
+        return statuses.stream().filter(status -> excludedStatuses.contains(status.getStatus()))
+                .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
     }
 
     private List<CloudVmInstanceStatus> getNotStarted(List<CloudVmInstanceStatus> statuses) {

@@ -89,6 +89,7 @@ public class StackCommonService {
     private static final Set<String> RESTART_INSTANCES_SUPPORTED_CLOUD_PLATFORMS = Set.of(
             CloudConstants.AWS,
             CloudConstants.AZURE,
+            CloudConstants.GCP,
             CloudConstants.MOCK);
 
     @Inject
