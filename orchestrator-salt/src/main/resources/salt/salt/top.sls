@@ -9,9 +9,9 @@ base:
     - tags
     - recipes.runner
     - telemetry
-    {% if cpuarch != 'aarch64' %}
     - fluent
     - monitoring
+    {% if cpuarch != 'aarch64' %}
     - metering
     {% endif %}
     - logrotate
