@@ -412,31 +412,6 @@
         "serviceType": "KNOX"
       },
       {
-        "refName": "zeppelin",
-        "serviceType": "ZEPPELIN",
-        "serviceConfigs": [
-          {
-            "name": "yarn_service",
-            "ref": "yarn"
-          },
-          {
-            "name": "hdfs_service",
-            "ref": "hdfs"
-          },
-          {
-            "name": "spark3_on_yarn_service",
-            "ref": "spark3_on_yarn"
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
-            "roleType": "ZEPPELIN_SERVER",
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "queuemanager",
         "serviceType": "QUEUEMANAGER",
         "serviceConfigs": [
@@ -513,7 +488,6 @@
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
-          "zeppelin-ZEPPELIN_SERVER-BASE",
           "query_processor-QUERY_PROCESSOR",
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
