@@ -354,31 +354,6 @@
         ]
       },
       {
-        "refName": "zeppelin",
-        "serviceType": "ZEPPELIN",
-        "serviceConfigs": [
-          {
-            "name": "yarn_service",
-            "ref": "yarn"
-          },
-          {
-            "name": "hdfs_service",
-            "ref": "hdfs"
-          },
-          {
-            "name": "spark3_on_yarn_service",
-            "ref": "spark3_on_yarn"
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
-            "roleType": "ZEPPELIN_SERVER",
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "query_processor",
         "serviceType": "QUERY_PROCESSOR",
         "roleConfigGroups": [
@@ -461,7 +436,6 @@
           "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "livy_for_spark3-GATEWAY-BASE",
           "livy_for_spark3-LIVY_SERVER-BASE",
-          "zeppelin-ZEPPELIN_SERVER-BASE",
           "oozie-OOZIE_SERVER-BASE",
           "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
