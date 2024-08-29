@@ -167,7 +167,7 @@
                   </#if>
                 </#if>
                 "VolumeSize" : "${group.rootVolumeSize}",
-                "VolumeType" : "gp3"
+                "VolumeType" : "${group.rootVolumeType}"
               }
             }
           ],

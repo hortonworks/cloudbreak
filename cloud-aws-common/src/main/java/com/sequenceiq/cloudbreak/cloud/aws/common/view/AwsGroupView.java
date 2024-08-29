@@ -59,10 +59,12 @@ public class AwsGroupView {
 
     private final String placementGroupStrategy;
 
+    private final String rootVolumeType;
+
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
             Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
             String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage,
-            Double spotMaxPrice, String placementGroupStrategy) {
+            Double spotMaxPrice, String placementGroupStrategy, String rootVolumeType) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -85,6 +87,7 @@ public class AwsGroupView {
         this.onDemandPercentage = onDemandPercentage;
         this.spotMaxPrice = spotMaxPrice;
         this.placementGroupStrategy = placementGroupStrategy;
+        this.rootVolumeType = rootVolumeType;
     }
 
     public static String getAutoScalingGroupName(String groupName) {
@@ -201,5 +204,9 @@ public class AwsGroupView {
 
     public String getPlacementGroupStrategy() {
         return placementGroupStrategy.toLowerCase(Locale.ROOT);
+    }
+
+    public String getRootVolumeType() {
+        return rootVolumeType;
     }
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -181,8 +182,8 @@ public class DistroXTestClient {
         return new DistroXDeleteDisksAction(instanceGroup);
     }
 
-    public Action<DistroXTestDto, CloudbreakClient> updateDisks(int size, String volumeType, String instanceGroup) {
-        return new DistroXDiskUpdateAction(size, volumeType, instanceGroup);
+    public Action<DistroXTestDto, CloudbreakClient> updateDisks(int size, String volumeType, String instanceGroup, DiskType diskType) {
+        return new DistroXDiskUpdateAction(size, volumeType, instanceGroup, diskType);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> instanceMetadataUpdate() {

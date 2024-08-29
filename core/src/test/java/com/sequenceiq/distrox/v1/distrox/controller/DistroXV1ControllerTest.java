@@ -274,4 +274,31 @@ class DistroXV1ControllerTest {
         verify(stackRotateRdsCertificateService).rotateRdsCertificate(nameOrCrn, ACCOUNT_ID);
         assertThat(result).isEqualTo(RESPONSE);
     }
+
+    @Test
+    void testUpdateRootVolumeByStackName() throws Exception {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.updateRootVolumeByDatahubName(NAME, diskUpdateRequest);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        verify(stackOperationService).rootVolumeDiskUpdate(NameOrCrn.ofName(NAME), diskUpdateRequest, "accountId");
+    }
+
+    @Test
+    void testUpdateRootVolumeByStackCrn() throws Exception {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        doAs(TEST_USER_CRN, () -> {
+            try {
+                distroXV1Controller.updateRootVolumeByDatahubCrn(CRN, diskUpdateRequest);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        verify(stackOperationService).rootVolumeDiskUpdate(NameOrCrn.ofCrn(CRN), diskUpdateRequest, "accountId");
+    }
 }

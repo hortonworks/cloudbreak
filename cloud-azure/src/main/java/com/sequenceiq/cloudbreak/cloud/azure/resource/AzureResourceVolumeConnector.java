@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -29,10 +32,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
@@ -49,6 +52,9 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
 
     @Inject
     private AzureResourceNameService resourceNameService;
+
+    @Inject
+    private AzureCloudResourceService azureCloudResourceService;
 
     @Override
     public void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
@@ -139,7 +145,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
             newVolumeSets.add(azureVolumeResourceBuilder.createVolumeSet(instance.getTemplate().getPrivateId(), authenticatedContext, group,
                     CloudResource.builder().withInstanceId(instance.getInstanceId())
                             .withName(instance.getInstanceId())
-                            .withType(ResourceType.AZURE_INSTANCE)
+                            .withType(AZURE_INSTANCE)
                             .build(), cloudStack.getParameters().get(PlatformParametersConsts.RESOURCE_CRN_PARAMETER),
                     false));
         }
@@ -190,5 +196,12 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
 
     private String getInstanceParameterAsString(CloudInstance cloudInstance, String parameterName) {
         return cloudInstance.getParameter(parameterName, String.class);
+    }
+
+    @Override
+    public List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) throws Exception {
+        AzureClient azureClient = rootVolumeFetchDto.getAuthenticatedContext().getParameter(AzureClient.class);
+        return azureCloudResourceService.getAttachedOsDiskResources(rootVolumeFetchDto.getCloudResourceList(),
+                rootVolumeFetchDto.getAzureResourceGroupName(), azureClient);
     }
 }

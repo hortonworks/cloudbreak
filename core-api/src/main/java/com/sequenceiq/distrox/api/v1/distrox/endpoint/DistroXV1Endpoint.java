@@ -51,6 +51,8 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REP
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RESTART_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_BY_DH_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_BY_DH_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_SALT_PASSWORD_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_NAME;
@@ -775,4 +777,20 @@ public interface DistroXV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(
             @Valid @NotNull DatahubDatabaseServerCertificateStatusV4Request request);
+
+    @PUT
+    @Path("name/{name}/modify_root_volume")
+    @Operation(summary = ROOT_VOLUME_UPDATE_BY_DH_NAME, operationId = "updateRootVolumeByDatahubName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateRootVolumeByDatahubName(
+            @PathParam("name") String name,
+            @Valid DiskUpdateRequest rootDiskVolumesRequest) throws Exception;
+
+    @PUT
+    @Path("crn/{crn}/modify_root_volume")
+    @Operation(summary = ROOT_VOLUME_UPDATE_BY_DH_CRN, operationId = "updateRootVolumeByDatahubCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateRootVolumeByDatahubCrn(
+            @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
+            @Valid DiskUpdateRequest rootDiskVolumesRequest) throws Exception;
 }

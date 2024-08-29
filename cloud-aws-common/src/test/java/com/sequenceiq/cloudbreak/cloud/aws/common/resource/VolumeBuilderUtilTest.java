@@ -148,6 +148,22 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
+    public void testGetEbsWhenEncryptedAndKmsKeyCustomAndVolumeType() {
+        when(group.getRootVolumeSize()).thenReturn(1);
+        when(group.getRootVolumeType()).thenReturn("gp2");
+        when(awsInstanceView.isEncryptedVolumes()).thenReturn(true);
+        when(awsInstanceView.isKmsCustom()).thenReturn(true);
+        when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
+
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
+        Assertions.assertTrue(actual.deleteOnTermination());
+        Assertions.assertTrue(actual.encrypted());
+        Assertions.assertEquals("gp2", actual.volumeType().toString());
+        Assertions.assertEquals(1, actual.volumeSize());
+        Assertions.assertEquals("kmsKey", actual.kmsKeyId());
+    }
+
+    @Test
     public void testGetEbsWhenNotEncryptedAndNotKmsKeyCustom() {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(false);

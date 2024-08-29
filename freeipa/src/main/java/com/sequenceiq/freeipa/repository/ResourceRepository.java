@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,4 +60,7 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
             @Param("resourceStatus") CommonStatus status,
             @Param("resourceType") ResourceType resourceType,
             @Param("stackId") Long stackId);
+
+    List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(Long stackId, String instanceGroup,
+            Collection<ResourceType> resourceTypes);
 }

@@ -49,7 +49,8 @@ public class AzureStackView {
                 for (CloudInstance instance : group.getInstances()) {
                     InstanceTemplate template = instance.getTemplate();
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
-                    String attachedDiskStorageType = template.getVolumes().isEmpty() ? AzurePlatformParameters.defaultDiskType().value()
+                    String attachedDiskStorageType = group.getRootVolumeType() != null ? group.getRootVolumeType() :
+                            template.getVolumes().isEmpty() ? AzurePlatformParameters.defaultDiskType().value()
                             : template.getVolumes().get(0).getType();
                     AzureInstanceView azureInstance = AzureInstanceView.builder(instance)
                             .withStackName(stackName)

@@ -60,7 +60,8 @@ class AzureLoadBalancerModelBuilderTest {
                 64,
                 null,
                 createGroupNetwork(),
-                emptyMap());
+                emptyMap(),
+                null);
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
@@ -225,7 +226,8 @@ class AzureLoadBalancerModelBuilderTest {
                 64,
                 null,
                 createGroupNetwork(),
-                emptyMap());
+                emptyMap(),
+                null);
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, sku, LOADBALANCER_TARGET_STICKY_SESSION);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         return cloudLoadBalancer;

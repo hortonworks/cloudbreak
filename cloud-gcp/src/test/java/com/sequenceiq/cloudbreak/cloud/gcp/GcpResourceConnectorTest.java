@@ -272,7 +272,7 @@ public class GcpResourceConnectorTest {
                 "publicKey",
                 50,
                 Optional.empty(),
-                createGroupNetwork(), emptyMap());
+                createGroupNetwork(), emptyMap(), null);
     }
 
     private InstanceTemplate instanceTemplate() {

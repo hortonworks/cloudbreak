@@ -42,6 +42,8 @@ public class Group extends DynamicModel {
 
     private final Map<String, String> tags;
 
+    private String rootVolumeType;
+
     public Group(String name,
             InstanceGroupType type,
             Collection<CloudInstance> instances,
@@ -53,9 +55,10 @@ public class Group extends DynamicModel {
             int rootVolumeSize,
             Optional<CloudFileSystemView> identity,
             GroupNetwork groupNetwork,
-            Map<String, String> tags) {
+            Map<String, String> tags,
+            String rootVolumeType) {
         this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
-                rootVolumeSize, identity, new ArrayList<>(), groupNetwork, tags);
+                rootVolumeSize, identity, new ArrayList<>(), groupNetwork, tags, rootVolumeType);
     }
 
     public Group(String name,
@@ -72,7 +75,7 @@ public class Group extends DynamicModel {
             GroupNetwork groupNetwork,
             Map<String, String> tags) {
         this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
-                rootVolumeSize, identity, deletedInstances, groupNetwork, tags);
+                rootVolumeSize, identity, deletedInstances, groupNetwork, tags, null);
     }
 
     public Group(String name,
@@ -87,9 +90,10 @@ public class Group extends DynamicModel {
             int rootVolumeSize,
             Optional<CloudFileSystemView> identity,
             GroupNetwork groupNetwork,
-            Map<String, String> tags) {
+            Map<String, String> tags,
+            String rootVolumeType) {
         this(name, type, instances, security, skeleton, parameters, instanceAuthentication, loginUserName, publicKey,
-                rootVolumeSize, identity, new ArrayList<>(), groupNetwork, tags);
+                rootVolumeSize, identity, new ArrayList<>(), groupNetwork, tags, rootVolumeType);
     }
 
     @JsonCreator
@@ -107,7 +111,8 @@ public class Group extends DynamicModel {
             @JsonProperty("identity") Optional<CloudFileSystemView> identity,
             @JsonProperty("deletedInstances") List<CloudInstance> deletedInstances,
             @JsonProperty("network") GroupNetwork groupNetwork,
-            @JsonProperty("tags") Map<String, String> tags) {
+            @JsonProperty("tags") Map<String, String> tags,
+            @JsonProperty("rootVolumeType") String rootVolumeType) {
         super(parameters);
         this.name = name;
         this.type = type;
@@ -123,6 +128,7 @@ public class Group extends DynamicModel {
         this.deletedInstances = deletedInstances;
         this.network = groupNetwork;
         this.tags = tags;
+        this.rootVolumeType = rootVolumeType;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -199,6 +205,14 @@ public class Group extends DynamicModel {
         this.rootVolumeSize = rootVolumeSize;
     }
 
+    public String getRootVolumeType() {
+        return rootVolumeType;
+    }
+
+    public void setRootVolumeType(String rootVolumeType) {
+        this.rootVolumeType = rootVolumeType;
+    }
+
     @Override
     public String toString() {
         return "Group{" +
@@ -211,6 +225,7 @@ public class Group extends DynamicModel {
                 ", instanceAuthentication=" + instanceAuthentication +
                 ", skeleton=" + skeleton +
                 ", rootVolumeSize=" + rootVolumeSize +
+                ", rootVolumeType=" + rootVolumeType +
                 ", identity=" + identity +
                 ", deletedInstances=" + deletedInstances +
                 ", network=" + network +

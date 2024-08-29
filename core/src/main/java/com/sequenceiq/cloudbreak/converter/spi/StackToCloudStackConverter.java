@@ -35,8 +35,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
@@ -61,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -110,6 +114,9 @@ public class StackToCloudStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
 
+    private static final Map<String, ResourceType> PLATFORM_RESOURCE_TYPE_MAP = ImmutableMap.of("AWS", ResourceType.AWS_ROOT_DISK,
+            "AZURE", ResourceType.AZURE_DISK);
+
     @Inject
     private ImageService imageService;
 
@@ -156,14 +163,18 @@ public class StackToCloudStackConverter {
     private ResourceService resourceService;
 
     public CloudStack convert(StackDtoDelegate stack) {
-        return convert(stack, Collections.emptySet());
+        return convert(stack, Collections.emptySet(), null);
+    }
+
+    public CloudStack convert(StackDtoDelegate stack, DiskUpdateRequest diskUpdateRequest) {
+        return convert(stack, Collections.emptySet(), diskUpdateRequest);
     }
 
     public CloudStack convertForDownscale(StackDtoDelegate stack, Set<String> deleteRequestedInstances) {
-        return convert(stack, deleteRequestedInstances);
+        return convert(stack, deleteRequestedInstances, null);
     }
 
-    public CloudStack convert(StackDtoDelegate stack, Collection<String> deleteRequestedInstances) {
+    public CloudStack convert(StackDtoDelegate stack, Collection<String> deleteRequestedInstances, DiskUpdateRequest diskUpdateRequest) {
         Image image = null;
         String environmentCrn = stack.getEnvironmentCrn();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(environmentCrn);
@@ -171,6 +182,14 @@ public class StackToCloudStackConverter {
                 stack.getInstanceGroupDtos(),
                 deleteRequestedInstances,
                 environment);
+        if (diskUpdateRequest != null && diskUpdateRequest.getDiskType().equals(DiskType.ROOT_DISK)) {
+            for (Group group : instanceGroups) {
+                if (group.getName().equals(diskUpdateRequest.getGroup())) {
+                    group.setRootVolumeSize(diskUpdateRequest.getSize());
+                    group.setRootVolumeType(diskUpdateRequest.getVolumeType());
+                }
+            }
+        }
         try {
             image = imageService.getImage(stack.getId());
         } catch (CloudbreakImageNotFoundException e) {
@@ -357,7 +376,8 @@ public class StackToCloudStackConverter {
                                         cloudFileSystemView,
                                         buildDeletedCloudInstances(environment, stack.getStack(), deleteRequests, instanceGroupDto),
                                         buildGroupNetwork(stack.getNetwork(), instanceGroup),
-                                        userDefinedTags)
+                                        userDefinedTags,
+                                        getRootVolumeType(stack.getId(), stack.getCloudPlatform(), instanceGroup.getGroupName()))
                         );
                     }
                 }
@@ -473,6 +493,23 @@ public class StackToCloudStackConverter {
             rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform());
         }
         return rootVolumeSize;
+    }
+
+    private String getRootVolumeType(Long stackId, String platform, String groupName) {
+        if (PLATFORM_RESOURCE_TYPE_MAP.containsKey(platform)) {
+            List<Resource> resources = resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(stackId, groupName,
+                    List.of(PLATFORM_RESOURCE_TYPE_MAP.get(platform)));
+            if (!resources.isEmpty()) {
+                try {
+                    VolumeSetAttributes volumeSetAttributes = resources.getFirst().getAttributes().get(VolumeSetAttributes.class);
+                    return volumeSetAttributes.getVolumes().get(0).getType();
+                } catch (Exception e) {
+                    LOGGER.warn("Exception while parsing volume set attributes from Json in StackToCloudStackConverter - getRootVolumeType" +
+                            "returning null for volume type for group: {} and stack id: {}", groupName, stackId);
+                }
+            }
+        }
+        return null;
     }
 
     private SpiFileSystem buildSpiFileSystem(StackDtoDelegate stack) {

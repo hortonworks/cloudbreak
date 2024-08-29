@@ -93,7 +93,7 @@ public class ParameterGenerator {
         Security security = new Security(rules, emptyList());
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                50, Optional.empty(), createGroupNetwork(), emptyMap()));
+                50, Optional.empty(), createGroupNetwork(), emptyMap(), null));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",

@@ -78,7 +78,7 @@ public class FreeIpaVerticalScaleHandlerTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 10, null, null, emptyMap());
+                instanceAuthentication.getPublicKey(), 10, null, null, emptyMap(), null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -137,7 +137,7 @@ public class FreeIpaVerticalScaleHandlerTest {
 
         Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 10, null, null, emptyMap());
+                instanceAuthentication.getPublicKey(), 10, null, null, emptyMap(), null);
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");

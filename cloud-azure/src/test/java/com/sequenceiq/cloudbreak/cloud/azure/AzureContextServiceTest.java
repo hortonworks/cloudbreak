@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,7 +70,7 @@ class AzureContextServiceTest {
     @NotNull
     private static Group group() {
         return new Group("worker", InstanceGroupType.CORE, List.of(cloudInstance(PRIVATE_ID_1), cloudInstance(PRIVATE_ID_2)), null, null,
-                null, null, null, 0, Optional.empty(), null, null);
+                null, null, null, 0, Optional.empty(), null, emptyMap(), null);
     }
 
     @NotNull

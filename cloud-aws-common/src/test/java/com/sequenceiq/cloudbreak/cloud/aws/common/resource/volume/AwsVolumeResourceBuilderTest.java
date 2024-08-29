@@ -581,7 +581,7 @@ class AwsVolumeResourceBuilderTest {
                 TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, temporaryStorageCount);
         CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null, "subnet-1", "az1");
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null,
-                null, ROOT_VOLUME_SIZE, null, createGroupNetwork(), emptyMap());
+                null, ROOT_VOLUME_SIZE, null, createGroupNetwork(), emptyMap(), null);
     }
 
     private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type) {

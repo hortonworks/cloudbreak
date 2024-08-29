@@ -7,5 +7,6 @@ public enum LaunchTemplateField {
     INSTANCE_TYPE,
     ROOT_DISK_SIZE,
     ROOT_DISK_PATH,
-    HTTP_METADATA_OPTIONS
+    HTTP_METADATA_OPTIONS,
+    ROOT_VOLUME_TYPE
 }

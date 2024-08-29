@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -323,12 +324,14 @@ public class ClusterRepairFlowEventChainFactoryTest {
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
         primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
                 .withFailedPrimaryGateway()
                 .withFailedSecondaryGateway()
                 .with3FailedCore()
                 .withFailedAuxiliary()
                 .withRepairType(RepairType.ONE_FROM_EACH_HOSTGROUP)
+                .withDiskUpdateRequest(diskUpdateRequest)
                 .build();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
@@ -357,6 +360,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         assertGroupWithHost(upscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
         assertGroupWithHost(upscale1, HG_CORE, "core1");
         assertGroupWithHost(upscale1, HG_AUXILIARY, "aux1");
+        assertEquals(diskUpdateRequest, upscale1.getDiskUpdateRequest());
 
         ClusterAndStackDownscaleTriggerEvent downscale2 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
         assertGroupWithHost(downscale2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
@@ -724,6 +728,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
         private boolean upgrade;
 
+        private DiskUpdateRequest diskUpdateRequest;
+
         private TriggerEventBuilder(Stack stack) {
             this.stack = stack;
         }
@@ -740,6 +746,11 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
         private TriggerEventBuilder withFailedCore() {
             failedCoreNodes.add(FAILED_CORE_FQDN);
+            return this;
+        }
+
+        private TriggerEventBuilder withDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
+            this.diskUpdateRequest = diskUpdateRequest;
             return this;
         }
 
@@ -784,7 +795,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 failedNodes.put(HG_AUXILIARY, failedAuxiliaryNodes);
             }
 
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade, diskUpdateRequest);
         }
     }
 }

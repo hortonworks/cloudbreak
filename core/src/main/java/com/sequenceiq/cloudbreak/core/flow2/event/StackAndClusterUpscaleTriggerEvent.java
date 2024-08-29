@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -31,6 +32,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private final boolean rollingRestartEnabled;
 
+    private DiskUpdateRequest diskUpdateRequest;
+
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment, ScalingType scalingType,
         NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
         super(selector, stackId, hostGroupWithAdjustment, Collections.emptyMap(), Collections.emptyMap(), networkScaleDetails, adjustmentTypeWithThreshold,
@@ -42,6 +45,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         restartServices = false;
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
         rollingRestartEnabled = false;
+        this.diskUpdateRequest = null;
     }
 
     @JsonCreator
@@ -70,6 +74,26 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         this.restartServices = restartServices;
         this.clusterManagerType = clusterManagerType;
         this.rollingRestartEnabled = rollingRestartEnabled;
+        this.diskUpdateRequest = null;
+    }
+
+    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
+            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames, ScalingType scalingType,
+            boolean singlePrimaryGateway, boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster, boolean restartServices,
+            ClusterManagerType clusterManagerType, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant,
+            boolean rollingRestartEnabled, DiskUpdateRequest diskUpdateRequest) {
+        this(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames, scalingType, singlePrimaryGateway,
+                kerberosSecured, accepted, singleNodeCluster, restartServices, clusterManagerType, adjustmentTypeWithThreshold, triggeredStackVariant,
+                rollingRestartEnabled);
+        this.diskUpdateRequest = diskUpdateRequest;
+    }
+
+    public DiskUpdateRequest getDiskUpdateRequest() {
+        return diskUpdateRequest;
+    }
+
+    public void setDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
+        this.diskUpdateRequest = diskUpdateRequest;
     }
 
     public ScalingType getScalingType() {

@@ -43,7 +43,8 @@ public class ResizedRootBlockDeviceMappingProvider {
 
     public List<LaunchTemplateBlockDeviceMappingRequest> createUpdatedRootBlockDeviceMapping(AmazonEc2Client ec2Client,
             Map<LaunchTemplateField, String> updatableFields, LaunchTemplateSpecification launchTemplateSpecification, CloudStack cloudStack) {
-        if (updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_SIZE) || updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_PATH)) {
+        if (updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_SIZE) || updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_PATH)
+            || updatableFields.containsKey(LaunchTemplateField.ROOT_VOLUME_TYPE)) {
             try {
                 DescribeLaunchTemplateVersionsResponse describeLaunchTemplateVersionsResponse =
                         ec2Client.describeLaunchTemplateVersions(DescribeLaunchTemplateVersionsRequest.builder()
@@ -101,10 +102,10 @@ public class ResizedRootBlockDeviceMappingProvider {
     }
 
     private boolean isUpdateRequired(Map<LaunchTemplateField, String> updatableFields, LaunchTemplateBlockDeviceMapping originalRootDeviceMapping) {
-        boolean rootDiskSizeDifferent = updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_SIZE)
-                && !Integer.valueOf(updatableFields.get(LaunchTemplateField.ROOT_DISK_SIZE)).equals(originalRootDeviceMapping.ebs().volumeSize());
+        boolean rootDiskSizeDifferent = rootVolumeSizeUpdateRequired(updatableFields, originalRootDeviceMapping);
         boolean rootDiskMountPointChanged = isNotBlank(updatableFields.get(LaunchTemplateField.ROOT_DISK_PATH));
-        return rootDiskSizeDifferent || rootDiskMountPointChanged;
+        boolean rootVolumeTypeDifferent = rootVolumeTypeUpdateRequired(updatableFields, originalRootDeviceMapping);
+        return rootDiskSizeDifferent || rootDiskMountPointChanged || rootVolumeTypeDifferent;
     }
 
     private String getOriginalRootDeviceNameFromAmi(AmazonEc2Client ec2Client, LaunchTemplateVersion launchTemplate) {
@@ -116,11 +117,16 @@ public class ResizedRootBlockDeviceMappingProvider {
             LaunchTemplateBlockDeviceMapping originalRootDeviceMapping) {
 
         LaunchTemplateEbsBlockDevice.Builder rootEbsBlockDeviceBuilder = originalRootDeviceMapping.ebs().toBuilder();
-        if (updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_SIZE)
-                && !Integer.valueOf(updatableFields.get(LaunchTemplateField.ROOT_DISK_SIZE)).equals(originalRootDeviceMapping.ebs().volumeSize())) {
+        if (rootVolumeSizeUpdateRequired(updatableFields, originalRootDeviceMapping)) {
             LOGGER.debug("Creating LaunchTemplateBlockDeviceMapping with new root disk size: [{}]",
                     updatableFields.get(LaunchTemplateField.ROOT_DISK_SIZE));
             rootEbsBlockDeviceBuilder.volumeSize(Integer.valueOf(updatableFields.get(LaunchTemplateField.ROOT_DISK_SIZE)));
+        }
+
+        if (rootVolumeTypeUpdateRequired(updatableFields, originalRootDeviceMapping)) {
+            LOGGER.debug("Creating LaunchTemplateBlockDeviceMapping with new root disk volume type: [{}]",
+                    updatableFields.get(LaunchTemplateField.ROOT_VOLUME_TYPE));
+            rootEbsBlockDeviceBuilder.volumeType(updatableFields.get(LaunchTemplateField.ROOT_VOLUME_TYPE));
         }
 
         LaunchTemplateBlockDeviceMapping.Builder updatedRootBlockDeviceMappingBuilder = originalRootDeviceMapping.toBuilder();
@@ -179,5 +185,17 @@ public class ResizedRootBlockDeviceMappingProvider {
         blockDeviceMappings.add(updateRootDeviceMapping);
         LOGGER.info("Using updated block device mapping: {}", blockDeviceMappings);
         return Optional.of(blockDeviceMappings);
+    }
+
+    private boolean rootVolumeTypeUpdateRequired(Map<LaunchTemplateField, String> updatableFields,
+            LaunchTemplateBlockDeviceMapping originalRootDeviceMapping) {
+        return updatableFields.containsKey(LaunchTemplateField.ROOT_VOLUME_TYPE)
+                && !updatableFields.get(LaunchTemplateField.ROOT_VOLUME_TYPE).equals(originalRootDeviceMapping.ebs().volumeType());
+    }
+
+    private boolean rootVolumeSizeUpdateRequired(Map<LaunchTemplateField, String> updatableFields,
+            LaunchTemplateBlockDeviceMapping originalRootDeviceMapping) {
+        return updatableFields.containsKey(LaunchTemplateField.ROOT_DISK_SIZE)
+                && !Integer.valueOf(updatableFields.get(LaunchTemplateField.ROOT_DISK_SIZE)).equals(originalRootDeviceMapping.ebs().volumeSize());
     }
 }
