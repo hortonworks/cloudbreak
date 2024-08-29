@@ -1120,6 +1120,8 @@ public class ClouderaManagerSetupServiceTest {
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
                 .thenReturn(Optional.of(clusterCommand));
         when(apiCommand.getSuccess()).thenReturn(Boolean.FALSE);
+        when(apiCommand.getActive()).thenReturn(Boolean.FALSE);
+        when(apiCommand.getCanRetry()).thenReturn(Boolean.TRUE);
         when(clusterCommand.getCommandId()).thenReturn(BigDecimal.ONE);
         when(clouderaManagerCommandsService.getApiCommand(any(), any())).thenReturn(apiCommand);
         when(clouderaManagerCommandsService.retryApiCommand(any(), any())).thenReturn(apiCommand);
