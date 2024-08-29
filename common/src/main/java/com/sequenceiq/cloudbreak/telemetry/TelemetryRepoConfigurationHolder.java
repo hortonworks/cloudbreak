@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.telemetry;
 
-import static com.sequenceiq.common.model.OsType.RHEL8;
-
 import jakarta.validation.constraints.NotBlank;
 
 import org.slf4j.Logger;
@@ -10,6 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 
 @Component
 @ConfigurationProperties("telemetry.repos")
@@ -23,16 +23,18 @@ public class TelemetryRepoConfigurationHolder {
     @NotBlank
     private TelemetryRepoConfiguration rhel8;
 
+    @NotBlank
+    private TelemetryRepoConfiguration rhel8Arm;
+
     public TelemetryRepoConfiguration selectCorrectRepoConfig(TelemetryContext context) {
-        String osType = context.getOsType();
-        if (RHEL8.getOs().equals(osType)) {
-            return rhel8;
-        }
-        if ("redhat7".equals(osType)) {
-            return rhel7;
-        }
-        LOGGER.warn("Unrecognized OsType {} selected for TelemetryContext using default fallback rhel7 repository", osType);
-        return rhel7;
+        TelemetryRepoConfiguration rhel8RepoConfigBasedOnArch = switch (Architecture.fromStringWithFallback(context.getArchitecture())) {
+            case ARM64 -> rhel8Arm;
+            case X86_64, UNKOWN -> rhel8;
+        };
+        return switch (OsType.getByOsTypeStringWithCentos7Fallback(context.getOsType())) {
+            case RHEL8 -> rhel8RepoConfigBasedOnArch;
+            case CENTOS7 -> rhel7;
+        };
     }
 
     public TelemetryRepoConfiguration getRhel7() {
@@ -49,5 +51,13 @@ public class TelemetryRepoConfigurationHolder {
 
     public void setRhel8(TelemetryRepoConfiguration rhel8) {
         this.rhel8 = rhel8;
+    }
+
+    public TelemetryRepoConfiguration getRhel8Arm() {
+        return rhel8Arm;
+    }
+
+    public void setRhel8Arm(TelemetryRepoConfiguration rhel8Arm) {
+        this.rhel8Arm = rhel8Arm;
     }
 }

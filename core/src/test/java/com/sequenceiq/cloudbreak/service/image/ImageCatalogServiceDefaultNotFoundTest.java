@@ -23,7 +23,6 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
@@ -38,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.common.model.Architecture;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceDefaultNotFoundTest {

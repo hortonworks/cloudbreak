@@ -57,6 +57,7 @@ import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -304,6 +305,7 @@ public class TelemetryConfigServiceTest {
         stack.setAccountId("accountId");
         stack.setRegion("region");
         stack.setResourceCrn("crn:cdp:freeipa:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:11111-2222");
+        stack.setImage(new ImageEntity());
         return stack;
     }
 

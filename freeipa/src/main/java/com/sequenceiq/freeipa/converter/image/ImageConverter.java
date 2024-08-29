@@ -8,10 +8,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
 @Component

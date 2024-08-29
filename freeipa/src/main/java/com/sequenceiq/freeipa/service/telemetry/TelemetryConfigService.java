@@ -132,6 +132,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             telemetryContext.setPaywallConfigs(getPaywallConfigs(stack));
             telemetryContext.setMeteringContext(MeteringContext.builder().build());
         }
+        telemetryContext.setOsType(stack.getImage().getOsType());
         return telemetryContext;
     }
 

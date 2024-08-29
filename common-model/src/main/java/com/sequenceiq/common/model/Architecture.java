@@ -1,9 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.common.model;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.google.common.base.Strings;
 
 public enum Architecture {
     UNKOWN,
@@ -23,7 +24,7 @@ public enum Architecture {
     }
 
     private static Architecture fromString(String architecture, boolean fallback) {
-        if (Strings.isNullOrEmpty(architecture)) {
+        if (StringUtils.isEmpty(architecture)) {
             return fallback ? X86_64 : null;
         }
         if (Arrays.stream(values()).noneMatch(arch -> arch.name().equalsIgnoreCase(architecture))) {

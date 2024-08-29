@@ -4,8 +4,8 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.Architecture;
 
 @Component
 public class ImageUtil {

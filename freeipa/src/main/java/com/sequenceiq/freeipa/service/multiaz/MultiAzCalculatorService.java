@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.multiaz;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 
 import java.util.ArrayList;

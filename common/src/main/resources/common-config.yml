@@ -34,6 +34,11 @@ telemetry:
       base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8/yum
       gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
       gpg-check: 1
+    rhel8Arm:
+      name: cdp-infra-tools
+      base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8arm64/yum
+      gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat8arm64/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      gpg-check: 1
   monitoring:
     remote-write-url: ""
     remote-write-internal-url: ""

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
+import com.sequenceiq.common.model.Architecture;
 
 public class ArchitectureConverter extends DefaultEnumConverter<Architecture> {
 

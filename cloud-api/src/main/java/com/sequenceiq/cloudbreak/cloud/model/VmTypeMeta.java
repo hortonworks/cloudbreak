@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.common.model.Architecture;
+
 public class VmTypeMeta {
 
     public static final String CPU = "Cpu";

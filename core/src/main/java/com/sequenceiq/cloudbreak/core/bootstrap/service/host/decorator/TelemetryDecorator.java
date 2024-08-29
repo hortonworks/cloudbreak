@@ -115,6 +115,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         try {
             Image image = componentConfigProviderService.getImage(stack.getId());
             telemetryContext.setOsType(image.getOsType());
+            telemetryContext.setArchitecture(image.getArchitecture());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.warn("Not able to get Image info from Component info for stack {}", stack.getId(), e);
         }

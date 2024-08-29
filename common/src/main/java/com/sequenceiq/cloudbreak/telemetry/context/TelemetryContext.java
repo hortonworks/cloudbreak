@@ -18,6 +18,8 @@ public class TelemetryContext {
 
     private String osType;
 
+    private String architecture;
+
     private DatabusContext databusContext;
 
     private MonitoringContext monitoringContext;
@@ -138,6 +140,14 @@ public class TelemetryContext {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sequenceiq.common.model;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public enum OsType {
 
@@ -46,13 +47,20 @@ public enum OsType {
     }
 
     public static OsType getByOsTypeString(String osType) {
-        return Arrays.stream(values())
-                .filter(e -> e.osType.equals(osType))
-                .findFirst()
-                .orElse(null);
+        return getOptionalByOsTypeString(osType).orElse(null);
+    }
+
+    public static OsType getByOsTypeStringWithCentos7Fallback(String osType) {
+        return getOptionalByOsTypeString(osType).orElse(CENTOS7);
     }
 
     public static OsType getByOs(String os) {
         return Arrays.stream(values()).filter(osType -> osType.os.equalsIgnoreCase(os)).findFirst().orElseThrow();
+    }
+
+    private static Optional<OsType> getOptionalByOsTypeString(String osType) {
+        return Arrays.stream(values())
+                .filter(e -> e.osType.equals(osType))
+                .findFirst();
     }
 }
