@@ -24,7 +24,6 @@ import org.testng.xml.XmlTest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Architecture;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.assertion.image.ImageAssertions;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -209,7 +208,7 @@ public class ImageValidatorE2ETestUtil {
         }
         switch (imageValidationType) {
             case BASE -> {
-                if (CloudPlatform.YARN.equalsIgnoreCase(commonCloudProperties.getCloudProvider())) {
+                if (commonCloudProperties.isYcloudTest()) {
                     testNGUtil.addTestCase(basicTests, YarnImageValidatorE2ETest.class, "testHybridSDXWithBaseImage");
                 } else {
                     testNGUtil.addTestCase(basicTests, BaseImageValidatorE2ETest.class, "testProvisioningWithBaseImage");
