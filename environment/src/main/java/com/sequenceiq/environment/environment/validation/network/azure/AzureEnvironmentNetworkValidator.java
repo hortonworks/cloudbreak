@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
@@ -242,9 +243,13 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         Set<String> newFlexibleSubnets = Optional.ofNullable(networkDto.getAzure())
                 .map(AzureParams::getFlexibleServerSubnetIds)
                 .orElse(Set.of());
-        if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
+        if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT
+                && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
             LOGGER.info("Flexible server subnet validation is not needed during environment edit as subnet ids has not changed.");
-        } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
+        } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT
+                && !originalFlexibleSubnets.isEmpty()
+                && newFlexibleSubnets.isEmpty()
+                && networkDto.getServiceEndpointCreation() != ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
             String message = "Deletion of all Flexible server delegated subnets is not supported";
             LOGGER.warn(message);
             resultBuilder.error(message);
