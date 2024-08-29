@@ -1819,4 +1819,16 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     clusterShape.name()));
         }
     }
+
+    public StackV4Response getDetailWithResources(String name, Set<String> entries, String accountId) {
+        try {
+            LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.getWithResources(WORKSPACE_ID_DEFAULT, name, entries, accountId));
+        } catch (jakarta.ws.rs.NotFoundException e) {
+            LOGGER.info("Sdx cluster not found on CB side", e);
+            return null;
+        }
+    }
 }

@@ -27,6 +27,15 @@ public class DiskUpdateRequest implements JsonEntity {
     @Schema(description = "Type of disk being updated")
     private DiskType diskType;
 
+    public DiskUpdateRequest() { }
+
+    public DiskUpdateRequest(String volumeType, int size, String group, DiskType diskType) {
+        this.volumeType = volumeType;
+        this.size = size;
+        this.group = group;
+        this.diskType = diskType;
+    }
+
     public String getVolumeType() {
         return volumeType;
     }

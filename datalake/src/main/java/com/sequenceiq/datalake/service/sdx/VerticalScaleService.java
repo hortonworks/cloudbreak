@@ -141,4 +141,8 @@ public class VerticalScaleService {
     public FlowIdentifier addVolumesDatalake(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
         return sdxReactorFlowManager.triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
     }
+
+    public FlowIdentifier updateRootVolumeDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        return sdxReactorFlowManager.triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, userCrn);
+    }
 }

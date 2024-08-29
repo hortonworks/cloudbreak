@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAddDisksAction;
@@ -23,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxDetailWithResourceAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDetailedDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxEnableRangerRazAction;
@@ -275,8 +277,8 @@ public class SdxTestClient {
         return new SdxRotateSecretInternalAction(secretTypes, additionalProperties);
     }
 
-    public Action<SdxInternalTestDto, SdxClient> updateDisks(int size, String volumeType, String instanceGroup) {
-        return new SdxDiskUpdateAction(size, volumeType, instanceGroup);
+    public Action<SdxInternalTestDto, SdxClient> updateDisks(int size, String volumeType, String instanceGroup, DiskType diskType) {
+        return new SdxDiskUpdateAction(size, volumeType, instanceGroup, diskType);
     }
 
     public Action<SdxScaleTestDto, SdxClient> scale() {
@@ -294,5 +296,9 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> setDefaultJavaVersion(String defaultJavaVersion, boolean restartServices) {
         return new SdxSetDefaultJavaVersionAction(defaultJavaVersion, restartServices);
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> describeInternalWithResources() {
+        return new SdxDetailWithResourceAction();
     }
 }

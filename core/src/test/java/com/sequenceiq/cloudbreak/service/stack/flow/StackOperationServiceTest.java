@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode.NODE_ID;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,10 +72,15 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
+import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
@@ -164,6 +170,9 @@ public class StackOperationServiceTest {
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private ClusterRepairService clusterRepairService;
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -618,6 +627,9 @@ public class StackOperationServiceTest {
     public void testRootVolumeDiskUpdate() throws Exception {
         StackDto stack = mock(StackDto.class);
         when(stack.getId()).thenReturn(STACK_ID);
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(List.of());
+        when(stack.getInstanceGroupByInstanceGroupName(anyString())).thenReturn(instanceGroupDto);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ROOT_DISK);
@@ -627,6 +639,8 @@ public class StackOperationServiceTest {
         when(instanceMetadataView.getInstanceGroupName()).thenReturn("test");
         when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("test-fqdn");
         when(stack.getAllAvailableInstances()).thenReturn(List.of(instanceMetadataView));
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = Result.success(Map.of());
+        when(clusterRepairService.validateRepair(eq(NODE_ID), eq(STACK_ID), any(Set.class), eq(false))).thenReturn(repairValidationResult);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         Map<String, List<String>> updatedNodesMap = Map.of("test", List.of("test-fqdn"));
         underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST");
@@ -644,5 +658,25 @@ public class StackOperationServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST"));
 
         assertEquals("Invalid Request: Size for root disk modification should be greater than or equal to 200GB", exception.getMessage());
+    }
+
+    @Test
+    public void testRootVolumeDiskUpdateThrowsBadRequestForValidation() throws Exception {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ROOT_DISK);
+        when(diskUpdateRequest.getSize()).thenReturn(200);
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(List.of());
+        when(stack.getInstanceGroupByInstanceGroupName(any())).thenReturn(instanceGroupDto);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult =
+                Result.error(new RepairValidation(List.of("Test validation error")));
+        when(clusterRepairService.validateRepair(eq(NODE_ID), eq(STACK_ID), any(Set.class), eq(false))).thenReturn(repairValidationResult);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST"));
+
+        assertEquals("Test validation error", exception.getMessage());
     }
 }

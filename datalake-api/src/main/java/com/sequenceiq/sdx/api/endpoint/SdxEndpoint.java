@@ -535,5 +535,27 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @PUT
+    @Path("/name/{name}/modify_root_volume")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Updates root volume type and size for an instance group in DL", operationId = "updateRootVolumeByDatalakeName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateRootVolumeByDatalakeName(@PathParam("name") String name, @Valid DiskUpdateRequest updateRequest);
+
+    @PUT
+    @Path("/crn/{crn}/modify_root_volume")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Updates root volume type and size for an instance group in DL", operationId = "updateRootVolumeByDatalakeCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateRootVolumeByDatalakeCrn(
+            @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
+
+    @GET
+    @Path("{name}/get_with_resources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "get SDX cluster detail", description = "getSdxDetailWithResourcesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxClusterDetailResponse getSdxDetailWithResourcesByName(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 }
 

@@ -611,6 +611,22 @@ public class SdxController implements SdxEndpoint {
         return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices());
     }
 
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
+    public FlowIdentifier updateRootVolumeByDatalakeName(@ResourceName String name, DiskUpdateRequest updateRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return verticalScaleService.updateRootVolumeDatalake(sdxCluster, updateRequest, userCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING)
+    public FlowIdentifier updateRootVolumeByDatalakeCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest updateRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return verticalScaleService.updateRootVolumeDatalake(sdxCluster, updateRequest, userCrn);
+    }
+
     private SdxCluster getSdxClusterByName(String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
@@ -646,4 +662,12 @@ public class SdxController implements SdxEndpoint {
         }
     }
 
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
+    public SdxClusterDetailResponse getSdxDetailWithResourcesByName(@ResourceName String name, Set<String> entries) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        StackV4Response stackV4Response = sdxService.getDetailWithResources(name, entries, sdxCluster.getAccountId());
+        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+        return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
+    }
 }

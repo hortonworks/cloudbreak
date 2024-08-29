@@ -60,7 +60,7 @@ public class RootDiskValidationService {
     @Inject
     private TemplateService templateService;
 
-    public List<Resource> fetchRootDiskResourcesForGroup(StackDto stack, DiskUpdateRequest updateRequest) throws Exception {
+    public List<Resource> fetchRootDiskResourcesForGroup(StackDto stack, DiskUpdateRequest updateRequest) {
         String platform = stack.getCloudPlatform();
         List<Resource> resources = new ArrayList<>();
         String groupName = updateRequest.getGroup();

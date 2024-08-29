@@ -229,7 +229,7 @@ public class AwsCommonDiskUpdateService {
         return filters;
     }
 
-    public List<CloudResource> getRootVolumes(AuthenticatedContext authenticatedContext, Group group) throws Exception {
+    public List<CloudResource> getRootVolumes(AuthenticatedContext authenticatedContext, Group group) {
         List<String> instanceIds = group.getInstances().stream().map(CloudInstance::getInstanceId).toList();
         AmazonEc2Client ec2Client = getEc2Client(authenticatedContext);
         List<Instance> instances = awsTaggingService.describeInstancesByInstanceIds(instanceIds, ec2Client);

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -50,6 +53,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -381,6 +385,50 @@ class SdxControllerTest {
                 "az1"));
     }
 
+    @Test
+    void testUpdateRootVolumeByDatalakeName() {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("compute");
+        diskUpdateRequest.setSize(100);
+        diskUpdateRequest.setVolumeType("gp2");
+        diskUpdateRequest.setDiskType(DiskType.ROOT_DISK);
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(verticalScaleService.updateRootVolumeDatalake(sdxCluster, diskUpdateRequest, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.updateRootVolumeByDatalakeName("TEST", diskUpdateRequest));
+
+        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, "TEST");
+        verify(verticalScaleService, times(1)).updateRootVolumeDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testUpdateRootVolumeByDatalakeCrn() {
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("compute");
+        diskUpdateRequest.setSize(100);
+        diskUpdateRequest.setVolumeType("gp2");
+        diskUpdateRequest.setDiskType(DiskType.ROOT_DISK);
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+        when(verticalScaleService.updateRootVolumeDatalake(sdxCluster, diskUpdateRequest, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.updateRootVolumeByDatalakeCrn(sdxCluster.getCrn(), diskUpdateRequest));
+
+        verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
+        verify(verticalScaleService, times(1)).updateRootVolumeDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
     private SdxCluster getValidSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);
@@ -391,4 +439,17 @@ class SdxControllerTest {
         return sdxCluster;
     }
 
+    @Test
+    void testGetSdxDetailWithResourcesByName() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setAccountId("accountId");
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        when(sdxService.getByNameInAccount(any(), eq("TEST"))).thenReturn(sdxCluster);
+        StackV4Response stackV4Response = mock(StackV4Response.class);
+        Set<String> entries = Set.of();
+        when(sdxService.getDetailWithResources("TEST", entries, "accountId")).thenReturn(stackV4Response);
+        SdxClusterDetailResponse sdxClusterDetailResponse = sdxController.getSdxDetailWithResourcesByName("TEST", entries);
+        assertEquals(stackV4Response, sdxClusterDetailResponse.getStackV4Response());
+        assertEquals(sdxCluster.getClusterName(), sdxClusterDetailResponse.getName());
+    }
 }

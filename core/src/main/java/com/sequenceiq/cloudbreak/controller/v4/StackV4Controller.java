@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
@@ -733,5 +734,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public void validateDefaultJavaVersionUpdateByCrnInternal(Long workspaceId, String crn, SetDefaultJavaVersionRequest request) {
         stackOperationService.validateDefaultJavaVersionUpdate(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier updateRootVolumeByStackCrnInternal(Long workspaceId, @ResourceCrn String crn,
+            DiskUpdateRequest rootDiskVolumesRequest, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 }

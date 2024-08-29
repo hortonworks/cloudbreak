@@ -5,6 +5,7 @@ import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -24,10 +25,13 @@ public class SdxDiskUpdateAction implements Action<SdxInternalTestDto, SdxClient
 
     private String instanceGroup;
 
-    public SdxDiskUpdateAction(int size, String volumeType, String instanceGroup) {
+    private DiskType diskType;
+
+    public SdxDiskUpdateAction(int size, String volumeType, String instanceGroup, DiskType diskType) {
         this.size = size;
         this.volumeType = volumeType;
         this.instanceGroup = instanceGroup;
+        this.diskType = diskType != null ? diskType : DiskType.ADDITIONAL_DISK;
     }
 
     @Override
@@ -38,9 +42,17 @@ public class SdxDiskUpdateAction implements Action<SdxInternalTestDto, SdxClient
         diskUpdateRequest.setVolumeType(volumeType);
         diskUpdateRequest.setSize(size);
         diskUpdateRequest.setGroup(instanceGroup);
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
-                .sdxEndpoint()
-                .diskUpdateByName(testDto.getResponse().getStackV4Response().getName(), diskUpdateRequest);
+        diskUpdateRequest.setDiskType(diskType);
+        FlowIdentifier flowIdentifier;
+        if (DiskType.ADDITIONAL_DISK.equals(diskType)) {
+            flowIdentifier = client.getDefaultClient()
+                    .sdxEndpoint()
+                    .diskUpdateByName(testDto.getResponse().getStackV4Response().getName(), diskUpdateRequest);
+        } else {
+            flowIdentifier = client.getDefaultClient()
+                    .sdxEndpoint()
+                    .updateRootVolumeByDatalakeName(testDto.getResponse().getStackV4Response().getName(), diskUpdateRequest);
+        }
         testDto.setFlow("SdxDiskUpdate", flowIdentifier);
         Log.whenJson(LOGGER, " SDX DiskUpdate Flow: ", client.getDefaultClient().sdxEndpoint().get(testDto.getName()));
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient()

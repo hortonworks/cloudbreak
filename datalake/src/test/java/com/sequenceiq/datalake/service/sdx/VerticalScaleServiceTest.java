@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,5 +78,19 @@ public class VerticalScaleServiceTest {
         String userCrn = "TEST-CRN";
         underTest.addVolumesDatalake(sdxCluster, addVolumesRequest, userCrn);
         verify(sdxReactorFlowManager).triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
+    }
+
+    @Test
+    public void testUpdateRootVolumeDatalake() {
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DiskUpdateRequest updateRequest = mock(DiskUpdateRequest.class);
+        String userCrn = "TEST-CRN";
+        FlowIdentifier flowIdentifier = mock(FlowIdentifier.class);
+        doReturn("test-flow-identifier").when(flowIdentifier).getPollableId();
+        doReturn(flowIdentifier).when(sdxReactorFlowManager).triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, userCrn);
+        FlowIdentifier result = underTest.updateRootVolumeDatalake(sdxCluster, updateRequest, userCrn);
+        verify(sdxReactorFlowManager).triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, userCrn);
+        assertEquals(flowIdentifier, result);
+        assertEquals("test-flow-identifier", result.getPollableId());
     }
 }

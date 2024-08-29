@@ -199,7 +199,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     @Override
-    public List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) throws Exception {
+    public List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) {
         AzureClient azureClient = rootVolumeFetchDto.getAuthenticatedContext().getParameter(AzureClient.class);
         return azureCloudResourceService.getAttachedOsDiskResources(rootVolumeFetchDto.getCloudResourceList(),
                 rootVolumeFetchDto.getAzureResourceGroupName(), azureClient);

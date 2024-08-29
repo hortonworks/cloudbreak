@@ -68,6 +68,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_OS_IN_WORKSPACE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DETERMINE_DATALAKE_DATA_SIZES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_BY_STACK_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_STACK_SECRETS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
@@ -96,6 +97,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
@@ -916,4 +918,16 @@ public interface StackV4Endpoint {
     void validateDefaultJavaVersionUpdateByCrnInternal(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @PUT
+    @Path("internal/crn/{crn}/modify_root_volume")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = ROOT_VOLUME_UPDATE_BY_STACK_CRN, description = Notes.STACK_NOTES,
+            operationId = "updateRootVolumeByStackCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateRootVolumeByStackCrnInternal(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @Valid DiskUpdateRequest rootDiskVolumesRequest,
+            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

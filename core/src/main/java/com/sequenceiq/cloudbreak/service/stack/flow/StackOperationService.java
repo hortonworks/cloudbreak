@@ -53,13 +53,18 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
+import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -155,6 +160,9 @@ public class StackOperationService {
 
     @Inject
     private DefaultJavaVersionUpdateValidator defaultJavaVersionUpdateValidator;
+
+    @Inject
+    private ClusterRepairService clusterRepairService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -543,10 +551,16 @@ public class StackOperationService {
         }
     }
 
-    public FlowIdentifier rootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId)
-            throws Exception {
+    public FlowIdentifier rootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         if (updateRequest.getDiskType().equals(DiskType.ROOT_DISK) && updateRequest.getSize() >= MINIMUM_DISK_SIZE) {
+            Set<String> selectedNodes = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup())
+                    .getInstanceMetadataViews().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toSet());
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = clusterRepairService.validateRepair(
+                    ManualClusterRepairMode.NODE_ID, stack.getId(), selectedNodes, false);
+            if (repairValidationResult.isError()) {
+                throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
+            }
             rootDiskValidationService.fetchRootDiskResourcesForGroup(stack, updateRequest);
             List<String> discoveryFqdnList = stack.getAllAvailableInstances().stream()
                     .filter(instanceMetadataView -> instanceMetadataView.getInstanceGroupName().equals(updateRequest.getGroup()))

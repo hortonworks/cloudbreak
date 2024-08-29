@@ -1,21 +1,18 @@
-package com.sequenceiq.datalake.flow.verticalscale.diskupdate.event;
-
-import java.util.List;
+package com.sequenceiq.datalake.flow.verticalscale.rootvolume.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.datalake.events.RootVolumeUpdateRequest;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
-@JsonDeserialize(builder = DatalakeDiskUpdateEvent.Builder.class)
-public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selectable {
+@JsonDeserialize(builder = DatalakeRootVolumeUpdateEvent.Builder.class)
+public class DatalakeRootVolumeUpdateEvent extends BaseNamedFlowEvent implements Selectable {
 
-    private final DiskUpdateRequest datalakeDiskUpdateRequest;
+    private final RootVolumeUpdateRequest rootVolumeUpdateRequest;
 
     private final String stackCrn;
 
@@ -25,12 +22,12 @@ public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selec
 
     private final String accountId;
 
-    private final List<Volume> volumesToBeUpdated;
-
     private final String cloudPlatform;
 
+    private final String initiatorUserCrn;
+
     //CHECKSTYLE:OFF:ExecutableStatementCount
-    public DatalakeDiskUpdateEvent(
+    public DatalakeRootVolumeUpdateEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("accepted") Promise<AcceptResult> accepted,
@@ -39,23 +36,23 @@ public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selec
             @JsonProperty("stackCrn") String stackCrn,
             @JsonProperty("clusterName") String clusterName,
             @JsonProperty("accountId") String accountId,
-            @JsonProperty("datalakeDiskUpdateRequest") DiskUpdateRequest datalakeDiskUpdateRequest,
-            @JsonProperty("volumesToBeUpdated") List<Volume> volumesToBeUpdated,
+            @JsonProperty("rootVolumeUpdateRequest") RootVolumeUpdateRequest rootVolumeUpdateRequest,
             @JsonProperty("cloudPlatform") String cloudPlatform,
-            @JsonProperty("stackId") Long stackId) {
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("initiatorUserCrn") String initiatorUserCrn) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
-        this.datalakeDiskUpdateRequest = datalakeDiskUpdateRequest;
+        this.rootVolumeUpdateRequest = rootVolumeUpdateRequest;
         this.stackCrn = stackCrn;
         this.clusterName = clusterName;
         this.accountId = accountId;
-        this.volumesToBeUpdated = volumesToBeUpdated;
         this.cloudPlatform = cloudPlatform;
         this.stackId = stackId;
+        this.initiatorUserCrn = initiatorUserCrn;
     }
     //CHECKSTYLE:ON:ExecutableStatementCount
 
-    public DiskUpdateRequest getDatalakeDiskUpdateRequest() {
-        return datalakeDiskUpdateRequest;
+    public RootVolumeUpdateRequest getRootVolumeUpdateRequest() {
+        return rootVolumeUpdateRequest;
     }
 
     public String getStackCrn() {
@@ -70,10 +67,6 @@ public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selec
         return accountId;
     }
 
-    public List<Volume> getVolumesToBeUpdated() {
-        return volumesToBeUpdated;
-    }
-
     public String getCloudPlatform() {
         return cloudPlatform;
     }
@@ -82,14 +75,18 @@ public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selec
         return stackId;
     }
 
-    public static DatalakeDiskUpdateEvent.Builder builder() {
-        return new DatalakeDiskUpdateEvent.Builder();
+    public String getInitiatorUserCrn() {
+        return initiatorUserCrn;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     @JsonPOJOBuilder
     public static final class Builder {
 
-        private DiskUpdateRequest datalakeDiskUpdateRequest;
+        private RootVolumeUpdateRequest rootVolumeUpdateRequest;
 
         private String resourceName;
 
@@ -107,78 +104,78 @@ public class DatalakeDiskUpdateEvent extends BaseNamedFlowEvent implements Selec
 
         private String accountId;
 
-        private List<Volume> volumesToBeUpdated;
-
         private String cloudPlatform;
 
         private Long stackId;
 
+        private String initiatorUserCrn;
+
         private Builder() {
         }
 
-        public DatalakeDiskUpdateEvent.Builder withResourceName(String resourceName) {
+        public Builder withResourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withStackCrn(String stackCrn) {
+        public Builder withStackCrn(String stackCrn) {
             this.stackCrn = stackCrn;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withSelector(String selector) {
+        public Builder withSelector(String selector) {
             this.selector = selector;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withResourceId(Long resourceId) {
+        public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withAccepted(Promise<AcceptResult> accepted) {
+        public Builder withAccepted(Promise<AcceptResult> accepted) {
             this.accepted = accepted;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withClusterName(String clusterName) {
+        public Builder withClusterName(String clusterName) {
             this.clusterName = clusterName;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withAccountId(String accountId) {
+        public Builder withAccountId(String accountId) {
             this.accountId = accountId;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withDatalakeDiskUpdateRequest(DiskUpdateRequest datalakeDiskUpdateRequest) {
-            this.datalakeDiskUpdateRequest = datalakeDiskUpdateRequest;
+        public Builder withRootVolumeUpdateRequest(RootVolumeUpdateRequest rootVolumeUpdateRequest) {
+            this.rootVolumeUpdateRequest = rootVolumeUpdateRequest;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withVolumesToBeUpdated(List<Volume> volumesToBeUpdated) {
-            this.volumesToBeUpdated = volumesToBeUpdated;
-            return this;
-        }
-
-        public DatalakeDiskUpdateEvent.Builder withCloudPlatform(String cloudPlatform) {
+        public Builder withCloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent.Builder withStackId(Long stackId) {
+        public Builder withStackId(Long stackId) {
             this.stackId = stackId;
             return this;
         }
 
-        public DatalakeDiskUpdateEvent build() {
-            return new DatalakeDiskUpdateEvent(selector, resourceId, accepted, resourceName, resourceCrn, stackCrn,
-                    clusterName, accountId, datalakeDiskUpdateRequest, volumesToBeUpdated, cloudPlatform, stackId);
+        public Builder withInitiatorUserCrn(String initiatorUserCrn) {
+            this.initiatorUserCrn = initiatorUserCrn;
+            return this;
+        }
+
+        public DatalakeRootVolumeUpdateEvent build() {
+            return new DatalakeRootVolumeUpdateEvent(selector, resourceId, accepted, resourceName, resourceCrn, stackCrn,
+                    clusterName, accountId, rootVolumeUpdateRequest, cloudPlatform, stackId, initiatorUserCrn);
         }
     }
 }

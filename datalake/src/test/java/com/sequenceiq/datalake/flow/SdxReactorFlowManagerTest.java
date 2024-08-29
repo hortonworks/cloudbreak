@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainS
 import static com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors.DATALAKE_ADD_VOLUMES_TRIGGER_EVENT;
+import static com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateStateSelectors.DATALAKE_ROOT_VOLUME_UPDATE_EVENT;
 import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -52,6 +53,7 @@ import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEve
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
+import com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -306,5 +308,19 @@ class SdxReactorFlowManagerTest {
         assertEquals("TEST", captor.getValue().getSdxName());
         assertEquals(DATALAKE_ADD_VOLUMES_TRIGGER_EVENT.selector(), captor.getValue().selector());
         assertEquals("COMPUTE", captor.getValue().getStackAddVolumesRequest().getInstanceGroup());
+    }
+
+    @Test
+    public void testTriggerDatalakeRootVolumeUpdate() {
+        ArgumentCaptor<DatalakeRootVolumeUpdateEvent> captor = ArgumentCaptor.forClass(DatalakeRootVolumeUpdateEvent.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        doReturn("TEST").when(sdxCluster).getClusterName();
+        DiskUpdateRequest updateRequest = mock(DiskUpdateRequest.class);
+
+        FlowIdentifier result = underTest.triggerDatalakeRootVolumeUpdate(sdxCluster, updateRequest, USER_CRN);
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        assertEquals("TEST", captor.getValue().getClusterName());
+        assertEquals(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector(), captor.getValue().getSelector());
+        assertEquals("flowId", result.getPollableId());
     }
 }

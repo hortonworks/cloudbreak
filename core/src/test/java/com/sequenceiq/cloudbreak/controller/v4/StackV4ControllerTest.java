@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
@@ -223,5 +224,15 @@ class StackV4ControllerTest {
         assertEquals("crn-2", resultResponse2.getCrn());
 
         verify(stackOperationService, times(1)).listDatabaseServersCertificateStatus(request, "usercrn");
+    }
+
+    @Test
+    void testUpdateRootVolumeByStackCrn() throws Exception {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        doAs(USER_CRN, () -> {
+            underTest.updateRootVolumeByStackCrnInternal(WORKSPACE_ID, STACK_CRN, diskUpdateRequest, USER_CRN);
+        });
+
+        verify(stackOperationService).rootVolumeDiskUpdate(NameOrCrn.ofCrn(STACK_CRN), diskUpdateRequest, "hortonworks");
     }
 }

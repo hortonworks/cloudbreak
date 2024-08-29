@@ -24,6 +24,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors.DATALAKE_ADD_VOLUMES_TRIGGER_EVENT;
+import static com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateStateSelectors.DATALAKE_ROOT_VOLUME_UPDATE_EVENT;
 
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
+import com.sequenceiq.datalake.events.RootVolumeUpdateRequest;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.certrotation.event.RotateCertificateStackEvent;
@@ -91,6 +93,7 @@ import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseSer
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
+import com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
@@ -430,5 +433,24 @@ public class SdxReactorFlowManager {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxInstanceMetadataUpdateEvent event = new SdxInstanceMetadataUpdateEvent(SDX_IMD_UPDATE_EVENT.event(), cluster.getId(), initiatorUserCrn, updateType);
         return notify(SDX_IMD_UPDATE_EVENT.event(), event, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerDatalakeRootVolumeUpdate(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        LOGGER.info("Root Volume Vertical Scale flow triggered for datalake {}", sdxCluster.getName());
+        DatalakeRootVolumeUpdateEvent datalakeRootVolumeUpdateEvent = DatalakeRootVolumeUpdateEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceCrn(sdxCluster.getResourceCrn())
+                .withResourceId(sdxCluster.getId())
+                .withResourceName(sdxCluster.getName())
+                .withRootVolumeUpdateRequest(RootVolumeUpdateRequest.convert(updateRequest))
+                .withStackCrn(sdxCluster.getStackCrn())
+                .withClusterName(sdxCluster.getClusterName())
+                .withAccountId(sdxCluster.getAccountId())
+                .withSelector(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector())
+                .withInitiatorUserCrn(userCrn)
+                .build();
+        LOGGER.debug("Root volume update flow trigger event sent for datalake {}", sdxCluster.getName());
+        return notify(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector(), datalakeRootVolumeUpdateEvent, sdxCluster.getClusterName(), userCrn);
     }
 }

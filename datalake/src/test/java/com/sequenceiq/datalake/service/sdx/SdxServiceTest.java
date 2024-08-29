@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -2114,5 +2115,30 @@ class SdxServiceTest {
         awsNetworkV4Parameters.setEndpointGatewaySubnetId("subnet-123");
         networkResponse.setAws(awsNetworkV4Parameters);
         return networkResponse;
+    }
+
+    @Test
+    void testSdxGetDetailsWithResources() {
+        StackV4Response stackResponse = mock(StackV4Response.class);
+        when(stackV4Endpoint.getWithResources(anyLong(), anyString(), any(), anyString())).thenReturn(stackResponse);
+        Set<String> entries = Set.of();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp::::user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        StackV4Response result = underTest.getDetailWithResources("test", entries, "accountId");
+        assertEquals(stackResponse, result);
+        verify(stackV4Endpoint).getWithResources(0L, "test", entries, "accountId");
+    }
+
+    @Test
+    void testSdxGetDetailsWithResourcesNull() {
+        when(stackV4Endpoint.getWithResources(anyLong(), anyString(), any(), anyString())).thenThrow(new jakarta.ws.rs.NotFoundException("test"));
+        Set<String> entries = Set.of();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp::::user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        StackV4Response result = underTest.getDetailWithResources("test", entries, "accountId");
+        assertNull(result);
+        verify(stackV4Endpoint).getWithResources(0L, "test", entries, "accountId");
     }
 }

@@ -82,7 +82,7 @@ public interface ResourceVolumeConnector {
      * @return returns a list of root volume resources for the instances in the cloud stack
      * @throws Exception        in case of any error
      */
-    default List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) throws Exception {
+    default List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

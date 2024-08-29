@@ -62,7 +62,7 @@ public class AwsNativeResourceVolumeConnector implements ResourceVolumeConnector
     }
 
     @Override
-    public List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) throws Exception {
+    public List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) {
         return awsCommonDiskUpdateService.getRootVolumes(rootVolumeFetchDto.getAuthenticatedContext(), rootVolumeFetchDto.getGroup());
     }
 }
