@@ -108,7 +108,7 @@ public class ImageValidatorE2ETestUtil {
         return imageValidationType != null;
     }
 
-    private boolean isFreeIpaImageValidation() {
+    public boolean isFreeIpaImageValidation() {
         return imageValidationType == ImageValidationType.FREEIPA;
     }
 
