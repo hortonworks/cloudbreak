@@ -38,6 +38,8 @@ public class DistroXOpDescription {
     public static final String DELETE_VOLUMES_BY_STACK_CRN = "delete attached volumes on stack instances by stack crn";
     public static final String ADD_VOLUMES_BY_STACK_NAME = "add block storage to stack instance group by stack name";
     public static final String ADD_VOLUMES_BY_STACK_CRN = "add EBS volumes to stack instance group by stack crn";
+    public static final String ROOT_VOLUME_UPDATE_BY_DH_NAME = "Update root volume of stack instance group by Datahub name";
+    public static final String ROOT_VOLUME_UPDATE_BY_DH_CRN = "Update root volume of to stack instance group by Datahub crn";
 
     public static final String IMD_UPDATE = "update instance metadata for Distrox's instances";
     public static final String REPAIR_CLUSTER_BY_NAME = "repairs the stack by name";

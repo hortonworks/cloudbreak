@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUp
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.REPAIR;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.SECRET_ENCRYPTION_ENABLED;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.TRIGGERED_VARIANT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -50,6 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
@@ -62,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -70,12 +73,14 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsSuccess;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
@@ -137,6 +142,9 @@ class StackUpscaleActionsTest {
     @Mock
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
+    @Mock
+    private StackUpdater stackUpdater;
+
     @InjectMocks
     private StackUpscaleActions underTest;
 
@@ -188,7 +196,7 @@ class StackUpscaleActionsTest {
     void setUp() {
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT),
-                Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
+                Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()), null);
     }
 
     private AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> getPrevalidateAction() {
@@ -229,6 +237,42 @@ class StackUpscaleActionsTest {
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
     }
 
+    private AbstractStackUpscaleAction<StackScaleTriggerEvent> getUpdateDomainDnsResolverAction() {
+        AbstractStackUpscaleAction<StackScaleTriggerEvent> action =
+                (AbstractStackUpscaleAction<StackScaleTriggerEvent>) underTest.updateDomainDnsResolverAction();
+        initActionPrivateFields(action);
+        return action;
+    }
+
+    // Note: this implicitly tests updateDomainDnsResolverAction().prepareExecution() as well.
+    @ParameterizedTest
+    @MethodSource("updateDomainDnsResolverActionProvider")
+    void testUpdateDomainDnsResolverAction(boolean repair, String requestEvent) throws Exception {
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(ADD_INSTANCES_EVENT.event(), STACK_ID, Map.of(), Map.of(), Map.of(), null,
+                adjustmentTypeWithThreshold, "", diskUpdateRequest);
+
+        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT),
+                Map.of(), Map.of(), repair, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()), diskUpdateRequest);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(getUpdateDomainDnsResolverAction()).prepareExecution(payload, new HashMap<>());
+
+        new AbstractActionTestSupport<>(getUpdateDomainDnsResolverAction()).doExecute(context, payload,
+                createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(), NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT));
+
+        verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
+        verify(eventBus).notify(requestEvent, event);
+
+        Object responsePayload = payloadArgumentCaptor.getValue();
+        if ("UPDATEDOMAINDNSRESOLVERRESULT".equals(requestEvent)) {
+            assertThat(responsePayload).isInstanceOf(UpdateDomainDnsResolverResult.class);
+        } else {
+            assertThat(responsePayload).isInstanceOf(UpdateDomainDnsResolverRequest.class);
+        }
+    }
+
     // Note: this implicitly tests getPrevalidateAction().createRequest() as well.
     @Test
     void prevalidateTestDoExecuteWhenScalingNeededAndAllowed() throws Exception {
@@ -243,7 +287,7 @@ class StackUpscaleActionsTest {
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stackDto, Map.of(INSTANCE_GROUP_NAME, 3), Map.of(), false, false,
                 context.getStackNetworkScaleDetails())).thenReturn(updatedStack);
         CloudStack convertedCloudStack = mock(CloudStack.class);
-        when(cloudStackConverter.convert(updatedStack)).thenReturn(convertedCloudStack);
+        when(cloudStackConverter.convert(updatedStack, null)).thenReturn(convertedCloudStack);
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
@@ -301,7 +345,7 @@ class StackUpscaleActionsTest {
     void prevalidateTestDoExecuteWhenScalingNotNeeded() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
-                Map.of(), Map.of(), false, adjustmentTypeWithThreshold);
+                Map.of(), Map.of(), false, adjustmentTypeWithThreshold, null);
         UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
@@ -357,12 +401,20 @@ class StackUpscaleActionsTest {
         );
     }
 
+    static Stream<Arguments> updateDomainDnsResolverActionProvider() {
+        return Stream.of(
+                //Args:   repair, event emitted
+                arguments(Boolean.FALSE, "UPDATEDOMAINDNSRESOLVERREQUEST"),
+                arguments(Boolean.TRUE, "UPDATEDOMAINDNSRESOLVERRESULT")
+        );
+    }
+
     @ParameterizedTest(name = "{0} when availability zone update happened: '{1}' and is repair: '{2}'")
     @MethodSource("addInstancesAvailabilityZonePopulationTestProvider")
     void testAddInstancesDoExecuteWhenAvailabilityZoneConnectorDoesNotPopulate(boolean zoneUpdateHappened, boolean repair) throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
-                Map.of(), Map.of(), repair, adjustmentTypeWithThreshold);
+                Map.of(), Map.of(), repair, adjustmentTypeWithThreshold, null);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, repair)).thenReturn(ADJUSTMENT_ZERO);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
@@ -371,7 +423,7 @@ class StackUpscaleActionsTest {
         when(stackUpgradeService.awsVariantMigrationIsFeasible(any(), anyString())).thenReturn(Boolean.FALSE);
         UpscaleCreateUserdataSecretsSuccess payload = new UpscaleCreateUserdataSecretsSuccess(STACK_ID, List.of(0L, 1L, 2L));
         CloudStack convertedCloudStack = mock(CloudStack.class);
-        when(cloudStackConverter.convert(stackDto)).thenReturn(convertedCloudStack);
+        when(cloudStackConverter.convert(stackDto, null)).thenReturn(convertedCloudStack);
         when(cloudContext.getId()).thenReturn(STACK_ID);
         List<Resource> secretResources = IntStream.range(0, 3).boxed().map(i -> new Resource()).toList();
         when(resourceService.findAllByResourceId(List.of(0L, 1L, 2L))).thenReturn(secretResources);
@@ -496,7 +548,7 @@ class StackUpscaleActionsTest {
             when(instanceGroupService.findAllInstanceGroupViewByStackIdAndGroupName(STACK_ID, Set.of("worker"))).thenReturn(List.of(instanceGroupView));
         }
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(instanceGroupName, ADJUSTMENT),
-                Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
+                Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()), null);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
         new AbstractActionTestSupport<>(getUpdateUserdataSecretsFinishedAction()).doExecute(context, payload, variables);

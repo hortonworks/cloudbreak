@@ -353,7 +353,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
                     scalingGroup.getRootVolumeSize(),
                     scalingGroup.getIdentity(),
                     scalingGroup.getNetwork(),
-                    scalingGroup.getTags()));
+                    scalingGroup.getTags(),
+                    scalingGroup.getRootVolumeType()));
         }
         return groups;
     }

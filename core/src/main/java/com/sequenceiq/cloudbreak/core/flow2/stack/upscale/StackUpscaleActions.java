@@ -149,6 +149,9 @@ public class StackUpscaleActions {
                 variables.put(HOST_GROUP_WITH_ADJUSTMENT, payload.getHostGroupsWithAdjustment());
                 variables.put(HOST_GROUP_WITH_HOSTNAMES, payload.getHostGroupsWithHostNames());
                 variables.put(REPAIR, payload.isRepair());
+                if (payload.getDiskUpdateRequest() != null) {
+                    variables.put(ROOT_DISK_UPDATE_REQUEST, payload.getDiskUpdateRequest());
+                }
                 if (payload.getTriggeredStackVariant() != null) {
                     variables.put(TRIGGERED_VARIANT, payload.getTriggeredStackVariant());
                 }
@@ -205,7 +208,7 @@ public class StackUpscaleActions {
                 Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context, stack);
                 StackDtoDelegate updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, hostGroupWithInstanceCountToCreate,
                         context.getHostgroupWithHostnames(), false, context.isRepair(), context.getStackNetworkScaleDetails());
-                CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
+                CloudStack cloudStack = cloudStackConverter.convert(updatedStack, context.getDiskUpdateRequest());
                 return new UpscaleStackValidationRequest<UpscaleStackValidationResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
         };
@@ -259,7 +262,7 @@ public class StackUpscaleActions {
                 List<CloudResource> resources = resourceService.getAllByStackId(updatedStack.getId()).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
-                CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
+                CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack, context.getDiskUpdateRequest());
                 AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = context.getAdjustmentTypeWithThreshold();
                 if (adjustmentTypeWithThreshold == null) {
                     Integer exactNumber = hostGroupWithInstanceCountToCreate.values().stream().reduce(0, Integer::sum);

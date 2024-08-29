@@ -69,7 +69,8 @@ public class CloudFormationTemplateBuilder {
                     getInstanceProfile(group),
                     awsInstanceView.getOnDemandPercentage(),
                     awsInstanceView.getSpotMaxPrice(),
-                    awsInstanceView.getPlacementGroupStrategy().name());
+                    awsInstanceView.getPlacementGroupStrategy().name(),
+                    group.getRootVolumeType() != null ? group.getRootVolumeType() : AwsDiskType.Gp3.value());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

@@ -229,7 +229,8 @@ public class MockResourceConnector implements ResourceConnector {
                             g.getRootVolumeSize(),
                             g.getIdentity(),
                             g.getNetwork(),
-                            g.getTags());
+                            g.getTags(),
+                            null);
                 }).collect(Collectors.toList());
 
         List<CloudVmInstanceStatus> resized = resize(authenticatedContext, groups);

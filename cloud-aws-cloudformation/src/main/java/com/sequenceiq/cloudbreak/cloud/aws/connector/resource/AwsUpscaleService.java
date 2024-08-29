@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,10 +21,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.AutoScalingGroupHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsSyncUserDataService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
@@ -52,6 +56,8 @@ import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import software.amazon.awssdk.services.autoscaling.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceStateName;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateEbsBlockDevice;
 
 @Service
 public class AwsUpscaleService {
@@ -98,6 +104,12 @@ public class AwsUpscaleService {
     @Inject
     private PersistenceNotifier resourceNotifier;
 
+    @Inject
+    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
+
+    @Inject
+    private AutoScalingGroupHandler autoScalingGroupHandler;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         LOGGER.info("Upscale AWS cluster with adjustment and threshold: {}. Resources: {}", adjustmentTypeWithThreshold, resources);
@@ -110,6 +122,7 @@ public class AwsUpscaleService {
         syncUserDataService.syncUserData(ac, stack, resources);
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
         Map<String, Group> desiredAutoscalingGroupsByName = getAutoScaleGroupsByNameFromCloudFormationTemplate(ac, cloudFormationClient, scaledGroups);
+        updateLauchTemplateOfAutoscalingGroup(cloudFormationClient, amazonASClient, ac, stack, amazonEC2Client);
         LOGGER.info("Desired autoscaling groups: {}", desiredAutoscalingGroupsByName);
         awsAutoScalingService.resumeAutoScaling(amazonASClient, desiredAutoscalingGroupsByName.keySet(), UPSCALE_PROCESSES);
         Map<String, Integer> originalAutoScalingGroupsBySize = getAutoScalingGroupsBySize(desiredAutoscalingGroupsByName.keySet(), amazonASClient);
@@ -363,10 +376,40 @@ public class AwsUpscaleService {
 
             return new Group(group.getName(), group.getType(), newInstances, group.getSecurity(), null, group.getParameters(),
                     group.getInstanceAuthentication(), group.getLoginUserName(),
-                    group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity(), group.getNetwork(), group.getTags());
+                    group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity(), group.getNetwork(), group.getTags(),
+                    group.getRootVolumeType());
         }).collect(Collectors.toList());
         LOGGER.debug("Collected groups with new instances: {}", collectedGroupsWithNewInstances);
         return collectedGroupsWithNewInstances;
+    }
+
+    private void updateLauchTemplateOfAutoscalingGroup(AmazonCloudFormationClient cloudFormationClient, AmazonAutoScalingClient autoScalingClient,
+            AuthenticatedContext ac, CloudStack stack, AmazonEc2Client ec2Client) {
+        Map<String, Group> groupByName = stack.getGroups().stream().collect(Collectors.toMap(Group::getName, group -> group));
+        Map<String, AutoScalingGroup> autoScalingGroupMap = autoScalingGroupHandler
+                .autoScalingGroupByName(cloudFormationClient, autoScalingClient, cfStackUtil.getCfStackName(ac));
+        for (String groupName : groupByName.keySet()) {
+            Group group = groupByName.get(groupName);
+            Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, String.valueOf(group.getRootVolumeSize()),
+                    LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType());
+            Optional<AutoScalingGroup> autoScalingGroupOptional = autoScalingGroupMap.keySet().stream().filter(key -> key.contains(groupName))
+                    .map(autoScalingGroupMap::get).findFirst();
+            if (autoScalingGroupOptional.isPresent()) {
+                AutoScalingGroup autoScalingGroup = autoScalingGroupOptional.get();
+                List<LaunchTemplateBlockDeviceMapping> currentBlockDeviceMappings =
+                        awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(ac, autoScalingGroup);
+                boolean updateLaunchTemplate = false;
+                for (LaunchTemplateBlockDeviceMapping bdm : currentBlockDeviceMappings) {
+                    if (bdm.ebs() != null) {
+                        LaunchTemplateEbsBlockDevice ebs = bdm.ebs();
+                        updateLaunchTemplate = ebs.volumeSize() != group.getRootVolumeSize() || !ebs.volumeTypeAsString().equals(group.getRootVolumeType());
+                    }
+                }
+                if (updateLaunchTemplate) {
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, false, autoScalingClient, ec2Client, autoScalingGroup, stack);
+                }
+            }
+        }
     }
 
 }

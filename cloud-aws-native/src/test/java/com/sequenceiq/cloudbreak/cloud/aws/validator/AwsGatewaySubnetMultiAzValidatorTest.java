@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
@@ -151,6 +152,7 @@ class AwsGatewaySubnetMultiAzValidatorTest {
                 100,
                 empty(),
                 groupNetwork,
-                emptyMap());
+                emptyMap(),
+                AwsDiskType.Gp3.value());
     }
 }

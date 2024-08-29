@@ -32,6 +32,8 @@ import org.mockito.stubbing.OngoingStubbing;
 
 import com.azure.resourcemanager.compute.models.Disk;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -73,6 +76,9 @@ class AzureResourceVolumeConnectorTest {
 
     @Mock
     private AzureResourceNameService resourceNameService;
+
+    @Mock
+    private AzureCloudResourceService azureCloudResourceService;
 
     @Test
     void testUpdateDiskVolumes() {
@@ -317,6 +323,22 @@ class AzureResourceVolumeConnectorTest {
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> underTest.attachVolumes(authenticatedContext, resources, cloudStack));
         assertEquals("TEST", exception.getMessage());
+    }
+
+    @Test
+    void testGetRootVolumes() throws Exception {
+        Group group = mock(Group.class);
+        CloudResource cloudResource = mock(CloudResource.class);
+        List<CloudResource> cloudResourceList = List.of(cloudResource);
+        AzureClient azureClient = mock(AzureClient.class);
+        when(authenticatedContext.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
+        String resourceGroupName = "test-resource-group";
+        when(azureCloudResourceService.getAttachedOsDiskResources(cloudResourceList, resourceGroupName, azureClient)).thenReturn(cloudResourceList);
+        RootVolumeFetchDto rootVolumeFetchDto = new RootVolumeFetchDto(authenticatedContext, group, resourceGroupName, cloudResourceList);
+
+        List<CloudResource> result = underTest.getRootVolumes(rootVolumeFetchDto);
+        assertEquals(cloudResourceList, result);
+        verify(azureCloudResourceService).getAttachedOsDiskResources(cloudResourceList, resourceGroupName, azureClient);
     }
 
     private CloudResource getCloudResource(String groupName, String instanceName) {

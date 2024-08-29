@@ -138,7 +138,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         LOGGER.info("Variables in AbstractStackDownscaleAction: {}", variables);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                 hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostgroupsWithHostnames, repair,
-                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null));
+                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null), null);
     }
 
     private Map<String, Set<Long>> createHostGroupsWithPrivateIdsFromUnusedPrivateIds(List<InstanceGroupDto> instanceGroupDtos,
@@ -180,7 +180,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         Map<String, Set<String>> hostgroupWithHostnames = getHostGroupWithHostnames(stack.getId(), variables);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                 hostGroupWithAdjustment, hostGroupWithPrivateIds, hostgroupWithHostnames, isRepair(variables),
-                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null));
+                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null), null);
     }
 
     @Override

@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(SpringExtension.class)
     @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
@@ -139,9 +140,11 @@ public class AwsStorageValidatorsTest {
         CloudInstance noStorageInstance = new CloudInstance("", noStorageTemplate, null, "subnet-1", "az1");
         CloudInstance storageInstance = new CloudInstance("", storageTemplate, null, "subnet-1", "az1");
         Group noStoragegroup = new Group("worker", InstanceGroupType.CORE,
-                List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
+                List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap(),
+                AwsDiskType.Gp3.value());
         Group storageGroup = new Group("compute", InstanceGroupType.CORE,
-                List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
+                List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap(),
+                AwsDiskType.Gp3.value());
         CloudStack cloudStack = CloudStack.builder()
                 .groups(List.of(noStoragegroup, storageGroup))
                 .build();

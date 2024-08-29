@@ -37,7 +37,12 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     @Override
     public List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
-        return azureClientActions.getSelectedInstancesVolumeIds(clusterName, instanceIds);
+        return azureClientActions.getSelectedInstancesVolumeIds(clusterName, instanceIds, false);
+    }
+
+    @Override
+    public List<String> listInstancesRootVolumeIds(String clusterName, List<String> instanceIds) {
+        return azureClientActions.getSelectedInstancesVolumeIds(clusterName, instanceIds, true);
     }
 
     @Override

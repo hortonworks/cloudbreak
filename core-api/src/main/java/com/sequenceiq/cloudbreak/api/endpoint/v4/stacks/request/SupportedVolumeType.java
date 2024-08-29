@@ -4,5 +4,8 @@ public enum SupportedVolumeType {
     STANDARD,
     GP2,
     GP3,
-    ST1;
+    ST1,
+    STANDARDSSD_LRS,
+    PREMIUM_LRS,
+    STANDARD_GRS;
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -21,10 +22,13 @@ public class DistroXDiskUpdateAction implements Action<DistroXTestDto, Cloudbrea
 
     private String instanceGroup;
 
-    public DistroXDiskUpdateAction(int size, String volumeType, String instanceGroup) {
+    private DiskType diskType;
+
+    public DistroXDiskUpdateAction(int size, String volumeType, String instanceGroup, DiskType diskType) {
         this.size = size;
         this.volumeType = volumeType;
         this.instanceGroup = instanceGroup;
+        this.diskType = diskType != null ? diskType : DiskType.ADDITIONAL_DISK;
     }
 
     @Override
@@ -35,10 +39,18 @@ public class DistroXDiskUpdateAction implements Action<DistroXTestDto, Cloudbrea
         diskUpdateRequest.setGroup(instanceGroup);
         diskUpdateRequest.setSize(size);
         diskUpdateRequest.setVolumeType(volumeType);
+        diskUpdateRequest.setDiskType(diskType);
         Log.whenJson(LOGGER, "DistroX Disk Update request: ", diskUpdateRequest);
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
-                .distroXV1Endpoint()
-                .diskUpdateByName(testDto.getName(), diskUpdateRequest);
+        FlowIdentifier flowIdentifier;
+        if (DiskType.ADDITIONAL_DISK.equals(diskType)) {
+            flowIdentifier = client.getDefaultClient()
+                    .distroXV1Endpoint()
+                    .diskUpdateByName(testDto.getName(), diskUpdateRequest);
+        } else {
+            flowIdentifier = client.getDefaultClient()
+                    .distroXV1Endpoint()
+                    .updateRootVolumeByDatahubName(testDto.getName(), diskUpdateRequest);
+        }
         testDto.setFlow("DistroX Disk Update Flow", flowIdentifier);
         Log.whenJson(LOGGER, "DistroX Disk Update Flow: ", flowIdentifier);
         return testDto;

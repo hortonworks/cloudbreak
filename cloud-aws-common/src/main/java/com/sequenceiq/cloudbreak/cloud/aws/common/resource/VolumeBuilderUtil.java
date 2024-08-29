@@ -82,7 +82,7 @@ public class VolumeBuilderUtil {
     }
 
     public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group, String accountId) {
-        String volumeType = AwsDiskType.Gp3.value();
+        String volumeType = group.getRootVolumeType() != null ? group.getRootVolumeType() : AwsDiskType.Gp3.value();
         int rootVolumeSize = group.getRootVolumeSize();
 
         LOGGER.debug("AwsInstanceView: {},  root volume type: {}, size: {}", awsInstanceView, volumeType, rootVolumeSize);

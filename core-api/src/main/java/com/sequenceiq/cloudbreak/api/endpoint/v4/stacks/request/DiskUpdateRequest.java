@@ -24,6 +24,9 @@ public class DiskUpdateRequest implements JsonEntity {
     @Schema(description = "Group being updated", required = true)
     private String group;
 
+    @Schema(description = "Type of disk being updated")
+    private DiskType diskType;
+
     public String getVolumeType() {
         return volumeType;
     }
@@ -48,11 +51,20 @@ public class DiskUpdateRequest implements JsonEntity {
         this.group = group;
     }
 
+    public DiskType getDiskType() {
+        return diskType;
+    }
+
+    public void setDiskType(DiskType diskType) {
+        this.diskType = diskType;
+    }
+
     public String toString() {
         return new StringJoiner(", ", DiskUpdateRequest.class.getSimpleName() + "[", "]")
                 .add("volumeType=" + volumeType)
                 .add("size=" + size)
                 .add("group=" + group)
+                .add("diskType=" + diskType)
                 .toString();
     }
 }

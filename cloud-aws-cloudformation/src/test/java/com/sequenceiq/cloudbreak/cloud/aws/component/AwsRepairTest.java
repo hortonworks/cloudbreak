@@ -43,7 +43,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.AutoScalingGroupHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsSyncUserDataService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
@@ -233,6 +235,12 @@ public class AwsRepairTest {
 
     @MockBean
     private S3ExpressBucketNameValidator s3ExpressBucketNameValidator;
+
+    @MockBean
+    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
+
+    @MockBean
+    private AutoScalingGroupHandler autoScalingGroupHandler;
 
     @Test
     public void repairStack() throws Exception {

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,13 +52,16 @@ import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequ
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappingRequest;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateEbsBlockDevice;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
 import software.amazon.awssdk.services.ec2.model.ResponseLaunchTemplateData;
 import software.amazon.awssdk.services.ec2.model.ValidationError;
 import software.amazon.awssdk.services.ec2.model.ValidationWarning;
+import software.amazon.awssdk.services.ec2.model.VolumeType;
 
 @ExtendWith(MockitoExtension.class)
 class AwsLaunchTemplateUpdateServiceTest {
@@ -294,6 +298,37 @@ class AwsLaunchTemplateUpdateServiceTest {
         when(ec2Client.describeLaunchTemplateVersions(any())).thenReturn(ltvResponse);
         String result = underTest.getUserDataFromAutoScalingGroup(ac, asg);
         assertThat(result).isNull();
+    }
+
+    @Test
+    void testGetBlockDeviceMappingFromAutoScalingGroup() {
+        LaunchTemplateSpecification launchTemplateSpecification = LaunchTemplateSpecification.builder().launchTemplateId("1").launchTemplateName("lt").build();
+        AutoScalingGroup asg = AutoScalingGroup.builder().autoScalingGroupName("master").launchTemplate(launchTemplateSpecification).build();
+        LaunchTemplateBlockDeviceMapping blockDeviceMapping = LaunchTemplateBlockDeviceMapping.builder().ebs(LaunchTemplateEbsBlockDevice.builder()
+                .volumeSize(20).volumeType(VolumeType.GP2).build()).build();
+        LaunchTemplateVersion lt = LaunchTemplateVersion.builder()
+                .launchTemplateId(LAUNCH_TEMPLATE_ID)
+                .versionNumber(Long.valueOf(LAUNCH_TEMPLATE_VERSION))
+                .launchTemplateData(ResponseLaunchTemplateData.builder()
+                        .userData(USERDATA_B64)
+                        .blockDeviceMappings(blockDeviceMapping)
+                        .build())
+                .build();
+        DescribeLaunchTemplateVersionsResponse ltvResponse = DescribeLaunchTemplateVersionsResponse.builder().launchTemplateVersions(lt).build();
+        when(ec2Client.describeLaunchTemplateVersions(any())).thenReturn(ltvResponse);
+        List<LaunchTemplateBlockDeviceMapping> result = underTest.getBlockDeviceMappingFromAutoScalingGroup(ac, asg);
+        assertEquals(List.of(blockDeviceMapping), result);
+    }
+
+    @Test
+    void testGetBlockDeviceMappingFromAutoScalingGroupNull() {
+        LaunchTemplateSpecification launchTemplateSpecification = LaunchTemplateSpecification.builder().launchTemplateId("1").launchTemplateName("lt").build();
+        AutoScalingGroup asg = AutoScalingGroup.builder().autoScalingGroupName("master").launchTemplate(launchTemplateSpecification).build();
+        List<LaunchTemplateVersion> lt = new ArrayList<>();
+        DescribeLaunchTemplateVersionsResponse ltvResponse = DescribeLaunchTemplateVersionsResponse.builder().launchTemplateVersions(lt).build();
+        when(ec2Client.describeLaunchTemplateVersions(any())).thenReturn(ltvResponse);
+        List<LaunchTemplateBlockDeviceMapping> result = underTest.getBlockDeviceMappingFromAutoScalingGroup(ac, asg);
+        assertNull(result);
     }
 
     private Map<AutoScalingGroup, String> createAutoScalingGroupHandler() {
