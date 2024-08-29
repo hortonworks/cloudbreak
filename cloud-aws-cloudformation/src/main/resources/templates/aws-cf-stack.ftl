@@ -275,6 +275,17 @@
       "Properties" : {
         "IpAddressType" : "ipv4",
         "Scheme" : "${loadBalancer.awsScheme}",
+        "SecurityGroups" : [
+        <#list gatewayGroups as group>
+          <#if group.cloudSecurityIds?size != 0>
+            <#list group.cloudSecurityIds as securityGroupId>
+              "${securityGroupId}"<#sep>,
+            </#list>
+          <#else>
+            { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } <#sep>,
+          </#if>
+        </#list>
+        ],
         "Subnets" : [
           <#list loadBalancer.subnetIds as subnetId>
           "${subnetId}"<#sep>,

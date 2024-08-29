@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
@@ -278,7 +278,7 @@ public class AwsLoadBalancerLaunchService {
 
     @VisibleForTesting
     boolean checkForLoadBalancerAndTargetGroupResources(AmazonCloudFormationClient cfClient, String cFStackName,
-            List<AwsLoadBalancer> awsLoadBalancers) {
+        List<AwsLoadBalancer> awsLoadBalancers) {
         ListStackResourcesResponse result = cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
 
         boolean resourcesFound = true;

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.dto;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -238,6 +239,14 @@ public interface StackDtoDelegate {
 
     default DatabaseAvailabilityType getExternalDatabaseCreationType() {
         return getDatabase().getExternalDatabaseAvailabilityType();
+    }
+
+    default List<String> getKnoxSecurityGroups() {
+        return getInstanceGroupDtos().stream()
+                .filter(e -> GATEWAY.equals(e.getInstanceGroup().getInstanceGroupType()))
+                .map(e -> e.getInstanceGroup().getSecurityGroup().getSecurityGroupIds())
+                .flatMap(Set::stream)
+                .collect(Collectors.toList());
     }
 
     default String getExternalDatabaseEngineVersion() {

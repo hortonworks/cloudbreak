@@ -103,6 +103,9 @@ public class AwsNativeLoadBalancerLaunchService {
     @Inject
     private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
 
+    @Inject
+    private AwsNativeLoadBalancerSecurityGroupProvider awsNativeLoadBalancerSecurityGroupProvider;
+
     public List<CloudResourceStatus> launchLoadBalancerResources(AuthenticatedContext authenticatedContext, CloudStack stack,
             PersistenceNotifier persistenceNotifier, AmazonElasticLoadBalancingClient loadBalancingClient, boolean registerTargetGroups) {
         LOGGER.debug("Creating AWS load balancer and it's resources for cloud stack: '{}'", authenticatedContext.getCloudContext().getCrn());
@@ -120,9 +123,7 @@ public class AwsNativeLoadBalancerLaunchService {
                 authenticatedContext.getCloudContext());
         try {
             for (AwsLoadBalancer awsLoadBalancer : loadBalancers) {
-
-                createLoadBalancer(creationContext, awsLoadBalancer);
-
+                createLoadBalancer(creationContext, awsLoadBalancer, stack);
                 if (registerTargetGroups) {
                     for (AwsListener listener : awsLoadBalancer.getListeners()) {
                         AwsTargetGroup targetGroup = listener.getTargetGroup();
@@ -145,7 +146,7 @@ public class AwsNativeLoadBalancerLaunchService {
         return creationContext.getResourceStatuses();
     }
 
-    private void createLoadBalancer(ResourceCreationContext context, AwsLoadBalancer awsLoadBalancer) {
+    private void createLoadBalancer(ResourceCreationContext context, AwsLoadBalancer awsLoadBalancer, CloudStack stack) {
         CloudResource loadBalancerResource;
         AwsLoadBalancerScheme scheme = awsLoadBalancer.getScheme();
         String loadBalancerResourceTypeAndSchemePart = resourceNameService.loadBalancerResourceTypeAndSchemeNamePart(scheme.resourceName());
@@ -173,6 +174,7 @@ public class AwsNativeLoadBalancerLaunchService {
                     .type(LoadBalancerTypeEnum.NETWORK)
                     .ipAddressType(IpAddressType.IPV4)
                     .tags(context.getTags())
+                    .securityGroups(awsNativeLoadBalancerSecurityGroupProvider.getSecurityGroups(context.getStackId(), stack))
                     .build();
             CreateLoadBalancerResponse loadBalancerResponse = createOrGetLoadBalancer(context, request);
             loadBalancerArn = loadBalancerResponse.loadBalancers()

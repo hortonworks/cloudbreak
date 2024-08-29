@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
+package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;

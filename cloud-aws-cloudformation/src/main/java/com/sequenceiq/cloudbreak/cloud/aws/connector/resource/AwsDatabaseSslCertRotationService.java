@@ -32,7 +32,7 @@ import software.amazon.awssdk.services.rds.waiters.RdsWaiter;
 @Service
 public class AwsDatabaseSslCertRotationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsLoadBalancerLaunchService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsDatabaseSslCertRotationService.class);
 
     private static final String ACCESS_DENIED = "AccessDenied";
 

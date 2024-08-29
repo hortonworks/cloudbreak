@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -148,6 +149,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
     @Mock
     private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
+
+    @Mock
+    private AwsNativeLoadBalancerSecurityGroupProvider awsNativeLoadBalancerSecurityGroupProvider;
 
     @InjectMocks
     private AwsNativeLoadBalancerLaunchService underTest;
@@ -643,6 +647,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateListenerResponse createListenerResponse = CreateListenerResponse.builder().listeners(listener).build();
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResponse);
         when(loadBalancingClient.registerTargets(any())).thenReturn(RegisterTargetsResponse.builder().build());
+        when(awsNativeLoadBalancerSecurityGroupProvider.getSecurityGroups(anyLong(), any()))
+                .thenReturn(List.of());
 
         List<CloudResourceStatus> statuses = underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
                 true);

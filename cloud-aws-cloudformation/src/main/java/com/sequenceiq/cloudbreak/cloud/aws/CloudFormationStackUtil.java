@@ -56,7 +56,6 @@ import software.amazon.awssdk.services.cloudformation.model.DescribeStacksReques
 import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRequest;
 import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
 import software.amazon.awssdk.services.cloudformation.model.Output;
-import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
@@ -112,17 +111,31 @@ public class CloudFormationStackUtil {
             backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
     public List<String> getLoadbalancersArns(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient) {
-        String cFStackName = getCfStackName(ac);
-        ListStackResourcesResponse listStackResourcesResponse = amazonCFClient.listStackResources(ListStackResourcesRequest.builder()
-                .stackName(cFStackName)
-                .build());
-        List<StackResourceSummary> summaries = listStackResourcesResponse.stackResourceSummaries();
-        List<StackResourceSummary> loadBalancerSummary = summaries.stream()
-                .filter(stackResourceSummary -> stackResourceSummary.resourceType().equals("AWS::ElasticLoadBalancingV2::LoadBalancer"))
-                .collect(Collectors.toList());
-        return loadBalancerSummary.stream()
+        return collectResources(ac, amazonCFClient, "AWS::ElasticLoadBalancingV2::LoadBalancer");
+    }
+
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+    )
+    public List<String> getSecurityGroupIds(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient) {
+        return collectResources(ac, amazonCFClient, "AWS::EC2::SecurityGroup");
+    }
+
+    private List<String> collectResources(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient, String anObject) {
+        return getListStackResourcesResponse(ac, amazonCFClient)
+                .stackResourceSummaries()
+                .stream()
+                .filter(stackResourceSummary -> stackResourceSummary.resourceType().equals(anObject))
                 .map(e -> e.physicalResourceId())
                 .collect(Collectors.toList());
+    }
+
+    private ListStackResourcesResponse getListStackResourcesResponse(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient) {
+        return amazonCFClient.listStackResources(ListStackResourcesRequest.builder()
+                .stackName(getCfStackName(ac))
+                .build());
     }
 
     public Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationClient client) {

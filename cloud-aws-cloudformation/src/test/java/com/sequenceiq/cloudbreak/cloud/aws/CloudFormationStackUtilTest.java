@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +40,10 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceRequest;
 import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceResponse;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
 import software.amazon.awssdk.services.cloudformation.model.StackResourceDetail;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
@@ -84,13 +89,12 @@ public class CloudFormationStackUtilTest {
 
         //init real default value
         ReflectionTestUtils.setField(underTest, "maxResourceNameLength", 200);
-        when(loadBalancerTypeConverter.convert((LoadBalancerType) any())).thenCallRealMethod();
-
     }
 
     @Test
     void testAddLoadBalancerDoNotAddComputeGroup() {
         when(gatewayGroup.getName()).thenReturn("gateway");
+        when(loadBalancerTypeConverter.convert((LoadBalancerType) any())).thenCallRealMethod();
 
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(elbClient);
 
@@ -129,8 +133,28 @@ public class CloudFormationStackUtilTest {
     }
 
     @Test
+    void testGetSecurityGroupIds() {
+        List<StackResourceSummary> summaries = new ArrayList<>();
+        summaries.add(StackResourceSummary.builder()
+                .resourceType("AWS::EC2::SecurityGroup")
+                .physicalResourceId("sgId")
+                .build());
+
+        ListStackResourcesResponse response = ListStackResourcesResponse.builder().stackResourceSummaries(summaries).build();
+
+        when(cfClient.listStackResources(any(ListStackResourcesRequest.class))).thenReturn(response);
+
+        List<String> securityGroupIds = underTest.getSecurityGroupIds(authenticatedContext, cfClient);
+
+        assertEquals(1, securityGroupIds.size());
+        assertTrue(securityGroupIds.contains("sgId"));
+        verify(cfClient, times(1)).listStackResources(any(ListStackResourcesRequest.class));
+    }
+
+    @Test
     void testAddLoadBalancerOnlyAddsGatewayGroup() {
         when(gatewayGroup.getName()).thenReturn("gateway");
+        when(loadBalancerTypeConverter.convert((LoadBalancerType) any())).thenCallRealMethod();
 
         when(awsClient.createElasticLoadBalancingClient(any(), any())).thenReturn(elbClient);
 
@@ -169,6 +193,6 @@ public class CloudFormationStackUtilTest {
 
         verify(elbClient, times(1)).registerTargets(captor.capture());
         List<TargetDescription> targets = captor.getValue().targets();
-        Assertions.assertEquals(cloudResource.getInstanceId(), targets.get(0).id());
+        assertEquals(cloudResource.getInstanceId(), targets.get(0).id());
     }
 }
