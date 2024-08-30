@@ -359,6 +359,7 @@ class FlowLogDBServiceTest {
         verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
         verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL, 123456789L, REASON);
         verify(flowLogRepository).save(savedFlowLogCaptor.capture());
+        verify(flowLogRepository, times(1)).updateStateStatusToSuccessfulForPendingItemsByFlowId(eq(FLOW_ID));
     }
 
     private FlowLog createFlowLog(boolean pending, String flowId) {

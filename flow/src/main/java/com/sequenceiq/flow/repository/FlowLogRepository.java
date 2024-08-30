@@ -57,6 +57,10 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("UPDATE FlowLog fl SET fl.finalized = true WHERE fl.flowId = :flowId")
     void finalizeByFlowId(@Param("flowId") String flowId);
 
+    @Modifying
+    @Query("UPDATE FlowLog fl SET fl.stateStatus = 'SUCCESSFUL' WHERE fl.flowId = :flowId AND fl.stateStatus = 'PENDING'")
+    void updateStateStatusToSuccessfulForPendingItemsByFlowId(@Param("flowId") String flowId);
+
     @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId = :cloudbreakNodeId AND fl.stateStatus = 'PENDING'")
     Set<FlowLog> findAllByCloudbreakNodeId(@Param("cloudbreakNodeId") String cloudbreakNodeId);
 

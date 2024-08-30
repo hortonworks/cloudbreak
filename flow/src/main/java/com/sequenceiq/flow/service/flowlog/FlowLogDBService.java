@@ -154,7 +154,9 @@ public class FlowLogDBService implements FlowLogService {
             flowLog.setReason(reason);
             flowLog.setEndTime(flowLog.getCreated());
             LOGGER.info("Persisting final FlowLog: {}", flowLog);
-            return flowLogRepository.save(flowLog);
+            FlowLog finalFlowLog = flowLogRepository.save(flowLog);
+            flowLogRepository.updateStateStatusToSuccessfulForPendingItemsByFlowId(flowId);
+            return finalFlowLog;
         });
     }
 
