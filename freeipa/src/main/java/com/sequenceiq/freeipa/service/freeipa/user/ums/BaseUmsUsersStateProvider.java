@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
@@ -59,30 +61,34 @@ public class BaseUmsUsersStateProvider {
 
     Set<String> addWagsToUsersStateBuilder(
             UsersState.Builder builder,
-            Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags,
+            Map<WorkloadAdministrationGroup, FmsGroup> environmentWags,
             String environmentCrn) {
         Set<String> wagNamesForOtherEnvironments = new HashSet<>();
         // Only add workload admin groups that belong to this environment.
         // At the same time, build a set of workload admin groups that are
         // associated with other environments so we can filter these out in
         // the per-user group listing in handleUser.
-        wags.entrySet().forEach(wagEntry -> {
-            UserManagementProto.WorkloadAdministrationGroup wag = wagEntry.getKey();
-            String groupName = wag.getWorkloadAdministrationGroupName();
+
+        environmentWags.forEach((wag, value) -> {
             if (wag.getResource().equalsIgnoreCase(environmentCrn)) {
-                builder.addGroup(wagEntry.getValue());
+                builder.addGroup(value);
             } else {
-                Crn resourceCrn = getCrn(wag);
-                if (resourceCrn != null && resourceCrn.getService() == Crn.Service.ENVIRONMENTS
-                        && resourceCrn.getResourceType() == Crn.ResourceType.ENVIRONMENT) {
-                    wagNamesForOtherEnvironments.add(groupName);
-                }
+                wagNamesForOtherEnvironments.add(wag.getWorkloadAdministrationGroupName());
             }
         });
         return wagNamesForOtherEnvironments;
     }
 
-    private Crn getCrn(UserManagementProto.WorkloadAdministrationGroup wag) {
+    public Map<WorkloadAdministrationGroup, FmsGroup> filterEnvironmentWags(Map<WorkloadAdministrationGroup, FmsGroup> wags) {
+        List<WorkloadAdministrationGroup> environmentWagEntries = new LinkedList<>();
+        return wags.entrySet().stream().filter(entry -> entry.getKey().getResource().contains("environments")).filter(entry -> {
+            Crn resourceCrn = getCrn(entry.getKey());
+            return resourceCrn != null && resourceCrn.getService() == Crn.Service.ENVIRONMENTS
+                    && resourceCrn.getResourceType() == Crn.ResourceType.ENVIRONMENT;
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Crn getCrn(WorkloadAdministrationGroup wag) {
         Crn resourceCrn = null;
         try {
             resourceCrn = Crn.fromString(wag.getResource());

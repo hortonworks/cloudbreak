@@ -63,6 +63,7 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
 
         Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(grpcUmsClient.listAllGroups(accountId));
         Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags = convertWagsToFmsGroups(grpcUmsClient.listWorkloadAdministrationGroups(accountId));
+        Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> environmentWags = filterEnvironmentWags(wags);
         List<String> requestedWorkloadUsernames = Streams.concat(
                 users.stream().map(UserManagementProto.User::getWorkloadUsername),
                 machineUsers.stream().map(UserManagementProto.MachineUser::getWorkloadUsername))
@@ -77,7 +78,7 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
             addRequestedWorkloadUsernames(umsUsersStateBuilder, requestedWorkloadUsernames);
             addGroupsToUsersStateBuilder(usersStateBuilder, crnToFmsGroup.values());
             Set<String> wagNamesForOtherEnvironments =
-                    addWagsToUsersStateBuilder(usersStateBuilder, wags, environmentCrn);
+                    addWagsToUsersStateBuilder(usersStateBuilder, environmentWags, environmentCrn);
 
             ActorHandler actorHandler = ActorHandler.newBuilder()
                     .withFmsGroupConverter(getFmsGroupConverter())

@@ -55,6 +55,7 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
         Map<String, FmsGroup> groups = convertGroupsToFmsGroups(userSyncStateModel.getGroupList());
         Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags =
                 convertWagsToFmsGroups(userSyncStateModel.getWorkloadAdministrationGroupList());
+        Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> environmentWags = filterEnvironmentWags(wags);
         List<String> requestedWorkloadUsernames = userSyncStateModel.getActorList().stream()
                 .map(UserManagementProto.UserSyncActor::getActorDetails)
                 .map(UserManagementProto.UserSyncActorDetails::getWorkloadUsername)
