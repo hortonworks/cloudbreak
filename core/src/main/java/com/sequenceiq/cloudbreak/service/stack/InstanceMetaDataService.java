@@ -149,7 +149,7 @@ public class InstanceMetaDataService {
                             ? multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroupDto, subnetAzPairs)
                             : subnetAzPairs;
                     prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroupDto, instanceMetaData, filteredSubnetsByLeastUsedAz, stackSubnetId,
-                            stackAz, networkScaleDetails);
+                            stackAz, networkScaleDetails, stack.getStack());
                     if (save) {
                         repository.save(instanceMetaData);
                     }
@@ -211,6 +211,8 @@ public class InstanceMetaDataService {
             return ResourceType.AWS_VOLUMESET;
         } else if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
             return ResourceType.AZURE_VOLUMESET;
+        } else if (CloudPlatform.GCP.equalsIgnoreCase(stack.getCloudPlatform())) {
+            return ResourceType.GCP_ATTACHED_DISKSET;
         }
         LOGGER.debug("Cloudbreak does not support the disk re-attachment for {}", stack.getCloudPlatform());
         return null;
@@ -241,11 +243,13 @@ public class InstanceMetaDataService {
     }
 
     private void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(InstanceGroupDto instanceGroup, InstanceMetaData instanceMetaData,
-            Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz, NetworkScaleDetails networkScaleDetails) {
+            Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz, NetworkScaleDetails networkScaleDetails, StackView stackView) {
         multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup, instanceMetaData, networkScaleDetails);
         if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
             instanceMetaData.setSubnetId(stackSubnetId);
-            instanceMetaData.setAvailabilityZone(stackAz);
+            if (multiAzCalculatorService.isSubnetAzNeeded(stackView.isMultiAz(), stackView.getCloudPlatform())) {
+                instanceMetaData.setAvailabilityZone(stackAz);
+            }
         }
         instanceMetaData.setRackId(multiAzCalculatorService.determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
     }

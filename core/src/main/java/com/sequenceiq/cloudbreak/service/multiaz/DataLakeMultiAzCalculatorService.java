@@ -49,7 +49,7 @@ public class DataLakeMultiAzCalculatorService {
                 LOGGER.info("Calculating multiAZ to {}", instanceGroup.getGroupName());
                 multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup.getInstanceGroupNetwork(),
                         instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
-                multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
+                multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup, stack);
             }
         }
         Optional<InstanceGroup> auxiliaryHostGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.AUXILIARY);
@@ -65,9 +65,9 @@ public class DataLakeMultiAzCalculatorService {
             LOGGER.info("Calculation being done for Auxiliary/Master");
             multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroupNetwork.get(), mergedInstanceMetaData);
             auxiliaryHostGroup.ifPresent(instanceGroup ->
-                    multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup));
+                    multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup, stack));
             masterHostGroup.ifPresent(instanceGroup ->
-                    multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup));
+                    multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup, stack));
         }
     }
 

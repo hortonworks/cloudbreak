@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -176,6 +177,8 @@ public class DataLakeMultiAzCalculatorServiceTest {
         dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, "sub1", "az-1");
         capture = ArgumentCaptor.forClass(Set.class);
         verify(multiAzCalculatorService, times(4)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
+        verify(multiAzCalculatorService, times(4)).prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(eq("sub1"),
+                eq("az-1"), any(InstanceGroup.class), eq(stack));
         reset(dataLakeMultiAzCalculatorService);
         reset(multiAzCalculatorService);
 
@@ -183,6 +186,8 @@ public class DataLakeMultiAzCalculatorServiceTest {
         dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, "sub1", "az-1");
         capture = ArgumentCaptor.forClass(Set.class);
         verify(multiAzCalculatorService, times(3)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
+        verify(multiAzCalculatorService, times(4)).prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(eq("sub1"),
+                eq("az-1"), any(InstanceGroup.class), eq(stack));
         reset(dataLakeMultiAzCalculatorService);
         reset(multiAzCalculatorService);
 
@@ -190,6 +195,8 @@ public class DataLakeMultiAzCalculatorServiceTest {
         dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, "sub1", "az-1");
         capture = ArgumentCaptor.forClass(Set.class);
         verify(multiAzCalculatorService, times(3)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
+        verify(multiAzCalculatorService, times(3)).prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(eq("sub1"),
+                eq("az-1"), any(InstanceGroup.class), eq(stack));
 
     }
 

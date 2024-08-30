@@ -34,6 +34,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
@@ -62,6 +64,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class InstanceMetaDataServiceTest {
 
     private static final int INSTANCE_GROUP_COUNT = 1;
@@ -143,6 +146,7 @@ class InstanceMetaDataServiceTest {
             return null;
         }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
+        when(multiAzCalculatorService.isSubnetAzNeeded(eq(false), any())).thenReturn(true);
 
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0),
                 new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
@@ -152,6 +156,36 @@ class InstanceMetaDataServiceTest {
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
         verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, null, INSTANCE_GROUP_COUNT);
+        verifyRepositorySave(resultInstanceGroups, save);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider")
+    void saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneNotNeededAndRackIdAndRoundRobin(String testCaseName, boolean save,
+            List<String> hostnames, String subnetId, String availabilityZone, String rackId) {
+        Stack stack = stack(INSTANCE_GROUP_COUNT);
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        Map<String, String> subnetAzPairs = Map.of();
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
+        doAnswer(invocation -> {
+            InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
+            instanceMetaData.setSubnetId(subnetId);
+            return null;
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
+        when(multiAzCalculatorService.determineRackId(subnetId, null)).thenReturn(rackId);
+        when(multiAzCalculatorService.isSubnetAzNeeded(eq(false), any())).thenReturn(false);
+
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0),
+                new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
+
+        assertThat(result).isSameAs(stack);
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
+        assertThat(resultInstanceGroups).isNotNull();
+        assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
+        verifyInstances(resultInstanceGroups, hostnames, subnetId, null, rackId, null, INSTANCE_GROUP_COUNT);
         verifyRepositorySave(resultInstanceGroups, save);
     }
 
@@ -298,6 +332,8 @@ class InstanceMetaDataServiceTest {
         doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
+        when(multiAzCalculatorService.isSubnetAzNeeded(eq(false), any())).thenReturn(true);
+
         StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
                 Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
 
@@ -427,6 +463,7 @@ class InstanceMetaDataServiceTest {
             instanceGroups.add(instanceGroup(i));
         }
         stack.setInstanceGroups(instanceGroups);
+        stack.setMultiAz(false);
         return stack;
     }
 

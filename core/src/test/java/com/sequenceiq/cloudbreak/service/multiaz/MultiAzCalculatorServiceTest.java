@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -617,6 +618,65 @@ public class MultiAzCalculatorServiceTest {
         });
     }
 
+    static List<Object []> testDataForSubnetAzNeeded() {
+        List<Object []> testData = new ArrayList<>();
+        Arrays.stream(CloudPlatform.values()).forEach(cloudPlatform -> {
+            testData.add(new Object[] {true, cloudPlatform.name(), cloudPlatform.name().equals("AWS")});
+            testData.add(new Object[] {false, cloudPlatform.name(), true});
+        });
+        return testData;
+    }
+
+    static List<Object []> testDataForNoneZonalSubnetAz() {
+        List<Object []> testData = new ArrayList<>();
+        List.of(CloudPlatform.AZURE, CloudPlatform.GCP).stream().forEach(cloudPlatform -> {
+            testData.add(new Object[] {true, cloudPlatform.name()});
+            testData.add(new Object[] {false, cloudPlatform.name()});
+        });
+        return testData;
+    }
+
+    @ParameterizedTest(name = "calculateByRoundRobinTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallbackAndNonZonalSubnet{index}")
+    @MethodSource("testDataForNoneZonalSubnetAz")
+    public void calculateByRoundRobinTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallbackAndNonZonalSubnet(boolean multiAz, String cloudPlatform) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
+        environmentNetworkResponse.setSubnetMetas(Map.of(
+                cloudSubnetName(1), cloudSubnet(1),
+                cloudSubnetName(2), cloudSubnet(2),
+                cloudSubnetName(3), cloudSubnet(3)
+        ));
+        detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
+
+        Stack stack = new Stack();
+        stack.setMultiAz(multiAz);
+        stack.setType(StackType.WORKLOAD);
+        stack.setCloudPlatform(cloudPlatform);
+        Network network = new Network();
+        network.setAttributes(Json.silent(Map.of(NetworkConstants.SUBNET_ID, "subnet-1")));
+        stack.setNetwork(network);
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setCloudPlatform(cloudPlatform);
+        instanceGroupNetwork.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("subnet-1", "subnet-2", "subnet-3"))));
+        InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
+        workerGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        stack.setInstanceGroups(Set.of(workerGroup));
+        when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(false);
+        Map<String, String> subnetAzPairs = underTest.prepareSubnetAzMap(detailedEnvironmentResponse);
+
+        underTest.calculateByRoundRobin(subnetAzPairs, stack);
+
+        Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
+                Collectors.toMap(InstanceGroup::getGroupName, InstanceGroup::getAllInstanceMetaData));
+
+        assertEquals(3, hostGroupInstances.get("worker").size());
+        for (InstanceMetaData im : hostGroupInstances.get("worker")) {
+            assertEquals("subnet-1", im.getSubnetId());
+            assertEquals(multiAz ? null : "az-1", im.getAvailabilityZone());
+            assertEquals(String.format("/%s", multiAz ? "subnet-1" : "az-1"), im.getRackId());
+        }
+    }
+
     @Test
     public void calculateByRoundRobinTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallback() throws IOException {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
@@ -748,6 +808,12 @@ public class MultiAzCalculatorServiceTest {
                 underTest.calculateByRoundRobin(Map.of("anysubnet", "anyaz"), instanceGroup, instanceMetaData, NetworkScaleDetails.getEmpty()));
         assertThat(actual.getMessage()).isEqualTo("The following subnets are missing from the Environment, you may have removed them during an environment " +
                 "update previously? Missing subnets: [subnet-0]");
+    }
+
+    @ParameterizedTest(name = "testDataForSubnetAzNeeded{index}")
+    @MethodSource("testDataForSubnetAzNeeded")
+    public void testIsSubnetAzNeeded(boolean multiAz, String cloudPlatform, boolean expectedValue) {
+        assertEquals(expectedValue, underTest.isSubnetAzNeeded(multiAz, cloudPlatform));
     }
 
     private InstanceGroupDto instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {

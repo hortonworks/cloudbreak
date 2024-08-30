@@ -27,6 +27,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -45,6 +46,8 @@ public class MultiAzCalculatorService {
     private static final String DEFAULT_RACK = "default-rack";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzCalculatorService.class);
+
+    private static final Set<CloudPlatform> ZONAL_SUBNET_CLOUD_PLATFORMS = Set.of(CloudPlatform.AWS);
 
     @Inject
     private MultiAzValidator multiAzValidator;
@@ -94,7 +97,7 @@ public class MultiAzCalculatorService {
         for (InstanceGroup instanceGroup : sortInstanceGroups(stack)) {
             calculateByRoundRobin(subnetAzPairs, instanceGroup.getInstanceGroupNetwork(),
                     instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
-            prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup);
+            prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup, stack);
         }
     }
 
@@ -265,11 +268,13 @@ public class MultiAzCalculatorService {
                 && CollectionUtils.isNotEmpty(networkScaleDetails.getPreferredSubnetIds());
     }
 
-    protected void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup) {
+    protected void prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(String stackSubnetId, String stackAz, InstanceGroup instanceGroup, Stack stack) {
         for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
             if (Strings.isNullOrEmpty(instanceMetaData.getSubnetId()) && Strings.isNullOrEmpty(instanceMetaData.getAvailabilityZone())) {
                 instanceMetaData.setSubnetId(stackSubnetId);
-                instanceMetaData.setAvailabilityZone(stackAz);
+                if (isSubnetAzNeeded(stack.isMultiAz(), stack.getCloudPlatform())) {
+                    instanceMetaData.setAvailabilityZone(stackAz);
+                }
             }
             instanceMetaData.setRackId(determineRackId(instanceMetaData.getSubnetId(), instanceMetaData.getAvailabilityZone()));
         }
@@ -292,5 +297,9 @@ public class MultiAzCalculatorService {
                 .map(attr -> attr.get(SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
+    }
+
+    public boolean isSubnetAzNeeded(boolean multiAz, String cloudPlatform) {
+        return !multiAz || ZONAL_SUBNET_CLOUD_PLATFORMS.contains(CloudPlatform.valueOf(cloudPlatform));
     }
 }
