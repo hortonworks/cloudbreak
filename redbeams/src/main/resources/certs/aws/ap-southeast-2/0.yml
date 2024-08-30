@@ -25,4 +25,4 @@ cert: |-
   zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
   -----END CERTIFICATE-----
 fingerprint: d40ddb29e3750dffa671c3140bbf5f478d1c8096
-deprecated: false
+deprecated: true
