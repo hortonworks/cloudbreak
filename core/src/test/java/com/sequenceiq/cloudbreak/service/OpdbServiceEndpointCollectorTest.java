@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -29,12 +30,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
@@ -46,6 +47,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
@@ -72,7 +75,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 /**
  * ServiceEndpointCollector tests for services deployed in operational database clusters
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OpdbServiceEndpointCollectorTest {
 
     private static final String GATEWAY_PATH = "gateway-path";
@@ -106,6 +109,9 @@ public class OpdbServiceEndpointCollectorTest {
     @Mock
     private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
+    @Mock
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
     @InjectMocks
     private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter =
             new GatewayTopologyV4RequestToExposedServicesConverter();
@@ -136,7 +142,7 @@ public class OpdbServiceEndpointCollectorTest {
                 .orElseThrow(() -> new NoSuchElementException("No such exposed service with name: " + name));
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
         // Called implicitly in ServiceEndpointCollector
@@ -166,6 +172,7 @@ public class OpdbServiceEndpointCollectorTest {
             return services1.stream().filter(exposedService -> components.contains(exposedService.getServiceName()))
                     .collect(Collectors.toList());
         });
+        when(clouderaManagerProductsProvider.findCdhProduct(anySet())).thenReturn(Optional.of(new ClouderaManagerProduct().withVersion("7.3.1-1.cdh7.3.1.p0")));
     }
 
     Collection<ExposedService> filterSupportedKnoxServices() {
@@ -206,21 +213,21 @@ public class OpdbServiceEndpointCollectorTest {
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
                 underTest.prepareClusterExposedServices(stack, "10.0.0.1");
 
-        assertEquals(clusterExposedServicesMap.toString(), 2L, clusterExposedServicesMap.keySet().size());
+        assertEquals(2L, clusterExposedServicesMap.keySet().size(), clusterExposedServicesMap.toString());
 
         Collection<ClusterExposedServiceV4Response> proxyServices = clusterExposedServicesMap.get("proxy");
         Collection<ClusterExposedServiceV4Response> proxyApiServices = clusterExposedServicesMap.get("proxy-api");
 
-        assertNotNull("Topology proxy services was null", proxyServices);
-        assertNotNull("Topology proxy API services was null", proxyApiServices);
+        assertNotNull(proxyServices, "Topology proxy services was null");
+        assertNotNull(proxyApiServices, "Topology proxy API services was null");
 
         Set<String> proxyServiceNames = proxyServices.stream()
                 .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
         Set<String> proxyApiServiceNames = proxyApiServices.stream()
                 .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
 
-        assertEquals(proxyServiceNames.toString(), 2, proxyServiceNames.size());
-        assertEquals(proxyApiServiceNames.toString(), 4, proxyApiServiceNames.size());
+        assertEquals(2, proxyServiceNames.size(), proxyServiceNames.toString());
+        assertEquals(4, proxyApiServiceNames.size(), proxyApiServiceNames.toString());
         assertEquals(new HashSet<>(Arrays.asList("CM-UI", "HBASEUI")), proxyServiceNames);
         assertEquals(new HashSet<>(Arrays.asList("CM-API", "HBASEJARS", "WEBHBASE", "AVATICA")), proxyApiServiceNames);
         Optional<ClusterExposedServiceV4Response> hbasejars = proxyApiServices.stream().filter(

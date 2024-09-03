@@ -2,19 +2,18 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceUtil.exposedService;
 import static java.util.Collections.emptyMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -23,12 +22,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
@@ -62,12 +62,18 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ServiceEndpointCollectorTest {
 
     private static final String CLOUDERA_MANAGER_IP = "127.0.0.1";
 
     private static final String GATEWAY_PATH = "gateway-path";
+
+    @InjectMocks
+    private final ServiceEndpointCollector underTest = new ServiceEndpointCollector();
+
+    @InjectMocks
+    private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter = new GatewayTopologyV4RequestToExposedServicesConverter();
 
     @Mock
     private BlueprintService blueprintService;
@@ -81,17 +87,11 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private ComponentLocatorService componentLocatorService;
 
-    @InjectMocks
-    private final ServiceEndpointCollector underTest = new ServiceEndpointCollector();
-
     @Mock
     private ExposedServiceListValidator exposedServiceListValidator;
 
     @Mock
     private ExposedServiceCollector exposedServiceCollector;
-
-    @InjectMocks
-    private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter = new GatewayTopologyV4RequestToExposedServicesConverter();
 
     @Mock
     private Workspace workspace;
@@ -102,28 +102,28 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
-    @Before
+    @Mock
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @BeforeEach
     public void setup() {
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
-        when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
-        when(exposedServiceCollector.getClouderaManagerUIService()).thenReturn(getClouderaManagerUIService());
-        when(exposedServiceCollector.getImpalaService()).thenReturn(exposedService("IMPALA"));
-        when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(
+        lenient().when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
+        lenient().when(exposedServiceCollector.getClouderaManagerUIService()).thenReturn(getClouderaManagerUIService());
+        lenient().when(exposedServiceCollector.getImpalaService()).thenReturn(exposedService("IMPALA"));
+        lenient().when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(
                 List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI"), exposedService("NAMENODE"), exposedService("HBASEJARS")));
-        when(exposedServiceCollector.getFullServiceListBasedOnList(anyList(), any())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
-        when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
-        when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
-        when(exposedServiceCollector.getNameNodeService()).thenReturn(exposedService("NAMENODE"));
-        when(exposedServiceCollector.getHBaseJarsService()).thenReturn(exposedService("HBASEJARS"));
-//        when(exposedServiceCollector.getHBaseUIService()).thenReturn(exposedService("HBASE_UI"));
+        lenient().when(exposedServiceCollector.getFullServiceListBasedOnList(anyList(), any())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
+        lenient().when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
+        lenient().when(exposedServiceCollector.getNameNodeService()).thenReturn(exposedService("NAMENODE"));
+        lenient().when(exposedServiceCollector.getHBaseJarsService()).thenReturn(exposedService("HBASEJARS"));
     }
 
     @Test
     public void testGetCmServerUrlWithYarnOrchestrator() {
         Stack stack = stackWithOrchestrator("YARN");
-        String ambariIp = CLOUDERA_MANAGER_IP;
 
-        String result = underTest.getManagerServerUrl(stack, ambariIp);
+        String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("http://127.0.0.1:8080", result);
     }
 
@@ -138,8 +138,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithNoAmbariInTopologies() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS"), exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS"), exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER") }, GatewayType.INDIVIDUAL);
 
         String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/", result);
@@ -147,8 +147,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithCentralGateway() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.CENTRAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER") }, GatewayType.CENTRAL);
 
         String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("/gateway-path/topology1/cmf/home/", result);
@@ -156,8 +156,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
 
         String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
@@ -167,25 +167,18 @@ public class ServiceEndpointCollectorTest {
     @Test
     public void testGetCmServerUrlInTopologiesWithIndividualGatewayOnPort8443() {
         ExposedService clouderaManagerUIService = getClouderaManagerUIService();
-        Stack stack = createStackWithComponents(new ExposedService[]{clouderaManagerUIService, exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { clouderaManagerUIService, exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(8443);
 
         String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home/", result);
     }
 
-    private ExposedService getClouderaManagerUIService() {
-        ExposedService clouderaManagerUIService = exposedService("CLOUDERA_MANAGER_UI");
-        clouderaManagerUIService.setKnoxUrl("/cmf/home/");
-        clouderaManagerUIService.setPort(443);
-        return clouderaManagerUIService;
-    }
-
     @Test
     public void testPrepareClusterExposedServices() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("WEBHDFS") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
 
         mockBlueprintTextProcessor();
@@ -232,8 +225,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServicesByGeneratedBlueprint() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("WEBHDFS") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
         stack.getCluster().setExtendedBlueprintText("extended-blueprint");
 
@@ -281,8 +274,8 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServicesIfBlueprintNull() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("WEBHDFS") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
         stack.getCluster().setExtendedBlueprintText("extended-blueprint");
         Blueprint blueprint = new Blueprint();
@@ -297,12 +290,11 @@ public class ServiceEndpointCollectorTest {
         assertEquals(4L, clusterExposedServicesMap.keySet().size());
     }
 
-
     //If the private ip list is empty, cluster does not have any hostgroup.
     @Test
     public void testPrepareClusterExposedServicesIfPrivateIpsEmpty() {
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
-                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("ATLAS") },
+                new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("WEBHDFS") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
         stack.getCluster().setExtendedBlueprintText("extended-blueprint");
         mockBlueprintTextProcessor();
@@ -321,8 +313,8 @@ public class ServiceEndpointCollectorTest {
                         exposedService("NAMENODE"), exposedService("IMPALA_DEBUG_UI")));
         when(exposedServiceCollector.getImpalaDebugUIService()).thenReturn(
                 exposedService("IMPALA_DEBUG_UI"));
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("IMPALA_DEBUG_UI")},
-                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("IMPALA_DEBUG_UI")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("IMPALA_DEBUG_UI") },
+                new ExposedService[] { exposedService("HIVE_SERVER"), exposedService("IMPALA_DEBUG_UI") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
         stack.getCluster().setExtendedBlueprintText("blueprintOfTheYear");
         mockBlueprintTextProcessor();
@@ -344,8 +336,8 @@ public class ServiceEndpointCollectorTest {
                         exposedService("NAMENODE"), exposedService("IMPALA_DEBUG_UI")));
         when(exposedServiceCollector.getImpalaDebugUIService()).thenReturn(
                 exposedService("IMPALA_DEBUG_UI"));
-        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("IMPALA")},
-                new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("IMPALA") },
+                new ExposedService[] { exposedService("HIVE_SERVER") }, GatewayType.INDIVIDUAL);
         stack.getCluster().getGateway().setGatewayPort(443);
         stack.getCluster().setExtendedBlueprintText("blueprintOfTheYear");
         mockBlueprintTextProcessor();
@@ -400,7 +392,7 @@ public class ServiceEndpointCollectorTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         blueprint.setWorkspace(workspace);
-        when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
+        lenient().when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
     }
@@ -466,5 +458,12 @@ public class ServiceEndpointCollectorTest {
         cluster.setWorkspace(workspace);
         stack.setType(StackType.WORKLOAD);
         return stack;
+    }
+
+    private ExposedService getClouderaManagerUIService() {
+        ExposedService clouderaManagerUIService = exposedService("CLOUDERA_MANAGER_UI");
+        clouderaManagerUIService.setKnoxUrl("/cmf/home/");
+        clouderaManagerUIService.setPort(443);
+        return clouderaManagerUIService;
     }
 }

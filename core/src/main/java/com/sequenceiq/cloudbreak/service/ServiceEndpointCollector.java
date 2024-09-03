@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -77,6 +79,9 @@ public class ServiceEndpointCollector {
     @Inject
     private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
+    @Inject
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         if (blueprint == null) {
@@ -111,12 +116,16 @@ public class ServiceEndpointCollector {
         String blueprintText = getBlueprintString(stackDto);
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
         if (!Strings.isNullOrEmpty(blueprintText)) {
-            BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+            Optional<String> runtimeVersion = clouderaManagerProductsProvider.findCdhProduct(stackDto.getClusterComponents())
+                    .map(product -> StringUtils.substringBefore(product.getVersion(), "-"));
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
             Collection<ExposedService> knownExposedServices = getExposedServices(
-                    blueprintText,
+                    runtimeVersion,
+                    cmTemplateProcessor.getAllComponents(),
                     entitlementService.getEntitlements(stackDto.getTenantName()));
             GatewayView gateway = stackDto.getGateway();
             Optional<String> version = Optional.ofNullable(stackDto.getBlueprint()).map(Blueprint::getStackVersion);
+            BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
             Map<String, List<String>> privateIps = componentLocatorService.getComponentLocationEvenIfStopped(stackDto, processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
             LOGGER.debug("The private IPs in the cluster {}", privateIps);
@@ -303,16 +312,9 @@ public class ServiceEndpointCollector {
         return exposedService.isSsoSupported() ? gateway.getSsoType() : SSOType.NONE;
     }
 
-    /**
-     * Get all exposed services for blueprint, there are filtered by visibility
-     *
-     * @param blueprintText given blueprintText
-     * @return all visible exposed services for the given blueprint
-     */
-    private Collection<ExposedService> getExposedServices(String blueprintText, List<String> entitlements) {
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-        List<String> components = processor.getAllComponents().stream().map(ServiceComponent::getComponent).collect(Collectors.toList());
-        return exposedServiceCollector.knoxServicesForComponents(processor.getVersion(), components)
+    private Collection<ExposedService> getExposedServices(Optional<String> runtimeVersion, Set<ServiceComponent> serviceComponents, List<String> entitlements) {
+        List<String> components = serviceComponents.stream().map(ServiceComponent::getComponent).collect(Collectors.toList());
+        return exposedServiceCollector.knoxServicesForComponents(runtimeVersion, components)
                 .stream()
                 .filter(ExposedService::isVisible)
                 .filter(e -> serviceEndpointCollectorEntitlementComparator.entitlementSupported(entitlements, e.getEntitlement()))
@@ -320,8 +322,9 @@ public class ServiceEndpointCollector {
     }
 
     private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint, List<String> entitlements) {
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
         return ExposedServiceV4Response.fromExposedServices(
-                getExposedServices(blueprint.getBlueprintJsonText(), entitlements));
+                getExposedServices(processor.getVersion(), processor.getAllComponents(), entitlements));
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology, Optional<String> version) {

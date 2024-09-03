@@ -194,7 +194,8 @@
       "apiOnly": false,
       "apiIncluded": false,
       "visibleForDatalake": true,
-      "visibleForDatahub": true
+      "visibleForDatahub": true,
+      "maxVersion": "7.3.0"
     },
     {
       "name": "RANGER",

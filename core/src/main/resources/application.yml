@@ -736,6 +736,9 @@ cb:
         interruptableCommands: >
           global-estimate-host-statistics,
           ProcessStalenessCheckCommand
+    servicesToRemove:
+      DAS: 7.2.18
+      ZEPPELIN: 7.3.1
 
   stopRestriction:
     restrictedCloudPlatform: AWS

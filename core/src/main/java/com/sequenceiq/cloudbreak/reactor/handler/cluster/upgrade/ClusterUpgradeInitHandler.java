@@ -66,7 +66,7 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
             Set<ClusterComponentView> components = parcelService.getParcelComponentsByBlueprint(stackDto);
             parcelService.removeUnusedParcelComponents(stackDto, components);
             ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
-            clusterUpgradePrerequisitesService.removeDasServiceIfNecessary(stackDto, connector, request.getTargetRuntimeVersion());
+            clusterUpgradePrerequisitesService.removeIncompatibleServices(stackDto, connector, request.getTargetRuntimeVersion());
             Set<ClouderaManagerProduct> upgradeCandidateProducts = upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components);
             result = new ClusterUpgradeInitSuccess(request.getResourceId(), upgradeCandidateProducts);
         } catch (Exception e) {
