@@ -130,7 +130,7 @@ class SdxSaltStatusCheckerJobTest {
         verify(jobService).unschedule(jobKey);
     }
 
-    @EnumSource(value = DatalakeStatusEnum.class, names = {"STACK_DELETION_IN_PROGRESS", "PROVISIONING_FAILED"})
+    @EnumSource(value = DatalakeStatusEnum.class, names = {"STACK_DELETION_IN_PROGRESS", "PROVISIONING_FAILED", "DELETED_ON_PROVIDER_SIDE"})
     @ParameterizedTest
     void unscheduleStatuses(DatalakeStatusEnum status) throws JobExecutionException {
         setStatus(status);

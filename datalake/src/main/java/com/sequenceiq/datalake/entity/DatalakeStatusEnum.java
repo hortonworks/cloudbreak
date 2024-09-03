@@ -117,6 +117,10 @@ public enum DatalakeStatusEnum {
                 || DELETE_FAILED.equals(this);
     }
 
+    public boolean isDeletedOnProviderSide() {
+        return DELETED_ON_PROVIDER_SIDE.equals(this);
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public DatalakeStatusEnum mapToFailedIfInProgress() {
         switch (this) {

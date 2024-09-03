@@ -59,7 +59,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
         try {
             rotateSaltPasswordService.validateRotateSaltPassword(stack);
             Status status = stack.getStackStatus().getStatus();
-            if (status.isDeletionInProgress() || status.isSuccessfullyDeleted()) {
+            if (status.isDeletionInProgress() || status.isSuccessfullyDeleted() || status.isDeletedOnProviderSide()) {
                 LOGGER.debug("Stack {} is deleted, unscheduling", stack.getResourceCrn());
                 jobService.unschedule(context.getJobDetail().getKey());
             } else if (status.isStopInProgressPhase() || status.isStoppedPhase()) {

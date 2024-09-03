@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -81,10 +82,11 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
             SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdxCluster);
-            if (sdxStatus.getStatus().isDeleteInProgressOrCompleted() || sdxStatus.getStatus().isProvisioningFailed()) {
-                LOGGER.debug("SDX cluster with id {} status is {}, unscheduling salt status check", getLocalId(), sdxStatus.getStatus());
+            DatalakeStatusEnum status = sdxStatus.getStatus();
+            if (status.isDeleteInProgressOrCompleted() || status.isProvisioningFailed() || status.isDeletedOnProviderSide()) {
+                LOGGER.debug("SDX cluster with id {} status is {}, unscheduling salt status check", getLocalId(), status);
                 jobService.unschedule(context.getJobDetail().getKey());
-            } else if (sdxStatus.getStatus().isStopState()) {
+            } else if (status.isStopState()) {
                 LOGGER.debug("SDX cluster with id {} is stopped, can not run salt status check", getLocalId());
             } else {
                 StackV4Endpoint stackV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().stackV4Endpoint();

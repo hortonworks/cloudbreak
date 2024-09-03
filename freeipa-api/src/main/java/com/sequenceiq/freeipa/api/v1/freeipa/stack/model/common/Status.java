@@ -111,6 +111,10 @@ public enum Status {
         return DELETE_COMPLETED.equals(this);
     }
 
+    public boolean isDeletedOnProviderSide() {
+        return DELETED_ON_PROVIDER_SIDE.equals(this);
+    }
+
     public boolean isDeletionInProgress() {
         return DELETE_IN_PROGRESS.equals(this);
     }

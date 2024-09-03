@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -61,6 +62,14 @@ public class SaltPasswordStatusService {
                 LOGGER.warn("Received error response from salt on stack {}", stack.getId(), e);
                 result = SaltPasswordStatus.FAILED_TO_CHECK;
             }
+        } catch (NotFoundException e) {
+            if (!"No reachable gateway found".equals(e.getMessage())) {
+                LOGGER.warn("Unhandled NotFoundException", e);
+            }
+            result = SaltPasswordStatus.FAILED_TO_CHECK;
+        } catch (Exception e) {
+            LOGGER.warn("Unhandled exception type", e);
+            result = SaltPasswordStatus.FAILED_TO_CHECK;
         }
         return result;
     }

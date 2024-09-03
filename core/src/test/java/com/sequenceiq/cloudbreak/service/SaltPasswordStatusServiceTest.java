@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -102,9 +103,31 @@ class SaltPasswordStatusServiceTest {
     }
 
     @Test
-    void errorWhileSaltPasswordRotationNeeded() throws Exception {
+    void orchestratorFailedWhileSaltPasswordRotationNeeded() throws Exception {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Unexpected failure");
+        CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Orchestrator failure");
+        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenThrow(exception);
+
+        SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
+
+        assertThat(result).isEqualTo(SaltPasswordStatus.FAILED_TO_CHECK);
+    }
+
+    @Test
+    void notFoundWhileSaltPasswordRotationNeeded() throws Exception {
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
+        NotFoundException exception = new NotFoundException("No reachable gateway found");
+        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenThrow(exception);
+
+        SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
+
+        assertThat(result).isEqualTo(SaltPasswordStatus.FAILED_TO_CHECK);
+    }
+
+    @Test
+    void unhandledExceptionWhileSaltPasswordRotationNeeded() throws Exception {
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
+        RuntimeException exception = new RuntimeException("Unexpected exception");
         when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SALTUSER)).thenThrow(exception);
 
         SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
