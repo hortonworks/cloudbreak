@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -63,12 +64,14 @@ public class AbstractActionTest {
     @Mock
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
+    @Mock
+    private FlowLogDBService flowLogDBService;
+
     private StateMachine<State, Event> stateMachine;
 
     @Before
     public void setup() throws Exception {
         underTest = spy(new TestAction());
-        underTest.setFailureEvent(Event.FAILURE);
         MockitoAnnotations.initMocks(this);
         BDDMockito.given(flow.getFlowId()).willReturn(FLOW_ID);
         BDDMockito.given(runningFlows.get(anyString())).willReturn(flow);
@@ -90,6 +93,7 @@ public class AbstractActionTest {
 
     @Test
     public void testExecute() {
+        underTest.setFailureEvent(Event.FAILURE);
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
         verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
@@ -101,13 +105,25 @@ public class AbstractActionTest {
 
     @Test
     public void testFailedExecute() {
+        underTest.setFailureEvent(Event.FAILURE);
         RuntimeException exception = new UnsupportedOperationException("");
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
         verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(1)).getFailurePayload(nullable(Payload.class), any(Optional.class), eq(exception));
         verify(underTest, times(1)).sendEvent(eq(FLOW_PARAMETERS), eq(Event.FAILURE.name()), eq(Collections.emptyMap()), any(Map.class));
+    }
+
+    @Test
+    public void testFailedExecuteWithoutFailureEvent() {
+        underTest.setFailureEvent(null);
+        RuntimeException exception = new IllegalStateException("something went wrong");
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        verify(flowLogDBService, times(1)).closeFlow(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
+                "java.lang.IllegalStateException, message: something went wrong");
     }
 
     enum State implements FlowState {

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
 
@@ -49,6 +50,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     @Inject
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
+    @Inject
+    private FlowLogDBService flowLogDBService;
+
     private final Class<P> payloadClass;
 
     private List<PayloadConverter<P>> payloadConverters;
@@ -69,7 +73,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     public void execute(StateContext<S, E> context) {
         FlowParameters flowParameters = (FlowParameters) context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
         ThreadBasedUserCrnProvider.doAs(flowParameters.getFlowTriggerUserCrn(), () -> {
-            MDCBuilder.addFlowId(flowParameters.getFlowId());
+            String flowId = flowParameters.getFlowId();
+            MDCBuilder.addFlowId(flowId);
             P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
             C flowContext = null;
             try {
@@ -84,6 +89,11 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                     sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
                 } else {
                     LOGGER.error("Missing error handling for " + getClass().getName());
+                    if (flowId != null) {
+                        LOGGER.error("Closing flow with id {}", flowId);
+                        flowLogDBService.closeFlow(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
+                                ex.getClass().getName(), ex.getMessage()));
+                    }
                     throw new CloudbreakServiceException("Missing error handling for " + getClass().getName());
                 }
             }
