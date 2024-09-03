@@ -55,17 +55,27 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
             when = "a SDX internal create request is sent",
             then = "the SDX cluster and the corresponding DistroX cluster is created")
     public void testCreateInternalSdxAndDistrox(TestContext testContext) {
-        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+        Architecture architecture;
+        String blueprintName;
+        if (imageValidatorE2ETestUtil.isFreeIpaImageValidation()) {
+            architecture = Architecture.X86_64;
+            blueprintName = commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime();
+        } else {
+            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+            architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
+            blueprintName = commonClusterManagerProperties().getDataEngDistroXBlueprintName(imageUnderValidation.getVersion());
+        }
 
         testContext.given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs();
-        setupSdxImage(testContext, imageUnderValidation);
-        testContext.given(SdxInternalTestDto.class)
-                .withoutDatabase()
-                .withCloudStorage(getCloudStorageRequest(testContext))
-                .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
-                .withTelemetry("telemetry")
+        setupSdxImage(testContext, architecture);
+        testContext
+                .given(SdxInternalTestDto.class)
+                    .withoutDatabase()
+                    .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
+                    .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .then(imageAssertions.validateSdxInternalImageSetupTime())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -73,8 +83,8 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
                 .validate();
         testContext
                 .given(DistroXTestDto.class)
-                .withArchitecture(Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()))
-                .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(imageUnderValidation.getVersion()))
+                    .withArchitecture(architecture)
+                    .withTemplate(blueprintName)
                 .when(distroXTestClient.create())
                 .then(imageAssertions.validateDistroXImageSetupTime())
                 .await(STACK_AVAILABLE)
@@ -92,8 +102,8 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
                 .validate();
     }
 
-    private void setupSdxImage(TestContext testContext, ImageV4Response imageUnderValidation) {
-        if (Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()) == Architecture.ARM64) {
+    private void setupSdxImage(TestContext testContext, Architecture architecture) {
+        if (architecture == Architecture.ARM64) {
             // arm64 is not supported for SDX, so a default image selected by CB should be used
             testContext.given(SdxInternalTestDto.class)
                     .withDefaultImage();

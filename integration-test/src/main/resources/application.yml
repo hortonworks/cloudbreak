@@ -99,6 +99,7 @@ integrationtest:
     defaultPassword: cb1STPneh2b6KyJn
     defaultPort: 7180
   cloudProvider: MOCK
+  ycloudTest: false
   runtimeVersion: 7.2.18
   upgrade:
     matrix:

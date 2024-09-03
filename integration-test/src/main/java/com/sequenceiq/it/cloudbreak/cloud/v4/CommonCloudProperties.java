@@ -11,6 +11,8 @@ public class CommonCloudProperties {
 
     private String cloudProvider;
 
+    private Boolean ycloudTest;
+
     private String sshPublicKey;
 
     private String rotationSshPublicKey;
@@ -55,6 +57,14 @@ public class CommonCloudProperties {
 
     public void setCloudProvider(String cloudProvider) {
         this.cloudProvider = cloudProvider;
+    }
+
+    public Boolean isYcloudTest() {
+        return ycloudTest;
+    }
+
+    public void setYcloudTest(Boolean ycloudTest) {
+        this.ycloudTest = ycloudTest;
     }
 
     public String getSshPublicKey() {
