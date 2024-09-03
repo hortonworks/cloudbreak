@@ -85,6 +85,32 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void testAddServiceConfigsWhenDuplicatedEntries() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/ENGESC-26635.bp"));
+
+        Map<String, ServiceComponent> stringServiceComponentMap = underTest.mapRoleRefsToServiceComponents();
+        Map<String, Set<ServiceComponent>> serviceComponentsByHostGroup = underTest.getServiceComponentsByHostGroup();
+        Set<ServiceComponent> allComponents = underTest.getAllComponents();
+
+        assertEquals(39, stringServiceComponentMap.size());
+        assertEquals(7, serviceComponentsByHostGroup.size());
+        assertEquals(33, allComponents.size());
+    }
+
+    @Test
+    public void testAddServiceConfigsWhenDuplicatedEntries2() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/ENGESC-26635-2.bp"));
+
+        Map<String, ServiceComponent> stringServiceComponentMap = underTest.mapRoleRefsToServiceComponents();
+        Map<String, Set<ServiceComponent>> serviceComponentsByHostGroup = underTest.getServiceComponentsByHostGroup();
+        Set<ServiceComponent> allComponents = underTest.getAllComponents();
+
+        assertEquals(39, stringServiceComponentMap.size());
+        assertEquals(7, serviceComponentsByHostGroup.size());
+        assertEquals(33, allComponents.size());
+    }
+
+    @Test
     public void addExistingServiceConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
