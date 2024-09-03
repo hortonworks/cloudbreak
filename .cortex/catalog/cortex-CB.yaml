@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
-  title: CB-cloudbreak
+  title: CB-Cloudbreak
   description: Cloudbreak Services
-  x-cortex-tag: CB-cloudbreak
+  x-cortex-tag: CB-Cloudbreak
   x-cortex-type: service
   x-cortex-git:
     github:
