@@ -36,8 +36,8 @@ public class DatalakeVerticalScaleActions {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
                 sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS,
-                                String.format("Validation of vertical scale is in progress for group of %s with instance type of %s on the Data Lake.",
-                                        payload.getVerticalScaleRequest().getGroup(), payload.getVerticalScaleRequest().getTemplate().getInstanceType()),
+                        String.format("Validation of vertical scale is in progress for group of %s with instance type of %s on the Data Lake.",
+                                payload.getVerticalScaleRequest().getGroup(), payload.getVerticalScaleRequest().getTemplate().getInstanceType()),
                         payload.getResourceId());
                 sendEvent(context, VERTICAL_SCALING_DATALAKE_VALIDATION_HANDLER.selector(), payload);
             }
@@ -77,10 +77,9 @@ public class DatalakeVerticalScaleActions {
             protected void doExecute(CommonContext context, DatalakeVerticalScaleFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.error(String.format("Failed to Vertical scale in DataLake '%s'. Status: '%s'.",
                         payload.getDataLakeVerticalScaleEvent(), payload.getDatalakeStatus()), payload.getException());
-                sdxStatusService.setStatusForDatalakeAndNotify(
+                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(
                         payload.getDatalakeStatus(),
-                        payload.getDatalakeStatus().getDefaultResourceEvent(),
-                        payload.getException().getMessage(),
+                        String.format("Vertical scaling has failed on the Data Lake. %s ", payload.getException().getMessage()),
                         payload.getResourceId());
                 sendEvent(context, HANDLED_FAILED_VERTICAL_SCALING_DATALAKE_EVENT.event(), payload);
             }
