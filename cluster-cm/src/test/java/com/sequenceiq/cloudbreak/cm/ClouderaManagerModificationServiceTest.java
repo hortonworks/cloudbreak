@@ -100,6 +100,8 @@ import com.sequenceiq.cloudbreak.cm.util.TestUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -107,6 +109,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.squareup.okhttp.Call;
 
@@ -217,6 +220,12 @@ class ClouderaManagerModificationServiceTest {
 
     @Mock
     private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
+
+    @Mock
+    private ClusterCommandService clusterCommandService;
+
+    @Mock
+    private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     @Spy
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
@@ -791,7 +800,10 @@ class ClouderaManagerModificationServiceTest {
         ApiCommand startCommand = mock(ApiCommand.class);
         when(startCommand.getId()).thenReturn(apiCommandId);
         when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        ApiCommandList activeCommandList = new ApiCommandList();
+        activeCommandList.setItems(new ArrayList<>());
         when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
 
         // Post parcel activation
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
@@ -883,7 +895,8 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostResourceApi);
         Call call = mock(Call.class);
         when(hostResourceApi.addTagsAsync(eq(HOSTNAME), any(), any())).thenReturn(call);
-
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER))).thenReturn(Optional.empty());
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
 
         underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
@@ -962,6 +975,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
 
@@ -1027,6 +1041,7 @@ class ClouderaManagerModificationServiceTest {
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(apiCommandList);
 
         when(clustersResourceApi.startCommand(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
         when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(apiCommandId);
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, v31Client, apiCommandId))
                 .thenReturn(success);
@@ -1495,5 +1510,88 @@ class ClouderaManagerModificationServiceTest {
         assertEquals("STOPPED", results.get("ATLAS"));
         assertEquals("STOPPING", results.get("HDFS"));
         assertEquals("NA", results.get("TEZ"));
+    }
+
+    @Test
+    public void testStartClusterWithOnlyServicesWhenNoActiveStartCommand() throws Exception {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList serviceList = new ApiServiceList();
+        ApiService service = new ApiService();
+        service.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER))).thenReturn(Optional.empty());
+        ApiCommand startCommand = mock(ApiCommand.class);
+        when(startCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+        ExtendedPollingResult pollingResult = mock(ExtendedPollingResult.class);
+        when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, BigDecimal.ONE)).thenReturn(pollingResult);
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
+
+        underTest.startCluster(true);
+
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client, BigDecimal.ONE);
+        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult,
+                "Cluster was terminated while waiting for Cloudera Runtime services to start",
+                "Timeout while stopping Cloudera Manager services.");
+        verify(clusterCommandService, times(1)).delete(any(ClusterCommand.class));
+    }
+
+    @Test
+    public void testStartClusterWithOnlyServicesWhenNoStartCommandInCM() throws Exception {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList serviceList = new ApiServiceList();
+        ApiService service = new ApiService();
+        service.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        ClusterCommand clusterCommand = new ClusterCommand();
+        clusterCommand.setCommandId(BigDecimal.ONE);
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
+                .thenReturn(Optional.of(clusterCommand));
+        ApiCommand startCommand = mock(ApiCommand.class);
+        when(startCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
+        ExtendedPollingResult pollingResult = mock(ExtendedPollingResult.class);
+        when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, BigDecimal.ONE)).thenReturn(pollingResult);
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
+
+        underTest.startCluster(true);
+
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client, BigDecimal.ONE);
+        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult,
+                "Cluster was terminated while waiting for Cloudera Runtime services to start",
+                "Timeout while stopping Cloudera Manager services.");
+        verify(clusterCommandService, times(2)).delete(any(ClusterCommand.class));
+    }
+
+    @Test
+    public void testStartClusterWithOnlyServicesWhenActiveStartCommand() throws Exception {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList serviceList = new ApiServiceList();
+        ApiService service = new ApiService();
+        service.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        ClusterCommand clusterCommand = new ClusterCommand();
+        clusterCommand.setCommandId(BigDecimal.ONE);
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
+                .thenReturn(Optional.of(clusterCommand));
+        ApiCommand startCommand = mock(ApiCommand.class);
+        when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, BigDecimal.ONE)).thenReturn(Optional.of(startCommand));
+        ExtendedPollingResult pollingResult = mock(ExtendedPollingResult.class);
+        when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, BigDecimal.ONE)).thenReturn(pollingResult);
+
+        underTest.startCluster(true);
+
+        verify(clustersResourceApi, never()).startCommand(STACK_NAME);
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client, BigDecimal.ONE);
+        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult,
+                "Cluster was terminated while waiting for Cloudera Runtime services to start",
+                "Timeout while stopping Cloudera Manager services.");
+        verify(clusterCommandService, times(1)).delete(any(ClusterCommand.class));
     }
 }

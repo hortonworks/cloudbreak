@@ -95,6 +95,8 @@ import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
@@ -103,6 +105,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.URLUtils;
@@ -177,6 +180,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
+
+    @Inject
+    private ClusterCommandService clusterCommandService;
+
+    @Inject
+    private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     private final StackDtoDelegate stack;
 
@@ -1035,12 +1044,46 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     .map(ApiService::getName)
                     .filter(StringUtils::hasText)
                     .collect(Collectors.toSet()));
-            ApiCommand apiCommand = apiInstance.startCommand(clusterName);
-            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, apiCommand.getId());
-            handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
-                    "Timeout while stopping Cloudera Manager services.");
+            ClusterCommand startCommand = null;
+            try {
+                startCommand = startServicesIfNotRunning(cluster, apiInstance);
+                ExtendedPollingResult pollingResult =
+                        clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, startCommand.getCommandId());
+                handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
+                        "Timeout while stopping Cloudera Manager services.");
+            } finally {
+                if (startCommand != null) {
+                    clusterCommandService.delete(startCommand);
+                }
+            }
         }
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTED);
+    }
+
+    private ClusterCommand startServicesIfNotRunning(ClusterView cluster, ClustersResourceApi clustersResourceApi)
+            throws ApiException {
+        Optional<ClusterCommand> startClusterCommand =
+                clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(), ClusterCommandType.START_CLUSTER);
+        if (startClusterCommand.isPresent()) {
+            Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, startClusterCommand.get().getCommandId());
+            if (apiCommand.isPresent()) {
+                return startClusterCommand.get();
+            } else {
+                clusterCommandService.delete(startClusterCommand.get());
+                return startServicesAndStoreCMCommand(cluster, clustersResourceApi);
+            }
+        } else {
+            return startServicesAndStoreCMCommand(cluster, clustersResourceApi);
+        }
+    }
+
+    private ClusterCommand startServicesAndStoreCMCommand(ClusterView cluster, ClustersResourceApi clustersResourceApi) throws ApiException {
+        ApiCommand startCommand = clustersResourceApi.startCommand(stack.getName());
+        ClusterCommand newStartClusterCommand = new ClusterCommand();
+        newStartClusterCommand.setClusterId(cluster.getId());
+        newStartClusterCommand.setCommandId(startCommand.getId());
+        newStartClusterCommand.setClusterCommandType(ClusterCommandType.START_CLUSTER);
+        return clusterCommandService.save(newStartClusterCommand);
     }
 
     private void startAgents() {

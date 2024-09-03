@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.cm;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,5 +57,43 @@ class ClouderaManagerCommandsServiceTest {
         ApiCommand actualApiCommand = underTest.retryApiCommand(apiClient, COMMAND_ID);
 
         Assertions.assertEquals(actualApiCommand, apiCommand);
+    }
+
+    @Test
+    public void getApiCommandIfExist() throws ApiException {
+        when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
+        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenReturn(apiCommand);
+
+        Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
+
+        Assertions.assertEquals(actualApiCommand.get(), apiCommand);
+    }
+
+    @Test
+    public void getApiCommandIfExistWhenNull() throws ApiException {
+        when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
+
+        Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
+
+        Assertions.assertTrue(actualApiCommand.isEmpty());
+    }
+
+    @Test
+    public void getApiCommandIfExistWhenApiException() throws ApiException {
+        when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
+        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenThrow(new ApiException("msg"));
+
+        Assertions.assertThrows(ApiException.class, () -> underTest.getApiCommandIfExist(apiClient, COMMAND_ID));
+    }
+
+    @Test
+    public void getApiCommandIfExistWhenNotFoundException() throws ApiException {
+        when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
+        ApiException apiException = new ApiException(null, null, HttpStatus.SC_NOT_FOUND, null, null);
+        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenThrow(apiException);
+
+        Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
+
+        Assertions.assertTrue(actualApiCommand.isEmpty());
     }
 }

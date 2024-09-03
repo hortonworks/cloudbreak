@@ -25,6 +25,10 @@ public class ClusterCommandService {
         clusterCommandRepository.deleteByClusterId(clusterId);
     }
 
+    public void delete(ClusterCommand clusterCommand) {
+        clusterCommandRepository.delete(clusterCommand);
+    }
+
     public Optional<ClusterCommand> findTopByClusterIdAndClusterCommandType(long clusterId, ClusterCommandType clusterCommandType) {
         return clusterCommandRepository.findTopByClusterIdAndClusterCommandType(clusterId, clusterCommandType);
     }
