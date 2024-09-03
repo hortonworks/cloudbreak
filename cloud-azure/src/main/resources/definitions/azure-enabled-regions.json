@@ -182,6 +182,21 @@
       "latitude": "25.286106",
       "longitude": "51.534817",
       "entitlements": [ "CDP_AZURE_DATABASE_FLEXIBLE_SERVER" ]
+    },
+    {
+      "name": "Sweden Central",
+      "latitude": "60.5932999",
+      "longitude": "16.9514008"
+    },
+    {
+      "name": "Italy North",
+      "latitude": "42.83333333",
+      "longitude": "12.83333333"
+    },
+    {
+      "name": "Israel Central",
+      "latitude": "31.771959",
+      "longitude": "35.217018"
     }
   ]
 }
