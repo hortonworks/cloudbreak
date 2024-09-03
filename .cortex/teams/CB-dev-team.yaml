@@ -1,0 +1,10 @@
+openapi: 3.0.1
+info:
+  title: CB Dev Team
+  description: CB Dev Team
+  x-cortex-tag: cb-dev-team
+  x-cortex-team:
+    groups:
+    - name: cloudbreak/cloudbreak-dev
+      provider: GITHUB
+  x-cortex-type: team

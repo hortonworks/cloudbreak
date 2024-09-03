@@ -1,0 +1,6 @@
+openapi: 3.0.0
+info:
+  title: cloubreak-services
+  description: Cloudbreak Services
+  x-cortex-tag: cloudbreak-services
+  x-cortex-type: domain

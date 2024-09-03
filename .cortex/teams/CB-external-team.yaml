@@ -1,0 +1,10 @@
+openapi: 3.0.1
+info:
+  title: CB External Team
+  description: CB External Team
+  x-cortex-tag: cb-external-team
+  x-cortex-team:
+    groups:
+    - name: cloudbreak/cloudbreak-external
+      provider: GITHUB
+  x-cortex-type: team

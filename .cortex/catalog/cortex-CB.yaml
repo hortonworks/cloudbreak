@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info:
+  title: CB-cloudbreak
+  description: Cloudbreak Services
+  x-cortex-tag: CB-cloudbreak
+  x-cortex-type: service
+  x-cortex-git:
+    github:
+      repository: cloudbreak/cloudbreak
+  x-cortex-parents:
+  - tag: cloudbreak-services
+  x-cortex-owners:
+  - type: email
+    email: cloudbreak-dev@cloudera.com
+  - type: group
+    provider: GITHUB
+    name: cloudbreak/cloudbreak-dev
+  x-cortex-oncall:
+    pagerduty:
+      id: PBBAZCA
+      type: SERVICE
+  x-cortex-issues:
+    jira:
+      projects:
+      - CB
+  x-cortex-slack:
+    channels:
+    - name: eng_cb_dev_internal
+      notificationsEnabled: 'true'
