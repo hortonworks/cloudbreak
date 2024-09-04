@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
@@ -245,12 +246,14 @@ class AzureEnvironmentNetworkValidatorTest {
         assertFalse(validationResult.hasError());
     }
 
-    @Test
-    void testValidateDuringFlowWhenFlexibleServerSubnetsDeleted() {
+    @ParameterizedTest
+    @EnumSource(ServiceEndpointCreation.class)
+    void testValidateDuringFlowWhenFlexibleServerSubnetsDeleted(ServiceEndpointCreation serviceEndpointCreation) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         AzureParams azureParams = getAzureParams("networkId", "networkResourceGroupName");
         NetworkDto networkDto = NetworkTestUtils
                 .getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, 0, RegistrationType.EXISTING)
+                .withServiceEndpointCreation(serviceEndpointCreation)
                 .build();
         EnvironmentValidationDto environmentValidationDto = environmentValidationDtoWithSingleRg(MY_SINGLE_RG, ValidationType.ENVIRONMENT_EDIT,
                 ResourceGroupUsagePattern.USE_SINGLE);
@@ -260,9 +263,13 @@ class AzureEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         ValidationResult validationResult = validationResultBuilder.build();
-        assertTrue(validationResult.hasError());
-        assertTrue(validationResult.getErrors().stream()
-                .anyMatch(error -> error.startsWith("Deletion of all Flexible server delegated subnets is not supported")));
+        if (serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
+            assertFalse(validationResult.hasError());
+        } else {
+            assertTrue(validationResult.hasError());
+            assertTrue(validationResult.getErrors().stream()
+                    .anyMatch(error -> error.startsWith("Deletion of all Flexible server delegated subnets is not supported")));
+        }
     }
 
     @Test
