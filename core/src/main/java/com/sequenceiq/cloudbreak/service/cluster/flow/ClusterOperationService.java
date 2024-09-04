@@ -623,4 +623,8 @@ public class ClusterOperationService {
     public FlowIdentifier rotateRdsCertificate(StackView stack) {
         return flowManager.triggerRotateRdsCertificate(stack.getId());
     }
+
+    public FlowIdentifier triggerMigrateRdsToTls(StackView stack) {
+        return flowManager.triggerMigrateRdsToTls(stack.getId());
+    }
 }

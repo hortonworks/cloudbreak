@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate;
 
 import jakarta.inject.Inject;
 
@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateCheckPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateCheckPrerequisitesResult;
@@ -31,14 +31,14 @@ public class CheckRotateRdsCertificatePrerequisitesHandler extends ExceptionCatc
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RotateRdsCertificateCheckPrerequisitesRequest> event) {
-        return new RotateRdsCertificateFailedEvent(resourceId, e);
+        return new RotateRdsCertificateFailedEvent(resourceId, event.getData().getRotateRdsCertificateType(), e);
     }
 
     @Override
     public Selectable doAccept(HandlerEvent<RotateRdsCertificateCheckPrerequisitesRequest> event) {
         RotateRdsCertificateCheckPrerequisitesRequest request = event.getData();
         Long stackId = request.getResourceId();
-        rotateRdsCertificateService.checkPrerequisites(stackId);
-        return new RotateRdsCertificateCheckPrerequisitesResult(stackId);
+        rotateRdsCertificateService.checkPrerequisites(stackId, request.getRotateRdsCertificateType());
+        return new RotateRdsCertificateCheckPrerequisitesResult(stackId, request.getRotateRdsCertificateType());
     }
 }

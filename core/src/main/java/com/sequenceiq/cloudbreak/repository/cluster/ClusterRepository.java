@@ -109,6 +109,10 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     void updateClusterManagerIp(@Param("clusterId") Long clusterId, @Param("clusterManagerIp") String clusterManagerIp);
 
     @Modifying
+    @Query("UPDATE Cluster c SET c.dbSslEnabled = true WHERE c.id = :clusterId")
+    void enableSsl(@Param("clusterId") Long clusterId);
+
+    @Modifying
     @Query("UPDATE Cluster c SET c.dbSslRootCertBundle = :dbSslRootCertBundle, c.dbSslEnabled = :dbSslEnabled WHERE c.id = :clusterId")
     void updateDbSslCert(@Param("clusterId") Long clusterId,
             @Param("dbSslRootCertBundle") String dbSslRootCertBundle,

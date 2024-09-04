@@ -15,6 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatabaseCertificateRotationAffectedDatahubsCollector;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatabaseCertificateRotationOutdatedDatahubsCollector;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatahubCertificateChecker;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)

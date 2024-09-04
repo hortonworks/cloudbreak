@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.check;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 

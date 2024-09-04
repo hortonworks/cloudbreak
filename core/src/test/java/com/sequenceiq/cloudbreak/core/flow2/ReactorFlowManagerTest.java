@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -219,8 +219,8 @@ class ReactorFlowManagerTest {
                 count++;
             }
         }
-        // -3: 2 notifyWithoutCheck, 1 terminationTriggerService, 1 triggerStackRemoveInstance internal
-        verify(reactorNotifier, times(count - 4)).notify(anyLong(), anyString(), any(Acceptable.class));
+        // -5: 2 notifyWithoutCheck, 1 terminationTriggerService, 1 triggerStackRemoveInstance internal, 1 triggerMigrateRdsToTls
+        verify(reactorNotifier, times(count - 5)).notify(anyLong(), anyString(), any(Acceptable.class));
         verify(reactorNotifier, times(2)).notifyWithoutCheck(anyLong(), anyString(), any(Acceptable.class));
         verify(terminationTriggerService, times(1)).triggerTermination(stack, true);
         verify(terminationTriggerService, times(1)).triggerTermination(stack, false);

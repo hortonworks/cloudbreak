@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
-
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.FINALIZED_EVENT;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert;
 
 import java.util.Map;
 
@@ -11,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.migrate.MigrateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateR
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateLatestRdsCertificateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateLatestRdsCertificateResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateTlsRdsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateTlsRdsResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 
 @Configuration
@@ -36,6 +38,9 @@ public class RotateRdsCertificateActions {
 
     @Inject
     private RotateRdsCertificateService rotateRdsCertificateService;
+
+    @Inject
+    private MigrateRdsCertificateService migrateRdsCertificateService;
 
     @Bean(name = "ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_STATE")
     public Action<?, ?> checkPrerequisites() {
@@ -50,17 +55,33 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new RotateRdsCertificateCheckPrerequisitesRequest(context.getStackId());
+                return new RotateRdsCertificateCheckPrerequisitesRequest(context.getStackId(), context.getType());
+            }
+        };
+    }
+
+    @Bean(name = "ROTATE_RDS_SETUP_TLS_STATE")
+    public Action<?, ?> setupNonTlsToTlsIfRequired() {
+        return new AbstractRotateRdsCertificateAction<>(RotateRdsCertificateCheckPrerequisitesResult.class) {
+            @Override
+            protected void doExecute(RotateRdsCertificateContext context, RotateRdsCertificateCheckPrerequisitesResult payload, Map<Object, Object> variables) {
+                migrateRdsCertificateService.setupNonTlsToTlsIfRequired(payload.getResourceId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(RotateRdsCertificateContext context) {
+                return new UpdateTlsRdsRequest(context.getStackId(), context.getType());
             }
         };
     }
 
     @Bean(name = "ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE")
     public Action<?, ?> getLatestRdsCertificate() {
-        return new AbstractRotateRdsCertificateAction<>(RotateRdsCertificateCheckPrerequisitesResult.class) {
+        return new AbstractRotateRdsCertificateAction<>(UpdateTlsRdsResult.class) {
 
             @Override
-            protected void doExecute(RotateRdsCertificateContext context, RotateRdsCertificateCheckPrerequisitesResult payload,
+            protected void doExecute(RotateRdsCertificateContext context, UpdateTlsRdsResult payload,
                     Map<Object, Object> variables) {
                 rotateRdsCertificateService.getLatestRdsCertificateState(payload.getResourceId());
                 sendEvent(context);
@@ -68,7 +89,7 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new GetLatestRdsCertificateRequest(context.getStackId());
+                return new GetLatestRdsCertificateRequest(context.getStackId(), context.getType());
             }
         };
     }
@@ -84,7 +105,7 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new UpdateLatestRdsCertificateRequest(context.getStackId());
+                return new UpdateLatestRdsCertificateRequest(context.getStackId(), context.getType());
             }
         };
     }
@@ -100,7 +121,7 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new RestartCmRequest(context.getStackId());
+                return new RestartCmRequest(context.getStackId(), context.getType());
             }
         };
     }
@@ -116,7 +137,7 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new RollingRestartServicesRequest(context.getStackId());
+                return new RollingRestartServicesRequest(context.getStackId(), context.getType());
             }
         };
     }
@@ -132,7 +153,7 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new RotateRdsCertificateOnProviderRequest(context.getStackId());
+                return new RotateRdsCertificateOnProviderRequest(context.getStackId(), context.getType());
             }
         };
     }
@@ -149,7 +170,7 @@ public class RotateRdsCertificateActions {
 
             @Override
             protected Selectable createRequest(RotateRdsCertificateContext context) {
-                return new StackEvent(FINALIZED_EVENT.event(), context.getStackId());
+                return new StackEvent(RotateRdsCertificateEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
     }

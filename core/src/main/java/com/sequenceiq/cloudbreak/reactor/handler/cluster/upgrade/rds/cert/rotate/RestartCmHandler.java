@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate;
 
 import jakarta.inject.Inject;
 
@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RestartCmRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RestartCmResult;
@@ -31,7 +31,7 @@ public class RestartCmHandler extends ExceptionCatcherEventHandler<RestartCmRequ
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RestartCmRequest> event) {
-        return new RotateRdsCertificateFailedEvent(resourceId, e);
+        return new RotateRdsCertificateFailedEvent(resourceId, event.getData().getRotateRdsCertificateType(), e);
     }
 
     @Override
@@ -39,6 +39,6 @@ public class RestartCmHandler extends ExceptionCatcherEventHandler<RestartCmRequ
         RestartCmRequest request = event.getData();
         Long stackId = request.getResourceId();
         rotateRdsCertificateService.restartCm(stackId);
-        return new RestartCmResult(stackId);
+        return new RestartCmResult(stackId, request.getRotateRdsCertificateType());
     }
 }

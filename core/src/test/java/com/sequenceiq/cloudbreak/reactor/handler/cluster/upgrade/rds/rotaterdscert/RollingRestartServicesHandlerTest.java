@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROLLING_RESTART_SERVICES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RotateRdsCertificateType.ROTATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROLLING_RESTART_SERVICES_FINISHED_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -14,11 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RollingRestartServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RollingRestartServicesResult;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.RollingRestartServicesHandler;
 
 @ExtendWith(MockitoExtension.class)
 class RollingRestartServicesHandlerTest {
@@ -40,7 +42,7 @@ class RollingRestartServicesHandlerTest {
 
     @BeforeEach
     void setUp() {
-        RollingRestartServicesRequest request = new RollingRestartServicesRequest(STACK_ID);
+        RollingRestartServicesRequest request = new RollingRestartServicesRequest(STACK_ID, ROTATE);
         event = new Event<>(request);
     }
 

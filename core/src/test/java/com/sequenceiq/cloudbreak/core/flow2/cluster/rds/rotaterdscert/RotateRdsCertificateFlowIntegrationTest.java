@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RotateRdsCertificateType.ROTATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -15,7 +18,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +49,11 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateActions;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateFlowTriggerCondition;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.migrate.MigrateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.core.flow2.service.CbEventParameterFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -60,12 +67,13 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.CheckRotateRdsCertificatePrerequisitesHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.GetLatestRdsCertificateHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.RestartCmHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.RollingRestartServicesHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.RotateRdsCertificateOnProviderHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert.UpdateLatestRdsCertificateHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.migrate.SetupNonTlsToTlsHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.CheckRotateRdsCertificatePrerequisitesHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.GetLatestRdsCertificateHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.RestartCmHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.RollingRestartServicesHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.RotateRdsCertificateOnProviderHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate.UpdateLatestRdsCertificateHandler;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -134,6 +142,9 @@ class RotateRdsCertificateFlowIntegrationTest {
     @SpyBean
     private RotateRdsCertificateService rotateRdsCertificateService;
 
+    @SpyBean
+    private MigrateRdsCertificateService migrateRdsCertificateService;
+
     private Stack stack;
 
     @BeforeEach
@@ -157,7 +168,7 @@ class RotateRdsCertificateFlowIntegrationTest {
     private RotateRdsCertificateFailedEvent flowFinished(boolean success) {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
+        assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
 
         ArgumentCaptor<RotateRdsCertificateFailedEvent> captor = ArgumentCaptor.forClass(RotateRdsCertificateFailedEvent.class);
         RotateRdsCertificateFailedEvent result = null;
@@ -176,7 +187,7 @@ class RotateRdsCertificateFlowIntegrationTest {
 
         InOrder inOrder = Mockito.inOrder(rotateRdsCertificateService);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).checkPrerequisitesState(STACK_ID);
-        inOrder.verify(rotateRdsCertificateService, times(expected[i++])).checkPrerequisites(STACK_ID);
+        inOrder.verify(rotateRdsCertificateService, times(expected[i++])).checkPrerequisites(STACK_ID, ROTATE);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).getLatestRdsCertificateState(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i++])).getLatestRdsCertificate(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).updateLatestRdsCertificateState(STACK_ID);
@@ -223,13 +234,14 @@ class RotateRdsCertificateFlowIntegrationTest {
         Stack stack = mockStack();
         when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
         when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(stack.getCluster());
+        doNothing().when(migrateRdsCertificateService).setupNonTlsToTlsIfRequired(anyLong());
     }
 
     private FlowIdentifier triggerFlow() {
         String selector = ROTATE_RDS_CERTIFICATE_EVENT.event();
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
-                () -> reactorNotifier.notify(STACK_ID, selector, new RotateRdsCertificateTriggerRequest(STACK_ID)));
+                () -> reactorNotifier.notify(STACK_ID, selector, new RotateRdsCertificateTriggerRequest(STACK_ID, ROTATE)));
     }
 
     @Profile("integration-test")
@@ -246,9 +258,11 @@ class RotateRdsCertificateFlowIntegrationTest {
             ReactorNotifier.class,
             RotateRdsCertificateActions.class,
             RotateRdsCertificateFlowConfig.class,
+            MigrateRdsCertificateService.class,
             RotateRdsCertificateFlowTriggerCondition.class,
             CheckRotateRdsCertificatePrerequisitesHandler.class,
             GetLatestRdsCertificateHandler.class,
+            SetupNonTlsToTlsHandler.class,
             RestartCmHandler.class,
             UpdateLatestRdsCertificateHandler.class,
             RollingRestartServicesHandler.class,
@@ -341,6 +355,9 @@ class RotateRdsCertificateFlowIntegrationTest {
 
         @MockBean
         private RotateRdsCertificateService rotateRdsCertificateService;
+
+        @MockBean
+        private MigrateRdsCertificateService migrateRdsCertificateService;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {

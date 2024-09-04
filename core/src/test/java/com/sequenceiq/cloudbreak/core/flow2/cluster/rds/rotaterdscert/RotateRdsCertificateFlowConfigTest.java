@@ -6,6 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState;
 
 class RotateRdsCertificateFlowConfigTest {
 

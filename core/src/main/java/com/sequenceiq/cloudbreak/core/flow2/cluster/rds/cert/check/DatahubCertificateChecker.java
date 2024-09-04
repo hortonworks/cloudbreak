@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.check;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check;
 
 import java.util.List;
 import java.util.stream.Collectors;

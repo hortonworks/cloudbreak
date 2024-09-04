@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert;
 
 import java.util.Optional;
 
@@ -6,16 +6,16 @@ import jakarta.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateBaseEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
-public abstract class AbstractRotateRdsCertificateAction<P extends Payload>
+public abstract class AbstractRotateRdsCertificateAction<P extends RotateRdsCertificateBaseEvent>
         extends AbstractStackAction<RotateRdsCertificateState, RotateRdsCertificateEvent, RotateRdsCertificateContext, P> {
 
     @Inject
@@ -32,7 +32,7 @@ public abstract class AbstractRotateRdsCertificateAction<P extends Payload>
         ClusterView cluster = stackDtoService.getClusterViewByStackId(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         MDCBuilder.buildMdcContext(cluster);
-        return new RotateRdsCertificateContext(flowParameters, payload.getResourceId(), stack);
+        return new RotateRdsCertificateContext(flowParameters, payload.getResourceId(), stack, payload.getRotateRdsCertificateType());
     }
 
     @Override

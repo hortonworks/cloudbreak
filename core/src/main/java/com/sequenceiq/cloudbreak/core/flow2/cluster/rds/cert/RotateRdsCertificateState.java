@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert;
 
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
@@ -9,6 +9,7 @@ public enum RotateRdsCertificateState implements FlowState {
     INIT_STATE,
     ROTATE_RDS_CERTIFICATE_FAILED_STATE,
     ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_STATE,
+    ROTATE_RDS_SETUP_TLS_STATE,
     ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE,
     ROTATE_RDS_CERTIFICATE_UPDATE_TO_LATEST_STATE,
     ROTATE_RDS_CERTIFICATE_RESTART_CM_STATE,

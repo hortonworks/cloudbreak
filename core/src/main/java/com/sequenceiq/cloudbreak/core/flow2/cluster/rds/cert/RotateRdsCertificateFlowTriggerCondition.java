@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert;
 
 import jakarta.inject.Inject;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ROTATE_RDS_CERTIFICATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
@@ -22,11 +22,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RotateRdsCertificateType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.check.DatahubCertificateChecker;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatahubCertificateChecker;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -48,7 +49,6 @@ import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -104,63 +104,63 @@ public class RotateRdsCertificateService {
     @Inject
     private DatahubCertificateChecker datahubCertificateChecker;
 
-    void checkPrerequisitesState(Long stackId) {
+    public void checkPrerequisitesState(Long stackId) {
         String statusReason = "Checking cluster prerequisites for RDS certificate rotation";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ROTATE_RDS_CERTIFICATE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES);
     }
 
-    void getLatestRdsCertificateState(Long stackId) {
+    public void getLatestRdsCertificateState(Long stackId) {
         String statusReason = "Obtaining the latest RDS certificate";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ROTATE_RDS_CERTIFICATE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_GET_LATEST);
     }
 
-    void updateLatestRdsCertificateState(Long stackId) {
+    public void updateLatestRdsCertificateState(Long stackId) {
         String statusReason = "Pushing latest RDS certificate to the cluster";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ROTATE_RDS_CERTIFICATE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_PUSH_LATEST);
     }
 
-    void restartCmState(Long stackId) {
+    public void restartCmState(Long stackId) {
         String statusReason = "Restarting Cluster Manager service";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ROTATE_RDS_CERTIFICATE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_CM_RESTART);
     }
 
-    void rollingRestartRdsCertificateState(Long stackId) {
+    public void rollingRestartRdsCertificateState(Long stackId) {
         String statusReason = "Restarting cluster services";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ROTATE_RDS_CERTIFICATE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_ROLLING_SERVICE_RESTART);
     }
 
-    void rotateOnProviderState(Long stackId) {
+    public void rotateOnProviderState(Long stackId) {
         String statusReason = "Rotating RDS certificate";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.ROTATE_RDS_CERTIFICATE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_ON_PROVIDER);
     }
 
-    void rotateRdsCertFinished(Long stackId) {
+    public void rotateRdsCertFinished(Long stackId) {
         String statusReason = "RDS certificate rotation finished";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, statusReason);
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_FINISHED);
     }
 
-    void rotateRdsCertFailed(RotateRdsCertificateFailedEvent failedEvent) {
+    public void rotateRdsCertFailed(RotateRdsCertificateFailedEvent failedEvent) {
         String statusReason = "RDS certificate rotation failed: " + failedEvent.getException().getMessage();
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(failedEvent.getResourceId(), ROTATE_RDS_CERTIFICATE_FAILED, statusReason);
         flowMessageService.fireEventAndLog(failedEvent.getResourceId(), UPDATE_FAILED.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_FAILED);
     }
 
-    public void checkPrerequisites(Long stackId) {
+    public void checkPrerequisites(Long stackId, RotateRdsCertificateType rotateRdsCertificateType) {
         StackView stack = stackDtoService.getStackViewById(stackId);
         if (AWS.name().equalsIgnoreCase(stack.getCloudPlatform())) {
             List<String> datahubsWhichMustBeUpdated = datahubCertificateChecker.collectDatahubsWhichMustBeUpdated(stack);
@@ -172,11 +172,13 @@ public class RotateRdsCertificateService {
                 throw new CloudbreakServiceException(errorMessage);
             }
             Cluster cluster = clusterService.getCluster(stack.getClusterId());
-            if (cluster != null && cluster.getDbSslRootCertBundle() != null && cluster.getDbSslEnabled()) {
-                LOGGER.info("{} with name {} is applicable for rotation", getType(stack), stack.getName());
-            } else {
-                throw new CloudbreakServiceException(String.format("%s Database not ssl enabled. " +
-                        "Rotation of certificate does not supported", getType(stack)));
+            if (rotateRdsCertificateType.equals(RotateRdsCertificateType.ROTATE)) {
+                if (cluster != null && cluster.getDbSslRootCertBundle() != null && cluster.getDbSslEnabled()) {
+                    LOGGER.info("{} with name {} is applicable for rotation", getType(stack), stack.getName());
+                } else {
+                    throw new CloudbreakServiceException(String.format("%s Database not ssl enabled. " +
+                            "Rotation of certificate does not supported", getType(stack)));
+                }
             }
         } else {
             throw new CloudbreakServiceException(String.format("%s is not deployed on AWS. " +
@@ -187,15 +189,16 @@ public class RotateRdsCertificateService {
     public void getLatestRdsCertificate(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
         String datalakeCrn = stackDto.getDatalakeCrn();
-        if (StringUtils.isNoneEmpty(datalakeCrn) && isPaaSDataLake(datalakeCrn)) {
+
+        if (datahubHasAttachedPaasDatalake(datalakeCrn)) {
             StackDto datalakeDto = stackDtoService.getByCrn(datalakeCrn);
-            if (datalakeDto.getCluster().hasExternalDatabase()) {
+            if (clusterHasExternalDatabase(datalakeDto)) {
                 LOGGER.info("Update Datalake's RDS SSL certificate to the latest: '{}/{}'", datalakeDto.getName(), datalakeCrn);
                 Cluster cluster = clusterService.getCluster(datalakeDto.getCluster().getId());
                 externalDatabaseService.updateToLatestSslCert(cluster);
             }
         }
-        if (stackDto.getCluster().hasExternalDatabase()) {
+        if (clusterHasExternalDatabase(stackDto)) {
             LOGGER.info("Update ('{}')'s external database SSL certificate to the latest", stackDto.getName());
             Cluster cluster = clusterService.getCluster(stackDto.getCluster().getId());
             externalDatabaseService.updateToLatestSslCert(cluster);
@@ -204,10 +207,6 @@ public class RotateRdsCertificateService {
             LOGGER.info("Update ('{}')'s embedded database SSL certificate to the latest", stackDto.getName());
             databaseSslService.setEmbeddedDbSslDetailsAndUpdateInClusterInternal(stackDto);
         }
-    }
-
-    private boolean isPaaSDataLake(String datalakeCrn) {
-        return datalakeCrn != null && PAAS.equals(TargetPlatform.getByCrn(datalakeCrn));
     }
 
     public void updateLatestRdsCertificate(Long stackId) {
@@ -249,7 +248,7 @@ public class RotateRdsCertificateService {
 
     public void rotateOnProvider(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
-        if (stackDto.getCluster().hasExternalDatabase()) {
+        if (clusterHasExternalDatabase(stackDto)) {
             Cluster cluster = clusterService.getCluster(stackDto.getCluster().getId());
             externalDatabaseService.rotateSSLCertificate(cluster);
         }
@@ -268,13 +267,24 @@ public class RotateRdsCertificateService {
     }
 
     private void restartCMServer(StackDto stackDto) throws Exception {
-        ClusterView cluster = stackDto.getCluster();
         StackView stack = stackDto.getStack();
         InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
-        ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
+        ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), stackDto.getCluster().getId());
         hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, exitModel);
         clusterManagerDefaultConfigAdjuster.waitForClusterManagerToBecomeAvailable(stackDto, false);
+    }
+
+    private boolean clusterHasExternalDatabase(StackDto stackDto) {
+        return stackDto.getCluster().hasExternalDatabase();
+    }
+
+    private boolean datahubHasAttachedPaasDatalake(String datalakeCrn) {
+        return StringUtils.isNoneEmpty(datalakeCrn) && isPaaSDataLake(datalakeCrn);
+    }
+
+    private boolean isPaaSDataLake(String datalakeCrn) {
+        return datalakeCrn != null && PAAS.equals(TargetPlatform.getByCrn(datalakeCrn));
     }
 }

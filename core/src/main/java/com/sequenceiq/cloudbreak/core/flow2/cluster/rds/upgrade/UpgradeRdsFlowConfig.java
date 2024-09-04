@@ -49,19 +49,24 @@ public class UpgradeRdsFlowConfig extends StackStatusFinalizerAbstractFlowConfig
     private static final List<Transition<UpgradeRdsState, UpgradeRdsEvent>> TRANSITIONS =
             new Builder<UpgradeRdsState, UpgradeRdsEvent>()
                     .defaultFailureEvent(UPGRADE_RDS_FAILED_EVENT)
-                    .from(INIT_STATE).to(UPGRADE_RDS_STOP_SERVICES_STATE)
+
+                    .from(INIT_STATE)
+                    .to(UPGRADE_RDS_STOP_SERVICES_STATE)
                     .event(UPGRADE_RDS_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_RDS_STOP_SERVICES_STATE).to(UPGRADE_RDS_DATA_BACKUP_STATE)
+                    .from(UPGRADE_RDS_STOP_SERVICES_STATE)
+                    .to(UPGRADE_RDS_DATA_BACKUP_STATE)
                     .event(UPGRADE_RDS_STOP_SERVICES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_RDS_DATA_BACKUP_STATE).to(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE)
+                    .from(UPGRADE_RDS_DATA_BACKUP_STATE)
+                    .to(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE)
                     .event(UPGRADE_RDS_DATA_BACKUP_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE).to(UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE)
+                    .from(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE)
+                    .to(UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE)
                     .event(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT)
                     .defaultFailureEvent()
 

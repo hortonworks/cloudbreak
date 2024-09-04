@@ -602,4 +602,9 @@ public class StackCommonService {
         MDCBuilder.buildMdcContext(stack);
         return clusterOperationService.rotateRdsCertificate(stack);
     }
+
+    public FlowIdentifier triggerMigrateRdsToTls(StackView stack) {
+        MDCBuilder.buildMdcContext(stack);
+        return clusterOperationService.triggerMigrateRdsToTls(stack);
+    }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RotateRdsCertificateType.ROTATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +33,8 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.check.DatahubCertificateChecker;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatahubCertificateChecker;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -150,7 +152,7 @@ class RotateRdsCertificateServiceTest {
 
     @Test
     void testRotateRdsCertFailed() {
-        RotateRdsCertificateFailedEvent failedEvent = new RotateRdsCertificateFailedEvent(STACK_ID, new RuntimeException("error"));
+        RotateRdsCertificateFailedEvent failedEvent = new RotateRdsCertificateFailedEvent(STACK_ID, ROTATE, new RuntimeException("error"));
         underTest.rotateRdsCertFailed(failedEvent);
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.ROTATE_RDS_CERTIFICATE_FAILED), anyString());
         verify(flowMessageService).fireEventAndLog(STACK_ID, UPDATE_FAILED.name(), ResourceEvent.ROTATE_RDS_CERTIFICATE_FAILED);
@@ -169,7 +171,7 @@ class RotateRdsCertificateServiceTest {
         when(cluster.getDbSslRootCertBundle()).thenReturn("some-cert-bundle");
         when(cluster.getDbSslEnabled()).thenReturn(true);
 
-        underTest.checkPrerequisites(stackId);
+        underTest.checkPrerequisites(stackId, ROTATE);
 
         verify(stackDtoService).getStackViewById(stackId);
         verify(clusterService).getCluster(1L);
@@ -184,7 +186,7 @@ class RotateRdsCertificateServiceTest {
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.checkPrerequisites(stackId);
+            underTest.checkPrerequisites(stackId, ROTATE);
         });
 
         assertEquals("Data Hub is not deployed on AWS. Rotation of certificate does not supported", exception.getMessage());
@@ -200,7 +202,7 @@ class RotateRdsCertificateServiceTest {
         when(clusterService.getCluster(any())).thenReturn(null);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.checkPrerequisites(stackId);
+            underTest.checkPrerequisites(stackId, ROTATE);
         });
 
         assertEquals("Data Hub Database not ssl enabled. Rotation of certificate does not supported", exception.getMessage());
@@ -218,7 +220,7 @@ class RotateRdsCertificateServiceTest {
         when(clusterService.getCluster(any())).thenReturn(cluster);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.checkPrerequisites(stackId);
+            underTest.checkPrerequisites(stackId, ROTATE);
         });
 
         assertEquals("Data Hub Database not ssl enabled. Rotation of certificate does not supported", exception.getMessage());
@@ -237,7 +239,7 @@ class RotateRdsCertificateServiceTest {
         when(clusterService.getCluster(any())).thenReturn(cluster);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.checkPrerequisites(stackId);
+            underTest.checkPrerequisites(stackId, ROTATE);
         });
 
         assertEquals("Data Hub Database not ssl enabled. Rotation of certificate does not supported", exception.getMessage());
@@ -256,7 +258,7 @@ class RotateRdsCertificateServiceTest {
         when(clusterService.getCluster(any())).thenReturn(cluster);
         when(datahubCertificateChecker.collectDatahubsWhichMustBeUpdated(any())).thenReturn(List.of());
 
-        underTest.checkPrerequisites(stackId);
+        underTest.checkPrerequisites(stackId, ROTATE);
     }
 
     @Test

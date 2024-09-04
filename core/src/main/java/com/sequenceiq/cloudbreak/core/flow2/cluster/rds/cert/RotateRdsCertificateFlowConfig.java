@@ -1,25 +1,27 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.CM_RESTART_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.FAIL_HANDLED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.FINALIZED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.GET_LATEST_RDS_CERTIFICATE_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROLLING_RESTART_SERVICES_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_FAILED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_ON_PROVIDER_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.UPDATE_TO_LATEST_RDS_CERTIFICATE_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.FINAL_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_ON_PROVIDER_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_RESTART_CM_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_ROLLING_RESTART_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_UPDATE_TO_LATEST_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.CM_RESTART_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.FAIL_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.GET_LATEST_RDS_CERTIFICATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROLLING_RESTART_SERVICES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_ON_PROVIDER_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_TLS_SETUP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.UPDATE_TO_LATEST_RDS_CERTIFICATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.FINAL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_ON_PROVIDER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_RESTART_CM_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_ROLLING_RESTART_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_CERTIFICATE_UPDATE_TO_LATEST_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateState.ROTATE_RDS_SETUP_TLS_STATE;
 
 import java.util.List;
 
@@ -45,8 +47,13 @@ public class RotateRdsCertificateFlowConfig extends StackStatusFinalizerAbstract
                     .defaultFailureEvent()
 
                     .from(ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_STATE)
-                    .to(ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE)
+                    .to(ROTATE_RDS_SETUP_TLS_STATE)
                     .event(ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(ROTATE_RDS_SETUP_TLS_STATE)
+                    .to(ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE)
+                    .event(ROTATE_RDS_CERTIFICATE_TLS_SETUP_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(ROTATE_RDS_CERTIFICATE_GET_LATEST_STATE)

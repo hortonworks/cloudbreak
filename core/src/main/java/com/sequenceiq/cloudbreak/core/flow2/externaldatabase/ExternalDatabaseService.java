@@ -202,12 +202,34 @@ public class ExternalDatabaseService {
         }
     }
 
+    public void turnOnSslOnProvider(Cluster cluster) {
+        String databaseCrn = cluster.getDatabaseServerCrn();
+        try {
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                redbeamsClient.turnOnSslOnProvider(databaseCrn);
+            }
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
     public void rotateSSLCertificate(Cluster cluster) {
         String databaseCrn = cluster.getDatabaseServerCrn();
         try {
             if (externalDatabaseReferenceExist(databaseCrn)) {
                 FlowIdentifier flowIdentifier = redbeamsClient.rotateSslCert(databaseCrn);
                 pollUntilFlowFinished(databaseCrn, flowIdentifier);
+            }
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
+    public void migrateRdsToTls(Cluster cluster) {
+        String databaseCrn = cluster.getDatabaseServerCrn();
+        try {
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                redbeamsClient.migrateRdsToTls(databaseCrn);
             }
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);

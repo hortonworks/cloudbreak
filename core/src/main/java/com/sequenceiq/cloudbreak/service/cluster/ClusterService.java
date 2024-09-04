@@ -540,6 +540,10 @@ public class ClusterService {
         repository.updateClusterManagerIp(clusterId, gatewayIp);
     }
 
+    public void enableSsl(Long clusterId) {
+        repository.enableSsl(clusterId);
+    }
+
     public Cluster getClusterReference(Long id) {
         return repository.getById(id);
     }

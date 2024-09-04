@@ -1,4 +1,6 @@
-package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.rotaterdscert;
+package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds.cert.rotate;
+
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RotateRdsCertificateType.MIGRATE;
 
 import jakarta.inject.Inject;
 
@@ -7,7 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.migrate.MigrateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateLatestRdsCertificateRequest;
@@ -24,6 +27,9 @@ public class UpdateLatestRdsCertificateHandler extends ExceptionCatcherEventHand
     @Inject
     private RotateRdsCertificateService rotateRdsCertificateService;
 
+    @Inject
+    private MigrateRdsCertificateService migrateRdsCertificateService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpdateLatestRdsCertificateRequest.class);
@@ -31,7 +37,7 @@ public class UpdateLatestRdsCertificateHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpdateLatestRdsCertificateRequest> event) {
-        return new RotateRdsCertificateFailedEvent(resourceId, e);
+        return new RotateRdsCertificateFailedEvent(resourceId, event.getData().getRotateRdsCertificateType(), e);
     }
 
     @Override
@@ -39,6 +45,9 @@ public class UpdateLatestRdsCertificateHandler extends ExceptionCatcherEventHand
         UpdateLatestRdsCertificateRequest request = event.getData();
         Long stackId = request.getResourceId();
         rotateRdsCertificateService.updateLatestRdsCertificate(stackId);
-        return new UpdateLatestRdsCertificateResult(stackId);
+        if (MIGRATE.equals(request.getRotateRdsCertificateType())) {
+            migrateRdsCertificateService.enableSslOnClusterSide(stackId);
+        }
+        return new UpdateLatestRdsCertificateResult(stackId, request.getRotateRdsCertificateType());
     }
 }

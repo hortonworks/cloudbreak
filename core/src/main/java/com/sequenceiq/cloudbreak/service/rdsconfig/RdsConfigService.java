@@ -61,6 +61,10 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
                 .orElseThrow(() -> new NotFoundException("Not found " + databaseType + " type rds configuration for stack " + stackCrn));
     }
 
+    public void enableSsl(Long rdsConfigId) {
+        rdsConfigRepository.enableSsl(rdsConfigId);
+    }
+
     @Override
     public RDSConfig delete(RDSConfig rdsConfig) {
         MDCBuilder.buildMdcContext(rdsConfig);

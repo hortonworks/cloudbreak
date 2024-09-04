@@ -7,6 +7,7 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -66,4 +67,8 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     @Query("SELECT rc FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.rdsConfigs rc " +
             "WHERE s.resourceCrn = :stackCrn AND rc.type = :databaseType AND rc.status = 'DEFAULT'")
     Optional<RDSConfig> findByStackIdAndType(@Param("stackCrn") String stackCrn, @Param("databaseType") String databaseType);
+
+    @Modifying
+    @Query("UPDATE RDSConfig r SET r.sslMode = 'ENABLED' WHERE r.id = :id")
+    void enableSsl(@Param("id") Long id);
 }

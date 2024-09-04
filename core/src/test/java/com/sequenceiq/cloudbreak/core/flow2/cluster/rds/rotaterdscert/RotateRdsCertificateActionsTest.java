@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.FAIL_HANDLED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RotateRdsCertificateType.ROTATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.FAIL_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.FINALIZED_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -30,6 +31,9 @@ import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateActions;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.migrate.MigrateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -40,13 +44,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.Restart
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RollingRestartServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RollingRestartServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateCheckPrerequisitesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateCheckPrerequisitesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateOnProviderRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateOnProviderResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateLatestRdsCertificateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateLatestRdsCertificateResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.UpdateTlsRdsResult;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -138,6 +142,9 @@ class RotateRdsCertificateActionsTest {
     @Mock
     private FlowEvent flowEvent;
 
+    @Mock
+    private MigrateRdsCertificateService migrateRdsCertificateService;
+
     @InjectMocks
     private RotateRdsCertificateActions underTest;
 
@@ -159,7 +166,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void checkPrerequisitesAction() {
-        RotateRdsCertificateTriggerRequest request = new RotateRdsCertificateTriggerRequest(ACTION_PAYLOAD_SELECTOR, STACK_ID);
+        RotateRdsCertificateTriggerRequest request = new RotateRdsCertificateTriggerRequest(ACTION_PAYLOAD_SELECTOR, STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(request);
         Action<?, ?> action = configureAction(underTest::checkPrerequisites);
         action.execute(stateContext);
@@ -170,7 +177,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void getLatestRdsCertificateAction() {
-        RotateRdsCertificateCheckPrerequisitesResult payload = new RotateRdsCertificateCheckPrerequisitesResult(STACK_ID);
+        UpdateTlsRdsResult payload = new UpdateTlsRdsResult(STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         Action<?, ?> action = configureAction(underTest::getLatestRdsCertificate);
         action.execute(stateContext);
@@ -181,7 +188,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void updateLatestRdsCertificateAction() {
-        GetLatestRdsCertificateResult payload = new GetLatestRdsCertificateResult(STACK_ID);
+        GetLatestRdsCertificateResult payload = new GetLatestRdsCertificateResult(STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         Action<?, ?> action = configureAction(underTest::updateLatestRdsCertificate);
         action.execute(stateContext);
@@ -192,7 +199,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void restartCmServiceAction() {
-        UpdateLatestRdsCertificateResult payload = new UpdateLatestRdsCertificateResult(STACK_ID);
+        UpdateLatestRdsCertificateResult payload = new UpdateLatestRdsCertificateResult(STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         Action<?, ?> action = configureAction(underTest::restartCmService);
         action.execute(stateContext);
@@ -203,7 +210,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void rollingRestartRdsCertificateAction() {
-        RestartCmResult payload = new RestartCmResult(STACK_ID);
+        RestartCmResult payload = new RestartCmResult(STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         Action<?, ?> action = configureAction(underTest::rollingRestartRdsCertificate);
         action.execute(stateContext);
@@ -214,7 +221,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void rotateRdsCertOnProviderAction() {
-        RollingRestartServicesResult payload = new RollingRestartServicesResult(STACK_ID);
+        RollingRestartServicesResult payload = new RollingRestartServicesResult(STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         Action<?, ?> action = configureAction(underTest::rotateRdsCertOnProvider);
         action.execute(stateContext);
@@ -225,7 +232,7 @@ class RotateRdsCertificateActionsTest {
 
     @Test
     void rotateRdsCertFinishedAction() {
-        RotateRdsCertificateOnProviderResult payload = new RotateRdsCertificateOnProviderResult(STACK_ID);
+        RotateRdsCertificateOnProviderResult payload = new RotateRdsCertificateOnProviderResult(STACK_ID, ROTATE);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
         Action<?, ?> action = configureAction(underTest::rotateRdsCertFinished);
         action.execute(stateContext);
@@ -238,7 +245,7 @@ class RotateRdsCertificateActionsTest {
     @Test
     void rotateRdsCertFailedAction() {
         RuntimeException expectedException = new RuntimeException(MESSAGE);
-        RotateRdsCertificateFailedEvent failedPayload = new RotateRdsCertificateFailedEvent(STACK_ID, expectedException);
+        RotateRdsCertificateFailedEvent failedPayload = new RotateRdsCertificateFailedEvent(STACK_ID, ROTATE, expectedException);
 
         when(runningFlows.get(anyString())).thenReturn(flow);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(failedPayload);

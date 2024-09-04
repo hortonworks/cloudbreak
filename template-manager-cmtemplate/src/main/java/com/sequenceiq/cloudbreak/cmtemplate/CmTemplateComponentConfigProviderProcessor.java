@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -21,6 +24,9 @@ public class CmTemplateComponentConfigProviderProcessor {
 
     @Inject
     private List<CmTemplateComponentConfigProvider> providers;
+
+    @Inject
+    private List<AbstractRdsRoleConfigProvider> rdsRoleConfigProviders;
 
     public CmTemplateProcessor process(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template) {
         for (CmTemplateComponentConfigProvider provider : providers) {
@@ -51,5 +57,21 @@ public class CmTemplateComponentConfigProviderProcessor {
             }
         }
         return cmTemplateProcessor;
+    }
+
+    public Table<String, String, String> collectDataConfigurations(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template) {
+        Table<String, String, String> cmServiceConfigTable = HashBasedTable.create();
+        for (CmTemplateComponentConfigProvider provider : rdsRoleConfigProviders) {
+            String simpleName = provider.getClass().getSimpleName();
+            if (provider.isConfigurationNeeded(cmTemplateProcessor, template)) {
+                LOGGER.info("{} is configuring", simpleName);
+                List<ApiClusterTemplateConfig> serviceConfigs = provider.getServiceConfigs(cmTemplateProcessor, template);
+                LOGGER.info("Adding serviceconfigs: {} ", serviceConfigs);
+                for (ApiClusterTemplateConfig serviceConfig : serviceConfigs) {
+                    cmServiceConfigTable.put(provider.getServiceType(), serviceConfig.getName(), serviceConfig.getValue());
+                }
+            }
+        }
+        return cmServiceConfigTable;
     }
 }
