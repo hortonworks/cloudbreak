@@ -1,29 +1,17 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.JAVA_EXCLUDE_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.JAVA_INTERMEDIATE2018;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.LOGIN_BANNER;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.OPENSSL_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.POLICY_DESCRIPTION;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.POLICY_NAME;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.POLICY_VERSION;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.TLS_CIPHERS_LIST_OPENSSL;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.TLS_CIPHER_SUITE;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.TLS_CIPHER_SUITE_JAVA;
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerFedRAMPService.TLS_CIPHER_SUITE_JAVA_EXCLUDE;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
-import com.cloudera.api.swagger.model.ApiConfigPolicy;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerFedRAMPServiceTest {
@@ -32,46 +20,16 @@ public class ClouderaManagerFedRAMPServiceTest {
     private ClouderaManagerFedRAMPService underTest;
 
     @Test
-    public void testGetApiConfigPolicyWhenEverythingWorksShouldReturnWithFivePolicy() {
-        ApiConfigPolicy apiConfigPolicy = underTest.getApiConfigPolicy();
+    public void testGetApiConfigEnforcements() {
+        ReflectionTestUtils.setField(underTest, "banner", "banner_text");
 
-        Assertions.assertEquals(apiConfigPolicy.getVersion(), POLICY_VERSION);
-        Assertions.assertEquals(apiConfigPolicy.getName(), POLICY_NAME);
-        Assertions.assertEquals(apiConfigPolicy.getDescription(), POLICY_DESCRIPTION);
-        Assertions.assertEquals(apiConfigPolicy.getConfigEnforcements().size(), 5);
-        Assertions.assertEquals(apiConfigPolicy.getConfigEnforcements()
-                        .stream()
-                        .map(ApiConfigEnforcement::getLabel)
-                        .collect(Collectors.toSet()),
-                Set.of(TLS_CIPHER_SUITE_JAVA_EXCLUDE, LOGIN_BANNER, TLS_CIPHER_SUITE, TLS_CIPHER_SUITE_JAVA, TLS_CIPHERS_LIST_OPENSSL));
-        Assertions.assertEquals(apiConfigPolicy.getConfigEnforcements()
-                        .stream()
-                        .filter(s -> s.getLabel().equals(TLS_CIPHER_SUITE_JAVA_EXCLUDE))
-                        .map(ApiConfigEnforcement::getDefaultValue)
-                        .findFirst()
-                        .get(),
-                JAVA_EXCLUDE_INTERMEDIATE2018);
-        Assertions.assertEquals(apiConfigPolicy.getConfigEnforcements()
-                        .stream()
-                        .filter(s -> s.getLabel().equals(TLS_CIPHER_SUITE))
-                        .map(ApiConfigEnforcement::getDefaultValue)
-                        .findFirst()
-                        .get(),
-                INTERMEDIATE2018);
-        Assertions.assertEquals(apiConfigPolicy.getConfigEnforcements()
-                        .stream()
-                        .filter(s -> s.getLabel().equals(TLS_CIPHER_SUITE_JAVA))
-                        .map(ApiConfigEnforcement::getDefaultValue)
-                        .findFirst()
-                        .get(),
-                JAVA_INTERMEDIATE2018);
-        Assertions.assertEquals(apiConfigPolicy.getConfigEnforcements()
-                        .stream()
-                        .filter(s -> s.getLabel().equals(TLS_CIPHERS_LIST_OPENSSL))
-                        .map(ApiConfigEnforcement::getDefaultValue)
-                        .findFirst()
-                        .get(),
-                OPENSSL_INTERMEDIATE2018);
+        List<ApiConfigEnforcement> result = underTest.getApiConfigEnforcements();
+
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(ApiConfigEnforcement::getLabel)
+                .hasSameElementsAs(List.of(LOGIN_BANNER));
+        assertThat(result).filteredOn(enforcement -> LOGIN_BANNER.equals(enforcement.getLabel()))
+                .extracting(ApiConfigEnforcement::getDefaultValue)
+                .containsExactly("banner_text");
     }
-
 }

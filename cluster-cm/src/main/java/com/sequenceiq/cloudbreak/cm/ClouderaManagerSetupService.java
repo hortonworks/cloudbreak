@@ -10,6 +10,7 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -40,7 +41,9 @@ import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigEnforcement;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiConfigPolicy;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
@@ -90,6 +93,16 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 @Scope("prototype")
 public class ClouderaManagerSetupService implements ClusterSetupService {
 
+    public static final String POLICY_VERSION = "1.0";
+
+    public static final String POLICY_DESCRIPTION = "Cloudera configured API Config Policy with TLS ciphers";
+
+    public static final String POLICY_DESCRIPTION_GOV = "Cloudera configured API Config Policy with TLS ciphers and FISMA login banner";
+
+    public static final String POLICY_NAME = "Policy with TLS ciphers";
+
+    public static final String POLICY_NAME_GOV = "Policy with TLS ciphers and FISMA login banner";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerSetupService.class);
 
     private static final String SDX_ENTERPRISE_DATALAKE_TEXT = "enterprise-datalake";
@@ -137,6 +150,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
+
+    @Inject
+    private ClouderaManagerCipherService clouderaManagerCipherService;
 
     @Inject
     private ClouderaManagerFedRAMPService clouderaManagerFedRAMPService;
@@ -337,10 +353,20 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     public void publishPolicy(String template, boolean govCloud) {
         try {
             ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
-            if (govCloud && isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_9_2)) {
-                LOGGER.info("Policy configuration will happen because the cluster is AWS GOV cluster.");
+            if (isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_9_2)) {
+                LOGGER.info("Configuring API policy for Cloudera Manager...");
                 ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
-                clouderaManagerResourceApi.addConfigPolicy(clouderaManagerFedRAMPService.getApiConfigPolicy());
+                List<ApiConfigEnforcement> apiConfigEnforcements = new ArrayList<>(clouderaManagerCipherService.getApiConfigEnforcements());
+                if (govCloud) {
+                    LOGGER.info("Adding FedRAMP related enforcements to the policy...");
+                    apiConfigEnforcements.addAll(clouderaManagerFedRAMPService.getApiConfigEnforcements());
+                }
+                ApiConfigPolicy apiConfigPolicy = new ApiConfigPolicy()
+                        .version(POLICY_VERSION)
+                        .name(govCloud ? POLICY_NAME_GOV : POLICY_NAME)
+                        .description(govCloud ? POLICY_DESCRIPTION_GOV : POLICY_DESCRIPTION)
+                        .configEnforcements(apiConfigEnforcements);
+                clouderaManagerResourceApi.addConfigPolicy(apiConfigPolicy);
             }
         } catch (Exception e) {
             LOGGER.error("Policy configuration error occurred.", e);

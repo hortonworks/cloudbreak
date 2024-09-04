@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_DESCRIPTION;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_DESCRIPTION_GOV;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_NAME;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_NAME_GOV;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerSetupService.POLICY_VERSION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,6 +19,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +37,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -90,7 +98,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @ExtendWith(MockitoExtension.class)
-public class ClouderaManagerSetupServiceTest {
+class ClouderaManagerSetupServiceTest {
 
     private static final String PROXY_PROTOCOL = "tcp";
 
@@ -147,6 +155,9 @@ public class ClouderaManagerSetupServiceTest {
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
 
     @Mock
+    private ClouderaManagerCipherService clouderaManagerCipherService;
+
+    @Mock
     private ClouderaManagerFedRAMPService clouderaManagerFedRAMPService;
 
     @Mock
@@ -162,7 +173,7 @@ public class ClouderaManagerSetupServiceTest {
     private ClouderaManagerSetupService underTest;
 
     @BeforeEach
-    public void before() {
+    void before() {
         underTest = new ClouderaManagerSetupService(testStack(), new HttpClientConfig("10.0.0.0"));
 
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
@@ -178,6 +189,7 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clouderaManagerSupportSetupService", clouderaManagerSupportSetupService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerYarnSetupService", clouderaManagerYarnSetupService);
         ReflectionTestUtils.setField(underTest, "clusterCommandService", clusterCommandService);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerCipherService", clouderaManagerCipherService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerFedRAMPService", clouderaManagerFedRAMPService);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
         ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
@@ -186,7 +198,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testAutoconfigureWhenItDoesItsJob() throws ApiException {
+    void testAutoconfigureWhenItDoesItsJob() throws ApiException {
         MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
                 .thenReturn(mgmtServiceResourceApi);
@@ -197,7 +209,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testAutoconfigureWhenThrowsException() throws ApiException {
+    void testAutoconfigureWhenThrowsException() throws ApiException {
         MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any(ApiClient.class)))
                 .thenReturn(mgmtServiceResourceApi);
@@ -208,7 +220,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testValidateLicenceWhenEverythingWorkAsExpectedShouldNotThrowException() {
+    void testValidateLicenceWhenEverythingWorkAsExpectedShouldNotThrowException() {
         doNothing().when(clouderaManagerLicenseService).validateClouderaManagerLicense(any());
 
         underTest.validateLicence();
@@ -216,43 +228,37 @@ public class ClouderaManagerSetupServiceTest {
         verify(clouderaManagerLicenseService, times(1)).validateClouderaManagerLicense(any());
     }
 
-    @Test
-    public void testPublishPolicyWhenGovCloudAndHigherThan792() throws ApiException, IOException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testPublishPolicyWhenCMVersionHigherThan792(boolean govCloud) throws ApiException {
         ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
-
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerFedRAMPService.getApiConfigPolicy()).thenReturn(new ApiConfigPolicy());
 
-        when(clouderaManagerResourceApi.addConfigPolicy(argumentCaptor.capture())).thenReturn(new ApiConfigPolicy());
+        underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", govCloud);
 
-        underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", true);
-
-        verify(clouderaManagerResourceApi, times(1)).addConfigPolicy(any());
-
+        verify(clouderaManagerResourceApi, times(1)).addConfigPolicy(argumentCaptor.capture());
+        verify(clouderaManagerCipherService, times(1)).getApiConfigEnforcements();
+        verify(clouderaManagerFedRAMPService, times(govCloud ? 1 : 0)).getApiConfigEnforcements();
+        ApiConfigPolicy apiConfigPolicy = argumentCaptor.getValue();
+        assertEquals(apiConfigPolicy.getVersion(), POLICY_VERSION);
+        assertEquals(apiConfigPolicy.getName(), govCloud ? POLICY_NAME_GOV : POLICY_NAME);
+        assertEquals(apiConfigPolicy.getDescription(), govCloud ? POLICY_DESCRIPTION_GOV : POLICY_DESCRIPTION);
     }
 
     @Test
-    public void testPublishPolicyWhenNonGovCloudAndHigherThan792() throws ApiException, IOException {
+    void testPublishPolicyWhenCMVersionLowerThan792() throws ApiException, IOException {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-
-        underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.2\",\"displayName\":\"opdb\"}", false);
-
-        verify(clouderaManagerResourceApi, times(0)).addConfigPolicy(any());
-    }
-
-    @Test
-    public void testPublishPolicyWhenGovCloudAndLowerThan792() throws ApiException, IOException {
-        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
-        ArgumentCaptor<ApiConfigPolicy> argumentCaptor = ArgumentCaptor.forClass(ApiConfigPolicy.class);
 
         underTest.publishPolicy("{\"cdhVersion\":\"7.2.16\",\"cmVersion\":\"7.9.1\",\"displayName\":\"opdb\"}", true);
 
-        verify(clouderaManagerResourceApi, times(0)).addConfigPolicy(any());
+        verify(clouderaManagerCipherService, never()).getApiConfigEnforcements();
+        verify(clouderaManagerFedRAMPService, never()).getApiConfigEnforcements();
+        verify(clouderaManagerResourceApi, never()).addConfigPolicy(any());
     }
 
     @Test
-    public void testValidateLicenceWhenItThrowExceptionShouldMapToClouderaManagerOperationFailedException() {
+    void testValidateLicenceWhenItThrowExceptionShouldMapToClouderaManagerOperationFailedException() {
         doThrow(new RuntimeException()).when(clouderaManagerLicenseService).validateClouderaManagerLicense(any());
 
         ClouderaManagerOperationFailedException actual =
@@ -263,7 +269,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureManagementServicesWhenApiExceptionHappensThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
+    void testConfigureManagementServicesWhenApiExceptionHappensThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
         ApiException error = mock(ApiException.class);
         HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
         TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
@@ -319,7 +325,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureManagementServicesWhenCManagerOperationFailedExceptionHappensThenShouldThrowCManagerOperationFailedException() throws Exception {
+    void testConfigureManagementServicesWhenCManagerOperationFailedExceptionHappensThenShouldThrowCManagerOperationFailedException() throws Exception {
         HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
         TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
         String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
@@ -372,7 +378,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureManagementServicesWhenThePrimaryGatewayInstanceDiscoveryFQDNIsPresentedOnCMSideShoudCallSetupMgmtServices() throws Exception {
+    void testConfigureManagementServicesWhenThePrimaryGatewayInstanceDiscoveryFQDNIsPresentedOnCMSideShoudCallSetupMgmtServices() throws Exception {
         HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
         TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
         String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
@@ -423,7 +429,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureManagementServicesWhenThePrimaryGatewayInstanceDiscoveryFQDNIsNOTPresentedOnCMSideShoudNOTCallSetupMgmtServices() throws Exception {
+    void testConfigureManagementServicesWhenThePrimaryGatewayInstanceDiscoveryFQDNIsNOTPresentedOnCMSideShoudNOTCallSetupMgmtServices() throws Exception {
         HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
         TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
         String mockSdxContext = JsonUtil.writeValueAsString(new ApiRemoteDataContext());
@@ -465,7 +471,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureKerberosWhenCMVersionIsLowerThen630ShouldCallConfigureKerberos() throws Exception {
+    void testConfigureKerberosWhenCMVersionIsLowerThen630ShouldCallConfigureKerberos() throws Exception {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.2.0");
@@ -491,7 +497,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureKerberosWhenCMVersionIsHigherThen630ShouldCallConfigureKerberos() throws Exception {
+    void testConfigureKerberosWhenCMVersionIsHigherThen630ShouldCallConfigureKerberos() throws Exception {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.5.0");
@@ -510,7 +516,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureKerberosWhenThrowApiExceptionThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
+    void testConfigureKerberosWhenThrowApiExceptionThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
         ApiException error = mock(ApiException.class);
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -541,7 +547,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureKerberosWhenThrowClouderaManagerOperationFailedExceptionThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
+    void testConfigureKerberosWhenThrowClouderaManagerOperationFailedExceptionThenShouldThrowClouderaManagerOperationFailedException() throws Exception {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.2.0");
@@ -568,7 +574,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testUpdateConfigWhenUpdateConfigShouldCall() throws Exception {
+    void testUpdateConfigWhenUpdateConfigShouldCall() throws Exception {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
@@ -585,7 +591,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testUpdateConfigWhenUpdateConfigWithDmpEntitlement() throws Exception {
+    void testUpdateConfigWhenUpdateConfigWithDmpEntitlement() throws Exception {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         lenient().when(entitlementService.isObservabilityDmpEnabled(any())).thenReturn(true);
@@ -607,7 +613,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testUpdateConfigWhenUpdateConfigWithAllObservabilityEntitlement() throws Exception {
+    void testUpdateConfigWhenUpdateConfigWithAllObservabilityEntitlement() throws Exception {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         lenient().when(entitlementService.isObservabilityDmpEnabled(any())).thenReturn(true);
@@ -629,7 +635,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testUpdateConfigWhenThrowApiExceptionThenThrowClouderaManagerOperationFailedException() throws Exception {
+    void testUpdateConfigWhenThrowApiExceptionThenThrowClouderaManagerOperationFailedException() throws Exception {
         ApiException error = mock(ApiException.class);
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
@@ -651,7 +657,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testUpdateConfigWhenThrowClouderaManagerOperationFailedExceptionThenThrowClouderaManagerOperationFailedException() throws Exception {
+    void testUpdateConfigWhenThrowClouderaManagerOperationFailedExceptionThenThrowClouderaManagerOperationFailedException() throws Exception {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
@@ -671,7 +677,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testRefreshParcelReposWithPreWarmedImageShouldCallStartPollingCmParcelRepositoryRefresh() throws Exception {
+    void testRefreshParcelReposWithPreWarmedImageShouldCallStartPollingCmParcelRepositoryRefresh() throws Exception {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
         ApiCommand apiCommand = mock(ApiCommand.class);
@@ -697,7 +703,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testRefreshParcelReposWithNONPreWarmedImageShouldNotCallStartPollingCmParcelRepositoryRefresh() {
+    void testRefreshParcelReposWithNONPreWarmedImageShouldNotCallStartPollingCmParcelRepositoryRefresh() {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
 
         when(clouderaManagerRepo.getPredefined()).thenReturn(false);
@@ -713,7 +719,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testRefreshParcelReposWhenApiExceptionOccursShouldThrowCloudbreakServiceException() {
+    void testRefreshParcelReposWhenApiExceptionOccursShouldThrowCloudbreakServiceException() {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
 
         when(clouderaManagerRepo.getPredefined()).thenReturn(true);
@@ -727,7 +733,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testWaitForHostsWhenEverythingFineShouldCmHostStatus() throws Exception {
+    void testWaitForHostsWhenEverythingFineShouldCmHostStatus() throws Exception {
         ApiClient apiClient = mock(ApiClient.class);
 
         when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
@@ -742,7 +748,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testWaitForHostsWhenDropClouderaManagerClientInitExceptionShouldReturnClusterClientInitException() throws Exception {
+    void testWaitForHostsWhenDropClouderaManagerClientInitExceptionShouldReturnClusterClientInitException() throws Exception {
         doThrow(new ClouderaManagerClientInitException()).when(clouderaManagerApiClientProvider)
                 .getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class));
 
@@ -753,7 +759,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testSupressWarningShouldWorkFine() {
+    void testSupressWarningShouldWorkFine() {
         doNothing().when(clouderaManagerYarnSetupService).suppressWarnings(any(Stack.class), any(ApiClient.class));
 
         underTest.suppressWarnings();
@@ -765,7 +771,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testWaitForServerWhenPollingExitedThenShouldReturnWithCancellationException() {
+    void testWaitForServerWhenPollingExitedThenShouldReturnWithCancellationException() {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
 
@@ -779,7 +785,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testWaitForServerWhenPollingFailedThenShouldReturnWithCloudbreakException() {
+    void testWaitForServerWhenPollingFailedThenShouldReturnWithCloudbreakException() {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().failure().build());
 
@@ -793,7 +799,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testWaitForServerWhenPollingSuccessThenEverythingShouldWork() throws ClusterClientInitException, CloudbreakException {
+    void testWaitForServerWhenPollingSuccessThenEverythingShouldWork() throws ClusterClientInitException, CloudbreakException {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
@@ -806,7 +812,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testStartManagementServicesWhenStartSuccessThenShouldEverythingWorksfine() throws ApiException {
+    void testStartManagementServicesWhenStartSuccessThenShouldEverythingWorksfine() throws ApiException {
         doNothing().when(clouderaManagerMgmtLaunchService).startManagementServices(any(Stack.class), any(ApiClient.class));
 
         underTest.startManagementServices();
@@ -818,7 +824,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testStartManagementServicesWhenApiExceptionHappensThenShouldReturnClouderaManagerOperationFailedException() throws ApiException {
+    void testStartManagementServicesWhenApiExceptionHappensThenShouldReturnClouderaManagerOperationFailedException() throws ApiException {
         ApiException error = mock(ApiException.class);
 
         when(error.getResponseBody()).thenReturn(null);
@@ -837,7 +843,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureSupportTagsWhenCmHostPresentedShouldEverythingWorks() throws ApiException {
+    void testConfigureSupportTagsWhenCmHostPresentedShouldEverythingWorks() throws ApiException {
         HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
         ApiHostList apiHostList = mock(ApiHostList.class);
         TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
@@ -862,7 +868,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testConfigureSupportTagsWhenThrowCManagerOperationFailedExceptionShouldThrowCManagerOperationFailedException() throws ApiException {
+    void testConfigureSupportTagsWhenThrowCManagerOperationFailedExceptionShouldThrowCManagerOperationFailedException() throws ApiException {
         HostsResourceApi mockHostsResourceApi = mock(HostsResourceApi.class);
         ApiHostList apiHostList = mock(ApiHostList.class);
         TemplatePreparationObject mockTemplatePreparationObject = mock(TemplatePreparationObject.class);
@@ -890,7 +896,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineButNoProxyHostBecauseOfVersion() throws ApiException {
+    void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineButNoProxyHostBecauseOfVersion() throws ApiException {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
@@ -927,7 +933,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineWithNoProxyHost() throws ApiException {
+    void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineWithNoProxyHost() throws ApiException {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
@@ -1003,7 +1009,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testSetupProxyWhenProxysetupThrowApiExceptionShouldThrowClouderaManagerOperationFailedException() throws ApiException {
+    void testSetupProxyWhenProxysetupThrowApiExceptionShouldThrowClouderaManagerOperationFailedException() throws ApiException {
         ApiException error = mock(ApiException.class);
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
@@ -1027,7 +1033,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testInstallClusterWhenApiExceptionOccursShouldReturnClouderaManagerOperationFailedException() throws ApiException {
+    void testInstallClusterWhenApiExceptionOccursShouldReturnClouderaManagerOperationFailedException() throws ApiException {
         ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
         ApiException error = mock(ApiException.class);
 
@@ -1042,7 +1048,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testInstallClusterWhenEverythingWorksFineShouldPollTheInsallProgress() throws ApiException {
+    void testInstallClusterWhenEverythingWorksFineShouldPollTheInsallProgress() throws ApiException {
         ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
         ApiCommand apiCommand = mock(ApiCommand.class);
         ApiCluster apiCluster = mock(ApiCluster.class);
@@ -1074,7 +1080,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testRetryInstallClusterWhenOriginalSucceeded() throws ApiException {
+    void testRetryInstallClusterWhenOriginalSucceeded() throws ApiException {
         ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
         ApiCommand apiCommand = mock(ApiCommand.class);
         ApiCluster apiCluster = mock(ApiCluster.class);
@@ -1104,7 +1110,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testRetryInstallClusterWhenOriginalFailed() throws ApiException {
+    void testRetryInstallClusterWhenOriginalFailed() throws ApiException {
         ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
         ApiCommand apiCommand = mock(ApiCommand.class);
         ApiCluster apiCluster = mock(ApiCluster.class);
