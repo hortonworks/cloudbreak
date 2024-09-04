@@ -7,15 +7,12 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
+import com.sequenceiq.redbeams.flow.redbeams.common.AbstractRedbeamsFailureAction;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent;
@@ -25,7 +22,7 @@ import com.sequenceiq.redbeams.metrics.RedbeamsMetricService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
 @Component("REDBEAMS_STOP_FAILED_STATE")
-public class StopDatabaseServerFailedAction extends AbstractRedbeamsStopAction<RedbeamsFailureEvent> {
+public class StopDatabaseServerFailedAction extends AbstractRedbeamsFailureAction<RedbeamsStopState, RedbeamsStopEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopDatabaseServerFailedAction.class);
 
@@ -34,10 +31,6 @@ public class StopDatabaseServerFailedAction extends AbstractRedbeamsStopAction<R
 
     @Inject
     private RedbeamsMetricService metricService;
-
-    public StopDatabaseServerFailedAction() {
-        super(RedbeamsFailureEvent.class);
-    }
 
     @Override
     protected void prepareExecution(RedbeamsFailureEvent payload, Map<Object, Object> variables) {
@@ -50,19 +43,7 @@ public class StopDatabaseServerFailedAction extends AbstractRedbeamsStopAction<R
     }
 
     @Override
-    protected RedbeamsContext createFlowContext(
-            FlowParameters flowParameters,
-            StateContext<RedbeamsStopState,
-            RedbeamsStopEvent> stateContext,
-            RedbeamsFailureEvent payload) {
-        Flow flow = getFlow(flowParameters.getFlowId());
-        flow.setFlowFailed(payload.getException());
-
-        return super.createFlowContext(flowParameters, stateContext, payload);
-    }
-
-    @Override
-    protected Selectable createRequest(RedbeamsContext context) {
-        return new RedbeamsEvent(RedbeamsStopEvent.REDBEAMS_STOP_FAILURE_HANDLED_EVENT.event(), context.getDBStack().getId());
+    protected void doExecute(CommonContext context, RedbeamsFailureEvent payload, Map<Object, Object> variables) throws Exception {
+        sendEvent(context, new RedbeamsEvent(RedbeamsStopEvent.REDBEAMS_STOP_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
     }
 }

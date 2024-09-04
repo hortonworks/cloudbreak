@@ -13,16 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.common.AbstractRedbeamsFailureAction;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
@@ -155,13 +154,10 @@ public class RedbeamsTerminationActions {
 
     @Bean(name = "REDBEAMS_TERMINATION_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractRedbeamsTerminationAction<>(RedbeamsFailureEvent.class, false) {
-
-            // A lot here - some of this could go into some sort of failure handler class
-            // compare to core StackCreationService::handleStackCreationFailure
+        return new AbstractRedbeamsFailureAction<RedbeamsTerminationState, RedbeamsTerminationEvent>() {
 
             @Override
-            protected void doExecute(RedbeamsContext context, RedbeamsFailureEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, RedbeamsFailureEvent payload, Map<Object, Object> variables) {
                 Exception failureException = payload.getException();
                 LOGGER.info("Error during database stack termination flow:", failureException);
                 if (failureException instanceof CancellationException || ExceptionUtils.getRootCause(failureException) instanceof CancellationException) {
@@ -173,27 +169,6 @@ public class RedbeamsTerminationActions {
                     metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FAILED, dbStack);
                 }
                 sendEvent(context, REDBEAMS_TERMINATION_FAILURE_HANDLED_EVENT.event(), payload);
-            }
-
-            @Override
-            protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<RedbeamsTerminationState,
-                            RedbeamsTerminationEvent> stateContext,
-                    RedbeamsFailureEvent payload) {
-
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-
-                // FIXME perhaps better to use something like StackFailureContext / AbstractStackFailureAction
-                // - leave out cloud context, cloud credentials, converted database stack
-                // - only "view" of dbstack, but not sure why that matters though
-
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
-
-            @Override
-            protected Object getFailurePayload(RedbeamsFailureEvent payload, Optional<RedbeamsContext> flowContext, Exception ex) {
-                return payload;
             }
         };
     }

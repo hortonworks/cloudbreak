@@ -10,23 +10,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.common.AbstractRedbeamsFailureAction;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.AbstractRedbeamsUpgradeAction;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeState;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
-import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
@@ -82,13 +81,13 @@ public class RedbeamsUpgradeActions {
 
     @Bean(name = "REDBEAMS_UPGRADE_FAILED_STATE")
     public Action<?, ?> upgradeFailed() {
-        return new AbstractRedbeamsUpgradeAction<>(RedbeamsUpgradeFailedEvent.class) {
+        return new AbstractRedbeamsFailureAction<RedbeamsUpgradeState, RedbeamsUpgradeEvent>() {
 
             @Override
-            protected void prepareExecution(RedbeamsUpgradeFailedEvent payload, Map<Object, Object> variables) {
+            protected void prepareExecution(RedbeamsFailureEvent payload, Map<Object, Object> variables) {
 
                 Exception failureException = payload.getException();
-                LOGGER.info("Error during database server upgrade flow:", failureException);
+                LOGGER.error("Error during database server upgrade flow:", failureException);
 
                 if (failureException instanceof CancellationException || ExceptionUtils.getRootCause(failureException) instanceof CancellationException) {
                     LOGGER.debug("The flow has been cancelled");
@@ -101,18 +100,8 @@ public class RedbeamsUpgradeActions {
             }
 
             @Override
-            protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<RedbeamsUpgradeState, RedbeamsUpgradeEvent> stateContext, RedbeamsUpgradeFailedEvent payload) {
-
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
-
-            @Override
-            protected Selectable createRequest(RedbeamsContext context) {
-                return new RedbeamsEvent(RedbeamsUpgradeEvent.REDBEAMS_UPGRADE_FAILURE_HANDLED_EVENT.event(), context.getDBStack().getId());
+            protected void doExecute(CommonContext context, RedbeamsFailureEvent payload, Map<Object, Object> variables) {
+                sendEvent(context, new RedbeamsEvent(RedbeamsUpgradeEvent.REDBEAMS_UPGRADE_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
             }
         };
     }

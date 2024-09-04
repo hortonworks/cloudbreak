@@ -11,18 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.common.AbstractRedbeamsFailureAction;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
@@ -124,10 +123,7 @@ public class RedbeamsProvisionActions {
 
     @Bean(name = "REDBEAMS_PROVISION_FAILED_STATE")
     public Action<?, ?> provisionFailed() {
-        return new AbstractRedbeamsProvisionAction<>(RedbeamsFailureEvent.class) {
-
-            // A lot here - some of this could go into some sort of failure handler class
-            // compare to core StackCreationService::handleStackCreationFailure
+        return new AbstractRedbeamsFailureAction<RedbeamsProvisionState, RedbeamsProvisionEvent>() {
 
             @Override
             protected void prepareExecution(RedbeamsFailureEvent payload, Map<Object, Object> variables) {
@@ -147,23 +143,10 @@ public class RedbeamsProvisionActions {
             }
 
             @Override
-            protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<RedbeamsProvisionState, RedbeamsProvisionEvent> stateContext, RedbeamsFailureEvent payload) {
-
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-
-                // FIXME perhaps better to use something like StackFailureContext / AbstractStackFailureAction
-                // - leave out cloud context, cloud credentials, converted database stack
-                // - only "view" of dbstack, but not sure why that matters though
-
-                return super.createFlowContext(flowParameters, stateContext, payload);
+            protected void doExecute(CommonContext context, RedbeamsFailureEvent payload, Map<Object, Object> variables) {
+                sendEvent(context, new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
             }
 
-            @Override
-            protected Selectable createRequest(RedbeamsContext context) {
-                return new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT.event(), context.getDBStack().getId());
-            }
         };
     }
 }
