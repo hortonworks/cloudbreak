@@ -73,28 +73,28 @@ public class CertRotationService {
                     () -> stackV4Endpoint.rotateAutoTlsCertificates(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, response.getFlowIdentifier());
             updateCertExpirationState(sdxCluster);
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS, "Datalake cert rotation in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS, "Data Lake cert rotation in progress", sdxCluster);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Couldn't start certiificate rotation in CB: {}", errorMessage, e);
+            LOGGER.error("Couldn't start certificate rotation in CB: {}", errorMessage, e);
             throw new RuntimeException(errorMessage, e);
         }
     }
 
     public void finalizeCertRotation(Long id) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datalake cert rotation finished", id);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Data Lake cert rotation finished", id);
     }
 
     public void handleFailure(Long id, Exception exception) {
-        String reason = StringUtils.defaultIfBlank(exception.getMessage(), "Datalake certificate rotation failed");
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FAILED, reason, id);
+        String reason = StringUtils.defaultIfBlank(exception.getMessage(), "Unknown reason");
+        sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.CERT_ROTATION_FAILED, reason, id);
     }
 
     public void waitForCloudbreakClusterCertRotation(Long id, PollingConfig pollingConfig) {
         SdxCluster sdxCluster = sdxService.getById(id);
         statusChecker.pollUpdateUntilAvailable("Certificate rotation", sdxCluster, pollingConfig);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FINISHED, ResourceEvent.SDX_CERT_ROTATION_FINISHED,
-                "Datalake is running", sdxCluster);
+                "Data Lake is running", sdxCluster);
     }
 
     private void updateCertExpirationState(SdxCluster sdxCluster) {

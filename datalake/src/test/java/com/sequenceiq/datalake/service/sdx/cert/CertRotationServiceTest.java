@@ -109,7 +109,7 @@ class CertRotationServiceTest {
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.startCertRotation(1L, request));
 
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS, "Datalake cert rotation in progress", sdxCluster);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS, "Data Lake cert rotation in progress", sdxCluster);
     }
 
     @Test
@@ -132,7 +132,7 @@ class CertRotationServiceTest {
     public void testFinalizeCertRotation() {
         underTest.finalizeCertRotation(1L);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datalake cert rotation finished", 1L);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Data Lake cert rotation finished", 1L);
     }
 
     @Test
@@ -141,7 +141,7 @@ class CertRotationServiceTest {
 
         underTest.handleFailure(1L, exception);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FAILED, exception.getMessage(), 1L);
+        verify(sdxStatusService).setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.CERT_ROTATION_FAILED, exception.getMessage(), 1L);
     }
 
     @Test
@@ -150,7 +150,7 @@ class CertRotationServiceTest {
 
         underTest.handleFailure(1L, exception);
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FAILED, "Datalake certificate rotation failed", 1L);
+        verify(sdxStatusService).setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.CERT_ROTATION_FAILED, "Unknown reason", 1L);
     }
 
     @Test
@@ -162,7 +162,7 @@ class CertRotationServiceTest {
 
         verify(statusChecker).pollUpdateUntilAvailable(eq("Certificate rotation"), eq(sdxCluster), any());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FINISHED, ResourceEvent.SDX_CERT_ROTATION_FINISHED,
-                "Datalake is running", sdxCluster);
+                "Data Lake is running", sdxCluster);
     }
 
     @Test
