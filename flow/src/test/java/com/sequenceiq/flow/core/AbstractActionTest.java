@@ -126,6 +126,17 @@ public class AbstractActionTest {
                 "java.lang.IllegalStateException, message: something went wrong");
     }
 
+    @Test
+    public void testFailedExecuteAndGetFailurePayloadFails() {
+        underTest.setFailureEvent(Event.FAILURE);
+        RuntimeException exception = new IllegalStateException("something went wrong");
+        Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
+        Mockito.doThrow(new NullPointerException("null")).when(underTest).getFailurePayload(any(), any(), any());
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        verify(flowLogDBService, times(1)).closeFlow(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
+                "java.lang.IllegalStateException, message: something went wrong");
+    }
+
     enum State implements FlowState {
         INIT, DOING;
 
