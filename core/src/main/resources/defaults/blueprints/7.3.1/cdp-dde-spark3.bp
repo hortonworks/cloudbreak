@@ -172,6 +172,10 @@
         "serviceType": "HUE",
         "serviceConfigs": [
           {
+            "name": "hue_service_safety_valve",
+            "value": "[desktop]\napp_blacklist=hive,zookeeper,hbase,impala,search,sqoop,security,pig"
+          },
+          {
             "name": "solr_service",
             "ref": "solr-dde"
           }
