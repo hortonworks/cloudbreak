@@ -1,0 +1,854 @@
+{
+  "cdhVersion": "7.2.14",
+  "displayName": "dataengineering ha",
+  "blueprintUpgradeOption": "GA",
+  "services": [
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "hdfs_verify_ec_with_topology_enabled",
+          "value": false
+        },
+        {
+          "name": "dfs_replication",
+          "value": 2
+        },
+        {
+          "name": "core_site_safety_valve",
+          "value": "<property><name>fs.s3a.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/s3a</value></property><property><name>fs.s3a.committer.name</name><value>directory</value></property><property><name>fs.azure.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/abfs</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.parallel.rename.recovery</name><value>true</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.parallel.task.commit</name><value>true</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.mv.threads</name><value>16</value></property><property><name>hadoop.proxyuser.srv_dev-sa-dmr-famcdhdev.groups</name><value>*</value><description>Datameer</description></property><property><name>hadoop.proxyuser.srv_dev-sa-dmr-famcdhdev.hosts</name><value>*</value><description>Datameer_Proxyuser</description></property><property><name>hadoop.proxyuser.srv_infa_famcdhdev.groups</name><value>*</value><description>informatica_user</description></property><property><name>hadoop.proxyuser.srv_infa_famcdhdev.hosts</name><value>*</value><description>informatica_hosts</description></property>"
+        },
+        {
+          "name": "dfs_permissions_supergroup",
+          "value": "tcld-sg-hdfssuperusers"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+              "value": "true"
+            },
+            {
+              "name": "role_config_suppression_fs_trash_interval_minimum_validator",
+              "value": "true"
+            },
+            {
+              "name": "fs_trash_interval",
+              "value": "0"
+            },
+            {
+              "name": "fs_trash_checkpoint_interval",
+              "value": "0"
+            },
+            {
+              "name": "erasure_coding_default_policy",
+              "value": " "
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+          "roleType": "FAILOVERCONTROLLER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-JOURNALNODE-BASE",
+          "roleType": "JOURNALNODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "configs": [
+            {
+              "name": "fs_checkpoint_dir_list",
+              "value": "/should_not_be_required_in_HA_setup"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "dfs_client_use_trash",
+              "value": false
+            },
+            {
+              "name": "role_config_suppression_hdfs_trash_disabled_validator",
+              "value": "true"
+            },
+            {
+              "name": "hdfs_client_env_safety_valve",
+              "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-HTTPFS-BASE",
+          "roleType": "HTTPFS",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hms",
+      "serviceType": "HIVE",
+      "displayName": "Hive Metastore",
+      "roleConfigGroups": [
+        {
+          "refName": "hms-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "hive_client_java_heapsize",
+              "value": 4294967296
+            }
+          ]
+        },
+        {
+          "refName": "hms-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true,
+          "configs": [
+            {
+              "name": "hive_metastore_config_safety_valve",
+              "value": "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>"
+            },
+            {
+              "name": "hive_metastore_delegation_token_store",
+              "value": "org.apache.hadoop.hive.thrift.DBTokenStore"
+            }
+          ]
+        },
+        {
+          "refName": "hms-HIVESERVER2-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true,
+          "configs": [
+            {
+              "name": "hive_client_java_heapsize",
+              "value": 4294967296
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE_ON_TEZ",
+      "displayName": "Hive",
+      "serviceConfigs": [
+        {
+          "name": "tez_auto_reducer_parallelism",
+          "value": "false"
+        },
+        {
+          "name": "hive_service_config_safety_valve",
+          "value": "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property><property><name>hive.server2.tez.session.lifetime</name><value>30m</value></property>\n <property><name>hive.blobstore.supported.schemes</name><value>s3,s3a,s3n,abfs,gs</value></property><property><name>hive.orc.splits.include.fileid</name><value>false</value></property><property><name>hive.hook.proto.events.clean.freq</name><value>1h</value></property>\n <property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property><property><name>parquet.compression</name><value>SNAPPY</value></property><property><name>hive.privilege.synchronizer</name><value>false</value></property><property><name>hive.security.authorization.sqlstd.confwhitelist.append</name><value>hive\\.enforce\\.bucketing|hive\\.root\\.logger|mapreduce\\.job\\.credentials\\.binary|org\\.xerial\\.snappy\\.tempdir|mapred\\.compress\\.map\\.output|mapred\\.output\\.compress|hive\\.exec\\.compress\\.output|hive\\.map\\.groupby\\.sorted|hive\\.ddl\\.output\\.format|hive\\.metastore\\.client\\.socket\\.timeout</value></property><property><name>hive.server2.thrift.saslQop</name><value>auth-conf</value></property>"
+        },
+        {
+          "name": "hive_aux_jars_path_dir",
+          "value": "/opt/cloudera/parcels/CDH/lib/hive-hcatalog/share/hcatalog"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true,
+          "configs": [
+            {
+              "name": "hive_server2_transport_mode",
+              "value": "http"
+            },
+            {
+              "name": "hiveserver2_mv_files_thread",
+              "value": 20
+            },
+            {
+              "name": "hiveserver2_load_dynamic_partitions_thread_count",
+              "value": 20
+            },
+            {
+              "name": "hiveserver2_idle_session_timeout",
+              "value": 14400000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hue",
+      "serviceType": "HUE",
+      "serviceConfigs": [
+        {
+          "name": "hue_service_safety_valve",
+          "value": "[desktop]\napp_blacklist=zookeeper,hbase,search,sqoop,security,pig\n\n[azure]\n[[abfs_clusters]]\n[[[default]]]\n\tfs_defaultfs=abfs://pcdpstorage@dbsmaps1deprdl2.dfs.core.windows.net/\n\twebhdfs_url=https://dbsmaps1deprdl2.dfs.core.windows.net/\n\n"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hue-HUE_SERVER-BASE",
+          "roleType": "HUE_SERVER",
+          "base": true
+        },
+        {
+          "refName": "hue-HUE_LOAD_BALANCER-BASE",
+          "roleType": "HUE_LOAD_BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "livy",
+      "serviceType": "LIVY",
+      "roleConfigGroups": [
+        {
+          "refName": "livy-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "livy-LIVY_SERVER-BASE",
+          "roleType": "LIVY_SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "oozie",
+      "serviceType": "OOZIE",
+      "roleConfigGroups": [
+        {
+          "refName": "oozie-OOZIE_SERVER-BASE",
+          "roleType": "OOZIE_SERVER",
+          "configs": [
+            {
+              "name": "oozie_config_safety_valve",
+              "value": "<property><name>oozie.service.HadoopAccessorService.nameNode.whitelist</name><value></value></property>"
+            }
+          ],
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "sqoop",
+      "serviceType": "SQOOP_CLIENT",
+      "roleConfigGroups": [
+        {
+          "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "configs": [],
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "serviceConfigs": [
+        {
+          "name": "yarn_admin_acl",
+          "value": "yarn,hive,hdfs,mapred,ryoshikawa,sannabiona,smurthyraju,pmanonita,skinra,rlankalapalli,ramoluguri,skshirsagar,asharma,abgupta,pnarsina,jpanol,bvishwaraj,sekirankumar,akamthe,ggrganesh,csso_sannabiona,csso_akamthe,,csso_ggrganesh,csso_pnarsina,,csso_skinra,srv_epr_famcdhdev,,sbishnoi"
+        },
+        {
+          "name": "yarn_service_mapred_safety_valve",
+          "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property><property><name>mapreduce.input.fileinputformat.list-status.num-threads</name><value>100</value></property>"
+        },
+        {
+          "name": "cm_yarn_enable_container_usage_aggregation",
+          "value": "true"
+        },
+        {
+          "name": "cm_yarn_container_usage_job_user",
+          "value": "akamthe"
+        },
+        {
+          "name": "cm_yarn_container_usage_job_pool",
+          "value": "default"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true,
+          "configs": [
+            {
+              "name": "resourcemanager_config_safety_valve",
+              "value": "<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+            },
+            {
+              "name": "yarn_resourcemanager_scheduler_class",
+              "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+            },
+            {
+              "name": "yarn_scheduler_capacity_resource_calculator",
+              "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+            },
+            {
+              "name": "resourcemanager_capacity_scheduler_configuration",
+              "value": "<configuration><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.root.Highpriority.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.Highpriority.capacity</name><value>50</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.ordering-policy</name><value>fair</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.Highpriority.acl_submit_applications</name><value> srv_infa_famcdhdev</value></property><property><name>yarn.scheduler.capacity.root.Mediumpriority.ordering-policy</name><value>fair</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>30</value></property><property><name>yarn.scheduler.capacity.root.Mediumpriority.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.queues</name><value>default,Highpriority,Mediumpriority</value></property><property><name>yarn.scheduler.capacity.root.Highpriority.ordering-policy</name><value>fair</value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.Mediumpriority.maximum-am-resource-percent</name><value>0.8</value></property><property><name>yarn.scheduler.capacity.root.default.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.webservice.mutation-api.version</name><value>1665728491171</value></property><property><name>yarn.scheduler.capacity.root.Mediumpriority.capacity</name><value>20</value></property><property><name>yarn.scheduler.capacity.queue-mappings</name><value>u:srv_infa_famcdhdev:Highpriority,u:srv_epr_famcdhdev:Mediumpriority,u:%user:default</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.root.default.state</name><value>RUNNING</value></property></configuration>"
+            },
+            {
+              "name": "resourcemanager_fair_scheduler_preemption",
+              "value": "true"
+            },
+            {
+              "name": "yarn_scheduler_maximum_allocation_mb",
+              "value": 51200
+            }
+          ]
+        },
+        {
+          "refName": "yarn-NODEMANAGER-BASE",
+          "roleType": "NODEMANAGER",
+          "base": true,
+          "configs": [
+            {
+              "name": "yarn_nodemanager_resource_memory_mb",
+              "value": 51200
+            },
+            {
+              "name": "node_manager_java_heapsize",
+              "value": 2147483648
+            },
+            {
+              "name": "yarn_nodemanager_resource_cpu_vcores",
+              "value": 32
+            }
+          ]
+        },
+        {
+          "refName": "yarn-NODEMANAGER-WORKER",
+          "roleType": "NODEMANAGER",
+          "configs": [
+            {
+              "name": "yarn_nodemanager_resource_memory_mb",
+              "value": 51200
+            },
+            {
+              "name": "node_manager_java_heapsize",
+              "value": 2147483648
+            },
+            {
+              "name": "yarn_nodemanager_resource_cpu_vcores",
+              "value": 32
+            }
+          ],
+          "base": false
+        },
+        {
+          "refName": "yarn-NODEMANAGER-COMPUTE",
+          "roleType": "NODEMANAGER",
+          "configs": [
+            {
+              "name": "yarn_nodemanager_resource_memory_mb",
+              "value": 51200
+            },
+            {
+              "name": "node_manager_java_heapsize",
+              "value": 2147483648
+            },
+            {
+              "name": "yarn_nodemanager_resource_cpu_vcores",
+              "value": 32
+            }
+          ],
+          "base": false
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true
+        },
+        {
+          "refName": "yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "mapreduce_client_env_safety_valve",
+              "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
+            },
+            {
+              "name": "yarn_app_mapreduce_am_resource_mb",
+              "value": 4096
+            },
+            {
+              "name": "mapreduce_map_memory_mb",
+              "value": 4096
+            },
+            {
+              "name": "mapreduce_reduce_memory_mb",
+              "value": 8192
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "spark_on_yarn",
+      "serviceType": "SPARK_ON_YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "roleType": "SPARK_YARN_HISTORY_SERVER",
+          "base": true
+        },
+        {
+          "refName": "spark_on_yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "spark-conf/spark-defaults.conf_client_config_safety_valve",
+              "value": "spark.hadoop.fs.s3a.ssl.channel.mode=openssl\nspark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
+            },
+            {
+              "name": "spark_deploy_mode",
+              "value": "cluster"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "tez",
+      "serviceType": "TEZ",
+      "serviceConfigs": [
+        {
+          "name": "yarn_service",
+          "ref": "yarn"
+        },
+        {
+          "name": "tez.am.container.reuse.non-local-fallback.enabled",
+          "value": "true"
+        },
+        {
+          "name": "tez.am.container.reuse.locality.delay-allocation-millis",
+          "value": "0"
+        },
+        {
+          "name": "tez.am.launch.cmd-opts",
+          "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+        },
+        {
+          "name": "tez.task.launch.cmd-opts",
+          "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+        },
+        {
+          "name": "tez.grouping.split-waves",
+          "value": 1.4
+        },
+        {
+          "name": "tez.grouping.min-size",
+          "value": 268435456
+        },
+        {
+          "name": "tez.grouping.max-size",
+          "value": 268435456
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "tez-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "tez-conf/tez-site.xml_client_config_safety_valve",
+              "value": "<property><name>tez.runtime.pipelined.sorter.lazy-allocate.memory</name><value>true</value></property>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "das",
+      "serviceType": "DAS",
+      "roleConfigGroups": [
+        {
+          "refName": "das-DAS_WEBAPP",
+          "roleType": "DAS_WEBAPP",
+          "base": true,
+          "configs": [
+            {
+              "name": "data_analytics_studio_admin_users",
+              "value": "*"
+            }
+          ]
+        },
+        {
+          "refName": "das-DAS_EVENT_PROCESSOR",
+          "roleType": "DAS_EVENT_PROCESSOR",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "knox",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "knox-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY"
+        }
+      ],
+      "serviceType": "KNOX"
+    },
+    {
+      "refName": "impala",
+      "serviceType": "IMPALA",
+      "serviceConfigs": [
+        {
+          "name": "impala_cmd_args_safety_valve",
+          "value": "--cache_s3_file_handles=true"
+        },
+        {
+          "name": "impala_scheduled_allocations",
+          "value": "{\"defaultFairSharePreemptionThreshold\":null,\"defaultFairSharePreemptionTimeout\":null,\"defaultMinSharePreemptionTimeout\":null,\"defaultQueueSchedulingPolicy\":\"fair\",\"queueMaxAMShareDefault\":null,\"queueMaxAppsDefault\":null,\"queuePlacementRules\":[{\"create\":false,\"name\":\"specified\",\"queue\":null,\"rules\":null},{\"create\":true,\"name\":\"specified\",\"queue\":null,\"rules\":null},{\"create\":null,\"name\":\"default\",\"queue\":null,\"rules\":null}],\"queues\":[{\"aclAdministerApps\":\"*\",\"aclSubmitApps\":\" \",\"allowPreemptionFrom\":null,\"fairSharePreemptionThreshold\":null,\"fairSharePreemptionTimeout\":null,\"minSharePreemptionTimeout\":null,\"name\":\"root\",\"queues\":[{\"aclAdministerApps\":null,\"aclSubmitApps\":\"*\",\"allowPreemptionFrom\":null,\"fairSharePreemptionThreshold\":null,\"fairSharePreemptionTimeout\":null,\"minSharePreemptionTimeout\":null,\"name\":\"default\",\"queues\":[],\"schedulablePropertiesList\":[{\"impalaClampMemLimitQueryOption\":null,\"impalaDefaultQueryMemLimit\":22528,\"impalaDefaultQueryOptions\":null,\"impalaMaxMemory\":null,\"impalaMaxQueryMemLimit\":null,\"impalaMaxQueuedQueries\":100,\"impalaMaxRunningQueries\":50,\"impalaMinQueryMemLimit\":null,\"impalaQueueTimeout\":600000,\"maxAMShare\":null,\"maxChildResources\":null,\"maxResources\":null,\"maxRunningApps\":null,\"minResources\":null,\"scheduleName\":\"default\",\"weight\":1.0}],\"schedulingPolicy\":\"fair\",\"type\":null}],\"schedulablePropertiesList\":[{\"impalaClampMemLimitQueryOption\":null,\"impalaDefaultQueryMemLimit\":null,\"impalaDefaultQueryOptions\":null,\"impalaMaxMemory\":null,\"impalaMaxQueryMemLimit\":null,\"impalaMaxQueuedQueries\":null,\"impalaMaxRunningQueries\":null,\"impalaMinQueryMemLimit\":null,\"impalaQueueTimeout\":null,\"maxAMShare\":null,\"maxChildResources\":null,\"maxResources\":null,\"maxRunningApps\":null,\"minResources\":null,\"scheduleName\":\"default\",\"weight\":1.0}],\"schedulingPolicy\":\"fair\",\"type\":null}],\"userMaxAppsDefault\":null,\"users\":[]}"
+        },
+        {
+          "name": "impala_scheduled_allocations_draft",
+          "value": "{\"defaultFairSharePreemptionThreshold\":null,\"defaultFairSharePreemptionTimeout\":null,\"defaultMinSharePreemptionTimeout\":null,\"defaultQueueSchedulingPolicy\":\"fair\",\"queueMaxAMShareDefault\":null,\"queueMaxAppsDefault\":null,\"queuePlacementRules\":[{\"create\":false,\"name\":\"specified\",\"queue\":null,\"rules\":null},{\"create\":true,\"name\":\"specified\",\"queue\":null,\"rules\":null},{\"create\":null,\"name\":\"default\",\"queue\":null,\"rules\":null}],\"queues\":[{\"aclAdministerApps\":\"*\",\"aclSubmitApps\":\" \",\"allowPreemptionFrom\":null,\"fairSharePreemptionThreshold\":null,\"fairSharePreemptionTimeout\":null,\"minSharePreemptionTimeout\":null,\"name\":\"root\",\"queues\":[{\"aclAdministerApps\":null,\"aclSubmitApps\":\"*\",\"allowPreemptionFrom\":null,\"fairSharePreemptionThreshold\":null,\"fairSharePreemptionTimeout\":null,\"minSharePreemptionTimeout\":null,\"name\":\"default\",\"queues\":[],\"schedulablePropertiesList\":[{\"impalaClampMemLimitQueryOption\":null,\"impalaDefaultQueryMemLimit\":22528,\"impalaDefaultQueryOptions\":null,\"impalaMaxMemory\":null,\"impalaMaxQueryMemLimit\":null,\"impalaMaxQueuedQueries\":100,\"impalaMaxRunningQueries\":50,\"impalaMinQueryMemLimit\":null,\"impalaQueueTimeout\":600000,\"maxAMShare\":null,\"maxChildResources\":null,\"maxResources\":null,\"maxRunningApps\":null,\"minResources\":null,\"scheduleName\":\"default\",\"weight\":1.0}],\"schedulingPolicy\":\"fair\",\"type\":null}],\"schedulablePropertiesList\":[{\"impalaClampMemLimitQueryOption\":null,\"impalaDefaultQueryMemLimit\":null,\"impalaDefaultQueryOptions\":null,\"impalaMaxMemory\":null,\"impalaMaxQueryMemLimit\":null,\"impalaMaxQueuedQueries\":null,\"impalaMaxRunningQueries\":null,\"impalaMinQueryMemLimit\":null,\"impalaQueueTimeout\":null,\"maxAMShare\":null,\"maxChildResources\":null,\"maxResources\":null,\"maxRunningApps\":null,\"minResources\":null,\"scheduleName\":\"default\",\"weight\":1.0}],\"schedulingPolicy\":\"fair\",\"type\":null}],\"userMaxAppsDefault\":null,\"users\":[]}"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "impala-IMPALAD-COORDINATOR",
+          "roleType": "IMPALAD",
+          "configs": [
+            {
+              "name": "impalad_specialization",
+              "value": "COORDINATOR_ONLY"
+            },
+            {
+              "name": "impalad_core_site_safety_valve",
+              "value": "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            },
+            {
+              "name": "impala_graceful_shutdown_deadline",
+              "value": "60"
+            },
+            {
+              "name": "impalad_memory_limit",
+              "value": 86528491520
+            },
+            {
+              "name": "impalad_idle_query_timeout",
+              "value": 900
+            },
+            {
+              "name": "impalad_idle_session_timeout",
+              "value": 1200
+            },
+            {
+              "name": "impalad_embedded_jvm_heapsize",
+              "value": 8589934592
+            }
+          ],
+          "base": false
+        },
+        {
+          "refName": "impala-IMPALAD-EXECUTOR",
+          "roleType": "IMPALAD",
+          "configs": [
+            {
+              "name": "impalad_specialization",
+              "value": "EXECUTOR_ONLY"
+            },
+            {
+              "name": "impalad_core_site_safety_valve",
+              "value": "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            },
+            {
+              "name": "impala_graceful_shutdown_deadline",
+              "value": "60"
+            },
+            {
+              "name": "impalad_memory_limit",
+              "value": 48318382080
+            },
+            {
+              "name": "impalad_idle_query_timeout",
+              "value": 900
+            },
+            {
+              "name": "impalad_idle_session_timeout",
+              "value": 1200
+            },
+            {
+              "name": "impalad_embedded_jvm_heapsize",
+              "value": 8589934592
+            }
+          ],
+          "base": false
+        },
+        {
+          "refName": "impala-IMPALAD-EXECUTOR",
+          "roleType": "IMPALAD",
+          "configs": [
+            {
+              "name": "impalad_specialization",
+              "value": "EXECUTOR_ONLY"
+            },
+            {
+              "name": "impalad_core_site_safety_valve",
+              "value": "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            },
+            {
+              "name": "impala_graceful_shutdown_deadline",
+              "value": "60"
+            },
+            {
+              "name": "impalad_memory_limit",
+              "value": 48318382080
+            },
+            {
+              "name": "impalad_idle_query_timeout",
+              "value": 900
+            },
+            {
+              "name": "impalad_idle_session_timeout",
+              "value": 1200
+            },
+            {
+              "name": "impalad_embedded_jvm_heapsize",
+              "value": 8589934592
+            }
+          ],
+          "base": false
+        },
+        {
+          "refName": "impala-IMPALAD-compute",
+          "roleType": "IMPALAD",
+          "configs": [
+            {
+              "name": "impalad_specialization",
+              "value": "EXECUTOR_ONLY"
+            },
+            {
+              "name": "impalad_core_site_safety_valve",
+              "value": "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            },
+            {
+              "name": "impala_graceful_shutdown_deadline",
+              "value": "60"
+            },
+            {
+              "name": "impalad_memory_limit",
+              "value": 48318382080
+            },
+            {
+              "name": "impalad_idle_query_timeout",
+              "value": 900
+            },
+            {
+              "name": "impalad_idle_session_timeout",
+              "value": 1200
+            },
+            {
+              "name": "impalad_embedded_jvm_heapsize",
+              "value": 8589934592
+            }
+          ],
+          "base": false
+        },
+        {
+          "refName": "impala-STATESTORE-BASE",
+          "roleType": "STATESTORE",
+          "base": false
+        },
+        {
+          "refName": "impala-CATALOGSERVER-BASE",
+          "roleType": "CATALOGSERVER",
+          "configs": [
+            {
+              "name": "catalogd_embedded_jvm_heapsize",
+              "value": 8589934592
+            }
+          ],
+          "base": false
+        }
+      ]
+    },
+    {
+      "refName": "queuemanager",
+      "serviceType": "QUEUEMANAGER",
+      "serviceConfigs": [
+        {
+          "name": "kerberos.auth.enabled",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "roleType": "QUEUEMANAGER_WEBAPP",
+          "base": true
+        },
+        {
+          "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+          "roleType": "QUEUEMANAGER_STORE",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "gateway",
+      "cardinality": 0,
+      "roleConfigGroupsRefNames": [
+        "hdfs-GATEWAY-BASE",
+        "hive-GATEWAY-BASE",
+        "hms-GATEWAY-BASE",
+        "livy-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-GATEWAY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
+      ]
+    },
+    {
+      "refName": "impalacoord",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-GATEWAY-BASE",
+        "hive-GATEWAY-BASE",
+        "hms-GATEWAY-BASE",
+        "livy-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-GATEWAY-BASE",
+        "impala-IMPALAD-COORDINATOR",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
+      ]
+    },
+    {
+      "refName": "master",
+      "cardinality": 2,
+      "roleConfigGroupsRefNames": [
+        "hdfs-FAILOVERCONTROLLER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hdfs-HTTPFS-BASE",
+        "hive-GATEWAY-BASE",
+        "hive-HIVESERVER2-BASE",
+        "hms-GATEWAY-BASE",
+        "hms-HIVEMETASTORE-BASE",
+        "livy-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "hdfs-JOURNALNODE-BASE",
+        "zookeeper-SERVER-BASE",
+        "yarn-GATEWAY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+        "hue-HUE_LOAD_BALANCER-BASE",
+        "hue-HUE_SERVER-BASE"
+      ]
+    },
+    {
+      "refName": "masterx",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-BALANCER-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hive-GATEWAY-BASE",
+        "hms-GATEWAY-BASE",
+        "livy-GATEWAY-BASE",
+        "livy-LIVY_SERVER-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+        "impala-CATALOGSERVER-BASE",
+        "impala-STATESTORE-BASE",
+        "das-DAS_EVENT_PROCESSOR",
+        "das-DAS_WEBAPP",
+        "hdfs-JOURNALNODE-BASE",
+        "zookeeper-SERVER-BASE",
+        "yarn-QUEUEMANAGER_WEBAPP-BASE",
+        "yarn-QUEUEMANAGER_STORE-BASE",
+        "yarn-GATEWAY-BASE"
+      ]
+    },
+    {
+      "refName": "worker",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE",
+        "yarn-NODEMANAGER-WORKER",
+        "impala-IMPALAD-EXECUTOR"
+      ]
+    },
+    {
+      "refName": "compute",
+      "cardinality": 0,
+      "roleConfigGroupsRefNames": [
+        "yarn-NODEMANAGER-COMPUTE",
+        "impala-IMPALAD-EXECUTOR"
+      ]
+    },
+    {
+      "refName": "manager",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "knox-KNOX_GATEWAY-BASE",
+        "oozie-OOZIE_SERVER-BASE",
+        "hive-GATEWAY-BASE",
+        "hms-GATEWAY-BASE",
+        "livy-GATEWAY-BASE",
+        "hdfs-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-GATEWAY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE"
+      ]
+    }
+  ]
+}
