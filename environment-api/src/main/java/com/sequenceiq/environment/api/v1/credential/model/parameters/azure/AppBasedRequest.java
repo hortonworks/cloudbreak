@@ -2,6 +2,8 @@ package com.sequenceiq.environment.api.v1.credential.model.parameters.azure;
 
 import java.io.Serializable;
 
+import jakarta.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class AppBasedRequest implements Serializable {
 
     @Schema
+    @Pattern(regexp = "(^[a-z0-9][-a-z0-9]*[a-z0-9]$)")
     private String accessKey;
 
     // We should default to SECRET, since in the past we supported only SECRET based app credentials

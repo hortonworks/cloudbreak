@@ -170,8 +170,8 @@ public class AzureCredentialIntegrationTest {
 
         AppBasedRequest appBasedRequest = new AppBasedRequest();
         appBasedRequest.setAuthenticationType(AppAuthenticationType.SECRET);
-        appBasedRequest.setAccessKey("accessKey");
-        appBasedRequest.setSecretKey("secretKey");
+        appBasedRequest.setAccessKey("accesskey");
+        appBasedRequest.setSecretKey("secretkey");
         azureCredentialRequestParameters.setAppBased(appBasedRequest);
         credentialRequest.setAzure(azureCredentialRequestParameters);
 
@@ -186,7 +186,7 @@ public class AzureCredentialIntegrationTest {
         assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AZURE"), ENVIRONMENT).isPresent());
 
         assertEquals("testcredential", response.getName());
-        assertEquals("accessKey", response.getAzure().getAccessKey());
+        assertEquals("accesskey", response.getAzure().getAccessKey());
         assertEquals("subid", response.getAzure().getSubscriptionId());
         assertEquals("tenant", response.getAzure().getTenantId());
         assertEquals(AppAuthenticationType.SECRET, response.getAzure().getAuthenticationType());

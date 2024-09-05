@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.credential.model.parameters.azure;
 import java.io.Serializable;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,9 +17,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class AzureCredentialRequestParameters implements Serializable {
 
     @Schema(example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
+    @Pattern(regexp = "(^[a-z0-9][-a-z0-9]*[a-z0-9]$)")
     private String subscriptionId;
 
     @Schema(example = "b10u3481-2451-10ba-7sfd-9o2d1v60185d")
+    @Pattern(regexp = "(^[a-z0-9][-a-z0-9]*[a-z0-9]$)")
     private String tenantId;
 
     @Valid
