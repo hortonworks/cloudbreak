@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,7 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCloudKMSFactory;
@@ -86,6 +89,7 @@ import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
@@ -447,6 +451,7 @@ public class GcpPlatformResources implements PlatformResources {
     private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
+        Map<String, Set<String>> availabilityZones = getAvailabilityZonesForVmTypes(cloudCredential, region);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -460,29 +465,37 @@ public class GcpPlatformResources implements PlatformResources {
             for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
                 MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();
                 for (MachineType machineType : machineTypeList.getItems()) {
-                    VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
-                            .withCpuAndMemory(machineType.getGuestCpus(),
-                                    machineType.getMemoryMb().floatValue() / THOUSAND)
+                    Set<String> availabilityZonesForVm = availabilityZones.getOrDefault(machineType.getName(), new HashSet<>());
+                    LOGGER.trace("Availability Zones for VM type {} are {}", machineType.getName(), availabilityZonesForVm);
+                    if (matchAvailabilityZones(filters, availabilityZonesForVm)) {
+                        VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
+                                .withCpuAndMemory(machineType.getGuestCpus(),
+                                        machineType.getMemoryMb().floatValue() / THOUSAND)
 
-                            .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
-                                    1, machineType.getMaximumPersistentDisksSizeGb().intValue())
+                                .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
+                                        1, machineType.getMaximumPersistentDisksSizeGb().intValue())
 
-                            .withSsdConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
-                                    1, machineType.getMaximumPersistentDisks())
+                                .withSsdConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
+                                        1, machineType.getMaximumPersistentDisks())
 
-                            .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
-                            .withVolumeEncryptionSupport(true);
-                    if (isLocalSsdSupportedForInstanceType(machineType)) {
-                        LOGGER.trace("Adding the local disk configurations to the instance {}.", machineType);
-                        vmTypeMetaBuilder.withLocalSsdConfig(
-                                Set.of(GCP_LOCAL_SSD_ALLOWED_VALUES),
-                                GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES
-                        );
-                    }
-                    VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMetaBuilder.create(), true);
-                    types.add(vmType);
-                    if (machineType.getName().equals(gcpVmDefault)) {
-                        defaultVmType = vmType;
+                                .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
+                                .withVolumeEncryptionSupport(true);
+                        if (isLocalSsdSupportedForInstanceType(machineType)) {
+                            LOGGER.trace("Adding the local disk configurations to the instance {}.", machineType);
+                            vmTypeMetaBuilder.withLocalSsdConfig(
+                                    Set.of(GCP_LOCAL_SSD_ALLOWED_VALUES),
+                                    GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES
+                            );
+                        }
+                        vmTypeMetaBuilder.withAvailabilityZones(new ArrayList<>(availabilityZonesForVm));
+                        VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMetaBuilder.create(), true);
+                        types.add(vmType);
+                        if (machineType.getName().equals(gcpVmDefault)) {
+                            defaultVmType = vmType;
+                        }
+                    } else {
+                        LOGGER.debug("{} with Availability Zones {} is not supported in requested Availability Zones. Do not add it to the result",
+                                machineType.getName(), availabilityZonesForVm);
                     }
                 }
                 cloudVmResponses.put(availabilityZone.value(), types);
@@ -654,5 +667,12 @@ public class GcpPlatformResources implements PlatformResources {
             LOGGER.info("Failed to get list of crypto keys on keyring path: [{}].", cryptoKeysPath, e);
             return List.of();
         }
+    }
+
+    private boolean matchAvailabilityZones(Map<String, String> filters, Set<String> availabilityZones) {
+        return filters == null || StringUtils.isEmpty(filters.get(NetworkConstants.AVAILABILITY_ZONES)) ||
+                CollectionUtils.containsAll(emptyIfNull(availabilityZones),
+                        Splitter.on(",").splitToList(filters.get(NetworkConstants.AVAILABILITY_ZONES))
+                );
     }
 }
