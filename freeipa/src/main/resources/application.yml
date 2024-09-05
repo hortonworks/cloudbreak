@@ -221,7 +221,7 @@ cb:
   enabledplatforms: AZURE,AWS,GCP
   platform.default.rootVolumeSize:
     AWS: 100
-    AZURE: 100
+    AZURE: 120
     GCP: 100
   platform.default.rootVolumeType:
     GCP: SSD
