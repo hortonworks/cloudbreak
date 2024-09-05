@@ -85,6 +85,7 @@ public class CloudStorageManifester {
             LOGGER.debug("Cloud storage configurations found in SDX cluster request.");
             CloudStorageResponse cloudStorageResponse = clusterV4Response.getCloudStorage();
             cloudStorageRequest.copy(cloudStorageResponse);
+            cloudStorageRequest.setAccountMapping(null);
         }
         return cloudStorageRequest;
     }

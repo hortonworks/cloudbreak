@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -22,10 +23,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -318,5 +322,23 @@ public class CloudStorageManifesterTest {
 
         underTest.normalizeCloudStorageRequest(cloudStorageRequest);
         assertEquals("s3a://cloudbreak bucket/something", cloudStorageRequest.getBaseLocation());
+    }
+
+    @Test
+    public void initCloudStorageRequestFromExistingSdxClusterShouldNotCopyAccountMapping() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setCloudStorageBaseLocation("s3a://cloudbreak");
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        CloudStorageResponse cloudStorageResponse = new CloudStorageResponse();
+        AccountMappingBase accountMapping = new AccountMappingBase();
+        accountMapping.setUserMappings(Map.of("raz", "raz_role"));
+        cloudStorageResponse.setAccountMapping(accountMapping);
+        StorageLocationBase storageLocationBase = new StorageLocationBase();
+        storageLocationBase.setType(CloudStorageCdpService.RANGER_AUDIT);
+        storageLocationBase.setValue("s3a://ranger-audit");
+        cloudStorageResponse.setLocations(List.of(storageLocationBase));
+        clusterV4Response.setCloudStorage(cloudStorageResponse);
+        CloudStorageRequest storageRequest = underTest.initCloudStorageRequestFromExistingSdxCluster(clusterV4Response, sdxCluster);
+        assertNull(storageRequest.getAccountMapping());
     }
 }
