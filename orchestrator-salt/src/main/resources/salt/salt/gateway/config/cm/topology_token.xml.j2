@@ -280,7 +280,7 @@
              {%- endif %}
              {% if 'LIVY_FOR_SPARK3_API' in exposed and 'LIVY_SERVER_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
              <param>
-               <name>LIVYFORSPARK3API</name>
+               <name>LIVY_FOR_SPARK3</name>
                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
             {%- endif %}
