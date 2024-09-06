@@ -60,36 +60,41 @@ class DLMServiceConfigProviderTest {
 
     @Test
     void testIsConfigurationNeeded() {
-        boolean required = dlmServiceConfigProvider.isConfigurationNeeded(cmTemplateProcessor, source);
-        assertTrue(required);
+        assertTrue(dlmServiceConfigProvider.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     @Test
     void testGetServiceConfigs() {
         String resourceCrn = "test-resource-crn";
         String accountId = "test-account-id";
+        String environmentCrn = "test-environment-crn";
         String cloudProvider = "AWS";
 
         when(generalClusterConfigs.getResourceCrn()).thenReturn(resourceCrn);
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of(accountId));
+        when(generalClusterConfigs.getEnvironmentCrn()).thenReturn(environmentCrn);
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
 
         List<ApiClusterTemplateConfig> configs = dlmServiceConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
 
-        assertEquals(3, configs.size());
-        assertEquals(DLMServiceConfigProvider.DLM_DATAHUB_RESOURCE_CRN, configs.get(0).getName());
-        assertEquals(resourceCrn, configs.get(0).getValue());
+        assertEquals(4, configs.size());
+        assertEquals(DLMServiceConfigProvider.DLM_DATAHUB_ENVIRONMENT_CRN, configs.getFirst().getName());
+        assertEquals(environmentCrn, configs.getFirst().getValue());
 
-        assertEquals(DLMServiceConfigProvider.DLM_ACCOUNT_ID, configs.get(1).getName());
-        assertEquals(accountId, configs.get(1).getValue());
+        assertEquals(DLMServiceConfigProvider.DLM_DATAHUB_RESOURCE_CRN, configs.get(1).getName());
+        assertEquals(resourceCrn, configs.get(1).getValue());
 
-        assertEquals(DLMServiceConfigProvider.DLM_CLOUD_PROVIDER, configs.get(2).getName());
-        assertEquals(cloudProvider, configs.get(2).getValue());
+        assertEquals(DLMServiceConfigProvider.DLM_ACCOUNT_ID, configs.get(2).getName());
+        assertEquals(accountId, configs.get(2).getValue());
+
+        assertEquals(DLMServiceConfigProvider.DLM_CLOUD_PROVIDER, configs.get(3).getName());
+        assertEquals(cloudProvider, configs.get(3).getValue());
     }
 
     @Test
     void testGetServiceConfigsWhenAccountIdIsEmpty() {
         String resourceCrn = "test-resource-crn";
+        String cloudProvider = "AWS";
 
         when(generalClusterConfigs.getResourceCrn()).thenReturn(resourceCrn);
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.empty());
@@ -97,7 +102,7 @@ class DLMServiceConfigProviderTest {
 
         List<ApiClusterTemplateConfig> configs = dlmServiceConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
 
-        assertEquals(3, configs.size());
-        assertEquals("UNKNOWN", configs.get(1).getValue());
+        assertEquals(4, configs.size());
+        assertEquals("UNKNOWN", configs.get(2).getValue());
     }
 }

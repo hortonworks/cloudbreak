@@ -59,6 +59,8 @@ public class GeneralClusterConfigs {
 
     private String resourceCrn;
 
+    private String environmentCrn;
+
     private Set<String> otherGatewayInstancesDiscoveryFQDN;
 
     public OrchestratorType getOrchestratorType() {
@@ -235,6 +237,14 @@ public class GeneralClusterConfigs {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public boolean isMultiAzEnabled() {

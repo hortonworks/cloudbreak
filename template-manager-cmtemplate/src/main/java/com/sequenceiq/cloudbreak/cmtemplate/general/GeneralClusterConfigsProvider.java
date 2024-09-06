@@ -60,6 +60,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         generalClusterConfigs.setCreatorWorkloadUserCrn(stack.getCreator().getUserCrn());
         generalClusterConfigs.setResourceCrn(stack.getResourceCrn());
+        generalClusterConfigs.setEnvironmentCrn(stack.getEnvironmentCrn());
         return generalClusterConfigs;
     }
 
@@ -93,6 +94,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setAutoTlsEnabled(autoTlsEnabled);
         generalClusterConfigs.setGovCloud(credential.isGovCloud());
         generalClusterConfigs.setResourceCrn(stack.getResourceCrn());
+        generalClusterConfigs.setEnvironmentCrn(stack.getEnvironmentCrn());
         return generalClusterConfigs;
     }
 

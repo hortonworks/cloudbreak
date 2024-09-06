@@ -16,7 +16,9 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class DLMServiceConfigProvider implements CmTemplateComponentConfigProvider {
 
-    public static final String DLM_DATAHUB_RESOURCE_CRN = "datahub.environment.crn";
+    public static final String DLM_DATAHUB_RESOURCE_CRN = "datahub.resource.crn";
+
+    public static final String DLM_DATAHUB_ENVIRONMENT_CRN = "datahub.environment.crn";
 
     public static final String DLM_ACCOUNT_ID = "environment.accountId";
 
@@ -41,6 +43,7 @@ public class DLMServiceConfigProvider implements CmTemplateComponentConfigProvid
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> dlmConfigs = new ArrayList<>();
         CloudPlatform cloudPlatform = source.getCloudPlatform();
+        dlmConfigs.add(config(DLM_DATAHUB_ENVIRONMENT_CRN, source.getGeneralClusterConfigs().getEnvironmentCrn()));
         dlmConfigs.add(config(DLM_DATAHUB_RESOURCE_CRN, source.getGeneralClusterConfigs().getResourceCrn()));
         dlmConfigs.add(config(DLM_ACCOUNT_ID, source.getGeneralClusterConfigs().getAccountId().orElse("UNKNOWN")));
         dlmConfigs.add(config(DLM_CLOUD_PROVIDER, cloudPlatform == null ? null : cloudPlatform.name()));
