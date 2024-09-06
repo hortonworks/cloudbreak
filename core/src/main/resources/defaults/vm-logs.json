@@ -410,5 +410,9 @@
   {
     "path": "/hadoopfs/*/nifi-log/nifi*.log",
     "label": "NIFI_NODE"
+  },
+  {
+    "path": "/var/log/pip*.log",
+    "label": "python_pip"
   }
 ]

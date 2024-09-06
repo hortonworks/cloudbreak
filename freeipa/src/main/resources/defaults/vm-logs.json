@@ -134,5 +134,9 @@
   {
     "path": "/var/log/update_cnames.log",
     "label": "update_cnames"
+  },
+  {
+    "path": "/var/log/pip*.log",
+    "label": "python_pip"
   }
 ]
