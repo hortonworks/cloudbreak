@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
@@ -72,6 +73,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateU
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpscaleUpdateUserdataSecretsSuccess;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.encryption.UserdataSecretsService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -135,6 +137,9 @@ public class StackUpscaleActions {
     @Inject
     private UserdataSecretsService userdataSecretsService;
 
+    @Inject
+    private StackUpdater stackUpdater;
+
     @Bean(name = "UPDATE_DOMAIN_DNS_RESOLVER_STATE")
     public Action<?, ?> updateDomainDnsResolverAction() {
         return new AbstractStackUpscaleAction<>(StackScaleTriggerEvent.class) {
@@ -153,6 +158,7 @@ public class StackUpscaleActions {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.UPSCALE_IN_PROGRESS);
                 if (context.isRepair()) {
                     LOGGER.debug("We do not need to update domainDnsResolver in case of repair activity, since it matters only in case of upscale activity.");
                     sendEvent(context, new UpdateDomainDnsResolverResult(context.getStackId()));

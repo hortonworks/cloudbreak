@@ -42,7 +42,7 @@ public enum DetailedStackStatus {
     STOPPED(Status.STOPPED),
     STOP_FAILED(Status.STOP_FAILED),
     // Upscale statuses
-    UPSCALE_REQUESTED(Status.UPDATE_REQUESTED),
+    UPSCALE_REQUESTED(Status.AVAILABLE),
     UPSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
     ADDING_NEW_INSTANCES(Status.UPDATE_IN_PROGRESS),
     EXTENDING_METADATA(Status.UPDATE_IN_PROGRESS),
@@ -53,16 +53,16 @@ public enum DetailedStackStatus {
     STACK_UPSCALE_COMPLETED(Status.UPDATE_IN_PROGRESS),
     UPSCALE_FAILED(Status.AVAILABLE),
     // Downscale statuses
-    DOWNSCALE_REQUESTED(Status.UPDATE_REQUESTED),
+    DOWNSCALE_REQUESTED(Status.AVAILABLE),
     DOWNSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
     DOWNSCALE_COMPLETED(Status.AVAILABLE),
     DOWNSCALE_FAILED(Status.AVAILABLE),
     // Upscale by starting statuses
-    UPSCALE_BY_START_REQUESTED(Status.UPDATE_REQUESTED),
+    UPSCALE_BY_START_REQUESTED(Status.AVAILABLE),
     UPSCALE_BY_START_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
     UPSCALE_BY_START_FAILED(Status.AVAILABLE),
     // Downscale by stopping statuses
-    DOWNSCALE_BY_STOP_REQUESTED(Status.UPDATE_REQUESTED),
+    DOWNSCALE_BY_STOP_REQUESTED(Status.AVAILABLE),
     DOWNSCALE_BY_STOP_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
     DOWNSCALE_BY_STOP_FAILED(Status.AVAILABLE),
     // Termination statuses
@@ -203,14 +203,14 @@ public enum DetailedStackStatus {
         this.status = status;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
     public static List<DetailedStackStatus> getUpgradeFailureStatuses() {
         return List.of(
                 DetailedStackStatus.CLUSTER_UPGRADE_FAILED,
                 DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED,
                 DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);
+    }
+
+    public Status getStatus() {
+        return status;
     }
 }
