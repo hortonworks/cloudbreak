@@ -174,7 +174,7 @@ subprojects {
     ignoreFailures = false
     showProgress = true
     onlyAnalyze = [ 'com.sequenceiq.cloudbreak.*' ]
-    maxHeapSize = '2g'
+    maxHeapSize = '4g'
   }
 
   jacoco {
@@ -254,14 +254,14 @@ subprojects {
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
     configDirectory = rootProject.file("config/checkstyle")
     minHeapSize = "200m"
-    maxHeapSize = "1g"
+    maxHeapSize = "4g"
   }
 
   checkstyleTest {
     ignoreFailures = false
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
     minHeapSize = "200m"
-    maxHeapSize = "1g"
+    maxHeapSize = "4g"
   }
 
   test {
