@@ -219,7 +219,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         Entry::getKey,
                         e -> e.getValue().stream()
                                 .map(ServiceComponent::getComponent)
-                                .collect(toSet())));
+                                .collect(toSet()),
+                        (a1, a2) -> a1));
     }
 
     private Map<String, Set<ServiceComponent>> collectServiceComponentsByHostGroup(Map<String, ServiceComponent> rolesByRoleRef) {
@@ -257,7 +258,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         e -> e.getValue().stream()
                                 .map(ServiceComponent::getComponent)
                                 .filter(i -> !i.equalsIgnoreCase("GATEWAY"))
-                                .collect(toSet())
+                                .collect(toSet()),
+                        (a1, a2) -> a1
                 ));
     }
 
@@ -267,7 +269,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         Entry::getKey,
                         e -> e.getValue().stream()
                                 .filter(i -> !i.getComponent().equalsIgnoreCase("GATEWAY"))
-                                .collect(toSet())
+                                .collect(toSet()),
+                        (a1, a2) -> a1
                 ));
 
     }
@@ -279,7 +282,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         Map.Entry::getKey,
                         e -> e.getValue().stream()
                                 .map(ServiceComponent::getComponent)
-                                .collect(toSet())
+                                .collect(toSet()),
+                        (a1, a2) -> a1
                 ));
     }
 
@@ -546,9 +550,12 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         Map<String, Set<ServiceComponent>> hgToNonGwServiceComponents = getNonGatewayServicesByHostGroup();
         Map<String, Set<ServiceComponent>> hgToNonGwServiceComponentsWithYarnNMs = hgToNonGwServiceComponents.entrySet().stream()
                 .filter(e -> isYarnNodemanager(e.getValue()))
-                .collect(toMap(Entry::getKey, Entry::getValue));
+                .collect(toMap(Entry::getKey, Entry::getValue, (a1, a2) -> a1));
         return hgToNonGwServiceComponentsWithYarnNMs.entrySet()
-                .stream().collect(toMap(Entry::getKey, e -> collectComponents(e.getValue())));
+                .stream().collect(toMap(
+                        Entry::getKey,
+                        e -> collectComponents(e.getValue()),
+                        (a1, a2) -> a1));
     }
 
     private boolean isYarnNodemanager(Set<ServiceComponent> serviceComponents) {
@@ -827,7 +834,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return configs.stream()
                 .collect(toMap(
                         ApiClusterTemplateConfig::getName,
-                        Function.identity()
+                        Function.identity(),
+                        (a1, a2) -> a1
                 ));
     }
 
@@ -965,7 +973,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         .map(rcg -> Pair.of(service.getServiceType(), rcg)))
                 .collect(toMap(
                         pair -> pair.getRight().getRefName(),
-                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())));
+                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType()),
+                        (a1, a2) -> a1));
     }
 
     Map<String, ServiceComponent> getImpalaCoordinators() {
@@ -976,7 +985,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                         .map(rcg -> Pair.of(service.getServiceType(), rcg)))
                 .collect(toMap(
                         pair -> pair.getRight().getRefName(),
-                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())));
+                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType()),
+                        (a1, a2) -> a1));
     }
 
     private Predicate<ApiClusterTemplateRoleConfigGroup> filterNonCoordinatorImpalaRole() {
