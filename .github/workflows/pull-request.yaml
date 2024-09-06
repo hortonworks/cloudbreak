@@ -50,6 +50,7 @@ jobs:
           ./scripts/jira.sh
 
 
+
   unit-test:
     permissions: write-all
     name: Unit Test
@@ -109,7 +110,7 @@ jobs:
             -x checkstyleTest \
             -x spotbugsMain \
             -x spotbugsTest \
-            --no-daemon --parallel -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+            --no-daemon --parallel -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
       - name: Add Test Report
         if: success() || failure()
         id: test-report
@@ -202,7 +203,7 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
       - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
         if: success() || failure()
         name: Checkstyle Main Report
@@ -261,7 +262,7 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
       - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
         if: success() || failure()
         name: Checkstyle Test Report
@@ -320,7 +321,7 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
       - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
         if: success() || failure()
         name: SpotBugs Test Report
@@ -379,7 +380,7 @@ jobs:
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsTest -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsTest -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
       - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
         if: success() || failure()
         name: SpotBugs Main Report
