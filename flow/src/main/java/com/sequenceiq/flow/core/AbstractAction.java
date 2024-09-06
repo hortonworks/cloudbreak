@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
 
@@ -49,6 +50,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     @Inject
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
+    @Inject
+    private FlowLogDBService flowLogDBService;
+
     private final Class<P> payloadClass;
 
     private List<PayloadConverter<P>> payloadConverters;
@@ -69,7 +73,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     public void execute(StateContext<S, E> context) {
         FlowParameters flowParameters = (FlowParameters) context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
         ThreadBasedUserCrnProvider.doAs(flowParameters.getFlowTriggerUserCrn(), () -> {
-            MDCBuilder.addFlowId(flowParameters.getFlowId());
+            String flowId = flowParameters.getFlowId();
+            MDCBuilder.addFlowId(flowId);
             P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
             C flowContext = null;
             try {
@@ -81,13 +86,28 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             } catch (Exception ex) {
                 LOGGER.error("Error during execution of " + getClass().getName(), ex);
                 if (failureEvent != null) {
-                    sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
+                    try {
+                        sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex), Map.of());
+                    } catch (Exception sendEventException) {
+                        LOGGER.error("Failed event propagation failed", sendEventException);
+                        closeFlowOnError(ex, flowId);
+                        throw new CloudbreakServiceException("Failed event propagation failed", sendEventException);
+                    }
                 } else {
                     LOGGER.error("Missing error handling for " + getClass().getName());
+                    closeFlowOnError(ex, flowId);
                     throw new CloudbreakServiceException("Missing error handling for " + getClass().getName());
                 }
             }
         });
+    }
+
+    private void closeFlowOnError(Exception ex, String flowId) {
+        if (flowId != null) {
+            LOGGER.error("Closing flow with id {}", flowId);
+            flowLogDBService.closeFlow(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
+                    ex.getClass().getName(), ex.getMessage()));
+        }
     }
 
     private void executeAction(StateContext<S, E> context, P payload, C flowContext, Map<Object, Object> variables, String flowStateName) throws Exception {
