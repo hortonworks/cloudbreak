@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -55,6 +56,9 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private SecretService secretService;
 
     public Cluster configureCluster(Cluster requestedCluster) {
         Objects.requireNonNull(requestedCluster);
@@ -114,14 +118,15 @@ public class SharedServiceConfigProvider {
                 setRdsConfigsForCluster(requestedCluster, List.of(rdsConfigWithoutCluster.get()));
             } else {
                 // we should reach this point only in case of CDL
-                String user = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_USER);
-                String password = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_PASSWORD);
+                String userVaultPath = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_USER);
+                String passwordVaultPath = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_PASSWORD);
+
                 RDSConfig config = new RDSConfig();
                 config.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());
                 config.setConnectionURL(connectionUrl);
-                config.setConnectionPassword(password);
+                config.setConnectionPassword(secretService.getSecretFromExternalVault(passwordVaultPath));
                 config.setStatus(ResourceStatus.DEFAULT);
-                config.setConnectionUserName(user);
+                config.setConnectionUserName(secretService.getSecretFromExternalVault(userVaultPath));
                 config.setName(String.format("%s_%s_%s", stack.getName(), stack.getId(), dbName));
                 config.setType(databaseType);
                 config.setClusters(Set.of(requestedCluster));

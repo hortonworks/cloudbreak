@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,6 +59,9 @@ public class SharedServiceConfigProviderTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private SecretService secretService;
 
     @InjectMocks
     private SharedServiceConfigProvider underTest;

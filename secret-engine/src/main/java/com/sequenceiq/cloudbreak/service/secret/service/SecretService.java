@@ -52,7 +52,6 @@ public class SecretService {
         VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
         Map<String, String> response = vaultRetryService.tryReadingVault(() -> {
             return persistentEngine.getWithCache(vaultSecret.getPath());
-
         });
         return response != null ? response.get(field) : null;
     }
@@ -92,6 +91,12 @@ public class SecretService {
         return Optional.ofNullable(vaultSecretConverter.convert(secret))
                 .map(s -> new SecretResponse(s.getEnginePath(), s.getPath(), s.getVersion()))
                 .orElse(null);
+    }
+
+    public String getSecretFromExternalVault(String externalVaultPath) {
+        Map<String, String> response = vaultRetryService.tryReadingVault(() ->
+                persistentEngine.getWithCache(externalVaultPath));
+        return response != null ? response.get(VaultConstants.FIELD_SECRET) : null;
     }
 
     private String fullSecretPath(String secretPath) {
