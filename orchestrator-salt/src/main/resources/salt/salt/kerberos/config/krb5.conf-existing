@@ -1,3 +1,5 @@
+{%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
+{%- set cCacheStoragePath = salt['pillar.get']('kerberos:cCacheSecretStorage') if secretEncryptionEnabled == True else '/tmp' %}
 {%- if "ipa_member" in grains.get('roles', []) -%}
 includedir /etc/krb5.conf.d/
 includedir /var/lib/sss/pubconf/krb5.include.d/
@@ -21,7 +23,7 @@ includedir /var/lib/sss/pubconf/krb5.include.d/
   ticket_lifetime = 24h
   forwardable = true
   udp_preference_limit = 1
-  default_ccache_name = /tmp/krb5cc_%{uid}
+  default_ccache_name = {{ cCacheStoragePath }}/krb5cc_%{uid}
   renew_lifetime = 7d
   max_retries = 1
 

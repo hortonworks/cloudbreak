@@ -1,3 +1,5 @@
+{%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
+{%- set krb5_ccname_template_path = salt['pillar.get']('kerberos:cCacheSecretStorage') if secretEncryptionEnabled == True else '/tmp' %}
 [nss]
 filter_users = root
 filter_groups = root
@@ -19,7 +21,7 @@ krb5_realm = {{ pillar['sssd-ad']['domainuppercase'] }}
 realmd_tags = manages-system joined-with-samba
 cache_credentials = True
 id_provider = ad
-krb5_ccname_template = FILE:/tmp/krb5cc_%U
+krb5_ccname_template = FILE:{{ krb5_ccname_template_path }}/krb5cc_%U
 krb5_store_password_if_offline = True
 default_shell = /bin/bash
 ldap_id_mapping = True

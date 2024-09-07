@@ -1,3 +1,5 @@
+{%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
+{%- set cCacheStoragePath = salt['pillar.get']('kerberos:cCacheSecretStorage') %}
 haveged:
   pkg.installed:
     - unless:
@@ -41,10 +43,23 @@ install_kerberos:
       - force: True
 {% endif %}
 
+{% if secretEncryptionEnabled == True %}
+{{ cCacheStoragePath }}:
+  file.directory:
+      - user: root
+      - group: root
+      - mode: 777
+      - makedirs: True
+{% endif %}
+
 /etc/krb5.conf:
   file.managed:
     - source: salt://kerberos/config/krb5.conf-existing
     - template: jinja
+    {% if secretEncryptionEnabled == True %}
+    - require:
+          - file: {{ cCacheStoragePath }}
+    {% endif %}
 
 {%- if "manager_server" in grains.get('roles', []) %}
 

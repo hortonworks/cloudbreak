@@ -156,6 +156,8 @@ class ClusterHostServiceRunnerTest {
 
     private static final String KNOX_IDBROKER_SECURITY_DIR = "knoxIdBrokerSecurityDir";
 
+    private static final String DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE = "defaultKerberosCcacheSecretStorage";
+
     private static final String EXTENDED_BLUEPRINT_TEXT = "extendedBlueprintText";
 
     @Mock
@@ -459,7 +461,7 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException, NodesUnreachableException {
+    void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException, NodesUnreachableException, IOException {
         setupMocksForRunClusterServices();
         Set<Node> gatewayNodes = Set.of(node("gateway1"), node("gateway2"), node("gateway3"));
         Set<Node> nodes = Sets.union(Set.of(node("fqdn3")), gatewayNodes);
@@ -470,8 +472,10 @@ class ClusterHostServiceRunnerTest {
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(gatewayNodes);
-        KerberosConfig kerberosConfig = new KerberosConfig();
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
@@ -493,6 +497,8 @@ class ClusterHostServiceRunnerTest {
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
+
+        verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
     }
 
     @Test
@@ -520,15 +526,16 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException {
+    void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException, IOException {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
-        KerberosConfig kerberosConfig = new KerberosConfig();
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
@@ -550,19 +557,21 @@ class ClusterHostServiceRunnerTest {
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
+        verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
     }
 
     @Test
     void testDecoratePillarWithMountInfoWithoutRecipeVerification()
-            throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException {
+            throws CloudbreakOrchestratorException, NodesUnreachableException, CloudbreakException, IOException {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         when(stackUtil.collectReachableAndCheckNecessaryNodes(any(), any())).thenReturn(nodes);
-        KerberosConfig kerberosConfig = new KerberosConfig();
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
@@ -584,6 +593,7 @@ class ClusterHostServiceRunnerTest {
         assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
+        verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
     }
 
     @Test
@@ -730,6 +740,10 @@ class ClusterHostServiceRunnerTest {
 
     private Map<String, Object> getIDBrokerProperties(SaltConfig saltConfig) {
         return (Map<String, Object>) saltConfig.getServicePillarConfig().get("idbroker").getProperties().get("idbroker");
+    }
+
+    private Map<String, Object> getKerberosProperties(SaltConfig saltConfig) {
+        return (Map<String, Object>) saltConfig.getServicePillarConfig().get("kerberos").getProperties().get("kerberos");
     }
 
     @Test
@@ -905,7 +919,7 @@ class ClusterHostServiceRunnerTest {
 
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
-    void testKnoxSecurityConfigToRunClusterServices() throws CloudbreakOrchestratorException {
+    void testKnoxSecurityConfigToRunClusterServices() throws CloudbreakOrchestratorException, IOException {
         setupMocksForRunClusterServices();
         GatewayView clusterGateway = mock(GatewayView.class);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
@@ -913,6 +927,9 @@ class ClusterHostServiceRunnerTest {
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
         when(environmentConfigProvider.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
         when(idBrokerService.getByCluster(CLUSTER_ID)).thenReturn(mock(IdBroker.class));
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
 
         underTest.runClusterServices(stack, Collections.emptyMap(), false);
 
@@ -926,6 +943,9 @@ class ClusterHostServiceRunnerTest {
 
         String knoxIdBrokerSecurityDir = (String) getIDBrokerProperties(saltConfig.getValue()).get("knoxIdBrokerSecurityDir");
         assertEquals(KNOX_IDBROKER_SECURITY_DIR, knoxIdBrokerSecurityDir);
+
+
+        verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
     }
 
     private void setupMocksForRunClusterServices() {
@@ -976,6 +996,7 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
         ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", KNOX_GATEWAY_SECURITY_DIR);
         ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", KNOX_IDBROKER_SECURITY_DIR);
+        ReflectionTestUtils.setField(underTest, "defaultKerberosCcacheSecretStorage", DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE);
 
         TemplatePreparationObject templatePreparationObject = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView())
@@ -1033,5 +1054,10 @@ class ClusterHostServiceRunnerTest {
     private void verifySecretEncryption(boolean expectedValue, SaltConfig saltConfig) {
         boolean secretEncryptionEnabled = (Boolean) getClusterProperties(saltConfig).get("secretEncryptionEnabled");
         assertEquals(expectedValue, secretEncryptionEnabled);
+    }
+
+    private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {
+        String defaultKerberosCcacheSecretStorage = (String) getKerberosProperties(saltConfig).get("cCacheSecretStorage");
+        assertEquals(expectedValue, defaultKerberosCcacheSecretStorage);
     }
 }
