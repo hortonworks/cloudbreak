@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_ATTACHED_DISKSET;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_RESERVED_IP;
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,11 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -40,13 +36,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -63,7 +57,6 @@ import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -217,7 +210,7 @@ public class GcpResourceConnectorTest {
         doNothing().when(resourceBuilderContext).addNetworkResources(anyCollection());
         when(groupResourceService.getGroupResources(any(Variant.class), anyCollection()))
                 .thenReturn(List.of(cloudResource("test-1", GCP_INSTANCE)));
-        Group master = group("master");
+        Group master = group();
         master.getInstances().get(0).putParameter(CloudInstance.FQDN, "fqdn");
         when(cloudStack.getGroups()).thenReturn(List.of(master));
         doNothing().when(resourceBuilderContext).addComputeResources(anyLong(), anyList());
@@ -260,19 +253,14 @@ public class GcpResourceConnectorTest {
         return new CloudInstance(name, instanceTemplate(), instanceAuthentication(), "subnet-1", "az1");
     }
 
-    private Group group(String name) {
-        return new Group(
-                name,
-                InstanceGroupType.CORE,
-                List.of(cloudInstance()),
-                new Security(List.of(), List.of()),
-                cloudInstance(),
-                instanceAuthentication(),
-                "loginUserName",
-                "publicKey",
-                50,
-                Optional.empty(),
-                createGroupNetwork(), emptyMap(), null);
+    private Group group() {
+        return Group.builder()
+                .withName("master")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(List.of(cloudInstance()))
+                .withSkeleton(cloudInstance())
+                .withInstanceAuthentication(instanceAuthentication())
+                .build();
     }
 
     private InstanceTemplate instanceTemplate() {
@@ -286,9 +274,5 @@ public class GcpResourceConnectorTest {
 
     private CloudInstance cloudInstance() {
         return new CloudInstance("test-1", instanceTemplate(), instanceAuthentication(), "subnet-1", "az1");
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -8,11 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,20 +20,16 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.context.VolumeMatcher;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
@@ -86,9 +78,11 @@ class AwsContextServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withInstances(workerInstances)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -97,9 +91,11 @@ class AwsContextServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withInstances(computeInstances)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build());
         ResourceBuilderContext context = new ResourceBuilderContext("context", Location.location(Region.region("us-west-1")), 0);
         awsContextService.addResourcesToContext(resources, context, groups);
 
@@ -134,9 +130,11 @@ class AwsContextServiceTest {
         List<Group> groups = new ArrayList<>();
         List<CloudInstance> computeInstances = new ArrayList<>();
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1"));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withInstances(computeInstances)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build());
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> awsContextService.addInstancesToContext(instances, context, groups));
         assertEquals("Not found enough instances in compute group, expected 1, got 0. " +
@@ -147,9 +145,4 @@ class AwsContextServiceTest {
         return new InstanceTemplate("large", group, privateId, new ArrayList<>(), InstanceStatus.CREATED, null, 1L,
                 "image", TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
-    }
-
 }

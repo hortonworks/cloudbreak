@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STA
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.DISCOVERY_NAME;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,7 +75,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -96,7 +93,6 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
@@ -561,17 +557,16 @@ public class GcpInstanceResourceBuilderTest {
     public Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
-        return new Group(name,
-                InstanceGroupType.CORE,
-                singletonList(cloudInstance),
-                security,
-                null,
-                instanceAuthentication,
-                instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(),
-                50,
-                Optional.ofNullable(cloudFileSystemView),
-                createGroupNetwork(), emptyMap(), null);
+        return Group.builder()
+                .withName(name)
+                .withType(InstanceGroupType.CORE)
+                .withInstances(singletonList(cloudInstance))
+                .withSecurity(security)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withIdentity(Optional.ofNullable(cloudFileSystemView))
+                .build();
     }
 
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
@@ -817,9 +812,4 @@ public class GcpInstanceResourceBuilderTest {
         String publicKey = builder.getPublicKey(sshKey, loginName);
         assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
-    }
-
 }

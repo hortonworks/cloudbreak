@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,7 +13,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -31,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.context.VolumeMatcher;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,8 +66,10 @@ class AzureContextServiceTest {
 
     @NotNull
     private static Group group() {
-        return new Group("worker", InstanceGroupType.CORE, List.of(cloudInstance(PRIVATE_ID_1), cloudInstance(PRIVATE_ID_2)), null, null,
-                null, null, null, 0, Optional.empty(), null, emptyMap(), null);
+        return Group.builder()
+                .withName("worker")
+                .withInstances(List.of(cloudInstance(PRIVATE_ID_1), cloudInstance(PRIVATE_ID_2)))
+                .build();
     }
 
     @NotNull

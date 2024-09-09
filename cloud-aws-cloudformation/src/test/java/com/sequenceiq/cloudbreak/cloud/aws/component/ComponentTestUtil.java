@@ -5,16 +5,13 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -30,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -46,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.common.model.FileSystemType;
 
@@ -108,14 +103,22 @@ public class ComponentTestUtil {
                 getCloudInstance(instanceAuthentication, "worker", workerStatuses, 0L, null),
                 getCloudInstance(instanceAuthentication, "worker", workerStatuses, 1L, null),
                 getCloudInstance(instanceAuthentication, "worker", InstanceStatus.STARTED, 2L, INSTANCE_ID_3));
-        List<Group> groups = List.of(new Group("master", InstanceGroupType.CORE, masterInstances, security, null,
-                        instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp3.value()),
-                new Group("worker", InstanceGroupType.CORE, workerInstances, security, null,
-                        instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp3.value()));
+        Group.Builder groupBuilder = Group.builder()
+                .withType(InstanceGroupType.CORE)
+                .withSecurity(security)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(ROOT_VOLUME_SIZE)
+                .withRootVolumeType(AwsDiskType.Gp3.value());
+        List<Group> groups = List.of(groupBuilder
+                        .withName("master")
+                        .withInstances(masterInstances)
+                        .build(),
+                groupBuilder
+                        .withName("worker")
+                        .withInstances(workerInstances)
+                        .build());
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -141,10 +144,17 @@ public class ComponentTestUtil {
         CloudInstance instance = getCloudInstance(instanceAuthentication, "group1", InstanceStatus.CREATE_REQUESTED, 0L, null);
         Security security = getSecurity();
 
-        List<Group> groups = List.of(new Group("group1", InstanceGroupType.CORE, List.of(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+        List<Group> groups = List.of(Group.builder()
+                .withName("group1")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(List.of(instance))
+                .withSecurity(security)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(ROOT_VOLUME_SIZE)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build());
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -197,9 +207,5 @@ public class ComponentTestUtil {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         return new Security(rules, emptyList());
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

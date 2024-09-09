@@ -375,10 +375,21 @@ public class AwsUpscaleService {
             List<CloudInstance> newInstances = group.getInstances().stream()
                     .filter(instance -> Objects.isNull(instance.getInstanceId())).collect(Collectors.toList());
 
-            return new Group(group.getName(), group.getType(), newInstances, group.getSecurity(), null, group.getParameters(),
-                    group.getInstanceAuthentication(), group.getLoginUserName(),
-                    group.getPublicKey(), group.getRootVolumeSize(), group.getIdentity(), group.getNetwork(), group.getTags(),
-                    group.getRootVolumeType());
+            return Group.builder()
+                    .withName(group.getName())
+                    .withType(group.getType())
+                    .withInstances(newInstances)
+                    .withSecurity(group.getSecurity())
+                    .withParameters(group.getParameters())
+                    .withInstanceAuthentication(group.getInstanceAuthentication())
+                    .withLoginUserName(group.getLoginUserName())
+                    .withPublicKey(group.getPublicKey())
+                    .withRootVolumeSize(group.getRootVolumeSize())
+                    .withIdentity(group.getIdentity())
+                    .withNetwork(group.getNetwork())
+                    .withTags(group.getTags())
+                    .withRootVolumeType(group.getRootVolumeType())
+                    .build();
         }).collect(Collectors.toList());
         LOGGER.debug("Collected groups with new instances: {}", collectedGroupsWithNewInstances);
         return collectedGroupsWithNewInstances;

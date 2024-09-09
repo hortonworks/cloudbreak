@@ -273,22 +273,22 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
                 GroupNetwork groupNetwork = buildGroupNetwork(stack.getNetwork(), instanceGroup);
 
-                groups.add(
-                        new Group(instanceGroup.getGroupName(),
-                                InstanceGroupType.GATEWAY,
-                                instances,
-                                buildSecurity(instanceGroup),
-                                skeleton,
-                                fields,
-                                instanceAuthentication,
-                                instanceAuthentication.getLoginUserName(),
-                                instanceAuthentication.getPublicKey(),
-                                rootVolumeSize,
-                                fileSystemView,
-                                groupNetwork,
-                                getUserDefinedTags(stack),
-                                getRootVolumeType(stack.getId(), stack.getCloudPlatform(), instanceGroup.getGroupName()))
-                );
+                groups.add(Group.builder()
+                        .withName(instanceGroup.getGroupName())
+                        .withType(InstanceGroupType.GATEWAY)
+                        .withInstances(instances)
+                        .withSecurity(buildSecurity(instanceGroup))
+                        .withSkeleton(skeleton)
+                        .withParameters(fields)
+                        .withInstanceAuthentication(instanceAuthentication)
+                        .withLoginUserName(instanceAuthentication.getLoginUserName())
+                        .withPublicKey(instanceAuthentication.getPublicKey())
+                        .withRootVolumeSize(rootVolumeSize)
+                        .withIdentity(fileSystemView)
+                        .withNetwork(groupNetwork)
+                        .withTags(getUserDefinedTags(stack))
+                        .withRootVolumeType(getRootVolumeType(stack.getId(), stack.getCloudPlatform(), instanceGroup.getGroupName()))
+                        .build());
             }
         }
         return groups;

@@ -362,23 +362,23 @@ public class StackToCloudStackConverter {
                         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                         Optional<CloudFileSystemView> cloudFileSystemView
                                 = cloudFileSystemViewProvider.getCloudFileSystemView(cluster.getFileSystem(), componentsByHostGroup, instanceGroup);
-                        groups.add(
-                                new Group(instanceGroup.getGroupName(),
-                                        instanceGroup.getInstanceGroupType(),
-                                        buildCloudInstances(environment, stack.getStack(), deleteRequests, instanceGroupDto),
-                                        buildSecurity(instanceGroup),
-                                        buildCloudInstanceSkeleton(environment, stack.getStack(), instanceGroupDto),
-                                        getFields(instanceGroup),
-                                        instanceAuthentication,
-                                        instanceAuthentication.getLoginUserName(),
-                                        instanceAuthentication.getPublicKey(),
-                                        getRootVolumeSize(instanceGroup),
-                                        cloudFileSystemView,
-                                        buildDeletedCloudInstances(environment, stack.getStack(), deleteRequests, instanceGroupDto),
-                                        buildGroupNetwork(stack.getNetwork(), instanceGroup),
-                                        userDefinedTags,
-                                        getRootVolumeType(stack.getId(), stack.getCloudPlatform(), instanceGroup.getGroupName()))
-                        );
+                        groups.add(Group.builder()
+                                .withName(instanceGroup.getGroupName())
+                                .withType(instanceGroup.getInstanceGroupType())
+                                .withInstances(buildCloudInstances(environment, stack.getStack(), deleteRequests, instanceGroupDto))
+                                .withSecurity(buildSecurity(instanceGroup))
+                                .withSkeleton(buildCloudInstanceSkeleton(environment, stack.getStack(), instanceGroupDto))
+                                .withParameters(getFields(instanceGroup))
+                                .withInstanceAuthentication(instanceAuthentication)
+                                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                                .withPublicKey(instanceAuthentication.getPublicKey())
+                                .withRootVolumeSize(getRootVolumeSize(instanceGroup))
+                                .withIdentity(cloudFileSystemView)
+                                .withDeletedInstances(buildDeletedCloudInstances(environment, stack.getStack(), deleteRequests, instanceGroupDto))
+                                .withNetwork(buildGroupNetwork(stack.getNetwork(), instanceGroup))
+                                .withTags(userDefinedTags)
+                                .withRootVolumeType(getRootVolumeType(stack.getId(), stack.getCloudPlatform(), instanceGroup.getGroupName()))
+                                .build());
                     }
                 }
             }

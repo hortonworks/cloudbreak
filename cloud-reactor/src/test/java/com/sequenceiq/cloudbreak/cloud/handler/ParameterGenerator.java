@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -91,9 +89,17 @@ public class ParameterGenerator {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, emptyList());
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                50, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+        groups.add(Group.builder()
+                .withName(name)
+                .withType(InstanceGroupType.CORE)
+                .withInstances(Collections.singletonList(instance))
+                .withSecurity(security)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(50)
+                .withNetwork(createGroupNetwork())
+                .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",

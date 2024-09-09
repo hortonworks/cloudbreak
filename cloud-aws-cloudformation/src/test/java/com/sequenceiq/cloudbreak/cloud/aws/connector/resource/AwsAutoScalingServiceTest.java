@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -133,8 +132,13 @@ public class AwsAutoScalingServiceTest {
     }
 
     private Group createGroup(String groupName, InstanceGroupType groupType, List<CloudInstance> instances) {
-        return new Group(groupName, groupType, instances, null, null, null, null, null, 0, null, createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+        return Group.builder()
+                .withName(groupName)
+                .withType(groupType)
+                .withInstances(instances)
+                .withNetwork(createGroupNetwork())
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build();
     }
 
     private GroupNetwork createGroupNetwork() {

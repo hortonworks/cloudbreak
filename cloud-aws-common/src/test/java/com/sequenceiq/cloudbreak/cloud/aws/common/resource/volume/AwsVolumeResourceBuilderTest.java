@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,7 +73,6 @@ import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceExceptio
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
@@ -580,8 +578,11 @@ class AwsVolumeResourceBuilderTest {
         InstanceTemplate template = new InstanceTemplate(FLAVOR, GROUP_NAME, PRIVATE_ID, volumes, InstanceStatus.CREATE_REQUESTED, templateParameters,
                 TEMPLATE_ID, IMAGE_ID, TemporaryStorage.ATTACHED_VOLUMES, temporaryStorageCount);
         CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null, "subnet-1", "az1");
-        return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null,
-                null, ROOT_VOLUME_SIZE, null, createGroupNetwork(), emptyMap(), null);
+        return Group.builder()
+                .withName(GROUP_NAME)
+                .withInstances(singletonList(instance))
+                .withRootVolumeSize(ROOT_VOLUME_SIZE)
+                .build();
     }
 
     private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type) {

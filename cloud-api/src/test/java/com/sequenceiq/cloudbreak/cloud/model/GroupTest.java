@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
@@ -143,9 +145,72 @@ class GroupTest {
         assertThat(result).isSameAs(cloudInstanceFirst.getTemplate());
     }
 
+    @Test
+    void builderTest() {
+        String name = "name";
+        InstanceGroupType type = InstanceGroupType.GATEWAY;
+        List<CloudInstance> instances = new ArrayList<>();
+        Security security = mock(Security.class);
+        String publicKey = "publicKey";
+        String loginUserName = "loginUserName";
+        InstanceAuthentication instanceAuthentication = mock(InstanceAuthentication.class);
+        CloudInstance skeleton = mock(CloudInstance.class);
+        int rootVolumeSize = 50;
+        CloudFileSystemView identity = mock(CloudFileSystemView.class);
+        List<CloudInstance> deletedInstances = new ArrayList<>();
+        GroupNetwork network = mock(GroupNetwork.class);
+        Map<String, String> tags = new HashMap<>();
+        String rootVolumeType = "rootVolumeType";
+        Map<String, Object> parameters = new HashMap<>();
+
+        Group underTest = Group.builder()
+                .withName(name)
+                .withType(type)
+                .withInstances(instances)
+                .withSecurity(security)
+                .withPublicKey(publicKey)
+                .withLoginUserName(loginUserName)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withSkeleton(skeleton)
+                .withRootVolumeSize(rootVolumeSize)
+                .withIdentity(Optional.of(identity))
+                .withDeletedInstances(deletedInstances)
+                .withNetwork(network)
+                .withTags(tags)
+                .withRootVolumeType(rootVolumeType)
+                .withParameters(parameters)
+                .build();
+
+        assertEquals(name, underTest.getName());
+        assertEquals(type, underTest.getType());
+        assertEquals(instances, underTest.getInstances());
+        assertEquals(security, underTest.getSecurity());
+        assertEquals(publicKey, underTest.getPublicKey());
+        assertEquals(loginUserName, underTest.getLoginUserName());
+        assertEquals(instanceAuthentication, underTest.getInstanceAuthentication());
+        assertEquals(skeleton, underTest.getReferenceInstanceConfiguration());
+        assertEquals(rootVolumeSize, underTest.getRootVolumeSize());
+        assertEquals(identity, underTest.getIdentity().get());
+        assertEquals(deletedInstances, underTest.getDeletedInstances());
+        assertEquals(network, underTest.getNetwork());
+        assertEquals(tags, underTest.getTags());
+        assertEquals(rootVolumeType, underTest.getRootVolumeType());
+        assertEquals(parameters, underTest.getParameters());
+    }
+
     private Group createGroup(Collection<CloudInstance> instances, CloudInstance skeleton) {
-        return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, instances, security, skeleton, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY,
-                ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        return Group.builder()
+                .withName(GROUP_NAME)
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(instances)
+                .withSecurity(security)
+                .withSkeleton(skeleton)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(LOGIN_USER_NAME)
+                .withPublicKey(PUBLIC_KEY)
+                .withRootVolumeSize(ROOT_VOLUME_SIZE)
+                .withNetwork(createGroupNetwork())
+                .build();
     }
 
     private CloudInstance createCloudInstance() {

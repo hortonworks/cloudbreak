@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -55,7 +53,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -75,7 +72,6 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -92,8 +88,6 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
     private static final String CUSTOM_IMAGE_NAME = "cloudbreak-image.vhd";
 
     private static final String LATEST_TEMPLATE_PATH = "templates/arm-v2.ftl";
-
-    private static final int ROOT_VOLUME_SIZE = 50;
 
     private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
 
@@ -260,9 +254,12 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         instance.getTemplate().putParameter(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
         instance.getTemplate().putParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, "myDES");
 
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+        groups.add(Group.builder()
+                .withName(name)
+                .withType(InstanceGroupType.CORE)
+                .withInstances(Collections.singletonList(instance))
+                .withSecurity(security)
+                .build());
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -321,9 +318,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+        groups.add(getGatewayGroup());
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -393,9 +388,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+        groups.add(getGatewayGroup());
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -464,9 +457,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+        groups.add(getGatewayGroup());
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
@@ -505,13 +496,18 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         validateJson(templateString);
     }
 
+    private Group getGatewayGroup() {
+        return Group.builder()
+                .withName("gateway-group")
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(Collections.singletonList(instance))
+                .withSecurity(security)
+                .build();
+    }
+
     private CloudCredential cloudCredential() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", "siq-haas");
         return new CloudCredential("crn", "test", parameters, "acc");
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

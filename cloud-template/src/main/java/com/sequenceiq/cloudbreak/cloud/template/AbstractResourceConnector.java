@@ -342,19 +342,20 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         for (Group scalingGroup : scalingGroups) {
             List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
             instances.removeIf(cloudInstance -> InstanceStatus.CREATE_REQUESTED != cloudInstance.getTemplate().getStatus());
-            groups.add(new Group(scalingGroup.getName(),
-                    scalingGroup.getType(),
-                    instances,
-                    scalingGroup.getSecurity(),
-                    null,
-                    scalingGroup.getInstanceAuthentication(),
-                    scalingGroup.getInstanceAuthentication().getLoginUserName(),
-                    scalingGroup.getInstanceAuthentication().getPublicKey(),
-                    scalingGroup.getRootVolumeSize(),
-                    scalingGroup.getIdentity(),
-                    scalingGroup.getNetwork(),
-                    scalingGroup.getTags(),
-                    scalingGroup.getRootVolumeType()));
+            groups.add(Group.builder()
+                    .withName(scalingGroup.getName())
+                    .withType(scalingGroup.getType())
+                    .withInstances(instances)
+                    .withSecurity(scalingGroup.getSecurity())
+                    .withInstanceAuthentication(scalingGroup.getInstanceAuthentication())
+                    .withLoginUserName(scalingGroup.getInstanceAuthentication().getLoginUserName())
+                    .withPublicKey(scalingGroup.getInstanceAuthentication().getPublicKey())
+                    .withRootVolumeSize(scalingGroup.getRootVolumeSize())
+                    .withIdentity(scalingGroup.getIdentity())
+                    .withNetwork(scalingGroup.getNetwork())
+                    .withTags(scalingGroup.getTags())
+                    .withRootVolumeType(scalingGroup.getRootVolumeType())
+                    .build());
         }
         return groups;
     }

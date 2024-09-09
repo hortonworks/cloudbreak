@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 import static com.sequenceiq.cloudbreak.TestUtil.instanceMetaData;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +51,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -156,8 +154,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(workerInstances)
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -166,8 +167,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(computeInstances)
+                .build());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
@@ -210,8 +214,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(workerInstances)
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -220,8 +227,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(computeInstances)
+                .build());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
@@ -258,8 +268,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(workerInstances)
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -268,8 +281,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(computeInstances)
+                .build());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
@@ -308,8 +324,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(workerInstances)
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -318,8 +337,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(computeInstances)
+                .build());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
@@ -362,8 +384,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(workerInstances)
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -372,8 +397,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(computeInstances)
+                .build());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
@@ -411,8 +439,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "worker2.example.com")));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
-        groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(workerInstances)
+                .build());
         List<CloudInstance> computeInstances = new ArrayList<>();
 
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
@@ -421,8 +452,11 @@ class StackUpscaleServiceTest {
                 Map.of(CloudInstance.FQDN, "compute2.example.com")));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class), "subnet-1", "az1",
                 Map.of(CloudInstance.FQDN, "compute3.example.com")));
-        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
-                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty(), null, emptyMap(), null));
+        groups.add(Group.builder()
+                .withName("compute")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(computeInstances)
+                .build());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)

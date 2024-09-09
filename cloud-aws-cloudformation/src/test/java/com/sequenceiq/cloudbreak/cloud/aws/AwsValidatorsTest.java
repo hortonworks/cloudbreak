@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.ATTACHED_VOLUMES;
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,10 +13,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import jakarta.inject.Inject;
@@ -64,19 +60,12 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.RetryService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -150,15 +139,11 @@ class AwsValidatorsTest {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
         when(amazonCloudFormationClient.describeStacks(any()))
                 .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("stackName does not exist").build()).build());
-        InstanceTemplate template =
-                new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES, 0L);
-        CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
-        Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(),
-            emptyMap(), AwsDiskType.Gp3.value());
-
+        Group group = Group.builder().build();
         CloudStack cloudStack = CloudStack.builder()
                 .groups(List.of(group))
                 .build();
+
         awsStackValidatorUnderTest.validate(authenticatedContext, cloudStack);
     }
 
@@ -244,10 +229,6 @@ class AwsValidatorsTest {
         return CloudStack.builder()
                 .tags(tags)
                 .build();
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
     @Configuration

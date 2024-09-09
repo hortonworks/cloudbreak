@@ -6,9 +6,7 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_I
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.CommonStatus.FAILED;
-import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,7 +22,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +56,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -67,7 +63,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
 import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
@@ -529,8 +524,7 @@ class AwsLoadBalancerLaunchServiceTest {
     }
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type) {
-        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(), emptyMap(), null);
+        Group group = Group.builder().build();
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;
@@ -611,9 +605,5 @@ class AwsLoadBalancerLaunchServiceTest {
         AwsLoadBalancer publicLb = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING);
         publicLb.getOrCreateListener(PORT, ProtocolEnum.TCP, "/", PORT, ProtocolEnum.HTTPS);
         return List.of(privateLb, publicLb);
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

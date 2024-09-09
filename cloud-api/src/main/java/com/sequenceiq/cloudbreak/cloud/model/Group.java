@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,58 +44,6 @@ public class Group extends DynamicModel {
 
     private String rootVolumeType;
 
-    public Group(String name,
-            InstanceGroupType type,
-            Collection<CloudInstance> instances,
-            Security security,
-            CloudInstance skeleton,
-            InstanceAuthentication instanceAuthentication,
-            String loginUserName,
-            String publicKey,
-            int rootVolumeSize,
-            Optional<CloudFileSystemView> identity,
-            GroupNetwork groupNetwork,
-            Map<String, String> tags,
-            String rootVolumeType) {
-        this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
-                rootVolumeSize, identity, new ArrayList<>(), groupNetwork, tags, rootVolumeType);
-    }
-
-    public Group(String name,
-            InstanceGroupType type,
-            Collection<CloudInstance> instances,
-            Security security,
-            CloudInstance skeleton,
-            InstanceAuthentication instanceAuthentication,
-            String loginUserName,
-            String publicKey,
-            int rootVolumeSize,
-            Optional<CloudFileSystemView> identity,
-            List<CloudInstance> deletedInstances,
-            GroupNetwork groupNetwork,
-            Map<String, String> tags) {
-        this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
-                rootVolumeSize, identity, deletedInstances, groupNetwork, tags, null);
-    }
-
-    public Group(String name,
-            InstanceGroupType type,
-            Collection<CloudInstance> instances,
-            Security security,
-            CloudInstance skeleton,
-            Map<String, Object> parameters,
-            InstanceAuthentication instanceAuthentication,
-            String loginUserName,
-            String publicKey,
-            int rootVolumeSize,
-            Optional<CloudFileSystemView> identity,
-            GroupNetwork groupNetwork,
-            Map<String, String> tags,
-            String rootVolumeType) {
-        this(name, type, instances, security, skeleton, parameters, instanceAuthentication, loginUserName, publicKey,
-                rootVolumeSize, identity, new ArrayList<>(), groupNetwork, tags, rootVolumeType);
-    }
-
     @JsonCreator
     public Group(
             @JsonProperty("name") String name,
@@ -131,11 +79,30 @@ public class Group extends DynamicModel {
         this.rootVolumeType = rootVolumeType;
     }
 
+    public Group(Builder builder) {
+        super(builder.parameters);
+        this.name = builder.name;
+        this.type = builder.type;
+        builder.instances.forEach(Objects::requireNonNull);
+        this.instances = new ArrayList<>(builder.instances);
+        this.security = builder.security;
+        this.publicKey = builder.publicKey;
+        this.loginUserName = builder.loginUserName;
+        this.instanceAuthentication = builder.instanceAuthentication;
+        this.skeleton = Optional.ofNullable(builder.skeleton);
+        this.rootVolumeSize = builder.rootVolumeSize;
+        this.identity = builder.identity;
+        this.deletedInstances = new ArrayList<>(builder.deletedInstances);
+        this.network = builder.network;
+        this.tags = builder.tags;
+        this.rootVolumeType = builder.rootVolumeType;
+    }
+
     public CloudInstance getReferenceInstanceConfiguration() {
         if (instances.isEmpty()) {
             return skeleton.orElseThrow(() -> new RuntimeException(String.format("There is no skeleton and instance available for Group -> name:%s", name)));
         }
-        return instances.get(0);
+        return instances.getFirst();
     }
 
     /**
@@ -231,5 +198,121 @@ public class Group extends DynamicModel {
                 ", network=" + network +
                 ", tags=" + tags +
                 '}';
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private Map<String, String> tags = Collections.emptyMap();
+
+        private GroupNetwork network;
+
+        private Collection<CloudInstance> deletedInstances = Collections.emptyList();
+
+        private Optional<CloudFileSystemView> identity = Optional.empty();
+
+        private int rootVolumeSize;
+
+        private CloudInstance skeleton;
+
+        private InstanceAuthentication instanceAuthentication;
+
+        private String loginUserName;
+
+        private String publicKey;
+
+        private Security security;
+
+        private Collection<CloudInstance> instances = Collections.emptyList();
+
+        private InstanceGroupType type;
+
+        private String name;
+
+        private Map<String, Object> parameters = Collections.emptyMap();
+
+        private String rootVolumeType;
+
+        public Builder withTags(Map<String, String> tags) {
+            this.tags = tags;
+            return this;
+        }
+
+        public Builder withNetwork(GroupNetwork network) {
+            this.network = network;
+            return this;
+        }
+
+        public Builder withDeletedInstances(List<CloudInstance> deletedInstances) {
+            this.deletedInstances = deletedInstances;
+            return this;
+        }
+
+        public Builder withIdentity(Optional<CloudFileSystemView> identity) {
+            this.identity = identity;
+            return this;
+        }
+
+        public Builder withRootVolumeSize(int rootVolumeSize) {
+            this.rootVolumeSize = rootVolumeSize;
+            return this;
+        }
+
+        public Builder withSkeleton(CloudInstance skeleton) {
+            this.skeleton = skeleton;
+            return this;
+        }
+
+        public Builder withInstanceAuthentication(InstanceAuthentication instanceAuthentication) {
+            this.instanceAuthentication = instanceAuthentication;
+            return this;
+        }
+
+        public Builder withLoginUserName(String loginUserName) {
+            this.loginUserName = loginUserName;
+            return this;
+        }
+
+        public Builder withPublicKey(String publicKey) {
+            this.publicKey = publicKey;
+            return this;
+        }
+
+        public Builder withSecurity(Security security) {
+            this.security = security;
+            return this;
+        }
+
+        public Builder withInstances(Collection<CloudInstance> instances) {
+            this.instances = instances;
+            return this;
+        }
+
+        public Builder withType(InstanceGroupType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withParameters(Map<String, Object> parameters) {
+            this.parameters = parameters;
+            return this;
+        }
+
+        public Builder withRootVolumeType(String rootVolumeType) {
+            this.rootVolumeType = rootVolumeType;
+            return this;
+        }
+
+        public Group build() {
+            return new Group(this);
+        }
     }
 }

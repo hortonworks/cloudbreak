@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -149,6 +147,8 @@ public class AzureTemplateBuilderFreeIpaTest {
 
     private String name;
 
+    private InstanceAuthentication instanceAuthentication;
+
     private CloudInstance instance;
 
     private Security security;
@@ -198,7 +198,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         Map<String, Object> params = new HashMap<>();
         params.put(NetworkConstants.SUBNET_ID, "existingSubnet");
         params.put(CloudInstance.ID, 1L);
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "existingSubnet", null, params);
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
@@ -237,11 +237,8 @@ public class AzureTemplateBuilderFreeIpaTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group gatewayGroup = getGatewayGroup(Collections.singletonList(instance));
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -250,10 +247,8 @@ public class AzureTemplateBuilderFreeIpaTest {
         gatewayGroup.putParameter("availabilitySet", asMap);
         groups.add(gatewayGroup);
 
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AzureDiskType.STANDARD_SSD_LRS.value());
+        Group coreGroup = getCoreGroup(Collections.singletonList(instance));
+        coreGroup.setRootVolumeType(AzureDiskType.STANDARD_SSD_LRS.value());
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -302,11 +297,8 @@ public class AzureTemplateBuilderFreeIpaTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group gatewayGroup = getGatewayGroup(Collections.singletonList(instance));
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -315,9 +307,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         gatewayGroup.putParameter("availabilitySet", asMap);
         groups.add(gatewayGroup);
 
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group coreGroup = getCoreGroup(Collections.singletonList(instance));
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -365,16 +355,12 @@ public class AzureTemplateBuilderFreeIpaTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         instance.setAvailabilityZone("1");
 
         CloudInstance instance1 = new CloudInstance("SOME_ID", instance.getTemplate(), instanceAuthentication, "existingSubnet", "2", instance.getParameters());
 
-
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, List.of(instance, instance1), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group gatewayGroup = getGatewayGroup(List.of(instance, instance1));
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -383,9 +369,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         gatewayGroup.putParameter("availabilitySet", asMap);
         groups.add(gatewayGroup);
 
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, List.of(instance, instance1), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group coreGroup = getCoreGroup(List.of(instance, instance1));
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -430,11 +414,8 @@ public class AzureTemplateBuilderFreeIpaTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group gatewayGroup = getGatewayGroup(Collections.singletonList(instance));
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -443,9 +424,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         gatewayGroup.putParameter("availabilitySet", asMap);
         groups.add(gatewayGroup);
 
-        Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+        Group coreGroup = getCoreGroup(Collections.singletonList(instance));
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -476,6 +455,26 @@ public class AzureTemplateBuilderFreeIpaTest {
         assertFalse(strippedTemplateString.contains("\"zones\":[\"2\"],\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"}"));
         assertFalse(strippedTemplateString.contains("\"zones\":[\"1\"],\"properties\""));
         assertFalse(strippedTemplateString.contains("\"zones\":[\"2\"],\"properties\""));
+    }
+
+    private Group getGatewayGroup(List<CloudInstance> instances) {
+        Group gatewayGroup = Group.builder()
+                .withName("gateway")
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(instances)
+                .withSecurity(security)
+                .build();
+        return gatewayGroup;
+    }
+
+    private Group getCoreGroup(List<CloudInstance> instances) {
+        Group coreGroup = Group.builder()
+                .withName("core")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(instances)
+                .withSecurity(security)
+                .build();
+        return coreGroup;
     }
 
     private CloudCredential cloudCredential() {

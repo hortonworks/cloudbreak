@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -9,10 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
@@ -38,15 +34,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
 import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
@@ -155,9 +147,7 @@ public class AwsTerminateServiceIntegrationTest {
     public void testTerminateWhenResourcesHasNoCfButStackNotExist() {
         CloudResource cf = CloudResource.builder().withName("cfn-87654321").withType(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = CloudResource.builder().withName("lc-87654321").withType(ResourceType.AWS_LAUNCHCONFIGURATION).build();
-        Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null,
-                null, null, null, "", 0, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+        Group group = Group.builder().build();
 
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cf);
@@ -172,16 +162,15 @@ public class AwsTerminateServiceIntegrationTest {
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingClient, never()).describeAutoScalingGroups(any());
         Assertions.assertEquals(0, result.size(), "Resources result should be empty");
-
     }
 
     @Test
     public void testTerminateWhenResourcesHasCf() {
         CloudResource cf = CloudResource.builder().withName("cfn-87654321").withType(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = CloudResource.builder().withName("lc-87654321").withType(ResourceType.AWS_LAUNCHCONFIGURATION).build();
-        Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null,
-                null, null, "", 0, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+        Group group = Group.builder()
+                .withName("alma")
+                .build();
         DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder().autoScalingGroups(List.of()).build();
 
         when(cloudStack.getGroups()).thenReturn(List.of(group));
@@ -220,9 +209,5 @@ public class AwsTerminateServiceIntegrationTest {
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, credential);
         ac.putParameter(AmazonEc2Client.class, ec2Client);
         return ac;
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 }

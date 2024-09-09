@@ -1367,8 +1367,15 @@ public class StackToCloudStackConverterTest {
         InstanceTemplate instanceTemplate2 = new InstanceTemplate("small", null, 2L, Set.of(), null, null, 0L, null, null, 0L);
         CloudInstance instance1 = new CloudInstance("instance1", instanceTemplate1, null, null, null);
         CloudInstance instance2 = new CloudInstance("instance2", instanceTemplate2, null, null, null);
-        Group group1 = new Group("group1", null, Set.of(instance1, instance2), null, null, null, null, null, 100, null, null, Map.of(), null);
-        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of(), null);
+        Group group1 = Group.builder()
+                .withName("group1")
+                .withInstances(Set.of(instance1, instance2))
+                .withRootVolumeSize(100)
+                .build();
+        Group group2 = Group.builder()
+                .withName("group2")
+                .withRootVolumeSize(100)
+                .build();
         CloudStack cloudStack = CloudStack.builder()
                 .groups(Set.of(group1, group2))
                 .build();
@@ -1386,8 +1393,15 @@ public class StackToCloudStackConverterTest {
     void testUpdateWithVerticalScaleRequestWithZeroInstanceGroup() {
         InstanceTemplate skeletonTemplate = new InstanceTemplate("small", null, 0L, Set.of(), null, null, 0L, null, null, 0L);
         CloudInstance skeleton = new CloudInstance("skeleton", skeletonTemplate, null, null, null);
-        Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of(), null);
-        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of(), null);
+        Group group1 = Group.builder()
+                .withName("group1")
+                .withSkeleton(skeleton)
+                .withRootVolumeSize(100)
+                .build();
+        Group group2 = Group.builder()
+                .withName("group2")
+                .withRootVolumeSize(100)
+                .build();
         CloudStack cloudStack = CloudStack.builder()
                 .groups(Set.of(group1, group2))
                 .build();

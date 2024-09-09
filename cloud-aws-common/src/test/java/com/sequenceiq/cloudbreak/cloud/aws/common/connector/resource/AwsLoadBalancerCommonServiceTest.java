@@ -6,9 +6,7 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
-import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.common.api.type.ResourceType.AWS_INSTANCE;
-import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -527,16 +525,20 @@ class AwsLoadBalancerCommonServiceTest {
     }
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
-        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap(), null);
+        Group group = Group.builder()
+                .withName(INSTANCE_NAME)
+                .withNetwork(createGroupNetwork(instanceGroupNetworkSubnetIds))
+                .build();
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, HEALTH_CHECK_PORT), Set.of(group));
         return cloudLoadBalancer;
     }
 
     private CloudLoadBalancer createCloudLoadBalancerWithHealthCheckSettings(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
-        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap(), null);
+        Group group = Group.builder()
+                .withName(INSTANCE_NAME)
+                .withNetwork(createGroupNetwork(instanceGroupNetworkSubnetIds))
+                .build();
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, TCP_UDP, HEALTH_CHECK_PORT, HEALTH_CHECK_PATH, HTTPS), Set.of(group));
         return cloudLoadBalancer;
@@ -544,8 +546,10 @@ class AwsLoadBalancerCommonServiceTest {
 
     private CloudLoadBalancer createCloudLoadBalancerWithEndpointGateay(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds,
             List<String> endpointGatewaySubnetIds) {
-        Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds), emptyMap(), null);
+        Group group = Group.builder()
+                .withName(INSTANCE_NAME)
+                .withNetwork(createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds))
+                .build();
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, HEALTH_CHECK_PORT), Set.of(group));
         return cloudLoadBalancer;

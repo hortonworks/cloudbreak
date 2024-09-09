@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.flow.freeipa.verticalscale.handler;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -8,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleService;
@@ -76,9 +73,7 @@ public class FreeIpaVerticalScaleHandlerTest {
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 10, null, null, emptyMap(), null);
+        Group group1 = Group.builder().build();
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
@@ -135,9 +130,7 @@ public class FreeIpaVerticalScaleHandlerTest {
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 10, null, null, emptyMap(), null);
+        Group group1 = Group.builder().build();
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");

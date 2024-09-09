@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Optional.empty;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -141,18 +139,11 @@ class AwsGatewaySubnetMultiAzValidatorTest {
     }
 
     private Group getGroup(String groupName, InstanceGroupType groupType, GroupNetwork groupNetwork) {
-        return new Group(groupName,
-                groupType,
-                Set.of(),
-                null,
-                null,
-                null,
-                "",
-                "",
-                100,
-                empty(),
-                groupNetwork,
-                emptyMap(),
-                AwsDiskType.Gp3.value());
+        return Group.builder()
+                .withName(groupName)
+                .withType(groupType)
+                .withNetwork(groupNetwork)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build();
     }
 }

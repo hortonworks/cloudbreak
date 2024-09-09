@@ -29,12 +29,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -45,8 +43,6 @@ import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -229,20 +225,12 @@ public class StackToCloudStackConverterTest {
                 "subnet",
                 "az");
 
-        Group group = new Group(
-                GROUP_NAME,
-                InstanceGroupType.CORE,
-                Set.of(cloudInstance),
-                new Security(Set.of(), Set.of()),
-                cloudInstance,
-                new InstanceAuthentication("publicKey", "publicKeyId", "loginuser"),
-                "cb",
-                "ssh",
-                80,
-                Optional.empty(),
-                new GroupNetwork(OutboundInternetTraffic.DISABLED, Set.of(), Map.of()),
-                Map.of(),
-                null);
+        Group group = Group.builder()
+                .withName(GROUP_NAME)
+                .withInstances(Set.of(cloudInstance))
+                .withSkeleton(cloudInstance)
+                .withRootVolumeSize(80)
+                .build();
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(Set.of(group))
@@ -273,8 +261,15 @@ public class StackToCloudStackConverterTest {
     void testUpdateWithVerticalScaleRequestWithZeroInstanceGroup() {
         InstanceTemplate skeletonTemplate = new InstanceTemplate("small", null, 0L, Set.of(), null, null, 0L, null, null, 0L);
         CloudInstance skeleton = new CloudInstance("skeleton", skeletonTemplate, null, null, null);
-        Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of(), null);
-        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of(), null);
+        Group group1 = Group.builder()
+                .withName("group1")
+                .withSkeleton(skeleton)
+                .withRootVolumeSize(100)
+                .build();
+        Group group2 = Group.builder()
+                .withName("group2")
+                .withRootVolumeSize(100)
+                .build();
         CloudStack cloudStack = CloudStack.builder()
                 .groups(Set.of(group1, group2))
                 .build();

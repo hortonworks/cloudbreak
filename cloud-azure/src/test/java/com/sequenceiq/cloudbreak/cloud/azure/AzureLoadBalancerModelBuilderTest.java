@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,12 +17,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 class AzureLoadBalancerModelBuilderTest {
     public static final String STACK_NAME = "stack-name";
@@ -49,19 +44,11 @@ class AzureLoadBalancerModelBuilderTest {
     @Test
     void testGetModel() {
         CloudStack mockCloudStack = mock(CloudStack.class);
-        Group targetGroup = new Group(INSTANCE_GROUP_NAME,
-                InstanceGroupType.GATEWAY,
-                List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")),
-                null,
-                null,
-                null,
-                null,
-                null,
-                64,
-                null,
-                createGroupNetwork(),
-                emptyMap(),
-                null);
+        Group targetGroup = Group.builder()
+                .withName(INSTANCE_GROUP_NAME)
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")))
+                .build();
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
@@ -198,10 +185,6 @@ class AzureLoadBalancerModelBuilderTest {
         assertThat(loadBalancers).hasSize(1).matches(lb -> lb.get(0).getType() == LoadBalancerType.PRIVATE);
     }
 
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
-    }
-
     private CloudLoadBalancer createCloudLoadBalancer() {
         return createCloudLoadBalancer(null);
     }
@@ -215,19 +198,11 @@ class AzureLoadBalancerModelBuilderTest {
     }
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerSku sku, LoadBalancerType type) {
-        Group targetGroup = new Group(INSTANCE_GROUP_NAME,
-                InstanceGroupType.GATEWAY,
-                List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")),
-                null,
-                null,
-                null,
-                null,
-                null,
-                64,
-                null,
-                createGroupNetwork(),
-                emptyMap(),
-                null);
+        Group targetGroup = Group.builder()
+                .withName(INSTANCE_GROUP_NAME)
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")))
+                .build();
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, sku, LOADBALANCER_TARGET_STICKY_SESSION);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         return cloudLoadBalancer;

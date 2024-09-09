@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static java.util.Collections.emptyMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
@@ -21,10 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
@@ -59,7 +56,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -74,7 +70,6 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
@@ -459,10 +454,16 @@ class AwsUpscaleServiceTest {
         cloudInstances.add(workerInstance3);
         cloudInstances.add(workerInstance4);
         cloudInstances.add(workerInstance5);
-        return new Group("worker", InstanceGroupType.CORE, cloudInstances, null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+        return Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(cloudInstances)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(50)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build();
     }
 
     private Group getMasterGroup(InstanceAuthentication instanceAuthentication) {
@@ -471,10 +472,16 @@ class AwsUpscaleServiceTest {
         CloudInstance masterInstance2 = new CloudInstance("i-master2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         masterInstances.add(masterInstance1);
         masterInstances.add(masterInstance2);
-        return new Group("master", InstanceGroupType.GATEWAY, masterInstances, null, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+        return Group.builder()
+                .withName("master")
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(masterInstances)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(50)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build();
     }
 
     private Network getNetwork() {
@@ -482,10 +489,6 @@ class AwsUpscaleServiceTest {
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         return new Network(new Subnet(null), networkParameters);
-    }
-
-    private GroupNetwork createGroupNetwork() {
-        return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
 
     private AutoScalingGroup newAutoScalingGroup(String groupName, List<String> instances) {
