@@ -75,6 +75,20 @@ public class ImageFilter {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "ImageFilter{" +
+                "imageCatalog=" + imageCatalog +
+                ", platforms=" + platforms +
+                ", baseImageEnabled=" + baseImageEnabled +
+                ", operatingSystems=" + operatingSystems +
+                ", clusterVersion='" + clusterVersion + '\'' +
+                ", architecture=" + architecture +
+                ", cbVersion='" + cbVersion + '\'' +
+                ", additionalPredicate=" + additionalPredicate +
+                '}';
+    }
+
     public static ImageFilterBuilder builder() {
         return new ImageFilterBuilder();
     }
@@ -95,7 +109,7 @@ public class ImageFilter {
 
         private String clusterVersion;
 
-        private Architecture architecture;
+        private Architecture architecture = Architecture.X86_64;
 
         private ImageFilterBuilder() {
         }
@@ -136,7 +150,9 @@ public class ImageFilter {
         }
 
         public ImageFilterBuilder withArchitecture(Architecture architecture) {
-            this.architecture = architecture;
+            if (architecture != null) {
+                this.architecture = architecture;
+            }
             return this;
         }
 
