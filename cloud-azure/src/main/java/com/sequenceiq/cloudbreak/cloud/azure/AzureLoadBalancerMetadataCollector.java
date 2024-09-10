@@ -43,7 +43,10 @@ public class AzureLoadBalancerMetadataCollector {
         // and in that case the second rule is basically the copy of the first one, only the name differs. See arm-v2.ftl
         Map<Integer, String> portToAsMapping = rules.values().stream()
                 .filter(r -> !r.name().endsWith("gateway"))
-                .collect(Collectors.toMap(LoadBalancingRule::backendPort, rule -> generateAvailabilitySetName(ac, rule.backend())));
+                .collect(Collectors.toMap(
+                        LoadBalancingRule::backendPort,
+                        rule -> generateAvailabilitySetName(ac, rule.backend()),
+                        (existingValue, newValue) -> existingValue));
         LOGGER.debug("Found port to availability set mapping [{}] for load balancer {}", portToAsMapping, loadBalancerName);
 
         portToAsMapping.forEach((port, availabilitySetName) -> {

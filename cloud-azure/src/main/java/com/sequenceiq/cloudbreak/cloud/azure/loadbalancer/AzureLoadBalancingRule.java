@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.azure.loadbalancer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 
 public final class AzureLoadBalancingRule {
@@ -12,20 +15,30 @@ public final class AzureLoadBalancingRule {
 
     private final int frontendPort;
 
+    private final String protocol;
+
     private final AzureLoadBalancerProbe probe;
 
     private final String groupName;
 
     public AzureLoadBalancingRule(TargetGroupPortPair portPair, Group group) {
+        this(portPair, portPair.getTrafficProtocol(), group);
+    }
+
+    public AzureLoadBalancingRule(TargetGroupPortPair portPair, NetworkProtocol trafficProtocol, Group group) {
         this.backendPort = portPair.getTrafficPort();
         this.frontendPort = portPair.getTrafficPort();
-        this.name = defaultNameFromPort(portPair.getTrafficPort());
-        this.probe = new AzureLoadBalancerProbe(portPair.getHealthCheckPort());
+
+        this.protocol = Optional.ofNullable(trafficProtocol).map(NetworkProtocol::name).orElse("");
+        this.name = defaultNameFromPort(portPair.getTrafficPort(), protocol);
+        String healthCheckProtocol = Optional.ofNullable(portPair).map(TargetGroupPortPair::getHealthCheckProtocol).map(NetworkProtocol::name).orElse("");
+        this.probe = new AzureLoadBalancerProbe(portPair.getHealthCheckPort(), null, portPair.getHealthCheckPath(), healthCheckProtocol);
         this.groupName = checkNotNull(group, "Group must be provided.").getName();
     }
 
-    private String defaultNameFromPort(int port) {
-        return "port-" + port + "-rule";
+    private String defaultNameFromPort(int port, String trafficProtocol) {
+
+        return "port-" + port + trafficProtocol + "-rule";
     }
 
     public String getName() {
@@ -48,6 +61,10 @@ public final class AzureLoadBalancingRule {
         return groupName;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -57,6 +74,7 @@ public final class AzureLoadBalancingRule {
         sb.append("    frontendPort: ").append(frontendPort).append("\n");
         sb.append("    probe: ").append(toIndentedString(probe)).append("\n");
         sb.append("    groupName: ").append(toIndentedString(groupName)).append("\n");
+        sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
         sb.append("}");
 
         return sb.toString();

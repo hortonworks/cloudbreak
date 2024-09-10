@@ -301,8 +301,30 @@ public class AzureResourceConnectorTest {
 
     @Test
     public void testLaunchLoadBalancerHandlesGracefully() throws Exception {
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+
         List<CloudResourceStatus> cloudResourceStatuses = underTest.launchLoadBalancers(ac, stack, notifier);
-        Assertions.assertEquals(0, cloudResourceStatuses.size());
+        Assertions.assertEquals(1, cloudResourceStatuses.size());
+
+        verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+    }
+
+    @Test
+    public void testWhenLaunchLoadBalancerTemplateDeploymentExistsAndInProgressThenComputeResourceServiceBuildsTheResources() {
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
+        when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
+
+        underTest.launchLoadBalancers(ac, stack, notifier);
+
+        verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
+        verify(client, never()).createTemplateDeployment(any(), any(), any(), any());
+        verify(client, times(2)).getTemplateDeployment(any(), any());
+        verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
     }
 
     @Test

@@ -295,6 +295,7 @@ cb:
 
   arm:
     template.path: templates/arm-v2-freeipa.ftl
+    template.lb.path: templates/arm-v2-freeipa-lb.ftl
     parameter.path: templates/parameters-freeipa.ftl
     storageaccount.template.path: templates/arm-storageaccount.ftl
 

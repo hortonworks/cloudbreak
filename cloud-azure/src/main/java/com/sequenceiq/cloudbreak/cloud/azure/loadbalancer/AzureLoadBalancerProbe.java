@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.cloud.azure.loadbalancer;
 
-import java.util.Objects;
-
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import io.micrometer.common.util.StringUtils;
 
 public class AzureLoadBalancerProbe {
     private final int port;
 
     private final String name;
 
-    public AzureLoadBalancerProbe(int port) {
-        this(port, "port-" + Integer.toString(port) + "-probe");
-    }
+    private final String path;
 
-    public AzureLoadBalancerProbe(int port, String name) {
-        Objects.requireNonNull(name);
+    private final String protocol;
 
+    public AzureLoadBalancerProbe(int port, String name, String healthCheckPath, String healthCheckProtocol) {
         this.port = port;
-        this.name = name;
+        this.name = StringUtils.isBlank(name) ? "port-" + port + "-probe" : name;
+        this.path = healthCheckPath;
+        this.protocol = healthCheckProtocol;
     }
 
     public int getPort() {
@@ -29,11 +29,21 @@ public class AzureLoadBalancerProbe {
         return name;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
     @Override
     public String toString() {
         return "AzureLoadBalancerProbe{" +
                 "port=" + port +
                 ", name='" + name + '\'' +
+                ", path='" + path + '\'' +
+                ", protocol='" + protocol + '\'' +
                 '}';
     }
 
@@ -50,8 +60,6 @@ public class AzureLoadBalancerProbe {
         }
         AzureLoadBalancerProbe rhs = (AzureLoadBalancerProbe) obj;
         return new EqualsBuilder()
-                .appendSuper(super.equals(obj))
-                .append(port, rhs.port)
                 .append(name, rhs.name)
                 .isEquals();
     }
@@ -61,6 +69,8 @@ public class AzureLoadBalancerProbe {
         return new HashCodeBuilder(19, 35)
                 .append(name)
                 .append(port)
+                .append(path)
+                .append(protocol)
                 .toHashCode();
     }
 }
