@@ -9,9 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
-import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
@@ -84,20 +80,8 @@ public class CloudStorageDecorator {
             }
             List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(environment.getCrn());
             updateCloudStorageLocations(blueprintName, clusterName, request, datalakes);
-            updateDynamoDBTable(request, environment);
         }
         return request;
-    }
-
-    public void updateDynamoDBTable(CloudStorageRequest request, DetailedEnvironmentResponse environment) {
-        if (dynamoDBTableNameSpecified(environment)) {
-            String dynamoDbTableName = environment.getAws().getS3guard().getDynamoDbTableName();
-            S3Guard s3Guard = new S3Guard();
-            s3Guard.setDynamoTableName(dynamoDbTableName);
-            AwsStorageParameters aws = new AwsStorageParameters();
-            aws.setS3Guard(s3Guard);
-            request.setAws(aws);
-        }
     }
 
     public CloudStorageRequest updateCloudStorageLocations(String blueprintName, String clusterName,
@@ -215,11 +199,5 @@ public class CloudStorageDecorator {
                 false,
                 0L);
         return entries;
-    }
-
-    private boolean dynamoDBTableNameSpecified(@NotNull DetailedEnvironmentResponse environment) {
-        return environment.getAws() != null
-                && environment.getAws().getS3guard() != null
-                && StringUtils.isNotEmpty(environment.getAws().getS3guard().getDynamoDbTableName());
     }
 }

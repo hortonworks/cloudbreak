@@ -53,7 +53,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEn
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -501,7 +500,6 @@ class EnvironmentApiConverterTest {
     }
 
     private void assertAwsParameters(EnvironmentRequest request, ParametersDto actual) {
-        assertEquals(request.getAws().getS3guard().getDynamoDbTableName(), actual.getAwsParametersDto().getS3GuardTableName());
         assertEquals(request.getFreeIpa().getAws().getSpot().getPercentage(), actual.getAwsParametersDto().getFreeIpaSpotPercentage());
         assertEquals(request.getFreeIpa().getAws().getSpot().getMaxPrice(), actual.getAwsParametersDto().getFreeIpaSpotMaxPrice());
         assertEquals(request.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn(),
@@ -576,10 +574,7 @@ class EnvironmentApiConverterTest {
     }
 
     private AwsEnvironmentParameters createAwsRequest() {
-        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
-        s3GuardRequestParameters.setDynamoDbTableName("my-table");
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
-        awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
         awsEnvironmentParameters.setAwsDiskEncryptionParameters(
                 AwsDiskEncryptionParameters.builder()
                         .withEncryptionKeyArn("dummy-key-arn")

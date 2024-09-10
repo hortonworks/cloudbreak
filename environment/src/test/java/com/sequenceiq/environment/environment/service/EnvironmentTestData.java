@@ -18,7 +18,6 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 
 public class EnvironmentTestData {
@@ -37,8 +36,6 @@ public class EnvironmentTestData {
     public static final String KNOX_SG = "knoxSG";
 
     public static final AwsParameters PARAMETERS = newAwsParameters();
-
-    public static final String S3_GUARD_TABLE_NAME = "dynamotable";
 
     public static final String CLOUD_PLATFORM = "AZURE";
 
@@ -107,8 +104,6 @@ public class EnvironmentTestData {
         awsParameters.setAccountId(TestConstants.ACCOUNT_ID);
         awsParameters.setId(10L);
         awsParameters.setName(ENVIRONMENT_NAME);
-        awsParameters.setS3guardTableName(S3_GUARD_TABLE_NAME);
-        awsParameters.setS3guardTableCreation(S3GuardTableCreation.CREATE_NEW);
         return awsParameters;
     }
 

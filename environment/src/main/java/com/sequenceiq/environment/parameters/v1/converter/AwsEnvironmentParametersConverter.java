@@ -32,12 +32,6 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
         AwsParameters awsParameters = (AwsParameters) baseParameters;
         Optional<AwsParametersDto> awsParametersDto = Optional.of(parametersDto)
                 .map(ParametersDto::getAwsParametersDto);
-        awsParameters.setS3guardTableName(awsParametersDto
-                .map(AwsParametersDto::getS3GuardTableName)
-                .orElse(null));
-        awsParameters.setS3guardTableCreation(awsParametersDto
-                .map(AwsParametersDto::getDynamoDbTableCreation)
-                .orElse(null));
         awsParameters.setFreeIpaSpotPercentage(awsParametersDto
                 .map(AwsParametersDto::getFreeIpaSpotPercentage)
                 .orElse(0));
@@ -55,8 +49,6 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
         super.postConvertToDto(builder, source);
         AwsParameters awsParameters = (AwsParameters) source;
         builder.withAwsParametersDto(AwsParametersDto.builder()
-                .withDynamoDbTableName(awsParameters.getS3guardTableName())
-                .withDynamoDbTableCreation(awsParameters.getS3guardTableCreation())
                 .withFreeIpaSpotPercentage(awsParameters.getFreeIpaSpotPercentage())
                 .withFreeIpaSpotMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
                 .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()

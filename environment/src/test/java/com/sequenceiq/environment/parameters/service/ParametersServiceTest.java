@@ -1,8 +1,6 @@
 package com.sequenceiq.environment.parameters.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,13 +58,5 @@ class ParametersServiceTest {
         BaseParameters result = underTest.saveParameters(environment, ParametersDto.builder().build());
 
         assertEquals(awsParameters, result);
-    }
-
-    @Test
-    void isS3GuardTableUsed() {
-        when(baseParametersRepository.isS3GuardTableUsed(any(), any(), any(), any(), any())).thenReturn(true);
-        assertTrue(underTest.isS3GuardTableUsed("accountid", "platform", "region", "tablename"));
-        when(baseParametersRepository.isS3GuardTableUsed(any(), any(), any(), any(), any())).thenReturn(false);
-        assertFalse(underTest.isS3GuardTableUsed("accountid", "platform", "region", "tablename"));
     }
 }

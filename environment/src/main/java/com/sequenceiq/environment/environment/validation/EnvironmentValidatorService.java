@@ -28,8 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -165,10 +163,6 @@ public class EnvironmentValidatorService {
         resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
                 "Environment request is not for cloud platform AWS.");
 
-        resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())
-                .map(AwsEnvironmentParameters::getS3guard)
-                .map(S3GuardRequestParameters::getDynamoDbTableName)
-                .orElse(null)), "S3Guard Dynamo DB table name is not found in environment request.");
         return resultBuilder.build();
     }
 

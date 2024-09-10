@@ -9,10 +9,12 @@ import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescriptio
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@Deprecated
 @Schema(name = "S3GuardV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class S3GuardRequestParameters implements Serializable {
 
+    @Deprecated
     @Pattern(regexp = "^[a-zA-Z0-9\\.\\-_]{3,255}$",
             message = "Table name must be between 3 and 255 characters long and can contain only alpnahumeric charachters, dot, dash and hyphen.")
     @Schema(description = EnvironmentModelDescription.S3_GUARD_DYNAMO_TABLE_NAME)
@@ -25,10 +27,12 @@ public class S3GuardRequestParameters implements Serializable {
         this.dynamoDbTableName = builder.dynamoDbTableName;
     }
 
+    @Deprecated
     public String getDynamoDbTableName() {
         return dynamoDbTableName;
     }
 
+    @Deprecated
     public void setDynamoDbTableName(String dynamoDbTableName) {
         this.dynamoDbTableName = dynamoDbTableName;
     }

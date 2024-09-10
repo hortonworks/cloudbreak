@@ -42,7 +42,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAcces
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -263,10 +262,6 @@ public class EnvironmentApiConverter {
 
     private AwsParametersDto awsParamsToAwsParameters(AwsEnvironmentParameters aws, AwsFreeIpaParameters awsFreeIpa) {
         AwsParametersDto.Builder builder = AwsParametersDto.builder()
-                .withDynamoDbTableName(Optional.ofNullable(aws)
-                        .map(AwsEnvironmentParameters::getS3guard)
-                        .map(S3GuardRequestParameters::getDynamoDbTableName)
-                        .orElse(null))
                 .withAwsDiskEncryptionParametersDto(Optional.ofNullable(aws)
                         .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
                         .filter(awsDiskEncryptionParameters -> Objects.nonNull(awsDiskEncryptionParameters.getEncryptionKeyArn()))

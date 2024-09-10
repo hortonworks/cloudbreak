@@ -223,7 +223,7 @@ class EnvironmentCreationServiceTest {
     @ParameterizedTest(name = "{0}")
     @EnumSource(CloudPlatform.class)
     void testCreate(CloudPlatform cloudPlatform) {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         String environmentCrn = "crn";
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
@@ -274,7 +274,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreateWhenNullGovCloud() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         String environmentCrn = "crn";
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
@@ -328,7 +328,6 @@ class EnvironmentCreationServiceTest {
     void testCreateWhenSecretEncryptionAndGovCloud(boolean secretEncryptionEnabled) {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParametersDto(AwsParametersDto.builder()
-                        .withDynamoDbTableName("dynamo")
                         .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummy-key-arn")
                                 .build())
@@ -387,7 +386,7 @@ class EnvironmentCreationServiceTest {
     @Test
     void testRecipeValidated() {
         Set<String> recipes = Set.of("recipe1", "recipe2");
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         String environmentCrn = "crn";
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
@@ -433,7 +432,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreateWithParentEnvironment() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCreator(CRN)
@@ -489,7 +488,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreationVerificationError() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
@@ -535,7 +534,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testParameterVerificationError() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)

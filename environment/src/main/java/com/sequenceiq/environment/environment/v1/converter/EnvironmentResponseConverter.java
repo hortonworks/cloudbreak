@@ -17,7 +17,6 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -284,7 +283,6 @@ public class EnvironmentResponseConverter {
                 .orElse(null);
         return Optional.ofNullable(parameters.getAwsParametersDto())
                 .map(aws -> AwsEnvironmentParameters.builder()
-                        .withS3guard(getIfNotNull(aws, this::awsParametersToS3guardParam))
                         .withAwsDiskEncryptionParameters(getIfNotNull(awsDiskEncryptionParametersDto, this::awsParametersToAwsDiskEncryptionParameters))
                         .build())
                 .orElse(null);
@@ -322,12 +320,6 @@ public class EnvironmentResponseConverter {
                         .withResourceEncryptionParameters(getIfNotNull(gcpResourceEncryptionParametersDto, this::gcpParametersToGcpResourceEncryptionParameters))
                         .build())
                 .orElse(null);
-    }
-
-    private S3GuardRequestParameters awsParametersToS3guardParam(AwsParametersDto awsParametersDto) {
-        return S3GuardRequestParameters.builder()
-                .withDynamoDbTableName(awsParametersDto.getS3GuardTableName())
-                .build();
     }
 
     private AwsDiskEncryptionParameters awsParametersToAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto) {

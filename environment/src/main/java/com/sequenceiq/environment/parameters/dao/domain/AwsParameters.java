@@ -15,17 +15,17 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
-import com.sequenceiq.environment.parameters.dao.converter.S3GuardTableCreationConverter;
 
 @Entity
 @DiscriminatorValue("AWS")
 public class AwsParameters extends BaseParameters implements AccountIdAwareResource {
 
+    @Deprecated
     @Column(name = "s3guard_dynamo_table_name")
     private String s3guardTableName;
 
+    @Deprecated
     @Column(name = "s3guard_dynamo_table_creation")
-    @Convert(converter = S3GuardTableCreationConverter.class)
     private S3GuardTableCreation s3guardTableCreation;
 
     @Column(name = "freeipa_spot_percentage")
@@ -39,18 +39,22 @@ public class AwsParameters extends BaseParameters implements AccountIdAwareResou
     @SecretValue
     private Secret encryptionKeyArn = Secret.EMPTY;
 
+    @Deprecated
     public String getS3guardTableName() {
         return s3guardTableName;
     }
 
+    @Deprecated
     public void setS3guardTableName(String s3guardTableName) {
         this.s3guardTableName = s3guardTableName;
     }
 
+    @Deprecated
     public S3GuardTableCreation getS3guardTableCreation() {
         return s3guardTableCreation;
     }
 
+    @Deprecated
     public void setS3guardTableCreation(S3GuardTableCreation s3guardTableCreation) {
         this.s3guardTableCreation = s3guardTableCreation;
     }

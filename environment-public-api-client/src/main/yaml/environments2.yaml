@@ -2903,7 +2903,8 @@ definitions:
         description: The subnets to use for endpoint access gateway.
       s3GuardTableName:
         type: string
-        description: The name for the DynamoDB table backing S3Guard.
+        description: The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+        x-deprecated: true
       description:
         type: string
         description: An description of the environment.
@@ -3030,7 +3031,8 @@ definitions:
         description: The subnets to use for endpoint access gateway.
       s3GuardTableName:
         type: string
-        description: The name for the DynamoDB table backing S3Guard.
+        description: The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+        x-deprecated: true
       description:
         type: string
         description: An description of the environment.
@@ -4193,7 +4195,8 @@ definitions:
         properties:
           s3GuardTableName:
             type: string
-            description: The name for the DynamoDB table backing S3Guard.
+            description: The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+            x-deprecated: true
       azureDetails:
         type: object
         description: Azure specific environment configuration information.

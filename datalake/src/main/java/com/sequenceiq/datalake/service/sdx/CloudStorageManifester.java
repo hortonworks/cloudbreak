@@ -18,10 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
-import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -71,9 +69,6 @@ public class CloudStorageManifester {
                 cloudStorageRequest = new CloudStorageRequest();
             }
             addLogIdentity(cloudStorageRequest, environment);
-        }
-        if (loggingConfigured || anyCloudStorageIsConfigured) {
-            addS3Guard(cloudStorageRequest, environment);
         }
         return cloudStorageRequest;
     }
@@ -128,21 +123,6 @@ public class CloudStorageManifester {
         }
     }
 
-    private void addS3Guard(CloudStorageRequest cloudStorageRequest,
-            DetailedEnvironmentResponse environment) {
-        if (isS3GuardConfigured(environment, cloudStorageRequest)) {
-            String dynamoDbTableName = environment.getAws().getS3guard().getDynamoDbTableName();
-            if (!Strings.isNullOrEmpty(dynamoDbTableName)) {
-                LOGGER.debug("Setting dynamo db table name s3 guard configuration: {}", dynamoDbTableName);
-                AwsStorageParameters awsStorageParameters = new AwsStorageParameters();
-                S3Guard s3Guard = new S3Guard();
-                s3Guard.setDynamoTableName(environment.getAws().getS3guard().getDynamoDbTableName());
-                awsStorageParameters.setS3Guard(s3Guard);
-                cloudStorageRequest.setAws(awsStorageParameters);
-            }
-        }
-    }
-
     protected void normalizeCloudStorageRequest(SdxCloudStorageRequest cloudStorageRequest) {
         cloudStorageRequest.setBaseLocation(cloudStorageRequest.getBaseLocation().strip());
     }
@@ -155,13 +135,6 @@ public class CloudStorageManifester {
             return storageLocation;
         }).collect(Collectors.toList());
         cloudStorageRequest.setLocations(storageLocations);
-    }
-
-    private boolean isS3GuardConfigured(DetailedEnvironmentResponse environment,
-            CloudStorageRequest cloudStorageRequest) {
-        return cloudStorageRequest.getAws() == null
-                && environment.getAws() != null
-                && environment.getAws().getS3guard() != null;
     }
 
     private boolean isInternalCloudStorageConfigured(ClusterV4Request clusterV4Request) {

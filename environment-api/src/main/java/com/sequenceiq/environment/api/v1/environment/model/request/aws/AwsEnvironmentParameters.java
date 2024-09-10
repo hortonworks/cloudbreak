@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AwsEnvironmentParameters implements Serializable {
 
+    @Deprecated
     @Valid
     @Schema(description = EnvironmentModelDescription.S3_GUARD)
     private S3GuardRequestParameters s3guard;
@@ -29,6 +30,7 @@ public class AwsEnvironmentParameters implements Serializable {
         this.awsDiskEncryptionParameters = builder.awsDiskEncryptionParameters;
     }
 
+    @Deprecated
     public S3GuardRequestParameters getS3guard() {
         return s3guard;
     }
@@ -37,6 +39,7 @@ public class AwsEnvironmentParameters implements Serializable {
         return awsDiskEncryptionParameters;
     }
 
+    @Deprecated
     public void setS3guard(S3GuardRequestParameters s3guard) {
         this.s3guard = s3guard;
     }

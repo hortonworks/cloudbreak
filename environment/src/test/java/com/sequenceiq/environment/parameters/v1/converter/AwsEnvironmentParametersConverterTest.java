@@ -17,7 +17,6 @@ import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 
@@ -27,8 +26,6 @@ class AwsEnvironmentParametersConverterTest {
     private static final String ACCOUNT_ID = "accountId";
 
     private static final String ENV_NAME = "envName";
-
-    private static final String TABLE_NAME = "dynamotable";
 
     private static final EnvironmentView ENVIRONMENT_VIEW = new EnvironmentView();
 
@@ -58,8 +55,6 @@ class AwsEnvironmentParametersConverterTest {
         ParametersDto parameters = ParametersDto.builder()
                                 .withId(ID)
                                 .withAwsParametersDto(AwsParametersDto.builder()
-                                    .withDynamoDbTableName(TABLE_NAME)
-                                    .withDynamoDbTableCreation(S3GuardTableCreation.CREATE_NEW)
                                     .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                             .withEncryptionKeyArn(ENCRYPTION_KEY_ARN)
                                     .build())
@@ -80,8 +75,6 @@ class AwsEnvironmentParametersConverterTest {
         assertEquals(ACCOUNT_ID, awsResult.getAccountId());
         assertEquals(ENVIRONMENT_VIEW, awsResult.getEnvironment());
         assertEquals(ID, awsResult.getId());
-        assertEquals(TABLE_NAME, awsResult.getS3guardTableName());
-        assertEquals(S3GuardTableCreation.CREATE_NEW, awsResult.getS3guardTableCreation());
     }
 
     @Test
@@ -92,8 +85,6 @@ class AwsEnvironmentParametersConverterTest {
         parameters.setEnvironment(environmentView);
         parameters.setId(ID);
         parameters.setName(ENV_NAME);
-        parameters.setS3guardTableName(TABLE_NAME);
-        parameters.setS3guardTableCreation(S3GuardTableCreation.CREATE_NEW);
         parameters.setFreeIpaSpotPercentage(null);
         parameters.setFreeIpaSpotMaxPrice(0.9);
         parameters.setEncryptionKeyArn(ENCRYPTION_KEY_ARN);
@@ -103,8 +94,6 @@ class AwsEnvironmentParametersConverterTest {
         assertEquals(ACCOUNT_ID, result.getAccountId());
         assertEquals(ID, result.getId());
         assertEquals(ENV_NAME, result.getName());
-        assertEquals(TABLE_NAME, result.getAwsParametersDto().getS3GuardTableName());
-        assertEquals(S3GuardTableCreation.CREATE_NEW, result.getAwsParametersDto().getDynamoDbTableCreation());
         assertEquals(0, result.getAwsParametersDto().getFreeIpaSpotPercentage());
         assertEquals(0.9, result.getAwsParametersDto().getFreeIpaSpotMaxPrice());
         assertEquals(ENCRYPTION_KEY_ARN, result.getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());

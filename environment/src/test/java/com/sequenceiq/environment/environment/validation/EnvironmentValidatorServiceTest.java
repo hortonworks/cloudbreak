@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -167,8 +166,7 @@ class EnvironmentValidatorServiceTest {
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
-        assertTrue(result.hasError());
-        assertEquals("S3Guard Dynamo DB table name is not found in environment request.", result.getErrors().get(0));
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -179,8 +177,7 @@ class EnvironmentValidatorServiceTest {
         request.setCredentialName("aws-credential");
         request.setAws(new AwsEnvironmentParameters());
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
-        assertTrue(result.hasError());
-        assertEquals("S3Guard Dynamo DB table name is not found in environment request.", result.getErrors().get(0));
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -190,11 +187,9 @@ class EnvironmentValidatorServiceTest {
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
         AwsEnvironmentParameters aws = new AwsEnvironmentParameters();
-        aws.setS3guard(new S3GuardRequestParameters());
         request.setAws(aws);
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
-        assertTrue(result.hasError());
-        assertEquals("S3Guard Dynamo DB table name is not found in environment request.", result.getErrors().get(0));
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -204,9 +199,6 @@ class EnvironmentValidatorServiceTest {
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
         AwsEnvironmentParameters aws = new AwsEnvironmentParameters();
-        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
-        s3GuardRequestParameters.setDynamoDbTableName("table");
-        aws.setS3guard(s3GuardRequestParameters);
         request.setAws(aws);
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertFalse(result.hasError());

@@ -40,7 +40,6 @@ import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -125,9 +124,6 @@ public class CloudStorageManifesterTest {
         loggingResponse.setS3(s3CloudStorageV1Parameters);
         telemetryResponse.setLogging(loggingResponse);
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
-        S3GuardRequestParameters s3GuardRequestParameters = new S3GuardRequestParameters();
-        s3GuardRequestParameters.setDynamoDbTableName("table");
-        awsEnvironmentParameters.setS3guard(s3GuardRequestParameters);
         environment.setAws(awsEnvironmentParameters);
         environment.setTelemetry(telemetryResponse);
         ClusterV4Request clusterV4Request = new ClusterV4Request();
@@ -145,7 +141,6 @@ public class CloudStorageManifesterTest {
                 .stream()
                 .filter(r -> r.getType().equals(CloudIdentityType.LOG))
                 .collect(Collectors.toSet()).size());
-        assertEquals("table", cloudStorageConfigReq.getAws().getS3Guard().getDynamoTableName());
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());

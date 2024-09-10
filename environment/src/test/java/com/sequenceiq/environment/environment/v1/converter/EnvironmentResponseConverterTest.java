@@ -387,7 +387,6 @@ class EnvironmentResponseConverterTest {
 
     private void assertParameters(EnvironmentDtoBase environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
         if (AWS.equals(cloudPlatform)) {
-            assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
             assertEquals(environment.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn(),
                     actual.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn());
         } else if (AZURE.equals(cloudPlatform)) {
@@ -518,9 +517,6 @@ class EnvironmentResponseConverterTest {
 
     private ParametersDto createAzureParameters() {
         return ParametersDto.builder()
-                .withAwsParametersDto(AwsParametersDto.builder()
-                        .withDynamoDbTableName("my-table")
-                        .build())
                 .withAzureParametersDto(AzureParametersDto.builder()
                         .withAzureResourceGroupDto(
                                 AzureResourceGroupDto.builder()
@@ -551,9 +547,6 @@ class EnvironmentResponseConverterTest {
 
     private ParametersDto createAwsParameters() {
         return ParametersDto.builder()
-                .withAwsParametersDto(AwsParametersDto.builder()
-                        .withDynamoDbTableName("my-table")
-                        .build())
                 .withAwsParametersDto(AwsParametersDto.builder()
                         .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummy-key-arn")

@@ -551,7 +551,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
   }
 
    /**
-   * The name for the DynamoDB table backing S3Guard.
+   * The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
    * @return s3GuardTableName
   **/
   @javax.annotation.Nullable

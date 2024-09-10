@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -62,10 +61,6 @@ public class ParametersService {
             }
         }
         return savedParameters;
-    }
-
-    public boolean isS3GuardTableUsed(String accountId, String cloudPlatform, String location, String dynamoTableName) {
-        return baseParametersRepository.isS3GuardTableUsed(accountId, cloudPlatform, EnvironmentStatus.AVAILABLE_STATUSES, location, dynamoTableName);
     }
 
     public void updateResourceGroupName(Environment environment, String resourceGroupName) {

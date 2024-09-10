@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_S3GUARD_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -59,10 +57,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
     @Test
     public void testHandlerToCheckS3guardEnvironment() {
         when(stackService.findEnvironmentCrnByStackId(STACK_ID)).thenReturn(RETURN_ENVIRONMENT);
-        S3GuardRequestParameters s3Parameters = new S3GuardRequestParameters();
-        s3Parameters.setDynamoDbTableName(DEFAULT_DYNAMO_TABLE_NAME);
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
-        awsEnvironmentParameters.setS3guard(s3Parameters);
         detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setAws(awsEnvironmentParameters);
         when(environmentService.getByCrn(RETURN_ENVIRONMENT)).thenReturn(detailedEnvironmentResponse);
@@ -71,7 +66,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
 
         verify(stackService).findEnvironmentCrnByStackId(STACK_ID);
         verify(environmentService).getByCrn(RETURN_ENVIRONMENT);
-        assertEquals(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
     }
 
     @Test

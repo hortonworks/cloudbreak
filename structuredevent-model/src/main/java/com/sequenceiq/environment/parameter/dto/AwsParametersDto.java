@@ -2,15 +2,9 @@ package com.sequenceiq.environment.parameter.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardParameters;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 
 @JsonDeserialize(builder = AwsParametersDto.Builder.class)
-public class AwsParametersDto implements S3GuardParameters {
-
-    private final String dynamoDbTableName;
-
-    private S3GuardTableCreation dynamoDbTableCreation;
+public class AwsParametersDto {
 
     private int freeIpaSpotPercentage;
 
@@ -19,25 +13,9 @@ public class AwsParametersDto implements S3GuardParameters {
     private final AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto;
 
     private AwsParametersDto(Builder builder) {
-        dynamoDbTableName = builder.dynamoDbTableName;
-        dynamoDbTableCreation = builder.dynamoDbTableCreation;
         freeIpaSpotPercentage = builder.freeIpaSpotPercentage;
         freeIpaSpotMaxPrice = builder.freeIpaSpotMaxPrice;
         awsDiskEncryptionParametersDto = builder.awsDiskEncryptionParametersDto;
-    }
-
-    @Override
-    public String getS3GuardTableName() {
-        return dynamoDbTableName;
-    }
-
-    @Override
-    public S3GuardTableCreation getDynamoDbTableCreation() {
-        return dynamoDbTableCreation;
-    }
-
-    public void setDynamoDbTableCreation(S3GuardTableCreation dynamoDbTableCreation) {
-        this.dynamoDbTableCreation = dynamoDbTableCreation;
     }
 
     public int getFreeIpaSpotPercentage() {
@@ -67,9 +45,7 @@ public class AwsParametersDto implements S3GuardParameters {
     @Override
     public String toString() {
         return "AwsParametersDto{"
-                + "dynamoDbTableName='" + dynamoDbTableName + '\''
-                + ", dynamoDbTableCreation=" + dynamoDbTableCreation
-                + ", freeIpaSpotPercentage=" + freeIpaSpotPercentage
+                + "freeIpaSpotPercentage='" + freeIpaSpotPercentage + '\''
                 + ", freeIpaSpotMaxPrice=" + freeIpaSpotMaxPrice
                 + ", awsDiskEncryptionParametersDto" + awsDiskEncryptionParametersDto
                 + '}';
@@ -78,10 +54,6 @@ public class AwsParametersDto implements S3GuardParameters {
     @JsonPOJOBuilder
     public static final class Builder {
 
-        private String dynamoDbTableName;
-
-        private S3GuardTableCreation dynamoDbTableCreation;
-
         private int freeIpaSpotPercentage;
 
         private Double freeIpaSpotMaxPrice;
@@ -89,16 +61,6 @@ public class AwsParametersDto implements S3GuardParameters {
         private AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto;
 
         private Builder() {
-        }
-
-        public Builder withDynamoDbTableName(String dynamoDbTableName) {
-            this.dynamoDbTableName = dynamoDbTableName;
-            return this;
-        }
-
-        public Builder withDynamoDbTableCreation(S3GuardTableCreation dynamoDbTableCreation) {
-            this.dynamoDbTableCreation = dynamoDbTableCreation;
-            return this;
         }
 
         public Builder withFreeIpaSpotPercentage(int freeIpaSpotPercentage) {

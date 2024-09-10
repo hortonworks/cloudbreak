@@ -2,12 +2,6 @@ package com.sequenceiq.environment.parameters.validation.validators;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
@@ -16,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,12 +20,10 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
-import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.parameters.validation.validators.parameter.AwsParameterValidator;
 
@@ -43,9 +34,6 @@ class AwsParameterValidatorTest {
 
     @Mock
     private static Credential credential;
-
-    @Mock
-    private NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService;
 
     @Mock
     private ParametersService parametersService;
@@ -76,48 +64,36 @@ class AwsParameterValidatorTest {
     @Test
     void validateAndDetermineAwsParametersAttached() {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
-                .withDynamoDbTableName("tablename")
                 .build();
 
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParametersDto(awsParameters)
                 .build();
-        when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
 
-        assertTrue(validationResult.hasError());
-        assertEquals(1L, validationResult.getErrors().size());
-        assertEquals("S3Guard Dynamo table 'tablename' is already attached to another active environment. "
-                + "Please select another unattached table or specify a non-existing name to create it. Refer to "
-                + "Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-s3.html " +
-                "for the required setup.", validationResult.getErrors().get(0));
-        verify(noSqlTableCreationModeDeterminerService, never()).determineCreationMode(any(), any());
+        assertFalse(validationResult.hasError());
     }
 
     @Test
     void validateNoS3GuardCheckOnUpdateAwsDiskEncryptionParameters() {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
-                .withDynamoDbTableName("tablename")
                 .build();
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParametersDto(awsParameters)
                 .build();
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
                 .withAwsParameters(AwsParametersDto.builder()
-                        .withDynamoDbTableName("tablename")
                         .build())
-                        .build();
+                .build();
         environmentValidationDto.setEnvironmentDto(environmentDto);
         ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
         assertFalse(validationResult.hasError());
-        verify(parametersService, never()).isS3GuardTableUsed(any(), any(), any(), any());
     }
 
     @Test
-    void validateS3GuardCheckWhenAWSDiskEncryptionParametersAlreadyPresent() {
+    void validateWhenAWSDiskEncryptionParametersAlreadyPresent() {
         AwsParametersDto awsParameters = AwsParametersDto.builder()
-                .withDynamoDbTableName("tablename")
                 .build();
 
         ParametersDto parametersDto = ParametersDto.builder()
@@ -132,42 +108,17 @@ class AwsParameterValidatorTest {
                         .build())
                 .build();
         environmentValidationDto.setEnvironmentDto(environmentDto);
-        when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
-
-        assertTrue(validationResult.hasError());
-        assertEquals(1L, validationResult.getErrors().size());
-        assertEquals("S3Guard Dynamo table 'tablename' is already attached to another active environment. "
-                + "Please select another unattached table or specify a non-existing name to create it. Refer to "
-                + "Cloudera documentation at https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-s3.html " +
-                "for the required setup.", validationResult.getErrors().get(0));
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = S3GuardTableCreation.class, names = {"USE_EXISTING", "CREATE_NEW"})
-    void validateAndDetermineAwsParametersUseExisting(S3GuardTableCreation creation) {
-        AwsParametersDto awsParameters = AwsParametersDto.builder()
-                .withDynamoDbTableName("tablename")
-                .build();
-        ParametersDto parametersDto = ParametersDto.builder()
-                .withAwsParametersDto(awsParameters)
-                .build();
-        when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(false);
-        when(noSqlTableCreationModeDeterminerService.determineCreationMode(any(), any())).thenReturn(creation);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
-        verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
-        assertEquals(creation, awsParameters.getDynamoDbTableCreation());
-        verify(parametersService, times(1)).saveParameters(ENV_ID, parametersDto);
     }
 
     @Test
     public void testNoEncryptionKeyArnAndEntitlementEnabledThenNoError() {
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
-                                        .withAwsParameters(AwsParametersDto.builder().build())
-                                        .build();
+                .withAwsParameters(AwsParametersDto.builder().build())
+                .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
@@ -228,3 +179,4 @@ class AwsParameterValidatorTest {
         }
     }
 }
+

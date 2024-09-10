@@ -307,11 +307,9 @@ class EnvironmentModificationServiceTest {
 
     @Test
     void editByNameParametersNotExisted() {
-        String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .withAwsParametersDto(AwsParametersDto.builder()
-                        .withDynamoDbTableName(dynamotable)
                         .build())
                 .build();
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
@@ -332,11 +330,9 @@ class EnvironmentModificationServiceTest {
 
     @Test
     void editByNameParametersExistedAndValid() {
-        String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .withAwsParametersDto(AwsParametersDto.builder()
-                        .withDynamoDbTableName(dynamotable)
                         .build())
                 .build();
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
@@ -346,7 +342,6 @@ class EnvironmentModificationServiceTest {
         Environment environment = new Environment();
         environment.setAccountId(ACCOUNT_ID);
         AwsParameters awsParameters = new AwsParameters();
-        awsParameters.setS3guardTableName("existingTable");
         BaseParameters baseParameters = awsParameters;
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentFlowValidatorService.validateParameters(any(), any())).thenReturn(validationResult);
@@ -362,11 +357,9 @@ class EnvironmentModificationServiceTest {
 
     @Test
     void editByNameParametersExistedAndNotValid() {
-        String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .withAwsParametersDto(AwsParametersDto.builder()
-                        .withDynamoDbTableName(dynamotable)
                         .build())
                 .build();
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
@@ -376,7 +369,6 @@ class EnvironmentModificationServiceTest {
         Environment environment = new Environment();
         environment.setAccountId(ACCOUNT_ID);
         AwsParameters awsParameters = new AwsParameters();
-        awsParameters.setS3guardTableName("existingTable");
         BaseParameters baseParameters = awsParameters;
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentFlowValidatorService.validateParameters(any(), any())).thenReturn(validationResult);
