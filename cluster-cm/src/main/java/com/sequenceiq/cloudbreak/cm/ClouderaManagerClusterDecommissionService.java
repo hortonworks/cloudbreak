@@ -41,7 +41,7 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Inject
-    private ClouderaManagerDecomissioner clouderaManagerDecomissioner;
+    private ClouderaManagerDecommissioner clouderaManagerDecommissioner;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -93,49 +93,49 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     @Override
     public void verifyNodesAreRemovable(StackDtoDelegate stack, Collection<InstanceMetadataView> removableInstances) {
-        clouderaManagerDecomissioner.verifyNodesAreRemovable(stack, removableInstances, v31Client);
+        clouderaManagerDecommissioner.verifyNodesAreRemovable(stack, removableInstances, v31Client);
     }
 
     @Override
     public Set<InstanceMetadataView> collectDownscaleCandidates(@Nonnull String hostGroupName, Integer scalingAdjustment,
             Set<InstanceMetadataView> instanceMetaDatasInStack) {
-        return clouderaManagerDecomissioner.collectDownscaleCandidates(v31Client, stack, hostGroupName, scalingAdjustment, instanceMetaDatasInStack);
+        return clouderaManagerDecommissioner.collectDownscaleCandidates(v31Client, stack, hostGroupName, scalingAdjustment, instanceMetaDatasInStack);
     }
 
     @Override
     public Map<String, InstanceMetadataView> collectHostsToRemove(@Nonnull String hostGroupName, Set<String> hostNames) {
-        return clouderaManagerDecomissioner.collectHostsToRemove(stack, hostGroupName, hostNames, v31Client);
+        return clouderaManagerDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames, v31Client);
     }
 
     @Override
     public Set<String> decommissionClusterNodes(Map<String, InstanceMetadataView> hostsToRemove) {
-        return clouderaManagerDecomissioner.decommissionNodes(stack, hostsToRemove, v31Client);
+        return clouderaManagerDecommissioner.decommissionNodes(stack, hostsToRemove, v31Client);
     }
 
     @Override
     public Set<String> decommissionClusterNodesStopStart(Map<String, InstanceMetadataView> hostsToRemove, long pollingTimeout) {
-        return clouderaManagerDecomissioner.decommissionNodesStopStart(stack, hostsToRemove, v31Client, pollingTimeout);
+        return clouderaManagerDecommissioner.decommissionNodesStopStart(stack, hostsToRemove, v31Client, pollingTimeout);
     }
 
     @Override
     public void enterMaintenanceMode(Set<String> hostFqdnList) {
-        clouderaManagerDecomissioner.enterMaintenanceMode(hostFqdnList, v31Client);
+        clouderaManagerDecommissioner.enterMaintenanceMode(hostFqdnList, v31Client);
     }
 
     @Override
     public void removeManagementServices() {
-        clouderaManagerDecomissioner.stopAndRemoveMgmtService(stack, v31Client);
+        clouderaManagerDecommissioner.stopAndRemoveMgmtService(stack, v31Client);
     }
 
     @Override
     public void deleteHostFromCluster(InstanceMetadataView data) {
-        clouderaManagerDecomissioner.deleteHost(stack, data, v31Client);
+        clouderaManagerDecommissioner.deleteHost(stack, data, v31Client);
     }
 
     @Override
     public void removeHostsFromCluster(List<InstanceMetadataView> hosts) throws ClusterClientInitException {
         if (v45Client != null) {
-            clouderaManagerDecomissioner.removeHostsFromCluster(stack, hosts, v45Client);
+            clouderaManagerDecommissioner.removeHostsFromCluster(stack, hosts, v45Client);
         } else {
             LOGGER.error("V45 client is not initialized, bulk host removal is not supported");
             throw new ClusterClientInitException("V45 client is not initialized, bulk host removal is not supported");
@@ -144,7 +144,7 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     @Override
     public void deleteUnusedCredentialsFromCluster() {
-        clouderaManagerDecomissioner.deleteUnusedCredentialsFromCluster(stack, v31Client);
+        clouderaManagerDecommissioner.deleteUnusedCredentialsFromCluster(stack, v31Client);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     @Override
     public void stopRolesOnHosts(Set<String> hosts, boolean stopServicesGracefully) throws CloudbreakException {
-        clouderaManagerDecomissioner.stopRolesOnHosts(stack, v53Client, v51Client, hosts, stopServicesGracefully);
+        clouderaManagerDecommissioner.stopRolesOnHosts(stack, v53Client, v51Client, hosts, stopServicesGracefully);
     }
 
     @Override

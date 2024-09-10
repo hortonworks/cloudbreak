@@ -58,7 +58,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
-    private ClouderaManagerDecomissioner clouderaManagerDecomissioner;
+    private ClouderaManagerDecommissioner clouderaManagerDecommissioner;
 
     @Mock
     private ApplicationContext applicationContext;
@@ -88,7 +88,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
         underTest = new ClouderaManagerClusterDecommissionService(stack, clientConfig);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiFactory", clouderaManagerApiFactory);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
-        ReflectionTestUtils.setField(underTest, "clouderaManagerDecomissioner", clouderaManagerDecomissioner);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerDecommissioner", clouderaManagerDecommissioner);
         ReflectionTestUtils.setField(underTest, "applicationContext", applicationContext);
         ReflectionTestUtils.setField(underTest, "v31Client", v31Client);
         ReflectionTestUtils.setField(underTest, "v45Client", v45Client);
@@ -117,7 +117,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     public void testVerifyNodesAreRemovable() {
         underTest.verifyNodesAreRemovable(stack, Collections.emptyList());
 
-        verify(clouderaManagerDecomissioner).verifyNodesAreRemovable(stack, Collections.emptyList(), v31Client);
+        verify(clouderaManagerDecommissioner).verifyNodesAreRemovable(stack, Collections.emptyList(), v31Client);
     }
 
     @Test
@@ -134,13 +134,13 @@ public class ClouderaManagerClusterDecommissionServiceTest {
         instanceMetaData2.setPrivateId(2L);
         instanceMetadatas.add(instanceMetaData2);
 
-        when(clouderaManagerDecomissioner.collectDownscaleCandidates(v31Client, stack, hostGroupName, scalingAdjustment, instanceMetadatas))
+        when(clouderaManagerDecommissioner.collectDownscaleCandidates(v31Client, stack, hostGroupName, scalingAdjustment, instanceMetadatas))
                 .thenReturn(instanceMetadatas);
 
         Set<InstanceMetadataView> actual = underTest.collectDownscaleCandidates(hostGroupName, scalingAdjustment, instanceMetadatas);
 
         assertEquals(instanceMetadatas, actual);
-        verify(clouderaManagerDecomissioner).collectDownscaleCandidates(v31Client, stack, hostGroupName, scalingAdjustment, instanceMetadatas);
+        verify(clouderaManagerDecommissioner).collectDownscaleCandidates(v31Client, stack, hostGroupName, scalingAdjustment, instanceMetadatas);
     }
 
     @Test
@@ -148,31 +148,31 @@ public class ClouderaManagerClusterDecommissionServiceTest {
         String hostGroupName = "hgName";
         Set<String> hostNames = Collections.emptySet();
         Map<String, InstanceMetadataView> hosts = new HashMap<>();
-        when(clouderaManagerDecomissioner.collectHostsToRemove(stack, hostGroupName, hostNames, v31Client)).thenReturn(hosts);
+        when(clouderaManagerDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames, v31Client)).thenReturn(hosts);
 
         Map<String, InstanceMetadataView> actual = underTest.collectHostsToRemove(hostGroupName, hostNames);
 
         assertEquals(hosts, actual);
-        verify(clouderaManagerDecomissioner).collectHostsToRemove(stack, hostGroupName, hostNames, v31Client);
+        verify(clouderaManagerDecommissioner).collectHostsToRemove(stack, hostGroupName, hostNames, v31Client);
     }
 
     @Test
     public void testDecommissionClusterNodes() {
         Map<String, InstanceMetadataView> hostsToRemove = new HashMap<>();
         Set<String> hosts = Set.of("host");
-        when(clouderaManagerDecomissioner.decommissionNodes(stack, hostsToRemove, v31Client)).thenReturn(hosts);
+        when(clouderaManagerDecommissioner.decommissionNodes(stack, hostsToRemove, v31Client)).thenReturn(hosts);
 
         Set<String> actual = underTest.decommissionClusterNodes(hostsToRemove);
 
         assertEquals(hosts, actual);
-        verify(clouderaManagerDecomissioner).decommissionNodes(stack, hostsToRemove, v31Client);
+        verify(clouderaManagerDecommissioner).decommissionNodes(stack, hostsToRemove, v31Client);
     }
 
     @Test
     public void testRemoveManagementServices() {
         underTest.removeManagementServices();
 
-        verify(clouderaManagerDecomissioner).stopAndRemoveMgmtService(stack, v31Client);
+        verify(clouderaManagerDecommissioner).stopAndRemoveMgmtService(stack, v31Client);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
 
         underTest.deleteHostFromCluster(hostMetadata);
 
-        verify(clouderaManagerDecomissioner).deleteHost(stack, hostMetadata, v31Client);
+        verify(clouderaManagerDecommissioner).deleteHost(stack, hostMetadata, v31Client);
     }
 
     @Test
@@ -205,7 +205,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
                 () -> underTest.removeHostsFromCluster(List.of(new InstanceMetaData())));
 
         assertEquals("V45 client is not initialized, bulk host removal is not supported", cloudbreakException.getMessage());
-        verify(clouderaManagerDecomissioner, never()).removeHostsFromCluster(any(), anyList(), any());
+        verify(clouderaManagerDecommissioner, never()).removeHostsFromCluster(any(), anyList(), any());
     }
 
     @Test
@@ -213,14 +213,14 @@ public class ClouderaManagerClusterDecommissionServiceTest {
         List<InstanceMetadataView> hosts = List.of(new InstanceMetaData());
         underTest.removeHostsFromCluster(hosts);
 
-        verify(clouderaManagerDecomissioner, times(1)).removeHostsFromCluster(eq(stack), eq(hosts), eq(v45Client));
+        verify(clouderaManagerDecommissioner, times(1)).removeHostsFromCluster(eq(stack), eq(hosts), eq(v45Client));
     }
 
     @Test
     public void stopRolesOnHostsTest() throws CloudbreakException {
         Set<String> hosts = Set.of("host1", "host2");
         underTest.stopRolesOnHosts(hosts, true);
-        verify(clouderaManagerDecomissioner, times(1)).stopRolesOnHosts(stack, v53Client, v51Client, hosts, true);
+        verify(clouderaManagerDecommissioner, times(1)).stopRolesOnHosts(stack, v53Client, v51Client, hosts, true);
     }
 
     private Stack createStack() {
