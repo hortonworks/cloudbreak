@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -148,7 +149,7 @@ class StopExternalDatabaseHandlerTest {
 
         verify(stopService, never()).stopDatabase(any(), any(), eq(environment));
         verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED),
-                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED), any());
+                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_NOT_REQUIRED), eq("External database stop is not required. Cluster stopped."));
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), any(Event.class));
     }
 
@@ -169,7 +170,7 @@ class StopExternalDatabaseHandlerTest {
 
         verify(stopService, never()).stopDatabase(any(), any(), eq(environment));
         verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED),
-                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED), any());
+                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_NOT_REQUIRED), isNull());
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), any(Event.class));
     }
 
@@ -192,7 +193,8 @@ class StopExternalDatabaseHandlerTest {
         underTest.accept(event);
 
         verify(stopService, never()).stopDatabase(any(), any(), eq(environment));
-        verify(stackUpdaterService).updateStatus(any(), any(), any(), any());
+        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED), eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_NOT_REQUIRED),
+                eq("External database stop is not supported by the cloud platform. Cluster stopped."));
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), any(Event.class));
     }
 

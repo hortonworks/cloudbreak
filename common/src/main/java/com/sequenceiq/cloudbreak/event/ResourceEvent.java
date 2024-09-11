@@ -533,6 +533,7 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_STOP_COMMANCED("cluster.externaldatabase.stop.commenced"),
     CLUSTER_EXTERNAL_DATABASE_STOP_FAILED("cluster.externaldatabase.stop.failed"),
     CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED("cluster.externaldatabase.stop.finished"),
+    CLUSTER_EXTERNAL_DATABASE_STOP_NOT_REQUIRED("cluster.externaldatabase.stop.not.required"),
 
     CLUSTER_RDS_UPGRADE_STOP_SERVICES("cluster.externaldatabase.upgrade.stop.services"),
     CLUSTER_RDS_UPGRADE_BACKUP_DATA("cluster.externaldatabase.upgrade.backup.data"),
