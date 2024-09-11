@@ -24,10 +24,12 @@ public class ImageFilter {
 
     private final Predicate<Image> additionalPredicate;
 
+    private final boolean defaultOnly;
+
     private String cbVersion;
 
     private ImageFilter(ImageCatalog imageCatalog, Set<ImageCatalogPlatform> platforms, String cbVersion, boolean baseImageEnabled,
-            Set<String> operatingSystems, String clusterVersion, Architecture architecture, Predicate<Image> additionalPredicate) {
+            Set<String> operatingSystems, String clusterVersion, Architecture architecture, Predicate<Image> additionalPredicate, boolean defaultOnly) {
         this.imageCatalog = imageCatalog;
         this.platforms = platforms;
         this.cbVersion = cbVersion;
@@ -36,6 +38,7 @@ public class ImageFilter {
         this.clusterVersion = clusterVersion;
         this.architecture = architecture;
         this.additionalPredicate = additionalPredicate;
+        this.defaultOnly = defaultOnly;
     }
 
     public ImageCatalog getImageCatalog() {
@@ -68,6 +71,10 @@ public class ImageFilter {
 
     public Predicate<Image> getAdditionalPredicate() {
         return additionalPredicate;
+    }
+
+    public boolean isDefaultOnly() {
+        return defaultOnly;
     }
 
     public ImageFilter withCbVersion(String cbVersion) {
@@ -110,6 +117,8 @@ public class ImageFilter {
         private String clusterVersion;
 
         private Architecture architecture;
+
+        private boolean defaultOnly;
 
         private ImageFilterBuilder() {
         }
@@ -154,8 +163,14 @@ public class ImageFilter {
             return this;
         }
 
+        public ImageFilterBuilder withDefaultOnly(boolean defaultOnly) {
+            this.defaultOnly = defaultOnly;
+            return this;
+        }
+
         public ImageFilter build() {
-            return new ImageFilter(imageCatalog, platforms, cbVersion, baseImageEnabled, operatingSystems, clusterVersion, architecture, additionalPredicate);
+            return new ImageFilter(imageCatalog, platforms, cbVersion, baseImageEnabled, operatingSystems, clusterVersion, architecture, additionalPredicate,
+                    defaultOnly);
         }
     }
 }

@@ -138,7 +138,8 @@ public interface ImageCatalogV4Endpoint {
             @QueryParam("platform") String platform,
             @QueryParam("runtimeVersion") String runtimeVersion,
             @QueryParam("imageType") String imageType,
-            @QueryParam("govCloud") boolean govCloud) throws Exception;
+            @QueryParam("govCloud") boolean govCloud,
+            @QueryParam("defaultOnly") boolean defaultOnly) throws Exception;
 
     @GET
     @Path("{name}/images")
@@ -146,12 +147,14 @@ public interface ImageCatalogV4Endpoint {
     @Operation(summary = ImageCatalogOpDescription.GET_IMAGES_BY_NAME,
             description = IMAGE_CATALOG_NOTES, operationId = "getImagesByNameInWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    @SuppressWarnings("checkstyle:ParameterNumber")
     ImagesV4Response getImagesByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("stackName") String stackName,
             @QueryParam("platform") String platform,
             @QueryParam("runtimeVersion") String runtimeVersion,
             @QueryParam("imageType") String imageType,
-            @QueryParam("govCloud") boolean govCloud) throws Exception;
+            @QueryParam("govCloud") boolean govCloud,
+            @QueryParam("defaultOnly") boolean defaultOnly) throws Exception;
 
     @GET
     @Path("image")

@@ -210,28 +210,31 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @DisableCheckPermissions
     public ImagesV4Response getImages(Long workspaceId, String stackName, String platform,
-            String runtimeVersion, String imageType, boolean govCloud) throws Exception {
+            String runtimeVersion, String imageType, boolean govCloud, boolean defaultOnly) throws Exception {
         Images images = imageCatalogService.getImagesFromDefault(
                 restRequestThreadLocalService.getRequestedWorkspaceId(),
                 stackName,
                 platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud),
                 Collections.emptySet(),
                 runtimeVersion,
-                govCloud);
+                govCloud,
+                defaultOnly);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform,
-            String runtimeVersion, String imageType, boolean govCloud) throws Exception {
+            String runtimeVersion, String imageType, boolean govCloud, boolean defaultOnly) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(
                 restRequestThreadLocalService.getRequestedWorkspaceId(),
                 name,
                 stackName,
                 platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud),
                 runtimeVersion,
-                govCloud);
+                govCloud,
+                defaultOnly);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 

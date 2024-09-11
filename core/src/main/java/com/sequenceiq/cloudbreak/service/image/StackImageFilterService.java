@@ -44,18 +44,19 @@ public class StackImageFilterService {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
-    public Images getApplicableImages(Long workspaceId, String stackName) throws CloudbreakImageCatalogException {
-        return getApplicableImages(workspaceId, CDP_DEFAULT_CATALOG_NAME, stackName);
+    public Images getApplicableImages(Long workspaceId, String stackName, boolean defaultOnly) throws CloudbreakImageCatalogException {
+        return getApplicableImages(workspaceId, CDP_DEFAULT_CATALOG_NAME, stackName, defaultOnly);
     }
 
-    public Images getApplicableImages(Long workspaceId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
+    public Images getApplicableImages(Long workspaceId, String imageCatalogName, String stackName, boolean defaultOnly) throws CloudbreakImageCatalogException {
         Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId)
                 .orElseThrow(NotFoundException.notFound("stack", stackName));
         StatedImages statedImages = imageCatalogService.getImages(
                 workspaceId,
                 imageCatalogName,
                 null,
-                platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(), stack.getPlatformVariant()));
+                platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(), stack.getPlatformVariant()),
+                defaultOnly);
         return getApplicableImages(imageCatalogName, statedImages, stack);
     }
 

@@ -340,10 +340,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform, null, null, govCloud)
+                            platform, runtimeVersion, null, govCloud, true)
                     .getCdhImages().stream()
-                    .filter(ImageV4Response::isDefaultImage)
-                    .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(), runtimeVersion))
                     .max(Comparator.comparing(ImageV4Response::getPublished))
                     .orElseThrow(() -> new TestFailException(
                             format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform, runtimeVersion)));
@@ -375,13 +373,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform, null, null, govCloud).getBaseImages();
+                            platform, null, null, govCloud, true).getBaseImages();
 
             if (images.isEmpty()) {
                 throw new TestFailException("Images are empty, there is not any base image on provider " + platform);
             }
             BaseImageV4Response baseImage = images.stream()
-                    .filter(ImageV4Response::isDefaultImage)
                     .filter(imageV4Response -> StringUtils.equalsIgnoreCase(imageV4Response.getOsType(), osType))
                     .max(Comparator.comparing(ImageV4Response::getPublished))
                     .orElseThrow(() -> new TestFailException(format("Cannot find base images at '%s' provider with os type '%s'!", platform, osType)));

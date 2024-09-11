@@ -118,7 +118,7 @@ public class ImageBasedDefaultCDHEntriesTest {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform)).thenReturn(statedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true)).thenReturn(statedImages);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, IMAGE_CATALOG_NAME);
 
@@ -137,8 +137,8 @@ public class ImageBasedDefaultCDHEntriesTest {
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
         StatedImages emptyStatedImages = StatedImages.statedImages(emptyImages, null, null);
 
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform)).thenReturn(emptyStatedImages);
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform)).thenReturn(statedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true)).thenReturn(emptyStatedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true)).thenReturn(statedImages);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, IMAGE_CATALOG_NAME);
 

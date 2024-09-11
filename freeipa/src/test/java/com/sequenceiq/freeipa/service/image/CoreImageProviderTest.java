@@ -68,7 +68,8 @@ public class CoreImageProviderTest {
 
     @Test
     public void shouldReturnEmptyInCaseOfException() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false)).thenThrow(new RuntimeException());
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false))
+                .thenThrow(new RuntimeException());
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
@@ -77,7 +78,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void shouldReturnEmptyInCaseOfNullResponse() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false)).thenReturn(null);
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false)).thenReturn(null);
 
         Optional<ImageWrapper> actual = victim.getImage(createImageFilterSettings());
 
@@ -86,7 +87,8 @@ public class CoreImageProviderTest {
 
     @Test
     public void shouldReturnResult() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false)).thenReturn(anImagesResponse());
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false))
+                .thenReturn(anImagesResponse());
         when(freeIpaImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(freeIpaImageFilter.findMostRecentImage(any())).thenAnswer(invocation -> {
             List<Image> images = invocation.getArgument(0);
@@ -109,7 +111,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void testGetImagesdReturnsEmptyListWhenFreeImagesNull() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false))
                 .thenReturn(new ImagesV4Response());
 
         List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
@@ -119,7 +121,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void testGetImagesdReturnsEmptyListWhenWebApplicationExceptionThrown() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false))
                 .thenThrow(new WebApplicationException());
 
         List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
@@ -129,7 +131,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void testGetImagesdReturnsEmptyListWhenExceptionThrown() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false))
                 .thenThrow(new Exception());
 
         List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
@@ -141,7 +143,7 @@ public class CoreImageProviderTest {
     public void testGetImages() throws Exception {
         ImagesV4Response imagesV4Response = new ImagesV4Response();
         imagesV4Response.setFreeipaImages(List.of(anImageResponse()));
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false))
                 .thenReturn(imagesV4Response);
 
         List<ImageWrapper> result = victim.getImages(createImageFilterSettings());

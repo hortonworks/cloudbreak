@@ -441,13 +441,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            CloudPlatform.AZURE.name(), null, null, false)
+                            CloudPlatform.AZURE.name(), runtimeVersion, null, false, false)
                     .getCdhImages().stream()
                     .filter(image -> image.getImageSetsByProvider().entrySet()
                             .stream()
                             .anyMatch(i -> i.getValue().containsKey(MARKETPLACE_REGION)))
-                    .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(),
-                            runtimeVersion))
                     .max(Comparator.comparing(ImageV4Response::getPublished));
 
             ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime

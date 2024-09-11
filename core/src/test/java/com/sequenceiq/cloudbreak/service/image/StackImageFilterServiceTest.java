@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -101,17 +102,17 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesCdh() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(""));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
-        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
         assertEquals(IMAGE_CDH_ID, images.getCdhImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(false));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -122,16 +123,16 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(IMAGE_HDP_ID));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
-        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(false));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -142,16 +143,16 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(false);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(""));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
-        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
+        Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, true);
 
         assertThat(images.getBaseImages(), empty());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(true));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
     }
@@ -166,7 +167,7 @@ public class StackImageFilterServiceTest {
         thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
 
-        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
+        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
     }
 
     @Test
@@ -179,7 +180,7 @@ public class StackImageFilterServiceTest {
         thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
 
-        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
+        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
     }
 
     private StatedImages getStatedImages() {

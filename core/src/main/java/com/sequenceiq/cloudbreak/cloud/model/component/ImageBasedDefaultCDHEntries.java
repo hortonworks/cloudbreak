@@ -49,10 +49,10 @@ public class ImageBasedDefaultCDHEntries {
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String os, String imageCatalogName)
             throws CloudbreakImageCatalogException {
         String catalogName = Optional.ofNullable(imageCatalogName).orElse(ImageCatalogService.CDP_DEFAULT_CATALOG_NAME);
-        StatedImages images = imageCatalogService.getImages(workspaceId, catalogName, null, platform);
+        StatedImages images = imageCatalogService.getImages(workspaceId, catalogName, null, platform, true);
         if (images.getImages().getCdhImages().isEmpty()) {
             LOGGER.warn("Missing CDH images for cloud platform: {}. Falling back to AWS.", platform);
-            images = imageCatalogService.getImages(workspaceId, catalogName, null, imageCatalogPlatform(CloudPlatform.AWS.name()));
+            images = imageCatalogService.getImages(workspaceId, catalogName, null, imageCatalogPlatform(CloudPlatform.AWS.name()), true);
         }
 
         return getEntries(images.getImages(), os);
