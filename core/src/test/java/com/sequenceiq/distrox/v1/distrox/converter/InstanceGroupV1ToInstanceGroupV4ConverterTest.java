@@ -98,7 +98,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
         DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
         when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
-        when(networkConverter.convertToInstanceGroupNetworkV4Request(any())).thenReturn(instanceGroupNetworkV4Request);
+        when(networkConverter.convertToInstanceGroupNetworkV4Request(any(), any(), eq(networkV4Request))).thenReturn(instanceGroupNetworkV4Request);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
         List<InstanceGroupV4Request> results = underTest.convertTo(networkV4Request, instanceGroups, environment);
 

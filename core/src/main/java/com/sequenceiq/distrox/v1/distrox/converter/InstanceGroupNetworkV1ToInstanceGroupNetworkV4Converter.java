@@ -1,11 +1,14 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -17,35 +20,30 @@ public class InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter {
     @Inject
     private InstanceGroupNetworkParameterConverter instanceGroupNetworkParameterConverter;
 
-    public InstanceGroupNetworkV4Request convertToInstanceGroupNetworkV4Request(Pair<InstanceGroupNetworkV1Request, DetailedEnvironmentResponse> network) {
-        DetailedEnvironmentResponse value = network.getValue();
-        EnvironmentNetworkResponse environmentNetworkResponse = null;
-        if (value == null) {
-            environmentNetworkResponse = new EnvironmentNetworkResponse();
-        } else {
-            environmentNetworkResponse = value.getNetwork();
-        }
-        InstanceGroupNetworkV1Request key = network.getKey();
-        if (key == null) {
-            key = new InstanceGroupNetworkV1Request();
+    public InstanceGroupNetworkV4Request convertToInstanceGroupNetworkV4Request(InstanceGroupNetworkV1Request instanceGroupNetworkV1Request,
+            DetailedEnvironmentResponse detailedEnvironmentResponse, NetworkV4Request stackLevelNetwork) {
+        Objects.requireNonNull(detailedEnvironmentResponse);
+        EnvironmentNetworkResponse environmentNetworkResponse = Optional.ofNullable(detailedEnvironmentResponse.getNetwork())
+                .orElse(new EnvironmentNetworkResponse());
+        if (instanceGroupNetworkV1Request == null) {
+            instanceGroupNetworkV1Request = new InstanceGroupNetworkV1Request();
         }
 
         InstanceGroupNetworkV4Request request = new InstanceGroupNetworkV4Request();
 
-        if (value != null) {
-            CloudPlatform cloudPlatform = CloudPlatform.valueOf(value.getCloudPlatform());
-            request.setCloudPlatform(cloudPlatform);
-            request.setAws(
-                    instanceGroupNetworkParameterConverter.convert(key.getAws(), environmentNetworkResponse, cloudPlatform));
-            request.setAzure(
-                    instanceGroupNetworkParameterConverter.convert(key.getAzure(), environmentNetworkResponse, cloudPlatform));
-            request.setGcp(
-                    instanceGroupNetworkParameterConverter.convert(key.getGcp(), environmentNetworkResponse, cloudPlatform));
-            request.setYarn(
-                    instanceGroupNetworkParameterConverter.convert(key.getYarn(), environmentNetworkResponse, cloudPlatform));
-            request.setMock(
-                    instanceGroupNetworkParameterConverter.convert(key.getMock(), environmentNetworkResponse, cloudPlatform));
-        }
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(detailedEnvironmentResponse.getCloudPlatform());
+        request.setCloudPlatform(cloudPlatform);
+        request.setAws(instanceGroupNetworkParameterConverter.convert(instanceGroupNetworkV1Request.getAws(), environmentNetworkResponse, cloudPlatform,
+                stackLevelNetwork));
+        request.setAzure(instanceGroupNetworkParameterConverter.convert(instanceGroupNetworkV1Request.getAzure(), environmentNetworkResponse, cloudPlatform,
+                stackLevelNetwork));
+        request.setGcp(instanceGroupNetworkParameterConverter.convert(instanceGroupNetworkV1Request.getGcp(), environmentNetworkResponse, cloudPlatform,
+                stackLevelNetwork));
+        request.setYarn(
+                instanceGroupNetworkParameterConverter.convert(instanceGroupNetworkV1Request.getYarn(), environmentNetworkResponse, cloudPlatform));
+        request.setMock(
+                instanceGroupNetworkParameterConverter.convert(instanceGroupNetworkV1Request.getMock(), environmentNetworkResponse, cloudPlatform,
+                        stackLevelNetwork));
         return request;
     }
 }

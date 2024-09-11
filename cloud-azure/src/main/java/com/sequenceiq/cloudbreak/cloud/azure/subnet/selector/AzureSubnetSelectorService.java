@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.subnet.selector;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -23,8 +24,9 @@ public class AzureSubnetSelectorService {
             LOGGER.debug("{}", errorMessage.get());
             return new SubnetSelectionResult(errorMessage.get());
         }
-        LOGGER.debug("Azure selected subnets: '{}'", String.join(", ", subnetMetas.stream().toString()));
-        return new SubnetSelectionResult(new ArrayList<>(subnetMetas));
+        List<CloudSubnet> result = new ArrayList<>(subnetMetas);
+        LOGGER.debug("Azure selected subnets: '{}'", result);
+        return new SubnetSelectionResult(result);
     }
 
     private Optional<String> quickValidate(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {

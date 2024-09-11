@@ -1,18 +1,28 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.NetworkV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.aws.InstanceGroupAwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.mock.InstanceGroupMockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.yarn.InstanceGroupYarnNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.InstanceGroupAzureNetworkV1Parameters;
@@ -24,46 +34,46 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 @Component
 public class InstanceGroupNetworkParameterConverter {
 
-    public InstanceGroupMockNetworkV4Parameters convert(InstanceGroupMockNetworkV1Parameters mock,
-        EnvironmentNetworkResponse value, CloudPlatform cloudPlatform) {
+    public InstanceGroupMockNetworkV4Parameters convert(InstanceGroupMockNetworkV1Parameters mock, EnvironmentNetworkResponse value,
+            CloudPlatform cloudPlatform, NetworkV4Request stackLevelNetwork) {
         InstanceGroupMockNetworkV4Parameters response = null;
         if (CloudPlatform.MOCK == cloudPlatform) {
             InstanceGroupMockNetworkV1Parameters params = mock == null
                     ? new InstanceGroupMockNetworkV1Parameters() : mock;
-            response = convertToMockNetworkParams(new ImmutablePair<>(params, value));
+            response = convertToMockNetworkParams(params, value, stackLevelNetwork);
         }
         return response;
     }
 
-    public InstanceGroupAzureNetworkV4Parameters convert(InstanceGroupAzureNetworkV1Parameters azure,
-        EnvironmentNetworkResponse value, CloudPlatform cloudPlatform) {
+    public InstanceGroupAzureNetworkV4Parameters convert(InstanceGroupAzureNetworkV1Parameters azure, EnvironmentNetworkResponse value,
+            CloudPlatform cloudPlatform, NetworkV4Request stackLevelNetwork) {
         InstanceGroupAzureNetworkV4Parameters response = null;
         if (CloudPlatform.AZURE == cloudPlatform) {
             InstanceGroupAzureNetworkV1Parameters params = azure == null
                     ? new InstanceGroupAzureNetworkV1Parameters() : azure;
-            response = convertToAzureNetworkParams(new ImmutablePair<>(params, value));
+            response = convertToAzureNetworkParams(params, value, stackLevelNetwork);
         }
         return response;
     }
 
-    public InstanceGroupAwsNetworkV4Parameters convert(InstanceGroupAwsNetworkV1Parameters aws,
-        EnvironmentNetworkResponse value, CloudPlatform cloudPlatform) {
+    public InstanceGroupAwsNetworkV4Parameters convert(InstanceGroupAwsNetworkV1Parameters aws, EnvironmentNetworkResponse value, CloudPlatform cloudPlatform,
+            NetworkV4Request stackLevelNetwork) {
         InstanceGroupAwsNetworkV4Parameters response = null;
         if (CloudPlatform.AWS == cloudPlatform) {
             InstanceGroupAwsNetworkV1Parameters params = aws == null ?
                     new InstanceGroupAwsNetworkV1Parameters() : aws;
-            response = convertToAwsNetworkParams(new ImmutablePair<>(params, value));
+            response = convertToAwsNetworkParams(params, value, stackLevelNetwork);
         }
         return response;
     }
 
-    public InstanceGroupGcpNetworkV4Parameters convert(InstanceGroupGcpNetworkV1Parameters gcp,
-        EnvironmentNetworkResponse value, CloudPlatform cloudPlatform) {
+    public InstanceGroupGcpNetworkV4Parameters convert(InstanceGroupGcpNetworkV1Parameters gcp, EnvironmentNetworkResponse value, CloudPlatform cloudPlatform,
+            NetworkV4Request stackLevelNetwork) {
         InstanceGroupGcpNetworkV4Parameters response = null;
         if (CloudPlatform.GCP == cloudPlatform) {
             InstanceGroupGcpNetworkV1Parameters params = gcp == null
                     ? new InstanceGroupGcpNetworkV1Parameters() : gcp;
-            response = convertToGcpNetworkParams(new ImmutablePair<>(params, value));
+            response = convertToGcpNetworkParams(params, value, stackLevelNetwork);
         }
         return response;
     }
@@ -79,20 +89,21 @@ public class InstanceGroupNetworkParameterConverter {
         return response;
     }
 
-    private InstanceGroupMockNetworkV4Parameters convertToMockNetworkParams(Pair<InstanceGroupMockNetworkV1Parameters,
-            EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
-        InstanceGroupMockNetworkV1Parameters key = source.getKey();
-
+    private InstanceGroupMockNetworkV4Parameters convertToMockNetworkParams(InstanceGroupMockNetworkV1Parameters instanceGroupMockNetworkV1Parameters,
+            EnvironmentNetworkResponse environmentNetworkResponse, NetworkV4Request stackLevelNetwork) {
         InstanceGroupMockNetworkV4Parameters params = new InstanceGroupMockNetworkV4Parameters();
 
-        if (key != null) {
-            List<String> subnetIds = key.getSubnetIds();
-            if (value != null) {
-                if (subnetIdsDefined(subnetIds)) {
+        if (instanceGroupMockNetworkV1Parameters != null) {
+            List<String> subnetIds = instanceGroupMockNetworkV1Parameters.getSubnetIds();
+            if (environmentNetworkResponse != null) {
+                if (CollectionUtils.isNotEmpty(subnetIds)) {
                     params.setSubnetIds(subnetIds);
                 } else {
-                    params.setSubnetIds(List.of(value.getPreferedSubnetId()));
+                    String stackLevelSubnetId = Optional.ofNullable(stackLevelNetwork)
+                            .map(NetworkV4Base::getMock)
+                            .map(MockNetworkV4Parameters::getSubnetId)
+                            .orElse(null);
+                    setFallbackSubnetIdForInstanceGroupNetwork(stackLevelSubnetId, environmentNetworkResponse, params::setSubnetIds);
                 }
             }
         }
@@ -100,21 +111,20 @@ public class InstanceGroupNetworkParameterConverter {
         return params;
     }
 
-    private InstanceGroupAzureNetworkV4Parameters convertToAzureNetworkParams(Pair<InstanceGroupAzureNetworkV1Parameters,
-            EnvironmentNetworkResponse> source) {
-        InstanceGroupAzureNetworkV1Parameters instanceGroupAzureNetworkV1Parameters = source.getKey();
-        EnvironmentNetworkResponse environmentNetworkResponse = source.getValue();
-
+    private InstanceGroupAzureNetworkV4Parameters convertToAzureNetworkParams(InstanceGroupAzureNetworkV1Parameters instanceGroupAzureNetworkV1Parameters,
+            EnvironmentNetworkResponse environmentNetworkResponse, NetworkV4Request stackLevelNetwork) {
         InstanceGroupAzureNetworkV4Parameters response = new InstanceGroupAzureNetworkV4Parameters();
 
         if (instanceGroupAzureNetworkV1Parameters != null) {
             List<String> subnetIds = instanceGroupAzureNetworkV1Parameters.getSubnetIds();
-            if (subnetIdsDefined(subnetIds)) {
+            if (CollectionUtils.isNotEmpty(subnetIds)) {
                 response.setSubnetIds(subnetIds);
             } else {
-                if (environmentNetworkResponse != null) {
-                    response.setSubnetIds(List.of(environmentNetworkResponse.getPreferedSubnetId()));
-                }
+                String stackLevelSubnetId = Optional.ofNullable(stackLevelNetwork)
+                        .map(NetworkV4Base::getAzure)
+                        .map(AzureNetworkV4Parameters::getSubnetId)
+                        .orElse(null);
+                setFallbackSubnetIdForInstanceGroupNetwork(stackLevelSubnetId, environmentNetworkResponse, response::setSubnetIds);
             }
             Set<String> availabilityZones = instanceGroupAzureNetworkV1Parameters.getAvailabilityZones();
             if (CollectionUtils.isNotEmpty(availabilityZones)) {
@@ -124,18 +134,20 @@ public class InstanceGroupNetworkParameterConverter {
         return response;
     }
 
-    private InstanceGroupGcpNetworkV4Parameters convertToGcpNetworkParams(Pair<InstanceGroupGcpNetworkV1Parameters,
-            EnvironmentNetworkResponse> source) {
-        InstanceGroupGcpNetworkV1Parameters key = source.getKey();
-
+    private InstanceGroupGcpNetworkV4Parameters convertToGcpNetworkParams(InstanceGroupGcpNetworkV1Parameters groupGcpNetworkV1Parameters,
+            EnvironmentNetworkResponse envNetwork, NetworkV4Request stackLevelNetwork) {
         InstanceGroupGcpNetworkV4Parameters response = new InstanceGroupGcpNetworkV4Parameters();
 
-        if (key != null) {
-            List<String> subnetIds = key.getSubnetIds();
-            if (subnetIdsDefined(subnetIds)) {
+        if (groupGcpNetworkV1Parameters != null) {
+            List<String> subnetIds = groupGcpNetworkV1Parameters.getSubnetIds();
+            if (CollectionUtils.isNotEmpty(subnetIds)) {
                 response.setSubnetIds(subnetIds);
-            } else if (source.getValue() != null) {
-                response.setSubnetIds(List.of(source.getValue().getPreferedSubnetId()));
+            } else {
+                String stackLevelSubnetId = Optional.ofNullable(stackLevelNetwork)
+                        .map(NetworkV4Base::getGcp)
+                        .map(GcpNetworkV4Parameters::getSubnetId)
+                        .orElse(null);
+                setFallbackSubnetIdForInstanceGroupNetwork(stackLevelSubnetId, envNetwork, response::setSubnetIds);
             }
         }
 
@@ -147,24 +159,25 @@ public class InstanceGroupNetworkParameterConverter {
         return new InstanceGroupYarnNetworkV4Parameters();
     }
 
-    private InstanceGroupAwsNetworkV4Parameters convertToAwsNetworkParams(Pair<InstanceGroupAwsNetworkV1Parameters,
-            EnvironmentNetworkResponse> source) {
-        InstanceGroupAwsNetworkV1Parameters instanceGroupAwsNetworkV1Parameters = source.getKey();
-
+    private InstanceGroupAwsNetworkV4Parameters convertToAwsNetworkParams(InstanceGroupAwsNetworkV1Parameters instanceGroupAwsNetworkV1Parameters,
+            EnvironmentNetworkResponse environmentNetworkResponse, NetworkV4Request stackLevelNetwork) {
         InstanceGroupAwsNetworkV4Parameters response = new InstanceGroupAwsNetworkV4Parameters();
 
         if (instanceGroupAwsNetworkV1Parameters != null) {
             List<String> subnetIds = instanceGroupAwsNetworkV1Parameters.getSubnetIds();
-            EnvironmentNetworkResponse environmentNetworkResponse = source.getValue();
-            if (subnetIdsDefined(subnetIds)) {
+            if (CollectionUtils.isNotEmpty(subnetIds)) {
                 response.setSubnetIds(subnetIds);
-            } else if (environmentNetworkResponse != null) {
-                response.setSubnetIds(List.of(environmentNetworkResponse.getPreferedSubnetId()));
+            } else {
+                String stackLevelSubnetId = Optional.ofNullable(stackLevelNetwork)
+                        .map(NetworkV4Base::getAws)
+                        .map(AwsNetworkV4Parameters::getSubnetId)
+                        .orElse(null);
+                setFallbackSubnetIdForInstanceGroupNetwork(stackLevelSubnetId, environmentNetworkResponse, response::setSubnetIds);
             }
             List<String> endpointGatewaySubnetIds = instanceGroupAwsNetworkV1Parameters.getEndpointGatewaySubnetIds();
-            if (subnetIdsDefined(endpointGatewaySubnetIds)) {
+            if (CollectionUtils.isNotEmpty(endpointGatewaySubnetIds)) {
                 response.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
-            } else if (environmentNetworkResponse != null) {
+            } else if (environmentNetworkResponse != null && CollectionUtils.isNotEmpty(environmentNetworkResponse.getEndpointGatewaySubnetIds())) {
                 response.setEndpointGatewaySubnetIds(List.copyOf(environmentNetworkResponse.getEndpointGatewaySubnetIds()));
             }
         }
@@ -172,7 +185,23 @@ public class InstanceGroupNetworkParameterConverter {
         return response;
     }
 
-    private boolean subnetIdsDefined(List<String> subnetIds) {
-        return subnetIds != null && !subnetIds.isEmpty();
+    private void setFallbackSubnetIdForInstanceGroupNetwork(String stackLevelNetwork, EnvironmentNetworkResponse envNetwork,
+            Consumer<List<String>> setter) {
+        String fallbackSubnetId = getSubnetIdFromStackOrEnvironmentLevel(stackLevelNetwork, envNetwork);
+        if (StringUtils.isNotEmpty(fallbackSubnetId)) {
+            setter.accept(List.of(fallbackSubnetId));
+        }
+    }
+
+    private String getSubnetIdFromStackOrEnvironmentLevel(String stackLevelSubnetId, EnvironmentNetworkResponse environmentNetworkResponse) {
+        String fallbackSubnet = null;
+        if (StringUtils.isNotEmpty(stackLevelSubnetId)) {
+            fallbackSubnet = stackLevelSubnetId;
+        } else if (environmentNetworkResponse != null && StringUtils.isNotEmpty(environmentNetworkResponse.getPreferedSubnetId())) {
+            fallbackSubnet = environmentNetworkResponse.getPreferedSubnetId();
+        } else {
+            throw new BadRequestException("Subnet could not be selected for you request, please check your environment and it's network configuration.");
+        }
+        return fallbackSubnet;
     }
 }
