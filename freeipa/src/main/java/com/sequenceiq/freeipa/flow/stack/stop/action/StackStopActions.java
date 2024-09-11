@@ -9,13 +9,11 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.event.instance.DelayedStopInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -31,6 +29,7 @@ import com.sequenceiq.freeipa.flow.stack.stop.StackStopContext;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopService;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopState;
+import com.sequenceiq.freeipa.flow.stack.stop.StopFreeIpaServicesEvent;
 import com.sequenceiq.freeipa.service.freeipa.PrimaryGatewayFirstThenSortByFqdnComparator;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
@@ -53,16 +52,25 @@ public class StackStopActions {
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
         return new AbstractStackStopAction<>(StackEvent.class) {
-
-            @Value("${freeipa.delayed.stop-start-sec}")
-            private long delayInSec;
-
-            @Inject
-            private EntitlementService entitlementService;
-
             @Override
             protected void doExecute(StackStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStopService.startStackStop(context);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackStopContext context) {
+                return new StopFreeIpaServicesEvent(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "STOP_INSTANCES_STATE")
+    public Action<?, ?> stackStopInstancesAction() {
+        return new AbstractStackStopAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackStopContext context, StackEvent payload, Map<Object, Object> variables) {
+                stackStopService.startStackInstancesStop(context);
                 sendEvent(context);
             }
 
@@ -73,8 +81,8 @@ public class StackStopActions {
                         .map(i -> instanceMetaDataToCloudInstanceConverter.convert(i))
                         .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
-                return new DelayedStopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,
-                        cloudInstances, delayInSec);
+                return new StopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,
+                        cloudInstances);
             }
         };
     }

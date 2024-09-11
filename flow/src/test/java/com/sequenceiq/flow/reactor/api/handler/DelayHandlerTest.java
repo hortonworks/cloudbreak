@@ -75,12 +75,12 @@ class DelayHandlerTest {
         ExecutionException exception = new ExecutionException("Execution exception", new RuntimeException());
         when(delayedExecutorService.isPresent()).thenReturn(Boolean.TRUE);
         when(delayedExecutorService.get()).thenReturn(executorService);
-        when(executorService.runWithDelay(any(), anyLong(), any(TimeUnit.class)))
+        when(executorService.runWithDelay(any(Callable.class), anyLong(), any(TimeUnit.class)))
                 .thenThrow(exception);
 
         Selectable result = delayHandler.doAccept(new HandlerEvent<>(new Event<>(delayEvent)));
 
-        verify(executorService, times(1)).runWithDelay(any(), anyLong(), any(TimeUnit.class));
+        verify(executorService, times(1)).runWithDelay(any(Callable.class), anyLong(), any(TimeUnit.class));
         assertEquals(new DelayFailedEvent(delayEvent.getResourceId(), exception), result);
     }
 

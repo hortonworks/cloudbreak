@@ -9,6 +9,7 @@ public enum StackStopState implements FlowState {
     INIT_STATE,
     STOP_FAILED_STATE,
     STOP_STATE(StackStopRestartAction.class),
+    STOP_INSTANCES_STATE,
     STOP_FINISHED_STATE,
     FINAL_STATE;
 

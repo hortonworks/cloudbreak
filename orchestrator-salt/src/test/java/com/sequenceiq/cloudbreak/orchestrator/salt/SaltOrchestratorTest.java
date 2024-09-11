@@ -577,7 +577,7 @@ class SaltOrchestratorTest {
         assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("replica1.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
         assertEquals(Set.of("replica2.example.com"), jobIdTrackers.get(2).getSaltJobRunner().getTargetHostnames());
-        verify(executorService, times(2)).runWithDelay(any(), anyLong(), any());
+        verify(executorService, times(2)).runWithDelay(any(Callable.class), anyLong(), any());
     }
 
     @Test

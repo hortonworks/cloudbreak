@@ -6,6 +6,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackStopEvent implements FlowEvent {
     STACK_STOP_EVENT("STACK_STOP_TRIGGER_EVENT"),
+    STACK_STOP_INSTANCES_EVENT("STACK_STOP_INSTANCES_EVENT"),
     STOP_FINISHED_EVENT(CloudPlatformResult.selector(StopInstancesResult.class)),
     STOP_FAILURE_EVENT(CloudPlatformResult.failureSelector(StopInstancesResult.class)),
     STOP_FINALIZED_EVENT("STOPSTACKFINALIZED"),

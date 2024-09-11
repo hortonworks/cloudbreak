@@ -21,7 +21,7 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
 
     @Override
     public void doBeforeRestart(RestartContext restartContext, Object payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(restartContext.getResourceId());
+        Stack stack = stackService.getStackById(restartContext.getResourceId());
         PollGroup pollGroup = Status.DELETE_COMPLETED == stack.getStackStatus().getStatus() ? PollGroup.CANCELLED : PollGroup.POLLABLE;
         InMemoryStateStore.putStack(stack.getId(), pollGroup);
         MDCBuilder.buildMdcContext(stack);

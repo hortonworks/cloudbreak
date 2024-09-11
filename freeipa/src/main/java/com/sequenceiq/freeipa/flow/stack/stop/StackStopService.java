@@ -30,11 +30,11 @@ public class StackStopService {
     private InstanceUpdater instanceUpdater;
 
     public void startStackStop(StackStopContext context) {
-        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.STOP_IN_PROGRESS, "Stack infrastructure is now stopping.");
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.STOP_IN_PROGRESS, "FreeIPA services is now stopping.");
     }
 
     public void handleStackStopError(Stack stack, StackFailureEvent payload) {
-        String logMessage = "Stack stop failed: ";
+        String logMessage = "FreeIPA stop failed: ";
         LOGGER.info(logMessage, payload.getException());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOP_FAILED, logMessage + payload.getException().getMessage());
     }
@@ -43,7 +43,7 @@ public class StackStopService {
         Stack stack = context.getStack();
         stackStartStopService.validateResourceResults(context.getCloudContext(),
                 stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
-        stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOPPED, "Stack infrastructure stopped successfully.");
+        stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOPPED, "FreeIPA infrastructure stopped successfully.");
         instanceUpdater.updateStatuses(stack, InstanceStatus.STOPPED);
     }
 
@@ -54,5 +54,9 @@ public class StackStopService {
             LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
             return false;
         }
+    }
+
+    public void startStackInstancesStop(StackStopContext context) {
+        stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.STOP_IN_PROGRESS, "FreeIPA infrastructure is now stopping.");
     }
 }

@@ -5,6 +5,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.SUSPEND_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STACK_STOP_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STACK_STOP_INSTANCES_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STOP_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STOP_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STOP_FINISHED_EVENT;
@@ -12,6 +13,7 @@ import static com.sequenceiq.freeipa.flow.stack.stop.StackStopState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopState.STOP_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopState.STOP_FINISHED_STATE;
+import static com.sequenceiq.freeipa.flow.stack.stop.StackStopState.STOP_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopState.STOP_STATE;
 
 import java.util.List;
@@ -31,7 +33,8 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)
             .from(INIT_STATE).to(STOP_STATE).event(STACK_STOP_EVENT).noFailureEvent()
-            .from(STOP_STATE).to(STOP_FINISHED_STATE).event(STOP_FINISHED_EVENT).defaultFailureEvent()
+            .from(STOP_STATE).to(STOP_INSTANCES_STATE).event(STACK_STOP_INSTANCES_EVENT).defaultFailureEvent()
+            .from(STOP_INSTANCES_STATE).to(STOP_FINISHED_STATE).event(STOP_FINISHED_EVENT).defaultFailureEvent()
             .from(STOP_FINISHED_STATE).to(FINAL_STATE).event(STOP_FINALIZED_EVENT).defaultFailureEvent()
             .build();
 

@@ -23,7 +23,7 @@ public class StackStopRestartAction extends DefaultRestartAction {
 
     @Override
     public void doBeforeRestart(RestartContext restartContext, Object payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(restartContext.getResourceId());
+        Stack stack = stackService.getStackById(restartContext.getResourceId());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOP_REQUESTED, "Stop/restart");
         MDCBuilder.buildMdcContext(stack);
     }
