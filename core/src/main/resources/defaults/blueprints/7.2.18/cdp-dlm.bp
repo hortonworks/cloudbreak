@@ -447,20 +447,6 @@
       {
       "refName": "dlm",
       "serviceType": "DLM",
-      "serviceConfigs": [
-        {
-          "name": "hive_service",
-          "ref": "HIVE-1"
-        },
-        {
-          "name": "hdfs_service",
-          "ref": "HDFS-1"
-        },
-        {
-          "name": "livy_for_spark3_service",
-          "ref": "LIVY_FOR_SPARK3-1"
-        }
-      ],
       "roleConfigGroups": [
         {
           "refName": "dlm-DLM_SERVER-BASE",
