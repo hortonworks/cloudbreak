@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
-
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -31,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class DistroXSecretRotationTests extends AbstractE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXSecretRotationTests.class);
@@ -93,14 +92,14 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     .when(freeIpaTestClient.rotateSecret())
                     .awaitForFlow()
                     .given(SdxInternalTestDto.class)
-                    .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_USER_KEYPAIR)))
+                    .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.USER_KEYPAIR)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
                         return testDto;
                     })
                     .given(DistroXTestDto.class)
-                    .when(distroXTestClient.rotateSecret(Set.of(USER_KEYPAIR)))
+                    .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.USER_KEYPAIR)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);

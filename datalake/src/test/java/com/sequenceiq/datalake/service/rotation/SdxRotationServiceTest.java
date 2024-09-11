@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -122,7 +122,7 @@ class SdxRotationServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
         when(stackV4Endpoint.rotateSecrets(eq(1L), any(), any())).thenReturn(flowIdentifier);
-        underTest.rotateCloudbreakSecret(RESOURCE_CRN, DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
+        underTest.rotateCloudbreakSecret(RESOURCE_CRN, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null);
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
         verify(stackV4Endpoint, times(1)).rotateSecrets(eq(1L), any(), any());
@@ -208,9 +208,9 @@ class SdxRotationServiceTest {
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
-        FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null);
+        FlowIdentifier flowIdentifier = underTest.triggerSecretRotation(RESOURCE_CRN, List.of(EXTERNAL_DATABASE_ROOT_PASSWORD.name()), null, null);
         verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull(), any());
-        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(DATALAKE_DATABASE_ROOT_PASSWORD)), isNull());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(EXTERNAL_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
     @Test
@@ -222,18 +222,18 @@ class SdxRotationServiceTest {
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED);
         when(sdxStatusService.getActualStatusForSdx(anyLong())).thenReturn(status);
-        underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null);
+        underTest.triggerSecretRotation(RESOURCE_CRN, List.of(EXTERNAL_DATABASE_ROOT_PASSWORD.name()), null, null);
         verify(sdxReactorFlowManager, times(1)).triggerSecretRotation(eq(sdxCluster), anyList(), isNull(), any());
-        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(DATALAKE_DATABASE_ROOT_PASSWORD)), isNull());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(EXTERNAL_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
     @Test
     void triggerSecretRotationShouldFailIfSdxClusterNotFound() {
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(DATALAKE_DATABASE_ROOT_PASSWORD.name()), null, null));
+                () -> underTest.triggerSecretRotation(RESOURCE_CRN, List.of(EXTERNAL_DATABASE_ROOT_PASSWORD.name()), null, null));
         assertEquals("SDX cluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
-        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(DATALAKE_DATABASE_ROOT_PASSWORD)), isNull());
+        verify(secretRotationValidationService, times(1)).validateEnabledSecretTypes(eq(List.of(EXTERNAL_DATABASE_ROOT_PASSWORD)), isNull());
     }
 
     @Test

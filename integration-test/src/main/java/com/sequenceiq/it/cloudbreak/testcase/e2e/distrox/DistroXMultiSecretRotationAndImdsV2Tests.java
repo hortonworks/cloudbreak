@@ -1,9 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
-
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -12,6 +9,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -21,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class DistroXMultiSecretRotationAndImdsV2Tests extends AbstractE2ETest {
 
@@ -51,13 +50,13 @@ public class DistroXMultiSecretRotationAndImdsV2Tests extends AbstractE2ETest {
     public void testCMSharedDbMultiSecretRotationAndImdsUpdate(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))
+                .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.CM_SERVICE_SHARED_DB)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecret(Set.of(DATAHUB_CM_SERVICE_SHARED_DB)))
+                .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.CM_SERVICE_SHARED_DB)))
                 .awaitForFlow()
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))
+                .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.CM_SERVICE_SHARED_DB)))
                 .awaitForFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())

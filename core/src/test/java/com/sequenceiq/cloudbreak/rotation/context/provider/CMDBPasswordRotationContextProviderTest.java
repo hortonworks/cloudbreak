@@ -111,7 +111,7 @@ public class CMDBPasswordRotationContextProviderTest {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("resource");
 
         assertEquals(4, contexts.size());
-        assertTrue(CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD.getSteps().stream().allMatch(contexts::containsKey));
+        assertTrue(CloudbreakSecretType.CM_DB_PASSWORD.getSteps().stream().allMatch(contexts::containsKey));
     }
 
     @Test

@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_LDAP_BIND_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_MGMT_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
@@ -84,7 +84,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .awaitForFlow();
         if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
             distroXTestDto
-                    .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_LDAP_BIND_PASSWORD), Map.of(CLUSTER_NAME.name(), clusterName)))
+                    .when(distroXTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD), Map.of(CLUSTER_NAME.name(), clusterName)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkLdapLogin(tc, testDto, client);
@@ -101,19 +101,19 @@ public class DistroXRepairTests extends AbstractE2ETest {
                     SALT_BOOT_SECRETS,
                     SALT_MASTER_KEY_PAIR,
                     SALT_SIGN_KEY_PAIR,
-                    CLUSTER_MGMT_CM_ADMIN_PASSWORD,
-                    CLUSTER_CB_CM_ADMIN_PASSWORD,
-                    CLUSTER_CM_DB_PASSWORD,
+                    CM_MGMT_ADMIN_PASSWORD,
+                    CM_ADMIN_PASSWORD,
+                    CM_DB_PASSWORD,
                     // we should enable this again when CDPD-43281 is resolved
                     //CLUSTER_CM_SERVICES_DB_PASSWORD,
                     // CB-24849 and CB-25311
                     //GATEWAY_CERT
-                    DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
-                    DATAHUB_CM_INTERMEDIATE_CA_CERT);
+                    EXTERNAL_DATABASE_ROOT_PASSWORD,
+                    CM_INTERMEDIATE_CA_CERT);
         } else {
             return Set.of(
-                    DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
-                    CLUSTER_CM_DB_PASSWORD);
+                    EXTERNAL_DATABASE_ROOT_PASSWORD,
+                    CM_DB_PASSWORD);
         }
     }
 

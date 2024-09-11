@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICE_SHARED_DB;
 
 import java.util.Map;
 import java.util.Set;
@@ -63,6 +63,6 @@ public class DatahubCMServiceSharedDBRotationContextProvider extends AbstractCMR
 
     @Override
     public SecretType getSecret() {
-        return DATAHUB_CM_SERVICE_SHARED_DB;
+        return CM_SERVICE_SHARED_DB;
     }
 }

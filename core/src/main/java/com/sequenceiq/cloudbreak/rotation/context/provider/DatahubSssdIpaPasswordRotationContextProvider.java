@@ -42,7 +42,7 @@ public class DatahubSssdIpaPasswordRotationContextProvider extends AbstractSssdI
 
     @Override
     public SecretType getSecret() {
-        return CloudbreakSecretType.DATAHUB_SSSD_IPA_PASSWORD;
+        return CloudbreakSecretType.SSSD_IPA_PASSWORD;
     }
 
 }

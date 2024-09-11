@@ -27,6 +27,6 @@ public class DatalakeDemoSecretRotationContextProvider implements RotationContex
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.DATALAKE_DEMO_SECRET;
+        return DatalakeSecretType.DEMO_SECRET;
     }
 }

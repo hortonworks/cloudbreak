@@ -55,7 +55,7 @@ public class StartFlowEventChainFactoryTest {
         assertEquals(4, flowTriggerEventQueue.getQueue().size());
         Optional<SecretType> optionalSecretType = getOptionalSecretType(flowTriggerEventQueue);
         assertTrue(optionalSecretType.isPresent());
-        assertEquals(CloudbreakSecretType.DATAHUB_CM_SERVICE_SHARED_DB, optionalSecretType.get());
+        assertEquals(CloudbreakSecretType.CM_SERVICE_SHARED_DB, optionalSecretType.get());
     }
 
     @Test

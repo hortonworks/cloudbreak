@@ -24,6 +24,6 @@ public class DatalakeSaltMasterKeyPairRotationContextProvider implements Rotatio
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.DATALAKE_SALT_MASTER_KEY_PAIR;
+        return DatalakeSecretType.SALT_MASTER_KEY_PAIR;
     }
 }

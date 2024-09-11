@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 
@@ -36,6 +36,6 @@ public class DatahubExternalDatabaseRootPasswordRotationContextProvider implemen
 
     @Override
     public SecretType getSecret() {
-        return DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
+        return EXTERNAL_DATABASE_ROOT_PASSWORD;
     }
 }

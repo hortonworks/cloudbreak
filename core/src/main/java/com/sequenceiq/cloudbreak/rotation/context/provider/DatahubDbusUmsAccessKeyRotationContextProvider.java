@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.UMS_DATABUS_CREDENTIAL;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_DBUS_UMS_ACCESS_KEY;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DBUS_UMS_ACCESS_KEY;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationC
 
     @Override
     public SecretType getSecret() {
-        return DATAHUB_DBUS_UMS_ACCESS_KEY;
+        return DBUS_UMS_ACCESS_KEY;
     }
 
     @Override

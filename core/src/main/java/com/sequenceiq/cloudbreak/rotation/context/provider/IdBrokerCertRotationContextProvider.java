@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE_ROLE_RESTART;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.IDBROKER_CERT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_DATALAKE_IDBROKER_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static java.lang.String.format;
@@ -94,7 +94,7 @@ public class IdBrokerCertRotationContextProvider extends AbstractKnoxCertRotatio
 
     @Override
     public SecretType getSecret() {
-        return IDBROKER_CERT;
+        return INTERNAL_DATALAKE_IDBROKER_CERT;
     }
 
     @Override

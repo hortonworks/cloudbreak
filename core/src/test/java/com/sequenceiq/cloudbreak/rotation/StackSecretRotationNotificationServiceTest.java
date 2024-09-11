@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.rotation;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_BOOT_SECRETS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +30,7 @@ class StackSecretRotationNotificationServiceTest {
 
     private static final Long STACK_ID = 1L;
 
-    private static final RotationMetadata METADATA = new RotationMetadata(DATALAKE_SALT_BOOT_SECRETS, ROTATE, null,
+    private static final RotationMetadata METADATA = new RotationMetadata(SALT_BOOT_SECRETS, ROTATE, null,
             "", Optional.empty(), null);
 
     @Mock
@@ -64,7 +64,7 @@ class StackSecretRotationNotificationServiceTest {
         underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
     }
 
     @Test
@@ -74,7 +74,7 @@ class StackSecretRotationNotificationServiceTest {
         underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
     }
 
     @Test
@@ -84,7 +84,7 @@ class StackSecretRotationNotificationServiceTest {
         underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
     }
 
     private void verifyEventIsSent(String message) {

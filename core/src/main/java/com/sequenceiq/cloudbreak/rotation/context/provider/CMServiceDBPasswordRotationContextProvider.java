@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.List;
@@ -62,6 +62,6 @@ public class CMServiceDBPasswordRotationContextProvider extends AbstractCMRelate
 
     @Override
     public SecretType getSecret() {
-        return CLUSTER_CM_SERVICES_DB_PASSWORD;
+        return CM_SERVICES_DB_PASSWORD;
     }
 }

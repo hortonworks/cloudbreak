@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
-import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_USERSYNC_USER_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
@@ -94,7 +94,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
             freeIpaRotationTestDto = testContext
                     .given(FreeIpaRotationTestDto.class)
-                    .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD))
+                    .withSecrets(List.of(SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD))
                     .when(freeIpaTestClient.rotateSecret())
                     .awaitForFlow();
         }

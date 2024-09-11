@@ -24,6 +24,6 @@ public class DatalakeSaltSignKeyPairRotationContextProvider implements RotationC
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.DATALAKE_SALT_SIGN_KEY_PAIR;
+        return DatalakeSecretType.SALT_SIGN_KEY_PAIR;
     }
 }

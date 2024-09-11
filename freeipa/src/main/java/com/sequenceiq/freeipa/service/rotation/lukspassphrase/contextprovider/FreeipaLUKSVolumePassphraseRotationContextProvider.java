@@ -57,7 +57,7 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
 
     @Override
     public SecretType getSecret() {
-        return FreeIpaSecretType.FREEIPA_LUKS_VOLUME_PASSPHRASE;
+        return FreeIpaSecretType.LUKS_VOLUME_PASSPHRASE;
     }
 
     private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn) {

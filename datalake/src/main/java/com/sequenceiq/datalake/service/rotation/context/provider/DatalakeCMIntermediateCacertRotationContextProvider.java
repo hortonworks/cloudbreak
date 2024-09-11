@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.service.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
 
 import java.util.Map;
 
@@ -24,6 +24,6 @@ public class DatalakeCMIntermediateCacertRotationContextProvider implements Rota
 
     @Override
     public SecretType getSecret() {
-        return DATALAKE_CM_INTERMEDIATE_CA_CERT;
+        return CM_INTERMEDIATE_CA_CERT;
     }
 }

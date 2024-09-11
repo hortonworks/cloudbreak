@@ -54,7 +54,7 @@ public class SaltSignKeyPairRotationContextProvider implements RotationContextPr
 
     @Override
     public SecretType getSecret() {
-        return FreeIpaSecretType.FREEIPA_SALT_SIGN_KEY_PAIR;
+        return FreeIpaSecretType.SALT_SIGN_KEY_PAIR;
     }
 
     @Override

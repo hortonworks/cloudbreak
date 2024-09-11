@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.service.rotation.notification;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_BOOT_SECRETS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +27,7 @@ import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 @ExtendWith(MockitoExtension.class)
 class SdxSecretRotationNotificationServiceTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(DATALAKE_SALT_BOOT_SECRETS, ROTATE, null,
+    private static final RotationMetadata METADATA = new RotationMetadata(SALT_BOOT_SECRETS, ROTATE, null,
             "", Optional.empty(), null);
 
     @Mock
@@ -59,7 +59,7 @@ class SdxSecretRotationNotificationServiceTest {
 
         verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
                 List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
     }
 
     @Test
@@ -71,7 +71,7 @@ class SdxSecretRotationNotificationServiceTest {
 
         verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
                 List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
     }
 
     @Test
@@ -83,6 +83,6 @@ class SdxSecretRotationNotificationServiceTest {
 
         verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
                 List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
     }
 }

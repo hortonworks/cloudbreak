@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.IDBROKER_CERT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_DATALAKE_IDBROKER_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,12 +21,12 @@ public class DatalakeIdBrokerCertRotationContextProvider implements RotationCont
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();
-        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, IDBROKER_CERT));
+        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, INTERNAL_DATALAKE_IDBROKER_CERT));
         return context;
     }
 
     @Override
     public SecretType getSecret() {
-        return DATALAKE_IDBROKER_CERT;
+        return IDBROKER_CERT;
     }
 }

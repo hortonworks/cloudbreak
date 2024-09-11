@@ -221,7 +221,7 @@ class SdxReactorFlowManagerTest {
     void testTriggerSecretRotation() {
         SdxCluster sdxCluster = getValidSdxCluster();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSecretRotation(sdxCluster,
-                List.of(DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD), null, null));
+                List.of(DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD), null, null));
         verify(reactor, times(1)).notify(eq(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class)), any(Event.class));
     }
 

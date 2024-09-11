@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_LDAP_BIND_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
@@ -92,7 +92,7 @@ public class ClusterLdapBindPasswordContextProvider implements RotationContextPr
 
     @Override
     public SecretType getSecret() {
-        return CLUSTER_LDAP_BIND_PASSWORD;
+        return LDAP_BIND_PASSWORD;
     }
 
 }

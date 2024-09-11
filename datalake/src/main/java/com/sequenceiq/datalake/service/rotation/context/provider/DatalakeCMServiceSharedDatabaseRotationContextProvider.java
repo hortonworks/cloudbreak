@@ -27,6 +27,6 @@ public class DatalakeCMServiceSharedDatabaseRotationContextProvider implements R
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.DATALAKE_CM_SERVICE_SHARED_DB;
+        return DatalakeSecretType.CM_SERVICE_SHARED_DB;
     }
 }

@@ -135,7 +135,7 @@ class FreeIpaStackEncryptionKeysRotationContextProviderTest {
 
     @Test
     void testGetSecret() {
-        assertEquals(FreeIpaSecretType.FREEIPA_STACK_ENCRYPTION_KEYS, underTest.getSecret());
+        assertEquals(FreeIpaSecretType.STACK_ENCRYPTION_KEYS, underTest.getSecret());
     }
 
 }

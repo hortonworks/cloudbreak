@@ -38,6 +38,6 @@ public class DatalakeSssdIpaPasswordSecretRotationContextProvider implements Rot
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.DATALAKE_SSSD_IPA_PASSWORD;
+        return DatalakeSecretType.SSSD_IPA_PASSWORD;
     }
 }

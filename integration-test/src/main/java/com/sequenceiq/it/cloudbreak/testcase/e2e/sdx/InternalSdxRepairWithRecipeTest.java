@@ -5,16 +5,16 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameter
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_DB_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_DB_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_LDAP_BIND_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_DB_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_MGMT_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICES_DB_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.LDAP_BIND_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_BOOT_SECRETS;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.USER_KEYPAIR;
 
 import java.util.List;
 import java.util.Map;
@@ -158,7 +158,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .awaitForFlow();
         if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
             sdxInternalTestDto
-                    .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_LDAP_BIND_PASSWORD),
+                    .when(sdxTestClient.rotateSecret(Set.of(LDAP_BIND_PASSWORD),
                             Map.of(CLUSTER_NAME.name(), clusterName)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
@@ -174,19 +174,19 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
             return Set.of(
                     // CB-24849 and CB-25311
                     //DATALAKE_GATEWAY_CERT,
-                    DATALAKE_USER_KEYPAIR,
-                    DATALAKE_IDBROKER_CERT,
-                    DATALAKE_SALT_BOOT_SECRETS,
-                    DATALAKE_MGMT_CM_ADMIN_PASSWORD,
-                    DATALAKE_CB_CM_ADMIN_PASSWORD,
-                    DATALAKE_DATABASE_ROOT_PASSWORD,
-                    DATALAKE_CM_DB_PASSWORD,
-                    DATALAKE_CM_SERVICE_DB_PASSWORD,
-                    DATALAKE_CM_INTERMEDIATE_CA_CERT);
+                    USER_KEYPAIR,
+                    IDBROKER_CERT,
+                    SALT_BOOT_SECRETS,
+                    CM_MGMT_ADMIN_PASSWORD,
+                    CM_ADMIN_PASSWORD,
+                    EXTERNAL_DATABASE_ROOT_PASSWORD,
+                    CM_DB_PASSWORD,
+                    CM_SERVICES_DB_PASSWORD,
+                    CM_INTERMEDIATE_CA_CERT);
         } else {
             return Set.of(
-                    DATALAKE_DATABASE_ROOT_PASSWORD,
-                    DATALAKE_CM_DB_PASSWORD);
+                    EXTERNAL_DATABASE_ROOT_PASSWORD,
+                    CM_DB_PASSWORD);
         }
     }
 

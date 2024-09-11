@@ -105,6 +105,6 @@ class FreeipaLUKSVolumePassphraseRotationContextProviderTest {
 
     @Test
     void testGetSecret() {
-        assertEquals(FreeIpaSecretType.FREEIPA_LUKS_VOLUME_PASSPHRASE, underTest.getSecret());
+        assertEquals(FreeIpaSecretType.LUKS_VOLUME_PASSPHRASE, underTest.getSecret());
     }
 }

@@ -23,6 +23,6 @@ public class DatalakeSaltBootSecretsRotationContextProvider implements RotationC
 
     @Override
     public SecretType getSecret() {
-        return DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
+        return DatalakeSecretType.SALT_BOOT_SECRETS;
     }
 }

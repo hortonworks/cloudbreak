@@ -1,9 +1,9 @@
 package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CB_CM_ADMIN_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_DB_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_ADMIN_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_DB_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,9 +24,9 @@ class DatalakeSecretRotationFlowEventProviderTest {
     @Test
     public void testGetPostFlowEvents() {
         assertTrue(underTest.getPostFlowEvent(new SecretRotationFlowChainTriggerEvent(null, 1L, null,
-                List.of(DATALAKE_CM_DB_PASSWORD), null, null)).isEmpty());
+                List.of(CM_DB_PASSWORD), null, null)).isEmpty());
         Set<Selectable> postFlowEvents = underTest.getPostFlowEvent(new SecretRotationFlowChainTriggerEvent(null, 1L, null,
-                List.of(DATALAKE_CM_INTERMEDIATE_CA_CERT), null, null));
+                List.of(CM_INTERMEDIATE_CA_CERT), null, null));
         assertFalse(postFlowEvents.isEmpty());
         assertEquals(postFlowEvents.iterator().next().getSelector(), SdxCertRotationEvent.ROTATE_CERT_EVENT.event());
     }
@@ -34,18 +34,18 @@ class DatalakeSecretRotationFlowEventProviderTest {
     @Test
     public void testSaltUpdateCheckIfExecutionSpecified() {
         assertFalse(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(DATALAKE_CM_DB_PASSWORD), ROTATE, null)));
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CM_DB_PASSWORD), ROTATE, null)));
     }
 
     @Test
     public void testSaltUpdateCheckIfSecretNotRequires() {
         assertFalse(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(DATALAKE_CB_CM_ADMIN_PASSWORD), ROTATE, null)));
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CM_ADMIN_PASSWORD), ROTATE, null)));
     }
 
     @Test
     public void testSaltUpdateCheck() {
         assertTrue(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(DATALAKE_CM_DB_PASSWORD), null, null)));
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CM_DB_PASSWORD), null, null)));
     }
 }

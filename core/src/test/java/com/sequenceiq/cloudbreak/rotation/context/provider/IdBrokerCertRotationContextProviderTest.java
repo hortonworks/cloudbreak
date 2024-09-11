@@ -89,7 +89,7 @@ class IdBrokerCertRotationContextProviderTest {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
 
         assertEquals(5, contexts.size());
-        assertTrue(CloudbreakSecretType.IDBROKER_CERT.getSteps().stream().allMatch(contexts::containsKey));
+        assertTrue(CloudbreakSecretType.INTERNAL_DATALAKE_IDBROKER_CERT.getSteps().stream().allMatch(contexts::containsKey));
 
         CMServiceRoleRestartRotationContext roleRestartContext = (CMServiceRoleRestartRotationContext) contexts.get(CM_SERVICE_ROLE_RESTART);
         assertEquals("KNOX", roleRestartContext.getServiceType());

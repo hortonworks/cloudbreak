@@ -59,7 +59,7 @@ class ClusterLdapBindPasswordContextProviderTest {
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
         assertEquals(3, contexts.size());
-        assertTrue(CloudbreakSecretType.CLUSTER_LDAP_BIND_PASSWORD.getSteps().stream().allMatch(contexts::containsKey));
+        assertTrue(CloudbreakSecretType.LDAP_BIND_PASSWORD.getSteps().stream().allMatch(contexts::containsKey));
     }
 
 }

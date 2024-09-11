@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +32,6 @@ public class DatalakeExternalDatabaseRootPasswordRotationContextProvider impleme
 
     @Override
     public SecretType getSecret() {
-        return DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
+        return INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
     }
 }

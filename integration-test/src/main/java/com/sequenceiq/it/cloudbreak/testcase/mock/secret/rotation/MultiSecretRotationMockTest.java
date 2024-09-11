@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.secret.rotation;
 
-import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_DEMO_SECRET;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DEMO_SECRET;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +10,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -60,11 +58,11 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
         createDefaultDatahub(testContext);
         testContext
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_DEMO_SECRET))
+                .withSecrets(List.of(FreeIpaSecretType.DEMO_SECRET))
                 .when(freeIpaTestClient.rotateSecretInternal())
                 .awaitForFlow()
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecretInternal(List.of(DATALAKE_DEMO_SECRET)))
+                .when(sdxTestClient.rotateSecretInternal(List.of(DatalakeSecretType.DEMO_SECRET)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.stop())
@@ -73,7 +71,7 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
                 .when(distroXTestClient.start())
                 .awaitForFlow()
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_DEMO_SECRET))
+                .withSecrets(List.of(FreeIpaSecretType.DEMO_SECRET))
                 .when(freeIpaTestClient.rotateSecretInternal())
                 .awaitForFlow()
                 .validate();
@@ -199,7 +197,7 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
     private FreeIpaRotationTestDto executeFreeIpaDemoRotation(TestContext testContext) {
         return testContext
                 .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FREEIPA_DEMO_SECRET))
+                .withSecrets(List.of(FreeIpaSecretType.DEMO_SECRET))
                 .when(freeIpaTestClient.rotateSecretInternal());
     }
 
@@ -210,7 +208,7 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
     private SdxInternalTestDto executeDataLakeDemoRotation(TestContext testContext, Map<String, String> additionalArgs) {
         return testContext
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.rotateSecretInternal(Set.of(DatalakeSecretType.DATALAKE_DEMO_SECRET), additionalArgs));
+                .when(sdxTestClient.rotateSecretInternal(Set.of(DatalakeSecretType.DEMO_SECRET), additionalArgs));
     }
 
     private DistroXTestDto executeDataHubDemoRotation(TestContext testContext) {
@@ -220,6 +218,6 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
     private DistroXTestDto executeDataHubDemoRotation(TestContext testContext, Map<String, String> additionalArgs) {
         return testContext
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecretInternal(Set.of(CloudbreakSecretType.DATAHUB_DEMO_SECRET), additionalArgs));
+                .when(distroXTestClient.rotateSecretInternal(Set.of(CloudbreakSecretType.DEMO_SECRET), additionalArgs));
     }
 }

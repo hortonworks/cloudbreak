@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_DEMO_SECRET;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DEMO_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.FINALIZE_FAILURE_KEY;
@@ -48,6 +48,6 @@ public class DatahubDemoSecretRotationContextProvider implements RotationContext
 
     @Override
     public SecretType getSecret() {
-        return DATAHUB_DEMO_SECRET;
+        return DEMO_SECRET;
     }
 }

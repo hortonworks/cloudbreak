@@ -116,7 +116,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
 
     @Override
     public SecretType getSecret() {
-        return FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
+        return FreeIpaSecretType.SALT_BOOT_SECRETS;
     }
 
     private SaltBootConfigRotationContext getServiceConfigRotationContext(Stack stack, String saltBootPasswordSecret, String saltBootPrivateKeySecret) {

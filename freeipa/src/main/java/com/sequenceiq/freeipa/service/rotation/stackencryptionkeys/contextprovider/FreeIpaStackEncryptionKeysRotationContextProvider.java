@@ -76,7 +76,7 @@ public class FreeIpaStackEncryptionKeysRotationContextProvider implements Rotati
 
     @Override
     public SecretType getSecret() {
-        return FreeIpaSecretType.FREEIPA_STACK_ENCRYPTION_KEYS;
+        return FreeIpaSecretType.STACK_ENCRYPTION_KEYS;
     }
 
     private void rotateStackEncryptionKeys(StackEncryption stackEncryption, EncryptionResources encryptionResources, Stack stack,

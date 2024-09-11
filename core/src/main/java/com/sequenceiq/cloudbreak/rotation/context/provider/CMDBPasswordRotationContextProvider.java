@@ -97,7 +97,7 @@ public class CMDBPasswordRotationContextProvider extends AbstractCMRelatedDataba
 
     @Override
     public SecretType getSecret() {
-        return CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
+        return CloudbreakSecretType.CM_DB_PASSWORD;
     }
 
     @Override

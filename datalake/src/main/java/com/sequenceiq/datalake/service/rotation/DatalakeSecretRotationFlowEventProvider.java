@@ -42,7 +42,7 @@ public class DatalakeSecretRotationFlowEventProvider implements SecretRotationFl
 
     private static Function<DatalakeSecretType, SdxEvent> secretTypeToPostFlowEvent(SecretRotationFlowChainTriggerEvent event) {
         return datalakeSecretType -> switch (datalakeSecretType) {
-            case DATALAKE_CM_INTERMEDIATE_CA_CERT -> {
+            case CM_INTERMEDIATE_CA_CERT -> {
                 CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
                 certificatesRotationV4Request.setSkipSaltUpdate(Boolean.TRUE);
                 certificatesRotationV4Request.setCertificateRotationType(CertificateRotationType.ALL);

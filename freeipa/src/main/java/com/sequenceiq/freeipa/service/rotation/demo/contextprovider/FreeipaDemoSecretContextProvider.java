@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretException
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.ROLLBACK_FAILURE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.ROTATION_FAILURE_KEY;
 import static com.sequenceiq.cloudbreak.rotation.secret.demo.DemoSecretExceptionProviderUtil.getCustomJobRunnableByProperties;
-import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_DEMO_SECRET;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.DEMO_SECRET;
 
 import java.util.Map;
 
@@ -36,7 +36,7 @@ public class FreeipaDemoSecretContextProvider implements RotationContextProvider
 
     @Override
     public SecretType getSecret() {
-        return FREEIPA_DEMO_SECRET;
+        return DEMO_SECRET;
     }
 
 }
