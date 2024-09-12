@@ -83,7 +83,7 @@ public class SecretRotationConfig {
     public List<SecretType> enabledSecretTypes() {
         if (!fipsEnabled && CollectionUtils.isNotEmpty(commercialEnabledSecretTypes)) {
             LOGGER.debug("Secret types filtering is enabled, secret types: {}", commercialEnabledSecretTypes);
-            List<SecretType> enabledSecretTypes = SecretTypeConverter.mapSecretTypes(this.commercialEnabledSecretTypes);
+            List<SecretType> enabledSecretTypes = SecretTypeConverter.mapSecretTypesSkipUnknown(commercialEnabledSecretTypes);
             List<SecretType> internalSecretTypes = enabledSecretTypes.stream().filter(SecretType::internal).toList();
             if (!internalSecretTypes.isEmpty()) {
                 throw new IllegalStateException(String.format("Do not configure internal secret types in commercialEnabledSecretTypes filter: %s",

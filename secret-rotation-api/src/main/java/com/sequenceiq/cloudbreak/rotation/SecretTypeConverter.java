@@ -7,11 +7,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.internal.guava.Sets;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public class SecretTypeConverter {
@@ -44,6 +46,30 @@ public class SecretTypeConverter {
             LOGGER.warn(message);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypesSkipUnknown(List<String> secrets) {
+        return mapSecretTypesSkipUnknown(secrets, AVAILABLE_SECRET_TYPES);
+    }
+
+    public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypesSkipUnknown(List<String> secrets,
+            Set<Class<? extends SecretType>> allowedSecretTypes) {
+        Set<String> unknownTypes = Sets.newHashSet();
+        List<SecretType> recognizedSecretTypes = secrets.stream()
+                .map(secretString -> {
+                    Optional<SecretType> optionalSecretType = getSecretType(secretString, allowedSecretTypes);
+                    if (optionalSecretType.isEmpty()) {
+                        unknownTypes.add(secretString);
+                    }
+                    return optionalSecretType;
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+        if (!unknownTypes.isEmpty()) {
+            LOGGER.warn("These secret types are not recognized: [{}].", Joiner.on(",").join(unknownTypes));
+        }
+        return recognizedSecretTypes;
     }
 
     public static <T extends Enum<T> & SecretType> SecretType mapSecretType(String secret,

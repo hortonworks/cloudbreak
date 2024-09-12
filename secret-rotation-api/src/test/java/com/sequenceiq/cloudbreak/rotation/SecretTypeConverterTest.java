@@ -25,9 +25,14 @@ class SecretTypeConverterTest {
     }
 
     @Test
+    void mapSecretTypesShouldSucceedFailIfUnknownSkipped() {
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypesSkipUnknown(List.of("TEST", "INVALID"));
+        assertThat(secretTypes).containsExactly(TestSecretType.TEST);
+    }
+
+    @Test
     void mapSecretTypesShouldSucceed() {
-        List<SecretType> secretTypes =
-                SecretTypeConverter.mapSecretTypes(List.of("TEST", "TEST_2"));
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(List.of("TEST", "TEST_2"));
         assertThat(secretTypes).containsExactly(TestSecretType.TEST, TestSecretType.TEST_2);
     }
 }
