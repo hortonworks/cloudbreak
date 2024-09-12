@@ -850,8 +850,17 @@ public class GrpcUmsClient {
         return makeClient().getWorkloadAdministrationGroupName(accountId, right.getRight(), resource).getWorkloadAdministrationGroupName();
     }
 
+    @Retryable(retryFor = RuntimeException.class, maxAttempts = 5, backoff = @Backoff(delay = 2000))
     public void deleteWorkloadAdministrationGroupName(String accountId, UmsVirtualGroupRight right, String resource) {
-        makeClient().deleteWorkloadAdministrationGroupName(accountId, right.getRight(), resource);
+        try {
+            makeClient().deleteWorkloadAdministrationGroupName(accountId, right.getRight(), resource);
+        } catch (StatusRuntimeException e) {
+            if (Status.NOT_FOUND.getCode().equals(e.getStatus().getCode())) {
+                LOGGER.debug("UMS virtualgroup not found, deletion skipped.");
+            } else {
+                throw e;
+            }
+        }
     }
 
     public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String accountId) {

@@ -35,6 +35,9 @@ public class VirtualGroupServiceTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:accountId:environment:4c5ba74b-c35e-45e9-9f47-123456789876";
 
+    @Captor
+    private final ArgumentCaptor<UmsVirtualGroupRight> rightCaptor = ArgumentCaptor.forClass(UmsVirtualGroupRight.class);
+
     @InjectMocks
     private VirtualGroupService virtualGroupService;
 
@@ -43,9 +46,6 @@ public class VirtualGroupServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
-
-    @Captor
-    private final ArgumentCaptor<UmsVirtualGroupRight> rightCaptor = ArgumentCaptor.forClass(UmsVirtualGroupRight.class);
 
     @BeforeEach
     public void setup() {
@@ -129,7 +129,32 @@ public class VirtualGroupServiceTest {
     }
 
     @Test
-    public void testCleanupVirtualGroups() {
+    public void testCleanupVirtualGroupsSuccessfully() {
+        virtualGroupService.cleanupVirtualGroups(ACCOUNT_ID, ENV_CRN);
+
+        verify(grpcUmsClient, times(UmsVirtualGroupRight.values().length)).deleteWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
+                rightCaptor.capture(), eq(ENV_CRN));
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
+            assertTrue(rightCaptor.getAllValues().contains(right));
+        }
+    }
+
+    @Test
+    public void testCleanupVirtualGroupsWhenNotFound() {
+        doThrow(new StatusRuntimeException(Status.NOT_FOUND)).when(grpcUmsClient).deleteWorkloadAdministrationGroupName(eq(ACCOUNT_ID), any(), eq(ENV_CRN));
+        virtualGroupService.cleanupVirtualGroups(ACCOUNT_ID, ENV_CRN);
+
+        verify(grpcUmsClient, times(UmsVirtualGroupRight.values().length)).deleteWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
+                rightCaptor.capture(), eq(ENV_CRN));
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
+            assertTrue(rightCaptor.getAllValues().contains(right));
+        }
+    }
+
+    @Test
+    public void testCleanupVirtualGroupsWhenFailed() {
+        doThrow(new StatusRuntimeException(Status.DEADLINE_EXCEEDED)).when(grpcUmsClient)
+                .deleteWorkloadAdministrationGroupName(eq(ACCOUNT_ID), any(), eq(ENV_CRN));
         virtualGroupService.cleanupVirtualGroups(ACCOUNT_ID, ENV_CRN);
 
         verify(grpcUmsClient, times(UmsVirtualGroupRight.values().length)).deleteWorkloadAdministrationGroupName(eq(ACCOUNT_ID),

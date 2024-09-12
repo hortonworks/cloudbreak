@@ -40,6 +40,7 @@ dependencies {
   testImplementation group: 'org.mockito',              name: 'mockito-inline',                 version: mockitoInlineVersion
   testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: byteBuddyVersion
   testImplementation project(path: ':common', configuration: 'tests')
 }
 
