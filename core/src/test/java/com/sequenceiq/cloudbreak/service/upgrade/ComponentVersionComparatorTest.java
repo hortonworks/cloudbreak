@@ -1,55 +1,58 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class ComponentVersionComparatorTest {
 
     private final ComponentVersionComparator underTest = new ComponentVersionComparator();
 
-    @Test
-    public void testPermitUpgradeNewerVersion() {
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.0", "2.3.0"));
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.99", "2.3.0"));
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.99", "2.99.0"));
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.99.0", "2.99.0"));
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.99.0", "2.99.0.0"));
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2", "2.99.0.0"));
-        assertTrue(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.99.0-123", "2.99.0.0-123"));
+    @ParameterizedTest(name = "[{index}] Upgrade from {0}.{1}-{2} to {3}.{4}-{5} should be {6}")
+    @MethodSource("provideTestParameters")
+    public void testPermitCmAndStackUpgradeByComponentVersion(String currentVersion, Integer currentPatchVersion, Integer currentBuildNumber,
+            String candidateVersion, Integer candidatePatchVersion, Integer candidateBuildNumber, boolean expectedResult) {
+        VersionComparisonContext currentVersionContext = new VersionComparisonContext.Builder()
+                .withMajorVersion(currentVersion)
+                .withPatchVersion(currentPatchVersion)
+                .withBuildNumber(currentBuildNumber)
+                .build();
+        VersionComparisonContext candidateVersionContext = new VersionComparisonContext.Builder()
+                .withMajorVersion(candidateVersion)
+                .withPatchVersion(candidatePatchVersion)
+                .withBuildNumber(candidateBuildNumber)
+                .build();
+        assertEquals(expectedResult, underTest.permitCmAndStackUpgradeByComponentVersion(currentVersionContext, candidateVersionContext));
     }
 
-    @Test
-    public void testPermitUpgradeSameVersion() {
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.0", "2.2.0"));
-    }
-
-    @Test
-    public void testPermitUpgradeUberNew() {
-        // This is an uber jump in versions, we shall not allow them (at least for now)
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.2.0", "3.2.0"));
-    }
-
-    @Test
-    public void testPermitCmAndSatckUpgradeUberOlder() {
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.3.0", "2.2.0"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.3.0", "2.2.99"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.99.0", "2.2.99"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.99.0", "2.2.99.0"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.99.0.0", "2.2.99.0"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.99.0.0", "2.2"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.99.0.0-123", "2.2.99.0-123"));
-    }
-
-    @Test
-    public void testInvalid() {
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.a", "2.2.0"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.2", "u"));
-
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion(null, "2.2"));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.2", null));
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion(null, null));
+    private static Stream<Arguments> provideTestParameters() {
+        return Stream.of(
+                Arguments.of("7.2.0", 100, 1, "7.3.0", 200, 2, true),
+                Arguments.of("7.2.9", 100, 1, "7.3.0", 200, 2, true),
+                Arguments.of("7.2.9", 100, 1, "7.9.0", 200, 2, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.0", 100, 1, true),
+                Arguments.of("7.3.0", 200, 2, "7.2.0", 100, 1, false),
+                Arguments.of("7.9.0", 200, 2, "7.2.9", 100, 1, false),
+                Arguments.of("7.2.2", 100, 1, "7.2.0", 100, 1, false),
+                Arguments.of("7.2.0", 100, 1, "7.2.0", 101, 1, true),
+                Arguments.of("7.2.0", 100, 2, "7.2.0", 101, 1, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.0", 100, 2, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.1", 100, 1, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.0", 101, 2, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.1", 99, 1, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.1", 100, 0, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.0", 99, 2, false),
+                Arguments.of("7.2.0", null, 1, "7.3.0", null, 2, true),
+                Arguments.of("7.2.0", null, 1, "7.2.0", null, 1, true),
+                Arguments.of("7.2.0", null, 1, "7.2.0", null, 2, true),
+                Arguments.of("7.2.0", null, 1, "7.2.1", null, 1, true),
+                Arguments.of("7.2.0", 100, 1, "7.2.0", null, 1, false),
+                Arguments.of("7.2.0", null, 1, "7.2.0", 100, 1, true)
+        );
     }
 
 }

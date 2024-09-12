@@ -92,7 +92,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
-import com.sequenceiq.cloudbreak.service.upgrade.ComponentBuildNumberComparator;
 import com.sequenceiq.cloudbreak.service.upgrade.ComponentVersionComparator;
 import com.sequenceiq.cloudbreak.service.upgrade.ComponentVersionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.CurrentImageRetrieverService;
@@ -103,6 +102,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOptionsResponseFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.VersionComparisonContextFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionValidator;
@@ -133,6 +133,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderServi
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
@@ -473,7 +474,6 @@ public class DistroXUpgradeRetrievalComponentTest {
             ParcelMatcher.class,
             UpgradeImageInfoFactory.class,
             UpgradePermissionProvider.class,
-            ComponentBuildNumberComparator.class,
             ComponentVersionComparator.class,
             UpgradeMatrixService.class,
             UpgradeMatrixDefinition.class,
@@ -494,6 +494,8 @@ public class DistroXUpgradeRetrievalComponentTest {
             RestClientFactory.class,
             ManifestRetrieverService.class,
             CloudbreakRestRequestThreadLocalService.class,
+            VersionComparisonContextFactory.class,
+            CdhPatchVersionProvider.class
     })
     static class Config {
 
