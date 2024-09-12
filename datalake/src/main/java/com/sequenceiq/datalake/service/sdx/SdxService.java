@@ -98,6 +98,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
@@ -1413,6 +1414,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
+            }
+            if (Architecture.fromStringWithFallback(imageV4Response.getArchitecture()) != Architecture.X86_64) {
+                validationBuilder.error("SDX cluster request image must have x86_64 architecture.");
             }
         } else if (isImageSpecified(imageSettingsV4Request) && StringUtils.isBlank(clusterRequest.getRuntime())) {
             if (cloudPlatform.equals(MOCK)) {

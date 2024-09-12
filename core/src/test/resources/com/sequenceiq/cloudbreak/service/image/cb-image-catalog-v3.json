@@ -878,6 +878,95 @@
           "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
           "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
         ]
+      },
+      {
+        "created": 1605687719,
+        "date": "2020-12-18",
+        "description": "Official arm64 Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-065e7d07ce44a7011",
+            "ap-northeast-2": "ami-0bfbc30b4f553c8b0",
+            "ap-south-1": "ami-03f4426bbb5920231",
+            "ap-southeast-1": "ami-0387ea52e81c6b724",
+            "ap-southeast-2": "ami-03727c671652eab7b",
+            "ca-central-1": "ami-02258a4ef48123c3d",
+            "eu-central-1": "ami-0eec5e4cd026ee595",
+            "eu-north-1": "ami-0987e4b8b5dceb81e",
+            "eu-west-1": "ami-0a16f25f6590db563",
+            "eu-west-2": "ami-09c1a8cdac1f947d4",
+            "eu-west-3": "ami-0f1b2ae69888037b3",
+            "sa-east-1": "ami-007852fa3bdd0766f",
+            "us-east-1": "ami-094141c5623e57177",
+            "us-east-2": "ami-0be43059f740f6abc",
+            "us-west-1": "ami-002fe7c590f74c086",
+            "us-west-2": "ami-0576c0576543725d8"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "architecture": "arm64",
+        "uuid": "f3071603-8ab3-4214-b78d-94131c588e83",
+        "package-versions": {
+          "cdh-build-number": "7150148",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.1",
+          "cm-build-number": "4731218",
+          "csa": "1.2.1.0-38",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-37",
+          "stack": "7.2.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/7150148/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.1",
+              "repository-version": "7.2.1-1.cdh7.2.1.p2.7150148"
+            },
+            "util": null
+          },
+          "version": "7.2.1",
+          "build-number": "7150148"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4731218/cm7/7.2.1/redhat7/yum/"
+        },
+        "version": "7.2.1",
+        "build-number": "4731218",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.0.3.0.7110.0-37-1.p0.5053441-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5053441/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-240-4844562-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4844562/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5053441/spark3/3.x/csd/SPARK3_ON_YARN-3.0.0.3.0.7110.0-37.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4844562/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-240-4844562.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
       }
     ]
   },
@@ -890,14 +979,16 @@
           "949bffa3-17d4-4076-9d5a-bf3d23c1086b",
           "ea9d91aa-583f-4858-835c-e20976c96ca4",
           "232fe6b6-aec4-4fa9-bb02-2c295d319a36",
-          "3cba3cd0-a169-4d62-8bc5-709df5f73b50"
+          "3cba3cd0-a169-4d62-8bc5-709df5f73b50",
+          "f3071603-8ab3-4214-b78d-94131c588e83"
         ],
         "defaults": [
           "1dcb6c74-85ea-4c12-7de7-7c4fe6948cf0",
           "83d976b6-5aa7-4f25-5888-08dccd937f8a",
           "949bffa3-17d4-4076-9d5a-bf3d23c1086b",
           "ea9d91aa-583f-4858-835c-e20976c96ca4",
-          "3cba3cd0-a169-4d62-8bc5-709df5f73b50"
+          "3cba3cd0-a169-4d62-8bc5-709df5f73b50",
+          "f3071603-8ab3-4214-b78d-94131c588e83"
         ],
         "versions": [
           "2.39.0-b124",
