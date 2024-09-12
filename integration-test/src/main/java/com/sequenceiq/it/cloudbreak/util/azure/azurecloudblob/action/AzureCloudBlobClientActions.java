@@ -190,6 +190,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
         if (StringUtils.isNotBlank((baseLocation))) {
             String containerName = getContainerName(baseLocation);
+            String storageAccountName = azureProperties.getCloudStorage().getAccountName();
             DataLakeFileSystemClient cloudBlobContainer = getDataLakeFileSystemClient(containerName);
             String keyPrefix = getKeyPrefix(baseLocation);
 
@@ -200,15 +201,15 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
 
             if (StringUtils.contains(keyPrefix, clusterLogPath)) {
                 LOGGER.info("Azure Adls Gen 2 Blob is present at '{}' container in storage directory with path: [{}]", containerName, keyPrefix);
-                return format("https://autotestingapi.blob.core.windows.net/%s/%s",
-                        containerName, keyPrefix);
+                return format("https://%s.blob.core.windows.net/%s/%s",
+                        storageAccountName, containerName, keyPrefix);
             }
             try {
                 DataLakeDirectoryClient storageDirectory = cloudBlobContainer.getDirectoryClient(keyPrefix);
                 DataLakeDirectoryClient logsDirectory = storageDirectory.getSubdirectoryClient(clusterLogPath);
                 if (logsDirectory.listPaths().iterator().hasNext()) {
-                    return format("https://autotestingapi.blob.core.windows.net/%s/%s%s",
-                            containerName, keyPrefix, clusterLogPath);
+                    return format("https://%s.blob.core.windows.net/%s/%s%s",
+                            storageAccountName, containerName, keyPrefix, clusterLogPath);
                 } else {
                     LOGGER.warn("Azure Adls Gen 2 Blob is NOT present at '{}' container in '{}' storage directory with path: [{}]", containerName, keyPrefix,
                             clusterLogPath);

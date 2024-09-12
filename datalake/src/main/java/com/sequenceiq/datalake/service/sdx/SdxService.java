@@ -121,6 +121,7 @@ import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -711,28 +712,28 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
                 new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
-                        sdxClusterResizeRequest.isValidationOnly());
+                sdxClusterResizeRequest.isValidationOnly());
         return Pair.of(sdxCluster, flowIdentifier);
     }
 
     private void setRecipesFromStackV4ResponseToStackV4Request(StackV4Response stackV4Response, StackV4Request stackRequest) {
         Map<String, Set<String>> instanceGroupNameRecipesMap = stackV4Response.getInstanceGroups()
-            .stream()
-            .filter(instanceGroup -> CollectionUtils.isNotEmpty(instanceGroup.getRecipes()))
-            .collect(Collectors.toMap(InstanceGroupV4Response::getName,
-                instanceGroup -> instanceGroup.getRecipes()
-                    .stream()
-                    .map(RecipeV4Base::getName)
-                    .collect(Collectors.toSet())));
+                .stream()
+                .filter(instanceGroup -> CollectionUtils.isNotEmpty(instanceGroup.getRecipes()))
+                .collect(Collectors.toMap(InstanceGroupV4Response::getName,
+                        instanceGroup -> instanceGroup.getRecipes()
+                                .stream()
+                                .map(RecipeV4Base::getName)
+                                .collect(Collectors.toSet())));
         stackRequest.getInstanceGroups()
-            .stream()
-            .filter(ig -> instanceGroupNameRecipesMap.containsKey(ig.getName()))
-            .forEach(
-                ig -> {
-                    Set<String> recipeNames = instanceGroupNameRecipesMap.get(ig.getName());
-                    ig.setRecipeNames(recipeNames);
-                }
-            );
+                .stream()
+                .filter(ig -> instanceGroupNameRecipesMap.containsKey(ig.getName()))
+                .forEach(
+                        ig -> {
+                            Set<String> recipeNames = instanceGroupNameRecipesMap.get(ig.getName());
+                            ig.setRecipeNames(recipeNames);
+                        }
+                );
     }
 
     private void overrideDefaultInstanceStorage(StackV4Request defaultTemplate, List<SdxInstanceGroupDiskRequest> customInstanceGroupDisks,
@@ -1319,9 +1320,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
         }
         if (!isShapeVersionSupportedByMaximumRuntimeVersion(runtime, MEDIUM_DUTY_MAXIMUM_VERSION)
-            && !entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(accountId)) {
+                && !entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(accountId)) {
             validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for 7.2.17 and below. If you want to provision a " +
-                runtime + " SDX, Please use the ENTERPRISE shape!");
+                    runtime + " SDX, Please use the ENTERPRISE shape!");
         }
     }
 
@@ -1413,6 +1414,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                     && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
                 validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
                         "decides runtime version.");
+            }
+            if (Architecture.fromStringWithFallback(imageV4Response.getArchitecture()) != Architecture.X86_64) {
+                validationBuilder.error("SDX cluster request image must have x86_64 architecture.");
             }
         } else if (isImageSpecified(imageSettingsV4Request) && StringUtils.isBlank(clusterRequest.getRuntime())) {
             if (cloudPlatform.equals(MOCK)) {

@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
@@ -114,5 +115,16 @@ public class SdxServiceValidateRuntimeAndImageTest {
     void imageNotFoundForMock() {
         environment.setCloudPlatform("MOCK");
         underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, null);
+    }
+
+    @Test
+    void arm64Image() {
+        ImageSettingsV4Request image = new ImageSettingsV4Request();
+        image.setId("arm64");
+        clusterRequest.setImage(image);
+        imageV4Response.setArchitecture(Architecture.ARM64.getName());
+
+        assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
+                .hasMessage("SDX cluster request image must have x86_64 architecture.");
     }
 }

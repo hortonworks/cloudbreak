@@ -124,7 +124,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
             underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         } catch (CloudbreakImageNotFoundException exception) {
             Assertions.assertEquals(
-                    "Could not find any image for platform 'gcp redhat8', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                    "Could not find any image for platform 'gcp redhat8-x86_64', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }
         verify(providerSpecificImageFilter, never()).filterImages(any(), anyList());
@@ -149,7 +149,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
             underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         } catch (CloudbreakImageNotFoundException exception) {
             Assertions.assertEquals(
-                    "Could not find any image for platform 'aws centos7', runtime 'null' " +
+                    "Could not find any image for platform 'aws centos7-x86_64', runtime 'null' " +
                             "and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }
