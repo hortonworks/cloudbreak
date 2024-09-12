@@ -21,6 +21,13 @@
     - source: salt://postgresql/upgrade/scripts/restore_db.sh
     - template: jinja
 
+/opt/salt/scripts/check_db_connection.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 750
+    - source: salt://postgresql/upgrade/scripts/check_db_connection.sh
+    - template: jinja
+
 set_pgpassword:
   environ.setenv:
     - name: PGPASSWORD

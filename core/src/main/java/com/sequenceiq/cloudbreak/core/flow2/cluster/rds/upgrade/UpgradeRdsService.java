@@ -18,14 +18,18 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class UpgradeRdsService {
@@ -49,6 +53,12 @@ public class UpgradeRdsService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     void stopServicesState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES);
@@ -113,7 +123,10 @@ public class UpgradeRdsService {
     }
 
     public void restoreRds(Long stackId, String targetVersion) throws CloudbreakOrchestratorException {
-        rdsUpgradeOrchestratorService.restoreRdsData(stackId, targetVersion);
+        StackDto stack = stackDtoService.getById(stackId);
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+        rdsUpgradeOrchestratorService.checkRdsConnection(stack, environment);
+        rdsUpgradeOrchestratorService.restoreRdsData(stack, targetVersion);
     }
 
     public void installPostgresPackages(Long stackId, MajorVersion targetVersion) throws CloudbreakOrchestratorException {

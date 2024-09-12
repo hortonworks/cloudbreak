@@ -1066,7 +1066,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(), ClusterCommandType.START_CLUSTER);
         if (startClusterCommand.isPresent()) {
             Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, startClusterCommand.get().getCommandId());
-            if (apiCommand.isPresent()) {
+            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().getActive())) {
                 return startClusterCommand.get();
             } else {
                 clusterCommandService.delete(startClusterCommand.get());

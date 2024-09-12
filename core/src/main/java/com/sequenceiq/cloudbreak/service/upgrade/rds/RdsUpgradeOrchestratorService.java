@@ -32,11 +32,16 @@ import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Service
 public class RdsUpgradeOrchestratorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsUpgradeOrchestratorService.class);
+
+    private static final String CHECK_CONNECTION_STATE = "postgresql/upgrade/check-db-connection";
 
     private static final String BACKUP_STATE = "postgresql/upgrade/backup";
 
@@ -65,6 +70,12 @@ public class RdsUpgradeOrchestratorService {
     private static final int MAX_RETRY_ON_ERROR = 3;
 
     private static final int MAX_RETRY = 2000;
+
+    private static final int RDS_CONNECT_RETRY = 60;
+
+    private static final int RDS_CONNECT_RETRY_ON_ERROR = 60;
+
+    private static final int RDS_CONNECT_SLEEPTIME = 60000;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -99,6 +110,21 @@ public class RdsUpgradeOrchestratorService {
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
 
+    public void checkRdsConnection(StackDto stack, DetailedEnvironmentResponse environment) throws CloudbreakOrchestratorException {
+        ServiceEndpointCreation serviceEndpointCreation = Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getNetwork)
+                .map(EnvironmentNetworkResponse::getServiceEndpointCreation)
+                .orElse(null);
+        if (serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
+            OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, CHECK_CONNECTION_STATE, true, RDS_CONNECT_RETRY,
+                    RDS_CONNECT_RETRY_ON_ERROR, RDS_CONNECT_SLEEPTIME);
+            LOGGER.debug("Calling checkRdsConnection with state params '{}'", stateParams);
+            hostOrchestrator.runOrchestratorState(stateParams);
+        } else {
+            LOGGER.debug("RDS connection check is skipped as it is not a private endpoint setup");
+        }
+    }
+
     public void backupRdsData(Long stackId, String backupLocation, String backupInstanceProfile) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, BACKUP_STATE, true);
         stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(backupLocation, backupInstanceProfile));
@@ -106,8 +132,8 @@ public class RdsUpgradeOrchestratorService {
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void restoreRdsData(Long stackId, String targetVersion) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE, true);
+    public void restoreRdsData(StackDto stack, String targetVersion) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stack, RESTORE_STATE, true);
         stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(null, null, targetVersion));
         LOGGER.debug("Calling restoreRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);

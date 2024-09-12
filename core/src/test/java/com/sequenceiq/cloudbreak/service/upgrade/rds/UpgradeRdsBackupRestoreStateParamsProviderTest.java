@@ -36,9 +36,11 @@ class UpgradeRdsBackupRestoreStateParamsProviderTest {
         Map<String, Object> pillarParams = (Map<String, Object>) actualResult.get("postgresql-upgrade").getProperties().get("upgrade");
         Map<String, Object> backupParams = (Map<String, Object>) pillarParams.get("backup");
         Map<String, Object> restoreParams = (Map<String, Object>) pillarParams.get("restore");
+        Map<String, Object> checkConnectionParams = (Map<String, Object>) pillarParams.get("checkconnection");
         Assertions.assertEquals(backupParams.get("directory"), "backuplocation/tmp/postgres_upgrade_backup");
         Assertions.assertEquals(backupParams.get("logfile"), "/var/log/postgres_upgrade_backup.log");
         Assertions.assertEquals(restoreParams.get("logfile"), "/var/log/postgres_upgrade_restore.log");
+        Assertions.assertEquals(checkConnectionParams.get("logfile"), "/var/log/postgres_upgrade_checkconnection.log");
     }
 
     @Test

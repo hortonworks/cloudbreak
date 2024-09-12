@@ -26,6 +26,11 @@ public class SaltStateParamsService {
     private GatewayConfigService gatewayConfigService;
 
     public OrchestratorStateParams createStateParams(StackDto stack, String saltState, boolean onlyOnPrimary, int maxRetry, int maxRetryOnError) {
+        return createStateParams(stack, saltState, onlyOnPrimary, maxRetry, maxRetryOnError, -1);
+    }
+
+    public OrchestratorStateParams createStateParams(StackDto stack, String saltState, boolean onlyOnPrimary, int maxRetry, int maxRetryOnError,
+            int sleepTime) {
         Set<Node> gatewayNodes = stackUtil.collectGatewayNodes(stack);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         if (onlyOnPrimary) {
@@ -33,16 +38,16 @@ public class SaltStateParamsService {
                     .filter(node -> node.getHostname().equals(primaryGatewayConfig.getHostname()))
                     .collect(Collectors.toSet());
         }
-        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, primaryGatewayConfig, gatewayNodes);
+        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, sleepTime, primaryGatewayConfig, gatewayNodes);
     }
 
     public OrchestratorStateParams createStateParamsForReachableNodes(StackDto stack, String saltState, int maxRetry, int maxRetryOnError) {
         Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, primaryGatewayConfig, reachableNodes);
+        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, reachableNodes);
     }
 
-    private OrchestratorStateParams getOrchestratorStateParams(StackDto stack, String saltState, int maxRetry, int maxRetryOnError,
+    private OrchestratorStateParams getOrchestratorStateParams(StackDto stack, String saltState, int maxRetry, int maxRetryOnError, int sleepTime,
             GatewayConfig primaryGatewayConfig, Set<Node> targetNodes) {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
         stateParams.setState(saltState);
@@ -51,6 +56,7 @@ public class SaltStateParamsService {
         OrchestratorStateRetryParams retryParams = new OrchestratorStateRetryParams();
         retryParams.setMaxRetryOnError(maxRetryOnError);
         retryParams.setMaxRetry(maxRetry);
+        retryParams.setSleepTime(sleepTime);
         stateParams.setStateRetryParams(retryParams);
         stateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         return stateParams;

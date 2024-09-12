@@ -12,6 +12,8 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +58,9 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @ExtendWith(MockitoExtension.class)
 class RdsUpgradeOrchestratorServiceTest {
@@ -133,6 +138,26 @@ class RdsUpgradeOrchestratorServiceTest {
     }
 
     @Test
+    void testCheckRdsConnectionWhenNoEnvironment() throws CloudbreakOrchestratorException {
+        underTest.checkRdsConnection(stack, null);
+        verify(saltStateParamsService, never()).createStateParams(stack, "postgresql/upgrade/check-db-connection", true, 60, 60, 60000);
+    }
+
+    @Test
+    void testCheckRdsConnection() throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
+        environmentNetworkResponse.setServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT);
+        detailedEnvironmentResponse.setNetwork(environmentNetworkResponse);
+        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt(), anyInt())).thenReturn(stateParams);
+
+        underTest.checkRdsConnection(stack, detailedEnvironmentResponse);
+
+        verify(saltStateParamsService, times(1)).createStateParams(stack, "postgresql/upgrade/check-db-connection", true, 60, 60, 60000);
+    }
+
+    @Test
     void testBackupRdsData() throws CloudbreakOrchestratorException {
         mockCreateStateParams();
         underTest.backupRdsData(STACK_ID, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
@@ -146,7 +171,7 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testRestoreRdsData() throws CloudbreakOrchestratorException {
         mockCreateStateParams();
-        underTest.restoreRdsData(STACK_ID, DATABASE_ENGINE_VERSION);
+        underTest.restoreRdsData(stack, DATABASE_ENGINE_VERSION);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/restore");

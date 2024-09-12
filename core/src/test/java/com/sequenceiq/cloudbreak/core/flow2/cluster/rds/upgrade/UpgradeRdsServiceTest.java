@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,10 +19,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -81,6 +86,12 @@ class UpgradeRdsServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
     @InjectMocks
     private UpgradeRdsService underTest;
 
@@ -116,9 +127,13 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testRestoreRds() throws CloudbreakOrchestratorException {
+        StackDto stack = mock(StackDto.class);
+        when(stackDtoService.getById(anyLong())).thenReturn(stack);
+
         underTest.restoreRds(STACK_ID, TARGET_VERSION);
 
-        verify(rdsUpgradeOrchestratorService).restoreRdsData(eq(STACK_ID), eq(TARGET_VERSION));
+        verify(rdsUpgradeOrchestratorService).checkRdsConnection(stack, null);
+        verify(rdsUpgradeOrchestratorService).restoreRdsData(eq(stack), eq(TARGET_VERSION));
     }
 
     @Test

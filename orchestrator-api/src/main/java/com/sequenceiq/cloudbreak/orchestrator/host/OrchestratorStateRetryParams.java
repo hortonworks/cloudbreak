@@ -5,6 +5,8 @@ public class OrchestratorStateRetryParams {
 
     private int maxRetryOnError = -1;
 
+    private int sleepTime = -1;
+
     public int getMaxRetry() {
         return maxRetry;
     }
@@ -19,5 +21,13 @@ public class OrchestratorStateRetryParams {
 
     public void setMaxRetryOnError(int maxRetryOnError) {
         this.maxRetryOnError = maxRetryOnError;
+    }
+
+    public int getSleepTime() {
+        return sleepTime;
+    }
+
+    public void setSleepTime(int sleepTime) {
+        this.sleepTime = sleepTime;
     }
 }

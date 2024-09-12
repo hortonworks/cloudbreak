@@ -1581,6 +1581,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
                 .thenReturn(Optional.of(clusterCommand));
         ApiCommand startCommand = mock(ApiCommand.class);
+        when(startCommand.getActive()).thenReturn(Boolean.TRUE);
         when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, BigDecimal.ONE)).thenReturn(Optional.of(startCommand));
         ExtendedPollingResult pollingResult = mock(ExtendedPollingResult.class);
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, BigDecimal.ONE)).thenReturn(pollingResult);
@@ -1593,5 +1594,37 @@ class ClouderaManagerModificationServiceTest {
                 "Cluster was terminated while waiting for Cloudera Runtime services to start",
                 "Timeout while stopping Cloudera Manager services.");
         verify(clusterCommandService, times(1)).delete(any(ClusterCommand.class));
+    }
+
+    @Test
+    public void testStartClusterWithOnlyServicesWhenInactiveStartCommand() throws Exception {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList serviceList = new ApiServiceList();
+        ApiService service = new ApiService();
+        service.setServiceState(ApiServiceState.STOPPED);
+        serviceList.addItemsItem(service);
+        when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
+        ClusterCommand clusterCommand = new ClusterCommand();
+        clusterCommand.setCommandId(BigDecimal.ONE);
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER)))
+                .thenReturn(Optional.of(clusterCommand));
+        ApiCommand startCommand = mock(ApiCommand.class);
+        when(clouderaManagerCommandsService.getApiCommandIfExist(v31Client, BigDecimal.ONE)).thenReturn(Optional.of(startCommand));
+        ExtendedPollingResult pollingResult = mock(ExtendedPollingResult.class);
+        ApiCommand newStartCommand = mock(ApiCommand.class);
+        when(newStartCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(newStartCommand);
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
+        when(clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, BigDecimal.ONE)).thenReturn(pollingResult);
+
+        underTest.startCluster(true);
+
+        verify(clustersResourceApi, times(1)).startCommand(STACK_NAME);
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client, BigDecimal.ONE);
+        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult,
+                "Cluster was terminated while waiting for Cloudera Runtime services to start",
+                "Timeout while stopping Cloudera Manager services.");
+        verify(clusterCommandService, times(2)).delete(any(ClusterCommand.class));
     }
 }

@@ -30,10 +30,13 @@ public class UpgradeRdsBackupRestoreStateParamsProvider {
                 "logfile", "/var/log/postgres_upgrade_backup.log");
         Map<String, String> restoreProperties = Map.of(
                 "logfile", "/var/log/postgres_upgrade_restore.log");
+        Map<String, String> checkConnectionProperties = Map.of(
+                "logfile", "/var/log/postgres_upgrade_checkconnection.log");
         return singletonMap(POSTGRESQL_UPGRADE, new SaltPillarProperties("/postgresql/upgrade.sls",
                 singletonMap("upgrade", Map.of(
                         "backup", backupProperties,
-                        "restore", restoreProperties))));
+                        "restore", restoreProperties,
+                        "checkconnection", checkConnectionProperties))));
     }
 
     private String determineRdsBackupLocation(StackDto stackDto, String rdsBackupLocation) {
