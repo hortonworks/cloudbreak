@@ -115,7 +115,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CmAndStackVersionU
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CurrentImageUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.EntitlementDrivenPackageLocationFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.IgnoredCmVersionUpgradeImageFilter;
-import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageCreationBasedUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageFilterUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageRegionUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.NonCmUpgradeImageFilter;
@@ -452,7 +451,6 @@ public class DistroXUpgradeRetrievalComponentTest {
             CurrentImageUpgradeImageFilter.class,
             EntitlementDrivenPackageLocationFilter.class,
             IgnoredCmVersionUpgradeImageFilter.class,
-            ImageCreationBasedUpgradeImageFilter.class,
             ImageRegionUpgradeImageFilter.class,
             NonCmUpgradeImageFilter.class,
             OsVersionBasedUpgradeImageFilter.class,

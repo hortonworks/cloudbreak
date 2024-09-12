@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 @Component
 public class CentosToRedHatUpgradeImageFilter implements UpgradeImageFilter {
 
-    private static final int ORDER_NUMBER = 12;
+    private static final int ORDER_NUMBER = 11;
 
     @Inject
     private EntitlementService entitlementService;

@@ -42,9 +42,6 @@ public class ImageFilterUpgradeServiceTest {
     private IgnoredCmVersionUpgradeImageFilter ignoredCmVersionUpgradeImageFilter;
 
     @Mock
-    private ImageCreationBasedUpgradeImageFilter imageCreationBasedUpgradeImageFilter;
-
-    @Mock
     private NonCmUpgradeImageFilter nonCmUpgradeImageFilter;
 
     @Mock
@@ -62,7 +59,7 @@ public class ImageFilterUpgradeServiceTest {
     @BeforeEach
     public void before() {
         underTest = new ImageFilterUpgradeService(List.of(currentImageUpgradeImageFilter, cloudPlatformBasedUpgradeImageFilter, nonCmUpgradeImageFilter,
-                ignoredCmVersionUpgradeImageFilter, imageCreationBasedUpgradeImageFilter, cmAndStackVersionUpgradeImageFilter, osVersionBasedUpgradeImageFilter,
+                ignoredCmVersionUpgradeImageFilter, cmAndStackVersionUpgradeImageFilter, osVersionBasedUpgradeImageFilter,
                 entitlementDrivenPackageLocationFilter));
     }
 
@@ -72,7 +69,6 @@ public class ImageFilterUpgradeServiceTest {
         when(cloudPlatformBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(nonCmUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(ignoredCmVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(imageCreationBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(cmAndStackVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(osVersionBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(entitlementDrivenPackageLocationFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
@@ -85,7 +81,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(ignoredCmVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(imageCreationBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(cmAndStackVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(osVersionBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(entitlementDrivenPackageLocationFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
@@ -102,7 +97,6 @@ public class ImageFilterUpgradeServiceTest {
         verifyNoInteractions(cloudPlatformBasedUpgradeImageFilter);
         verifyNoInteractions(nonCmUpgradeImageFilter);
         verifyNoInteractions(ignoredCmVersionUpgradeImageFilter);
-        verifyNoInteractions(imageCreationBasedUpgradeImageFilter);
         verifyNoInteractions(cmAndStackVersionUpgradeImageFilter);
         verifyNoInteractions(osVersionBasedUpgradeImageFilter);
         verifyNoInteractions(entitlementDrivenPackageLocationFilter);
@@ -120,7 +114,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verifyNoInteractions(nonCmUpgradeImageFilter);
         verifyNoInteractions(ignoredCmVersionUpgradeImageFilter);
-        verifyNoInteractions(imageCreationBasedUpgradeImageFilter);
         verifyNoInteractions(cmAndStackVersionUpgradeImageFilter);
         verifyNoInteractions(osVersionBasedUpgradeImageFilter);
         verifyNoInteractions(entitlementDrivenPackageLocationFilter);
@@ -139,7 +132,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verifyNoInteractions(ignoredCmVersionUpgradeImageFilter);
-        verifyNoInteractions(imageCreationBasedUpgradeImageFilter);
         verifyNoInteractions(cmAndStackVersionUpgradeImageFilter);
         verifyNoInteractions(osVersionBasedUpgradeImageFilter);
         verifyNoInteractions(entitlementDrivenPackageLocationFilter);
@@ -159,28 +151,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(ignoredCmVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verifyNoInteractions(imageCreationBasedUpgradeImageFilter);
-        verifyNoInteractions(cmAndStackVersionUpgradeImageFilter);
-        verifyNoInteractions(osVersionBasedUpgradeImageFilter);
-        verifyNoInteractions(entitlementDrivenPackageLocationFilter);
-    }
-
-    @Test
-    public void testFilterImagesShouldReturnErrorMessageWhenImageCreationBasedFilterDoesNotReturnImages() {
-        when(currentImageUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(cloudPlatformBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(nonCmUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(ignoredCmVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(imageCreationBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(emptyResult);
-
-        ImageFilterResult actual = underTest.filterImages(imageFilterResultWithCandidates, imageFilterParams);
-
-        assertEmptyResultWithReason(actual);
-        verify(currentImageUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(ignoredCmVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(imageCreationBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verifyNoInteractions(cmAndStackVersionUpgradeImageFilter);
         verifyNoInteractions(osVersionBasedUpgradeImageFilter);
         verifyNoInteractions(entitlementDrivenPackageLocationFilter);
@@ -192,7 +162,6 @@ public class ImageFilterUpgradeServiceTest {
         when(cloudPlatformBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(nonCmUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(ignoredCmVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(imageCreationBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(cmAndStackVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(emptyResult);
 
         ImageFilterResult actual = underTest.filterImages(imageFilterResultWithCandidates, imageFilterParams);
@@ -202,7 +171,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(ignoredCmVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(imageCreationBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(cmAndStackVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verifyNoInteractions(osVersionBasedUpgradeImageFilter);
         verifyNoInteractions(entitlementDrivenPackageLocationFilter);
@@ -214,7 +182,6 @@ public class ImageFilterUpgradeServiceTest {
         when(cloudPlatformBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(nonCmUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(ignoredCmVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(imageCreationBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(cmAndStackVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(osVersionBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(emptyResult);
 
@@ -225,7 +192,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(ignoredCmVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(imageCreationBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(cmAndStackVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(osVersionBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verifyNoInteractions(entitlementDrivenPackageLocationFilter);
@@ -237,7 +203,6 @@ public class ImageFilterUpgradeServiceTest {
         when(cloudPlatformBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(nonCmUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(ignoredCmVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
-        when(imageCreationBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(cmAndStackVersionUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(osVersionBasedUpgradeImageFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(imageFilterResultWithCandidates);
         when(entitlementDrivenPackageLocationFilter.filter(imageFilterResultWithCandidates, imageFilterParams)).thenReturn(emptyResult);
@@ -249,7 +214,6 @@ public class ImageFilterUpgradeServiceTest {
         verify(cloudPlatformBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(nonCmUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(ignoredCmVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
-        verify(imageCreationBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(cmAndStackVersionUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(osVersionBasedUpgradeImageFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
         verify(entitlementDrivenPackageLocationFilter).filter(imageFilterResultWithCandidates, imageFilterParams);
