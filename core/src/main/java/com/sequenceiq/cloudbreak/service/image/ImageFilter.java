@@ -109,7 +109,7 @@ public class ImageFilter {
 
         private String clusterVersion;
 
-        private Architecture architecture = Architecture.X86_64;
+        private Architecture architecture;
 
         private ImageFilterBuilder() {
         }
@@ -150,9 +150,7 @@ public class ImageFilter {
         }
 
         public ImageFilterBuilder withArchitecture(Architecture architecture) {
-            if (architecture != null) {
-                this.architecture = architecture;
-            }
+            this.architecture = architecture;
             return this;
         }
 

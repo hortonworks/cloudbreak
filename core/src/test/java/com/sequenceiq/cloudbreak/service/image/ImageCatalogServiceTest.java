@@ -663,10 +663,9 @@ public class ImageCatalogServiceTest {
                 .build();
         StatedImages images = underTest.getImages(imageFilter);
 
-        assertEquals(1, images.getImages().getCdhImages().size());
-        boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
-                .noneMatch(img -> "f3071603-8ab3-4214-b78d-94131c588e83".equals(img.getUuid()));
-        assertTrue(exactImageIdMatch, "Result mustn't contain the only image with arm64 architecture.");
+        List<String> imageUuids = images.getImages().getCdhImages().stream().map(Image::getUuid).toList();
+        assertTrue(imageUuids.contains("f3071603-8ab3-4214-b78d-94131c588e83"), "Result must contain the only image with arm64 architecture.");
+        assertTrue(imageUuids.contains("0898c324-c1f0-4055-98e1-ddc565473878"), "Result must contain the only image with x86_64 architecture.");
     }
 
     @Test

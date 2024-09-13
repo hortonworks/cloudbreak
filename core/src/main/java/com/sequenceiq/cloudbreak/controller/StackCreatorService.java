@@ -234,7 +234,7 @@ public class StackCreatorService {
                     () -> determineBlueprint(stackRequest, workspace),
                     LOGGER,
                     "Blueprint determined in {} ms for stack {}", stackName);
-            Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
+            Future<StatedImage> imgFromCatalogFuture = determineImage(stackName, platformString, stackRequest, blueprint, user, workspace);
             hueWorkaroundValidatorService.validateForStackRequest(getHueHostGroups(blueprint.getBlueprintJsonText()), stackStub.getName());
 
             savedStack = transactionService.required(() -> {
@@ -428,7 +428,7 @@ public class StackCreatorService {
                 .findFirst().orElseThrow(() -> new BadRequestException(String.format("Cluster definition with name %s not found!", bpName)));
     }
 
-    private Future<StatedImage> determineImageCatalog(String stackName, String platformString, StackV4Request stackRequest, Blueprint blueprint,
+    private Future<StatedImage> determineImage(String stackName, String platformString, StackV4Request stackRequest, Blueprint blueprint,
             User user, Workspace workspace) {
         ClusterV4Request clusterRequest = stackRequest.getCluster();
         if (clusterRequest == null) {

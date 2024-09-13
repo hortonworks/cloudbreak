@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -557,7 +556,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (imageCatalogV3 != null) {
             LOGGER.info("Image catalog found, filtering the images..");
             StatedImages images = imageCatalogServiceProxy.getImages(imageCatalogV3, imageFilter);
-            images = filterImages(images, "architecture=" + imageFilter.getArchitecture(), isMatchingArchitecture(imageFilter.getArchitecture()));
+            if (imageFilter.getArchitecture() != null) {
+                String filterName = "architecture=" + imageFilter.getArchitecture();
+                images = filterImages(images, filterName, isMatchingArchitecture(imageFilter.getArchitecture()));
+            }
             if (!CollectionUtils.isEmpty(imageFilter.getOperatingSystems())) {
                 String filterName = String.format("operating system in (%s)", String.join(",", imageFilter.getOperatingSystems()));
                 images = filterImages(images, filterName, isMatchingOs(imageFilter.getOperatingSystems()));
@@ -579,7 +581,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private static Predicate<Image> isMatchingArchitecture(Architecture architecture) {
-        return image -> Architecture.fromStringWithFallback(image.getArchitecture()) == Objects.requireNonNullElse(architecture, Architecture.X86_64);
+        return image -> Architecture.fromStringWithFallback(image.getArchitecture()) == architecture;
     }
 
     private static Predicate<Image> filterImagesByRuntimeVersion(String clusterVersion) {

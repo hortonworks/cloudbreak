@@ -113,8 +113,8 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     @Schema(description = StackModelDescription.MULTIPLE_AVAILABILITY_ZONES)
     private boolean enableMultiAz;
 
-    @Schema(description = ModelDescriptions.ARCHITECTURE)
-    private Architecture architecture;
+    @Schema(description = ModelDescriptions.ARCHITECTURE, defaultValue = "x86_64")
+    private Architecture architecture = Architecture.X86_64;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -293,6 +293,8 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     }
 
     public void setArchitecture(Architecture architecture) {
-        this.architecture = architecture;
+        if (architecture != null) {
+            this.architecture = architecture;
+        }
     }
 }
