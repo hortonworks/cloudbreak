@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -622,6 +623,53 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
+    public void testGetImagesWhenArchitectureProvided() throws Exception {
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V3_CB_CATALOG_FILE);
+
+        Set<String> vMImageUUIDs = Set.of("f3071603-8ab3-4214-b78d-94131c588e83", "0898c324-c1f0-4055-98e1-ddc565473878");
+        Set<String> defaultVMImageUUIDs = Set.of("f3071603-8ab3-4214-b78d-94131c588e83", "0898c324-c1f0-4055-98e1-ddc565473878");
+        Set<String> supportedVersions = Set.of("2.41.0-dev.1");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("2.41.0"), any())).thenReturn(prefixMatchImages);
+
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("aws")))
+                .withArchitecture(Architecture.ARM64)
+                .withCbVersion("2.41.0")
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
+
+        assertEquals(1, images.getImages().getCdhImages().size());
+        boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
+                .anyMatch(img -> "f3071603-8ab3-4214-b78d-94131c588e83".equals(img.getUuid()));
+        assertTrue(exactImageIdMatch, "Result doesn't contain the only required image with id for the architecture.");
+    }
+
+    @Test
+    public void testGetImagesWhenArchitectureNotProvided() throws Exception {
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V3_CB_CATALOG_FILE);
+
+        Set<String> vMImageUUIDs = Set.of("f3071603-8ab3-4214-b78d-94131c588e83", "0898c324-c1f0-4055-98e1-ddc565473878");
+        Set<String> defaultVMImageUUIDs = Set.of("f3071603-8ab3-4214-b78d-94131c588e83", "0898c324-c1f0-4055-98e1-ddc565473878");
+        Set<String> supportedVersions = Set.of("2.41.0-dev.1");
+        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(vMImageUUIDs, defaultVMImageUUIDs, supportedVersions);
+        when(prefixMatcherService.prefixMatchForCBVersion(eq("2.41.0"), any())).thenReturn(prefixMatchImages);
+
+        ImageFilter imageFilter = ImageFilter.builder()
+                .withImageCatalog(imageCatalog)
+                .withPlatforms(Collections.singleton(imageCatalogPlatform("aws")))
+                .withCbVersion("2.41.0")
+                .build();
+        StatedImages images = underTest.getImages(imageFilter);
+
+        assertEquals(1, images.getImages().getCdhImages().size());
+        boolean exactImageIdMatch = images.getImages().getCdhImages().stream()
+                .noneMatch(img -> "f3071603-8ab3-4214-b78d-94131c588e83".equals(img.getUuid()));
+        assertTrue(exactImageIdMatch, "Result mustn't contain the only image with arm64 architecture.");
+    }
+
+    @Test
     public void testGetImagesWhenExactVersionDoesnotExistInCatalogForPlatform() throws Exception {
         ImageCatalog imageCatalog = getImageCatalog();
 
@@ -1059,7 +1107,7 @@ public class ImageCatalogServiceTest {
         String currentImageId = "232fe6b6-aec4-4fa9-bb02-2c295d319a36";
         ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, false, currentImageId);
 
-        assertEquals(4, actual.getImages().size());
+        assertEquals(5, actual.getImages().size());
         assertTrue(actual.getImages().stream().anyMatch(image -> image.getUuid().equals(currentImageId)));
     }
 
@@ -1073,7 +1121,7 @@ public class ImageCatalogServiceTest {
 
         ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, true, "current-image-id");
 
-        assertEquals(8, actual.getImages().size());
+        assertEquals(9, actual.getImages().size());
         verifyNoInteractions(prefixMatcherService);
     }
 
