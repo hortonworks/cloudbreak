@@ -99,9 +99,9 @@ public class AwsLoadBalancerCommonService {
             DescribeTargetGroupsResponse describeTargetGroupsResponse =
                     client.describeTargetGroup(DescribeTargetGroupsRequest.builder().loadBalancerArn(arn).build());
             for (TargetGroup targetGroup : describeTargetGroupsResponse.targetGroups()) {
-                Set<TargetGroupAttribute> targetGroupAttributes = new HashSet<>();
                 if (stickySession) {
-                    targetGroupAttributes.addAll(Set.of(
+                    LOGGER.debug("Setting sticky session and cross-zone enablement attribute for target group '{}'", targetGroup.targetGroupArn());
+                    Set<TargetGroupAttribute> targetGroupAttributes = new HashSet<>(Set.of(
                             TargetGroupAttribute.builder()
                                     .key("stickiness.enabled")
                                     .value("true")
@@ -114,9 +114,9 @@ public class AwsLoadBalancerCommonService {
                             .targetGroupArn(targetGroup.targetGroupArn())
                             .attributes(targetGroupAttributes)
                             .build();
+                    LOGGER.debug("Modifying target group ({}) attributes with: {}", targetGroup.targetGroupArn(), targetGroupAttributes);
                     client.modifyTargetGroupAttributes(modifyRequest);
                 }
-
             }
         } catch (LoadBalancerNotFoundException loadBalancerNotFoundException) {
             LOGGER.info("Load balancer has already been deleted with ARN '{}', no need to modify attribute.", arn);
