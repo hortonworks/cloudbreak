@@ -132,7 +132,9 @@ public class AwsNativeLoadBalancerLaunchService {
                         String targetGroupNameTypeSchemePortPart = resourceNameService.loadBalancerTargetGroupResourceTypeSchemeAndPortNamePart(
                                 loadBalancerScheme, targetGroup.getPort());
                         createTargetGroup(creationContext, awsNetworkView, targetGroup, targetGroupNameTypeSchemePortPart);
-                        LOGGER.debug("Updating target group '{}' with sticky session attribute", targetGroup.getArn());
+                        LOGGER.debug("Updating loadbalancer's ({}) target group(s) with attributes", awsLoadBalancer.getArn());
+                        awsLoadBalancerCommonService.modifyTargetGroupAttributes(loadBalancingClient, awsLoadBalancer.getArn(),
+                                awsLoadBalancer.isUseStickySessionForTargetGroup());
                         createListener(creationContext, listener, targetGroupNameTypeSchemePortPart);
                         registerTarget(loadBalancingClient, stackId, targetGroup);
                     }
@@ -183,10 +185,6 @@ public class AwsNativeLoadBalancerLaunchService {
                     .orElseThrow()
                     .loadBalancerArn();
             awsLoadBalancerCommonService.modifyLoadBalancerAttributes(context.getLoadBalancingClient(), loadBalancerArn);
-            awsLoadBalancerCommonService.modifyTargetGroupAttributes(
-                    context.getLoadBalancingClient(),
-                    loadBalancerArn,
-                    awsLoadBalancer.isUseStickySessionForTargetGroup());
             context.setLoadBalancerArn(loadBalancerArn);
             Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
                     Enum.valueOf(LoadBalancerTypeAttribute.class, awsLoadBalancer.getScheme().getLoadBalancerType().name()));
