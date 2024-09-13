@@ -10,9 +10,11 @@
   {%- if instance_cmd_output %}
     {%- set instance_name = instance_cmd_output %}
   {%- endif %}
-  {%- if salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.29-1') >= 0 %}
-        {%- set blackboxClouderaUrls = monitoring.blackboxExporterClouderaLinks %}
-        {%- set blackboxCloudUrls = monitoring.blackboxExporterCloudLinks %}
+  {%- if telemetry.cdpTelemetryPackageVersion is defined and telemetry.cdpTelemetryPackageVersion is not none and telemetry.cdpTelemetryPackageVersion %}
+    {%- if salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.29-1') >= 0 %}
+          {%- set blackboxClouderaUrls = monitoring.blackboxExporterClouderaLinks %}
+          {%- set blackboxCloudUrls = monitoring.blackboxExporterCloudLinks %}
+    {%- endif %}
   {%- endif %}
 {%- endif %}
 global:
