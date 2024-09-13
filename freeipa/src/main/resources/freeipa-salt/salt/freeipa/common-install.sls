@@ -1,3 +1,6 @@
+{%- set secretEncryptionEnabled = True if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True else False %}
+{%- set kerberosConfigOriginalPath = '/etc' %}
+{%- set kerberosConfigPath = salt['pillar.get']('freeipa:kerberosSecretLocation') if secretEncryptionEnabled == True else kerberosConfigOriginalPath %}
 update_cnames:
   cmd.run:
     - name: /opt/salt/scripts/update_cnames.sh 2>&1 | tee -a /var/log/update_cnames.log && exit ${PIPESTATUS[0]}
@@ -38,6 +41,31 @@ add-httpd-x-cdp-trace-id:
     - mode: 644
     - source: salt://freeipa/scripts/getkeytab.py
     - onlyif: test -f /etc/ipa/default.conf
+
+{% if secretEncryptionEnabled == True %}
+copy_krb5_keytab:
+  file.copy:
+    - name: {{ kerberosConfigPath }}/krb5.keytab
+    - source: {{ kerberosConfigOriginalPath }}/krb5.keytab
+    - force: True
+    - onlyif: test -f {{ kerberosConfigOriginalPath }}/krb5.keytab
+{{ kerberosConfigOriginalPath }}/krb5.keytab:
+  file.symlink:
+    - target: {{ kerberosConfigPath }}/krb5.keytab
+    - force: True
+add_keytab_krb5:
+  file.line:
+    - name: /etc/krb5.conf
+    - mode: ensure
+    - content: default_keytab_name = {{ kerberosConfigPath }}/krb5.keytab
+    - after: "default_ccache_name.*"
+add_keytab_sssd:
+  file.line:
+    - name: /etc/sssd/sssd.conf
+    - mode: ensure
+    - content: krb5_keytab = {{ kerberosConfigPath }}/krb5.keytab
+    - after: "ldap_tls_cacert.*"
+{% endif %}
 
 restart_freeipa_after_plugin_change:
   service.running:

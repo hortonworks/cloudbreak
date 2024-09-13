@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -37,6 +38,7 @@ import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -60,6 +62,10 @@ class FreeIpaConfigServiceTest {
     private static final String PRIVATE_IP = "10.117.0.69";
 
     private static final String CIDR = "10.0.0.0/24";
+
+    private static final String ENV_CRN = "envCrn";
+
+    private static final String KERBEROS_SECRET_LOCATION = "kerberosSecretLocation";
 
     private Multimap<String, String> subnetWithCidr;
 
@@ -90,6 +96,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private ProxyConfigDtoService proxyConfigDtoService;
 
+    @Mock
+    private EnvironmentService environmentService;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -97,6 +106,7 @@ class FreeIpaConfigServiceTest {
     public void init() {
         subnetWithCidr = ArrayListMultimap.create();
         subnetWithCidr.put("10.117.0.0", "16");
+        ReflectionTestUtils.setField(underTest, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
     }
 
     @Test
@@ -112,7 +122,7 @@ class FreeIpaConfigServiceTest {
         stack.setCloudPlatform(CloudPlatform.AWS.name());
         stack.setBackup(backup);
         stack.setRegion("region");
-        stack.setEnvironmentCrn("envcrn");
+        stack.setEnvironmentCrn(ENV_CRN);
         Network network = new Network();
         network.setNetworkCidrs(List.of(CIDR));
         stack.setNetwork(network);
@@ -126,6 +136,7 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
@@ -144,6 +155,8 @@ class FreeIpaConfigServiceTest {
         assertEquals(CloudPlatform.AWS.name(), freeIpaConfigView.getBackup().getPlatform());
         assertEquals(expectedHosts, freeIpaConfigView.getHosts());
         assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
+        assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
+        assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -154,6 +167,7 @@ class FreeIpaConfigServiceTest {
         Network network = new Network();
         network.setNetworkCidrs(List.of(CIDR));
         stack.setNetwork(network);
+        stack.setEnvironmentCrn(ENV_CRN);
 
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
@@ -164,12 +178,15 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, Set.of());
 
         assertEquals(expectedCcmv2Enabled, freeIpaConfigView.isCcmv2Enabled());
         assertEquals(expectedCcmV2JumpgateEnabled, freeIpaConfigView.isCcmv2JumpgateEnabled());
+        assertEquals(false, freeIpaConfigView.isSecretEncryptionEnabled());
+        assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
     }
 
     // @formatter:off

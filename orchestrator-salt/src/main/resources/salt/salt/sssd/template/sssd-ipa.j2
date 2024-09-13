@@ -1,5 +1,6 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
-{%- set krb5_ccname_template_path = salt['pillar.get']('kerberos:cCacheSecretStorage') if secretEncryptionEnabled == True else '/tmp' %}
+{%- set krb5_ccname_template_path = salt['pillar.get']('kerberos:cCacheSecretLocation') if secretEncryptionEnabled == True else '/tmp' %}
+{%- set kerberosConfigPath = salt['pillar.get']('kerberos:kerberosSecretLocation') if secretEncryptionEnabled == True else '/etc' %}
 [sssd]
 {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
 services = nss, pam, sudo
@@ -19,6 +20,7 @@ krb5_store_password_if_offline = True
 krb5_realm = {{ pillar['sssd-ipa']['realm'] }}
 ipa_domain = {{ pillar['sssd-ipa']['domain'] }}
 krb5_ccname_template = FILE:{{ krb5_ccname_template_path }}/krb5cc_%U
+krb5_keytab = {{ kerberosConfigPath }}/krb5.keytab
 id_provider = ipa
 auth_provider = ipa
 access_provider = ipa

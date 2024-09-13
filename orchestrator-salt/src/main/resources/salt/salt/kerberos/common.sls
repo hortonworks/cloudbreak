@@ -1,5 +1,7 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
-{%- set cCacheStoragePath = salt['pillar.get']('kerberos:cCacheSecretStorage') %}
+{%- set cCacheStoragePath = salt['pillar.get']('kerberos:cCacheSecretLocation') %}
+{%- set kerberosConfigOriginalPath = '/etc' %}
+{%- set kerberosConfigPath = salt['pillar.get']('kerberos:kerberosSecretLocation') if secretEncryptionEnabled == True else kerberosConfigOriginalPath %}
 haveged:
   pkg.installed:
     - unless:
@@ -46,10 +48,20 @@ install_kerberos:
 {% if secretEncryptionEnabled == True %}
 {{ cCacheStoragePath }}:
   file.directory:
-      - user: root
-      - group: root
-      - mode: 777
-      - makedirs: True
+    - user: root
+    - group: root
+    - mode: 777
+    - makedirs: True
+copy_krb5_keytab:
+  file.copy:
+    - name: {{ kerberosConfigPath }}/krb5.keytab
+    - source: {{ kerberosConfigOriginalPath }}/krb5.keytab
+    - force: True
+    - onlyif: test -f {{ kerberosConfigOriginalPath }}/krb5.keytab
+{{ kerberosConfigOriginalPath }}/krb5.keytab:
+  file.symlink:
+    - target: {{ kerberosConfigPath }}/krb5.keytab
+    - force: True
 {% endif %}
 
 /etc/krb5.conf:
@@ -58,7 +70,8 @@ install_kerberos:
     - template: jinja
     {% if secretEncryptionEnabled == True %}
     - require:
-          - file: {{ cCacheStoragePath }}
+      - file: {{ cCacheStoragePath }}
+      - file: {{ kerberosConfigPath }}/krb5.keytab
     {% endif %}
 
 {%- if "manager_server" in grains.get('roles', []) %}

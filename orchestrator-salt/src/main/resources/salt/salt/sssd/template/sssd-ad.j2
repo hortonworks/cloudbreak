@@ -1,5 +1,6 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
-{%- set krb5_ccname_template_path = salt['pillar.get']('kerberos:cCacheSecretStorage') if secretEncryptionEnabled == True else '/tmp' %}
+{%- set krb5_ccname_template_path = salt['pillar.get']('kerberos:cCacheSecretLocation') if secretEncryptionEnabled == True else '/tmp' %}
+{%- set kerberosConfigPath = salt['pillar.get']('kerberos:kerberosSecretLocation') if secretEncryptionEnabled == True else '/etc' %}
 [nss]
 filter_users = root
 filter_groups = root
@@ -22,6 +23,7 @@ realmd_tags = manages-system joined-with-samba
 cache_credentials = True
 id_provider = ad
 krb5_ccname_template = FILE:{{ krb5_ccname_template_path }}/krb5cc_%U
+krb5_keytab = {{ kerberosConfigPath }}/krb5.keytab
 krb5_store_password_if_offline = True
 default_shell = /bin/bash
 ldap_id_mapping = True

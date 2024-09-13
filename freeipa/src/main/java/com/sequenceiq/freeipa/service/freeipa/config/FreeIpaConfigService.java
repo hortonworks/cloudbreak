@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
@@ -31,6 +33,9 @@ public class FreeIpaConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaConfigService.class);
 
     private static final String DEFAULT_DNSSEC_VALIDATION_PREFIX = "freeipa.platform.dnssec.validation.";
+
+    @Value("${freeipa.kerberos.secret.location}")
+    private String kerberosSecretLocation;
 
     @Inject
     private NetworkService networkService;
@@ -52,6 +57,9 @@ public class FreeIpaConfigService {
 
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
@@ -75,6 +83,8 @@ public class FreeIpaConfigService {
                 .withCcmv2Enabled(stack.getTunnel().useCcmV2OrJumpgate())
                 .withCidrBlocks(stack.getNetwork().getNetworkCidrs())
                 .withCcmv2JumpgateEnabled(stack.getTunnel().useCcmV2Jumpgate())
+                .withSecretEncryptionEnabled(environmentService.isSecretEncryptionEnabled(stack.getEnvironmentCrn()))
+                .withKerberosSecretLocation(kerberosSecretLocation)
                 .build();
     }
 

@@ -158,6 +158,8 @@ class ClusterHostServiceRunnerTest {
 
     private static final String DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE = "defaultKerberosCcacheSecretStorage";
 
+    private static final String KERBEROS_SECRET_LOCATION = "kerberosSecretLocation";
+
     private static final String EXTENDED_BLUEPRINT_TEXT = "extendedBlueprintText";
 
     @Mock
@@ -499,6 +501,7 @@ class ClusterHostServiceRunnerTest {
         verifySecretEncryption(false, saltConfig.getValue());
 
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
+        verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
     }
 
     @Test
@@ -558,6 +561,7 @@ class ClusterHostServiceRunnerTest {
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
+        verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
     }
 
     @Test
@@ -594,6 +598,7 @@ class ClusterHostServiceRunnerTest {
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
         verifySecretEncryption(false, saltConfig.getValue());
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
+        verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
     }
 
     @Test
@@ -946,6 +951,7 @@ class ClusterHostServiceRunnerTest {
 
 
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
+        verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
     }
 
     private void setupMocksForRunClusterServices() {
@@ -996,7 +1002,8 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
         ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", KNOX_GATEWAY_SECURITY_DIR);
         ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", KNOX_IDBROKER_SECURITY_DIR);
-        ReflectionTestUtils.setField(underTest, "defaultKerberosCcacheSecretStorage", DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE);
+        ReflectionTestUtils.setField(underTest, "defaultKerberosCcacheSecretLocation", DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE);
+        ReflectionTestUtils.setField(underTest, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
 
         TemplatePreparationObject templatePreparationObject = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(new BlueprintView())
@@ -1057,7 +1064,12 @@ class ClusterHostServiceRunnerTest {
     }
 
     private void verifyDefaultKerberosCcacheSecretStorage(String expectedValue, SaltConfig saltConfig) {
-        String defaultKerberosCcacheSecretStorage = (String) getKerberosProperties(saltConfig).get("cCacheSecretStorage");
+        String defaultKerberosCcacheSecretStorage = (String) getKerberosProperties(saltConfig).get("cCacheSecretLocation");
         assertEquals(expectedValue, defaultKerberosCcacheSecretStorage);
+    }
+
+    private void verifyKerberosSecretLocation(String expectedValue, SaltConfig saltConfig) {
+        String kerberosSecretLocation = (String) getKerberosProperties(saltConfig).get("kerberosSecretLocation");
+        assertEquals(expectedValue, kerberosSecretLocation);
     }
 }

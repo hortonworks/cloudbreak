@@ -43,6 +43,10 @@ public class FreeIpaConfigView {
 
     private final boolean ccmv2JumpgateEnabled;
 
+    private final boolean secretEncryptionEnabled;
+
+    private final String kerberosSecretLocation;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -58,6 +62,8 @@ public class FreeIpaConfigView {
         this.ccmv2Enabled = builder.ccmv2Enabled;
         this.cidrBlocks = builder.cidrBlocks;
         this.ccmv2JumpgateEnabled = builder.ccmv2JumpgateEnabled;
+        this.secretEncryptionEnabled = builder.secretEncryptionEnabled;
+        this.kerberosSecretLocation = builder.kerberosSecretLocation;
     }
 
     public String getRealm() {
@@ -112,6 +118,14 @@ public class FreeIpaConfigView {
         return ccmv2JumpgateEnabled;
     }
 
+    public boolean isSecretEncryptionEnabled() {
+        return secretEncryptionEnabled;
+    }
+
+    public String getKerberosSecretLocation() {
+        return kerberosSecretLocation;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -132,6 +146,8 @@ public class FreeIpaConfigView {
             map.put("hosts", this.hosts);
         }
         map.put("cidrBlocks", cidrBlocks);
+        map.put("secretEncryptionEnabled", secretEncryptionEnabled);
+        map.put("kerberosSecretLocation", kerberosSecretLocation);
         return map;
     }
 
@@ -162,6 +178,10 @@ public class FreeIpaConfigView {
         private List<String> cidrBlocks;
 
         private boolean ccmv2JumpgateEnabled;
+
+        private boolean secretEncryptionEnabled;
+
+        private String kerberosSecretLocation;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -229,6 +249,16 @@ public class FreeIpaConfigView {
 
         public Builder withCcmv2JumpgateEnabled(boolean ccmv2JumpgateEnabled) {
             this.ccmv2JumpgateEnabled = ccmv2JumpgateEnabled;
+            return this;
+        }
+
+        public Builder withSecretEncryptionEnabled(boolean secretEncryptionEnabled) {
+            this.secretEncryptionEnabled = secretEncryptionEnabled;
+            return this;
+        }
+
+        public Builder withKerberosSecretLocation(String kerberosSecretLocation) {
+            this.kerberosSecretLocation = kerberosSecretLocation;
             return this;
         }
     }

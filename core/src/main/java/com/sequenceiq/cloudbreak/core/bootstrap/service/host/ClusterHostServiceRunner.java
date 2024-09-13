@@ -160,11 +160,14 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.missed.heartbeat.interval}")
     private String cmMissedHeartbeatInterval;
 
-    @Value("${cb.cm.kerberos.cCache.secret.storage}")
-    private String defaultKerberosCcacheSecretStorage;
+    @Value("${cb.kerberos.secret.cCache.location}")
+    private String defaultKerberosCcacheSecretLocation;
 
     @Value("${cb.cm.kerberos.encryption.type}")
     private String defaultKerberosEncryptionType;
+
+    @Value("${cb.kerberos.secret.location}")
+    private String kerberosSecretLocation;
 
     @Value("${cb.ccmRevertJob.activationInMinutes}")
     private Integer activationInMinutes;
@@ -619,7 +622,8 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosPillarConf, properties.get("realm"), "realm");
             }
             putIfNotNull(kerberosPillarConf, defaultKerberosEncryptionType, "encryptionType");
-            putIfNotNull(kerberosPillarConf, defaultKerberosCcacheSecretStorage, "cCacheSecretStorage");
+            putIfNotNull(kerberosPillarConf, defaultKerberosCcacheSecretLocation, "cCacheSecretLocation");
+            putIfNotNull(kerberosPillarConf, kerberosSecretLocation, "kerberosSecretLocation");
             putIfNotNull(kerberosPillarConf, kerberosConfig.getVerifyKdcTrust().toString(), "verifyKdcTrust");
             servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", singletonMap("kerberos", kerberosPillarConf)));
         }

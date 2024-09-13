@@ -172,6 +172,7 @@ freeipa:
     supported-variants: AWS_NATIVE,AWS_NATIVE_GOV,AZURE,GCP
   secret.rotation:
     kmskey.rotationPeriodInDays: 365
+  kerberos.secret.location: "/mnt/cdp-luks/etc"
 info:
   app:
     capabilities:

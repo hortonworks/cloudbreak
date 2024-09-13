@@ -49,4 +49,8 @@ public class EnvironmentService {
             }
         }
     }
+
+    public boolean isSecretEncryptionEnabled(String environmentCrn) {
+        return environmentEndpoint.getByCrn(environmentCrn).isEnableSecretEncryption();
+    }
 }
