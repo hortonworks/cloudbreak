@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -592,6 +593,22 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
     public SdxMigrateDatabaseV1Response migrateDatabaseToSslByCrn(@TenantAwareParam @ResourceCrn String crn) {
         return null;
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = UPGRADE_DATALAKE)
+    public FlowIdentifier setDefaultJavaVersionByName(@ResourceName String name, SetDefaultJavaVersionRequest request) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        sdxService.validateDefaultJavaVersionUpdate(sdxCluster.getCrn(), request);
+        return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = UPGRADE_DATALAKE)
+    public FlowIdentifier setDefaultJavaVersionByCrn(@TenantAwareParam @ResourceCrn String crn, SetDefaultJavaVersionRequest request) {
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        sdxService.validateDefaultJavaVersionUpdate(crn, request);
+        return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices());
     }
 
     private SdxCluster getSdxClusterByName(String name) {

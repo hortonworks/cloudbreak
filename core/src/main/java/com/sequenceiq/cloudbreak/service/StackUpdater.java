@@ -75,6 +75,10 @@ public class StackUpdater {
         stackService.updateStackVersion(stackId, stackVersion);
     }
 
+    public void updateJavaVersion(Long stackId, String javaVersion) {
+        stackService.updateJavaVersion(stackId, javaVersion);
+    }
+
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
         stackService.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
     }

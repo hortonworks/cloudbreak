@@ -24,7 +24,6 @@ import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiHostList;
 import com.sequenceiq.mock.swagger.model.ApiHostRef;
 import com.sequenceiq.mock.swagger.model.ApiHostRefList;
-import com.sequenceiq.mock.swagger.model.ApiRestartClusterArgs;
 import com.sequenceiq.mock.swagger.model.ApiServiceState;
 
 @Controller
@@ -70,7 +69,7 @@ public class ClusterResourceOperation {
         return responseCreatorComponent.exec(apiHostRef);
     }
 
-    public ResponseEntity<ApiCommand> restartCommand(String mockUuid, String clusterName, @Valid ApiRestartClusterArgs body) {
+    public ResponseEntity<ApiCommand> restartCommand(String mockUuid, String clusterName) {
         startCommand(mockUuid, clusterName);
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.CLUSTER_RESTART));
     }

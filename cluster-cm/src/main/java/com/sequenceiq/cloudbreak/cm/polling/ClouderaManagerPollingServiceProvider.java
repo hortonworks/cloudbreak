@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
+import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -20,7 +23,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
+import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerApiCheckerTask;
@@ -86,6 +91,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     @Inject
     private ClusterEventService clusterEventService;
+
+    @Inject
+    private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     public ExtendedPollingResult startPollingCmStartup(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
@@ -321,7 +329,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 pollerObject,
-                getPollInterval(stack),
+                getPollInterval(stack, apiClient),
                 ClouderaManagerPollingTimeoutProvider.getSyncApiCommandTimeout(stack.getCloudPlatform()));
     }
 
@@ -331,7 +339,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandListPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
-                getPollInterval(stack),
+                getPollInterval(stack, apiClient),
                 maximumWaitTimeInSeconds);
     }
 
@@ -341,7 +349,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerPollerObject,
-                getPollInterval(stack),
+                getPollInterval(stack, apiClient),
                 maximumWaitTimeInSeconds, MAX_CONSECUTIVE_FAILURES);
     }
 
@@ -351,7 +359,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
-                getPollInterval(stack),
+                getPollInterval(stack, apiClient),
                 maximumWaitTimeInSeconds);
     }
 
@@ -361,7 +369,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAttempt(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
-                getPollInterval(stack),
+                getPollInterval(stack, apiClient),
                 numAttempts);
     }
 
@@ -371,15 +379,22 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerPollerObjectPollingService.pollWithAttempt(
                 listenerTask,
                 clouderaManagerPollerObject,
-                getPollInterval(stack),
+                getPollInterval(stack, apiClient),
                 numAttempts);
     }
 
-    private static int getPollInterval(StackDtoDelegate stackDtoDelegate) {
-        int instanceCount = stackDtoDelegate.getNotTerminatedInstanceMetaData().size();
-        if (instanceCount < DEFAULT_BACKOFF_NODECOUNT_LIMIT) {
-            return POLL_INTERVAL;
+    private int getPollInterval(StackDtoDelegate stackDtoDelegate, ApiClient apiClient) {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        try {
+            ApiHostList apiHostList = hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name());
+            int instanceCount = apiHostList.getItems().size();
+            if (instanceCount < DEFAULT_BACKOFF_NODECOUNT_LIMIT) {
+                return POLL_INTERVAL;
+            }
+            return POLL_INTERVAL + (instanceCount * BACKOFF_NODE_COUNT_MULTIPLIER);
+        } catch (ApiException e) {
+            LOGGER.warn("Could not fetch hosts from Cloudera Manager, go with default poll interval", e);
         }
-        return POLL_INTERVAL + (instanceCount * BACKOFF_NODE_COUNT_MULTIPLIER);
+        return POLL_INTERVAL;
     }
 }

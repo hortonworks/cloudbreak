@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.scale.ServicesRollingRestartEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
@@ -348,9 +348,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerClusterServicesRestart(Long stackId, boolean refreshNeeded) {
+    public FlowIdentifier triggerClusterServicesRestart(Long stackId, boolean refreshNeeded, boolean rollingRestart) {
         String selector = CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new ClusterServicesRestartTriggerEvent(selector, stackId, refreshNeeded));
+        return reactorNotifier.notify(stackId, selector, new ClusterServicesRestartTriggerEvent(selector, stackId, refreshNeeded, rollingRestart));
     }
 
     public FlowIdentifier triggerClusterStop(Long stackId) {
@@ -515,11 +515,6 @@ public class ReactorFlowManager {
         return new NetworkScaleDetails(preferredSubnetIds, preferredAvailabilityZones);
     }
 
-    public FlowIdentifier triggerServicesRollingRestart(Long stackId) {
-        String selector = ServicesRollingRestartEvent.SERVICES_ROLLING_RESTART_TRIGGER_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new StackEvent(stackId));
-    }
-
     public FlowIdentifier triggerDeleteVolumes(Long stackId, StackDeleteVolumesRequest deleteRequest) {
         String selector = DELETE_VOLUMES_VALIDATION_EVENT.event();
         DeleteVolumesTriggerEvent event = new DeleteVolumesTriggerEvent(selector, stackId, deleteRequest);
@@ -574,4 +569,8 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new RotateRdsCertificateTriggerRequest(selector, stackId, MIGRATE));
     }
 
+    public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices) {
+        String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices));
+    }
 }

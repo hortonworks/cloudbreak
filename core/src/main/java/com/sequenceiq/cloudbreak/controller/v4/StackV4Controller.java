@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatal
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -721,4 +722,16 @@ public class StackV4Controller extends NotificationController implements StackV4
         return stackOperationService.listDatabaseServersCertificateStatus(request, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
+    @Override
+    @InternalOnly
+    public FlowIdentifier setDefaultJavaVersionByCrnInternal(Long workspaceId, String crn, SetDefaultJavaVersionRequest request) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
+        return stackOperationService.triggerSetDefaultJavaVersion(nameOrCrn, ThreadBasedUserCrnProvider.getAccountId(), request);
+    }
+
+    @Override
+    @InternalOnly
+    public void validateDefaultJavaVersionUpdateByCrnInternal(Long workspaceId, String crn, SetDefaultJavaVersionRequest request) {
+        stackOperationService.validateDefaultJavaVersionUpdate(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request);
+    }
 }

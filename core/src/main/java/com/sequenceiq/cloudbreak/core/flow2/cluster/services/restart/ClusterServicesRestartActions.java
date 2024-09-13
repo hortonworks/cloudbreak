@@ -41,7 +41,7 @@ public class ClusterServicesRestartActions {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterServicesRestartTriggerEvent payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.CLUSTER_RESTART_IN_PROGRESS);
-                ClusterServicesRestartRequest request = new ClusterServicesRestartRequest(context.getStackId());
+                ClusterServicesRestartRequest request = new ClusterServicesRestartRequest(context.getStackId(), payload.isRollingRestart());
                 request.setDatahubRefreshNeeded(payload.isRefreshNeeded());
                 String selector = EventSelectorUtil.selector(ClusterServicesRestartRequest.class);
                 sendEvent(context, selector, request);

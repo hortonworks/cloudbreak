@@ -17,6 +17,7 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAK
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.imdupdate.SdxInstanceMetadataUpdateStateSelectors.SDX_IMD_UPDATE_EVENT;
+import static com.sequenceiq.datalake.flow.java.SetDatalakeDefaultJavaVersionFlowEvent.SET_DATALAKE_DEFAULT_JAVA_VERSION_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
@@ -77,6 +78,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.imdupdate.event.SdxInstanceMetadataUpdateEvent;
+import com.sequenceiq.datalake.flow.java.SetDatalakeDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerEvent;
@@ -308,6 +310,15 @@ public class SdxReactorFlowManager {
         RotateCertificateStackEvent event =
                 new RotateCertificateStackEvent(ROTATE_CERTIFICATE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(event.selector(), event, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerSetDefaultJavaVersion(SdxCluster cluster, String defaultJavaVersion, boolean restartServices) {
+        LOGGER.info("Trigger Set Default Java Version to {} on Datalake for: {}, restart services: {}", defaultJavaVersion, cluster, restartServices);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SetDatalakeDefaultJavaVersionTriggerEvent datalakeDefaultJavaVersionTriggerEvent =
+                new SetDatalakeDefaultJavaVersionTriggerEvent(SET_DATALAKE_DEFAULT_JAVA_VERSION_EVENT.event(), cluster.getId(), initiatorUserCrn,
+                        defaultJavaVersion, restartServices);
+        return notify(datalakeDefaultJavaVersionTriggerEvent.selector(), datalakeDefaultJavaVersionTriggerEvent, cluster.getClusterName());
     }
 
     private FlowIdentifier notify(String selector, Acceptable acceptable, String identifier, String userId) {

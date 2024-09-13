@@ -579,6 +579,10 @@ public enum ResourceEvent {
     CLUSTER_CCM_UPGRADE_FAILED("cluster.ccm.upgrade.failed"),
     CLUSTER_CCM_UPGRADE_FINISHED("cluster.ccm.upgrade.finished"),
 
+    CLUSTER_SET_DEFAULT_JAVA_VERSION("cluster.set.default.java.version"),
+    CLUSTER_SET_DEFAULT_JAVA_VERSION_FINISHED("cluster.set.default.java.version.finished"),
+    CLUSTER_SET_DEFAULT_JAVA_VERSION_FAILED("cluster.set.default.java.version.failed"),
+
     KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
 
     CLOUD_CONFIG_VALIDATION_FAILED("cluster.cloudconfig.validation.failed"),
@@ -652,6 +656,8 @@ public enum ResourceEvent {
     DATALAKE_SALT_UPDATE_FAILED("datalake.salt.update.failed"),
     DATALAKE_SALT_UPDATE_FINISHED("datalake.salt.update.finished"),
 
+    DATALAKE_DEFAULT_JAVA_VERSION_CHANGE_IN_PROGRESS("datalake.default.java.version.change.in.progress"),
+    DATALAKE_DEFAULT_JAVA_VERSION_CHANGE_FAILED("datalake.default.java.version.change.failed"),
     DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS("datalake.verticalscale.validation.in.progress"),
     DATALAKE_VERTICAL_SCALE_VALIDATION_FAILED("datalake.verticalscale.validation.failed"),
     DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS("datalake.verticalscale.datalake.in.progress"),

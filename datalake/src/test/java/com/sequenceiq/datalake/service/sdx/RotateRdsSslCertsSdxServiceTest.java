@@ -67,7 +67,7 @@ public class RotateRdsSslCertsSdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRdsSslCertRotation(dlCrn)));
 
         verify(stackV4Endpoint).validateRotateRdsCertificateByCrnInternal(WORKSPACE_ID_DEFAULT, dlCrn, USER_CRN);
-        assertEquals("RDS SSL certificate rotation is not triggerable", actualException.getMessage());
+        assertEquals("Validation failed RDS SSL certificate rotation is not triggerable", actualException.getMessage());
     }
 
     @Test

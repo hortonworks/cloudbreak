@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -145,6 +146,9 @@ public class StackOperationService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private DefaultJavaVersionUpdateValidator defaultJavaVersionUpdateValidator;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -499,7 +503,7 @@ public class StackOperationService {
 
     public FlowIdentifier triggerServicesRollingRestart(String crn) {
         StackView stack = stackDtoService.getStackViewByCrn(crn);
-        return flowManager.triggerServicesRollingRestart(stack.getId());
+        return flowManager.triggerClusterServicesRestart(stack.getId(), false, true);
     }
 
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
@@ -531,5 +535,17 @@ public class StackOperationService {
                     request.getCrns(), errorMessage), e);
             throw new BadRequestException("Could not query database certificate status for clusters. " + errorMessage);
         }
+    }
+
+    public FlowIdentifier triggerSetDefaultJavaVersion(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
+        LOGGER.info("Triggering default Java update on stack ('{}')", nameOrCrn);
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        defaultJavaVersionUpdateValidator.validate(stack, request);
+        return flowManager.triggerSetDefaultJavaVersion(stack.getId(), request.getDefaultJavaVersion(), request.isRestartServices());
+    }
+
+    public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        defaultJavaVersionUpdateValidator.validate(stack, request);
     }
 }

@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Azu
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -1738,22 +1739,34 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public void validateRdsSslCertRotation(String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String operationNameToValidate = "RDS SSL certificate rotation";
+        Runnable endpointCall = () -> stackV4Endpoint.validateRotateRdsCertificateByCrnInternal(WORKSPACE_ID_DEFAULT, crn, userCrn);
+        validateOnCoreInternalApiWithExceptionHandling(endpointCall, operationNameToValidate);
+    }
+
+    public void validateDefaultJavaVersionUpdate(String crn, SetDefaultJavaVersionRequest request) {
+        String operationNameToValidate = "default Java version update";
+        Runnable endpointCall = () -> stackV4Endpoint.validateDefaultJavaVersionUpdateByCrnInternal(WORKSPACE_ID_DEFAULT, crn, request);
+        validateOnCoreInternalApiWithExceptionHandling(endpointCall, operationNameToValidate);
+    }
+
+    private void validateOnCoreInternalApiWithExceptionHandling(Runnable endpointCall, String operationNameToValidate) {
+        LOGGER.info("Calling Cloudbreak to validate {} is triggerable", operationNameToValidate);
         try {
-            LOGGER.info("Calling Cloudbreak to validate RDS SSL certificate rotation is triggerable by CRN {}", crn);
-            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> stackV4Endpoint.validateRotateRdsCertificateByCrnInternal(WORKSPACE_ID_DEFAULT, crn, userCrn));
+                    endpointCall);
         } catch (jakarta.ws.rs.BadRequestException e) {
-            String defaultMessage = "RDS SSL certificate rotation is not triggerable";
-            LOGGER.info(defaultMessage, e);
+            String msg = String.format("Validation failed %s is not triggerable", operationNameToValidate);
+            LOGGER.info(msg, e);
             String message = Optional.ofNullable(e.getResponse())
-                    .map(resp -> resp.hasEntity() ? resp.readEntity(ExceptionResponse.class) : new ExceptionResponse(defaultMessage))
+                    .map(resp -> resp.hasEntity() ? resp.readEntity(ExceptionResponse.class) : new ExceptionResponse(msg))
                     .map(ExceptionResponse::getMessage)
-                    .orElse(defaultMessage);
+                    .orElse(msg);
             throw new BadRequestException(message, e);
         } catch (jakarta.ws.rs.WebApplicationException wae) {
-            String msg = "Failed to validate RDS SSL certificate rotation for SDX";
+            String msg = String.format("Failed to validate %s for SDX", operationNameToValidate);
             LOGGER.warn(msg, wae);
             throw new IllegalStateException(msg, wae);
         }
