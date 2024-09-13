@@ -204,11 +204,11 @@ elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
         error_exit "Unable to login to Azure!"
     fi
-    /usr/local/bin/azcopy copy "${FULL_BACKUP_LOCATION}" "${config[backup_path]}/${config[full_dir]}" --as-subdir=false --recursive=true --check-length=false 2>&1 | tee -a "${LOGFILE}"
+    /usr/local/bin/azcopy copy "${FULL_BACKUP_LOCATION}/*" "${config[backup_path]}/${config[full_dir]}" --recursive=true --check-length=false 2>&1 | tee -a "${LOGFILE}"
     if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
         error_exit "Sync of backups from ${FULL_BACKUP_LOCATION} failed!"
     fi
-    /usr/local/bin/azcopy copy "${DATA_BACKUP_LOCATION}" "${config[backup_path]}/${config[data_dir]}" --as-subdir=false --recursive=true --check-length=false 2>&1 | tee -a "${LOGFILE}"
+    /usr/local/bin/azcopy copy "${DATA_BACKUP_LOCATION}/*" "${config[backup_path]}/${config[data_dir]}" --recursive=true --check-length=false 2>&1 | tee -a "${LOGFILE}"
     if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
         error_exit "Sync of backups from ${DATA_BACKUP_LOCATION} failed!"
     fi
