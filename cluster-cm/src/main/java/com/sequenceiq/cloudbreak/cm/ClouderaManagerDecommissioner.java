@@ -72,13 +72,12 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
-public class ClouderaManagerDecomissioner {
+public class ClouderaManagerDecommissioner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerDecomissioner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerDecommissioner.class);
 
     private static final String SUMMARY_REQUEST_VIEW = "SUMMARY";
 
@@ -100,35 +99,35 @@ public class ClouderaManagerDecomissioner {
         try {
             HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
             ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
-
-            for (InstanceGroupDto instanceGroupDto : stack.getInstanceGroupDtos()) {
-                InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
-                String groupName = instanceGroup.getGroupName();
-                Set<InstanceMetadataView> removableHostsInHostGroup = removableInstances.stream()
-                        .filter(instanceMetaData -> instanceMetaData.getInstanceGroupName().equals(groupName))
-                        .collect(Collectors.toSet());
-                if (!removableHostsInHostGroup.isEmpty()) {
-                    int replication = hostGroupNodesAreDataNodes(hostTemplates, groupName) ? getReplicationFactor(client, stack.getName()) : 0;
-
-                    List<InstanceMetadataView> runningInstances = instanceGroupDto.getRunningInstanceMetaData();
-                    int removableSizeFromTheRunning = Math.toIntExact(removableHostsInHostGroup.stream()
-                            .filter(runningInstances::contains)
-                            .count());
-                    verifyNodeCount(replication, removableSizeFromTheRunning, runningInstances.size(),
-                            0, stack);
-                    Set<String> removableInstanceFqdn = removableInstances.stream()
-                            .map(InstanceMetadataView::getDiscoveryFQDN)
-                            .filter(org.apache.commons.lang3.StringUtils::isNoneBlank)
-                            .collect(Collectors.toSet());
-                    verifyNodeNotBusy(removableInstanceFqdn, client);
+            if (noRepairInProgress(stack)) {
+                List<InstanceMetadataView> runningDataNodes = getRunningDataNodes(hostTemplates, stack.getInstanceGroupDtos());
+                List<InstanceMetadataView> removableDataNodes = runningDataNodes.stream()
+                        .filter(removableInstances::contains)
+                        .toList();
+                if (!removableDataNodes.isEmpty()) {
+                    int replicationFactor = getReplicationFactor(client, stack.getName());
+                    verifyDataNodeReplicationFactor(replicationFactor, removableDataNodes.size(), runningDataNodes.size());
                 }
             }
+            verifyNodeNotBusy(removableInstances, client);
         } catch (ApiException ex) {
             throw new CloudbreakServiceException("Could not verify if nodes are removable or not", ex);
         }
     }
 
-    private void verifyNodeNotBusy(Collection<String> hosts, ApiClient client) {
+    private List<InstanceMetadataView> getRunningDataNodes(ApiHostTemplateList hostTemplates, List<InstanceGroupDto> instanceGroups) {
+        return instanceGroups
+                .stream()
+                .filter(instanceGroup -> hostGroupNodesAreDataNodes(hostTemplates, instanceGroup.getInstanceGroup().getGroupName()))
+                .flatMap(instanceGroup -> instanceGroup.getRunningInstanceMetaData().stream())
+                .toList();
+    }
+
+    private void verifyNodeNotBusy(Collection<InstanceMetadataView> removableInstances, ApiClient client) {
+        Collection<String> hosts = removableInstances.stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .filter(org.apache.commons.lang3.StringUtils::isNoneBlank)
+                .collect(Collectors.toSet());
         HostServiceStatuses hostServiceStates = getHostServiceStatuses(hosts, client);
         if (hostServiceStates.anyHostBusy()) {
             Set<String> busyHostNames = hostServiceStates.getBusyHosts();
@@ -168,7 +167,7 @@ public class ClouderaManagerDecomissioner {
     }
 
     public Set<InstanceMetadataView> collectDownscaleCandidates(ApiClient client, StackDtoDelegate stack, String hostGroupName, Integer scalingAdjustment,
-            Set<InstanceMetadataView> instanceMetaDatasInStack) {
+                                                                Set<InstanceMetadataView> instanceMetaDatasInStack) {
         LOGGER.debug("Collecting downscale candidates");
         Set<InstanceMetadataView> instancesForHostGroup = instanceMetaDatasInStack.stream()
                 .filter(instanceMetaData -> instanceMetaData.getInstanceGroupName().equals(hostGroupName))
@@ -177,8 +176,13 @@ public class ClouderaManagerDecomissioner {
         try {
             HostTemplatesResourceApi hostTemplatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(client);
             ApiHostTemplateList hostTemplates = hostTemplatesResourceApi.readHostTemplates(stack.getName());
-            int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroupName) ? getReplicationFactor(client, stack.getName()) : 0;
-            verifyNodeCount(replication, scalingAdjustment, instancesForHostGroup.size(), 0, stack);
+            if (noRepairInProgress(stack)) {
+                validateNodeCount(scalingAdjustment, instancesForHostGroup.size());
+                if (hostGroupNodesAreDataNodes(hostTemplates, hostGroupName)) {
+                    int replication = getReplicationFactor(client, stack.getName());
+                    verifyDataNodeReplicationFactor(replication, scalingAdjustment, getRunningDataNodes(hostTemplates, stack.getInstanceGroupDtos()).size());
+                }
+            }
 
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, FULL_REQUEST_VIEW);
             Set<InstanceMetadataView> instancesToRemove = getUnusedInstances(scalingAdjustment, instancesForHostGroup, hostRefList);
@@ -420,7 +424,7 @@ public class ClouderaManagerDecomissioner {
     }
 
     private void retryDecommissionNodes(ClouderaManagerResourceApi apiInstance, ApiHostNameList body, StackDtoDelegate stack, ApiClient client,
-            List<String> removableHosts, String hostGroupName) throws ApiException {
+                                        List<String> removableHosts, String hostGroupName) throws ApiException {
         ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                 .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), true, removableHosts.size());
@@ -459,17 +463,28 @@ public class ClouderaManagerDecomissioner {
                 .anyMatch(rcg -> rcg.getRoleConfigGroupName().contains("DATANODE"))).orElse(false);
     }
 
-    private void verifyNodeCount(int replication, int scalingAdjustment, int hostSize, int reservedInstances, StackDtoDelegate stack) {
-        boolean repairInProgress = stack.getDiskResources().stream()
-                .map(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
-                .flatMap(Optional::stream)
-                .map(VolumeSetAttributes::getDeleteOnTermination)
-                .anyMatch(Boolean.FALSE::equals);
+    private void verifyDataNodeReplicationFactor(int replication, int scalingAdjustment, int hostSize) {
         int adjustment = Math.abs(scalingAdjustment);
-        if (!repairInProgress && (hostSize + reservedInstances - adjustment < replication || hostSize < adjustment)) {
+        if (hostSize - adjustment < replication) {
             LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new NotEnoughNodeException("There is not enough node to downscale. Check the replication factor.");
         }
+    }
+
+    private void validateNodeCount(int scalingAdjustment, int hostSize) {
+        int adjustment = Math.abs(scalingAdjustment);
+        if (hostSize < adjustment) {
+            LOGGER.info("Cannot downscale: adjustment: {}, filtered host size: {}", scalingAdjustment, hostSize);
+            throw new NotEnoughNodeException("There is not enough node to downscale.");
+        }
+    }
+
+    private boolean noRepairInProgress(StackDtoDelegate stack) {
+        return stack.getDiskResources().stream()
+                .map(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getDeleteOnTermination)
+                .noneMatch(Boolean.FALSE::equals);
     }
 
     public void deleteHost(StackDtoDelegate stack, InstanceMetadataView data, ApiClient client) {
