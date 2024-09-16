@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRole
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_SERVICE_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.STORAGEOPERATIONS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
@@ -73,6 +74,10 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
         if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
             LOGGER.info("Adding '{}' to the cluster template config.", CORE_SITE_SAFETY_VALVE);
             apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
+        }
+
+        if (source.getGeneralClusterConfigs().isGovCloud()) {
+            apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
         }
 
         return apiClusterTemplateConfigs;
