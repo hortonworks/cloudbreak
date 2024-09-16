@@ -38,7 +38,7 @@ dependencies {
   implementation project(':template-manager-core')
   implementation project(':workspace')
 
-  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.12.7"
+  implementation            group: "joda-time",                 name: "joda-time",                               version: "2.13.0"
   implementation            group: 'org.hibernate',             name: 'hibernate-envers',                        version: hibernateCoreVersion
 
   testImplementation project(path: ':common', configuration: 'tests')
