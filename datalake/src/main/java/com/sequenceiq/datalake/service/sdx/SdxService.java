@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -85,6 +86,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -707,6 +709,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster.getClusterShape());
         overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage(),
                 sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape(), stackV4Response.getCluster().isDbSSLEnabled());
+        stackRequest.setNetwork(createNetworkRequestFromCurrentDatalake(stackV4Response.getNetwork()));
         newSdxCluster.setStackRequest(stackRequest);
         sdxRecommendationService.validateVmTypeOverride(environment, newSdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
@@ -1752,6 +1755,29 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             LOGGER.warn(msg, wae);
             throw new IllegalStateException(msg, wae);
         }
+    }
+
+    private NetworkV4Request createNetworkRequestFromCurrentDatalake(NetworkV4Response networkFromCurrentDatalake) {
+        LOGGER.info("Datalake resize will use network details from the original datalake.");
+
+        NetworkV4Request networkRequest = new NetworkV4Request();
+
+        networkRequest.setSubnetCIDR(networkFromCurrentDatalake.getSubnetCIDR());
+        networkRequest.setCloudPlatform(networkFromCurrentDatalake.getCloudPlatform());
+        if (networkFromCurrentDatalake.getAws() != null) {
+            networkRequest.setAws(networkFromCurrentDatalake.getAws());
+        }
+        if (networkFromCurrentDatalake.getAzure() != null) {
+            networkRequest.setAzure(networkFromCurrentDatalake.getAzure());
+        }
+        if (networkFromCurrentDatalake.getGcp() != null) {
+            networkRequest.setGcp(networkFromCurrentDatalake.getGcp());
+        }
+        if (networkFromCurrentDatalake.getMock() != null) {
+            networkRequest.setMock(networkFromCurrentDatalake.getMock());
+        }
+
+        return networkRequest;
     }
 
     private void validateMultiAzForGcp(String accountId, SdxClusterShape clusterShape, ValidationResultBuilder validationBuilder) {

@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -619,6 +620,7 @@ class SdxServiceTest {
         stackV4Response.setImage(image);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
@@ -685,11 +687,9 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-
         mockEnvironmentCall(sdxClusterResizeRequest, GCP);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.15/gcp/medium_duty_ha.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
@@ -698,6 +698,12 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        NetworkV4Response networkResponse = new NetworkV4Response();
+        GcpNetworkV4Parameters gcpNetworkV4Parameters = new GcpNetworkV4Parameters();
+        gcpNetworkV4Parameters.setSubnetId("subnet-123");
+        gcpNetworkV4Parameters.setNetworkId("net-123");
+        networkResponse.setGcp(gcpNetworkV4Parameters);
+        stackV4Response.setNetwork(networkResponse);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -711,11 +717,12 @@ class SdxServiceTest {
         assertEquals(runtime, createdSdxCluster.getRuntime());
         assertEquals("gcs://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
         assertEquals(ENVIRONMENT_NAME, createdSdxCluster.getEnvName());
-
         String stackRequestRawString = createdSdxCluster.getStackRequest();
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
         assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(stackV4Request.getNetwork().getGcp().getSubnetId(), "subnet-123");
+        assertEquals(stackV4Request.getNetwork().getGcp().getNetworkId(), "net-123");
     }
 
     @Test
@@ -814,6 +821,7 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         assertDoesNotThrow(
@@ -1009,7 +1017,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
@@ -1022,6 +1029,7 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, sdxClusterResizeRequest));
@@ -1039,6 +1047,10 @@ class SdxServiceTest {
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
         assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
+        assertEquals(stackV4Request.getNetwork().getAws().getSubnetId(), "subnet-123");
+        assertEquals(stackV4Request.getNetwork().getAws().getSubnetId(), "subnet-123");
+        assertEquals(stackV4Request.getNetwork().getAws().getSubnetId(), "subnet-123");
     }
 
     @Test
@@ -1081,11 +1093,9 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-
         mockEnvironmentCall(resizeRequest, AWS);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
@@ -1099,6 +1109,7 @@ class SdxServiceTest {
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         clusterV4Response.setDbSSLEnabled(false);
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
@@ -1328,6 +1339,7 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -1376,6 +1388,7 @@ class SdxServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -1522,6 +1535,7 @@ class SdxServiceTest {
         stackV4Response.setImage(image);
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(eq(0L), eq("dl-name"), any(), eq("hortonworks"))).thenReturn(stackV4Response);
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
         when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
@@ -1605,19 +1619,17 @@ class SdxServiceTest {
         stackV4Response.setInstanceGroups(List.of(masterIg));
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
-
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
                 .thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-
         mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
         CDPConfigKey cdpConfigKeyLightDuty = new CDPConfigKey(AWS, MEDIUM_DUTY_HA, "7.2.18");
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
@@ -1663,19 +1675,17 @@ class SdxServiceTest {
         stackV4Response.setInstanceGroups(List.of(masterIg));
         ClusterV4Response clusterV4Response = new ClusterV4Response();
         stackV4Response.setCluster(clusterV4Response);
-
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
                 .thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-
         mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
         CDPConfigKey cdpConfigKeyLightDuty = new CDPConfigKey(AWS, LIGHT_DUTY, "7.2.18");
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
@@ -1729,6 +1739,7 @@ class SdxServiceTest {
         stackV4Response.setCluster(new ClusterV4Response());
         stackV4Response.getCluster().setDbSSLEnabled(false);
         stackV4Response.setStatus(Status.STOPPED);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         doThrow(new BadRequestException("Invalid custom instance type for instance group: master - r5.large"))
                 .when(sdxRecommendationService).validateVmTypeOverride(any(), any());
@@ -1744,17 +1755,14 @@ class SdxServiceTest {
     @Test
     void resizeMoveRecipesToNewCluster() throws IOException {
         String accountId = Crn.safeFromString(USER_CRN).getAccountId();
-
         SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
         resizeRequest.setEnvironment(ENVIRONMENT_NAME);
         resizeRequest.setClusterShape(ENTERPRISE);
-
         SdxDatabase sdxDatabase = new SdxDatabase();
         sdxDatabase.setCreateDatabase(true);
         sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         sdxDatabase.setDatabaseEngineVersion("11");
         sdxDatabase.setId(1L);
-
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setRuntime("7.2.17");
         sdxCluster.setRangerRazEnabled(true);
@@ -1762,10 +1770,8 @@ class SdxServiceTest {
         sdxCluster.setSdxDatabase(sdxDatabase);
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.setCloudStorageBaseLocation("s3a://cloudStorageBase/location");
-
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
         detailedEnvironmentResponse.setAccountId(accountId);
-
         RecipeV4Response recipeV4Response1 = new RecipeV4Response();
         recipeV4Response1.setName("recipe1");
         recipeV4Response1.setType(RecipeV4Type.POST_SERVICE_DEPLOYMENT);
@@ -1773,15 +1779,12 @@ class SdxServiceTest {
         recipeV4Response2.setName("recipe2");
         RecipeV4Response recipeV4Response3 = new RecipeV4Response();
         recipeV4Response3.setName("recipe3");
-
         InstanceGroupV4Response masterIg = new InstanceGroupV4Response();
         masterIg.setName("master");
         masterIg.setRecipes(List.of(recipeV4Response1, recipeV4Response2));
-
         InstanceGroupV4Response coreIg = new InstanceGroupV4Response();
         coreIg.setName("core");
         coreIg.setRecipes(List.of(recipeV4Response1, recipeV4Response2, recipeV4Response3));
-
         StackV4Response stackV4Response = getStackV4ResponseForEnterpriseDatalake(Map.of("tag1", "value1"),
                 List.of(masterIg, coreIg), getClusterV4Response());
 
@@ -1801,7 +1804,6 @@ class SdxServiceTest {
                 .thenReturn(stackV4Response);
         when(cdpConfigService.getConfigForKey(any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
-
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -1983,5 +1985,15 @@ class SdxServiceTest {
         clusterV4Response.setStatus(Status.AVAILABLE);
         clusterV4Response.setName(CLUSTER_NAME);
         return clusterV4Response;
+    }
+
+    private NetworkV4Response getNetworkForCurrentDatalake() {
+        NetworkV4Response networkResponse = new NetworkV4Response();
+        AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
+        awsNetworkV4Parameters.setVpcId("vpc-123");
+        awsNetworkV4Parameters.setSubnetId("subnet-123");
+        awsNetworkV4Parameters.setEndpointGatewaySubnetId("subnet-123");
+        networkResponse.setAws(awsNetworkV4Parameters);
+        return networkResponse;
     }
 }
