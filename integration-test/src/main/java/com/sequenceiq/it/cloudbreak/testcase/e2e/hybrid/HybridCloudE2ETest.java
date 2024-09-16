@@ -288,14 +288,14 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         LOGGER.info("Tear down AWS-YCloud E2E context");
 
         if (sdxInternalTestDto != null && sdxInternalTestDto.getResponse() != null) {
-            if (sdxInternalTestDto.getPrivateIps().isEmpty()) {
+            if (sdxInternalTestDto.getPrivateIpsForLogCollection().isEmpty()) {
                 LOGGER.warn("Error occured while creating SDX stack! So cannot download cluster logs from SDX.");
             } else {
                 try {
                     String environmentCrnSdx = sdxInternalTestDto.getResponse().getEnvironmentCrn();
                     String sdxName = sdxInternalTestDto.getResponse().getName();
                     LOGGER.info("Downloading YCloud SDX logs...");
-                    yarnClusterLogs.downloadClusterLogs(environmentCrnSdx, sdxName, sdxInternalTestDto.getPrivateIps(), "sdx");
+                    yarnClusterLogs.downloadClusterLogs(environmentCrnSdx, sdxName, sdxInternalTestDto.getPrivateIpsForLogCollection(), "sdx");
                     LOGGER.info("YCloud SDX logs have been downloaded!");
                 } catch (Exception sdxError) {
                     LOGGER.warn("Error occured while downloading SDX logs!", sdxError);
@@ -306,14 +306,14 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         }
 
         if (distroXTestDto != null && distroXTestDto.getResponse() != null) {
-            if (distroXTestDto.getPrivateIps().isEmpty()) {
+            if (distroXTestDto.getPrivateIpsForLogCollection().isEmpty()) {
                 LOGGER.warn("Error occured while creating DistroX! So cannot download cluster logs from DistroX.");
             } else {
                 try {
                     String environmentCrnDistroX = distroXTestDto.getResponse().getEnvironmentCrn();
                     String distorxName = distroXTestDto.getResponse().getName();
                     LOGGER.info("Downloading YCloud DistroX logs...");
-                    yarnClusterLogs.downloadClusterLogs(environmentCrnDistroX, distorxName, distroXTestDto.getPrivateIps(), "distrox");
+                    yarnClusterLogs.downloadClusterLogs(environmentCrnDistroX, distorxName, distroXTestDto.getPrivateIpsForLogCollection(), "distrox");
                     LOGGER.info("YCloud DistroX logs have been downloaded!");
                 } catch (Exception distroxError) {
                     LOGGER.warn("Error occured while downloading DistroX logs!", distroxError);

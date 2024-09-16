@@ -145,12 +145,12 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     @Override
-    public void setPrivateIps(TestContext testContext) {
+    public void setPrivateIpsForLogCollection(TestContext testContext) {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 
     @Override
-    public Map<HostGroupType, String> getPrivateIps() {
+    public Map<HostGroupType, String> getPrivateIpsForLogCollection() {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 

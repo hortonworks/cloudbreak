@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
-import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -681,25 +681,25 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
-    public void setPrivateIps(TestContext testContext) {
+    public void setPrivateIpsForLogCollection(TestContext testContext) {
         refreshResponse(testContext, testContext.getSdxClient());
         for (HostGroupType hostGroupType : Set.of(MASTER, IDBROKER)) {
             String hostGroupName = hostGroupType.getName();
-            InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
-                    .findFirst()
-                    .orElseThrow(() -> new TestFailException("Cannot find valid instance group with this name: " + hostGroupName));
-            String privateIp = instanceMetaData.getPrivateIp();
-            if (StringUtils.isNotBlank(privateIp)) {
-                LOGGER.info("Found {} private IP for {} host group!", privateIp, hostGroupName);
-                privateIps.put(hostGroupType, privateIp);
-            } else {
-                LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
+            Optional<InstanceMetaDataV4Response> instanceMetaData = getInstanceMetaData(hostGroupName).stream().findFirst();
+            if (instanceMetaData.isPresent()) {
+                String privateIp = instanceMetaData.get().getPrivateIp();
+                if (StringUtils.isNotBlank(privateIp)) {
+                    LOGGER.info("Found {} private IP for {} host group!", privateIp, hostGroupName);
+                    privateIps.put(hostGroupType, privateIp);
+                } else {
+                    LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.get().getInstanceStatus());
+                }
             }
         }
     }
 
     @Override
-    public Map<HostGroupType, String> getPrivateIps() {
+    public Map<HostGroupType, String> getPrivateIpsForLogCollection() {
         return privateIps;
     }
 
@@ -711,13 +711,21 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     private Set<InstanceMetaDataV4Response> getInstanceMetaData(String hostGroupName) {
-        return Optional.ofNullable(getResponse().getStackV4Response())
+        Optional<InstanceGroupV4Response> instanceGroupV4Response = Optional.ofNullable(getResponse().getStackV4Response())
                 .map(StackV4Response::getInstanceGroups)
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(ig -> ig.getName().equals(hostGroupName))
-                .findFirst()
-                .orElseThrow(() -> new TestFailException(format("The expected '%s' host group is NOT present at SDX!", hostGroupName)))
-                .getMetadata();
+                .findFirst();
+        if (instanceGroupV4Response.isEmpty()) {
+            LOGGER.error("There is no valid '{}' group for SDX based on the StackV4Response, check test logs for possible failures.", hostGroupName);
+            return Set.of();
+        } else if (CollectionUtils.isEmpty(instanceGroupV4Response.get().getMetadata())) {
+            LOGGER.error("There is no valid metadata for '{}' group of SDX based on the StackV4Response, check test logs for possible failures.",
+                    hostGroupName);
+            return Set.of();
+        } else {
+            return instanceGroupV4Response.get().getMetadata();
+        }
     }
 }

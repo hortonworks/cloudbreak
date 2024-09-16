@@ -23,9 +23,9 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
 
     void setLastKnownFlowId(String lastKnownFlowId);
 
-    void setPrivateIps(TestContext testContext);
+    void setPrivateIpsForLogCollection(TestContext testContext);
 
-    Map<HostGroupType, String> getPrivateIps();
+    Map<HostGroupType, String> getPrivateIpsForLogCollection();
 
     CloudbreakTestDto valid();
 

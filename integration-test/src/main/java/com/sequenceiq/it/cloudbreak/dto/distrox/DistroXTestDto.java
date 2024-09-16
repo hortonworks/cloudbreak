@@ -474,7 +474,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public void setPrivateIps(TestContext testContext) {
+    public void setPrivateIpsForLogCollection(TestContext testContext) {
         refreshResponse(testContext, testContext.getCloudbreakClient());
         String hostGroupName = MASTER.getName();
         InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
@@ -490,7 +490,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public Map<HostGroupType, String> getPrivateIps() {
+    public Map<HostGroupType, String> getPrivateIpsForLogCollection() {
         return privateIps;
     }
 
