@@ -212,6 +212,9 @@ main() {
     log $LOG_FILE "started, version: $VERSION"
     log $LOG_FILE We will calculate the device names and not using the ATTACHED_VOLUME_UUID_LIST which is $ATTACHED_VOLUME_UUID_LIST
     device_name_list=$(get_device_names $LOG_FILE)
+    if [ -z "$(device_name_list)" ] || [ $? -ne 0 ]; then
+        exit_with_code $LOG_FILE 1 "some volumes are missing"
+    fi
     log $LOG_FILE The calculate device name list is $device_name_list
     export ATTACHED_VOLUME_UUID_LIST=$(get_uuid_list $LOG_FILE "$device_name_list") # ephemeral devices' uuid should not be returned
     log $LOG_FILE The calculated ATTACHED_VOLUME_UUID_LIST is $ATTACHED_VOLUME_UUID_LIST
