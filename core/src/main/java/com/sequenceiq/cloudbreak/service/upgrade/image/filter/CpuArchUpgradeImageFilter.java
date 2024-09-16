@@ -22,7 +22,7 @@ public class CpuArchUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        Architecture architecture = imageFilterParams.getCurrentImage().getArchitectureEnum();
+        Architecture architecture = Architecture.fromStringWithFallback(imageFilterParams.getCurrentImage().getArchitecture());
         List<Image> filteredImages = imageFilterResult.getImages().stream()
                 .filter(image -> Architecture.fromStringWithFallback(image.getArchitecture()) == architecture)
                 .toList();

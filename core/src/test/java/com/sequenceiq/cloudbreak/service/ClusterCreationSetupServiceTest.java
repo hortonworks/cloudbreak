@@ -101,16 +101,15 @@ class ClusterCreationSetupServiceTest {
                 .withImageId("id")
                 .build();
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
-        Component stackCmRepoConfig = new Component(ComponentType.CM_REPO_DETAILS, ComponentType.CM_REPO_DETAILS.name(), new Json(""), stack);
 
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
-        when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(imageComponent, stackCmRepoConfig));
+        when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(imageComponent));
 
         lenient().when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
-        when(clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(any(), any(), any(), any(), any()))
-                .thenReturn(new ArrayList<>());
+        when(clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(any(), any(), any(), any(), any())).
+                thenReturn(new ArrayList<>());
     }
 
     @Test

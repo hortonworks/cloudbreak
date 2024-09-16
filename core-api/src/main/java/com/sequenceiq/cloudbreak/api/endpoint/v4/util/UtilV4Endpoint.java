@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.util.UtilControllerDescription;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
-import com.sequenceiq.common.model.Architecture;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,8 +56,7 @@ public interface UtilV4Endpoint {
         @QueryParam("imageCatalogName") String imageCatalogName,
         @QueryParam("platform") String platform,
         @QueryParam("govCloud") boolean govCloud,
-        @QueryParam("os") String os,
-        @QueryParam("architecture") Architecture architecture) throws Exception;
+        @QueryParam("os") String os) throws Exception;
 
     @GET
     @Path("cloud_storage_matrix")

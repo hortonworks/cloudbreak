@@ -51,8 +51,17 @@ class CpuArchUpgradeImageFilterTest {
     }
 
     @Test
+    public void testCurrentImageArchitectureNull() {
+        when(currentImage.getArchitecture()).thenReturn(null);
+
+        ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(armImage, oldImage, x86Image)), imageFilterParams);
+
+        assertEquals(List.of(oldImage, x86Image), result.getImages());
+    }
+
+    @Test
     public void testCurrentImageArchitectureX86() {
-        when(currentImage.getArchitectureEnum()).thenReturn(Architecture.X86_64);
+        when(currentImage.getArchitecture()).thenReturn(Architecture.X86_64.getName());
 
         ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(armImage, oldImage, x86Image)), imageFilterParams);
 
@@ -61,7 +70,7 @@ class CpuArchUpgradeImageFilterTest {
 
     @Test
     public void testCurrentImageArchitectureArm64() {
-        when(currentImage.getArchitectureEnum()).thenReturn(Architecture.ARM64);
+        when(currentImage.getArchitecture()).thenReturn(Architecture.ARM64.getName());
 
         ImageFilterResult result = underTest.filter(new ImageFilterResult(List.of(armImage, oldImage, x86Image)), imageFilterParams);
 

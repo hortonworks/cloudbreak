@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Service
@@ -42,34 +41,33 @@ public class DefaultClouderaManagerRepoService {
 
     private Map<String, RepositoryInfo> entries = new HashMap<>();
 
-    public ClouderaManagerRepo getDefault(Long workspaceId, String clusterVersion, ImageCatalogPlatform platform,
-            com.sequenceiq.cloudbreak.cloud.model.Image image) throws CloudbreakImageCatalogException {
-        String osType = image.getOsType();
-        Architecture architecture = image.getArchitectureEnum();
-        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(workspaceId, platform, image.getOs(), architecture,
-                image.getImageCatalogName());
-        Map<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorMap = stackMatrixV4Response.getCdh();
+    public ClouderaManagerRepo getDefault(String osType, String os, String clusterType, String clusterVersion,
+        ImageCatalogPlatform platform) throws CloudbreakImageCatalogException {
+        if (StackType.CDH.name().equals(clusterType)) {
+            StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(platform, os);
+            Map<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorMap = stackMatrixV4Response.getCdh();
 
-        if (stackDescriptorMap != null) {
-            Optional<Entry<String, ClouderaManagerStackDescriptorV4Response>> descriptorEntry = stackDescriptorMap.entrySet().stream()
-                    .filter(stackDescriptorEntry ->
-                            clusterVersion == null || clusterVersion.equals(stackDescriptorEntry.getKey()))
-                    .max(Comparator.comparing(Entry::getKey));
-            if (descriptorEntry.isPresent()) {
-                Entry<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorEntry = descriptorEntry.get();
-                ClouderaManagerInfoV4Response clouderaManagerInfoJson = stackDescriptorEntry.getValue().getClouderaManager();
-                if (clouderaManagerInfoJson.getRepository().get(osType) != null) {
-                    ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-                    clouderaManagerRepo.setPredefined(false);
-                    clouderaManagerRepo.setVersion(clouderaManagerInfoJson.getVersion());
-                    clouderaManagerRepo.setBaseUrl(clouderaManagerInfoJson.getRepository().get(osType).getBaseUrl());
-                    clouderaManagerRepo.setGpgKeyUrl(clouderaManagerInfoJson.getRepository().get(osType).getGpgKeyUrl());
-                    return clouderaManagerRepo;
+            if (stackDescriptorMap != null) {
+                Optional<Entry<String, ClouderaManagerStackDescriptorV4Response>> descriptorEntry = stackDescriptorMap.entrySet().stream()
+                        .filter(stackDescriptorEntry ->
+                                clusterVersion == null || clusterVersion.equals(stackDescriptorEntry.getKey()))
+                        .max(Comparator.comparing(Entry::getKey));
+                if (descriptorEntry.isPresent()) {
+                    Entry<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorEntry = descriptorEntry.get();
+                    ClouderaManagerInfoV4Response clouderaManagerInfoJson = stackDescriptorEntry.getValue().getClouderaManager();
+                    if (clouderaManagerInfoJson.getRepository().get(osType) != null) {
+                        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+                        clouderaManagerRepo.setPredefined(false);
+                        clouderaManagerRepo.setVersion(clouderaManagerInfoJson.getVersion());
+                        clouderaManagerRepo.setBaseUrl(clouderaManagerInfoJson.getRepository().get(osType).getBaseUrl());
+                        clouderaManagerRepo.setGpgKeyUrl(clouderaManagerInfoJson.getRepository().get(osType).getGpgKeyUrl());
+                        return clouderaManagerRepo;
+                    }
                 }
             }
         }
 
-        LOGGER.info("Missing Cloudera Manager Repo information for os: {}, architecture: {}, clusterVersion: {}", osType, architecture, clusterVersion);
+        LOGGER.info("Missing Cloudera Manager Repo information for os: {} clusterType: {} clusterVersion: {}", osType, clusterType, clusterVersion);
         return null;
     }
 

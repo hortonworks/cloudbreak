@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 public class ImageBasedDefaultCDHEntriesTest {
@@ -78,7 +77,7 @@ public class ImageBasedDefaultCDHEntriesTest {
 
     @Test
     public void shouldReturnImageBasedDefaultCDHInfoMapByDefaultCdhImages() {
-        List<Image> imageList = getImages(OS, Architecture.X86_64);
+        List<Image> imageList = getImages(OS);
         when(images.getCdhImages()).thenReturn(imageList);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(images);
@@ -91,7 +90,7 @@ public class ImageBasedDefaultCDHEntriesTest {
     public void shouldFilterByOs() {
         String os = "redhat8";
         when(imageOsService.isSupported(os)).thenReturn(false);
-        List<Image> imageList = getImages(os, Architecture.X86_64);
+        List<Image> imageList = getImages(os);
         when(images.getCdhImages()).thenReturn(imageList);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(images);
@@ -101,8 +100,8 @@ public class ImageBasedDefaultCDHEntriesTest {
 
     @Test
     public void shouldPreferOs() {
-        List<Image> imageList = new ArrayList<>(getImages("redhat8", Architecture.X86_64));
-        List<Image> defaultOsImages = getImages(OS, Architecture.X86_64);
+        List<Image> imageList = new ArrayList<>(getImages("redhat8"));
+        List<Image> defaultOsImages = getImages(OS);
         imageList.addAll(defaultOsImages);
         when(images.getCdhImages()).thenReturn(imageList);
 
@@ -113,35 +112,25 @@ public class ImageBasedDefaultCDHEntriesTest {
     }
 
     @Test
-    public void shouldReturnImageBasedDefaultCDHInfoMapByPlatformAndOsAndArchitectureAndImageCatalog() throws CloudbreakImageCatalogException {
-        List<Image> x86Images = getImages(OS, Architecture.X86_64);
-        List<Image> x86Images2 = getImages("centos7", Architecture.X86_64);
-        List<Image> armImages = getImages(OS, Architecture.ARM64);
-        List<Image> armImages2 = getImages("centos7", Architecture.ARM64);
-        List<Image> imageList = new ArrayList<>();
-        imageList.addAll(x86Images);
-        imageList.addAll(x86Images2);
-        imageList.addAll(armImages);
-        imageList.addAll(armImages2);
+    public void shouldReturnImageBasedDefaultCDHInfoMapByPlatformAndImageCatalog() throws CloudbreakImageCatalogException {
+        List<Image> imageList = getImages(OS);
         when(images.getCdhImages()).thenReturn(imageList);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform)).thenReturn(statedImages);
 
-        Map<String, ImageBasedDefaultCDHInfo> x86Actual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.X86_64, IMAGE_CATALOG_NAME);
-        Image x86Image = x86Images.stream().filter(Image::isDefaultImage).findFirst().get();
-        verify(x86Image, x86Actual.get(IMAGE_VERSION));
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, IMAGE_CATALOG_NAME);
 
-        Map<String, ImageBasedDefaultCDHInfo> armActual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.ARM64, IMAGE_CATALOG_NAME);
-        Image armImage = armImages.stream().filter(Image::isDefaultImage).findFirst().get();
-        verify(armImage, armActual.get(IMAGE_VERSION));
+        Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
+
+        verify(image, actual.get(IMAGE_VERSION));
     }
 
     @Test
     public void shouldFallBackToAwsInCaseOfMissingCdhImages() throws CloudbreakImageCatalogException {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CloudPlatform.YARN.name());
-        List<Image> imageList = getImages(OS, Architecture.X86_64);
+        List<Image> imageList = getImages(OS);
         when(images.getCdhImages()).thenReturn(imageList);
         when(emptyImages.getCdhImages()).thenReturn(Collections.emptyList());
 
@@ -151,14 +140,14 @@ public class ImageBasedDefaultCDHEntriesTest {
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform)).thenReturn(emptyStatedImages);
         when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform)).thenReturn(statedImages);
 
-        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.X86_64, IMAGE_CATALOG_NAME);
+        Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, IMAGE_CATALOG_NAME);
 
         Image image = imageList.stream().filter(Image::isDefaultImage).findFirst().get();
 
         verify(image, actual.get(IMAGE_VERSION));
     }
 
-    private List<Image> getImages(String os, Architecture architecture) {
+    private List<Image> getImages(String os) {
         StackRepoDetails stackRepoDetails = new StackRepoDetails(getRepo(), null);
         ImageStackDetails stackDetails = new ImageStackDetails(null, stackRepoDetails, null);
         List<List<String>> parcels = getParcels();
@@ -169,12 +158,10 @@ public class ImageBasedDefaultCDHEntriesTest {
         when(defaultImage.getPreWarmParcels()).thenReturn(parcels);
         when(defaultImage.getPreWarmCsd()).thenReturn(PRE_WARM_CSD);
         when(defaultImage.getOs()).thenReturn(os);
-        when(defaultImage.getArchitecture()).thenReturn(architecture.getName());
 
         Image nonDefaultImage = mock(Image.class);
         when(nonDefaultImage.isDefaultImage()).thenReturn(false);
         when(nonDefaultImage.getOs()).thenReturn(os);
-        when(nonDefaultImage.getArchitecture()).thenReturn(architecture.getName());
 
         //Default image added double times to test
         //the algorithm is not failing on multiple default images for the same version
