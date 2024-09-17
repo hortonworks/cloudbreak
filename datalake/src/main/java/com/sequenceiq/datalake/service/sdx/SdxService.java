@@ -667,7 +667,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         MDCBuilder.buildMdcContext(sdxCluster);
 
-        validateSdxResizeRequest(sdxCluster, accountIdFromCrn, shape);
+        validateSdxResizeRequest(sdxCluster, accountIdFromCrn, shape, sdxClusterResizeRequest.isEnableMultiAz());
         StackV4Response stackV4Response = getDetail(clusterName,
                 Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName(), StackResponseEntries.EVENTS.getEntryName()), accountIdFromCrn);
 
@@ -694,7 +694,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);
         CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
-        customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + shape.getResizeSuffix());
+        String azSuffix = (shape == sdxCluster.getClusterShape()) ? "-az" : "";
+        customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + shape.getResizeSuffix() + azSuffix);
         stackRequest.setCustomDomain(customDomainSettingsV4Request);
 
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster);
@@ -1376,13 +1377,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 });
     }
 
-    private void validateSdxResizeRequest(SdxCluster sdxCluster, String accountId, SdxClusterShape shape) {
+    private void validateSdxResizeRequest(SdxCluster sdxCluster, String accountId, SdxClusterShape shape, boolean enableMultiAz) {
         if (!entitlementService.isDatalakeLightToMediumMigrationEnabled(accountId)) {
             throw new BadRequestException("Resizing of the data lake is not supported");
         }
-        if (sdxCluster.getClusterShape() == shape) {
-            throw new BadRequestException("SDX cluster already is of requested shape");
+        if (sdxCluster.getClusterShape() == shape && (!enableMultiAz || sdxCluster.isEnableMultiAz())) {
+            throw new BadRequestException("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ");
         }
+
         sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(accountId, sdxCluster.getEnvCrn())
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());

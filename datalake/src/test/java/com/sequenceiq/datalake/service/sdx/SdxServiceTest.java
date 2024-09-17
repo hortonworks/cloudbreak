@@ -302,6 +302,7 @@ class SdxServiceTest {
     @BeforeEach
     void initMocks() {
         lenient().when(platformConfig.getRazSupportedPlatforms()).thenReturn(List.of(AWS, AZURE, GCP));
+        lenient().when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(Set.of(AWS, AZURE, GCP));
         lenient().doNothing().when(platformAwareSdxConnector).validateIfOtherPlatformsHasSdx(any(), any());
     }
 
@@ -664,7 +665,8 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
                 sdxClusterResizeRequest));
-        assertEquals("SDX cluster already is of requested shape", badRequestException.getMessage());
+        assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
+                badRequestException.getMessage());
     }
 
     @Test
@@ -1047,10 +1049,127 @@ class SdxServiceTest {
         ObjectMapper mapper = new ObjectMapper();
         StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
         assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
-        assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
         assertEquals(stackV4Request.getNetwork().getAws().getSubnetId(), "subnet-123");
+    }
+
+    @Test
+    void testSdxResizeAwsSameShapeMultiAZClusterSuccess() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(true);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setEnableMultiAz(false);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+        mockEnvironmentCall(sdxClusterResizeRequest, AWS);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, sdxClusterResizeRequest));
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
+                any(DatalakeDrSkipOptions.class), eq(false));
+
+        SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
+        assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
+        assertEquals(runtime, createdSdxCluster.getRuntime());
+        assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
+        assertEquals(ENVIRONMENT_NAME, createdSdxCluster.getEnvName());
+
+        String stackRequestRawString = createdSdxCluster.getStackRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
+        assertEquals(CLUSTER_NAME + MEDIUM_DUTY_HA.getResizeSuffix() + "-az", stackV4Request.getCustomDomain().getHostname());
         assertEquals(stackV4Request.getNetwork().getAws().getSubnetId(), "subnet-123");
-        assertEquals(stackV4Request.getNetwork().getAws().getSubnetId(), "subnet-123");
+    }
+
+    @Test
+    void testSdxResizeAwsSameShapeSingleAZThrowsBadRequest() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(false);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setEnableMultiAz(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+        assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
+                badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxResizeAwsSameShapeSameAZThrowsBadRequest() throws Exception {
+        final String runtime = "7.2.10";
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        sdxClusterResizeRequest.setEnableMultiAz(true);
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(SDX_ID);
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime(runtime);
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setEnableMultiAz(true);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        stackV4Response.setCluster(clusterV4Response);
+        stackV4Response.setNetwork(getNetworkForCurrentDatalake());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
+        assertEquals("SDX cluster is already of requested shape and not resizing to multi AZ from single AZ",
+                badRequestException.getMessage());
     }
 
     @Test
