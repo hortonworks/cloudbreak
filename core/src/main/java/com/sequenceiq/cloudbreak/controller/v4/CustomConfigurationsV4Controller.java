@@ -101,7 +101,7 @@ public class CustomConfigurationsV4Controller implements CustomConfigurationsV4E
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CUSTOM_CONFIGS)
     public ServiceTypeV4Response getServiceTypes() {
-        return new ServiceTypeV4Response(Arrays.stream(AllServiceTypes.values()).map(Enum::toString).collect(Collectors.toList()));
+        return new ServiceTypeV4Response(Arrays.stream(AllServiceTypes.values()).map(Enum::toString).sorted().collect(Collectors.toList()));
     }
 
     @Override
