@@ -61,9 +61,18 @@ public class ClusterManagerUpgradeManagementService {
     }
 
     private boolean isClusterManagerUpgradeNecessary(String targetVersion, StackDto stackDto) {
-        Optional<String> installedCmVersion = cmServerQueryService.queryCmVersion(stackDto);
+        Optional<String> installedCmVersion = getInstalledCmVersion(stackDto);
         LOGGER.debug("Comparing installed CM version: {} with the target: {}", installedCmVersion, targetVersion);
         return installedCmVersion.isEmpty() || !targetVersion.equals(installedCmVersion.get());
+    }
+
+    private Optional<String> getInstalledCmVersion(StackDto stackDto) {
+        try {
+            return cmServerQueryService.queryCmVersion(stackDto);
+        } catch (Exception e) {
+            LOGGER.error("Failed while fetching CM version", e);
+            return Optional.empty();
+        }
     }
 
     private void validateCmVersionAfterUpgrade(StackDto stack, ClouderaManagerRepo clouderaManagerRepo) {

@@ -131,6 +131,25 @@ public class ClusterManagerUpgradeManagementServiceTest {
     }
 
     @Test
+    public void testUpgradeClusterManagerWhenCmVersionCollectionFails() throws CloudbreakOrchestratorException, CloudbreakException {
+        when(stackDto.getStack()).thenReturn(stack);
+        when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
+        when(cmServerQueryService.queryCmVersion(stackDto))
+                .thenThrow(new CloudbreakServiceException("version mismatch error"))
+                .thenReturn(Optional.of(CM_VERSION));
+
+        underTest.upgradeClusterManager(STACK_ID, false);
+
+        verify(clusterApiConnectors, times(3)).getConnector(stackDto);
+        verify(clusterApi).stopCluster(true);
+        verify(clusterApi).startClusterManagerAndAgents();
+        verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
+        verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
+        verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
+    }
+
+    @Test
     public void testUpgradeClusterManagerVersionIsDifferentAfterTheUpgrade() throws CloudbreakOrchestratorException, CloudbreakException {
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
         when(stackDto.getStack()).thenReturn(stack);
