@@ -7,7 +7,11 @@ git reset --hard origin/master
 
 FROM_REGEX="docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis[^[:space:]]+(.*)$"
 
-for i in $(find . -name "Dockerfile" -o -name "docker-build.sh" -o -name "docker-compose_template.yml"); do
+for i in $(find . -name "docker-compose_template.yml"); do
+    sed -E -i "s|$FROM_REGEX|$NEW_IMAGE\1|g" "$i"
+done
+
+for i in $(find . -path "*/fedramp/Dockerfile"); do
     sed -E -i "s|$FROM_REGEX|$NEW_IMAGE\1|g" "$i"
 done
 

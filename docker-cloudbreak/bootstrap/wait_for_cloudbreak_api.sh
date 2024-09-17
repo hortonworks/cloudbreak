@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 : <<USAGE
 ========================================================
 this script is intended to be run in a docker container
