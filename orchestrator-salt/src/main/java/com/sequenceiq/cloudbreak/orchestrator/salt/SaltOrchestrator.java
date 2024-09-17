@@ -247,8 +247,10 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void uploadSaltMasterConfig(SaltConnector sc, BootstrapParams params, Set<String> gatewayTargets, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
-        String masterConfig = "worker_threads: " + params.getMasterWorkerThreads();
-        uploadFileToTargets(sc, gatewayTargets, exitModel, "/etc/salt/master.d", "worker_threads.conf", masterConfig.getBytes(StandardCharsets.UTF_8));
+        if (params.getMasterWorkerThreads() != null) {
+            String masterConfig = "worker_threads: " + params.getMasterWorkerThreads();
+            uploadFileToTargets(sc, gatewayTargets, exitModel, "/etc/salt/master.d", "worker_threads.conf", masterConfig.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     @Override
@@ -1429,15 +1431,15 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void backupDryRunValidation(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
-        int databaseMaxDurationInMin)
-        throws CloudbreakOrchestratorFailedException {
+            int databaseMaxDurationInMin)
+            throws CloudbreakOrchestratorFailedException {
         int maxDatabaseDrRetry = databaseMaxDurationInMin == 0 ? maxDatabaseDrRetryDefault :
-            databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
+                databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
         LOGGER.info("Calling salt orchestrator on database backup/restore with retry number: {}", maxDatabaseDrRetry);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave =
-                    PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                        PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
                 saltPillarRunner.call();
             }
@@ -1450,15 +1452,15 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void restoreDryRunValidation(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
-        int databaseMaxDurationInMin)
-        throws CloudbreakOrchestratorFailedException {
+            int databaseMaxDurationInMin)
+            throws CloudbreakOrchestratorFailedException {
         int maxDatabaseDrRetry = databaseMaxDurationInMin == 0 ? maxDatabaseDrRetryDefault :
-            databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
+                databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
         LOGGER.info("Calling salt orchestrator on database backup/restore with retry number: {}", maxDatabaseDrRetry);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave =
-                    PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                        PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
                 saltPillarRunner.call();
             }
@@ -1836,7 +1838,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void executeSaltState(GatewayConfig gatewayConfig, Set<String> target, List<String> states, ExitCriteriaModel exitModel,
             Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            for (String state: states) {
+            for (String state : states) {
                 executeSingleSaltState(target, exitModel, maxRetry, maxRetryOnError, sc, state);
             }
         } catch (Exception e) {
@@ -1904,12 +1906,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
         Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
         return nodesWithDiskData.stream()
-            .map(node -> {
-                String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
-                String uuidList = uuidResponse.getOrDefault(node.getHostname(), "");
-                return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
-            })
-            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                .map(node -> {
+                    String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
+                    String uuidList = uuidResponse.getOrDefault(node.getHostname(), "");
+                    return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
+                })
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     @Override
@@ -1940,7 +1942,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, Map<String, String>> formatAndMountDisksAfterModifyingVolumesOnNodes(List<GatewayConfig> allGateway,
-        Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+            Set<Node> nodesWithDiskData, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));

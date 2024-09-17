@@ -16,7 +16,7 @@ public class BootstrapParams {
 
     private boolean restartNeeded;
 
-    private int masterWorkerThreads = DEFAULT_WORKER_THREADS;
+    private Integer masterWorkerThreads = DEFAULT_WORKER_THREADS;
 
     public String getCloud() {
         return cloud;
@@ -58,11 +58,11 @@ public class BootstrapParams {
         this.restartNeeded = restartNeeded;
     }
 
-    public int getMasterWorkerThreads() {
+    public Integer getMasterWorkerThreads() {
         return masterWorkerThreads;
     }
 
-    public void setMasterWorkerThreads(int masterWorkerThreads) {
+    public void setMasterWorkerThreads(Integer masterWorkerThreads) {
         this.masterWorkerThreads = masterWorkerThreads;
     }
 

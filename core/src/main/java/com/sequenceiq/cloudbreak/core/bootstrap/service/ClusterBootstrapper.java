@@ -328,7 +328,14 @@ public class ClusterBootstrapper {
         boolean saltBootstrapRestartNeededSupported = isSaltBootstrapRestartNeededSupported(stack);
         params.setSaltBootstrapFpSupported(saltBootstrapFpSupported);
         params.setRestartNeededFlagSupported(saltBootstrapRestartNeededSupported);
-        getMasterInstanceType(stack).ifPresent(instanceType -> params.setMasterWorkerThreads(calcMasterWorkerThreads(stack, instanceType)));
+        getMasterInstanceType(stack).ifPresent(instanceType -> {
+            try {
+                params.setMasterWorkerThreads(calcMasterWorkerThreads(stack, instanceType));
+            } catch (Exception e) {
+                LOGGER.info("Couldn't calculate salt master worker threads.", e);
+                params.setMasterWorkerThreads(null);
+            }
+        });
         LOGGER.debug("Created bootstrap params: {}", params);
         return params;
     }
