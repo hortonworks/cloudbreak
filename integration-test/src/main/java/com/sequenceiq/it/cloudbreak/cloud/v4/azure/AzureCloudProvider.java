@@ -287,7 +287,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
         return network.withSubnetIDs(getSubnetIds())
-                .withAzure(environmentNetworkParameters());
+                .withAzure(environmentNetworkParameters())
+                .withServiceEndpoints(serviceEndpoint());
     }
 
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
@@ -298,7 +299,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         environmentNetworkAzureParams.setResourceGroupName(network.getResourceGroupName());
         environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(network.getDatabasePrivateDnsZoneId());
         environmentNetworkAzureParams.setNoOutboundLoadBalancer(false);
-        environmentNetworkAzureParams.setFlexibleServerSubnetIds(network.getFlexibleServerSubnetIds());
         return environmentNetworkAzureParams;
     }
 

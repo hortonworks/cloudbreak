@@ -227,7 +227,7 @@ integrationtest:
         - cloud-daily.internal.0.westus2
       flexibleServerSubnetIds:
         - subnet_10_124_116_0-23
-      databasePrivateDnsZoneId: /subscriptions/3ddda1c7-d1f5-4e7b-ac81-0523f483b3b3/resourceGroups/cloud-daily/providers/Microsoft.Network/privateDnsZones/flexible.cloud-daily.postgres.database.azure.com
+      databasePrivateDnsZoneId: /subscriptions/3ddda1c7-d1f5-4e7b-ac81-0523f483b3b3/resourceGroups/cloud-daily/providers/Microsoft.Network/privateDnsZones/privatelink.postgres.database.azure.com
     credential:
       appId:
       appPassword:
