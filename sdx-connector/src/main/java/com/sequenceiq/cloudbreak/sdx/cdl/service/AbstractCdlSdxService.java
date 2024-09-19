@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.cdl.service;
 
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_CONTAINERIZED_DATALKE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_CONTAINERIZED_DATALAKE;
 
 import jakarta.inject.Inject;
 
@@ -31,7 +31,7 @@ public abstract class AbstractCdlSdxService implements PlatformAwareSdxCommonSer
 
     @Override
     public boolean isPlatformEntitled(String accountId) {
-        return entitlementService.isEntitledFor(accountId, ENABLE_CONTAINERIZED_DATALKE);
+        return entitlementService.isEntitledFor(accountId, ENABLE_CONTAINERIZED_DATALAKE);
     }
 
     public boolean isEnabled(String crn) {
