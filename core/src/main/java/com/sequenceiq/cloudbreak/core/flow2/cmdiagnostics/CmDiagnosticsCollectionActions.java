@@ -112,9 +112,6 @@ public class CmDiagnosticsCollectionActions {
                         String storageLocation = getStorageLocation(parameters);
                         message = "Upload location: " + storageLocation;
                         break;
-                    case ENG:
-                        message = "Engineering will receive the logs.";
-                        break;
                     case SUPPORT:
                         message = String.format("Diagnostics bundle sent to support. Ticket: '%s' Comments: '%s'",
                                 parameters.getTicketNumber(), parameters.getComments());

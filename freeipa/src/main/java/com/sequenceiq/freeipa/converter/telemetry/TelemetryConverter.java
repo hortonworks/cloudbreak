@@ -33,8 +33,6 @@ public class TelemetryConverter {
 
     private final boolean freeIpaTelemetryEnabled;
 
-    private final boolean clusterLogsCollection;
-
     private final boolean useSharedAltusCredential;
 
     private final String databusEndpoint;
@@ -49,7 +47,6 @@ public class TelemetryConverter {
             MonitoringUrlResolver monitoringUrlResolver,
             EntitlementService entitlementService) {
         this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
-        this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.monitoringUrlResolver = monitoringUrlResolver;
@@ -161,15 +158,6 @@ public class TelemetryConverter {
 
     private Features createFeaturesFromRequest(FeaturesRequest featuresRequest) {
         Features features = new Features();
-        if (clusterLogsCollection) {
-            if (featuresRequest != null && featuresRequest.getClusterLogsCollection() != null) {
-                features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
-                LOGGER.debug("Fill report deployment log settings from feature request");
-            } else {
-                LOGGER.debug("Auto-fill report deployment logs settings with defaults. (disabled)");
-                features.addClusterLogsCollection(false);
-            }
-        }
         if (useSharedAltusCredential) {
             features.addUseSharedAltusCredential(true);
         }
@@ -190,7 +178,6 @@ public class TelemetryConverter {
         FeaturesResponse featuresResponse = null;
         if (features != null) {
             featuresResponse = new FeaturesResponse();
-            featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             if (features.getCloudStorageLogging() != null) {
                 featuresResponse.setCloudStorageLogging(features.getCloudStorageLogging());

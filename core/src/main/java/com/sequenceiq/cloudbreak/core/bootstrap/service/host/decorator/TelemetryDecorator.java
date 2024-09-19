@@ -155,7 +155,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
         DatabusContext.Builder builder = DatabusContext.builder();
         DataBusCredential dbusCredential = getOrRefreshDataBusCredential(stack, accountId, telemetry, dataBusCredential, cdpAccessKeyType);
-        if (telemetry.isAnyDataBusBasedFeatureEnabled()) {
+        if (telemetry.isMeteringFeatureEnabled()) {
             builder.enabled();
         }
         if (dbusCredential != null && dbusCredential.isValid()) {
@@ -238,9 +238,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         if (telemetry.isCloudStorageLoggingEnabled() && logging != null
                 && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs(), logging.getCloudwatch())) {
             builder.enabled().cloudStorageLogging();
-        }
-        if (telemetry.isClusterLogsCollectionEnabled()) {
-            builder.enabled().collectDeploymentLogs();
         }
         return builder
                 .withVmLogs(vmLogList)

@@ -42,8 +42,6 @@ filecollector_collect_start:
   cmd.run:
 {% if filecollector.destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
     - name: "cdp-telemetry filecollector collect --config /opt/cdp-telemetry/conf/filecollector-collect.yaml {{ extra_params }}"
-{% elif filecollector.destination == "ENG" %}
-    - name: "cdp-telemetry filecollector collect --config /opt/cdp-telemetry/conf/filecollector-eng.yaml {{ extra_params }}"
 {% else %}
     - name: 'echo Not supported destination: {{ filecollector.destination }}'
 {% endif %}

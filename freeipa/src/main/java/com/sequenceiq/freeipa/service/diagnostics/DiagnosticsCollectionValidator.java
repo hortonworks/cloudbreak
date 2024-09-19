@@ -67,11 +67,6 @@ public class DiagnosticsCollectionValidator extends AbstractDiagnosticsCollectio
     }
 
     @Override
-    public boolean isClusterLogCollectionDisabled(Telemetry telemetry) {
-        return !telemetry.isClusterLogsCollectionEnabled();
-    }
-
-    @Override
     public String getStackType() {
         return "FreeIPA";
     }

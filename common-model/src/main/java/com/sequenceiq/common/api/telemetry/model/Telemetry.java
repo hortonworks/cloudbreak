@@ -118,17 +118,6 @@ public class Telemetry implements Serializable {
     }
 
     @JsonIgnore
-    public boolean isClusterLogsCollectionEnabled() {
-        return features != null && features.getClusterLogsCollection() != null
-                && features.getClusterLogsCollection().getEnabled();
-    }
-
-    @JsonIgnore
-    public boolean isAnyDataBusBasedFeatureEnabled() {
-        return isClusterLogsCollectionEnabled() || isMeteringFeatureEnabled();
-    }
-
-    @JsonIgnore
     public boolean isUseSharedAltusCredentialEnabled() {
         return features != null && features.getUseSharedAltusCredential() != null
                 && features.getUseSharedAltusCredential().getEnabled();

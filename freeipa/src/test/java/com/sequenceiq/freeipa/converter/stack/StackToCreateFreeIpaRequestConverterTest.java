@@ -245,7 +245,6 @@ public class StackToCreateFreeIpaRequestConverterTest {
         logging.setCloudwatch(cloudwatchParamsStorage);
         telemetry.setLogging(logging);
         Features features = new Features();
-        features.setClusterLogsCollection(new FeatureSetting());
         features.setMonitoring(new FeatureSetting());
         features.setCloudStorageLogging(new FeatureSetting());
         features.setWorkloadAnalytics(new FeatureSetting());
@@ -362,7 +361,6 @@ public class StackToCreateFreeIpaRequestConverterTest {
         assertEquals(gcsStorage, telemetryRequest.getLogging().getGcs());
         assertNotNull(telemetryRequest.getLogging().getCloudwatch());
         assertNotNull(telemetryRequest.getFeatures());
-        assertNotNull(telemetryRequest.getFeatures().getClusterLogsCollection());
         assertNotNull(telemetryRequest.getFeatures().getMonitoring());
         assertNotNull(telemetryRequest.getFeatures().getCloudStorageLogging());
         assertNotNull(telemetryRequest.getFeatures().getWorkloadAnalytics());

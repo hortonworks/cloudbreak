@@ -1,7 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 # CONFIGURED BY SALT - do not edit
-{% if providerPrefix != "databus" or fluent.dbusClusterLogsCollection %}
+{% if providerPrefix != "databus" %}
 <worker {{ workerIndex }}>{% for logfile in telemetry.logs %}{% if not ("type" in logfile and logfile["type"] == "salt" and not fluent.dbusIncludeSaltLogs) %}
    <source>
      @type tail

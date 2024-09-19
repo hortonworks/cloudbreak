@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -685,7 +684,6 @@ class EnvironmentModificationServiceTest {
         String accountId = "myAccountId";
         String envName = "myEnvName";
         EnvironmentFeatures featuresInput = new EnvironmentFeatures();
-        featuresInput.addClusterLogsCollection(true);
         Environment environment = new Environment();
         environment.setTelemetry(new EnvironmentTelemetry());
         when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(envName, accountId))
@@ -696,7 +694,6 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.changeTelemetryFeaturesByEnvironmentName(accountId, envName, featuresInput);
 
         verify(environmentService).save(any());
-        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test
@@ -705,7 +702,6 @@ class EnvironmentModificationServiceTest {
         String envCrn = "myEnvCrn";
         EnvironmentFeatures featuresInput = new EnvironmentFeatures();
         featuresInput.addCloudStorageLogging(false);
-        featuresInput.addClusterLogsCollection(true);
         Environment environment = new Environment();
         environment.setTelemetry(new EnvironmentTelemetry());
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(envCrn, accountId))
@@ -717,7 +713,6 @@ class EnvironmentModificationServiceTest {
 
         verify(environmentService).save(any());
         assertFalse(environment.getTelemetry().getFeatures().getCloudStorageLogging().getEnabled());
-        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test

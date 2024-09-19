@@ -204,9 +204,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 && ObjectUtils.anyNotNull(logging.getS3(), logging.getAdlsGen2(), logging.getGcs(), logging.getCloudwatch())) {
             builder.enabled().cloudStorageLogging();
         }
-        if (telemetry.isClusterLogsCollectionEnabled()) {
-            builder.enabled().collectDeploymentLogs();
-        }
         return builder
                 .withVmLogs(vmLogList)
                 .withCloudRegion(stack.getRegion())
@@ -218,7 +215,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         if (telemetry == null) {
             return builder.build();
         }
-        if (telemetry.isAnyDataBusBasedFeatureEnabled()) {
+        if (telemetry.isMeteringFeatureEnabled()) {
             LOGGER.debug("Apply DataBus related configurations.");
             builder.enabled();
             if (entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId())) {

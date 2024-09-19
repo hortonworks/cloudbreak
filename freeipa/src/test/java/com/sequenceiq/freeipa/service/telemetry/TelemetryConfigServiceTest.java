@@ -56,6 +56,7 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -161,7 +162,7 @@ public class TelemetryConfigServiceTest {
         // THEN
         assertEquals(FluentClusterType.FREEIPA, result.getClusterType());
         assertEquals("myuuid", result.getPaywallConfigs().get("paywall_username"));
-        assertTrue(result.getLogShipperContext().isEnabled());
+        assertFalse(result.getLogShipperContext().isEnabled());
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertFalse(result.getMeteringContext().isEnabled());
@@ -309,11 +310,15 @@ public class TelemetryConfigServiceTest {
         return stack;
     }
 
-    private Telemetry telemetry(boolean cloudLogging, boolean monitoringEnabled, boolean clusterDeploymentLogs) {
+    private Telemetry telemetry(boolean cloudLogging, boolean monitoringEnabled, boolean databusEnabled) {
         Telemetry telemetry = new Telemetry();
         telemetry.setDatabusEndpoint("myendpoint");
         Features features = new Features();
-        features.addClusterLogsCollection(clusterDeploymentLogs);
+        if (databusEnabled) {
+            FeatureSetting metering = new FeatureSetting();
+            metering.setEnabled(Boolean.TRUE);
+            features.setMetering(metering);
+        }
         if (monitoringEnabled) {
             Monitoring monitoring = new Monitoring();
             monitoring.setRemoteWriteUrl("remoteWriteUrl");

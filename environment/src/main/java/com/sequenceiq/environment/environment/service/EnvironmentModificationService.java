@@ -261,11 +261,6 @@ public class EnvironmentModificationService {
         if (telemetry != null) {
             EnvironmentFeatures actualFeatures = telemetry.getFeatures();
             if (actualFeatures != null) {
-                if (features.getClusterLogsCollection() != null) {
-                    actualFeatures.setClusterLogsCollection(features.getClusterLogsCollection());
-                    LOGGER.debug("Updating cluster log collection (environment telemetry feature): {}.",
-                            features.getClusterLogsCollection().getEnabled());
-                }
                 if (features.getWorkloadAnalytics() != null) {
                     actualFeatures.setWorkloadAnalytics(features.getWorkloadAnalytics());
                     LOGGER.debug("Updating workload analytics (environment telemetry feature): {}.",

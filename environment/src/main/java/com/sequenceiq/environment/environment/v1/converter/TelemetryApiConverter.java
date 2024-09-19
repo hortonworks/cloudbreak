@@ -34,8 +34,6 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 @Component
 public class TelemetryApiConverter {
 
-    private final boolean clusterLogsCollection;
-
     private final boolean useSharedAltusCredential;
 
     private final MonitoringUrlResolver monitoringUrlResolver;
@@ -46,7 +44,6 @@ public class TelemetryApiConverter {
 
     public TelemetryApiConverter(TelemetryConfiguration configuration, MonitoringUrlResolver monitoringUrlResolver, EntitlementService entitlementService,
             StorageLocationDecorator storageLocationDecorator) {
-        clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.entitlementService = entitlementService;
         this.monitoringUrlResolver = monitoringUrlResolver;
         useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
@@ -118,7 +115,6 @@ public class TelemetryApiConverter {
         FeaturesRequest featuresRequest = null;
         if (features != null) {
             featuresRequest = new FeaturesRequest();
-            featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresRequest.setMonitoring(features.getMonitoring());
             setCloudStorageLoggingOnFeaturesModel(features, featuresRequest);
             setMonitoringOnFeaturesModel(features, featuresRequest, accountId);
@@ -130,7 +126,6 @@ public class TelemetryApiConverter {
         FeaturesResponse featuresResponse = null;
         if (features != null) {
             featuresResponse = new FeaturesResponse();
-            featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             setCloudStorageLoggingOnFeaturesModel(features, featuresResponse);
@@ -171,7 +166,6 @@ public class TelemetryApiConverter {
             if (useSharedAltusCredential) {
                 features.addUseSharedAltusredential(true);
             }
-            setClusterLogsCollectionFromAccountAndRequest(featuresRequest, accountFeatures, features);
             setMonitoringFromAccountAndRequest(featuresRequest, accountFeatures, features, accountId);
             setCloudStorageLoggingFromAccountAndRequest(featuresRequest, accountFeatures, features);
             if (accountFeatures.getWorkloadAnalytics() != null) {
@@ -192,19 +186,6 @@ public class TelemetryApiConverter {
             features.setCloudStorageLogging(featuresRequest.getCloudStorageLogging());
         } else {
             features.addCloudStorageLogging(true);
-        }
-    }
-
-    private void setClusterLogsCollectionFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features) {
-        if (clusterLogsCollection) {
-            if (accountFeatures.getClusterLogsCollection() != null) {
-                features.setClusterLogsCollection(accountFeatures.getClusterLogsCollection());
-            }
-            if (featuresRequest.getClusterLogsCollection() != null) {
-                features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
-            } else {
-                features.addClusterLogsCollection(false);
-            }
         }
     }
 

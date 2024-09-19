@@ -268,12 +268,6 @@ function doctor() {
         log "Metering buffer size: $act_buffer_size Bytes"
       fi
     fi
-  elif [[ "$is_installed" == "0" ]]; then
-    log "Service cdp-logging-agent is installed, but not active. Check if it can be started."
-    if [[ -f "/etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf" ]]; then
-      log "Service cdp-logging-agent already configured by salt and not running, so starting it"
-      systemctl start cdp-logging-agent
-    fi
   fi
   do_exit 0 "LOGGING AGENT DOCTOR OPERATION FINISHED"
 }

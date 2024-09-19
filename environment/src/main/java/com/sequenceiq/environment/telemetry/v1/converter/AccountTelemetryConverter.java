@@ -36,7 +36,6 @@ public class AccountTelemetryConverter {
         FeaturesResponse response = null;
         if (source != null) {
             response = new FeaturesResponse();
-            response.setClusterLogsCollection(source.getClusterLogsCollection());
             response.setMonitoring(source.getMonitoring());
             response.setWorkloadAnalytics(source.getWorkloadAnalytics());
             if (source.getCloudStorageLogging() != null) {
@@ -52,7 +51,6 @@ public class AccountTelemetryConverter {
         Features features = null;
         if (request != null) {
             features = new Features();
-            features.setClusterLogsCollection(request.getClusterLogsCollection());
             features.setMonitoring(request.getMonitoring());
             features.setWorkloadAnalytics(request.getWorkloadAnalytics());
         }

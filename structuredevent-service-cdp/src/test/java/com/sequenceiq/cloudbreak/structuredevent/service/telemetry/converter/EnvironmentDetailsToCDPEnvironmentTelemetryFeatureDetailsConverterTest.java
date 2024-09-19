@@ -48,19 +48,15 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverterT
 
     @Test
     public void testConversionTelemetry() {
-        FeatureSetting clusterLogsCollection = new FeatureSetting();
-        clusterLogsCollection.setEnabled(Boolean.TRUE);
-
         FeatureSetting workloadAnalytics = new FeatureSetting();
         workloadAnalytics.setEnabled(Boolean.FALSE);
 
         when(environmentDetails.getEnvironmentTelemetryFeatures()).thenReturn(environmentFeatures);
-        when(environmentFeatures.getClusterLogsCollection()).thenReturn(clusterLogsCollection);
         when(environmentFeatures.getWorkloadAnalytics()).thenReturn(workloadAnalytics);
 
         UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("true", telemetryFeatureDetails.getClusterLogsCollection());
+        Assertions.assertEquals("", telemetryFeatureDetails.getClusterLogsCollection());
         Assertions.assertEquals("false", telemetryFeatureDetails.getWorkloadAnalytics());
     }
 }

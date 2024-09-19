@@ -44,11 +44,6 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     }
 
     @Override
-    public boolean isClusterLogCollectionDisabled(Telemetry telemetry) {
-        return !telemetry.isClusterLogsCollectionEnabled();
-    }
-
-    @Override
     public void validateCloudStorageSettings(Telemetry telemetry, String stackName,
             ValidationResult.ValidationResultBuilder validationBuilder) {
         if (telemetry.getLogging() == null) {

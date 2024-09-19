@@ -135,8 +135,6 @@ public class DiagnosticsOperationsService {
                 return UsageProto.CDPVMDiagnosticsDestination.Value.CLOUD_STORAGE;
             case SUPPORT:
                 return UsageProto.CDPVMDiagnosticsDestination.Value.SUPPORT;
-            case ENG:
-                return UsageProto.CDPVMDiagnosticsDestination.Value.ENGINEERING;
             default:
                 return UsageProto.CDPVMDiagnosticsDestination.Value.UNSET;
         }

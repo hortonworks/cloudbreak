@@ -15,6 +15,7 @@ public abstract class FeaturesBase implements Serializable {
     @Schema(description = TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private FeatureSetting workloadAnalytics;
 
+    @Deprecated
     @JsonProperty("clusterLogsCollection")
     @Schema(description = TelemetryModelDescription.TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED)
     private FeatureSetting clusterLogsCollection;
@@ -35,10 +36,12 @@ public abstract class FeaturesBase implements Serializable {
         this.workloadAnalytics = workloadAnalytics;
     }
 
+    @Deprecated
     public FeatureSetting getClusterLogsCollection() {
         return clusterLogsCollection;
     }
 
+    @Deprecated
     public void setClusterLogsCollection(FeatureSetting clusterLogsCollection) {
         this.clusterLogsCollection = clusterLogsCollection;
     }
@@ -66,12 +69,6 @@ public abstract class FeaturesBase implements Serializable {
     }
 
     @JsonIgnore
-    public void addClusterLogsCollection(boolean enabled) {
-        clusterLogsCollection = new FeatureSetting();
-        clusterLogsCollection.setEnabled(enabled);
-    }
-
-    @JsonIgnore
     public void addMonitoring(boolean enabled) {
         monitoring = new FeatureSetting();
         monitoring.setEnabled(enabled);
@@ -87,7 +84,6 @@ public abstract class FeaturesBase implements Serializable {
     public String toString() {
         return "FeaturesBase{" +
                 "workloadAnalytics=" + workloadAnalytics +
-                ", clusterLogsCollection=" + clusterLogsCollection +
                 ", monitoring=" + monitoring +
                 ", cloudStorageLogging=" + cloudStorageLogging +
                 '}';

@@ -311,9 +311,6 @@ public class DiagnosticsCollectionActions {
                         String storageLocation = getStorageLocation(parameters);
                         message = "Upload location: " + storageLocation;
                         break;
-                    case ENG:
-                        message = "Engineering will receive the logs.";
-                        break;
                     case SUPPORT:
                         if (StringUtils.isNotBlank(parameters.getIssue())) {
                             message = String.format("Diagnostics have been sent to support. " +

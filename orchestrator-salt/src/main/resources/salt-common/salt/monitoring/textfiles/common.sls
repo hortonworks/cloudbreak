@@ -14,9 +14,6 @@
 {%- if salt['pillar.get']('fluent:dbusMeteringEnabled') %}
   {% do logging_types_arr.append("metering_databus") %}
 {%- endif %}
-{%- if salt['pillar.get']('fluent:dbusClusterLogsCollection') %}
-  {% do logging_types_arr.append("databus_service_logs") %}
-{%- endif %}
 
 /var/lib/node_exporter/scripts/salt.sh:
   file.managed:

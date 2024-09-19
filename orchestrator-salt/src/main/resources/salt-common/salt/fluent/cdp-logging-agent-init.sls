@@ -1,7 +1,6 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {% set os = salt['grains.get']('os') %}
-{% set dbus_lock_exists = salt['file.file_exists' ]('/etc/cdp-logging-agent/databus_bundle.lock') %}
 {% set restart_sleep_time = 1200 %}
 {% set cpuarch = salt['grains.get']('cpuarch') %}
 
@@ -25,14 +24,6 @@ install_cdp_logging_agent_warning:
     - name: echo "CDP logging agent cannot be installed to {{ os }}"
 {% endif %}
 {% endif %}
-
-/etc/cdp-logging-agent/post-start.sh:
-  file.managed:
-    - source: salt://fluent/template/post-start.sh.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: '0750'
 
 /etc/cdp-logging-agent/pos:
   file.directory:
@@ -66,35 +57,17 @@ fluent_stop:
     - group: "{{ fluent.group }}"
     - mode: '0640'
     - context:
-        monitorFilesForDbusProcessing: "true"
-        numberOfWorkers: {{ fluent.numberOfWorkers }}
-
-/etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf:
-  file.managed:
-    - source: salt://fluent/template/logging-agent.conf.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: '0640'
-    - context:
-        monitorFilesForDbusProcessing: "false"
         numberOfWorkers: {{ fluent.numberOfWorkers }}
 
 copy_cdp_logging_agent_conf:
   cmd.run:
-{%- if not fluent.dbusClusterLogsCollection or (dbus_lock_exists and (not fluent.dbusClusterLogsCollectionDisableStop)) %}
-    - name: "cp /etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf"
-    - onlyif: "! diff /etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf"
-{% else %}
     - name: "cp /etc/cdp-logging-agent/cdp-logging-agent_bundle_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf"
     - onlyif: "! diff /etc/cdp-logging-agent/cdp-logging-agent_bundle_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf"
-{% endif %}
 
 {% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 /etc/cdp-logging-agent/input.conf:
-  file.managed:{% if telemetry.logs %}
-    - source: salt://fluent/template/input_vm_logs.conf.j2{% else %}
-    - source: salt://fluent/template/input.conf.j2{% endif %}
+  file.managed:
+    - source: salt://fluent/template/input_vm_logs.conf.j2
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
@@ -108,48 +81,6 @@ copy_cdp_logging_agent_conf:
 /etc/cdp-logging-agent/databus_metering.conf:
    file.managed:
     - source: salt://fluent/template/databus_metering.conf.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: 640
-
-/etc/cdp-logging-agent/input_databus.conf:
-  file.managed:{% if telemetry.logs %}
-    - source: salt://fluent/template/input_vm_logs.conf.j2{% else %}
-    - source: salt://fluent/template/input.conf.j2{% endif %}
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: 640
-    - context:
-        providerPrefix: "databus"
-        workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
-
-/etc/cdp-logging-agent/input_databus_stream.conf:
-  file.managed:
-    - source: salt://fluent/template/input_databus_stream.conf.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: 640
-    - context:
-        workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
-
-/etc/cdp-logging-agent/filter_databus.conf:
-  file.managed:
-    - name: /etc/cdp-logging-agent/filter_databus.conf
-    - source: salt://fluent/template/filter.conf.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: 640
-    - context:
-        providerPrefix: "databus"
-        workerIndex: {{ fluent.clusterLogsCollectionWorkerIndex }}
-
-/etc/cdp-logging-agent/output_databus.conf:
-  file.managed:
-    - source: salt://fluent/template/output_databus.conf.j2
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
@@ -213,9 +144,7 @@ fluentd_systemd_reload_and_run:
       - file: /etc/systemd/system/cdp-logging-agent.service{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
       - file: /etc/cdp-logging-agent/input.conf
       - file: /etc/cdp-logging-agent/output.conf{% endif %}
-      {% if cpuarch != 'aarch64' %}- file: /etc/cdp-logging-agent/input_databus.conf
-      - file: /etc/cdp-logging-agent/filter_databus.conf
-      - file: /etc/cdp-logging-agent/databus_metering.conf{% endif %}
+      {% if cpuarch != 'aarch64' %}- file: /etc/cdp-logging-agent/databus_metering.conf{% endif %}
 
   service.running:
     - enable: True
@@ -224,10 +153,7 @@ fluentd_systemd_reload_and_run:
        - file: /etc/systemd/system/cdp-logging-agent.service{% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
        - file: /etc/cdp-logging-agent/input.conf
        - file: /etc/cdp-logging-agent/output.conf{% endif %}
-       {% if cpuarch != 'aarch64' %}- file: /etc/cdp-logging-agent/input_databus.conf
-       - file: /etc/cdp-logging-agent/filter_databus.conf
-       - file: /etc/cdp-logging-agent/output_databus.conf
-       - file: /etc/cdp-logging-agent/databus_metering.conf{% endif %}
+       {% if cpuarch != 'aarch64' %}- file: /etc/cdp-logging-agent/databus_metering.conf{% endif %}
 {% else %}
 
 fs.file-max:
@@ -242,13 +168,5 @@ fluent_start:
       - CDP_LOGGING_AGENT_GROUP: "{{ fluent.group }}"
 {% endif %}
 
-{%- if not fluent.dbusClusterLogsCollectionDisableStop %}
-fluentd_delalyed_restart:
-   cmd.run:
-    - names:
-        - "nohup sleep 30; cp /etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf &"
-        - "nohup sh /etc/cdp-logging-agent/post-start.sh {{ restart_sleep_time }} > /etc/cdp-logging-agent/delayed_restart.out 2>&1 &"
-    - onlyif: "test -f /etc/cdp-logging-agent/cdp-logging-agent.conf && ! test -f /etc/cdp-logging-agent/databus_bundle.lock && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/cdp-logging-agent/cdp-logging-agent.conf"
-{% endif %}
 include:
   - fluent.crontab

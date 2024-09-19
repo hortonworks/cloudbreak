@@ -24,8 +24,6 @@ fluent:
   azureInstanceMsi:
   azureIdBrokerInstanceMsi:
   azureStorageAccessKey:
-  dbusClusterLogsCollection: false
-  dbusClusterLogsCollectionDisableStop: false
   dbusMeteringEnabled: false
   dbusMeteringAppName:
   dbusMeteringStreamName:

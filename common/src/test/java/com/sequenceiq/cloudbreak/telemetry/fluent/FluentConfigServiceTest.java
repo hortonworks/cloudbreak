@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
-import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -49,10 +48,8 @@ public class FluentConfigServiceTest {
     public void setUp() {
         MeteringConfiguration meteringConfiguration =
                 new MeteringConfiguration(false, "dbusApp", "dbusStream", false);
-        ClusterLogsCollectionConfiguration logCollectionConfig =
-                new ClusterLogsCollectionConfiguration(false, null, null, false);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(null, meteringConfiguration, logCollectionConfig, null, null);
+                new TelemetryConfiguration(null, meteringConfiguration, null, null);
         underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),
                 new AnonymizationRuleResolver(), telemetryConfiguration);
     }
@@ -99,7 +96,6 @@ public class FluentConfigServiceTest {
         assertEquals(true, result.get("enabled"));
         assertEquals(true, result.get("cloudStorageLoggingEnabled"));
         assertEquals(true, result.get("dbusMeteringEnabled"));
-        assertEquals(true, result.get("dbusClusterLogsCollection"));
         assertEquals("mybucket", result.get("s3LogArchiveBucketName"));
         assertEquals("cluster-logs/datahub/cl1", result.get("logFolderName"));
         assertEquals("s3", result.get("providerPrefix"));
@@ -211,7 +207,6 @@ public class FluentConfigServiceTest {
         LogShipperContext logShipperContext = LogShipperContext
                 .builder()
                 .enabled()
-                .collectDeploymentLogs()
                 .cloudStorageLogging()
                 .withCloudRegion(REGION_SAMPLE)
                 .withVmLogs(new ArrayList<>())

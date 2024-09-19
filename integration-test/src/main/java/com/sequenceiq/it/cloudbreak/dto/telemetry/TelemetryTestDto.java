@@ -35,18 +35,15 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
 
     public TelemetryTestDto withReportClusterLogs() {
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addClusterLogsCollection(true);
         getRequest().setFeatures(featuresRequest);
         Map<String, Object> fluentAttributes = new HashMap<>();
         fluentAttributes.put("dbusIncludeSaltLogs", true);
-        fluentAttributes.put("dbusClusterLogsCollectionDisableStop", true);
         getRequest().setFluentAttributes(fluentAttributes);
         return this;
     }
 
     public TelemetryTestDto withOnlyCloudStorageLogging() {
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addClusterLogsCollection(false);
         featuresRequest.addWorkloadAnalytics(false);
         featuresRequest.addCloudStorageLogging(true);
         getRequest().setFeatures(featuresRequest);

@@ -56,7 +56,7 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
         Stack stack = stackService.getStackById(stackId);
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
-            if (telemetry.isClusterLogsCollectionEnabled() || StringUtils.isNotBlank(stack.getDatabusCredential())) {
+            if (StringUtils.isNotBlank(stack.getDatabusCredential())) {
                 LOGGER.info("Cleanup fluent machine user.");
                 ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),

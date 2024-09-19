@@ -10,8 +10,6 @@ public class LogShipperContext {
 
     private final boolean cloudStorageLogging;
 
-    private final boolean collectDeploymentLogs;
-
     private final String cloudRegion;
 
     private final List<VmLog> vmLogs;
@@ -19,7 +17,6 @@ public class LogShipperContext {
     private LogShipperContext(Builder builder) {
         this.enabled = builder.enabled;
         this.cloudStorageLogging = builder.cloudStorageLogging;
-        this.collectDeploymentLogs = builder.collectDeploymentLogs;
         this.cloudRegion = builder.cloudRegion;
         this.vmLogs = builder.vmLogs;
     }
@@ -30,10 +27,6 @@ public class LogShipperContext {
 
     public boolean isCloudStorageLogging() {
         return cloudStorageLogging;
-    }
-
-    public boolean isCollectDeploymentLogs() {
-        return collectDeploymentLogs;
     }
 
     public List<VmLog> getVmLogs() {
@@ -53,7 +46,6 @@ public class LogShipperContext {
         return "LogShipperContext{" +
                 "enabled=" + enabled +
                 ", cloudStorageLogging=" + cloudStorageLogging +
-                ", collectDeploymentLogs=" + collectDeploymentLogs +
                 ", cloudRegion='" + cloudRegion + '\'' +
                 ", vmLogs=" + vmLogs +
                 '}';
@@ -64,8 +56,6 @@ public class LogShipperContext {
         private boolean enabled;
 
         private boolean cloudStorageLogging;
-
-        private boolean collectDeploymentLogs;
 
         private String cloudRegion;
 
@@ -85,11 +75,6 @@ public class LogShipperContext {
 
         public Builder cloudStorageLogging() {
             this.cloudStorageLogging = true;
-            return this;
-        }
-
-        public Builder collectDeploymentLogs() {
-            this.collectDeploymentLogs = true;
             return this;
         }
 

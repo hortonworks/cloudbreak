@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
-import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
@@ -35,11 +34,7 @@ public class DiagnosticsVmPreFlightCheckHandler extends AbstractDiagnosticsOpera
         DiagnosticParameters parameters = data.getParameters();
         Map<String, Object> parameterMap = parameters.toMap();
         LOGGER.debug("Diagnostics collection VM preflight check started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-        if (!DiagnosticsDestination.ENG.equals(parameters.getDestination())) {
-            diagnosticsOperationsService.vmPreflightCheck(resourceId, parameters);
-        } else {
-            LOGGER.debug("Diagnostics VM preflight check skipped.");
-        }
+        diagnosticsOperationsService.vmPreflightCheck(resourceId, parameters);
         return DiagnosticsCollectionEvent.builder()
                 .withResourceCrn(resourceCrn)
                 .withResourceId(resourceId)

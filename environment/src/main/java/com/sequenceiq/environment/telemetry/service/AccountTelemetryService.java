@@ -91,15 +91,9 @@ public class AccountTelemetryService {
             Features finalFeatures = null;
             if (features != null && newFeatures != null) {
                 finalFeatures = new Features();
-                finalFeatures.setClusterLogsCollection(features.getClusterLogsCollection());
                 finalFeatures.setWorkloadAnalytics(features.getWorkloadAnalytics());
                 finalFeatures.setMonitoring(features.getMonitoring());
                 finalFeatures.setCloudStorageLogging(features.getCloudStorageLogging());
-                if (newFeatures.getClusterLogsCollection() != null) {
-                    LOGGER.debug("Account telemetry feature request contains log collection feature " +
-                            "for account {} (set: {})", accountId, newFeatures.getClusterLogsCollection().getEnabled());
-                    finalFeatures.setClusterLogsCollection(newFeatures.getClusterLogsCollection());
-                }
                 if (newFeatures.getWorkloadAnalytics() != null) {
                     LOGGER.debug("Account telemetry feature request contains workload analytics feature " +
                             "for account {} (set: {})", accountId, newFeatures.getWorkloadAnalytics().getEnabled());
@@ -134,7 +128,6 @@ public class AccountTelemetryService {
                     return encodedRule;
                 }).collect(Collectors.toList());
         Features defaultFeatures = new Features();
-        defaultFeatures.addClusterLogsCollection(false);
         defaultFeatures.addWorkloadAnalytics(true);
         defaultFeatures.addCloudStorageLogging(true);
         defaultTelemetry.setRules(defaultEncodedRules);

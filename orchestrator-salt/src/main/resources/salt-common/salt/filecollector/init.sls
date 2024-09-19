@@ -27,19 +27,6 @@ include:
     - context:
         destination: "LOCAL"
 
-{% if fluent.dbusClusterLogsCollection %}
-/opt/cdp-telemetry/conf/filecollector-eng.yaml:
-   file.managed:
-    - source: salt://filecollector/template/filecollector.yaml.j2
-    - template: jinja
-    - user: "root"
-    - group: "root"
-    - mode: '0640'
-    - failhard: True
-    - context:
-        destination: "ENG"
-{% endif %}
-
 /opt/cdp-telemetry/conf/diagnostics_request.json:
    file.managed:
     - source: salt://filecollector/template/diagnostics_request.json.j2
@@ -90,18 +77,6 @@ test_abfs_put:
 delete_test_cloud_storage_file:
   cmd.run:
     - name: rm -rf /tmp/.test_cloud_storage_upload.txt
-{% elif not filecollector.skipValidation and filecollector.destination == "ENG" and fluent.dbusClusterLogsCollection and databus.endpoint %}
-check_dbus_connection:
-  cmd.run:
-    - name: "curl {{ telemetry.databusCurlConnectOpts }} -s -k {{ databus.endpoint }} > /dev/null"
-    - failhard: True{% if filecollector.proxyUrl %}
-    - env:
-       - https_proxy: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-       - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
-check_logging_agent_running_systemctl:
-  cmd.run:
-    - name: "systemctl is-active --quiet td-agent || systemctl is-active --quiet cdp-logging-agent"
-    - failhard: True
 {% elif filecollector.dbusUrl and filecollector.destination == "SUPPORT" %}
 check_support_dbus_connection:
   cmd.run:

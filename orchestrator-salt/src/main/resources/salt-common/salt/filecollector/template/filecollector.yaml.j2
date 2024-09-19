@@ -105,15 +105,3 @@ collector:
             accountId: {{ filecollector.accountId }}
             licenseId:{% if filecollector.issue %}
         Case_number: "{{ filecollector.issue }}"{% endif %}
-{% if destination == "ENG" and fluent.dbusClusterLogsCollection %}
-    compress: false
-    deleteProcessedTempFilesOneByOne: true
-    checkDiskSpace: false
-    fluentProcessor:
-        host: "localhost"
-        port: {{ fluent.forwardPort }}
-        additionalFieldsKey: "bundleContext"
-        additionalFields:{% if filecollector.issue %}
-            issue: "{{ filecollector.issue }}"{% endif%}{% if filecollector.description %}
-            description: "{{ filecollector.description }}"{% endif%}
-        tag: databus{% endif %}

@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
@@ -56,11 +55,10 @@ public class TelemetryApiConverterTest {
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", "", true, "****", "****");
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setRemoteWriteUrl("http://myaddress/api/v1/receive");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(
-                altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
+                altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
         underTest = new TelemetryApiConverter(telemetryConfiguration, new MonitoringUrlResolver(monitoringConfig), entitlementService, storageLocationDecorator);
     }
 
@@ -75,7 +73,6 @@ public class TelemetryApiConverterTest {
         telemetryRequest.setLogging(loggingRequest);
         telemetryRequest.setWorkloadAnalytics(new WorkloadAnalyticsRequest());
         FeaturesRequest fr = new FeaturesRequest();
-        fr.addClusterLogsCollection(true);
         fr.addWorkloadAnalytics(true);
         fr.addMonitoring(true);
         telemetryRequest.setFeatures(fr);
@@ -85,7 +82,6 @@ public class TelemetryApiConverterTest {
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("http://myaddress/api/v1/receive", result.getMonitoring().getRemoteWriteUrl());
-        assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().getEnabled());
         assertTrue(result.getFeatures().getMonitoring().getEnabled());
@@ -254,7 +250,6 @@ public class TelemetryApiConverterTest {
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         logging.setS3(s3Params);
         EnvironmentFeatures features = new EnvironmentFeatures();
-        features.addClusterLogsCollection(false);
         features.addMonitoring(true);
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         telemetry.setLogging(logging);
@@ -263,7 +258,6 @@ public class TelemetryApiConverterTest {
         TelemetryRequest result = underTest.convertToRequest(telemetry, ACCOUNT_ID);
         // THEN
         assertNotNull(result.getFeatures());
-        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
     }

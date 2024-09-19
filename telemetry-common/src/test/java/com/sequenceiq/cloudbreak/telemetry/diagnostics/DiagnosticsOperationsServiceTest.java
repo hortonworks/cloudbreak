@@ -210,16 +210,6 @@ public class DiagnosticsOperationsServiceTest {
     }
 
     @Test
-    public void testVmDiagnosticsReportWithEngDestination() {
-        // GIVEN
-        doNothing().when(usageReporter).cdpVmDiagnosticsEvent(any());
-        // WHEN
-        underTest.vmDiagnosticsReport("crn", diagnosticParameters(DiagnosticsDestination.ENG));
-        // THEN
-        verify(usageReporter, times(1)).cdpVmDiagnosticsEvent(any());
-    }
-
-    @Test
     public void testVmDiagnosticsReportWithLocalDestination() {
         // GIVEN
         doNothing().when(usageReporter).cdpVmDiagnosticsEvent(any());

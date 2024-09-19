@@ -22,7 +22,6 @@ import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -103,29 +102,14 @@ public class DiagnosticsCollectionValidatorTest {
     }
 
     @Test
-    void testValidateWithInvalidEngDestination() {
-        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
-        request.setDestination(DiagnosticsDestination.ENG);
-        Telemetry telemetry = new Telemetry();
-
-        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
-                underTest.validate(request, createStackWithTelemetry(telemetry)));
-
-        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for FreeIPA"));
-    }
-
-    @Test
-    void testValidateWithValidEngDestination() {
+    void testValidateWithEngDestination() {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.ENG);
         Telemetry telemetry = new Telemetry();
         Features features = new Features();
-        FeatureSetting clusterLogsCollection = new FeatureSetting();
-        clusterLogsCollection.setEnabled(true);
-        features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
 
-        underTest.validate(request, createStackWithTelemetry(telemetry));
+        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, createStackWithTelemetry(telemetry)));
     }
 
     @Test
@@ -134,9 +118,6 @@ public class DiagnosticsCollectionValidatorTest {
         request.setDestination(DiagnosticsDestination.ENG);
         Telemetry telemetry = new Telemetry();
         Features features = new Features();
-        FeatureSetting clusterLogsCollection = new FeatureSetting();
-        clusterLogsCollection.setEnabled(true);
-        features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
         Stack stack = createStackWithTelemetry(telemetry);
         when(imageEntity.getDate()).thenReturn("2020-01-01");

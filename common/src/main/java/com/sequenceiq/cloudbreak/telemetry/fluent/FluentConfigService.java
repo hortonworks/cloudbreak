@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
-import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -56,8 +55,6 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
 
     private final MeteringConfiguration meteringConfiguration;
 
-    private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
-
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
             GcsConfigGenerator gcsConfigGenerator,
@@ -68,7 +65,6 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
         this.gcsConfigGenerator = gcsConfigGenerator;
         this.anonymizationRuleResolver = anonymizationRuleResolver;
         this.meteringConfiguration = telemetryConfiguration.getMeteringConfiguration();
-        this.clusterLogsCollectionConfiguration = telemetryConfiguration.getClusterLogsCollectionConfiguration();
     }
 
     @Override
@@ -86,13 +82,6 @@ public class FluentConfigService implements TelemetryPillarConfigGenerator<Fluen
             builder.withEnabled(true)
                     .withMeteringEnabled(true)
                     .withMeteringConfiguration(meteringConfiguration);
-        }
-        if (logShipperContext.isCollectDeploymentLogs()) {
-            LOGGER.debug("Set anonymization rules (only for cluster log collection)");
-            builder.withEnabled(true)
-                    .withClusterLogsCollection(true)
-                    .withClusterLogsCollectionConfiguration(clusterLogsCollectionConfiguration)
-                    .withAnonymizationRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()));
         }
         if (logShipperContext.isCloudStorageLogging()) {
             builder.withEnabled(true);

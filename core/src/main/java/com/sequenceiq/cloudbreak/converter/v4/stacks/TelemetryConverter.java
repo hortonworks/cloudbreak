@@ -63,8 +63,6 @@ public class TelemetryConverter {
 
     private final boolean meteringEnabled;
 
-    private final boolean clusterLogsCollection;
-
     private final boolean useSharedAltusCredential;
 
     private final MonitoringUrlResolver monitoringUrlResolver;
@@ -81,7 +79,6 @@ public class TelemetryConverter {
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
-        this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.monitoringUrlResolver = monitoringUrlResolver;
     }
 
@@ -114,7 +111,6 @@ public class TelemetryConverter {
             telemetry.setMonitoring(monitoring);
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
-            setClusterLogsCollection(request, features);
             setMonitoring(request, features, accountId);
             setUseSharedAltusCredential(features);
             setCloudStorageLogging(request, features);
@@ -146,8 +142,6 @@ public class TelemetryConverter {
             telemetryRequest.setMonitoring(monitoringRequest);
             FeaturesResponse featuresResponse = response.getFeatures();
             if (featuresResponse != null) {
-                LOGGER.debug("Setting cluster logs collection request (telemetry) based on environment response.");
-                featuresRequest.setClusterLogsCollection(featuresResponse.getClusterLogsCollection());
                 LOGGER.debug("Setting cluster monitoring request (telemetry) based on environment response.");
                 featuresRequest.setMonitoring(featuresResponse.getMonitoring());
                 LOGGER.debug("Setting cloud storage logging request (telemetry) based on environment response.");
@@ -249,7 +243,6 @@ public class TelemetryConverter {
         if (features != null) {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setWorkloadAnalytics(features.getWorkloadAnalytics());
-            featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresRequest.setMonitoring(features.getMonitoring());
             setCloudStorageLoggingOnFeaturesModel(features, featuresRequest);
         }
@@ -391,7 +384,6 @@ public class TelemetryConverter {
             LOGGER.debug("Setting feature telemetry response.");
             FeaturesResponse featuresResponse = new FeaturesResponse();
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
-            featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setMonitoring(features.getMonitoring());
             featuresResponse.setMetering(features.getMetering());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
@@ -447,21 +439,6 @@ public class TelemetryConverter {
             }
         }
         return newAttributes;
-    }
-
-    private void setClusterLogsCollection(TelemetryRequest request, Features features) {
-        if (clusterLogsCollection) {
-            if (request.getFeatures() != null && request.getFeatures().getClusterLogsCollection() != null) {
-                LOGGER.debug("Fill cluster logs collection setting from telemetry feature request");
-                features.setClusterLogsCollection(request.getFeatures().getClusterLogsCollection());
-            } else {
-                LOGGER.debug("Auto-filling cluster logs collection telemetry settings as it is set, but missing from the request.");
-                features.addClusterLogsCollection(false);
-            }
-        } else {
-            LOGGER.debug("Cluster logs collection feature is disabled. Set feature as false.");
-            features.addClusterLogsCollection(false);
-        }
     }
 
     private void setMonitoring(TelemetryRequest request, Features features, String accountId) {

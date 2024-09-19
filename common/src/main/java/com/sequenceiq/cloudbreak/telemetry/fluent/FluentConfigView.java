@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
-import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
@@ -28,8 +27,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
-    private static final Boolean DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT = false;
-
     private static final Boolean DBUS_INCLUDE_SALT_LOGS_DEFAULT = false;
 
     private static final Integer PARTITION_INTERVAL_DEFAULT = 5;
@@ -40,15 +37,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean cloudLoggingServiceEnabled;
 
-    private final boolean clusterLogsCollection;
-
     private final boolean meteringEnabled;
 
     private final boolean monitoringEnabled;
 
     private final MeteringConfiguration meteringConfiguration;
-
-    private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
 
     private final TelemetryClusterDetails clusterDetails;
 
@@ -98,10 +91,8 @@ public class FluentConfigView implements TelemetryConfigView {
         this.enabled = builder.enabled;
         this.cloudStorageLoggingEnabled = builder.cloudStorageLoggingEnabled;
         this.cloudLoggingServiceEnabled = builder.cloudLoggingServiceEnabled;
-        this.clusterLogsCollection = builder.clusterLogsCollection;
         this.meteringEnabled = builder.meteringEnabled;
         this.monitoringEnabled = builder.monitoringEnabled;
-        this.clusterLogsCollectionConfiguration = builder.clusterLogsCollectionConfiguration;
         this.meteringConfiguration = builder.meteringConfiguration;
         this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
@@ -219,10 +210,6 @@ public class FluentConfigView implements TelemetryConfigView {
         return cloudLoggingServiceEnabled;
     }
 
-    public boolean isClusterLogsCollection() {
-        return clusterLogsCollection;
-    }
-
     public boolean isMeteringEnabled() {
         return meteringEnabled;
     }
@@ -238,8 +225,6 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
         map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
         map.put("dbusMeteringEnabled", this.meteringEnabled);
-        map.put("dbusClusterLogsCollection", this.clusterLogsCollection);
-        map.put("dbusClusterLogsCollectionDisableStop", DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT);
         map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
         map.put("user", ObjectUtils.defaultIfNull(this.user, TD_AGENT_USER_DEFAULT));
         map.put("group", ObjectUtils.defaultIfNull(this.group, TD_AGENT_GROUP_DEFAULT));
@@ -269,9 +254,6 @@ public class FluentConfigView implements TelemetryConfigView {
         if (this.meteringConfiguration != null) {
             map.putAll(meteringConfiguration.getDbusConfigs());
         }
-        if (this.clusterLogsCollectionConfiguration != null) {
-            map.putAll(clusterLogsCollectionConfiguration.getDbusConfigs());
-        }
         if (this.overrideAttributes != null) {
             fillOverrideAttributes(map);
         }
@@ -296,15 +278,11 @@ public class FluentConfigView implements TelemetryConfigView {
 
         private boolean cloudLoggingServiceEnabled;
 
-        private boolean clusterLogsCollection;
-
         private boolean meteringEnabled;
 
         private boolean monitoringEnabled;
 
         private MeteringConfiguration meteringConfiguration;
-
-        private ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -444,11 +422,6 @@ public class FluentConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withClusterLogsCollection(boolean clusterLogsCollection) {
-            this.clusterLogsCollection = clusterLogsCollection;
-            return this;
-        }
-
         public Builder withMonitoringEnabled(boolean monitoringEnabled) {
             this.monitoringEnabled = monitoringEnabled;
             return this;
@@ -471,11 +444,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withMeteringConfiguration(MeteringConfiguration meteringConfiguration) {
             this.meteringConfiguration = meteringConfiguration;
-            return this;
-        }
-
-        public Builder withClusterLogsCollectionConfiguration(ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration) {
-            this.clusterLogsCollectionConfiguration = clusterLogsCollectionConfiguration;
             return this;
         }
 

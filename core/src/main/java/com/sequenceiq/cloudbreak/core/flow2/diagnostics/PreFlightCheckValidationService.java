@@ -27,6 +27,6 @@ public class PreFlightCheckValidationService {
 
     private boolean anyDatabusFeatureEnabled(Long stackId) {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
-        return telemetry.isAnyDataBusBasedFeatureEnabled();
+        return telemetry.isMeteringFeatureEnabled();
     }
 }

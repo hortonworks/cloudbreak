@@ -22,9 +22,6 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter 
             if (environmentFeatures.getWorkloadAnalytics() != null && environmentFeatures.getWorkloadAnalytics().getEnabled() != null) {
                 cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(environmentFeatures.getWorkloadAnalytics().getEnabled().toString());
             }
-            if (environmentFeatures.getClusterLogsCollection() != null && environmentFeatures.getClusterLogsCollection().getEnabled() != null) {
-                cdpTelemetryFeatureDetailsBuilder.setClusterLogsCollection(environmentFeatures.getClusterLogsCollection().getEnabled().toString());
-            }
         }
 
         CDPEnvironmentTelemetryFeatureDetails ret = cdpTelemetryFeatureDetailsBuilder.build();

@@ -316,7 +316,6 @@ public class EnvironmentTestDto
         features.setCloudStorageLogging(storageLoggingFeature);
         FeatureSetting clusterLogCollectionFeature = new FeatureSetting();
         clusterLogCollectionFeature.setEnabled(false);
-        features.setClusterLogsCollection(clusterLogCollectionFeature);
         telemetry.setFeatures(features);
         getRequest().setTelemetry(telemetry);
         return this;

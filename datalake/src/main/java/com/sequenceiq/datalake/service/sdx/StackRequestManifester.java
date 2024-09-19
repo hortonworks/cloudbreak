@@ -310,7 +310,6 @@ public class StackRequestManifester {
             telemetryRequest.setMonitoring(monitoringRequest);
             if (envTelemetry.getFeatures() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
-                featuresRequest.setClusterLogsCollection(envTelemetry.getFeatures().getClusterLogsCollection());
                 featuresRequest.setMonitoring(envTelemetry.getFeatures().getMonitoring());
                 if (envTelemetry.getFeatures().getCloudStorageLogging() != null) {
                     featuresRequest.setCloudStorageLogging(envTelemetry.getFeatures().getCloudStorageLogging());

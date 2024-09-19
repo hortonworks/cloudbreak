@@ -469,7 +469,6 @@ public class EnvironmentApiConverter {
     public EnvironmentFeatures convertToEnvironmentTelemetryFeatures(FeaturesRequest featuresRequest) {
         EnvironmentFeatures features = new EnvironmentFeatures();
         features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());
-        features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
         features.setCloudStorageLogging(featuresRequest.getCloudStorageLogging());
         return features;
     }

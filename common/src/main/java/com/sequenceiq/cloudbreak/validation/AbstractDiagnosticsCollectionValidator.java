@@ -35,11 +35,8 @@ public abstract class AbstractDiagnosticsCollectionValidator<T, S> {
             validationBuilder.error(String.format("Telemetry is not enabled for %s (name: '%s')", getStackType(), stackName));
         } else if (DiagnosticsDestination.CLOUD_STORAGE.equals(destination)) {
             validateCloudStorageSettings(telemetry, stackName, validationBuilder);
-        } else if (isEngDestinationWithCMBundle(destination, cmBundle)) {
-            validationBuilder.error("Cluster log collection with ENG destination is not supported for CM based diagnostics");
-        } else if (isEngDestinationDisabled(telemetry, destination)) {
-            validationBuilder.error(
-                    String.format("Cluster log collection is not enabled for %s (name: '%s')", getStackType(), stackName));
+        } else if (isEngDestinationEnabled(telemetry, destination)) {
+            validationBuilder.error("Cluster log collection is deprecated, please disable it!");
         } else if (isSupportDestinationDisabled(destination, cmBundle)) {
             validationBuilder.error(
                     String.format("Destination %s is not supported yet.", DiagnosticsDestination.SUPPORT.name()));
@@ -53,8 +50,6 @@ public abstract class AbstractDiagnosticsCollectionValidator<T, S> {
     protected abstract void validateStackStatus(S stackStatus, String stackName);
 
     protected abstract boolean isSupportBundleEnabled(boolean cmBundle);
-
-    protected abstract boolean isClusterLogCollectionDisabled(T telemetry);
 
     protected abstract void validateCloudStorageSettings(T telemetry, String stackName,
             ValidationResult.ValidationResultBuilder validationBuilder);
@@ -73,12 +68,8 @@ public abstract class AbstractDiagnosticsCollectionValidator<T, S> {
                 .orElse(true);
     }
 
-    private boolean isEngDestinationDisabled(T telemetry, DiagnosticsDestination destination) {
-        return DiagnosticsDestination.ENG.equals(destination) && isClusterLogCollectionDisabled(telemetry);
-    }
-
-    private boolean isEngDestinationWithCMBundle(DiagnosticsDestination destination, boolean cmBundle) {
-        return DiagnosticsDestination.ENG.equals(destination) && cmBundle;
+    private boolean isEngDestinationEnabled(T telemetry, DiagnosticsDestination destination) {
+        return DiagnosticsDestination.ENG.equals(destination);
     }
 
     private boolean isSupportDestinationDisabled(DiagnosticsDestination destination, boolean cmBundle) {

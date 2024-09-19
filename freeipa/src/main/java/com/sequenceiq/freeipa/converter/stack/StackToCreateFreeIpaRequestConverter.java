@@ -331,7 +331,6 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         FeaturesRequest request = null;
         if (features != null) {
             request = new FeaturesRequest();
-            request.setClusterLogsCollection(features.getClusterLogsCollection());
             request.setMonitoring(features.getMonitoring());
             request.setCloudStorageLogging(features.getCloudStorageLogging());
             request.setWorkloadAnalytics(features.getWorkloadAnalytics());

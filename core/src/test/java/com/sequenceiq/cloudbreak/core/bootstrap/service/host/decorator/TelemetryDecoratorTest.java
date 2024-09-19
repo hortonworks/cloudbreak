@@ -103,12 +103,10 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContext() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(true);
         given(telemetry.isMeteringFeatureEnabled()).willReturn(true);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(telemetry.getLogging()).willReturn(logging);
         given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
-        given(telemetry.isClusterLogsCollectionEnabled()).willReturn(true);
         given(logging.getS3()).willReturn(new S3CloudStorageV1Parameters());
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
@@ -129,7 +127,6 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextWithDatalakeMeteringDisabled() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(true);
         given(telemetry.isMeteringFeatureEnabled()).willReturn(true);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.DATALAKE));
@@ -142,7 +139,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextWithMonitoringOnly() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
@@ -161,7 +158,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsNotGranted() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         telemetry.setMonitoring(monitoring);
@@ -180,7 +177,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOnIfEntitlementIsGranted() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
@@ -200,7 +197,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testCreateTelemetryContextWithMonitoringOnlyAndMajorVersionChanged() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
@@ -220,7 +217,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsTooOld() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b61");
@@ -238,7 +235,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsVeryOld() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.21.0-b10000");
@@ -256,7 +253,7 @@ public class TelemetryDecoratorTest {
     @Test
     public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsUnkown() {
         // GIVEN
-        given(telemetry.isAnyDataBusBasedFeatureEnabled()).willReturn(false);
+        given(telemetry.isMeteringFeatureEnabled()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
         given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn(null);
@@ -276,7 +273,6 @@ public class TelemetryDecoratorTest {
         // GIVEN
         given(telemetry.getLogging()).willReturn(logging);
         given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
-        given(telemetry.isClusterLogsCollectionEnabled()).willReturn(false);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN

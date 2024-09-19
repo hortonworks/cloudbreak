@@ -156,7 +156,6 @@ public class AccountTelemetryServiceTest {
             testPatternWithOutput(rule, "- FPW: secret", "FPW");
             testPatternWithOutput(rule, "cdpHashedPassword='{SHA512}abcdef'", "[CDP");
         }
-        assertThat(result.getFeatures().getClusterLogsCollection().getEnabled()).isEqualTo(false);
     }
 
     @Test
@@ -175,7 +174,7 @@ public class AccountTelemetryServiceTest {
 
     @Test
     public void testWorkloadAnalyticsAlwaysOverwritten() {
-        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false, false);
+        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false);
 
         when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(accountTelemetryInDatabase));
 
@@ -185,24 +184,22 @@ public class AccountTelemetryServiceTest {
 
     @Test
     public void testUpdateAccountTelemetry() {
-        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false, false);
+        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false);
 
         when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(accountTelemetryInDatabase));
 
         Features newFeatures = new Features();
         newFeatures.addWorkloadAnalytics(true);
-        newFeatures.addClusterLogsCollection(true);
         newFeatures.addMonitoring(true);
 
         Features updatedFeatures = underTest.updateFeatures("account-id", newFeatures);
         assertEquals(true, updatedFeatures.getMonitoring().getEnabled());
-        assertEquals(true, updatedFeatures.getClusterLogsCollection().getEnabled());
         assertEquals(true, updatedFeatures.getWorkloadAnalytics().getEnabled());
     }
 
     @Test
     public void testSelectiveUpdateAccountTelemetry() {
-        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false, false);
+        AccountTelemetry accountTelemetryInDatabase = createAccountTelemetry(false, false);
 
         when(accountTelemetryRepository.findByAccountId(any())).thenReturn(Optional.of(accountTelemetryInDatabase));
 
@@ -211,7 +208,6 @@ public class AccountTelemetryServiceTest {
 
         Features updatedFeatures = underTest.updateFeatures("account-id", newFeatures);
         assertEquals(false, updatedFeatures.getMonitoring().getEnabled());
-        assertEquals(false, updatedFeatures.getClusterLogsCollection().getEnabled());
         assertEquals(true, updatedFeatures.getWorkloadAnalytics().getEnabled());
     }
 
@@ -243,10 +239,9 @@ public class AccountTelemetryServiceTest {
         return rule;
     }
 
-    private AccountTelemetry createAccountTelemetry(boolean monitoring, boolean workloadAnalytics, boolean logCollection) {
+    private AccountTelemetry createAccountTelemetry(boolean monitoring, boolean workloadAnalytics) {
         Features features = new Features();
         features.addWorkloadAnalytics(workloadAnalytics);
-        features.addClusterLogsCollection(logCollection);
         features.addMonitoring(monitoring);
 
         AccountTelemetry accountTelemetry = new AccountTelemetry();

@@ -20,7 +20,6 @@ import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 @ExtendWith(MockitoExtension.class)
 class DiagnosticsCollectionValidatorTest {
@@ -82,34 +81,17 @@ class DiagnosticsCollectionValidatorTest {
     }
 
     @Test
-    void testWithEngDestinationAndDisabledLogCollection() {
-        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
-        request.setDestination(DiagnosticsDestination.ENG);
-        StackV4Response stackV4Response = new StackV4Response();
-        stackV4Response.setCrn(DATALAKE_CRN);
-        TelemetryResponse telemetry = new TelemetryResponse();
-        stackV4Response.setTelemetry(telemetry);
-
-        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
-
-        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for Data Lake"));
-    }
-
-    @Test
-    void testWithValidEngDestination() {
+    void testWithEngDestination() {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.ENG);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setCrn(DATALAKE_CRN);
         TelemetryResponse telemetry = new TelemetryResponse();
         FeaturesResponse features = new FeaturesResponse();
-        FeatureSetting featureSetting = new FeatureSetting();
-        featureSetting.setEnabled(true);
-        features.setClusterLogsCollection(featureSetting);
         telemetry.setFeatures(features);
         stackV4Response.setTelemetry(telemetry);
 
-        underTest.validate(request, stackV4Response);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
     }
 
     @Test

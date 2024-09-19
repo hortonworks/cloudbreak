@@ -22,7 +22,6 @@ import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.FeatureSetting;
 
 @ExtendWith(MockitoExtension.class)
 class DiagnosticsCollectionValidatorTest {
@@ -86,28 +85,14 @@ class DiagnosticsCollectionValidatorTest {
     }
 
     @Test
-    void testValidateWithInvalidEngDestination() {
-        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
-        request.setDestination(DiagnosticsDestination.ENG);
-        Telemetry telemetry = new Telemetry();
-
-        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, createStack(), telemetry));
-
-        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for Data Hub"));
-    }
-
-    @Test
-    void testValidateWithValidEngDestination() {
+    void testValidateWithEngDestination() {
         BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
         request.setDestination(DiagnosticsDestination.ENG);
         Telemetry telemetry = new Telemetry();
         Features features = new Features();
-        FeatureSetting clusterLogsCollection = new FeatureSetting();
-        clusterLogsCollection.setEnabled(true);
-        features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
 
-        underTest.validate(request, createStack(), telemetry);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request, createStack(), telemetry));
     }
 
     private Stack createStack() {

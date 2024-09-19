@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
@@ -59,10 +58,9 @@ public class TelemetryConverterTest {
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, monitoringConfig, null);
         MockitoAnnotations.openMocks(this);
         underTest = new TelemetryConverter(telemetryConfiguration, true, monitoringUrlResolver, entitlementService);
     }
@@ -74,7 +72,6 @@ public class TelemetryConverterTest {
         LoggingRequest logging = new LoggingRequest();
         logging.setS3(new S3CloudStorageV1Parameters());
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addClusterLogsCollection(false);
         telemetryRequest.setLogging(logging);
         MonitoringRequest monitoringRequest = new MonitoringRequest();
         monitoringRequest.setRemoteWriteUrl(MONITORING_REMOTE_WRITE_URL);
@@ -86,7 +83,6 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(ACCOUNT_ID, telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
-        assertThat(result.getFeatures().getClusterLogsCollection().getEnabled(), is(false));
         assertThat(result.getFeatures().getCloudStorageLogging().getEnabled(), is(true));
         assertThat(result.getFeatures().getMonitoring().getEnabled(), is(true));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
@@ -120,14 +116,12 @@ public class TelemetryConverterTest {
         gcsCloudStorageV1Parameters.setServiceAccountEmail(EMAIL);
         logging.setGcs(gcsCloudStorageV1Parameters);
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        featuresRequest.addClusterLogsCollection(false);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         // WHEN
         Telemetry result = underTest.convert(ACCOUNT_ID, telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
-        assertThat(result.getFeatures().getClusterLogsCollection().getEnabled(), is(false));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
         assertThat(result.getLogging().getGcs(), notNullValue());
         assertThat(result.getLogging().getGcs().getServiceAccountEmail(), is(EMAIL));
