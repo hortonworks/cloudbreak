@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProv
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 class MismatchedInstanceHandlerServiceTest {
@@ -338,6 +339,7 @@ class MismatchedInstanceHandlerServiceTest {
     private StackDto stack() {
         StackDto stackDto = mock(StackDto.class);
         lenient().when(stackDto.getId()).thenReturn(STACK_ID);
+        lenient().when(stackDto.getArchitecture()).thenReturn(Architecture.X86_64);
         lenient().when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         lenient().when(stackDto.getResources()).thenReturn(Set.of());
         lenient().when(stackDto.getAvailabilityZonesByInstanceGroup(eq(INSTANCE_GROUP_ID))).thenReturn(Set.of("eu-central-1a", "eu-central-1b"));

@@ -236,8 +236,9 @@ public class DefaultClusterTemplateCache {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        boolean internalTenant = entitlementService.internalTenant(workspace.getTenant().getName());
-        boolean arm64Enabled = entitlementService.isDataHubArmEnabled(workspace.getTenant().getName());
+        String accountId = workspace.getTenant().getName();
+        boolean internalTenant = entitlementService.internalTenant(accountId);
+        boolean arm64Enabled = entitlementService.isDataHubArmEnabled(accountId);
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
                 DefaultClusterTemplateV4Request defaultClusterTemplate = value.getKey();
@@ -261,7 +262,7 @@ public class DefaultClusterTemplateCache {
     private boolean notArm64TemplateOrArm64Enabled(DefaultClusterTemplateV4Request defaultClusterTemplate, boolean arm64Enabled) {
         boolean hasArm64InstanceType = defaultClusterTemplate.getDistroXTemplate().getInstanceGroups().stream()
                 .anyMatch(group -> StringUtils.isNotEmpty(group.getTemplate().getInstanceType()) &&
-                        DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES.contains(group.getTemplate().getInstanceType()));
+                        DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST.contains(group.getTemplate().getInstanceType()));
         return !hasArm64InstanceType || arm64Enabled;
     }
 

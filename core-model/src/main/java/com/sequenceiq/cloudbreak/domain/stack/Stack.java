@@ -1135,8 +1135,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
+    @Override
     public Architecture getArchitecture() {
         return architecture;
+    }
+
+    public String getArchitectureName() {
+        return architecture == null ? null : architecture.getName();
     }
 
     public void setArchitecture(Architecture architecture) {

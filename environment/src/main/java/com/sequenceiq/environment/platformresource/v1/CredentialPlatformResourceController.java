@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.platformresource.v1;
 
+import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
@@ -143,7 +146,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 platformVariant,
                 availabilityZone,
                 null,
-                new HashMap<>(),
+                Map.of(ARCHITECTURE, Architecture.X86_64.getName()),
                 null,
                 null,
                 cdpResourceType);

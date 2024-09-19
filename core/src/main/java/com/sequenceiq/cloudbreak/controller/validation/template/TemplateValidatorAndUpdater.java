@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
+import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -110,7 +110,7 @@ public class TemplateValidatorAndUpdater {
                 stack.getRegion(),
                 stack.getPlatformVariant(),
                 stackType,
-                new HashMap<>());
+                Map.of(ARCHITECTURE, stack.getArchitectureName()));
 
         if (isEmpty(template.getInstanceType())) {
             validateCustomInstanceType(template, validationBuilder);

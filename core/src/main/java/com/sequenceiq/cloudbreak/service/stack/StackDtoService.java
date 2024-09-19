@@ -227,7 +227,7 @@ public class StackDtoService implements LocalPaasSdxService {
                                     e -> e.getValue().stream().map(AvailabilityZoneView::getAvailabilityZone).collect(Collectors.toList())));
         }
         return new StackDto(stackView, cluster, network, database, workspace, workspace.getTenant(), groupListMap, resources, blueprint, gateway,
-                orchestrator, fileSystem, additionalFileSystem, components, parameters, securityConfig, availabilityZonesByStackId);
+                orchestrator, fileSystem, additionalFileSystem, components, stackView.getArchitecture(), parameters, securityConfig, availabilityZonesByStackId);
     }
 
     public List<InstanceGroupDto> getInstanceMetadataByInstanceGroup(Long stackId) {

@@ -57,11 +57,15 @@ public class DistroxEnabledInstanceTypes {
             "c7i.xlarge,c7i.2xlarge,c7i.4xlarge,c7i.8xlarge,c7i.12xlarge,c7i.16xlarge,c7i.24xlarge,c7i.48xlarge," +
             "c7a.xlarge,c7a.2xlarge,c7a.4xlarge,c7a.8xlarge,c7a.12xlarge,c7a.16xlarge,c7a.24xlarge,c7a.32xlarge,c7a.48xlarge,";
 
-    private static final String ENABLED_ARM64_TYPES = "r7gd.2xlarge";
+    private static final String ENABLED_ARM64_TYPES = "r7gd.2xlarge," +
+            "i4g.xlarge,i4g.2xlarge,i4g.4xlarge,i4g.8xlarge,i4g.16xlarge," +
+            "m7g.xlarge,m7g.2xlarge,m7g.4xlarge,m7g.8xlarge,m7g.12xlarge,m7g.16xlarge," +
+            "r7g.xlarge,r7g.2xlarge,r7g.4xlarge,r7g.8xlarge,r7g.12xlarge,r7g.16xlarge," +
+            "c7g.xlarge,c7g.2xlarge,c7g.4xlarge,c7g.8xlarge,c7g.12xlarge,c7g.16xlarge";
 
     public static final Set<String> AWS_ENABLED_X86_TYPES_LIST = splitInstanceList(ENABLED_X86_TYPES);
 
-    public static final Set<String> AWS_ENABLED_ARM64_TYPES = splitInstanceList(ENABLED_ARM64_TYPES);
+    public static final Set<String> AWS_ENABLED_ARM64_TYPES_LIST = splitInstanceList(ENABLED_ARM64_TYPES);
 
     private DistroxEnabledInstanceTypes() {
     }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.metering;
 
+import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -94,8 +96,12 @@ public class MismatchedInstanceHandlerService {
         try {
             LOGGER.info("Handle mismatching instance groups: {}", mismatchingInstanceGroups);
             ExtendedCloudCredential extendedCloudCredential = credentialClientService.getExtendedCloudCredential(stack.getEnvironmentCrn());
-            CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredential, stack.getRegion(), stack.getCloudPlatform(),
-                    CdpResourceType.DATAHUB, Map.of());
+            CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
+                    extendedCloudCredential,
+                    stack.getRegion(),
+                    stack.getCloudPlatform(),
+                    CdpResourceType.DATAHUB,
+                    Map.of(ARCHITECTURE, stack.getArchitecture().getName()));
             handleMismatchingInstanceTypes(stack, mismatchingInstanceGroups, vmTypes);
         } catch (Exception e) {
             metricService.incrementMetricCounter(MetricType.METERING_CHANGE_INSTANCE_TYPE_FAILED);

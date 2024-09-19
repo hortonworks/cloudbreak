@@ -190,7 +190,7 @@ class StackDtoToMeteringEventConverterTest {
         stack.setTags(tags);
 
         StackDto stackDto = new StackDto(stack, null, null, null, null, null, instanceGroups, null, null,
-                null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null);
         return stackDto;
     }
 

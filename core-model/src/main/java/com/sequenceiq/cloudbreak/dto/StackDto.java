@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.Architecture;
 
 public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContextInfoProvider, IdAware {
 
@@ -73,6 +74,8 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     private Orchestrator orchestrator;
 
+    private Architecture architecture;
+
     private FileSystem fileSystem;
 
     private FileSystem additionalFileSystem;
@@ -87,8 +90,8 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public StackDto(StackView stack, ClusterView cluster, Network network, Database database, Workspace workspace, Tenant tenant,
             Map<String, InstanceGroupDto> instanceGroups, Set<Resource> resources, Blueprint blueprint, GatewayView gateway, Orchestrator orchestrator,
-            FileSystem fileSystem, FileSystem additionalFileSystem, Set<ClusterComponentView> clusterComponents, List<StackParameters> stackParameters,
-            SecurityConfig securityConfig, Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup) {
+            FileSystem fileSystem, FileSystem additionalFileSystem, Set<ClusterComponentView> clusterComponents, Architecture architecture,
+            List<StackParameters> stackParameters, SecurityConfig securityConfig, Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup) {
         this.stack = stack;
         this.cluster = cluster;
         this.network = network;
@@ -106,6 +109,7 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         this.securityConfig = securityConfig;
         this.availabilityZonesByInstanceGroup = availabilityZonesByInstanceGroup;
         this.tenant = tenant;
+        this.architecture = architecture;
     }
 
     public StackDto() {
@@ -176,6 +180,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public Database getDatabase() {
         return database;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
     }
 
     public Set<Resource> getResources() {

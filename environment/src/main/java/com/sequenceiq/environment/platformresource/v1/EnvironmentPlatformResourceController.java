@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.platformresource.v1;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -34,8 +36,10 @@ import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
@@ -116,6 +120,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
     private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
 
     @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
     private EnvironmentService environmentService;
 
     @Override
@@ -125,6 +132,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String region,
             String platformVariant,
             String availabilityZone,
+            Architecture architecture,
             CdpResourceType cdpResourceType) {
         String accountId = getAccountId();
         validateEnvironmentCrnPattern(environmentCrn);
@@ -138,6 +146,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null,
                 null,
                 cdpResourceType);
+        setFilterForVmTypes(List.of(availabilityZone), architecture, request, accountId);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
@@ -151,7 +160,8 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             @ResourceCrn String environmentCrn,
             String instanceType,
             CdpResourceType cdpResourceType,
-            List<String> availabilityZones) {
+            List<String> availabilityZones,
+            Architecture architecture) {
         String accountId = getAccountId();
         validateEnvironmentCrnPattern(environmentCrn);
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(environmentCrn, accountId);
@@ -160,10 +170,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 environmentDto.getRegions().stream().findFirst().get().getName(),
                 cdpResourceType);
-        if (CollectionUtils.isNotEmpty(availabilityZones)) {
-            LOGGER.debug("Setting filter for Availability Zones {}", availabilityZones);
-            request.setFilters(Map.of(NetworkConstants.AVAILABILITY_ZONES, String.join(",", availabilityZones)));
-        }
+        setFilterForVmTypes(availabilityZones, architecture, request, accountId);
         LOGGER.debug("Get /platform_resources/machine_types_for_vertical_scaling, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(
@@ -174,6 +181,23 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         LOGGER.debug("Resp /platform_resources/machine_types_for_vertical_scaling, request: {}, cloudVmTypes: {}, response: {}",
                 request, cloudVmTypes, response);
         return response;
+    }
+
+    private void setFilterForVmTypes(List<String> availabilityZones, Architecture architecture, PlatformResourceRequest request, String accountId) {
+        Map<String, String> filter = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(availabilityZones)) {
+            LOGGER.debug("Setting filter for Availability Zones {}", availabilityZones);
+            filter.put(NetworkConstants.AVAILABILITY_ZONES, String.join(",", availabilityZones));
+        }
+        architecture = architecture == null ? Architecture.X86_64 : architecture;
+        if (Architecture.ARM64.equals(architecture)) {
+            if (entitlementService.isDataHubArmEnabled(accountId)) {
+                filter.put(AwsPlatformResourcesFilterConstants.ARCHITECTURE, architecture.name());
+            } else {
+                throw new BadRequestException("Graviton support is not enabled for your account.");
+            }
+        }
+        request.setFilters(filter);
     }
 
     @Override

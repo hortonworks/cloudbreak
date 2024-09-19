@@ -25,9 +25,9 @@ public class CloudVmTypesToPlatformVmTypesV1ResponseConverter {
     public PlatformVmtypesResponse convert(CloudVmTypes source) {
         Map<String, VirtualMachinesResponse> result = new HashMap<>();
         for (Entry<String, Set<VmType>> entry : source.getCloudVmResponses().entrySet()) {
-            Set<VmTypeResponse> vmTypeRespons = new HashSet<>();
+            Set<VmTypeResponse> vmTypeResponse = new HashSet<>();
             for (VmType vmType : entry.getValue()) {
-                vmTypeRespons.add(vmTypeToVmTypeV1ResponseConverter.convert(vmType));
+                vmTypeResponse.add(vmTypeToVmTypeV1ResponseConverter.convert(vmType));
             }
 
             VirtualMachinesResponse virtualMachinesResponse = new VirtualMachinesResponse();
@@ -35,7 +35,7 @@ public class CloudVmTypesToPlatformVmTypesV1ResponseConverter {
             if (defaultVmType != null) {
                 virtualMachinesResponse.setDefaultVirtualMachine(vmTypeToVmTypeV1ResponseConverter.convert(defaultVmType));
             }
-            virtualMachinesResponse.setVirtualMachines(vmTypeRespons);
+            virtualMachinesResponse.setVirtualMachines(vmTypeResponse);
             result.put(entry.getKey(), virtualMachinesResponse);
         }
         return new PlatformVmtypesResponse(result);

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+import static com.sequenceiq.common.model.Architecture.X86_64;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -58,8 +60,12 @@ public class FreeIpaRecommendationService {
     }
 
     private Set<VmTypeResponse> getAvailableVmTypes(String region, String availabilityZone, Credential credential, String defaultInstanceType) {
-        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(credential),
-                region, credential.getCloudPlatform(), CdpResourceType.DEFAULT, Maps.newHashMap());
+        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(credential),
+                region,
+                credential.getCloudPlatform(),
+                CdpResourceType.DEFAULT,
+                Map.of(ARCHITECTURE, X86_64.getName()));
 
         Set<VmType> availableVmTypes = Collections.emptySet();
         if (vmTypes.getCloudVmResponses() != null && StringUtils.isNotBlank(availabilityZone)

@@ -159,7 +159,9 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -200,7 +202,9 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -241,7 +245,9 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();
@@ -283,7 +289,9 @@ class TemplateValidatorAndUpdaterTest {
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         // Call the validate method
-        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, new Stack(), CdpResourceType.DATAHUB, validationBuilder);
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.X86_64);
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
 
         // Assert that there are no errors in the ValidationResult
         ValidationResult validationResult = validationBuilder.build();

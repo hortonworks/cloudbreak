@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -124,7 +125,7 @@ public class VerticalScalingValidatorService {
                     stack.getRegion(),
                     stack.getPlatformVariant(),
                     CdpResourceType.DEFAULT,
-                    Maps.newHashMap());
+                    Map.of(ARCHITECTURE, stack.getArchitectureName()));
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     getInstance(region, availabilityZone, requestedInstanceType, allVmTypes),

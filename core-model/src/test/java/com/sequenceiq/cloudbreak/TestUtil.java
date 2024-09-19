@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.AwsDiskType;
 
 public class TestUtil {
@@ -198,6 +199,7 @@ public class TestUtil {
         stack.setOrchestrator(orchestrator());
         stack.setEnvironmentCrn("envCrn");
         stack.setResourceCrn(STACK_CRN);
+        stack.setArchitecture(Architecture.X86_64);
 
         switch (credential.cloudPlatform()) {
             case AWS:

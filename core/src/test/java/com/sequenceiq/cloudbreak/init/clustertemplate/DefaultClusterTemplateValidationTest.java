@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
@@ -115,7 +115,7 @@ public class DefaultClusterTemplateValidationTest {
                 .stream()
                 .map(s -> s.replaceAll(" ", ""))
                 .collect(Collectors.toList()));
-        awsEnabledInstanceTypes.addAll(AWS_ENABLED_ARM64_TYPES);
+        awsEnabledInstanceTypes.addAll(AWS_ENABLED_ARM64_TYPES_LIST);
 
         List<String> azureEnabledInstanceTypes = AZURE_ENABLED_TYPES_LIST
                 .stream()

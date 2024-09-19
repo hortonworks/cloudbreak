@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 public class VerticalScalingValidatorServiceTest {
@@ -193,6 +194,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getRegion()).thenReturn("eu");
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getArchitectureName()).thenReturn(Architecture.X86_64.getName());
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
         CloudConnector connector = mock(CloudConnector.class);
         when(providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(any())).thenReturn(new AzureAvailabilityZoneConnector());
@@ -244,6 +246,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getRegion()).thenReturn("eu");
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getArchitectureName()).thenReturn(Architecture.X86_64.getName());
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
 
         InstanceTemplateV4Request instanceTemplateV4Request = new InstanceTemplateV4Request();
@@ -293,6 +296,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getRegion()).thenReturn("eu");
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformVariant()).thenReturn("AWS");
+        when(stack.getArchitectureName()).thenReturn(Architecture.X86_64.getName());
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
         when(providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(any())).thenReturn(null);
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.ST1;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
+import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -240,6 +241,8 @@ public class AwsPlatformResources implements PlatformResources {
             .noneMatch(di -> vmt.value().startsWith(di));
 
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AWS_ENABLED_X86_TYPES_LIST.contains(vmt.value());
+
+    private final Predicate<VmType> enabledDistroxInstanceTypeArmFilter = vmt -> AWS_ENABLED_ARM64_TYPES_LIST.contains(vmt.value());
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
@@ -648,23 +651,36 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        Architecture architecture = getArchitecture(filters);
         boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
-        return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, getEnabledInstancePredicate(dataHubArmEnabled, false), false);
+        return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, getEnabledInstancePredicate(false, architecture), false);
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        Architecture architecture = getArchitecture(filters);
         boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
-        Predicate<VmType> instanceTypeFilter = getEnabledInstancePredicate(dataHubArmEnabled, restrictInstanceTypes);
+        Predicate<VmType> instanceTypeFilter = getEnabledInstancePredicate(restrictInstanceTypes, architecture);
         return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, instanceTypeFilter, true);
     }
 
-    private Predicate<VmType> getEnabledInstancePredicate(boolean dataHubArmEnabled, boolean restrictInstanceTypes) {
+    private Architecture getArchitecture(Map<String, String> filters) {
+        return Architecture.fromStringWithFallback(filters.getOrDefault(
+                ARCHITECTURE,
+                Architecture.X86_64.getName()));
+    }
+
+    private Predicate<VmType> getEnabledInstancePredicate(boolean restrictInstanceTypes, Architecture architecture) {
         if (restrictInstanceTypes) {
-            return enabledDistroxInstanceTypeFilter.or(vm -> dataHubArmEnabled && AWS_ENABLED_ARM64_TYPES.contains(vm.value()));
+            if (Architecture.X86_64.equals(architecture)) {
+                return enabledDistroxInstanceTypeFilter;
+            } else {
+                return enabledDistroxInstanceTypeArmFilter;
+            }
+
         } else {
             return enabledInstanceTypeFilter;
         }
@@ -687,6 +703,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, boolean dataHubArmEnabled, Region region, Map<String, String> filters,
             Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
+        Architecture architecture = getArchitecture(filters);
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
@@ -703,7 +720,8 @@ public class AwsPlatformResources implements PlatformResources {
 
             Set<VmType> awsInstances = new HashSet<>();
             for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
-                String[] processorArchitectures = dataHubArmEnabled ? new String[] {"x86_64", "arm64"} : new String[] {"x86_64"};
+                String[] processorArchitectures = dataHubArmEnabled && Architecture.ARM64.equals(architecture) ?
+                        new String[] {"arm64"} : new String[] {"x86_64"};
                 DescribeInstanceTypesRequest request = DescribeInstanceTypesRequest.builder()
                         .filters(Filter.builder()
                                 .name("processor-info.supported-architecture")
@@ -738,7 +756,9 @@ public class AwsPlatformResources implements PlatformResources {
                         .filter(enabledInstanceTypeFilter)
                         .collect(Collectors.toSet());
                 cloudVmResponses.put(availabilityZone.value(), types);
-                defaultCloudVmResponses.put(availabilityZone.value(), defaultVmTypes.get(region));
+                VmType defaultVmType = defaultVmTypes.get(region);
+                defaultVmType = defaultVmType == null && !types.isEmpty() ? types.iterator().next() : defaultVmType;
+                defaultCloudVmResponses.put(availabilityZone.value(), defaultVmType);
             }
         } else {
             LOGGER.info("Availability zones is null or empty in {}", region.getRegionName());

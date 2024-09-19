@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -58,23 +59,23 @@ public class EnvironmentPlatformResourceControllerTest {
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsNull() {
         PlatformResourceRequest request = mock(PlatformResourceRequest.class);
         setupMocks(request);
-        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, null));
-        verify(request, times(0)).setFilters(any());
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, null, Architecture.X86_64));
+        verify(request, times(1)).setFilters(any());
     }
 
     @Test
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsEmpty() {
         PlatformResourceRequest request = mock(PlatformResourceRequest.class);
         setupMocks(request);
-        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of()));
-        verify(request, times(0)).setFilters(any());
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of(), Architecture.X86_64));
+        verify(request, times(1)).setFilters(any());
     }
 
     @Test
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsNonEmpty() {
         PlatformResourceRequest request = mock(PlatformResourceRequest.class);
         setupMocks(request);
-        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of("1", "2", "3")));
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of("1", "2", "3"), Architecture.X86_64));
         verify(request, times(1)).setFilters(Map.of(NetworkConstants.AVAILABILITY_ZONES, "1,2,3"));
     }
 

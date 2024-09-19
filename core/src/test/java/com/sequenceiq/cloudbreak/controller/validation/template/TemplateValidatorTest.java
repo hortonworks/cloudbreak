@@ -125,7 +125,7 @@ public class TemplateValidatorTest {
         machines.put(location, Set.of(c3VmType, i3VmType, c5VmType, m5VmType));
         cloudVmTypes = new CloudVmTypes(machines, new HashMap<>());
         when(cloudParameterService.getVmTypesV2(
-                isNull(), anyString(), isNull(), any(CdpResourceType.class), any(HashMap.class))).thenReturn(cloudVmTypes);
+                isNull(), anyString(), isNull(), any(CdpResourceType.class), any())).thenReturn(cloudVmTypes);
 
         Platform platform = Platform.platform("AWS");
         Map<Platform, Map<String, VolumeParameterType>> diskMappings = new HashMap<>();
@@ -142,6 +142,7 @@ public class TemplateValidatorTest {
     @Test
     public void validateIDBrokerDataVolumeZeroCountZeroSize() {
         stack.setType(StackType.DATALAKE);
+        stack.setArchitecture(Architecture.X86_64);
         instanceGroup = createInstanceGroup(0, 0, true, false, false, "c3.2xlarge");
         when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
