@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties;
 import com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -26,7 +27,6 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class AzureMarketplaceImageTest extends AbstractE2ETest {
-
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -35,6 +35,9 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
 
     @Inject
     private AzureMarketplaceImageProperties azureMarketplaceImageProperties;
+
+    @Inject
+    private AzureProperties azureProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -50,22 +53,22 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
             when = "create an Environment with FreeIPA",
             then = "should use Marketplace image catalog and Marketplace image UUID")
     public void testCreateNewEnvironmentWithMarketplaceImage(TestContext testContext) {
-
+        EnvironmentNetworkTestDto environmentNetworkTestDto = testContext.given("network", EnvironmentNetworkTestDto.class)
+                    .withServiceEndpoints(ServiceEndpointCreation.DISABLED);
+        environmentNetworkTestDto.getRequest().getAzure().setFlexibleServerSubnetIds(azureProperties.getNetwork().getFlexibleServerSubnetIds());
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
-                .given(EnvironmentNetworkTestDto.class)
-                    .withServiceEndpoints(ServiceEndpointCreation.DISABLED)
                 .given(EnvironmentTestDto.class)
-                    .withNetwork()
+                    .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_MULTIPLE, "")
+                    .withNetwork("network")
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withOneFreeIpaNode()
                     .withMarketplaceFreeIpaImage()
-                    .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_MULTIPLE, "")
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
