@@ -74,6 +74,17 @@ restore_global_objects() {
   fi
 }
 
+restore_passwords() {
+  PASSWORD_FILE=${BACKUPS_DIR}/passwords.sql
+  if [ -f "${PASSWORD_FILE}" ]; then
+    set -x
+    psql -f ${PASSWORD_FILE} --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore passwords from ${PASSWORD_FILE}"
+    set +x
+  else
+      errorExit "INFO Not restoring passwords as ${PASSWORD_FILE} does not exist"
+  fi
+}
+
 restore_database_for_service() {
     SERVICE="$1"
 
@@ -97,16 +108,15 @@ restore_database_for_service() {
 }
 
 run_restore() {
-
   BACKUP_DIR=$(ls -td $BACKUPS_DIR/*/ | head -1)
   restore_global_objects
+  restore_passwords
   {% for service, values in pillar.get('postgres', {}).items()  %}
   {% if values['user'] is defined %}
   restore_database_for_service {{ service }}
   {% endif %}
   {% endfor %}
-  rm -rfv "$BACKUPS_DIR/*" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
-
+  rm -rfv "${BACKUPS_DIR}"/* > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 
 doLog "INFO Initiating restore"

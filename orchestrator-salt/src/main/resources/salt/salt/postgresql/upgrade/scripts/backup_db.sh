@@ -58,6 +58,7 @@ dump_global_objects() {
   pg_dumpall -r --host="$HOST" --port="$PORT" --username="$USERNAME" --database=postgres > $GLOBAL_OBJECT_BACKUP 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump global objects"
   # This is needed because of https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/postgresql/single-server/how-to-upgrade-using-dump-and-restore.md#migrate-the-roles
   sed -i -e 's/\(NOSUPERUSER\|NOBYPASSRLS\)//g' $GLOBAL_OBJECT_BACKUP
+  sed -i -e "s/PASSWORD '.*'//g" $GLOBAL_OBJECT_BACKUP
 }
 
 backup_database_for_service() {
