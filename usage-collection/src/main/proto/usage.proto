@@ -311,6 +311,18 @@ message Event {
     CDPDFDeploymentFlowVersionChangeRequested cdpDFDeploymentFlowVersionChangeRequested = 150;
     // A CDP Operational Database AutoScalingConfig Event
     CDPCODAutoScalingConfig cdpCODAutoScalingConfig = 151;
+    // A CDP CML Serving Endpoint Deployed Event
+    CDPCMLServingEndpointDeployedEvent cdpCMLServingEndpointDeployedEvent = 152;
+    // A CDP Operational Database StorageDetailsForWorker event
+    CDPCODStorageDetailsForWorker cdpCODStorageDetailsForWorker = 153;
+    // A CDP DataEngineering service was requested to be suspended or resumed.
+    CDPCDEServiceSuspendResumeRequested cdpCDEServiceSuspendResumeRequested = 154;
+    // A CDP DataEngineering service's status changed during suspend-resume.
+    CDPCDEServiceSuspendResumeStatusChanged cdpCDEServiceSuspendResumeStatusChanged = 155;
+    // A CDP DataEngineering service was requested to enter or exit maintenance.
+    CDPCDEServiceMaintenanceRequested cdpCDEServiceMaintenanceRequested = 156;
+    // A CDP DataEngineering service's status changed during enter/exit maintenance.
+    CDPCDEServiceMaintenanceStatusChanged cdpCDEServiceMaintenanceStatusChanged = 157;
   }
 }
 
@@ -966,6 +978,13 @@ message CDPCMLWorkspaceStatus {
 
     // The status when the healthpoller is not able to reach the KubeAPI server of a workspace.
     CONNECTION_FAILED = 66;
+
+    // The status when a CML serving workspace tries to rollback in the event of an upgrade failure.
+    ROLLBACK_STARTED = 67;
+    // The status when a CML serving workspace has rolled back successfully.
+    ROLLBACK_FINISHED = 68;
+    // The status indicates that the rollback operation for the CML serving workspace has failed.
+    ROLLBACK_FAILED = 69;
   }
 }
 
@@ -1128,6 +1147,13 @@ message CDPCMLResourceStatus {
 
     // The status when the healthpoller is not able to reach the KubeAPI server of a resource.
     CONNECTION_FAILED = 66;
+
+    // The status when a CML serving workspace tries to rollback in the event of an upgrade failure.
+    ROLLBACK_STARTED = 67;
+    // The status when a CML serving workspace has rolled back successfully.
+    ROLLBACK_FINISHED = 68;
+    // The status indicates that the rollback operation for the CML serving workspace has failed.
+    ROLLBACK_FAILED = 69;
   }
 }
 
@@ -2274,6 +2300,8 @@ message CDPEnvironmentDetails {
   bool secretEncryptionEnabled = 11;
   // shows which client initiated the operation. This value shall come from the userAgent header from the request context
   string creatorClient = 12;
+  // Compute cluster specific details of the environment
+  CDPComputeClusterDetails computeClusterDetails = 13;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment
@@ -2362,6 +2390,26 @@ message CDPNetworkDetails {
 message CDPCredentialDetails {
   // The type of the used credential
   CDPCredentialType.Value credentialType = 1;
+}
+
+// CDP Compute cluster specific details of the environment
+message CDPComputeClusterDetails {
+  // True if compute cluster has been created for the environment
+  bool enabled = 1;
+  // True if its a private cluster
+  bool privateCluster = 2;
+  // Kubernetes API authorized IP ranges in CIDR notation.
+  repeated string kubeApiAuthorizedIpRanges = 3;
+  // Subnets for Kubernetes Worker Nodes
+  repeated string workerNodeSubnetIds = 4;
+  // Azure specific compute cluster details
+  CDPAzureComputeClusterDetails azureComputeClusterDetails = 5;
+}
+
+// Azure specific compute cluster details
+message CDPAzureComputeClusterDetails {
+  // Cluster egress with defined outbound type in Azure Kubernetes Service.
+  string outboundType = 1;
 }
 
 // Generated when Environment creation has been requested or finished
@@ -3453,6 +3501,30 @@ message CDPDFDeploymentFlowVersionChangeRequested {
   uint32 waitForFlowToStopInMinutes = 10;
 }
 
+// A CDP CML Serving Endpoint Deployed Event
+message CDPCMLServingEndpointDeployedEvent {
+  // App CRN of the workload
+  string resourceCrn = 1;
+  // The type of CML Resource sending the event (Serving in this case)
+  string resourceType = 2;
+  // Version of CML Serving App deployed
+  string resourceVersion = 3;
+  // ID of the user who triggerred the event
+  uint32 userId = 4;
+  // ID of the model which was deployed
+  string modelID = 5;
+  // Name of the model that was deployed
+  string modelName = 6;
+  // Version of the model that was deployed
+  string modelVersion = 7;
+  // Number of CPU cores requested for the virtual cluster autoscaling.
+  float cpu = 8;
+  // Memory requested for the virtual cluster autoscaling.
+  float mem = 9;
+  // Number of GPU cores requested for the virtual cluster autoscaling.
+  float gpu = 10;
+}
+
 // The strategies that can be used for change flow version.
 message CDPDFDeploymentFlowVersionChangeStrategy {
   enum Value {
@@ -3528,27 +3600,27 @@ message CDPDFDiagnosticRequestCollection {
 }
 
 message CDPDFDiagnosticDestination {
- enum Value {
-      // A value indicating the enum is unset.
-      UNSET =0;
-      // A value indicating that the diagnostic bundle being sent is to a cloud storage.
-      CLOUD_STORAGE = 1;
-      // A value indicating that the diagnostic bundle being sent is to a support.
-      SUPPORT = 2;
- }
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET =0;
+    // A value indicating that the diagnostic bundle being sent is to a cloud storage.
+    CLOUD_STORAGE = 1;
+    // A value indicating that the diagnostic bundle being sent is to a support.
+    SUPPORT = 2;
+  }
 }
 
 message CDPDFDiagnosticCollectionScope {
- enum Value {
-      // A value indicating the enum is unset.
-      UNSET = 0;
-      // A value indicating that the logs must be collected from both the deployment and environment.
-      ALL = 1;
-      // A value indicating that the logs must be collected from just the environment.
-      ENVIRONMENT = 2;
-      // A value indicating that the logs must be collected from just the deployment.
-      DEPLOYMENT = 3;
- }
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating that the logs must be collected from both the deployment and environment.
+    ALL = 1;
+    // A value indicating that the logs must be collected from just the environment.
+    ENVIRONMENT = 2;
+    // A value indicating that the logs must be collected from just the deployment.
+    DEPLOYMENT = 3;
+  }
 }
 
 message CDPDFProjectResourceType {
@@ -3975,6 +4047,10 @@ message CDPCDWVirtualWarehouseRequested {
   int32 minNodes = 9;
   // The maximum number of nodes of the CDW virtual warehouse.
   int32 maxNodes = 10;
+  // The user-defined tags for the workspace. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 11;
 }
 
 // Generated when a CDP CDW virtual warehouse's status has changed.
@@ -4335,6 +4411,104 @@ message CDPCDESessionRequested {
   uint64 created = 12;
   // Metadata
   CDPCDEMetadata metadata = 13;
+}
+
+// operation type: suspend OR resume.
+message CDPCDESuspendResumeOperationType {
+  enum Value {
+    SUSPEND = 0;
+    RESUME  = 1;
+  }
+}
+
+// Generated when a CDP CDE service suspend/resume is requested.
+message CDPCDEServiceSuspendResumeRequested {
+  // The ID of the CDE service.
+  string clusterID = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The cluster CRN.
+  string clusterCrn = 3;
+  // The CDP actor CRN of the creator.
+  string actorCrn = 4;
+  // The CDE version.
+  string cdeVersion = 5;
+  // operation type: suspend OR resume.
+  CDPCDESuspendResumeOperationType.Value operationType = 6;
+  // Number of times it is attempted. For first attempt it's 1 and for each
+  // subsequent retry it's incremented by 1.
+  int32 attemptNumber = 7;
+  // Workflow Id of the CDE CP workflow.
+  string workflowId = 8;
+}
+
+// A CDP DataEngineering service's status changed during suspend-resume.
+message CDPCDEServiceSuspendResumeStatusChanged {
+  // The ID of the CDP CDE service.
+  string clusterID = 1;
+  // The CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The workflow ID.
+  string workflowId = 4;
+  // New status of the CDP CDE service(in-progress/success/failed).
+  string status = 5;
+  // Cluster details (If there are any additional details or error messages).
+  string details = 6;
+}
+
+message CDPCDEServiceMaintenancePhase {
+  enum Value {
+    ENTER_MAINTENANCE = 0;
+    QUIT_MAINTENANCE = 1;
+  }
+}
+
+message CDPCDEServiceMaintenanceOperationType {
+  enum Value {
+    UPGRADE = 0;
+    SUSPEND_RESUME = 1;
+  }
+}
+
+// Generated when a CDP CDE service maintenance is requested.
+message CDPCDEServiceMaintenanceRequested {
+  // The ID of the CDE service.
+  string clusterID = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The cluster CRN.
+  string clusterCrn = 3;
+  // The CDP actor CRN of the creator.
+  string creatorCrn = 4;
+  // The CDE version.
+  string cdeVersion = 5;
+  // The CDE service maintenance phase - enter or exit maintenance.
+  CDPCDEServiceMaintenancePhase.Value maintenancePhase = 6;
+  // The CDE service maintenance type - upgrade or suspend/resume.
+  CDPCDEServiceMaintenanceOperationType.Value maintenanceOperationType = 7;
+  // Number of times it is attempted. For first attempt it's 1 and for each
+  // subsequent retry it's incremented by 1.
+  int32 attemptNumber = 8;
+  // Workflow Id of the CDE CP workflow.
+  string workflowId = 9;
+}
+
+// A CDP DataEngineering service's status changed during enter/exit maintenance.
+message CDPCDEServiceMaintenanceStatusChanged {
+  // The ID of the CDP CDE service.
+  string clusterID = 1;
+  // The CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The workflow ID.
+  string workflowId = 4;
+  // New status of the CDP CDE service(in-progress/success/failed).
+  string status = 5;
+  // Cluster details (If there are any additional details or error messages).
+  string details = 6;
 }
 
 // Details specific to a CDE interactive spark session
@@ -5459,6 +5633,10 @@ message ModelV2UploadedEvent {
 message RMGeneralPolicyStats {
   // Total count of policies for a particular type
   int32 totalCount = 1;
+  // Total count of successful replication jobs for a particular type
+  int32 successfulJobsCount = 2;
+  // Total count of failed replication jobs for a particular type
+  int32 failedJobsCount = 3;
 }
 
 // Statistics related to cloud-based policy types managed by Replication Manager
@@ -5471,6 +5649,10 @@ message RMCloudPolicyStats {
   int32 azurePolicyCount = 3;
   // Count of GCP-specific policies
   int32 gcpPolicyCount = 4;
+  // Total count of cloud-based successful replication jobs for a particular type
+  int32 successfulJobsCount = 5;
+  // Total count of cloud-based failed replication jobs for a particular type
+  int32 failedJobsCount = 6;
 }
 
 // Consolidated statistics for Replication Manager usage
@@ -5493,6 +5675,11 @@ message RMUsageStatistics {
   RMCloudPolicyStats cloudToOnPremPolicyStats = 7;
   // Statistics for on-premises-to-cloud replication policies
   RMCloudPolicyStats onPremToCloudPolicyStats = 8;
+
+  // Total number of  successful replication jobs overseen by Replication Manager
+  int32 totalSuccessfulJobsCount = 9;
+  // Total number of  failed replication jobs overseen by Replication Manager
+  int32 totalFailedJobsCount = 10;
 }
 
 // Status of secret rotation event
@@ -5781,4 +5968,16 @@ message CDPCODAutoScalingConfig {
   int32 maxComputeNodesForDatabase = 14;
   // The minimum number of compute nodes, as per these metrics, that can be scaled down to.
   int32 minComputeNodesForDatabase = 15;
+}
+
+// CDPCODAutoScalingConfig event
+message CDPCODStorageDetailsForWorker {
+  // Database crn
+  string crn = 1;
+  // The number of volumes.
+  int32 volumeCount = 2;
+  // The target size of the volume, in GiB.
+  int32 volumeSize = 3;
+  // The volume type.
+  string volumeType = 4;
 }

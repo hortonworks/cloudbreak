@@ -77,7 +77,10 @@ public interface UsageReporter {
     /**
      * Reports that a CDP Datalake has been requested.
      * @param details the event details
+     *
+     * @deprecated Contains a subset of the cdpDatalakeStatusChanged data, use cdpDatalakeClusterRequested instead.
      */
+    @Deprecated()
     void cdpDatalakeRequested(
             UsageProto.CDPDatalakeRequested details);
 
@@ -91,7 +94,10 @@ public interface UsageReporter {
     /**
      * Reports that a CDP Datahub has been requested.
      * @param details the event details
+     *
+     * @deprecated Contains a subset of the cdpDatahubStatusChanged data, use cdpDatahubClusterRequested instead.
      */
+    @Deprecated
     void cdpDatahubRequested(
             UsageProto.CDPDatahubRequested details);
 

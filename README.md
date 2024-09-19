@@ -281,8 +281,8 @@ Cloudbreak integrates with GRPC components. This results in generated files insi
 
 Go to `Help -> Edit Custom Properties...`, then insert
 ```
-#parse files up until 15MB
-idea.max.intellisense.filesize=15000
+#parse files up until 25MB
+idea.max.intellisense.filesize=25000
 ```
 Restart IDEA, and Rebuild.
 

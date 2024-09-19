@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPAzureComputeClusterDetails;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPComputeClusterDetails;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCredentialDetails;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCredentialType;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails;
@@ -22,10 +24,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
@@ -110,11 +114,31 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
 
             cdpEnvironmentDetails.setSecretEncryptionEnabled(srcEnvironmentDetails.isEnableSecretEncryption());
             cdpEnvironmentDetails.setCreatorClient(srcEnvironmentDetails.creatorClient());
+            cdpEnvironmentDetails.setComputeClusterDetails(convertComputeClusterDetails(srcEnvironmentDetails));
         }
 
         CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();
         LOGGER.debug("Converted CDPEnvironmentDetails event: {}", ret);
         return ret;
+    }
+
+    private CDPComputeClusterDetails convertComputeClusterDetails(EnvironmentDetails environmentDetails) {
+        CDPComputeClusterDetails.Builder cdpComputeClusterDetails = CDPComputeClusterDetails.newBuilder();
+        ExternalizedComputeClusterDto externalizedComputeCluster = environmentDetails.getExternalizedComputeCluster();
+        if (externalizedComputeCluster != null) {
+            cdpComputeClusterDetails.setEnabled(externalizedComputeCluster.isCreate());
+            cdpComputeClusterDetails.setPrivateCluster(externalizedComputeCluster.isPrivateCluster());
+            cdpComputeClusterDetails.addAllKubeApiAuthorizedIpRanges(externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
+            cdpComputeClusterDetails.addAllWorkerNodeSubnetIds(externalizedComputeCluster.getWorkerNodeSubnetIds());
+            if (environmentDetails.getCloudPlatform() != null && CloudPlatform.AZURE.equals(CloudPlatform.valueOf(environmentDetails.getCloudPlatform()))) {
+                cdpComputeClusterDetails.setAzureComputeClusterDetails(CDPAzureComputeClusterDetails.newBuilder()
+                        .setOutboundType(externalizedComputeCluster.getOutboundType())
+                        .build());
+            }
+        } else {
+            cdpComputeClusterDetails.setEnabled(false);
+        }
+        return cdpComputeClusterDetails.build();
     }
 
     private CDPCredentialDetails convertCredentialDetails(CredentialDetails credentialDetails) {

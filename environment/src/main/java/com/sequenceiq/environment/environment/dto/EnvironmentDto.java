@@ -61,6 +61,7 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         this.credentialDetails = credentialDetails;
     }
 
+    @Override
     public ExternalizedComputeClusterDto getExternalizedComputeCluster() {
         return externalizedComputeCluster;
     }

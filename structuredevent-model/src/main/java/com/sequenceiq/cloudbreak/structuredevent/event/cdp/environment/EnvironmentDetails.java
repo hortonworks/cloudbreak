@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.Pro
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -48,5 +49,7 @@ public interface EnvironmentDetails {
     CredentialDetails getCredentialDetails();
 
     String creatorClient();
+
+    ExternalizedComputeClusterDto getExternalizedComputeCluster();
 
 }

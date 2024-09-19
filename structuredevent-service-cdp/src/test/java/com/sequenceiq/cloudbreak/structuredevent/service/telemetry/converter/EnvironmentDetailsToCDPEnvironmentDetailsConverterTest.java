@@ -26,11 +26,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
@@ -50,6 +52,22 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
     @Mock
     private EnvironmentDetails environmentDetails;
+
+    private static Stream<Arguments> credentialTypes() {
+        return Stream.of(
+                Arguments.of(CredentialType.AWS_KEY_BASED, UsageProto.CDPCredentialType.Value.AWS_KEY_BASED),
+                Arguments.of(CredentialType.AWS_ROLE_BASED, UsageProto.CDPCredentialType.Value.AWS_ROLE_BASED),
+                Arguments.of(CredentialType.AZURE_CODEGRANTFLOW, UsageProto.CDPCredentialType.Value.AZURE_CODEGRANTFLOW),
+                Arguments.of(CredentialType.AZURE_APPBASED_SECRET, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_SECRET),
+                Arguments.of(CredentialType.AZURE_APPBASED_CERTIFICATE, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_CERTIFICATE),
+                Arguments.of(CredentialType.GCP_JSON, UsageProto.CDPCredentialType.Value.GCP_JSON),
+                Arguments.of(CredentialType.GCP_P12, UsageProto.CDPCredentialType.Value.GCP_P12),
+                Arguments.of(CredentialType.YARN, UsageProto.CDPCredentialType.Value.YARN),
+                Arguments.of(CredentialType.MOCK, UsageProto.CDPCredentialType.Value.MOCK),
+                Arguments.of(CredentialType.UNKNOWN, UsageProto.CDPCredentialType.Value.UNKNOWN),
+                Arguments.of(null, UsageProto.CDPCredentialType.Value.UNKNOWN)
+        );
+    }
 
     @BeforeEach()
     void setUp() {
@@ -377,19 +395,27 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isTrue();
     }
 
-    private static Stream<Arguments> credentialTypes() {
-        return Stream.of(
-                Arguments.of(CredentialType.AWS_KEY_BASED, UsageProto.CDPCredentialType.Value.AWS_KEY_BASED),
-                Arguments.of(CredentialType.AWS_ROLE_BASED, UsageProto.CDPCredentialType.Value.AWS_ROLE_BASED),
-                Arguments.of(CredentialType.AZURE_CODEGRANTFLOW, UsageProto.CDPCredentialType.Value.AZURE_CODEGRANTFLOW),
-                Arguments.of(CredentialType.AZURE_APPBASED_SECRET, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_SECRET),
-                Arguments.of(CredentialType.AZURE_APPBASED_CERTIFICATE, UsageProto.CDPCredentialType.Value.AZURE_APPBASED_CERTIFICATE),
-                Arguments.of(CredentialType.GCP_JSON, UsageProto.CDPCredentialType.Value.GCP_JSON),
-                Arguments.of(CredentialType.GCP_P12, UsageProto.CDPCredentialType.Value.GCP_P12),
-                Arguments.of(CredentialType.YARN, UsageProto.CDPCredentialType.Value.YARN),
-                Arguments.of(CredentialType.MOCK, UsageProto.CDPCredentialType.Value.MOCK),
-                Arguments.of(CredentialType.UNKNOWN, UsageProto.CDPCredentialType.Value.UNKNOWN),
-                Arguments.of(null, UsageProto.CDPCredentialType.Value.UNKNOWN)
-        );
+    @Test
+    void testComputeClusterDetailsConversion() {
+        when(environmentDetails.getExternalizedComputeCluster()).thenReturn(ExternalizedComputeClusterDto.builder()
+                .withCreate(true)
+                .withPrivateCluster(true)
+                .withKubeApiAuthorizedIpRanges(Set.of("0.0.0.0/0", "1.1.1.1/1"))
+                .withWorkerNodeSubnetIds(Set.of("subnet1", "subnet2"))
+                .withOutboundType("udr")
+                .build());
+        when(environmentDetails.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.name());
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        UsageProto.CDPComputeClusterDetails computeClusterDetails = cdpEnvironmentDetails.getComputeClusterDetails();
+        assertThat(computeClusterDetails).isNotNull();
+        assertTrue(computeClusterDetails.getEnabled());
+        assertTrue(computeClusterDetails.getPrivateCluster());
+        assertThat(computeClusterDetails.getKubeApiAuthorizedIpRangesList()).containsOnly("0.0.0.0/0", "1.1.1.1/1");
+        assertThat(computeClusterDetails.getWorkerNodeSubnetIdsList()).containsOnly("subnet1", "subnet2");
+        UsageProto.CDPAzureComputeClusterDetails azureComputeClusterDetails = computeClusterDetails.getAzureComputeClusterDetails();
+        assertThat(azureComputeClusterDetails);
+        assertEquals("udr", azureComputeClusterDetails.getOutboundType());
     }
 }
