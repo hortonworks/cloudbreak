@@ -123,6 +123,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Valid
     private PlacementSettingsV4Response placement;
 
+    @Deprecated
     @Schema(description = ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Response sharedService;
 
@@ -336,10 +337,12 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.customDomains = customDomains;
     }
 
+    @Deprecated
     public SharedServiceV4Response getSharedService() {
         return sharedService;
     }
 
+    @Deprecated
     public void setSharedService(SharedServiceV4Response sharedService) {
         this.sharedService = sharedService;
     }

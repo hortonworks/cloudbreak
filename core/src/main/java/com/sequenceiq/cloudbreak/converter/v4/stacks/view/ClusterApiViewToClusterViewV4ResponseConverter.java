@@ -12,13 +12,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Res
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintViewToBlueprintV4ViewResponseConverter;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 
 @Component
 public class ClusterApiViewToClusterViewV4ResponseConverter {
-
-    @Inject
-    private DatalakeService datalakeService;
 
     @Inject
     private BlueprintViewToBlueprintV4ViewResponseConverter blueprintViewToBlueprintV4ViewResponseConverter;
@@ -39,7 +35,6 @@ public class ClusterApiViewToClusterViewV4ResponseConverter {
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterViewResponse.setCertExpirationState(source.getCertExpirationState());
-        datalakeService.addSharedServiceResponse(source, clusterViewResponse);
         return clusterViewResponse;
     }
 

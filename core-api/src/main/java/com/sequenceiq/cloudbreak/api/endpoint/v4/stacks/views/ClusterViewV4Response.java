@@ -23,6 +23,7 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     @Schema(description = ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupViewV4Response> hostGroups = new HashSet<>();
 
+    @Deprecated
     @Schema(description = ClusterModelDescription.SHARED_SERVICE)
     private SharedServiceV4Response sharedServiceResponse;
 
@@ -51,10 +52,12 @@ public class ClusterViewV4Response extends CompactViewV4Response {
         this.hostGroups = hostGroups;
     }
 
+    @Deprecated
     public SharedServiceV4Response getSharedServiceResponse() {
         return sharedServiceResponse;
     }
 
+    @Deprecated
     public void setSharedServiceResponse(SharedServiceV4Response sharedServiceResponse) {
         this.sharedServiceResponse = sharedServiceResponse;
     }
