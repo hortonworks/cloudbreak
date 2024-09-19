@@ -121,7 +121,7 @@ main() {
     can_start $script_name $LOG_FILE
 
     device_name_list=$(get_device_names $LOG_FILE)
-    if [ -z "$(device_name_list)" ] || [ $? -ne 0 ]; then
+    if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "some volumes are missing"
     fi
     ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
