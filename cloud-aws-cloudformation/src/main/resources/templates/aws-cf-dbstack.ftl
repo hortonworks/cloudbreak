@@ -202,6 +202,7 @@
                 "MasterUsername": { "Ref": "MasterUsernameParameter" },
                 "DeletionProtection": { "Ref": "DeletionProtectionParameter" },
                 "MultiAZ": { "Fn::If" : [ "UseMultiAZ", true, false ] },
+                "AutoMinorVersionUpgrade": { "Fn::If" : [ "UseMultiAZ", true, false ] },
                 <#if hasPort>
                 "Port": { "Ref": "PortParameter" },
                 </#if>
