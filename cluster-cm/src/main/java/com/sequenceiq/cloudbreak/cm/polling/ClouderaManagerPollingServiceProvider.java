@@ -267,8 +267,12 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerParcelsApiListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
-    public ExtendedPollingResult startPollingCdpRuntimeUpgrade(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
-        return startDefaultPolling(stack, apiClient, commandId, "Upgrade CDP Runtime services");
+    public ExtendedPollingResult startPollingCdpRuntimeUpgrade(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId, boolean rollingUpgrade) {
+        String commandName = "Upgrade CDP Runtime services";
+        LOGGER.debug("Waiting for Cloudera Manager for [{}].", commandName);
+        return pollCommandWithTimeListener(stack, apiClient, commandId,
+                ClouderaManagerPollingTimeoutProvider.getCdhUpgradeTimeout(stack.getCloudPlatform(), rollingUpgrade),
+                new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, commandName));
     }
 
     public ExtendedPollingResult startPollingCdpRuntimeParcelDownload(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId,

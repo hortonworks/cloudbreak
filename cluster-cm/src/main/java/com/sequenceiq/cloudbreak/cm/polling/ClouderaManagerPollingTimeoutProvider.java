@@ -25,6 +25,13 @@ public class ClouderaManagerPollingTimeoutProvider {
         return POLL_FOR_TWO_HOURS;
     }
 
+    public static long getCdhUpgradeTimeout(String cloudPlatform, boolean rollingUpgrade) {
+        if (CloudPlatform.MOCK.equals(CloudPlatform.valueOf(cloudPlatform))) {
+            return DEFAULT_MOCK_TIMEOUT;
+        }
+        return rollingUpgrade ? POLL_FOR_TWO_HOURS : POLL_FOR_ONE_HOUR;
+    }
+
     public static long getDefaultTimeout(String cloudPlatform) {
         if (CloudPlatform.MOCK.equals(CloudPlatform.valueOf(cloudPlatform))) {
             return DEFAULT_MOCK_TIMEOUT;

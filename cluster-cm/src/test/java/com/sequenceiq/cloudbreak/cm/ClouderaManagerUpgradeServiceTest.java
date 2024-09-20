@@ -72,14 +72,15 @@ public class ClouderaManagerUpgradeServiceTest {
     public void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommendIsNotPresent() throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
+        boolean rollingUpgradeEnabled = false;
 
         ArgumentCaptor<ApiCdhUpgradeArgs> cdhUpgradeArgsArgumentCaptor = ArgumentCaptor.forClass(ApiCdhUpgradeArgs.class);
         when(syncApiCommandRetriever.getCommandId(COMMAND_NAME, clustersResourceApi, stack)).thenReturn(Optional.empty());
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), cdhUpgradeArgsArgumentCaptor.capture())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, false);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
 
         ApiCdhUpgradeArgs cdhUpgradeArgs = cdhUpgradeArgsArgumentCaptor.getValue();
         assertEquals(STACK_PRODUCT_VERSION, cdhUpgradeArgs.getCdhParcelVersion());
@@ -87,7 +88,7 @@ public class ClouderaManagerUpgradeServiceTest {
         verify(syncApiCommandRetriever).getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
         verify(clustersResourceApi).upgradeCdhCommand(eq(CLUSTER_NAME), any());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
         verify(clouderaManagerCommandsService, times(0)).getApiCommand(apiClient, COMMAND_ID);
     }
 
@@ -96,14 +97,15 @@ public class ClouderaManagerUpgradeServiceTest {
             throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
+        boolean rollingUpgradeEnabled = true;
 
         ArgumentCaptor<ApiCdhUpgradeArgs> cdhUpgradeArgsArgumentCaptor = ArgumentCaptor.forClass(ApiCdhUpgradeArgs.class);
         when(syncApiCommandRetriever.getCommandId(COMMAND_NAME, clustersResourceApi, stack)).thenReturn(Optional.empty());
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), cdhUpgradeArgsArgumentCaptor.capture())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, true);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
 
         ApiCdhUpgradeArgs cdhUpgradeArgs = cdhUpgradeArgsArgumentCaptor.getValue();
         assertEquals(STACK_PRODUCT_VERSION, cdhUpgradeArgs.getCdhParcelVersion());
@@ -111,7 +113,7 @@ public class ClouderaManagerUpgradeServiceTest {
         verify(syncApiCommandRetriever).getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
         verify(clustersResourceApi).upgradeCdhCommand(eq(CLUSTER_NAME), any());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
         verify(clouderaManagerCommandsService, times(0)).getApiCommand(apiClient, COMMAND_ID);
     }
 
@@ -122,19 +124,20 @@ public class ClouderaManagerUpgradeServiceTest {
         apiCommand.setActive(Boolean.TRUE);
         apiCommand.setCanRetry(Boolean.FALSE);
         apiCommand.setSuccess(Boolean.FALSE);
+        boolean rollingUpgradeEnabled = false;
 
         when(syncApiCommandRetriever.getCommandId(COMMAND_NAME, clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, false);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
 
         verify(syncApiCommandRetriever).getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
         verify(clouderaManagerCommandsService).getApiCommand(apiClient, COMMAND_ID);
         verify(clustersResourceApi, times(0)).upgradeCdhCommand(eq(CLUSTER_NAME), any());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
         verifyNoMoreInteractions(clustersResourceApi);
     }
 
@@ -142,6 +145,7 @@ public class ClouderaManagerUpgradeServiceTest {
     public void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndInactiveAndNotRetryable()
             throws CloudbreakException, ApiException {
         Stack stack = createStack();
+        boolean rollingUpgradeEnabled = false;
         ApiCommand apiCommand = createApiCommand();
         apiCommand.setActive(Boolean.FALSE);
         apiCommand.setCanRetry(Boolean.FALSE);
@@ -149,12 +153,12 @@ public class ClouderaManagerUpgradeServiceTest {
 
         ArgumentCaptor<ApiCdhUpgradeArgs> cdhUpgradeArgsArgumentCaptor = ArgumentCaptor.forClass(ApiCdhUpgradeArgs.class);
         when(syncApiCommandRetriever.getCommandId(COMMAND_NAME, clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), cdhUpgradeArgsArgumentCaptor.capture())).thenReturn(apiCommand);
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, false);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
 
         ApiCdhUpgradeArgs cdhUpgradeArgs = cdhUpgradeArgsArgumentCaptor.getValue();
         assertEquals(STACK_PRODUCT_VERSION, cdhUpgradeArgs.getCdhParcelVersion());
@@ -163,7 +167,7 @@ public class ClouderaManagerUpgradeServiceTest {
         verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
         verify(clouderaManagerCommandsService).getApiCommand(apiClient, COMMAND_ID);
         verify(clustersResourceApi, times(1)).upgradeCdhCommand(eq(CLUSTER_NAME), any());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
         verifyNoMoreInteractions(clustersResourceApi);
     }
 
@@ -171,24 +175,25 @@ public class ClouderaManagerUpgradeServiceTest {
     public void testCallUpgradeCdhCommandShouldRetryCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndInactiveAndRetryable()
             throws CloudbreakException, ApiException {
         Stack stack = createStack();
+        boolean rollingUpgradeEnabled = false;
         ApiCommand apiCommand = createApiCommand();
         apiCommand.setActive(Boolean.FALSE);
         apiCommand.setCanRetry(Boolean.TRUE);
         apiCommand.setSuccess(Boolean.FALSE);
 
         when(syncApiCommandRetriever.getCommandId(COMMAND_NAME, clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
         when(clouderaManagerCommandsService.retryApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, false);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
 
         verify(syncApiCommandRetriever).getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         verify(clouderaManagerCommandsService).getApiCommand(apiClient, COMMAND_ID);
         verify(clouderaManagerCommandsService).retryApiCommand(apiClient, COMMAND_ID);
         verify(clustersResourceApi, times(0)).upgradeCdhCommand(eq(CLUSTER_NAME), any());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
         verifyNoMoreInteractions(clustersResourceApi);
     }
 
@@ -197,12 +202,13 @@ public class ClouderaManagerUpgradeServiceTest {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build();
+        boolean rollingUpgradeEnabled = false;
 
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), any())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled)).thenReturn(pollingResult);
         doThrow(new CancellationException("Exit")).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, false);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
     }
 
     @Test(expected = CloudbreakException.class)
@@ -210,12 +216,15 @@ public class ClouderaManagerUpgradeServiceTest {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build();
+        boolean rollingUpgradeEnabled = false;
 
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), any())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled)).thenReturn(pollingResult);
         doThrow(new CloudbreakException("Timeout")).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, false);
+        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
+
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
     }
 
     @Test
@@ -238,12 +247,12 @@ public class ClouderaManagerUpgradeServiceTest {
         when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.empty());
         when(clustersResourceApi.postClouderaRuntimeUpgrade(eq(CLUSTER_NAME))).thenReturn(apiCommand);
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false)).thenReturn(pollingResult);
 
         underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
 
         verify(syncApiCommandRetriever).getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack);
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false);
         verify(clustersResourceApi, times(1)).postClouderaRuntimeUpgrade(CLUSTER_NAME);
     }
 
@@ -257,12 +266,12 @@ public class ClouderaManagerUpgradeServiceTest {
         when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.of(COMMAND_ID));
         when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false)).thenReturn(pollingResult);
 
         underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
 
         verify(syncApiCommandRetriever).getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack);
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false);
         verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
         verifyNoMoreInteractions(clustersResourceApi);
     }
@@ -278,12 +287,12 @@ public class ClouderaManagerUpgradeServiceTest {
         when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(apiCommand);
         when(clustersResourceApi.postClouderaRuntimeUpgrade(eq(CLUSTER_NAME))).thenReturn(apiCommand);
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false)).thenReturn(pollingResult);
 
         underTest.callPostRuntimeUpgradeCommand(clustersResourceApi, stack, apiClient);
 
         verify(syncApiCommandRetriever).getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack);
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, false);
         verify(clouderaManagerCommandsService, times(0)).retryApiCommand(apiClient, COMMAND_ID);
         verify(clustersResourceApi, times(1)).postClouderaRuntimeUpgrade(CLUSTER_NAME);
     }
