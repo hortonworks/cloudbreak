@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +50,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyEnableAutoRotationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
@@ -57,6 +60,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 
 import software.amazon.awssdk.services.kms.model.CreateKeyRequest;
 import software.amazon.awssdk.services.kms.model.CreateKeyResponse;
+import software.amazon.awssdk.services.kms.model.EnableKeyRotationRequest;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyResponse;
 import software.amazon.awssdk.services.kms.model.KeyListEntry;
@@ -66,6 +70,7 @@ import software.amazon.awssdk.services.kms.model.KeyUsageType;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.OriginType;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
+import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandRequest;
 import software.amazon.awssdk.services.kms.model.Tag;
 
 @ExtendWith(MockitoExtension.class)
@@ -130,6 +135,8 @@ class AwsEncryptionResourcesTest {
                     "\"kms:EncryptionContext:SecretARN\":[\"arn:aws-us-gov:secretsmanager:us-gov-west-1:123456789012:secret:my-secret-rk4Dy0\"," +
                     "\"arn:aws-us-gov:secretsmanager:us-gov-west-1:123456789012:secret:my-secret-2-Pi92sB\"]}}}]}";
 
+    private static final Integer KEY_ROTATION_PERIOD = 365;
+
     @Mock
     private CommonAwsClient awsClient;
 
@@ -185,6 +192,12 @@ class AwsEncryptionResourcesTest {
 
     @Captor
     private ArgumentCaptor<PutKeyPolicyRequest> putKeyPolicyRequestCaptor;
+
+    @Captor
+    private ArgumentCaptor<EnableKeyRotationRequest> enableKeyRotationRequestCaptor;
+
+    @Captor
+    private ArgumentCaptor<RotateKeyOnDemandRequest> rotateKeyOnDemandRequestCaptor;
 
     @BeforeEach
     void setUp() {
@@ -250,6 +263,14 @@ class AwsEncryptionResourcesTest {
                 .withName(KEY_NAME)
                 .withType(AWS_KMS_KEY)
                 .withReference(ARN_KMS_KEY)
+                .build();
+    }
+
+    private CloudResource createKeyCloudResource(String keyReference) {
+        return CloudResource.builder()
+                .withName(KEY_NAME)
+                .withType(AWS_KMS_KEY)
+                .withReference(keyReference)
                 .build();
     }
 
@@ -1119,6 +1140,44 @@ class AwsEncryptionResourcesTest {
                         "\"arn:aws-us-gov:ec2:us-gov-west-1:123456789012:instance/i-1ec6923af50a86b21\"],\"kms:EncryptionContext:SecretARN\":[" +
                         "\"arn:aws-us-gov:secretsmanager:us-gov-west-1:123456789012:secret:my-secret-2-Pi92sB\"," +
                         "\"arn:aws-us-gov:secretsmanager:us-gov-west-1:123456789012:secret:my-secret-3-8Lwc1u\"]}}}]}");
+    }
+
+    @Test
+    void enableAutoRotationForEncryptionKey() {
+        CloudResource key1 = createKeyCloudResource("arn1");
+        CloudResource key2 = createKeyCloudResource("arn2");
+        EncryptionKeyEnableAutoRotationRequest encryptionKeyEnableAutoRotationRequest = EncryptionKeyEnableAutoRotationRequest.builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withCloudResources(List.of(key1, key2))
+                .withRotationPeriodInDays(KEY_ROTATION_PERIOD)
+                .build();
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION))).thenReturn(kmsClient);
+
+        underTest.enableAutoRotationForEncryptionKey(encryptionKeyEnableAutoRotationRequest);
+
+        verify(kmsClient, times(2)).enableKeyRotation(enableKeyRotationRequestCaptor.capture());
+        List<EnableKeyRotationRequest> capturedRequests = enableKeyRotationRequestCaptor.getAllValues();
+        assertThat(capturedRequests).extracting(EnableKeyRotationRequest::keyId).containsExactly("arn1", "arn2");
+        assertThat(capturedRequests).extracting(EnableKeyRotationRequest::rotationPeriodInDays).allMatch(KEY_ROTATION_PERIOD::equals);
+    }
+
+    @Test
+    void rotateEncryptionKey() {
+        CloudResource key1 = createKeyCloudResource("arn1");
+        CloudResource key2 = createKeyCloudResource("arn2");
+        EncryptionKeyRotationRequest encryptionKeyRotationRequest = EncryptionKeyRotationRequest.builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withCloudResources(List.of(key1, key2))
+                .build();
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION))).thenReturn(kmsClient);
+
+        underTest.rotateEncryptionKey(encryptionKeyRotationRequest);
+
+        verify(kmsClient, times(2)).rotateKeyOnDemand(rotateKeyOnDemandRequestCaptor.capture());
+        List<RotateKeyOnDemandRequest> capturedRequests = rotateKeyOnDemandRequestCaptor.getAllValues();
+        assertThat(capturedRequests).extracting(RotateKeyOnDemandRequest::keyId).containsExactly("arn1", "arn2");
     }
 
 }

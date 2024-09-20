@@ -17,6 +17,8 @@ import software.amazon.awssdk.services.kms.model.CreateKeyRequest;
 import software.amazon.awssdk.services.kms.model.CreateKeyResponse;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.EnableKeyRotationRequest;
+import software.amazon.awssdk.services.kms.model.EnableKeyRotationResponse;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyResponse;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
@@ -27,6 +29,8 @@ import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyResponse;
+import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandRequest;
+import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandResponse;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
 
@@ -123,6 +127,28 @@ class AmazonKmsClientTest {
         when(client.scheduleKeyDeletion(scheduleKeyDeletionRequest)).thenReturn(expectedResponse);
         ScheduleKeyDeletionResponse response = underTest.scheduleKeyDeletion(scheduleKeyDeletionRequest);
         verify(client).scheduleKeyDeletion(scheduleKeyDeletionRequest);
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testEnableKeyRotation() {
+        EnableKeyRotationRequest enableKeyRotationRequest = mock(EnableKeyRotationRequest.class);
+        EnableKeyRotationResponse expectedResponse = mock(EnableKeyRotationResponse.class);
+        when(client.enableKeyRotation(enableKeyRotationRequest)).thenReturn(expectedResponse);
+
+        EnableKeyRotationResponse response = underTest.enableKeyRotation(enableKeyRotationRequest);
+
+        assertEquals(expectedResponse, response);
+    }
+
+    @Test
+    void testRotateKeyOnDemand() {
+        RotateKeyOnDemandRequest rotateKeyOnDemandRequest = mock(RotateKeyOnDemandRequest.class);
+        RotateKeyOnDemandResponse expectedResponse = mock(RotateKeyOnDemandResponse.class);
+        when(client.rotateKeyOnDemand(rotateKeyOnDemandRequest)).thenReturn(expectedResponse);
+
+        RotateKeyOnDemandResponse response = underTest.rotateKeyOnDemand(rotateKeyOnDemandRequest);
+
         assertEquals(expectedResponse, response);
     }
 

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
@@ -41,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyEnableAutoRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -189,6 +193,8 @@ public class EncryptionKeyServiceTest {
         when(encryptionResources.createEncryptionKey(any())).thenReturn(cloudEncryptionKey);
         when(cloudEncryptionKey.getName()).thenReturn(KEY_ARN_LUKS).thenReturn(KEY_ARN_SECRET_MANAGER);
         when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
+        when(cloudInformationDecorator.getLuksEncryptionKeyResourceType()).thenReturn(ResourceType.AWS_KMS_KEY);
+        when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyResourceType()).thenReturn(ResourceType.AWS_KMS_KEY);
     }
 
     @Test
@@ -237,23 +243,41 @@ public class EncryptionKeyServiceTest {
         verify(credentialService).getCredentialByEnvCrn(ENVIRONMENT_CRN);
         verify(cachedEnvironmentClientService).getByCrn(ENVIRONMENT_CRN);
         verify(stackService).getStackById(STACK_ID);
-        verify(resourceRetriever).findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID);
+        verify(resourceRetriever, times(2)).findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID);
         verify(credentialService).getCredentialByEnvCrn(ENVIRONMENT_CRN);
         verify(extendedCloudCredentialConverter).convert(credential);
     }
 
     @Test
     void testGenerateEncryptionKeysSecretSuccess() {
-        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
+        ReflectionTestUtils.setField(underTest, "rotationPeriodInDays", 365);
+        CloudResource cloudResource1 = mock(CloudResource.class);
+        CloudResource cloudResource2 = mock(CloudResource.class);
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID))
+                .thenReturn(new ArrayList<>(List.of(cloudResource1, cloudResource2)));
         when(cloudInformationDecorator.getLuksEncryptionKeyCryptographicPrincipals(environment)).thenReturn(List.of(LOGGER_INSTANCE_PROFILE));
         when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment))
                 .thenReturn(List.of(CROSS_ACCOUNT_ROLE, LOGGER_INSTANCE_PROFILE));
+        when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_LUKS),
+                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
+        when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_SECRET_MANAGER),
+                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
+
         underTest.generateEncryptionKeys(STACK_ID);
+
         verify(cachedEnvironmentClientService).getByCrn(ENVIRONMENT_CRN);
         verify(stackService).getStackById(STACK_ID);
-        verify(resourceRetriever).findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID);
+        verify(resourceRetriever, times(2)).findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID);
         verify(credentialService).getCredentialByEnvCrn(ENVIRONMENT_CRN);
         verify(extendedCloudCredentialConverter).convert(credential);
+        ArgumentCaptor<EncryptionKeyEnableAutoRotationRequest> enableAutoRotationRequestCaptor =
+                ArgumentCaptor.forClass(EncryptionKeyEnableAutoRotationRequest.class);
+        verify(encryptionResources).enableAutoRotationForEncryptionKey(enableAutoRotationRequestCaptor.capture());
+        EncryptionKeyEnableAutoRotationRequest enableAutoRotationRequest = enableAutoRotationRequestCaptor.getValue();
+        assertEquals(List.of(cloudResource, cloudResource), enableAutoRotationRequest.cloudResources());
+        assertEquals(365, enableAutoRotationRequest.rotationPeriodInDays());
+        assertNotNull(enableAutoRotationRequest.cloudContext());
+        assertNotNull(enableAutoRotationRequest.cloudCredential());
         ArgumentCaptor<StackEncryption> stackEncryptionArgumentCaptor = ArgumentCaptor.forClass(StackEncryption.class);
         verify(stackEncryptionService).save(stackEncryptionArgumentCaptor.capture());
         StackEncryption stackEncryption = stackEncryptionArgumentCaptor.getValue();
@@ -270,8 +294,8 @@ public class EncryptionKeyServiceTest {
                 .anyMatch(KEY_NAME_LUKS::equals));
         assertTrue(values.stream().map(EncryptionKeyCreationRequest::keyName)
                 .anyMatch(KEY_NAME_SECRET_MANAGER::equals));
-        verifyEncryptionKeyCreationRequest(values.get(0), List.of(cloudResource));
-        verifyEncryptionKeyCreationRequest(values.get(1), List.of(cloudResource));
+        verifyEncryptionKeyCreationRequest(values.get(0), List.of(cloudResource1, cloudResource2));
+        verifyEncryptionKeyCreationRequest(values.get(1), List.of(cloudResource1, cloudResource2));
     }
 
     @Test

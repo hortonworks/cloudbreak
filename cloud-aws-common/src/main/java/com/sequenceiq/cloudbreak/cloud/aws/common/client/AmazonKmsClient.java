@@ -5,6 +5,8 @@ import software.amazon.awssdk.services.kms.model.CreateKeyRequest;
 import software.amazon.awssdk.services.kms.model.CreateKeyResponse;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.EnableKeyRotationRequest;
+import software.amazon.awssdk.services.kms.model.EnableKeyRotationResponse;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyResponse;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
@@ -15,6 +17,8 @@ import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyResponse;
+import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandRequest;
+import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandResponse;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
 
@@ -56,6 +60,14 @@ public class AmazonKmsClient extends AmazonClient {
 
     public ScheduleKeyDeletionResponse scheduleKeyDeletion(ScheduleKeyDeletionRequest scheduleKeyDeletionRequest) {
         return client.scheduleKeyDeletion(scheduleKeyDeletionRequest);
+    }
+
+    public EnableKeyRotationResponse enableKeyRotation(EnableKeyRotationRequest enableKeyRotationRequest) {
+        return client.enableKeyRotation(enableKeyRotationRequest);
+    }
+
+    public RotateKeyOnDemandResponse rotateKeyOnDemand(RotateKeyOnDemandRequest rotateKeyOnDemandRequest) {
+        return client.rotateKeyOnDemand(rotateKeyOnDemandRequest);
     }
 
 }

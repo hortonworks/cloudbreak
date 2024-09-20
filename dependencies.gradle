@@ -39,7 +39,7 @@ ext {
   tomcatVersion = '10.1.24'
 
   // Cloud SDKs
-  awsSdkVersion = '2.22.12'
+  awsSdkVersion = '2.28.3'
   azureSdkOkHttpVersion = '1.12.2'
   azureSdkCoreVersion = '1.51.0'
   azureSdkIdentityVersion = '1.12.2'

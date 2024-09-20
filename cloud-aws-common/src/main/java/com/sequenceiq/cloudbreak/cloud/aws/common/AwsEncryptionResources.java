@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyEnableAutoRotationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
@@ -49,6 +51,7 @@ import software.amazon.awssdk.policybuilder.iam.IamPrincipalType;
 import software.amazon.awssdk.policybuilder.iam.IamResource;
 import software.amazon.awssdk.policybuilder.iam.IamStatement;
 import software.amazon.awssdk.services.kms.model.CreateKeyRequest;
+import software.amazon.awssdk.services.kms.model.EnableKeyRotationRequest;
 import software.amazon.awssdk.services.kms.model.GetKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.KeyListEntry;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
@@ -57,6 +60,7 @@ import software.amazon.awssdk.services.kms.model.KeyUsageType;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.OriginType;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
+import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandRequest;
 import software.amazon.awssdk.services.kms.model.Tag;
 
 @Service
@@ -444,4 +448,30 @@ public class AwsEncryptionResources implements EncryptionResources {
         kmsClient.putKeyPolicy(putKeyPolicyRequest);
     }
 
+    @Override
+    public void enableAutoRotationForEncryptionKey(EncryptionKeyEnableAutoRotationRequest request) {
+        AwsCredentialView awsCredentialView = new AwsCredentialView(request.cloudCredential());
+        AmazonKmsClient kmsClient = awsClient.createAWSKMS(awsCredentialView, request.cloudContext().getLocation().getRegion().value());
+        for (CloudResource cloudResource : request.cloudResources()) {
+            String keyArn = cloudResource.getReference();
+            LOGGER.info("Enabling auto rotation for KMS key [{}]", keyArn);
+            kmsClient.enableKeyRotation(EnableKeyRotationRequest.builder()
+                    .keyId(keyArn)
+                    .rotationPeriodInDays(request.rotationPeriodInDays())
+                    .build());
+        }
+    }
+
+    @Override
+    public void rotateEncryptionKey(EncryptionKeyRotationRequest request) {
+        AwsCredentialView awsCredentialView = new AwsCredentialView(request.cloudCredential());
+        AmazonKmsClient kmsClient = awsClient.createAWSKMS(awsCredentialView, request.cloudContext().getLocation().getRegion().value());
+        for (CloudResource cloudResource : request.cloudResources()) {
+            String keyArn = cloudResource.getReference();
+            LOGGER.info("Rotating KMS key [{}]", keyArn);
+            kmsClient.rotateKeyOnDemand(RotateKeyOnDemandRequest.builder()
+                    .keyId(keyArn)
+                    .build());
+        }
+    }
 }

@@ -7,13 +7,16 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
@@ -29,11 +32,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyEnableAutoRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -55,6 +58,9 @@ public class EncryptionKeyService {
     private static final String KEY_DESC_LUKS = "LUKS KMS Key for %s-%s";
 
     private static final String KEY_DESC_CLOUD_SECRET_MANAGER = "Cloud Secret Manager KMS Key for %s-%s";
+
+    @Value("${freeipa.secret.rotation.kmskey.rotationPeriodInDays:365}")
+    private Integer rotationPeriodInDays;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -90,12 +96,13 @@ public class EncryptionKeyService {
             List<String> cloudSecretManagerKeyCryptographicPrincipals =
                     cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment);
             Map<String, String> tags = getTags(stack);
-            List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, stack.getId());
+            List<CloudResource> existingKeyCloudResources = getExistingKeyCloudResources(cloudInformationDecorator, stack.getId());
+            CloudContext cloudContext = getCloudContext(stack);
             ExtendedCloudCredential extendedCloudCredential = getExtendedCloudCredential(stack);
             EncryptionKeyCreationRequest.Builder encryptionKeyBuilder = EncryptionKeyCreationRequest.builder()
                     .withCloudCredential(extendedCloudCredential)
-                    .withCloudContext(getCloudContext(stack))
-                    .withCloudResources(cloudResources)
+                    .withCloudContext(cloudContext)
+                    .withCloudResources(existingKeyCloudResources)
                     .withTags(tags);
             EncryptionResources encryptionResources = getEncryptionResources(stack);
             String luksKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_LUKS, stack), populateStackInformation(KEY_DESC_LUKS, stack),
@@ -103,6 +110,8 @@ public class EncryptionKeyService {
             String cloudSecretManagerKmsKey = generateEncryptionKey(populateStackInformation(KEY_NAME_CLOUD_SECRET_MANAGER, stack),
                     populateStackInformation(KEY_DESC_CLOUD_SECRET_MANAGER, stack), cloudSecretManagerKeyCryptographicPrincipals, encryptionKeyBuilder,
                     encryptionResources);
+            enableAutoRotationForEncryptionKeys(luksKmsKey, cloudSecretManagerKmsKey, cloudContext, extendedCloudCredential, encryptionResources,
+                    cloudInformationDecorator);
             StackEncryption stackEncryption = new StackEncryption(stack.getId());
             stackEncryption.setAccountId(stack.getAccountId());
             stackEncryption.setEncryptionKeyLuks(luksKmsKey);
@@ -111,6 +120,15 @@ public class EncryptionKeyService {
         } else {
             LOGGER.info("Secret Encryption is not enable for Stack ID {} so encryption keys will not be generated", stackId);
         }
+    }
+
+    private List<CloudResource> getExistingKeyCloudResources(CloudInformationDecorator cloudInformationDecorator, Long stackId) {
+        Set<CloudResource> existingKeyCloudResources = new HashSet<>();
+        existingKeyCloudResources.addAll(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED,
+                cloudInformationDecorator.getLuksEncryptionKeyResourceType(), stackId));
+        existingKeyCloudResources.addAll(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED,
+                cloudInformationDecorator.getCloudSecretManagerEncryptionKeyResourceType(), stackId));
+        return List.copyOf(existingKeyCloudResources);
     }
 
     private String generateEncryptionKey(String keyName, String keyDescription, List<String> cryptographicPrincipals,
@@ -122,6 +140,20 @@ public class EncryptionKeyService {
                 .build();
         CloudEncryptionKey cloudEncryptionKey = encryptionResources.createEncryptionKey(encryptionKeyCreationRequest);
         return cloudEncryptionKey.getName();
+    }
+
+    private void enableAutoRotationForEncryptionKeys(String luksKey, String cloudSecretManagerKey, CloudContext cloudContext, CloudCredential cloudCredential,
+            EncryptionResources encryptionResources, CloudInformationDecorator cloudInformationDecorator) {
+        CloudResource luksKeyCloudResource = resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(luksKey), CommonStatus.CREATED,
+                cloudInformationDecorator.getLuksEncryptionKeyResourceType(), cloudContext.getId()).getFirst();
+        CloudResource cloudSecretmanagerCloudResource = resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(cloudSecretManagerKey),
+                CommonStatus.CREATED, cloudInformationDecorator.getCloudSecretManagerEncryptionKeyResourceType(), cloudContext.getId()).getFirst();
+        encryptionResources.enableAutoRotationForEncryptionKey(EncryptionKeyEnableAutoRotationRequest.builder()
+                .withCloudResources(List.of(luksKeyCloudResource, cloudSecretmanagerCloudResource))
+                .withRotationPeriodInDays(rotationPeriodInDays)
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .build());
     }
 
     public EncryptionResources getEncryptionResources(Stack stack) {
