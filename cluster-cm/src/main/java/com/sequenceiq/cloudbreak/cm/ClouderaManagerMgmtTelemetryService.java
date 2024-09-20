@@ -236,7 +236,8 @@ public class ClouderaManagerMgmtTelemetryService {
             telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
                     TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
             // the HMS metadata extractor is true by default in the Observability, but this make impact on the DHs performance therefore we should disable it.
-            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_HMS_METADATA_ENABLED, "false");
+            // Enabling this temporarily, but will be reverted once DL telemetry issues are fixed.
+            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_HMS_METADATA_ENABLED, "true");
         }
         enrichWithEnvironmentMetadata(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
