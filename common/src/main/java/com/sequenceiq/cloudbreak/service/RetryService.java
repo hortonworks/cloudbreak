@@ -49,4 +49,12 @@ public class RetryService implements Retry {
         return action.get();
     }
 
+    @Override
+    @Retryable(
+            value = ActionFailedException.class,
+            backoff = @Backoff(delay = 1000, multiplier = 1, maxDelay = 10000)
+    )
+    public <T> T testWith1SecDelayMax3Times(Supplier<T> action) throws ActionFailedException {
+        return action.get();
+    }
 }

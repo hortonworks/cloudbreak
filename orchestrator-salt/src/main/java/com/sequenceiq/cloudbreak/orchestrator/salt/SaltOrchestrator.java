@@ -1089,6 +1089,16 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public Map<String, String> runCommandOnAllHostsWithFewRetry(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
+            return saltStateService.runCommandWithFewRetry(retry, saltConnector, command);
+        } catch (RuntimeException e) {
+            LOGGER.info("Error occurred during command execution: " + command, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);

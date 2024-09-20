@@ -92,6 +92,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException;
 
+    Map<String, String> runCommandOnAllHostsWithFewRetry(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException;
+
     Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command)
             throws CloudbreakOrchestratorFailedException;
 

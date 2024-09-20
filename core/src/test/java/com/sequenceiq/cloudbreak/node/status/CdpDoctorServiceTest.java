@@ -39,7 +39,7 @@ public class CdpDoctorServiceTest {
     @Test
     void testGetMeteringReport() throws CloudbreakOrchestratorFailedException {
         when(gatewayConfigService.getPrimaryGatewayConfig(any(StackDtoDelegate.class))).thenReturn(new GatewayConfig(null, null, null, null, null, null));
-        when(saltOrchestrator.runCommandOnAllHosts(any(), any())).thenReturn(Map.of(
+        when(saltOrchestrator.runCommandOnAllHostsWithFewRetry(any(), any())).thenReturn(Map.of(
                 "host1", "{\"random\": \"OK\", \"heartbeatAgentRunning\": null}",
                 "host2", "invalidjson",
                 "host3", "{\"heartbeatAgentRunning\": \"OK\"}"));
@@ -54,7 +54,7 @@ public class CdpDoctorServiceTest {
     @Test
     void testGetNetworkReport() throws CloudbreakOrchestratorFailedException {
         when(gatewayConfigService.getPrimaryGatewayConfig(any(StackDtoDelegate.class))).thenReturn(new GatewayConfig(null, null, null, null, null, null));
-        when(saltOrchestrator.runCommandOnAllHosts(any(), any())).thenReturn(Map.of(
+        when(saltOrchestrator.runCommandOnAllHostsWithFewRetry(any(), any())).thenReturn(Map.of(
                 "host1", "{\"random\": \"OK\", \"databusAccessible\": null}",
                 "host2", "invalidjson",
                 "host3", "{\"databusAccessible\": \"OK\"}"));
@@ -69,7 +69,7 @@ public class CdpDoctorServiceTest {
     @Test
     void testGetServicesReport() throws CloudbreakOrchestratorFailedException {
         when(gatewayConfigService.getPrimaryGatewayConfig(any(StackDtoDelegate.class))).thenReturn(new GatewayConfig(null, null, null, null, null, null));
-        when(saltOrchestrator.runCommandOnAllHosts(any(), any())).thenReturn(Map.of(
+        when(saltOrchestrator.runCommandOnAllHostsWithFewRetry(any(), any())).thenReturn(Map.of(
                 "host1", "{\"random\": \"OK\", \"cmServices\": null}",
                 "host2", "invalidjson",
                 "host3", "{\"cmServices\": [{\"name\":\"service\",\"status\":\"OK\"}]}"));

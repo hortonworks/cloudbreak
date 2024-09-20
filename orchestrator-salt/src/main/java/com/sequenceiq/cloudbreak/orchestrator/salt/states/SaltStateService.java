@@ -437,17 +437,23 @@ public class SaltStateService {
     }
 
     public Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
-        return retry.testWith2SecDelayMax15Times(() -> {
-            try {
-                CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
-                        "Command run took {}ms for command [{}]", command);
-                List<Map<String, String>> result = resp.getResult();
-                return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
-            } catch (RuntimeException e) {
-                LOGGER.error("Salt run command failed", e);
-                throw new Retry.ActionFailedException("Salt run command failed");
-            }
-        });
+        return retry.testWith2SecDelayMax15Times(() -> runCommand(sc, command));
+    }
+
+    public Map<String, String> runCommandWithFewRetry(Retry retry, SaltConnector sc, String command) {
+        return retry.testWith1SecDelayMax3Times(() -> runCommand(sc, command));
+    }
+
+    private Map<String, String> runCommand(SaltConnector sc, String command) {
+        try {
+            CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
+                    "Command run took {}ms for command [{}]", command);
+            List<Map<String, String>> result = resp.getResult();
+            return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+        } catch (RuntimeException e) {
+            LOGGER.error("Salt run command failed", e);
+            throw new Retry.ActionFailedException("Salt run command failed");
+        }
     }
 
     public Map<String, String> replacePatternInFile(Retry retry, SaltConnector sc, String file, String pattern, String replace) {

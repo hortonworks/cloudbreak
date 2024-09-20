@@ -34,21 +34,21 @@ public class CdpDoctorService {
 
     public Map<String, CdpDoctorMeteringStatusResponse> getMeteringStatusForMinions(StackDtoDelegate stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return saltOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, DOCTOR_METERING_COMMAND).entrySet().stream()
+        return saltOrchestrator.runCommandOnAllHostsWithFewRetry(primaryGatewayConfig, DOCTOR_METERING_COMMAND).entrySet().stream()
                 .filter(entry -> JsonUtil.isValid(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonUtil.readValueUnchecked(entry.getValue(), CdpDoctorMeteringStatusResponse.class)));
     }
 
     public Map<String, CdpDoctorNetworkStatusResponse> getNetworkStatusForMinions(StackDtoDelegate stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return saltOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, DOCTOR_NETWORK_COMMAND).entrySet().stream()
+        return saltOrchestrator.runCommandOnAllHostsWithFewRetry(primaryGatewayConfig, DOCTOR_NETWORK_COMMAND).entrySet().stream()
                 .filter(entry -> JsonUtil.isValid(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonUtil.readValueUnchecked(entry.getValue(), CdpDoctorNetworkStatusResponse.class)));
     }
 
     public Map<String, CdpDoctorServicesStatusResponse> getServicesStatusForMinions(StackDtoDelegate stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return saltOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, DOCTOR_SERVICES_COMMAND).entrySet().stream()
+        return saltOrchestrator.runCommandOnAllHostsWithFewRetry(primaryGatewayConfig, DOCTOR_SERVICES_COMMAND).entrySet().stream()
                 .filter(entry -> JsonUtil.isValid(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonUtil.readValueUnchecked(entry.getValue(), CdpDoctorServicesStatusResponse.class)));
     }
