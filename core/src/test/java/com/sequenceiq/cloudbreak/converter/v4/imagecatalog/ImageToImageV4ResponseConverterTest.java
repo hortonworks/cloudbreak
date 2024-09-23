@@ -85,7 +85,7 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
     public void testUnknownArchitecture() {
         ImageV4Response result = underTest.convert(getTestImageWithoutCollections("aarch64"));
 
-        validateImageV4Response(result, true, "unkown");
+        validateImageV4Response(result, true, "unknown");
     }
 
     private static Image getTestImage(String architecture) {
