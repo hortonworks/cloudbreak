@@ -5,6 +5,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -210,7 +212,8 @@ public class FreeIpaProvisionActions {
             }
 
             private void synchronizeUsersViaWiam(Stack stack) {
-                if (!entitlementService.isWorkloadIamSyncEnabled(stack.getAccountId())
+                if (!StringUtils.equals(CloudPlatform.MOCK.name(), stack.getCloudPlatform())
+                        && !entitlementService.isWorkloadIamSyncEnabled(stack.getAccountId())
                         && entitlementService.isWiamUsersyncRoutingEnabled(stack.getAccountId())) {
                     LOGGER.debug("Initiating usersync via WIAM");
                     try {
