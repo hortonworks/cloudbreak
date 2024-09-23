@@ -91,7 +91,7 @@ class StackDownscaleActionsTest {
         when(stack.getId()).thenReturn(STACK_ID);
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                 Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(INSTANCE_GROUP_NAME, Set.of(0L, 1L, 2L)), Map.of(),
-                false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()), null);
+                false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
     }
 
     private AbstractStackDownscaleAction<DownscaleStackResult> getDownscaleRemoveUserdataSecretsAction() {

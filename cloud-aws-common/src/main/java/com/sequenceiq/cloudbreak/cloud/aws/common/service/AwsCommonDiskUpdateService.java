@@ -5,13 +5,10 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +18,10 @@ import org.springframework.util.CollectionUtils;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.google.api.client.util.Lists;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -40,7 +34,6 @@ import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.DetachVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
-import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.Volume;
@@ -60,9 +53,6 @@ public class AwsCommonDiskUpdateService {
     private static final int MAXIMUM_READ_COUNT = 15;
 
     private static final int SLEEP_INTERVAL_IN_SECONDS = 2;
-
-    @Inject
-    private AwsTaggingService awsTaggingService;
 
     public void modifyVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
         AmazonEc2Client amazonEC2Client = getEc2Client(authenticatedContext);
@@ -227,17 +217,5 @@ public class AwsCommonDiskUpdateService {
         Filter availableFilter = Filter.builder().name("status").values("available").build();
         filters.add(availableFilter);
         return filters;
-    }
-
-    public List<CloudResource> getRootVolumes(AuthenticatedContext authenticatedContext, Group group) throws Exception {
-        List<String> instanceIds = group.getInstances().stream().map(CloudInstance::getInstanceId).toList();
-        AmazonEc2Client ec2Client = getEc2Client(authenticatedContext);
-        List<Instance> instances = awsTaggingService.describeInstancesByInstanceIds(instanceIds, ec2Client);
-        List<String> rootVolumeIds = awsTaggingService.getRootVolumeIdsFromInstances(instances);
-        Map<String, String> groupNameByInstanceId = new HashMap<>();
-        for (String instanceId: instanceIds) {
-            groupNameByInstanceId.put(instanceId, group.getName());
-        }
-        return awsTaggingService.getRootVolumeResource(rootVolumeIds, ec2Client, groupNameByInstanceId);
     }
 }

@@ -412,7 +412,7 @@
                   </#if>
                 </#if>
                 "VolumeSize" : "${group.rootVolumeSize}",
-                "VolumeType" : "${group.rootVolumeType}"
+                "VolumeType" : "gp3"
               }
             }
             <#assign ephemeralCount = group.getVolumeCount("ephemeral")>

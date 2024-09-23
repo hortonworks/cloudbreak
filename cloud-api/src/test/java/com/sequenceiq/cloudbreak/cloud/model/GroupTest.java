@@ -145,7 +145,7 @@ class GroupTest {
 
     private Group createGroup(Collection<CloudInstance> instances, CloudInstance skeleton) {
         return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, instances, security, skeleton, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY,
-                ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
     }
 
     private CloudInstance createCloudInstance() {

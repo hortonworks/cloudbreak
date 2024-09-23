@@ -25,9 +25,7 @@ import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
-import com.azure.resourcemanager.compute.models.OSDisk;
 import com.azure.resourcemanager.compute.models.PowerState;
-import com.azure.resourcemanager.compute.models.StorageProfile;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
@@ -53,31 +51,21 @@ public class AzureClientActions {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    private Map<String, Set<String>> listInstancesVolumeIds(String clusterName, List<String> instanceIds, boolean rootVolumes) {
+    private Map<String, Set<String>> listInstancesVolumeIds(String clusterName, List<String> instanceIds) {
         Map<String, Set<String>> dataDiskMap = new HashMap<>();
-        if (rootVolumes) {
-            instanceIds.forEach(id -> {
-                String resourceGroup = getResourceGroupName(clusterName, id);
-                VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                StorageProfile storageProfile = vm.storageProfile();
-                OSDisk osDisk = storageProfile.osDisk();
-                dataDiskMap.put(id, Set.of(osDisk.managedDisk().id()));
-            });
-        } else {
-            instanceIds.forEach(id -> {
-                String resourceGroup = getResourceGroupName(clusterName, id);
-                VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-                dataDiskMap.put(id, vm.dataDisks().values()
-                        .stream()
-                        .map(HasId::id)
-                        .collect(Collectors.toSet()));
-            });
-        }
+        instanceIds.forEach(id -> {
+            String resourceGroup = getResourceGroupName(clusterName, id);
+            VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+            dataDiskMap.put(id, vm.dataDisks().values()
+                    .stream()
+                    .map(HasId::id)
+                    .collect(Collectors.toSet()));
+        });
         return dataDiskMap;
     }
 
-    public List<String> getSelectedInstancesVolumeIds(String clusterName, List<String> instanceIds, boolean rootVolumes) {
-        Map<String, Set<String>> dataDiskMap = listInstancesVolumeIds(clusterName, instanceIds, rootVolumes);
+    public List<String> getSelectedInstancesVolumeIds(String clusterName, List<String> instanceIds) {
+        Map<String, Set<String>> dataDiskMap = listInstancesVolumeIds(clusterName, instanceIds);
         return dataDiskMap
                 .values()
                 .stream()
@@ -86,7 +74,7 @@ public class AzureClientActions {
     }
 
     public Map<String, Set<String>> getInstanceVolumeIds(String clusterName, String instanceId) {
-        return listInstancesVolumeIds(clusterName, List.of(instanceId), false);
+        return listInstancesVolumeIds(clusterName, List.of(instanceId));
     }
 
     public List<String> listInstanceTypes(String clusterName, List<String> instanceIds) {

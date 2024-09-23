@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.resource;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -104,9 +103,5 @@ public class ResourceService {
         return findAllByStackId(stackId).stream()
                 .map(resource -> resourceToCloudResourceConverter.convert(resource))
                 .collect(Collectors.toList());
-    }
-
-    public List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeIn(Long stackId, String instanceGroup, Collection<ResourceType> resourceTypes) {
-        return repository.findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(stackId, instanceGroup, resourceTypes);
     }
 }

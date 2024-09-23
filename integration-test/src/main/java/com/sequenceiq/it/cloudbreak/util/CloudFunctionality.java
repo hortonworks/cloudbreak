@@ -10,7 +10,6 @@ import org.springframework.retry.annotation.Retryable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
 public interface CloudFunctionality {
@@ -28,14 +27,6 @@ public interface CloudFunctionality {
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
     List<String> listInstancesVolumeIds(String clusterName, List<String> instanceIds);
-
-    @Retryable(
-            maxAttempts = ATTEMPTS,
-            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
-    )
-    default List<String> listInstancesRootVolumeIds(String clusterName, List<String> instanceIds) {
-        throw new TestFailException("Not implemented for Cloud Provider!");
-    }
 
     @Retryable(
             maxAttempts = ATTEMPTS,

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -122,19 +120,5 @@ class AwsResourceVolumeConnectorTest {
         CloudResource cloudResource = mock(CloudResource.class);
         underTest.attachVolumes(authenticatedContext, List.of(cloudResource), null);
         verify(awsAdditionalDiskAttachmentService).attachAllVolumes(authenticatedContext, List.of(cloudResource));
-    }
-
-    @Test
-    void testGetRootVolumes() throws Exception {
-        Group group = mock(Group.class);
-        CloudResource cloudResource = mock(CloudResource.class);
-        List<CloudResource> cloudResourceList = List.of(cloudResource);
-        doReturn(cloudResourceList).when(awsCommonDiskUpdateService).getRootVolumes(authenticatedContext, group);
-        RootVolumeFetchDto rootVolumeFetchDto = new RootVolumeFetchDto(authenticatedContext, group, "", List.of(mock(CloudResource.class)));
-
-        List<CloudResource> result = underTest.getRootVolumes(rootVolumeFetchDto);
-
-        assertEquals(cloudResourceList, result);
-        verify(awsCommonDiskUpdateService).getRootVolumes(authenticatedContext, group);
     }
 }

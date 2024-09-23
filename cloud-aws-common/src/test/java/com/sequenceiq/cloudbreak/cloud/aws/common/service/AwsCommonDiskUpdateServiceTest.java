@@ -25,23 +25,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
-import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.Volume;
@@ -63,9 +58,6 @@ class AwsCommonDiskUpdateServiceTest {
 
     @Mock
     private AuthenticatedContext authenticatedContext;
-
-    @Mock
-    private AwsTaggingService awsTaggingService;
 
     @Test
     void testModifyVolumes() throws Exception {
@@ -228,29 +220,5 @@ class AwsCommonDiskUpdateServiceTest {
         assertEquals(1, volumesMap.get("x1.com").size());
         assertEquals(VolumeState.AVAILABLE, volumesMap.get("x1.com").get(0).state());
         assertEquals("vol-1", volumesMap.get("x1.com").get(0).volumeId());
-    }
-
-    @Test
-    void testGetRootVolumes() throws Exception {
-        List<String> rootVolumeIdsList = List.of("root-vol-id");
-        Group group = mock(Group.class);
-        CloudInstance instance = mock(CloudInstance.class);
-        doReturn("instance-id").when(instance).getInstanceId();
-        doReturn(List.of(instance)).when(group).getInstances();
-        doReturn("test-group").when(group).getName();
-        doReturn(amazonEc2Client).when(authenticatedContext).getParameter(any());
-        Instance awsInstance = mock(Instance.class);
-        doReturn(List.of(awsInstance)).when(awsTaggingService).describeInstancesByInstanceIds(List.of("instance-id"), amazonEc2Client);
-        doReturn(rootVolumeIdsList).when(awsTaggingService).getRootVolumeIdsFromInstances(List.of(awsInstance));
-        CloudResource rootVolResource = CloudResource.builder().withType(ResourceType.AWS_ROOT_DISK).withName("test-root-volume-resource").build();
-        doReturn(List.of(rootVolResource)).when(awsTaggingService).getRootVolumeResource(rootVolumeIdsList, amazonEc2Client,
-                Map.of("instance-id", "test-group"));
-
-        List<CloudResource> result = underTest.getRootVolumes(authenticatedContext, group);
-
-        assertEquals(List.of(rootVolResource), result);
-        verify(awsTaggingService).describeInstancesByInstanceIds(List.of("instance-id"), amazonEc2Client);
-        verify(awsTaggingService).getRootVolumeIdsFromInstances(List.of(awsInstance));
-        verify(awsTaggingService).getRootVolumeResource(rootVolumeIdsList, amazonEc2Client, Map.of("instance-id", "test-group"));
     }
 }

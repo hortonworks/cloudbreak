@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -39,7 +37,6 @@ import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappin
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateEbsBlockDevice;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.ResponseLaunchTemplateData;
-import software.amazon.awssdk.services.ec2.model.VolumeType;
 
 @ExtendWith(MockitoExtension.class)
 class ResizedRootBlockDeviceMappingProviderTest {
@@ -377,45 +374,5 @@ class ResizedRootBlockDeviceMappingProviderTest {
                         .ebs().volumeSize());
         assertEquals(2, blockDeviceMappings.size());
         assertTrue(blockDeviceMappings.stream().anyMatch(blockDeviceMapping -> "dummy".equals(blockDeviceMapping.deviceName())));
-    }
-
-    @Test
-    void testCreateResizedRootBlockDeviceMappingDescribeLaunchTemplateWithRootDiskNameDiffAndTypeDiff() {
-        ArgumentCaptor<DescribeLaunchTemplateVersionsRequest> requestCaptor = ArgumentCaptor.forClass(DescribeLaunchTemplateVersionsRequest.class);
-        ArgumentCaptor<LaunchTemplateBlockDeviceMapping> blockDeviceMappingArgumentCaptor = ArgumentCaptor.forClass(LaunchTemplateBlockDeviceMapping.class);
-        when(blockDeviceMappingConverter.convert(any(LaunchTemplateBlockDeviceMapping.class)))
-                .thenReturn(LaunchTemplateBlockDeviceMappingRequest.builder().build());
-        when(ec2Client.describeLaunchTemplateVersions(requestCaptor.capture())).thenReturn(DescribeLaunchTemplateVersionsResponse.builder()
-                .launchTemplateVersions(LaunchTemplateVersion.builder()
-                        .defaultVersion(Boolean.TRUE)
-                        .launchTemplateData(ResponseLaunchTemplateData.builder()
-                                .imageId(OLD_AMI)
-                                .blockDeviceMappings(LaunchTemplateBlockDeviceMapping.builder()
-                                                .deviceName("dummy")
-                                                .build(),
-                                        LaunchTemplateBlockDeviceMapping.builder()
-                                                .deviceName(ROOT_DEV_NAME)
-                                                .ebs(LaunchTemplateEbsBlockDevice.builder().volumeSize(100).volumeType(VolumeType.GP3).build())
-                                                .build())
-                                .build())
-                        .build())
-                .build());
-        mockCloudstackImage(NEW_ROOT_DEV_NAME);
-        when(volumeBuilderUtil.getRootDeviceName(OLD_AMI, ec2Client)).thenReturn(ROOT_DEV_NAME);
-        Map<LaunchTemplateField, String> updatableField = new HashMap<>();
-        updatableField.put(LaunchTemplateField.ROOT_DISK_PATH, "");
-        updatableField.put(LaunchTemplateField.ROOT_DISK_SIZE, "150");
-        updatableField.put(LaunchTemplateField.ROOT_VOLUME_TYPE, "gp2");
-        List<LaunchTemplateBlockDeviceMappingRequest> result =
-                underTest.createUpdatedRootBlockDeviceMapping(ec2Client, updatableField,
-                        LaunchTemplateSpecification.builder().launchTemplateId("templateId").build(), cloudStack);
-
-        verify(blockDeviceMappingConverter, times(2)).convert(blockDeviceMappingArgumentCaptor.capture());
-        List<LaunchTemplateBlockDeviceMapping> launchTemplateBlockDeviceMappings = blockDeviceMappingArgumentCaptor.getAllValues();
-        assertFalse(result.isEmpty());
-        assertEquals("templateId", requestCaptor.getValue().launchTemplateId());
-        assertEquals(launchTemplateBlockDeviceMappings.get(1).deviceName(), NEW_ROOT_DEV_NAME);
-        assertEquals(launchTemplateBlockDeviceMappings.get(1).ebs().volumeSize(), 150);
-        assertEquals(launchTemplateBlockDeviceMappings.get(1).ebs().volumeType(), VolumeType.GP2);
     }
 }

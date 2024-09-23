@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -28,8 +27,6 @@ public class StackScaleTriggerEvent extends StackEvent {
     private final NetworkScaleDetails networkScaleDetails;
 
     private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
-
-    private DiskUpdateRequest diskUpdateRequest;
 
     public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<Long>> hostGroupsWithPrivateIds,
         Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
@@ -67,14 +64,6 @@ public class StackScaleTriggerEvent extends StackEvent {
         this.networkScaleDetails = new NetworkScaleDetails();
         this.adjustmentTypeWithThreshold = adjustmentTypeWithThreshold;
         this.triggeredStackVariant = triggeredStackVariant;
-    }
-
-    public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
-            Map<String, Set<Long>> hostGroupsWithPrivateIds, Map<String, Set<String>> hostGroupsWithHostNames, NetworkScaleDetails networkScaleDetails,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant, DiskUpdateRequest diskUpdateRequest) {
-        this(selector, stackId, hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostGroupsWithHostNames, networkScaleDetails, adjustmentTypeWithThreshold,
-                triggeredStackVariant);
-        this.diskUpdateRequest = diskUpdateRequest;
     }
 
     public StackScaleTriggerEvent setRepair() {
@@ -117,11 +106,4 @@ public class StackScaleTriggerEvent extends StackEvent {
         return triggeredStackVariant;
     }
 
-    public DiskUpdateRequest getDiskUpdateRequest() {
-        return diskUpdateRequest;
-    }
-
-    public void setDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
-        this.diskUpdateRequest = diskUpdateRequest;
-    }
 }

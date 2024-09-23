@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
@@ -26,20 +25,17 @@ public class StackScalingFlowContext extends StackViewContext {
 
     private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
 
-    private final DiskUpdateRequest diskUpdateRequest;
-
     public StackScalingFlowContext(FlowParameters flowParameters, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential,
         Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
-        Map<String, Set<String>> hostgroupWithHostnames, boolean repair, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
-            DiskUpdateRequest diskUpdateRequest) {
+        Map<String, Set<String>> hostgroupWithHostnames, boolean repair, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         this(flowParameters, stack, cloudContext, cloudCredential, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostgroupWithHostnames, repair,
-                NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, diskUpdateRequest);
+                NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold);
     }
 
     public StackScalingFlowContext(FlowParameters flowParameters, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential,
         Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
         Map<String, Set<String>> hostgroupWithHostnames, boolean repair, NetworkScaleDetails networkScaleDetails,
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, DiskUpdateRequest diskUpdateRequest) {
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         super(flowParameters, stack, cloudContext, cloudCredential);
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupWithPrivateIds = hostGroupWithPrivateIds;
@@ -47,7 +43,6 @@ public class StackScalingFlowContext extends StackViewContext {
         this.repair = repair;
         this.networkScaleDetails = networkScaleDetails;
         this.adjustmentTypeWithThreshold = adjustmentTypeWithThreshold;
-        this.diskUpdateRequest = diskUpdateRequest;
     }
 
     public Map<String, Integer> getHostGroupWithAdjustment() {
@@ -72,9 +67,5 @@ public class StackScalingFlowContext extends StackViewContext {
 
     public NetworkScaleDetails getStackNetworkScaleDetails() {
         return networkScaleDetails;
-    }
-
-    public DiskUpdateRequest getDiskUpdateRequest() {
-        return diskUpdateRequest;
     }
 }

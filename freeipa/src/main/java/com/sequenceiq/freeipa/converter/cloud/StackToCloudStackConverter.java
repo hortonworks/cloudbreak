@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -56,7 +55,6 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
@@ -69,7 +67,6 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -97,9 +94,6 @@ import com.sequenceiq.freeipa.service.resource.ResourceService;
 public class StackToCloudStackConverter implements Converter<Stack, CloudStack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
-
-    private static final Map<String, ResourceType> PLATFORM_RESOURCE_TYPE_MAP = ImmutableMap.of("AWS", ResourceType.AWS_ROOT_DISK,
-            "AZURE", ResourceType.AZURE_DISK);
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -286,8 +280,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                                 rootVolumeSize,
                                 fileSystemView,
                                 groupNetwork,
-                                getUserDefinedTags(stack),
-                                getRootVolumeType(stack.getId(), stack.getCloudPlatform(), instanceGroup.getGroupName()))
+                                getUserDefinedTags(stack))
                 );
             }
         }
@@ -551,22 +544,5 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceGroup);
-    }
-
-    private String getRootVolumeType(Long stackId, String platform, String groupName) {
-        if (PLATFORM_RESOURCE_TYPE_MAP.containsKey(platform)) {
-            List<Resource> resources = resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(stackId, groupName,
-                    List.of(PLATFORM_RESOURCE_TYPE_MAP.get(platform)));
-            if (!resources.isEmpty()) {
-                try {
-                    VolumeSetAttributes volumeSetAttributes = resources.getFirst().getAttributes().get(VolumeSetAttributes.class);
-                    return volumeSetAttributes.getVolumes().get(0).getType();
-                } catch (Exception e) {
-                    LOGGER.warn("Exception while parsing volume set attributes from Json in StackToCloudStackConverter - getRootVolumeType" +
-                            "returning null for volume type for group: {} and stack id: {}", groupName, stackId);
-                }
-            }
-        }
-        return null;
     }
 }

@@ -241,7 +241,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -252,8 +252,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AzureDiskType.STANDARD_SSD_LRS.value());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -287,7 +286,6 @@ public class AzureTemplateBuilderFreeIpaTest {
         assertTrue(strippedTemplateString.contains("\"dependsOn\":[\"[concat('Microsoft.Compute/availabilitySets/','gateway-as')]\""));
         assertTrue(strippedTemplateString.contains("\"properties\":{\"availabilitySet\":{\"id\"" +
                 ":\"[resourceId('Microsoft.Compute/availabilitySets','gateway-as')]"));
-        assertTrue(templateString.contains("\"storageAccountType\": \"StandardSSD_LRS\""));
 
     }
 
@@ -306,7 +304,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -317,7 +315,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -374,7 +372,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, List.of(instance, instance1), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -385,7 +383,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group coreGroup = new Group("core", InstanceGroupType.CORE, List.of(instance, instance1), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
@@ -434,7 +432,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group gatewayGroup = new Group("gateway", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = gatewayGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
@@ -445,7 +443,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group coreGroup = new Group("core", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         coreGroup.putParameter("availabilitySet", null);
         groups.add(coreGroup);
 
