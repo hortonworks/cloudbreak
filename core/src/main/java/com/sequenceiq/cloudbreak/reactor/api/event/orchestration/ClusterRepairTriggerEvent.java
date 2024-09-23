@@ -9,7 +9,6 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterRepairTriggerEvent extends StackEvent {
@@ -28,8 +27,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final boolean rollingRestartEnabled;
 
-    private DiskUpdateRequest diskUpdateRequest;
-
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
             String triggeredStackVariant) {
         super(stackId);
@@ -40,13 +37,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.upgrade = triggeredStackVariant != null;
         this.triggeredStackVariant = triggeredStackVariant;
         this.rollingRestartEnabled = false;
-        this.diskUpdateRequest = null;
-    }
-
-    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
-            String triggeredStackVariant, boolean upgrade, DiskUpdateRequest diskUpdateRequest) {
-        this(stackId, failedNodesMap, repairType, restartServices, triggeredStackVariant, upgrade);
-        this.diskUpdateRequest = diskUpdateRequest;
     }
 
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
@@ -59,7 +49,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.upgrade = upgrade;
         this.triggeredStackVariant = triggeredStackVariant;
         this.rollingRestartEnabled = false;
-        this.diskUpdateRequest = null;
     }
 
     @JsonCreator
@@ -79,7 +68,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.upgrade = triggeredStackVariant != null;
         this.triggeredStackVariant = triggeredStackVariant;
         this.rollingRestartEnabled = rollingRestartEnabled;
-        this.diskUpdateRequest = null;
     }
 
     public Map<String, List<String>> getFailedNodesMap() {
@@ -108,14 +96,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     public boolean isRollingRestartEnabled() {
         return rollingRestartEnabled;
-    }
-
-    public DiskUpdateRequest getDiskUpdateRequest() {
-        return diskUpdateRequest;
-    }
-
-    public void setDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
-        this.diskUpdateRequest = diskUpdateRequest;
     }
 
     private Map<String, List<String>> copyToSerializableMap(Map<String, List<String>> map) {

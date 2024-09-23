@@ -530,7 +530,7 @@ class AwsLoadBalancerLaunchServiceTest {
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(), emptyMap(), null);
+                null, null, 100, null, createGroupNetwork(), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;

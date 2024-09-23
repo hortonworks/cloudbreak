@@ -76,7 +76,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -154,7 +153,7 @@ class AwsValidatorsTest {
                 new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES, 0L);
         CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
         Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(),
-            emptyMap(), AwsDiskType.Gp3.value());
+                emptyMap());
 
         CloudStack cloudStack = CloudStack.builder()
                 .groups(List.of(group))

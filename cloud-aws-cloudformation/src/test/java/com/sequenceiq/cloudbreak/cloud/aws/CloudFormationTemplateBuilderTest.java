@@ -76,7 +76,6 @@ import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
@@ -782,8 +781,7 @@ public class CloudFormationTemplateBuilderTest {
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp3.value()));
+                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
                 .image(image)
@@ -818,12 +816,10 @@ public class CloudFormationTemplateBuilderTest {
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
         groups.add(new Group("gateway", InstanceGroupType.GATEWAY, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp2.value()));
+                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp2.value()));
+                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
                 .image(image)
@@ -849,7 +845,6 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SecurityGroupIngress")));
         assertThat(templateString, containsString("\"single-sg-id\""));
-        assertThat(templateString, containsString("\"gp2\""));
     }
 
     @Test
@@ -859,8 +854,7 @@ public class CloudFormationTemplateBuilderTest {
         Security security = new Security(emptyList(), List.of("multi-sg-id1", "multi-sg-id2"));
         groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp3.value()));
+                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
                 .image(image)
@@ -899,8 +893,7 @@ public class CloudFormationTemplateBuilderTest {
         CloudInstance spotInstance = new CloudInstance("SOME_ID", spotInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
         groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(spotInstance), security, spotInstance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         groups.add(createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security, Optional.empty()));
         CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
 
@@ -938,8 +931,7 @@ public class CloudFormationTemplateBuilderTest {
         CloudInstance spotInstance = new CloudInstance("SOME_ID", spotInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
         groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(spotInstance), security, spotInstance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+                "publickey", ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         groups.add(createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security, Optional.empty()));
         CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
 
@@ -1650,15 +1642,14 @@ public class CloudFormationTemplateBuilderTest {
         CloudInstance cloudInstance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication, "subnet-1", "az1");
         return new Group(name, instanceGroupType, singletonList(cloudInstance), security, null,
         instanceAuthentication, instanceAuthentication.getLoginUserName(),
-        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), AwsDiskType.Gp3.value());
+        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
     }
 
     private Group createDefaultGroup(String name, InstanceGroupType type, int rootVolumeSize, Security security,
             Optional<CloudFileSystemView> cloudFileSystemView) {
         return new Group(name, type, singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), rootVolumeSize, cloudFileSystemView, createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+                instanceAuthentication.getPublicKey(), rootVolumeSize, cloudFileSystemView, createGroupNetwork(), emptyMap());
     }
 
     private InstanceTemplate createDefaultInstanceTemplate() {

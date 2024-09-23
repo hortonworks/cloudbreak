@@ -851,15 +851,4 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         stackDatabaseServerCertificateStatusV4Request.setCrns(request.getCrns());
         return stackOperationService.listDatabaseServersCertificateStatus(stackDatabaseServerCertificateStatusV4Request, userCrn);
     }
-
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier updateRootVolumeByDatahubName(@ResourceName String name, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
-        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofName(name), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
-    public FlowIdentifier updateRootVolumeByDatahubCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
-        return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
-    }
 }

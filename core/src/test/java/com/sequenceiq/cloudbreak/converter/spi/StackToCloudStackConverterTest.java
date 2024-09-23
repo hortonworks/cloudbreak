@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -62,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -226,7 +224,6 @@ public class StackToCloudStackConverterTest {
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
-        when(stack.getId()).thenReturn(TEST_STACK_ID);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
@@ -303,7 +300,6 @@ public class StackToCloudStackConverterTest {
         when(template.getCloudPlatform()).thenReturn("AWS");
         when(template.getVolumeTemplates()).thenReturn(Set.of());
         when(instanceGroup.getTemplate()).thenReturn(template);
-        when(instanceGroup.getGroupName()).thenReturn("TEST_GROUP");
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
@@ -312,7 +308,6 @@ public class StackToCloudStackConverterTest {
         assertEquals(1L, result.getGroups().size());
         assertTrue(result.getGroups().get(0).getInstances().isEmpty());
         assertEquals(new HashSet<>(az1), result.getGroups().get(0).getNetwork().getAvailabilityZones());
-        assertNull(result.getGroups().get(0).getRootVolumeType());
     }
 
     @Test
@@ -345,7 +340,6 @@ public class StackToCloudStackConverterTest {
         assertEquals(fqdnParsedName, result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(instanceMetaData.getSubnetId(), result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(instanceMetaData.getInstanceName(), result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
-        assertNull(result.getGroups().get(0).getRootVolumeType());
     }
 
     @Test
@@ -491,21 +485,14 @@ public class StackToCloudStackConverterTest {
         int expected = Integer.MAX_VALUE;
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(stack.getStack()).thenReturn(stack);
-        when(stack.getCloudPlatform()).thenReturn("AWS");
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(template.getRootVolumeSize()).thenReturn(expected);
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("1", "testDevice", 100, "gp2", CloudVolumeUsageType.GENERAL);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "/test", List.of(volume), 100, "General");
-        Resource resource = mock(Resource.class);
-        when(resource.getAttributes()).thenReturn(new Json(volumeSetAttributes));
-        when(resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(any(), any(), any())).thenReturn(List.of(resource));
 
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
         assertEquals(expected, result.getGroups().get(0).getRootVolumeSize());
         verify(defaultRootVolumeSizeProvider, times(0)).getForPlatform(any(String.class));
-        assertEquals("gp2", result.getGroups().get(0).getRootVolumeType());
     }
 
     @Test
@@ -1367,8 +1354,8 @@ public class StackToCloudStackConverterTest {
         InstanceTemplate instanceTemplate2 = new InstanceTemplate("small", null, 2L, Set.of(), null, null, 0L, null, null, 0L);
         CloudInstance instance1 = new CloudInstance("instance1", instanceTemplate1, null, null, null);
         CloudInstance instance2 = new CloudInstance("instance2", instanceTemplate2, null, null, null);
-        Group group1 = new Group("group1", null, Set.of(instance1, instance2), null, null, null, null, null, 100, null, null, Map.of(), null);
-        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of(), null);
+        Group group1 = new Group("group1", null, Set.of(instance1, instance2), null, null, null, null, null, 100, null, null, Map.of());
+        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
         CloudStack cloudStack = CloudStack.builder()
                 .groups(Set.of(group1, group2))
                 .build();
@@ -1386,8 +1373,8 @@ public class StackToCloudStackConverterTest {
     void testUpdateWithVerticalScaleRequestWithZeroInstanceGroup() {
         InstanceTemplate skeletonTemplate = new InstanceTemplate("small", null, 0L, Set.of(), null, null, 0L, null, null, 0L);
         CloudInstance skeleton = new CloudInstance("skeleton", skeletonTemplate, null, null, null);
-        Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of(), null);
-        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of(), null);
+        Group group1 = new Group("group1", null, Set.of(), null, skeleton, null, null, null, 100, null, null, Map.of());
+        Group group2 = new Group("group2", null, Set.of(), null, null, null, null, null, 100, null, null, Map.of());
         CloudStack cloudStack = CloudStack.builder()
                 .groups(Set.of(group1, group2))
                 .build();

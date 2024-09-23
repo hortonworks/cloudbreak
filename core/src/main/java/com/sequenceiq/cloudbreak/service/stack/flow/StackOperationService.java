@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -86,8 +85,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterD
 public class StackOperationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperationService.class);
-
-    private static final Integer MINIMUM_DISK_SIZE = 200;
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -148,9 +145,6 @@ public class StackOperationService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    @Inject
-    private RootDiskValidationService rootDiskValidationService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -536,21 +530,6 @@ public class StackOperationService {
             LOGGER.error(String.format("Failed to get DatabaseServersCertificateStatus for clusters '%s' due to: '%s'",
                     request.getCrns(), errorMessage), e);
             throw new BadRequestException("Could not query database certificate status for clusters. " + errorMessage);
-        }
-    }
-
-    public FlowIdentifier rootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId)
-            throws Exception {
-        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        if (updateRequest.getDiskType().equals(DiskType.ROOT_DISK) && updateRequest.getSize() >= MINIMUM_DISK_SIZE) {
-            rootDiskValidationService.fetchRootDiskResourcesForGroup(stack, updateRequest);
-            List<String> discoveryFqdnList = stack.getAllAvailableInstances().stream()
-                    .filter(instanceMetadataView -> instanceMetadataView.getInstanceGroupName().equals(updateRequest.getGroup()))
-                    .map(InstanceMetadataView::getDiscoveryFQDN).toList();
-            Map<String, List<String>> updatedNodesMap = Map.of(updateRequest.getGroup(), discoveryFqdnList);
-            return flowManager.triggerRootVolumeUpdateFlow(stack.getId(), updatedNodesMap, updateRequest);
-        } else {
-            throw new BadRequestException("Invalid Request: Size for root disk modification should be greater than or equal to 200GB");
         }
     }
 }

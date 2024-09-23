@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
 import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
@@ -157,8 +156,7 @@ public class AwsTerminateServiceTest {
         CloudResource cf = CloudResource.builder().withName("cfn-87654321").withType(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = CloudResource.builder().withName("lc-87654321").withType(ResourceType.AWS_LAUNCHCONFIGURATION).build();
         Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null,
-                "", 0, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+                "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
 
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cf);
@@ -181,8 +179,7 @@ public class AwsTerminateServiceTest {
         CloudResource cf = CloudResource.builder().withName("cfn-87654321").withType(ResourceType.CLOUDFORMATION_STACK).build();
         CloudResource lc = CloudResource.builder().withName("lc-87654321").withType(ResourceType.AWS_LAUNCHCONFIGURATION).build();
         Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null,
-                "", 0, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+                "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
                 .autoScalingGroups(Collections.emptyList()).build();
 

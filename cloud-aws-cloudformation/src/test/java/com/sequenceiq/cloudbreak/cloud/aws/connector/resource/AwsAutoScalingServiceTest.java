@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.core.waiters.Waiter;
 import software.amazon.awssdk.services.autoscaling.model.Activity;
@@ -133,8 +132,7 @@ public class AwsAutoScalingServiceTest {
     }
 
     private Group createGroup(String groupName, InstanceGroupType groupType, List<CloudInstance> instances) {
-        return new Group(groupName, groupType, instances, null, null, null, null, null, 0, null, createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value());
+        return new Group(groupName, groupType, instances, null, null, null, null, null, 0, null, createGroupNetwork(), emptyMap());
     }
 
     private GroupNetwork createGroupNetwork() {

@@ -157,7 +157,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
         group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), 50, Optional.empty(), createGroupNetwork(), emptyMap());
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume("1234", "noop", 0, "eph", CloudVolumeUsageType.GENERAL));

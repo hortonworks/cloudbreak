@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -56,7 +55,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -87,7 +85,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -167,9 +164,6 @@ public class StackOperationServiceTest {
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
-
-    @Mock
-    private RootDiskValidationService rootDiskValidationService;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -612,37 +606,5 @@ public class StackOperationServiceTest {
 
         verify(webApplicationExceptionMessageExtractor, times(1)).getErrorMessage(mockException);
         verify(redbeamsClient, times(1)).listDatabaseServersCertificateStatusByStackCrns(any(), anyString());
-    }
-
-    @Test
-    public void testRootVolumeDiskUpdate() throws Exception {
-        StackDto stack = mock(StackDto.class);
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ROOT_DISK);
-        when(diskUpdateRequest.getSize()).thenReturn(200);
-        when(diskUpdateRequest.getGroup()).thenReturn("test");
-        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
-        when(instanceMetadataView.getInstanceGroupName()).thenReturn("test");
-        when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("test-fqdn");
-        when(stack.getAllAvailableInstances()).thenReturn(List.of(instanceMetadataView));
-        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
-        Map<String, List<String>> updatedNodesMap = Map.of("test", List.of("test-fqdn"));
-        underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST");
-
-        verify(flowManager).triggerRootVolumeUpdateFlow(STACK_ID, updatedNodesMap, diskUpdateRequest);
-    }
-
-    @Test
-    public void testRootVolumeDiskUpdateThrowsBadRequest() throws Exception {
-        StackDto stack = mock(StackDto.class);
-        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ADDITIONAL_DISK);
-        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST"));
-
-        assertEquals("Invalid Request: Size for root disk modification should be greater than or equal to 200GB", exception.getMessage());
     }
 }

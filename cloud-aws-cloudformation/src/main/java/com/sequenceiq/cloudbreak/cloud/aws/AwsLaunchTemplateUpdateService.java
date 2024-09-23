@@ -270,22 +270,4 @@ public class AwsLaunchTemplateUpdateService {
                 updatableFields, autoScalingGroup.autoScalingGroupName());
         return updateAutoScalingGroupResponse;
     }
-
-    public List<software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMapping> getBlockDeviceMappingFromAutoScalingGroup(AuthenticatedContext ac,
-            AutoScalingGroup asg) {
-        AmazonEc2Client ec2Client = getEc2Client(ac);
-        LaunchTemplateSpecification launchTemplateSpecification = getLaunchTemplateSpecification(asg);
-        DescribeLaunchTemplateVersionsResponse launchTemplateVersionsResponse = ec2Client.describeLaunchTemplateVersions(
-                DescribeLaunchTemplateVersionsRequest.builder()
-                        .launchTemplateId(launchTemplateSpecification.launchTemplateId())
-                        .versions(launchTemplateSpecification.version())
-                        .build());
-        List<LaunchTemplateVersion> launchTemplateVersions = launchTemplateVersionsResponse.launchTemplateVersions();
-        if (launchTemplateVersions.size() != 1) {
-            LOGGER.warn("ASG {} did not return launch template {} version {}",
-                    asg.autoScalingGroupName(), launchTemplateSpecification.launchTemplateId(), launchTemplateSpecification.version());
-            return null;
-        }
-        return launchTemplateVersions.get(0).launchTemplateData().blockDeviceMappings();
-    }
 }

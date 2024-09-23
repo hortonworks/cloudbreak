@@ -528,7 +528,7 @@ class AwsLoadBalancerCommonServiceTest {
 
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap(), null);
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, HEALTH_CHECK_PORT), Set.of(group));
         return cloudLoadBalancer;
@@ -536,7 +536,7 @@ class AwsLoadBalancerCommonServiceTest {
 
     private CloudLoadBalancer createCloudLoadBalancerWithHealthCheckSettings(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap(), null);
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, LoadBalancerSku.getDefault(), targetGroupStickyness);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, TCP_UDP, HEALTH_CHECK_PORT, HEALTH_CHECK_PATH, HTTPS), Set.of(group));
         return cloudLoadBalancer;
@@ -545,7 +545,7 @@ class AwsLoadBalancerCommonServiceTest {
     private CloudLoadBalancer createCloudLoadBalancerWithEndpointGateay(LoadBalancerType type, List<String> instanceGroupNetworkSubnetIds,
             List<String> endpointGatewaySubnetIds) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null,
-                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds), emptyMap(), null);
+                null, null, 100, null, createGroupNetwork(instanceGroupNetworkSubnetIds, endpointGatewaySubnetIds), emptyMap());
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, HEALTH_CHECK_PORT), Set.of(group));
         return cloudLoadBalancer;

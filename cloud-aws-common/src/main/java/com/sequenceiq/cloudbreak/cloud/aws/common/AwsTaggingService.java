@@ -92,8 +92,14 @@ public class AwsTaggingService {
         String stackName = ac.getCloudContext().getName();
         LOGGER.debug("Fetch AWS instances to collect all root volume ids for stack: {}", stackName);
         List<String> instanceIds = instanceResources.stream().map(CloudResource::getInstanceId).collect(Collectors.toList());
-        List<Instance> instances = describeInstancesByInstanceIds(instanceIds, ec2Client);
-        List<String> rootVolumeIds = getRootVolumeIdsFromInstances(instances);
+        DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(instanceIds).build());
+
+        List<Instance> instances = describeInstancesResponse.reservations().stream().flatMap(res -> res.instances().stream()).collect(Collectors.toList());
+        List<String> rootVolumeIds = instances.stream()
+                .map(this::getRootVolumeId)
+                .filter(Optional::isPresent)
+                .map(blockDeviceMapping -> blockDeviceMapping.get().ebs().volumeId())
+                .collect(Collectors.toList());
 
         Map<String, String> groupNameByInstanceId = instanceResources.stream().collect(Collectors.toMap(CloudResource::getInstanceId,
                 CloudResource::getGroup));
@@ -120,7 +126,7 @@ public class AwsTaggingService {
         return rootVolumeResources;
     }
 
-    public List<CloudResource> getRootVolumeResource(List<String> rootVolumeIds, AmazonEc2Client ec2Client,
+    private List<CloudResource> getRootVolumeResource(List<String> rootVolumeIds, AmazonEc2Client ec2Client,
             Map<String, String> groupNameByInstanceId) {
         DescribeVolumesRequest describeVolumesRequest = DescribeVolumesRequest.builder().volumeIds(rootVolumeIds).build();
         try {
@@ -140,7 +146,7 @@ public class AwsTaggingService {
                                     .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                                                     .withAvailabilityZone(vol.availabilityZone())
                                                     .withVolumes(List.of(new VolumeSetAttributes.Volume(vol.volumeId(), deviceName, vol.size(),
-                                                            vol.volumeTypeAsString(), CloudVolumeUsageType.GENERAL)))
+                                                            vol.volumeType().name(), CloudVolumeUsageType.GENERAL)))
                                                     .withDeleteOnTermination(Boolean.TRUE)
                                                     .build()))
                                     .build();
@@ -152,20 +158,6 @@ public class AwsTaggingService {
             LOGGER.warn(exceptionMessage + "This should not prevent instance creation.");
         }
         return new ArrayList<>();
-    }
-
-    public List<Instance> describeInstancesByInstanceIds(List<String> instanceIds, AmazonEc2Client ec2Client) {
-        DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances(DescribeInstancesRequest.builder().instanceIds(instanceIds).build());
-
-        return describeInstancesResponse.reservations().stream().flatMap(res -> res.instances().stream()).collect(Collectors.toList());
-    }
-
-    public List<String> getRootVolumeIdsFromInstances(List<Instance> instances) {
-        return instances.stream()
-                .map(this::getRootVolumeId)
-                .filter(Optional::isPresent)
-                .map(blockDeviceMapping -> blockDeviceMapping.get().ebs().volumeId())
-                .collect(Collectors.toList());
     }
 
     public TagSpecification prepareEc2TagSpecification(Map<String, String> userDefinedTags, ResourceType resourceType) {

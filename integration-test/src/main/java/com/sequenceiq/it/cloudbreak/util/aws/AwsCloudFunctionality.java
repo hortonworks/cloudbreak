@@ -42,11 +42,6 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listInstancesRootVolumeIds(String clusterName, List<String> instanceIds) {
-        return amazonEC2Util.listInstancesRootVolumeIds(instanceIds);
-    }
-
-    @Override
     public Map<String, Set<String>> listInstanceVolumeIds(String clusterName, String instanceId) {
         return amazonEC2Util.listInstanceVolumeIds(instanceId);
     }

@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguratio
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
@@ -110,12 +109,10 @@ public class ComponentTestUtil {
                 getCloudInstance(instanceAuthentication, "worker", InstanceStatus.STARTED, 2L, INSTANCE_ID_3));
         List<Group> groups = List.of(new Group("master", InstanceGroupType.CORE, masterInstances, security, null,
                         instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp3.value()),
+                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()),
                 new Group("worker", InstanceGroupType.CORE, workerInstances, security, null,
                         instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                        AwsDiskType.Gp3.value()));
+                        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
@@ -143,8 +140,7 @@ public class ComponentTestUtil {
 
         List<Group> groups = List.of(new Group("group1", InstanceGroupType.CORE, List.of(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(),
-                AwsDiskType.Gp3.value()));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         Network network = new Network(new Subnet(CIDR));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(

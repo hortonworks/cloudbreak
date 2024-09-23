@@ -117,7 +117,7 @@ public class AwsTaggingServiceTest {
         VolumeSetAttributes.Volume rootVolume = volumeSetAttributes.getVolumes().get(0);
         assertEquals(VOLUME_ID, rootVolume.getId());
         assertEquals("/dev/sda1", rootVolume.getDevice());
-        assertEquals(VolumeType.GP2.toString(), rootVolume.getType());
+        assertEquals(VolumeType.GP2.name(), rootVolume.getType());
         assertEquals(200, rootVolume.getSize());
     }
 

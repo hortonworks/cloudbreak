@@ -574,8 +574,4 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new RotateRdsCertificateTriggerRequest(selector, stackId, MIGRATE));
     }
 
-    public FlowIdentifier triggerRootVolumeUpdateFlow(Long stackId, Map<String, List<String>> updatedNodesMap, DiskUpdateRequest updateRequest) {
-        return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, updatedNodesMap, RepairType.ONE_BY_ONE, true, null, false, updateRequest));
-    }
 }

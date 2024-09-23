@@ -270,7 +270,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         Map<String, String> userDefinedTags = Maps.newHashMap();
         userDefinedTags.put("testtagkey1", "testtagvalue1");
         userDefinedTags.put("testtagkey2", "testtagvalue2");
@@ -314,7 +314,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -349,7 +349,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -385,7 +385,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -424,7 +424,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -458,7 +458,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -492,7 +492,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -527,7 +527,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
@@ -572,7 +572,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.emptyList(), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD, LOADBALANCER_TARGET_STICKY_SESSION);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
@@ -622,7 +622,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.emptyList(), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
@@ -674,7 +674,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.emptyList(), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         cloudStack = CloudStack.builder()
                 .groups(groups)
                 .network(network)
@@ -711,7 +711,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD, LOADBALANCER_TARGET_STICKY_SESSION);
         loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
@@ -775,10 +775,10 @@ public class AzureTemplateBuilderPart2Test {
         lbParams.put("availabilitySet", lbAsName);
         Group lbGroup = new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 lbParams, instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         Group nonLbGroup = new Group("core-group", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
         groups.add(lbGroup);
         groups.add(nonLbGroup);
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
@@ -821,7 +821,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
@@ -881,7 +881,7 @@ public class AzureTemplateBuilderPart2Test {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null));
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
         CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
         publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));

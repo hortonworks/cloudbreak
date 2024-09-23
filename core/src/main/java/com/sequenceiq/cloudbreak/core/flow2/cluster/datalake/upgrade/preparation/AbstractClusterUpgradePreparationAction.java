@@ -63,7 +63,7 @@ public abstract class AbstractClusterUpgradePreparationAction<P extends Payload>
                 .withTenantId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
-        CloudStack cloudStack = stackToCloudStackConverter.convert(stack, Collections.emptyList(), null);
+        CloudStack cloudStack = stackToCloudStackConverter.convert(stack, Collections.emptyList());
         return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
 

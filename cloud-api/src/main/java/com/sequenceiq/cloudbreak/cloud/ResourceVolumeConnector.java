@@ -6,7 +6,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -72,17 +71,6 @@ public interface ResourceVolumeConnector {
      */
     default void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, CloudStack cloudStack)
             throws CloudbreakServiceException {
-        throw new UnsupportedOperationException("Interface not implemented.");
-    }
-
-    /**
-     * Gets root volume information of instances on cloud provider side.
-     *
-     * @param rootVolumeFetchDto the dto that contains all required parameters for fetching Root Volumes
-     * @return returns a list of root volume resources for the instances in the cloud stack
-     * @throws Exception        in case of any error
-     */
-    default List<CloudResource> getRootVolumes(RootVolumeFetchDto rootVolumeFetchDto) throws Exception {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

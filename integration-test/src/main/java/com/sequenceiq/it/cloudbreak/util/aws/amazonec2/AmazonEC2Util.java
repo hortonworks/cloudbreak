@@ -72,8 +72,4 @@ public class AmazonEC2Util {
         return ec2ClientActions.describeVolumes(volumeIds);
     }
 
-    public List<String> listInstancesRootVolumeIds(List<String> instanceIds) {
-        return ec2ClientActions.getSelectedInstancesVolumeIds(instanceIds, true);
-    }
-
 }
