@@ -105,6 +105,7 @@ public class TlsSecurityService {
                         conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
                         saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
                         InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
+                        null, null,
                         new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
                         null, null);
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {

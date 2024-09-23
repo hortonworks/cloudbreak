@@ -174,7 +174,7 @@ class SaltOrchestratorTest {
     @BeforeEach
     void setUp() throws Exception {
         gatewayConfig = new GatewayConfig("172.16.252.43", "1.1.1.1", "10.0.0.1", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
-                "saltpasswd", "saltbootpassword", "signkey", false, true, "privatekey", "publickey", null, null);
+                "saltpasswd", "saltbootpassword", "signkey", false, true, "masterPrivateKey", "masterPublicKey", "privatekey", "publickey", null, null);
         targets = new HashSet<>();
         NodeVolumes nodeVolumes = mock(NodeVolumes.class);
         targets.add(new Node("10.0.0.1", "1.1.1.1", "instanceid1", "hg", "10-0-0-1.example.com", "hg",
@@ -211,7 +211,7 @@ class SaltOrchestratorTest {
 
         saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
 
-        verify(saltRunner, times(5)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(7)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
         verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
@@ -286,7 +286,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
-        verify(saltRunner, times(4)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(6)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
                 .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }

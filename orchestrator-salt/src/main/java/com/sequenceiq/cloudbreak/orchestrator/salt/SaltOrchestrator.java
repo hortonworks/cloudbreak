@@ -221,6 +221,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Inject
     private Optional<DelayedExecutorService> delayedExecutorService;
 
+    private static LocalDate parseDateString(String dateString) {
+        return CHAGE_DATE_NEVER.equals(dateString) ? LocalDate.MAX : LocalDate.parse(dateString, CHAGE_DATE_PATTERN);
+    }
+
     @Override
     public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
@@ -232,7 +236,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSaltMasterConfig(sc, params, gatewayTargets, exitModel);
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
-            uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
+            uploadSaltKeys(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
@@ -468,7 +472,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
                 params.setRestartNeeded(true);
             }
-            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
+            uploadSaltKeys(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, nodes, params);
@@ -1665,6 +1669,27 @@ public class SaltOrchestrator implements HostOrchestrator {
         uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/srv", "salt.zip", byteArray);
     }
 
+    private void uploadSaltKeys(SaltConnector saltConnector, GatewayConfig gateway, Set<String> gatewayTargets,
+            Set<String> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
+        uploadMasterKeyPair(saltConnector, gateway, gatewayTargets, targets, exitCriteriaModel);
+        uploadSignKey(saltConnector, gateway, gatewayTargets, targets, exitCriteriaModel);
+    }
+
+    private void uploadMasterKeyPair(SaltConnector saltConnector, GatewayConfig gateway, Set<String> gatewayTargets,
+            Set<String> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
+        try {
+            String saltMasterPrivateKey = gateway.getSaltMasterPrivateKey();
+            String saltMasterPublicKey = gateway.getSaltMasterPublicKey();
+            if (!gatewayTargets.isEmpty() && saltMasterPrivateKey != null && saltMasterPublicKey != null) {
+                LOGGER.debug("Upload master.pem and master.pub to gateways");
+                uploadFileToTargets(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master.pem", saltMasterPrivateKey.getBytes());
+                uploadFileToTargets(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master.pub", saltMasterPublicKey.getBytes());
+            }
+        } catch (SecurityException se) {
+            throw new CloudbreakOrchestratorFailedException("Failed to read salt sign key: " + se.getMessage());
+        }
+    }
+
     private void uploadSignKey(SaltConnector saltConnector, GatewayConfig gateway, Set<String> gatewayTargets,
             Set<String> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
         try {
@@ -1678,7 +1703,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             String saltSignPublicKey = gateway.getSaltSignPublicKey();
             if (!targets.isEmpty() && saltSignPublicKey != null) {
                 byte[] publicKeyContent = saltSignPublicKey.getBytes();
-                LOGGER.debug("Upload master_sign.pub to nodes: " + targets);
+                LOGGER.debug("Upload master_sign.pub to nodes: {}", targets);
                 uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "master_sign.pub", publicKeyContent);
             }
         } catch (SecurityException se) {
@@ -1786,10 +1811,6 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.info("Error occurred during the salt state upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
-    }
-
-    private static LocalDate parseDateString(String dateString) {
-        return CHAGE_DATE_NEVER.equals(dateString) ? LocalDate.MAX : LocalDate.parse(dateString, CHAGE_DATE_PATTERN);
     }
 
     @Override
