@@ -190,8 +190,12 @@ class EnvironmentResponseConverterTest {
     void testDtoToDetailedResponseWhenComputeClusterEnabled(CloudPlatform cloudPlatform) {
         EnvironmentDto environment = createEnvironmentDtoBuilder(cloudPlatform)
                 .withExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
-                        .withCreate(true).withKubeApiAuthorizedIpRanges(Set.of("10.0.0.0/8", "172.0.0.0/16")).withPrivateCluster(true)
-                        .withOutboundType("outbound").build()).build();
+                        .withCreate(true)
+                        .withKubeApiAuthorizedIpRanges(Set.of("10.0.0.0/8", "172.0.0.0/16"))
+                        .withPrivateCluster(true)
+                        .withOutboundType("outbound")
+                        .build())
+                .build();
         CredentialResponse credentialResponse = mock(CredentialResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -250,6 +254,7 @@ class EnvironmentResponseConverterTest {
         assertThat(actual.getExternalizedComputeCluster().getKubeApiAuthorizedIpRanges()).contains("10.0.0.0/8", "172.0.0.0/16");
         assertTrue(actual.getExternalizedComputeCluster().isPrivateCluster());
         assertEquals("outbound", actual.getExternalizedComputeCluster().getOutboundType());
+        assertEquals("outbound", actual.getExternalizedComputeCluster().getAzure().getOutboundType());
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());

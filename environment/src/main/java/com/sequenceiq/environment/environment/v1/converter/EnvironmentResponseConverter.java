@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
@@ -154,6 +155,9 @@ public class EnvironmentResponseConverter {
                     .withKubeApiAuthorizedIpRanges(externalizedComputeClusterDto.getKubeApiAuthorizedIpRanges())
                     .withOutboundType(externalizedComputeClusterDto.getOutboundType())
                     .withWorkerNodeSubnetIds(workerNodeSubnetIds)
+                    .withAzure(AzureExternalizedComputeParams.newBuilder()
+                            .withOutboundType(externalizedComputeClusterDto.getOutboundType())
+                            .build())
                     .build();
         } else {
             return null;

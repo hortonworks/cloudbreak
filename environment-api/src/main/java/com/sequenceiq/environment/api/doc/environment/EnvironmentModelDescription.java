@@ -167,6 +167,7 @@ public class EnvironmentModelDescription {
     public static final String EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES = "Externalized compute cluster Kubernetes API authorized IP ranges";
     public static final String EXTERNALIZED_COMPUTE_OUTBOUND_TYPE = "Externalized compute cluster outbound type";
     public static final String EXTERNALIZED_COMPUTE_WORKER_NODE_SUBNET_IDS = "Externalized compute cluster worker node subnet ids";
+    public static final String EXTERNALIZED_COMPUTE_AZURE_PARAMS = "Externalized compute cluster azure-specific parameters";
 
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";

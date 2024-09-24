@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
+import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -193,7 +194,10 @@ public class EnvironmentApiConverter {
             externalizedComputeService.externalizedComputeValidation(accountId);
             builder.withCreate(externalizedCompute.isCreate())
                     .withPrivateCluster(externalizedCompute.isPrivateCluster());
-            if (StringUtils.hasText(externalizedCompute.getOutboundType())) {
+            AzureExternalizedComputeParams azure = externalizedCompute.getAzure();
+            if (azure != null && StringUtils.hasText(azure.getOutboundType())) {
+                builder.withOutboundType(azure.getOutboundType());
+            } else if (StringUtils.hasText(externalizedCompute.getOutboundType())) {
                 builder.withOutboundType(externalizedCompute.getOutboundType());
             }
             if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {

@@ -36,6 +36,7 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -540,7 +541,7 @@ class EnvironmentApiConverterTest {
         ExternalizedComputeCreateRequest extClusterCreateReq = new ExternalizedComputeCreateRequest();
         extClusterCreateReq.setCreate(true);
         extClusterCreateReq.setPrivateCluster(true);
-        extClusterCreateReq.setOutboundType(OUTBOUND_TYPE);
+        extClusterCreateReq.setAzure(AzureExternalizedComputeParams.newBuilder().withOutboundType(OUTBOUND_TYPE).build());
         extClusterCreateReq.setKubeApiAuthorizedIpRanges(KUBE_API_AUTHORIZED_IP_RANGES);
         request.setExternalizedComputeCreateRequest(extClusterCreateReq);
         setParameters(request, cloudPlatform);

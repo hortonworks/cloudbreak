@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
 import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrListAsString;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,11 +27,18 @@ public class ExternalizedComputeCreateRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES)
     private String kubeApiAuthorizedIpRanges;
 
+    /**
+     * @deprecated Use provider-specific azure.outboundType field instead
+     */
+    @Deprecated(forRemoval = true)
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_OUTBOUND_TYPE)
     private String outboundType;
 
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_WORKER_NODE_SUBNET_IDS)
     private Set<String> workerNodeSubnetIds;
+
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_AZURE_PARAMS)
+    private AzureExternalizedComputeParams azure;
 
     public boolean isCreate() {
         return create;
@@ -56,10 +64,18 @@ public class ExternalizedComputeCreateRequest implements Serializable {
         this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     }
 
+    /**
+     * @deprecated Use provider-specific azure.outboundType field instead
+     */
+    @Deprecated(forRemoval = true)
     public String getOutboundType() {
         return outboundType;
     }
 
+    /**
+     * @deprecated Use provider-specific azure.outboundType field instead
+     */
+    @Deprecated(forRemoval = true)
     public void setOutboundType(String outboundType) {
         this.outboundType = outboundType;
     }
@@ -72,6 +88,14 @@ public class ExternalizedComputeCreateRequest implements Serializable {
         this.workerNodeSubnetIds = workerNodeSubnetIds;
     }
 
+    public AzureExternalizedComputeParams getAzure() {
+        return azure;
+    }
+
+    public void setAzure(AzureExternalizedComputeParams azure) {
+        this.azure = azure;
+    }
+
     @Override
     public String toString() {
         return "ExternalizedComputeCreateRequest{" +
@@ -80,6 +104,7 @@ public class ExternalizedComputeCreateRequest implements Serializable {
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
                 ", workerNodeSubnetIds='" + workerNodeSubnetIds + '\'' +
+                ", azure='" + azure + '\'' +
                 '}';
     }
 }
