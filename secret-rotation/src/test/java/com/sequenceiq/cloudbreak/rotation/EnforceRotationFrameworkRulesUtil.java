@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;
 
 public class EnforceRotationFrameworkRulesUtil {
 
@@ -61,7 +62,7 @@ public class EnforceRotationFrameworkRulesUtil {
 
     private static Set<String> getDuplicatedSecretTypeValues(Stream<? extends SerializableRotationEnum> enumStream) {
         Map<String, Long> secretTypeCounts = enumStream
-                .map(SerializableRotationEnum::value)
+                .map(SecretRotationEnumSerializationUtil::serialize)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         return secretTypeCounts
                 .entrySet()

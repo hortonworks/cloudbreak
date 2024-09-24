@@ -260,9 +260,9 @@ public class EncryptionKeyServiceTest {
         when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment))
                 .thenReturn(List.of(CROSS_ACCOUNT_ROLE, LOGGER_INSTANCE_PROFILE));
         when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_LUKS),
-                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
+                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource1));
         when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_SECRET_MANAGER),
-                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
+                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource2));
 
         underTest.generateEncryptionKeys(STACK_ID);
 
@@ -275,7 +275,7 @@ public class EncryptionKeyServiceTest {
                 ArgumentCaptor.forClass(EncryptionKeyEnableAutoRotationRequest.class);
         verify(encryptionResources).enableAutoRotationForEncryptionKey(enableAutoRotationRequestCaptor.capture());
         EncryptionKeyEnableAutoRotationRequest enableAutoRotationRequest = enableAutoRotationRequestCaptor.getValue();
-        assertEquals(List.of(cloudResource, cloudResource), enableAutoRotationRequest.cloudResources());
+        assertThat(enableAutoRotationRequest.cloudResources()).containsExactlyInAnyOrder(cloudResource1, cloudResource2);
         assertEquals(365, enableAutoRotationRequest.rotationPeriodInDays());
         assertNotNull(enableAutoRotationRequest.cloudContext());
         assertNotNull(enableAutoRotationRequest.cloudCredential());

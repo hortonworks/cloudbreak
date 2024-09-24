@@ -110,7 +110,7 @@ public class CloudResource extends DynamicModel {
     }
 
     public String getDetailedInfo() {
-        if (instanceId != null  && !name.equals(instanceId)) {
+        if (instanceId != null && !name.equals(instanceId)) {
             return getType() + " - " + getName() + " (" + instanceId + ")";
         } else {
             return getType() + " - " + getName();
@@ -131,6 +131,27 @@ public class CloudResource extends DynamicModel {
                 .add("availabilityZone='" + availabilityZone + "'")
                 .add("parameters='" + getParameters() + "'")
                 .toString();
+    }
+
+    @Override
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CloudResource that = (CloudResource) o;
+        return persistent == that.persistent && stackAware == that.stackAware && type == that.type && status == that.status &&
+                Objects.equals(name, that.name) && Objects.equals(reference, that.reference) && Objects.equals(group, that.group) &&
+                Objects.equals(availabilityZone, that.availabilityZone) && Objects.equals(instanceId, that.instanceId) &&
+                Objects.equals(getParameters(), that.getParameters());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, status, name, reference, group, availabilityZone, persistent, stackAware, instanceId, getParameters());
     }
 
     @JsonPOJOBuilder

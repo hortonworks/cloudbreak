@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOA
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -46,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyEnableAutoRotationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.UpdateEncryptionKeyResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -200,6 +205,8 @@ public class EncryptionKeyServiceTest {
         when(extendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(encryptionResources.createEncryptionKey(any())).thenReturn(cloudEncryptionKey);
         when(cloudEncryptionKey.getName()).thenReturn(KEY_ARN_LUKS).thenReturn(KEY_ARN_SECRET_MANAGER);
+        when(cloudInformationDecorator.getLuksEncryptionKeyResourceType()).thenReturn(ResourceType.AWS_KMS_KEY);
+        when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyResourceType()).thenReturn(ResourceType.AWS_KMS_KEY);
     }
 
     @Test
@@ -237,6 +244,9 @@ public class EncryptionKeyServiceTest {
     @ParameterizedTest(name = "testGenerateEncryptionKeysSecretSuccess{0}")
     @EnumSource(value = StackType.class, names = {"WORKLOAD", "DATALAKE"}, mode = EnumSource.Mode.INCLUDE)
     void testGenerateEncryptionKeysSecretSuccess(StackType stackType) {
+        ReflectionTestUtils.setField(underTest, "rotationPeriodInDays", 365);
+        CloudResource cloudResource1 = mock(CloudResource.class);
+        CloudResource cloudResource2 = mock(CloudResource.class);
         when(stack.getType()).thenReturn(stackType);
         if (stackType == DATALAKE) {
             when(cloudInformationDecorator.getLuksEncryptionKeyCryptographicPrincipals(environment, stack))
@@ -249,13 +259,28 @@ public class EncryptionKeyServiceTest {
             when(cloudInformationDecorator.getCloudSecretManagerEncryptionKeyCryptographicPrincipals(environment, stack))
                     .thenReturn(List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_LOGGER));
         }
-        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource));
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID))
+                .thenReturn(new ArrayList<>(List.of(cloudResource1, cloudResource2)));
+        when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_LUKS),
+                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource1));
+        when(resourceRetriever.findByResourceReferencesAndStatusAndTypeAndStack(List.of(KEY_ARN_SECRET_MANAGER),
+                CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID)).thenReturn(List.of(cloudResource2));
+
         underTest.generateEncryptionKeys(STACK_ID);
+
         verify(environmentClientService).getByCrn(ENVIRONMENT_CRN);
         verify(stackService).get(STACK_ID);
-        verify(resourceRetriever).findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID);
+        verify(resourceRetriever, times(2)).findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.AWS_KMS_KEY, STACK_ID);
         verify(credentialConverter).convert(credentialResponse);
         verify(extendedCloudCredentialConverter).convert(credential);
+        ArgumentCaptor<EncryptionKeyEnableAutoRotationRequest> enableAutoRotationRequestCaptor =
+                ArgumentCaptor.forClass(EncryptionKeyEnableAutoRotationRequest.class);
+        verify(encryptionResources).enableAutoRotationForEncryptionKey(enableAutoRotationRequestCaptor.capture());
+        EncryptionKeyEnableAutoRotationRequest enableAutoRotationRequest = enableAutoRotationRequestCaptor.getValue();
+        assertThat(enableAutoRotationRequest.cloudResources()).containsExactlyInAnyOrder(cloudResource1, cloudResource2);
+        assertEquals(365, enableAutoRotationRequest.rotationPeriodInDays());
+        assertNotNull(enableAutoRotationRequest.cloudContext());
+        assertNotNull(enableAutoRotationRequest.cloudCredential());
         ArgumentCaptor<StackEncryption> stackEncryptionArgumentCaptor = ArgumentCaptor.forClass(StackEncryption.class);
         verify(stackEncryptionService).save(stackEncryptionArgumentCaptor.capture());
         StackEncryption stackEncryption = stackEncryptionArgumentCaptor.getValue();
@@ -272,8 +297,8 @@ public class EncryptionKeyServiceTest {
                 .anyMatch(keyName -> populateStackInformation(KEY_NAME_LUKS, stackType).equals(keyName)));
         assertTrue(values.stream().map(EncryptionKeyCreationRequest::keyName)
                 .anyMatch(keyName -> populateStackInformation(KEY_NAME_SECRET_MANAGER, stackType).equals(keyName)));
-        verifyEncryptionKeyCreationRequest(values.get(0), List.of(cloudResource), stackType);
-        verifyEncryptionKeyCreationRequest(values.get(1), List.of(cloudResource), stackType);
+        verifyEncryptionKeyCreationRequest(values.get(0), List.of(cloudResource1, cloudResource2), stackType);
+        verifyEncryptionKeyCreationRequest(values.get(1), List.of(cloudResource1, cloudResource2), stackType);
     }
 
     @Test
@@ -342,7 +367,7 @@ public class EncryptionKeyServiceTest {
                 (stackType == DATALAKE ? List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_IDBROKER, CLOUD_IDENTITY_LOGGER) :
                         List.of(CROSS_ACCOUNT_ROLE, CLOUD_IDENTITY_LOGGER));
         assertEquals(extendedCloudCredential, encryptionKeyCreationRequest.cloudCredential());
-        assertEquals(cloudResources, encryptionKeyCreationRequest.cloudResources());
+        assertThat(encryptionKeyCreationRequest.cloudResources()).containsExactlyInAnyOrderElementsOf(cloudResources);
         assertEquals(location(region(REGION), availabilityZone(AVAILABILITY_ZONE)), encryptionKeyCreationRequest.cloudContext().getLocation());
         assertEquals(encryptionKeyCreationRequest.tags(), expectedTags());
         assertEquals(expectedDescription, encryptionKeyCreationRequest.description());

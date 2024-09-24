@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CLUSTER_PROXY_REREGISTER;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CLUSTER_PROXY_UPDATE;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE;
@@ -47,7 +46,8 @@ public enum CloudbreakSecretType implements SecretType {
     CLUSTER_LDAP_BIND_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CUSTOM_JOB, SALT_STATE_APPLY)),
     DATAHUB_SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, SALT_PILLAR), Set.of(SKIP_SALT_UPDATE)),
     INTERNAL_DATALAKE_SSSD_IPA_PASSWORD(List.of(SALT_PILLAR), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
-    DATAHUB_DBUS_UMS_ACCESS_KEY(List.of(UMS_DATABUS_CREDENTIAL, CUSTOM_JOB));
+    DATAHUB_DBUS_UMS_ACCESS_KEY(List.of(UMS_DATABUS_CREDENTIAL, CUSTOM_JOB)),
+    STACK_ENCRYPTION_KEYS(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE));
 
     private final List<SecretRotationStep> steps;
 
