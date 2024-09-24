@@ -60,7 +60,10 @@ public class SaltConfigProvider {
         servicePillarConfig.putAll(getCcmPillarProperties(stack));
         servicePillarConfig.putAll(ldapAgentConfigProvider.generateConfig(freeIpaConfigView.getDomain()));
         servicePillarConfig.putAll(paywallConfigService.createPaywallPillarConfig(stack));
-
+        if (freeIpaConfigView.isSecretEncryptionEnabled()) {
+            servicePillarConfig.put("cdpluksvolumebackup", new SaltPillarProperties("/cdpluksvolumebackup/init.sls",
+                    singletonMap("cdpluksvolumebackup", getCdpLuksVolumeBackUpProperties(stack))));
+        }
         return saltConfig;
     }
 
@@ -72,6 +75,12 @@ public class SaltConfigProvider {
         return Map.of(
                 "platform", stack.getCloudPlatform(),
                 "gov_cloud", govCloud);
+    }
+
+    private static Map<String, Object> getCdpLuksVolumeBackUpProperties(Stack stack) {
+        return Map.of(
+                "backup_location", stack.getBackup() != null ? stack.getBackup().getStorageLocation() : "",
+                "aws_region", stack.getRegion());
     }
 
     public Map<String, SaltPillarProperties> getCcmPillarProperties(Stack stack) {

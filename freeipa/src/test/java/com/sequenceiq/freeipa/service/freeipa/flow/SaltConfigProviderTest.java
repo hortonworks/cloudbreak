@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
@@ -55,6 +57,10 @@ class SaltConfigProviderTest {
     private static final String PAYWALL_PILLAR = "paywall";
 
     private static final String PAYWALL_PILLAR_PATH = "/paywall/init.sls";
+
+    private static final String BACKUP_LOCATION = "backUpLocation";
+
+    private static final String AWS_REGION = "aws_region";
 
     @Mock
     private FreeIpaConfigService freeIpaConfigService;
@@ -149,5 +155,45 @@ class SaltConfigProviderTest {
                 null, null, null, null, null, null, null, null, null)));
         underTest.getCcmPillarProperties(stack);
         verify(ccmParametersConfigService, times(1)).createCcmParametersPillarConfig(eq(ENV_CRN), notNull());
+    }
+
+    @Test
+    void testCdpLuksVolumeBackUpPropertiesSecretEncryptionFalse() {
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
+        FreeIpaConfigView freeIpaConfigView = mock(FreeIpaConfigView.class);
+        when(freeIpaConfigView.getDomain()).thenReturn(DOMAIN);
+        when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
+        SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
+
+        Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
+        assertNotNull(servicePillarConfig);
+        SaltPillarProperties cdpluksvolumebackupProperties = servicePillarConfig.get("cdpluksvolumebackup");
+        assertNull(cdpluksvolumebackupProperties);
+    }
+
+    @Test
+    void testCdpLuksVolumeBackUpPropertiesSecretEncryptionTrue() {
+        Backup backUp = mock(Backup.class);
+        when(backUp.getStorageLocation()).thenReturn(BACKUP_LOCATION);
+        Stack stack = mock(Stack.class);
+        when(stack.getBackup()).thenReturn(backUp);
+        when(stack.getRegion()).thenReturn(AWS_REGION);
+        when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
+        FreeIpaConfigView freeIpaConfigView = mock(FreeIpaConfigView.class);
+        when(freeIpaConfigView.getDomain()).thenReturn(DOMAIN);
+        when(freeIpaConfigView.isSecretEncryptionEnabled()).thenReturn(true);
+        when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
+
+        SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
+
+        Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
+        assertNotNull(servicePillarConfig);
+        SaltPillarProperties cdpluksvolumebackupSaltPillar = servicePillarConfig.get("cdpluksvolumebackup");
+        assertNotNull(cdpluksvolumebackupSaltPillar);
+        assertEquals("/cdpluksvolumebackup/init.sls", cdpluksvolumebackupSaltPillar.getPath());
+        Map<String, String> cdpluksvolumebackupProperties = (Map<String, String>) cdpluksvolumebackupSaltPillar.getProperties().get("cdpluksvolumebackup");
+        assertEquals(BACKUP_LOCATION, cdpluksvolumebackupProperties.get("backup_location"));
+        assertEquals(AWS_REGION, cdpluksvolumebackupProperties.get("aws_region"));
     }
 }

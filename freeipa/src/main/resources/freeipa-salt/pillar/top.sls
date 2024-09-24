@@ -15,3 +15,4 @@ base:
 {%- endif %}
     - ldapagent
     - paywall
+    - cdpluksvolumebackup

@@ -28,6 +28,9 @@ base:
              - freeipa.primary-install
              - freeipa.common-install
              - freeipa.backups
+             {% if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True %}
+             - cdpluksvolumebackup
+             {% endif %}
              - freeipa.healthagent
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
@@ -38,6 +41,9 @@ base:
              - freeipa.replica-install
              - freeipa.common-install
              - freeipa.backups
+             {% if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True %}
+             - cdpluksvolumebackup
+             {% endif %}
              - freeipa.healthagent
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
@@ -49,6 +55,9 @@ base:
              - freeipa.common-install
              - freeipa.promote-replica-to-master
              - freeipa.backups
+             {% if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True %}
+             - cdpluksvolumebackup
+             {% endif %}
              - freeipa.healthagent
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent

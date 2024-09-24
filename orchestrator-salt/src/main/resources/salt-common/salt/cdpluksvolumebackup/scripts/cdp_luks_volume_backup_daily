@@ -1,0 +1,5 @@
+#!/bin/bash
+if [ ! -f /tmp/cdp_luks_volume_backup_daily_bypass ]; then
+    /usr/local/bin/cdp_luks_volume_backup
+fi
+
