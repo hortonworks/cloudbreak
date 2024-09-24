@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
@@ -69,10 +70,12 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                 machineUsers.stream().map(UserManagementProto.MachineUser::getWorkloadUsername))
                 .collect(Collectors.toList());
 
+        ImmutableSet<FmsGroup> workloadAdminGroups = ImmutableSet.copyOf(wags.values());
+        LOGGER.debug("WAG size: {}", workloadAdminGroups.size());
         Map<String, UmsUsersState> umsUsersStateMap = new HashMap<>();
         environmentCrns.forEach(environmentCrn -> {
             UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder()
-                    .setWorkloadAdministrationGroups(wags.values());
+                    .setWorkloadAdministrationGroups(workloadAdminGroups);
             UsersState.Builder usersStateBuilder = new UsersState.Builder();
 
             addRequestedWorkloadUsernames(umsUsersStateBuilder, requestedWorkloadUsernames);
