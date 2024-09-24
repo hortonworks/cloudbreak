@@ -28,8 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -45,9 +47,6 @@ public class AzureTemplateBuilder {
 
     @Value("${cb.arm.template.path:}")
     private String armTemplatePath;
-
-    @Value("${cb.arm.template.lb.path:}")
-    private String armTemplateLbPath;
 
     @Value("${cb.arm.parameter.path:}")
     private String armTemplateParametersPath;
@@ -152,49 +151,12 @@ public class AzureTemplateBuilder {
         }
     }
 
-    public String buildLoadBalancer(String stackName, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
-            CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
-        try {
-
-            Network network = cloudStack.getNetwork();
-            Map<String, Object> model = new HashMap<>();
-            AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
-            boolean containsMarketplaceImageDetails = cloudStack.getTemplate().contains("marketplaceImageDetails");
-
-            AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName, !containsMarketplaceImageDetails);
-            Region region = cloudContext.getLocation().getRegion();
-            CloudVmTypes cloudVmTypes = platformResources.virtualMachinesNonExtended(armCredentialView.getCloudCredential(), region, null);
-
-            model.put("stackname", stackName);
-            model.put("region", region.value());
-            model.put("groups", armStack.getInstancesByGroupType());
-            model.put("igs", armStack.getInstanceGroups());
-            model.put("securityGroups", armSecurityView.getSecurityGroupIds());
-            model.put("existingVPC", azureUtils.isExistingNetwork(network));
-            model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
-            model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
-            model.put("noPublicIp", azureUtils.isPrivateIp(network));
-            model.put("userDefinedTags", cloudStack.getTags());
-            model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator
-                    .validate(armStack, cloudVmTypes.getCloudVmResponses().getOrDefault(region.value(), Set.of())));
-            model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
-            model.putAll(loadBalancerModelBuilder.buildModel());
-            model.put("multiAz", cloudStack.isMultiAz());
-            String generatedTemplate = freeMarkerTemplateUtils
-                    .processTemplateIntoString(getTemplate(armTemplateLbPath), model);
-            LOGGER.info("Generated Arm template for Load Balancer: {}", generatedTemplate);
-            return generatedTemplate;
-        } catch (IOException | TemplateException e) {
-            throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
-        }
-    }
-
     private boolean isRedHatByos(AzureMarketplaceImage azureMarketplaceImage) {
         return Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getPublisherId).orElse("").equalsIgnoreCase(REDHAT)
                 && Optional.ofNullable(azureMarketplaceImage.getOfferId()).orElse("").equalsIgnoreCase(RHEL_BYOS);
     }
 
-    public String buildParameters() {
+    public String buildParameters(CloudCredential credential, Network network, Image image) {
         try {
             return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
         } catch (IOException | TemplateException e) {
@@ -203,7 +165,7 @@ public class AzureTemplateBuilder {
     }
 
     public String getTemplateString() {
-        return getTemplate(armTemplatePath).toString();
+        return getTemplate().toString();
     }
 
     // Quickfix for https://jira.cloudera.com/browse/CB-24844
@@ -222,16 +184,16 @@ public class AzureTemplateBuilder {
                 return new Template(armTemplatePath, storedTemplate, freemarkerConfiguration);
             } else {
                 LOGGER.debug("Stored arm template doesn't contains marketplace image details, we will use the latest one.");
-                return getTemplate(armTemplatePath);
+                return getTemplate();
             }
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't create template object", e);
         }
     }
 
-    private Template getTemplate(String templatePath) {
+    private Template getTemplate() {
         try {
-            return freemarkerConfiguration.getTemplate(templatePath, "UTF-8");
+            return freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8");
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't get ARM template", e);
         }

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureOutboundRule;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -97,17 +95,10 @@ public class AzureLoadBalancerModelBuilder {
         if (!LoadBalancerType.OUTBOUND.equals(cloudLoadBalancer.getType())) {
             return cloudLoadBalancer.getPortToTargetGroupMapping()
                     .entrySet().stream()
-                    .flatMap(entry -> {
+                    .map(entry -> {
                         TargetGroupPortPair pair = entry.getKey();
                         Group firstGroup = entry.getValue().stream().findFirst().orElse(null);
-                        if (pair.getTrafficProtocol() != null && NetworkProtocol.TCP_UDP.equals(pair.getTrafficProtocol())) {
-                            return Stream.of(
-                                new AzureLoadBalancingRule(pair, NetworkProtocol.TCP, firstGroup),
-                                new AzureLoadBalancingRule(pair, NetworkProtocol.UDP, firstGroup)
-                            );
-                        } else {
-                            return Stream.of(new AzureLoadBalancingRule(pair, firstGroup));
-                        }
+                        return new AzureLoadBalancingRule(pair, firstGroup);
                     })
                     .collect(toList());
         } else {
