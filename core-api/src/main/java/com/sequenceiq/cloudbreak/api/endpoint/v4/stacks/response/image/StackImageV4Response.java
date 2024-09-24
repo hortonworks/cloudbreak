@@ -28,6 +28,9 @@ public class StackImageV4Response implements JsonEntity {
     @Schema(description = ModelDescriptions.StackModelDescription.IMAGE_OS)
     private String os;
 
+    @Schema(description = ModelDescriptions.ARCHITECTURE)
+    private String architecture;
+
     public String getName() {
         return name;
     }
@@ -66,5 +69,13 @@ public class StackImageV4Response implements JsonEntity {
 
     public void setOs(String os) {
         this.os = os;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
     }
 }

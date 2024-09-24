@@ -404,6 +404,17 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         waitForDatalakeCreation(testContext);
     }
 
+    protected void createDatalakeWithVersion(TestContext testContext, String runtimeVersion) {
+        initiateEnvironmentCreation(testContext);
+        testContext
+                .given(SdxInternalTestDto.class)
+                    .withRuntimeVersion(runtimeVersion);
+        initiateDatalakeCreation(testContext);
+        waitForEnvironmentCreation(testContext);
+        waitForUserSync(testContext);
+        waitForDatalakeCreation(testContext);
+    }
+
     protected void createDefaultDatalakeWithAutoTlsAndExternalDb(TestContext testContext) {
         initiateEnvironmentCreation(testContext);
         initiateDatalakeCreationWithAutoTlsAndExternalDb(testContext);

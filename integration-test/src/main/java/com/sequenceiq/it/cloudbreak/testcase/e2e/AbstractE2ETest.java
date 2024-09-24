@@ -127,6 +127,12 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     }
 
     @Override
+    protected void createDatalakeWithVersion(TestContext testContext, String runtimeVersion) {
+        createResourceGroup(testContext);
+        super.createDatalakeWithVersion(testContext, runtimeVersion);
+    }
+
+    @Override
     protected void createDefaultDatahub(TestContext testContext) {
         createResourceGroup(testContext);
         super.createDefaultDatahub(testContext);

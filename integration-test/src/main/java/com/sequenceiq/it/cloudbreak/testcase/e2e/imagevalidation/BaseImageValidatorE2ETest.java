@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -16,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
-import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
@@ -52,7 +50,7 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
 
     private static final String LATEST_CENTOS7_RUNTIME_VERSION = "7.2.17";
 
-    private static final String FIRST_ARM64_RUNTIME_VERSION = "7.3.1";
+    private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.1";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -139,10 +137,15 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
             when = "provisioning an DistroX with the arm64 base image under validation",
             then = "DistroX should be available with healthy instances")
     private void testDistroXWithArm64BaseImage(TestContext testContext, ImageV4Response imageUnderValidation) {
-        testContext.given(SdxInternalTestDto.class)
-                .withDefaultImage()
-                .withoutDatabase()
-                .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
+        String runtimeVersion = new VersionComparator().compare(() -> commonClusterManagerProperties().getRuntimeVersion(), () -> ARM64_MIN_RUNTIME_VERSION) < 0
+                ? ARM64_MIN_RUNTIME_VERSION
+                : commonClusterManagerProperties().getRuntimeVersion();
+
+        testContext
+                .given(SdxInternalTestDto.class)
+                    .withDefaultImage()
+                    .withoutDatabase()
+                    .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
@@ -150,11 +153,6 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
 
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
-        String runtimeVersion = Set.<Versioned>of(() -> commonClusterManagerProperties().getRuntimeVersion(), () -> FIRST_ARM64_RUNTIME_VERSION)
-                .stream()
-                .max(new VersionComparator())
-                .map(Versioned::getVersion)
-                .orElseThrow();
 
         testContext
                 .given(clouderaManager, DistroXClouderaManagerTestDto.class)

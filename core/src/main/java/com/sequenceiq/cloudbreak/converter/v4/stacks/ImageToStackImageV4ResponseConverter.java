@@ -41,6 +41,8 @@ public class ImageToStackImageV4ResponseConverter {
         decorateWithImageCatalogUrl(source, image);
         image.setCatalogName(Strings.isNullOrEmpty(source.getImageCatalogName()) ? "cloudbreak-default" : source.getImageCatalogName());
         image.setId(Strings.isNullOrEmpty(source.getImageId()) ? null : source.getImageId());
+        image.setOs(source.getOs());
+        image.setArchitecture(source.getArchitecture());
         return image;
     }
 

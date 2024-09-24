@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageToStackImageV4ResponseConverterTest {
@@ -32,6 +33,8 @@ public class ImageToStackImageV4ResponseConverterTest {
     private static final String IMAGE_ID = "image id";
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final Architecture ARCHITECTURE = Architecture.ARM64;
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -61,9 +64,11 @@ public class ImageToStackImageV4ResponseConverterTest {
         assertEquals(IMAGE_CATALOG_NAME, actual.getCatalogName());
         assertEquals(IMAGE_ID, actual.getId());
         assertEquals(IMAGE_NAME, actual.getName());
+        assertEquals(OS, actual.getOs());
+        assertEquals(ARCHITECTURE.getName(), actual.getArchitecture());
     }
 
     private Image anImageWithoutImageCatalogUrl() {
-        return new Image(IMAGE_NAME, null, OS, OS_TYPE, "arch", null, IMAGE_CATALOG_NAME, IMAGE_ID, null, null, null);
+        return new Image(IMAGE_NAME, null, OS, OS_TYPE, ARCHITECTURE.getName(), null, IMAGE_CATALOG_NAME, IMAGE_ID, null, null, null);
     }
 }

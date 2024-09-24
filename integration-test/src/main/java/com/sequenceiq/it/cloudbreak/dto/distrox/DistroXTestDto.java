@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -347,9 +346,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto withArchitecture(Architecture architecture) {
         DistroXImageV1Request image = getRequest().getImage();
-        if (image == null || Strings.isNullOrEmpty(image.getId())) {
-            getRequest().setArchitecture(architecture);
-        }
+        getRequest().setArchitecture(architecture);
         getCloudProvider().template(getTestContext().given(DistroXInstanceTemplateTestDto.class), architecture);
         return this;
     }
