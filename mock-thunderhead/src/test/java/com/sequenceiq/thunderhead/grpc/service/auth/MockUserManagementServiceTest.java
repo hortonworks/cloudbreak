@@ -99,8 +99,20 @@ public class MockUserManagementServiceTest {
         assertThat(underTest.sanitizeWorkloadUsername(username)).isEqualTo(expected);
     }
 
-    @Test
-    public void testGetWorkloadCredentials() throws IOException {
+    static Object[][] testGetWorkloadCredentialsDataProvider() {
+        return new Object[][]{
+                // userId, expectedWorkloadUsername
+                {"a592e3d7-8b53-40e5-80a4-6a1daf43d976", "a592e3d78b5340e580a46a1daf43d976"},
+                {"foo_bar", "foo_bar"},
+                {"foo+bar", "foobar"},
+                {"foo@bar", "foo"},
+                {"baz/FOO@bar", "foo"},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testGetWorkloadCredentialsDataProvider")
+    public void testGetWorkloadCredentials(String userId, String expectedWorkloadUsername) throws IOException {
         Path sshPublicKeyFilePath = Files.createTempFile("key", ".pub");
         Files.writeString(sshPublicKeyFilePath, SAMPLE_SSH_PUBLIC_KEY);
         ReflectionTestUtils.setField(underTest, "sshPublicKeyFilePath", sshPublicKeyFilePath.toString());
@@ -114,7 +126,7 @@ public class MockUserManagementServiceTest {
             long currentTime = System.currentTimeMillis();
 
             GetActorWorkloadCredentialsRequest req = GetActorWorkloadCredentialsRequest.newBuilder()
-                    .setActorCrn(CrnTestUtil.getUserCrnBuilder().setAccountId(ACCOUNT_ID).setResource(UUID.randomUUID().toString()).build().toString())
+                    .setActorCrn(CrnTestUtil.getUserCrnBuilder().setAccountId(ACCOUNT_ID).setResource(userId).build().toString())
                     .build();
             StreamRecorder<GetActorWorkloadCredentialsResponse> observer = StreamRecorder.create();
 
@@ -129,6 +141,7 @@ public class MockUserManagementServiceTest {
             assertThat(res.getPasswordHashExpirationDate() > currentTime).isTrue();
             assertThat(res.getSshPublicKeyCount()).isEqualTo(1);
             assertThat(res.getSshPublicKey(0).getPublicKey()).isEqualTo(SAMPLE_SSH_PUBLIC_KEY);
+            assertThat(res.getWorkloadUsername()).isEqualTo(expectedWorkloadUsername);
         } finally {
             Files.delete(sshPublicKeyFilePath);
         }
@@ -154,7 +167,7 @@ public class MockUserManagementServiceTest {
             Account account = res.getAccount();
             assertThat(account.hasGlobalPasswordPolicy()).isTrue();
             WorkloadPasswordPolicy passwordPolicy = account.getGlobalPasswordPolicy();
-            assertThat(passwordPolicy.getWorkloadPasswordMaxLifetime()).isEqualTo(MockUserManagementService.PASSWORD_LIFETIME);
+            assertThat(passwordPolicy.getWorkloadPasswordMaxLifetime()).isEqualTo(MockUserManagementService.PASSWORD_LIFETIME_IN_MILLISECONDS);
         } finally {
             Files.delete(licenseFilePath);
         }

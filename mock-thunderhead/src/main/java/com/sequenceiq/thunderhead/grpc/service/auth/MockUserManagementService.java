@@ -264,7 +264,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     public static final String ACCOUNT_SUBDOMAIN = "xcu2-8y8x";
 
     @VisibleForTesting
-    static final long PASSWORD_LIFETIME = 31449600000L;
+    static final long PASSWORD_LIFETIME_IN_MILLISECONDS = 31449600000L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUserManagementService.class);
 
@@ -293,6 +293,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
     // not used in CB, but used in CDP CLI, so we need this in mock for local development
     private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
+
+    private static final String CRN_COMPONENT_SEPARATOR_REGEX = ":";
 
     @Inject
     private JsonUtil jsonUtil;
@@ -602,7 +604,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @VisibleForTesting
     void initializeWorkloadPasswordPolicy() {
         WorkloadPasswordPolicy.Builder builder = WorkloadPasswordPolicy.newBuilder();
-        builder.setWorkloadPasswordMaxLifetime(PASSWORD_LIFETIME);
+        builder.setWorkloadPasswordMaxLifetime(PASSWORD_LIFETIME_IN_MILLISECONDS);
         workloadPasswordPolicy = builder.build();
     }
 
@@ -622,7 +624,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
         LOGGER.info("Get user: {}", request.getUserIdOrCrn());
         String userIdOrCrn = request.getUserIdOrCrn();
-        String[] splitCrn = userIdOrCrn.split(":");
+        String[] splitCrn = userIdOrCrn.split(CRN_COMPONENT_SEPARATOR_REGEX);
         String userName = splitCrn[6];
         String accountId = splitCrn[4];
         accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
@@ -652,7 +654,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             responseObserver.onNext(userBuilder.build());
         } else {
             String userIdOrCrn = request.getUserIdOrCrn(0);
-            String[] splitCrn = userIdOrCrn.split(":");
+            String[] splitCrn = userIdOrCrn.split(CRN_COMPONENT_SEPARATOR_REGEX);
             String userName = splitCrn[6];
             String accountId = splitCrn[4];
             responseObserver.onNext(
@@ -783,7 +785,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             responseObserver.onNext(ListMachineUsersResponse.newBuilder().build());
         } else {
             String machineUserIdOrCrn = request.getMachineUserNameOrCrn(0);
-            String[] splitCrn = machineUserIdOrCrn.split(":");
+            String[] splitCrn = machineUserIdOrCrn.split(CRN_COMPONENT_SEPARATOR_REGEX);
             String userName;
             String accountId = request.getAccountId();
             String crnString;
@@ -1115,7 +1117,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
         AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
         String userIdOrCrn = introspectResponse.getSub();
-        String[] splitCrn = userIdOrCrn.split(":");
+        String[] splitCrn = userIdOrCrn.split(CRN_COMPONENT_SEPARATOR_REGEX);
         responseObserver.onNext(
                 VerifyInteractiveUserSessionTokenResponse.newBuilder()
                         .setAccountId(splitCrn[4])
@@ -1326,15 +1328,16 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void getActorWorkloadCredentials(GetActorWorkloadCredentialsRequest request,
             io.grpc.stub.StreamObserver<GetActorWorkloadCredentialsResponse> responseObserver) {
-        LOGGER.info("Get actor workload credentials: {}", request.getActorCrn());
+        Crn actorCrn = Crn.safeFromString(request.getActorCrn());
+        LOGGER.info("Get actor workload credentials: {}", actorCrn);
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder(actorWorkloadCredentialsResponse);
-        builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME);
+        builder.setPasswordHashExpirationDate(System.currentTimeMillis() + PASSWORD_LIFETIME_IN_MILLISECONDS);
         if (sshPublicKey.isPresent()) {
-            Crn actorCrn = Crn.safeFromString(request.getActorCrn());
             builder.addSshPublicKey(SshPublicKey.newBuilder(sshPublicKey.get())
                     .setCrn(mockCrnService.createCrn(actorCrn.getAccountId(), CrnResourceDescriptor.PUBLIC_KEY, UUID.randomUUID().toString()).toString())
                     .build());
         }
+        builder.setWorkloadUsername(sanitizeWorkloadUsername(actorCrn.getUserId()));
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
