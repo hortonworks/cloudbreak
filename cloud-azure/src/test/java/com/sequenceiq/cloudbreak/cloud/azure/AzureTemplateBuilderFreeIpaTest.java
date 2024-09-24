@@ -253,7 +253,7 @@ public class AzureTemplateBuilderFreeIpaTest {
 
         Group masterGroup = new Group("MASTER", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(),
-                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap(), null);
         Map<String, Object> asMap = new HashMap<>();
         String availabilitySetName = masterGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
         asMap.put("name", availabilitySetName);
