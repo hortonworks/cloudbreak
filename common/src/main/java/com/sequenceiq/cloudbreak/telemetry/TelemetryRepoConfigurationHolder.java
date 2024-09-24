@@ -29,7 +29,7 @@ public class TelemetryRepoConfigurationHolder {
     public TelemetryRepoConfiguration selectCorrectRepoConfig(TelemetryContext context) {
         TelemetryRepoConfiguration rhel8RepoConfigBasedOnArch = switch (Architecture.fromStringWithFallback(context.getArchitecture())) {
             case ARM64 -> rhel8Arm;
-            case X86_64, UNKOWN -> rhel8;
+            case X86_64, UNKNOWN -> rhel8;
         };
         return switch (OsType.getByOsTypeStringWithCentos7Fallback(context.getOsType())) {
             case RHEL8 -> rhel8RepoConfigBasedOnArch;

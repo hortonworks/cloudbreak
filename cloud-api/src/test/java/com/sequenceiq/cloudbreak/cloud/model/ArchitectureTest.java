@@ -64,7 +64,7 @@ class ArchitectureTest {
     @Test
     void testFallbackUnknown() {
         Architecture result = Architecture.fromStringWithFallback("aarch64");
-        assertEquals(Architecture.UNKOWN, result);
+        assertEquals(Architecture.UNKNOWN, result);
     }
 
     @Test

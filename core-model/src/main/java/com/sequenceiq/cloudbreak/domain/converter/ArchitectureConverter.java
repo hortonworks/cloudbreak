@@ -12,6 +12,6 @@ public class ArchitectureConverter extends DefaultEnumConverter<Architecture> {
 
     @Override
     public Architecture getDefault() {
-        return Architecture.UNKOWN;
+        return Architecture.UNKNOWN;
     }
 }

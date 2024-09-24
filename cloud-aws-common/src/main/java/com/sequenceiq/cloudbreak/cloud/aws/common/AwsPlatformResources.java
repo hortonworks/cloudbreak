@@ -848,9 +848,9 @@ public class AwsPlatformResources implements PlatformResources {
     private Architecture getArchitecture(InstanceTypeInfo instanceType) {
         Architecture architecture = instanceType.processorInfo().supportedArchitectures().stream()
                 .map(architectureType -> Architecture.fromStringWithFallback(architectureType.name()))
-                .filter(arch -> arch != Architecture.UNKOWN)
+                .filter(arch -> arch != Architecture.UNKNOWN)
                 .findFirst()
-                .orElse(Architecture.UNKOWN);
+                .orElse(Architecture.UNKNOWN);
         return architecture;
     }
 
