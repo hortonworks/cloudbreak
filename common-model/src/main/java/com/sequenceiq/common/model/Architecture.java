@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Architecture {
-    UNKOWN,
+    UNKNOWN,
     X86_64,
     ARM64;
 
@@ -17,7 +17,7 @@ public enum Architecture {
 
     public static Architecture fromStringWithValidation(String architecture) {
         Architecture result = fromString(architecture, false);
-        if (result == UNKOWN) {
+        if (result == UNKNOWN) {
             throw new IllegalArgumentException(String.format("Architecture '%s' is not supported", architecture));
         }
         return result;
@@ -28,7 +28,7 @@ public enum Architecture {
             return fallback ? X86_64 : null;
         }
         if (Arrays.stream(values()).noneMatch(arch -> arch.name().equalsIgnoreCase(architecture))) {
-            return UNKOWN;
+            return UNKNOWN;
         }
         return valueOf(architecture.toUpperCase());
     }
