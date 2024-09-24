@@ -73,7 +73,8 @@ public class SdxUpgradeRecoveryTests extends PreconditionSdxE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class)
                 .withCloudStorage()
-                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
+                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade()
+                        .getCurrentRuntimeVersion(testContext.getCloudProvider().getGovCloud()))
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()

@@ -55,7 +55,8 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
     public void testBaseDistroXOSUpgrade(TestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
         String distroXName = resourcePropertyProvider().getName();
-        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade()
+                .getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
 
         testContext

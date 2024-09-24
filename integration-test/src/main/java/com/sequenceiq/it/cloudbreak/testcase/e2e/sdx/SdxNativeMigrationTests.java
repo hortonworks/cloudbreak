@@ -72,7 +72,8 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
-        String runtimeVersion = commonClusterManagerProperties().getUpgrade().getCurrentRuntimeVersion();
+        String runtimeVersion = commonClusterManagerProperties().getUpgrade()
+                .getCurrentRuntimeVersion(testContext.getCloudProvider().getGovCloud());
         String blueprintName = commonClusterManagerProperties().getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion);
 
         testContext

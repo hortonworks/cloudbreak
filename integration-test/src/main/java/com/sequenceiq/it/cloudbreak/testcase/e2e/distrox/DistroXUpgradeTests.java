@@ -105,9 +105,12 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                     "disks are encrypted too")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
 
-        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
+        boolean govCloud = testContext.getCloudProvider().getGovCloud();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade()
+                .getDistroXUpgradeCurrentVersion(govCloud);
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
-        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyCurrentVersion();
+        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade()
+                .getDistroXUpgrade3rdPartyCurrentVersion(govCloud);
         String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
 
         String firstDhName = resourcePropertyProvider().getName();

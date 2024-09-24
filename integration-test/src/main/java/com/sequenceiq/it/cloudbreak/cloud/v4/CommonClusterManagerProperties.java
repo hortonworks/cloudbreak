@@ -146,17 +146,25 @@ public class CommonClusterManagerProperties {
 
         private String currentHARuntimeVersion;
 
+        private String currentGovHARuntimeVersion;
+
         private String currentRuntimeVersion;
+
+        private String currentGovRuntimeVersion;
 
         private String targetRuntimeVersion;
 
         private String distroXUpgradeCurrentVersion;
+
+        private String distroXUpgradeCurrentGovVersion;
 
         private String distroXUpgradeTargetVersion;
 
         private String imageCatalogUrl3rdParty;
 
         private String distroXUpgrade3rdPartyCurrentVersion;
+
+        private String distroXUpgrade3rdPartyCurrentGovVersion;
 
         private String distroXUpgrade3rdPartyTargetVersion;
 
@@ -168,16 +176,48 @@ public class CommonClusterManagerProperties {
             this.matrix = matrix;
         }
 
-        public String getCurrentHARuntimeVersion() {
-            return currentHARuntimeVersion;
+        public String getCurrentGovHARuntimeVersion() {
+            return currentGovHARuntimeVersion;
+        }
+
+        public void setCurrentGovHARuntimeVersion(String currentGovHARuntimeVersion) {
+            this.currentGovHARuntimeVersion = currentGovHARuntimeVersion;
+        }
+
+        public String getDistroXUpgradeCurrentGovVersion() {
+            return distroXUpgradeCurrentGovVersion;
+        }
+
+        public void setDistroXUpgradeCurrentGovVersion(String distroXUpgradeCurrentGovVersion) {
+            this.distroXUpgradeCurrentGovVersion = distroXUpgradeCurrentGovVersion;
+        }
+
+        public String getCurrentGovRuntimeVersion() {
+            return currentGovRuntimeVersion;
+        }
+
+        public void setCurrentGovRuntimeVersion(String currentGovRuntimeVersion) {
+            this.currentGovRuntimeVersion = currentGovRuntimeVersion;
+        }
+
+        public String getDistroXUpgrade3rdPartyCurrentGovVersion() {
+            return distroXUpgrade3rdPartyCurrentGovVersion;
+        }
+
+        public void setDistroXUpgrade3rdPartyCurrentGovVersion(String distroXUpgrade3rdPartyCurrentGovVersion) {
+            this.distroXUpgrade3rdPartyCurrentGovVersion = distroXUpgrade3rdPartyCurrentGovVersion;
+        }
+
+        public String getCurrentHARuntimeVersion(boolean govCloud) {
+            return govCloud ? currentGovHARuntimeVersion : currentHARuntimeVersion;
         }
 
         public void setCurrentHARuntimeVersion(String currentHARuntimeVersion) {
             this.currentHARuntimeVersion = currentHARuntimeVersion;
         }
 
-        public String getCurrentRuntimeVersion() {
-            return currentRuntimeVersion;
+        public String getCurrentRuntimeVersion(boolean govCloud) {
+            return govCloud ? currentGovRuntimeVersion : currentRuntimeVersion;
         }
 
         public void setCurrentRuntimeVersion(String currentRuntimeVersion) {
@@ -192,8 +232,8 @@ public class CommonClusterManagerProperties {
             this.targetRuntimeVersion = targetRuntimeVersion;
         }
 
-        public String getDistroXUpgradeCurrentVersion() {
-            return distroXUpgradeCurrentVersion;
+        public String getDistroXUpgradeCurrentVersion(boolean govCloud) {
+            return govCloud ? distroXUpgradeCurrentGovVersion : distroXUpgradeCurrentVersion;
         }
 
         public void setDistroXUpgradeCurrentVersion(String distroXUpgradeCurrentVersion) {
@@ -216,8 +256,8 @@ public class CommonClusterManagerProperties {
             this.imageCatalogUrl3rdParty = imageCatalogUrl3rdParty;
         }
 
-        public String getDistroXUpgrade3rdPartyCurrentVersion() {
-            return distroXUpgrade3rdPartyCurrentVersion;
+        public String getDistroXUpgrade3rdPartyCurrentVersion(boolean govCloud) {
+            return govCloud ? distroXUpgrade3rdPartyCurrentGovVersion : distroXUpgrade3rdPartyCurrentVersion;
         }
 
         public void setDistroXUpgrade3rdPartyCurrentVersion(String distroXUpgrade3rdPartyCurrentVersion) {

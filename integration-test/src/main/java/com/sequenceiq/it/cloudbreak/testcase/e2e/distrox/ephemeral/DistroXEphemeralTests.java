@@ -60,7 +60,8 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         createDefaultCredential(testContext);
         createEnvironmentWithFreeIpa(testContext);
 
-        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
+        boolean govCloud = testContext.getCloudProvider().getGovCloud();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
         createAndWaitDatalakeWithRuntime(testContext, currentUpgradeRuntimeVersion);
         createDataHubWithStorageOptimizedInstancesAndWithRuntime(testContext, currentUpgradeRuntimeVersion);
         waitForDatahubCreation(testContext);

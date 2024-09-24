@@ -107,7 +107,8 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
             ImageV4Response upgradeSourceImage = imageValidatorE2ETestUtil.getUpgradeSourceImage(testContext);
             sdxTestDto.withImage(imageValidatorE2ETestUtil.getImageCatalogName(), upgradeSourceImage.getUuid());
         } else {
-            sdxTestDto.withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion());
+            sdxTestDto.withRuntimeVersion(commonClusterManagerProperties.getUpgrade()
+                    .getCurrentRuntimeVersion(testContext.getCloudProvider().getGovCloud()));
         }
     }
 
@@ -126,7 +127,8 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                 .given(SdxTestDto.class)
                     .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
                     .withCloudStorage()
-                    .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentHARuntimeVersion())
+                    .withRuntimeVersion(commonClusterManagerProperties.getUpgrade()
+                            .getCurrentHARuntimeVersion(testContext.getCloudProvider().getGovCloud()))
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
