@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.encryption;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -379,7 +380,7 @@ public class EncryptionKeyServiceTest {
         String expectedDescription = luksKey ? KEY_DESC_LUKS : KEY_DESC_SECRET_MANAGER;
         List<String> expectedCryptographicPrincipals = luksKey ? List.of(LOGGER_INSTANCE_PROFILE) : List.of(CROSS_ACCOUNT_ROLE, LOGGER_INSTANCE_PROFILE);
         assertEquals(extendedCloudCredential, encryptionKeyCreationRequest.cloudCredential());
-        assertEquals(cloudResources, encryptionKeyCreationRequest.cloudResources());
+        assertThat(encryptionKeyCreationRequest.cloudResources()).containsExactlyInAnyOrderElementsOf(cloudResources);
         assertEquals(location(region(REGION), availabilityZone(AVAILABILITY_ZONE)), encryptionKeyCreationRequest.cloudContext().getLocation());
         assertEquals(encryptionKeyCreationRequest.tags(), expectedTags());
         assertEquals(expectedDescription, encryptionKeyCreationRequest.description());
