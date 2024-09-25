@@ -4,12 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FreeIpaBackupConfigView {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaBackupConfigView.class);
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 

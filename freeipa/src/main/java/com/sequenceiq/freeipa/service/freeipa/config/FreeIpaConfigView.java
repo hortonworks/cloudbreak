@@ -51,6 +51,8 @@ public class FreeIpaConfigView {
 
     private final boolean tlsv13Enabled;
 
+    private final FreeIpaLbConfigView lbConfig;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -70,6 +72,7 @@ public class FreeIpaConfigView {
         this.kerberosSecretLocation = builder.kerberosSecretLocation;
         this.seLinux = builder.seLinux;
         this.tlsv13Enabled = builder.tlsv13Enabled;
+        this.lbConfig = builder.lbConfig;
     }
 
     public String getRealm() {
@@ -164,6 +167,7 @@ public class FreeIpaConfigView {
         map.put("kerberosSecretLocation", kerberosSecretLocation);
         map.put("selinux_mode", seLinux);
         map.put("tlsv13Enabled", tlsv13Enabled);
+        map.put("loadBalancer", lbConfig.toMap());
         return map;
     }
 
@@ -202,6 +206,8 @@ public class FreeIpaConfigView {
         private String seLinux;
 
         private boolean tlsv13Enabled;
+
+        private FreeIpaLbConfigView lbConfig = new FreeIpaLbConfigView();
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -289,6 +295,11 @@ public class FreeIpaConfigView {
 
         public Builder withSeLinux(String seLinux) {
             this.seLinux = seLinux;
+            return this;
+        }
+
+        public Builder withLbConfig(FreeIpaLbConfigView lbConfig) {
+            this.lbConfig = lbConfig;
             return this;
         }
     }

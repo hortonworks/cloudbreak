@@ -1,6 +1,15 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('freeipa:secretEncryptionEnabled', False) == True else False %}
 {%- set kerberosConfigOriginalPath = '/etc' %}
 {%- set kerberosConfigPath = salt['pillar.get']('freeipa:kerberosSecretLocation') if secretEncryptionEnabled == True else kerberosConfigOriginalPath %}
+
+{% if salt['pillar.get']('freeipa:loadBalancer:enabled', False) %}
+  {% set loadbalanced_endpoint = salt['pillar.get']('freeipa:loadBalancer:endpoint','ipa-ca') %}
+{% else %}
+  {% set loadbalanced_endpoint = 'ipa-ca' %}
+{% endif %}
+
+{%- do salt.log.debug("loadbalanced_endpoint " ~ loadbalanced_endpoint) %}
+
 update_cnames:
   cmd.run:
     - name: /opt/salt/scripts/update_cnames.sh 2>&1 | tee -a /var/log/update_cnames.log && exit ${PIPESTATUS[0]}
@@ -9,6 +18,7 @@ update_cnames:
         - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}
         - REALM: {{salt['pillar.get']('freeipa:realm')}}
         - ADMIN_USER: {{salt['pillar.get']('freeipa:admin_user')}}
+        - LOADBALANCED_ENDPOINT: {{ loadbalanced_endpoint }}
     - failhard: True
     - require:
         - file: /opt/salt/scripts/update_cnames.sh

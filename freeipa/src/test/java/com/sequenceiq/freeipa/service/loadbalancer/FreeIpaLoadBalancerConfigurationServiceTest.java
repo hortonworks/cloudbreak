@@ -12,7 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaLoadBalancerConfigurationServiceTest {
@@ -27,11 +29,17 @@ class FreeIpaLoadBalancerConfigurationServiceTest {
     @Mock
     private LoadBalancerTargets loadBalancerTargets;
 
+    @Mock
+    private FreeIpaService freeIpaService;
+
     @Test
     void testShouldCreateLoadBalancerConfiguration() {
         when(loadBalancerTargets.getTargets()).thenReturn(TARGETS);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain("cloudera.site");
+        when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa);
 
-        LoadBalancer actual = underTest.createLoadBalancerConfiguration(STACK_ID);
+        LoadBalancer actual = underTest.createLoadBalancerConfiguration(STACK_ID, "freeipaStackName");
 
         assertEquals(STACK_ID, actual.getStackId());
         assertEquals(TARGETS.size(), actual.getTargetGroups().size());
@@ -40,6 +48,8 @@ class FreeIpaLoadBalancerConfigurationServiceTest {
                         .anyMatch(targetGroup ->
                                 targetGroup.getTrafficPort().equals(Integer.parseInt(entry.getKey())) &&
                                         targetGroup.getProtocol().equals(entry.getValue()))));
+        assertEquals("freeipaStackName" + "-lb", actual.getEndpoint());
+        assertEquals("freeipaStackName" + "-lb.cloudera.site", actual.getFqdn());
     }
 
 }

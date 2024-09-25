@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -22,9 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +43,9 @@ class KerberosConfigUpdateServiceTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private FreeIpaLoadBalancerService loadBalancerService;
+
     @Test
     void testUpdateNameservers() {
         Stack stack = new Stack();
@@ -46,6 +53,7 @@ class KerberosConfigUpdateServiceTest {
         stack.setAccountId("acc");
         stack.setName("name");
         stack.setAppVersion("2.20.0");
+        stack.setId(1L);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
         InstanceMetaData instanceMetaData1 = new InstanceMetaData();
@@ -61,6 +69,7 @@ class KerberosConfigUpdateServiceTest {
         KerberosConfig kerberosConfig2 = mock(KerberosConfig.class);
         List<KerberosConfig> kerberosConfigs = List.of(kerberosConfig1, kerberosConfig2);
         when(kerberosConfigService.findAllInEnvironment(any())).thenReturn(kerberosConfigs);
+        when(loadBalancerService.findByStackId(1L)).thenReturn(Optional.empty());
 
         underTest.updateNameservers(1L);
 
@@ -70,6 +79,46 @@ class KerberosConfigUpdateServiceTest {
 
         List.of(nameServersCaptor.getValue(), nameServersCaptor.getValue()).forEach(actualNameServersValue -> {
             assertTrue("1.1.1.1,2.2.2.2".equals(actualNameServersValue) || "2.2.2.2,1.1.1.1".equals(actualNameServersValue));
+        });
+
+        verify(kerberosConfigService).saveAll(eq(kerberosConfigs));
+    }
+
+    @Test
+    void testUpdateNameserversWithLb() {
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn("env");
+        stack.setAccountId("acc");
+        stack.setName("name");
+        stack.setAppVersion("2.20.0");
+        stack.setId(1L);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
+        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
+        instanceMetaData1.setDiscoveryFQDN("fqdn");
+        instanceMetaData1.setPrivateIp("1.1.1.1");
+        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
+        instanceMetaData2.setDiscoveryFQDN("fqdn");
+        instanceMetaData2.setPrivateIp("2.2.2.2");
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData1, instanceMetaData2));
+        stack.setInstanceGroups(Collections.singleton(instanceGroup));
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
+        KerberosConfig kerberosConfig1 = mock(KerberosConfig.class);
+        KerberosConfig kerberosConfig2 = mock(KerberosConfig.class);
+        List<KerberosConfig> kerberosConfigs = List.of(kerberosConfig1, kerberosConfig2);
+        when(kerberosConfigService.findAllInEnvironment(any())).thenReturn(kerberosConfigs);
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setIp("3.3.3.3,4.4.4.4");
+        when(loadBalancerService.findByStackId(1L)).thenReturn(Optional.of(loadBalancer));
+
+        underTest.updateNameservers(1L);
+
+        ArgumentCaptor<String> nameServersCaptor = ArgumentCaptor.forClass(String.class);
+        verify(kerberosConfig1).setNameServers(nameServersCaptor.capture());
+        verify(kerberosConfig2).setNameServers(nameServersCaptor.capture());
+
+        List.of(nameServersCaptor.getValue(), nameServersCaptor.getValue()).forEach(actualNameServersValue -> {
+            assertEquals("3.3.3.3,4.4.4.4", actualNameServersValue);
         });
 
         verify(kerberosConfigService).saveAll(eq(kerberosConfigs));

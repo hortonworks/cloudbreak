@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.config.SidGenerationConfigurator;
 import com.sequenceiq.freeipa.service.freeipa.host.MaxHostnameLengthPolicyService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerDomainService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -94,6 +95,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private SidGenerationConfigurator sidGenerationConfigurator;
 
+    @Inject
+    private FreeIpaLoadBalancerDomainService freeIpaLoadBalancerDomainService;
+
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -105,6 +109,7 @@ public class FreeIpaPostInstallService {
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         hostnameLengthPolicyService.updateMaxHostnameLength(stack, freeIpaClient);
         Benchmark.measure(() -> sidGenerationConfigurator.enableAndTriggerSidGeneration(stack, freeIpaClient), LOGGER, "Post-install configuration took {}ms.");
+        freeIpaLoadBalancerDomainService.registerLbDomain(stackId, freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
             userSyncBindUserService.createUserAndLdapConfig(stack, freeIpaClient);

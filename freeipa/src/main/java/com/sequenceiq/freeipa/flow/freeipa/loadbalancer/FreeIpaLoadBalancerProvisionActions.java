@@ -53,7 +53,7 @@ public class FreeIpaLoadBalancerProvisionActions {
                 Long stackId = payload.getResourceId();
                 if (freeIpaLoadBalancerService.findByStackId(stackId).isEmpty()) {
                     LOGGER.debug("Creating load balancer configuration for FreeIPA cluster");
-                    LoadBalancer loadBalancer = freeIpaLoadBalancerConfigurationService.createLoadBalancerConfiguration(stackId);
+                    LoadBalancer loadBalancer = freeIpaLoadBalancerConfigurationService.createLoadBalancerConfiguration(stackId, context.getStack().getName());
                     freeIpaLoadBalancerService.save(loadBalancer);
                 } else {
                     LOGGER.debug("Load balancer configuration is already exists for FreeIPA cluster.");

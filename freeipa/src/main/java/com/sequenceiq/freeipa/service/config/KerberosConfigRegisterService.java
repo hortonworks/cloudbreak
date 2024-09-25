@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.config;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,9 +17,11 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @Service
@@ -33,6 +36,9 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
 
     @Inject
     private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
+
+    @Inject
+    private FreeIpaLoadBalancerService loadBalancerService;
 
     @Override
     public void register(Long stackId) {
@@ -58,7 +64,8 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
         Set<InstanceMetaData> allNotDeletedInstances = stack.getInstanceGroups().stream()
                 .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream()).collect(Collectors.toSet());
         String allFreeIpaIpJoined = allNotDeletedInstances.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.joining(","));
-        kerberosConfig.setNameServers(allFreeIpaIpJoined);
+        Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
+        kerberosConfig.setNameServers(loadBalancer.map(LoadBalancer::getIp).orElse(allFreeIpaIpJoined));
         addServerAddress(freeIpa, stack, kerberosConfig, allNotDeletedInstances);
         kerberosConfig.setPassword(StringUtils.isBlank(password) ? freeIpa.getAdminPassword() : password);
         kerberosConfig.setClusterName(clusterName);

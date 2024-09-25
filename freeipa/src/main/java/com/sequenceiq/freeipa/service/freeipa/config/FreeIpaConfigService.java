@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
 
 @Service
@@ -66,6 +67,9 @@ public class FreeIpaConfigService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private FreeIpaLoadBalancerService loadBalancerService;
+
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
@@ -93,6 +97,9 @@ public class FreeIpaConfigService {
                 .withKerberosSecretLocation(kerberosSecretLocation)
                 .withSeLinux(seLinux)
                 .withTlsv13Enabled(entitlementService.isTlsv13Enabled(stack.getAccountId()))
+                .withLbConfig(loadBalancerService.findByStackId(stack.getId())
+                        .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn()))
+                        .orElse(new FreeIpaLbConfigView()))
                 .build();
     }
 

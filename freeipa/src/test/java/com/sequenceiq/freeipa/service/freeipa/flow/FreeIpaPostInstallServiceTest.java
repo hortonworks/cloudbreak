@@ -42,6 +42,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.config.SidGenerationConfigurator;
 import com.sequenceiq.freeipa.service.freeipa.host.MaxHostnameLengthPolicyService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerDomainService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -96,6 +97,9 @@ class FreeIpaPostInstallServiceTest {
     @Mock
     private SidGenerationConfigurator sidGenerationConfigurator;
 
+    @Mock
+    private FreeIpaLoadBalancerDomainService freeIpaLoadBalancerDomainService;
+
     @InjectMocks
     private FreeIpaPostInstallService underTest;
 
@@ -117,6 +121,7 @@ class FreeIpaPostInstallServiceTest {
         verify(hostOrchestrator).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
         verify(userSyncBindUserService).doesBindUserAndConfigAlreadyExist(stack, ipaClient);
         verify(userSyncBindUserService).createUserAndLdapConfig(stack, ipaClient);
+        verify(freeIpaLoadBalancerDomainService).registerLbDomain(1L, ipaClient);
     }
 
     @Test

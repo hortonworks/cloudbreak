@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -47,6 +49,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,6 +110,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private FreeIpaLoadBalancerService loadBalancerService;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -115,6 +121,7 @@ class FreeIpaConfigServiceTest {
         subnetWithCidr = ArrayListMultimap.create();
         subnetWithCidr.put("10.117.0.0", "16");
         ReflectionTestUtils.setField(underTest, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
+        when(loadBalancerService.findByStackId(any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -172,6 +179,71 @@ class FreeIpaConfigServiceTest {
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         assertEquals(true, freeIpaConfigView.isTlsv13Enabled());
+    }
+
+    @Test
+    void testCreateFreeIpaConfigsWithLb() {
+        String backupLocation = "s3://mybucket/test";
+        Backup backup = new Backup();
+        backup.setStorageLocation(backupLocation);
+        backup.setS3(new S3CloudStorageV1Parameters());
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setAdminPassword(PASSWORD);
+        Stack stack = new Stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setBackup(backup);
+        stack.setRegion("region");
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.ENFORCING);
+        stack.setSecurityConfig(securityConfig);
+        stack.setEnvironmentCrn(ENV_CRN);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setFqdn("lb.fqdn");
+        loadBalancer.setEndpoint("lb");
+
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(entitlementService.isTlsv13Enabled(ACCOUNT)).thenReturn(true);
+        when(loadBalancerService.findByStackId(any())).thenReturn(Optional.of(loadBalancer));
+
+        Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
+        Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
+        Set<Object> expectedHosts = ImmutableSet.of(expectedHost);
+
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
+                stack, ImmutableSet.of(node));
+
+        assertEquals(DOMAIN.toUpperCase(Locale.ROOT), freeIpaConfigView.getRealm());
+        assertEquals(DOMAIN, freeIpaConfigView.getDomain());
+        assertEquals(PASSWORD, freeIpaConfigView.getPassword());
+        assertEquals(REVERSE_ZONE, freeIpaConfigView.getReverseZones());
+        assertEquals(ADMIN, freeIpaConfigView.getAdminUser());
+        assertEquals(HOSTNAME, freeIpaConfigView.getFreeipaToReplicate());
+        assertEquals(backupLocation, freeIpaConfigView.getBackup().getLocation());
+        assertEquals(CloudPlatform.AWS.name(), freeIpaConfigView.getBackup().getPlatform());
+        assertEquals(expectedHosts, freeIpaConfigView.getHosts());
+        assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
+        assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
+        assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
+        assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
+        assertEquals(true, freeIpaConfigView.isTlsv13Enabled());
+        Map<String, Object> lbConf = (Map<String, Object>) freeIpaConfigView.toMap().get("loadBalancer");
+        assertEquals(loadBalancer.getEndpoint(), lbConf.get("endpoint"));
+        assertEquals(loadBalancer.getFqdn(), lbConf.get("fqdn"));
+        assertTrue((Boolean) lbConf.get("enabled"));
     }
 
     @ParameterizedTest(name = "{0}")
