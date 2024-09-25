@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -79,6 +80,9 @@ public class StackToStackV4ResponseConverter {
 
     @Inject
     private ServiceEndpointCollector serviceEndpointCollector;
+
+    @Inject
+    private DatalakeService datalakeService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -172,6 +176,7 @@ public class StackToStackV4ResponseConverter {
                 .convert(stack.getExternalDatabaseCreationType(), stack.getExternalDatabaseEngineVersion()));
         response.setJavaVersion(source.getJavaVersion());
         response.setEnableMultiAz(source.isMultiAz());
+        datalakeService.addSharedServiceResponse(response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         response.setLoadBalancers(convertLoadBalancers(source.getId()));
         if (!CollectionUtils.isEmpty(response.getLoadBalancers())) {

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
@@ -75,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -104,6 +106,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
 
     @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
+
+    @Mock
+    private DatalakeService datalakeService;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -165,6 +170,11 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         lenient().when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         lenient().when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         lenient().when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
+        lenient().doAnswer(answer  -> {
+            StackV4Response result = answer.getArgument(0, StackV4Response.class);
+            result.setSharedService(new SharedServiceV4Response());
+            return null;
+        }).when(datalakeService).addSharedServiceResponse(any(StackV4Response.class));
         lenient().when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(Collections.emptyList());
         lenient().when(loadBalancerService.findByStackId(any())).thenReturn(Set.of());
     }
@@ -191,7 +201,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers", "sharedService"));
+                "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
@@ -216,7 +226,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
-                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers", "sharedService"));
+                "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         assertNull(result.getCluster());
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
