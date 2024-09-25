@@ -120,12 +120,8 @@ main() {
     local script_name="find-device-and-format"
     can_start $script_name $LOG_FILE
 
-    if [ -z "$ATTACHED_VOLUME_NAME_LIST" ]; then
-        exit_with_code $LOG_FILE $EXIT_CODE_OK "no persistent disks to mount: $ATTACHED_VOLUME_NAME_LIST"
-    fi
-
     device_name_list=$(get_device_names $LOG_FILE)
-    if [ -z "$device_name_list" ]; then
+    if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "some volumes are missing"
     fi
     ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
