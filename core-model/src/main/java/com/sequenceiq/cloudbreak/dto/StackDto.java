@@ -444,7 +444,7 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public List<InstanceMetadataView> getAllPrimaryGatewayInstances() {
         return getNotDeletedInstanceMetaData().stream()
-                .filter(imd -> imd.isGatewayOrPrimaryGateway())
+                .filter(InstanceMetadataView::isGatewayOrPrimaryGateway)
                 .collect(Collectors.toList());
     }
 

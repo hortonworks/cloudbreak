@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
-import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -98,9 +97,6 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
-    private PaasSdxDescribeService paasSdxDescribeService;
-
-    @Inject
     private StackUpdater stackUpdater;
 
     @Inject
@@ -112,10 +108,8 @@ public class ClusterBuilderService implements LocalPaasRemoteDataContextSupplier
         connector.waitForServer(true);
         boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stackDto.getStack().getEnvironmentCrn(), stackDto.getStack().getName());
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
-        if (StackType.DATALAKE.equals(stackDto.getType())) {
-            if (paasSdxDescribeService.isSdxClusterHA(stackDto.getStack().getResourceCrn())) {
-                connector.clusterModificationService().reconfigureCMMemory();
-            }
+        if (StackType.DATALAKE.equals(stackDto.getType()) && stackDto.getAllPrimaryGatewayInstances().size() > 1) {
+            connector.clusterModificationService().reconfigureCMMemory();
         }
     }
 

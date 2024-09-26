@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
@@ -31,10 +33,14 @@ public class PaasSdxDeleteService extends PaasSdxStatusService implements Platfo
     @Inject
     private Optional<LocalPaasSdxService> localPaasSdxService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Override
     public void deleteSdx(String sdxCrn, Boolean force) {
         LOGGER.info("Calling delete for SDX PaaS cluster {}", sdxCrn);
-        sdxEndpoint.deleteByCrn(sdxCrn, force);
+        ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> sdxEndpoint.deleteByCrn(sdxCrn, force));
     }
 
     @Override

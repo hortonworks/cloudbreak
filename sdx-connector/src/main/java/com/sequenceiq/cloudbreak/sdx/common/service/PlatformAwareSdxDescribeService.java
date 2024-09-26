@@ -32,8 +32,6 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
 
     Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn);
 
-    boolean isSdxClusterHA(String environmentCrn);
-
     default Map<String, String> getHmsServiceConfig(String crn) {
         try {
             Optional<String> remoteDataContext = getRemoteDataContext(crn);

@@ -232,7 +232,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATALAKE)
-    public FlowIdentifier deleteByCrn(@ResourceCrn String clusterCrn, Boolean forced) {
+    public FlowIdentifier deleteByCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Boolean forced) {
         return sdxDeleteService.deleteSdxByClusterCrn(ThreadBasedUserCrnProvider.getAccountId(), clusterCrn, forced);
     }
 

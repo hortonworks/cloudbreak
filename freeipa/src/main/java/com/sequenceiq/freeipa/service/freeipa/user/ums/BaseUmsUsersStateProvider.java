@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,7 +79,6 @@ public class BaseUmsUsersStateProvider {
     }
 
     public Map<WorkloadAdministrationGroup, FmsGroup> filterEnvironmentWags(Map<WorkloadAdministrationGroup, FmsGroup> wags) {
-        List<WorkloadAdministrationGroup> environmentWagEntries = new LinkedList<>();
         return wags.entrySet().stream().filter(entry -> entry.getKey().getResource().contains("environments")).filter(entry -> {
             Crn resourceCrn = getCrn(entry.getKey());
             return resourceCrn != null && resourceCrn.getService() == Crn.Service.ENVIRONMENTS

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +34,8 @@ import com.cloudera.api.swagger.model.ApiMapEntry;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -45,11 +49,23 @@ public class PaasSdxDescribeServiceTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:crn1";
 
+    private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
+
     @Mock
     private SdxEndpoint sdxEndpoint;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @InjectMocks
     private PaasSdxDescribeService underTest;
+
+    @BeforeEach
+    void setup() {
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
+    }
 
     @Test
     public void testLocalListCrn() throws IllegalAccessException {
@@ -58,7 +74,8 @@ public class PaasSdxDescribeServiceTest {
         when(mockLocalSdxService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
         Set<String> sdxCrns = underTest.listSdxCrns(ENV_CRN);
         assertTrue(sdxCrns.contains(PAAS_CRN));
-        verify(sdxEndpoint).getByEnvCrn(eq(ENV_CRN));
+        verifyNoInteractions(sdxEndpoint);
+        verify(mockLocalSdxService).listSdxCrns(anyString());
     }
 
     @Test
