@@ -241,7 +241,8 @@ public class StackV4RequestToStackConverter {
     }
 
     private void convertDatabase(StackV4Request source, Stack stack) {
-        stack.setDatabase(databaseRequestToDatabaseConverter.convert(source.getCloudPlatform(), source.getExternalDatabase()));
+        stack.setDatabase(databaseRequestToDatabaseConverter.convert(source.getCloudPlatform(), source.getExternalDatabase(),
+                source.isDisableDbSslEnforcement()));
     }
 
     private void setTimeToLive(StackV4Request source, Stack stack) {
@@ -408,6 +409,7 @@ public class StackV4RequestToStackConverter {
                     .collect(Collectors.toSet());
             cluster.setHostGroups(hostGroups);
             cluster.setAutoTlsEnabled(true);
+            cluster.setDbSslEnabled(!source.isDisableDbSslEnforcement());
             stack.setCluster(cluster);
         }
     }

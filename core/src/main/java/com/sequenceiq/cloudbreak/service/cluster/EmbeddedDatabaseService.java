@@ -74,7 +74,13 @@ public class EmbeddedDatabaseService {
 
     public boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, Database database) {
         StackType stackType = stackView.getType();
-        boolean sslEnforcementEnabled = stackType == StackType.DATALAKE || stackType == StackType.WORKLOAD;
+
+        boolean sslEnforcementEnabled;
+        if (clusterView.getDbSslEnabled() != null) {
+            sslEnforcementEnabled = clusterView.getDbSslEnabled() && (stackType == StackType.DATALAKE || stackType == StackType.WORKLOAD);
+        } else {
+            sslEnforcementEnabled = stackType == StackType.DATALAKE || stackType == StackType.WORKLOAD;
+        }
         String runtime = getRuntime(clusterView);
         boolean response = sslEnforcementEnabled && isEmbeddedDatabaseOnAttachedDiskEnabledByStackView(stackView, clusterView, database) &&
                 isSslEnforcementSupportedForRuntime(runtime);

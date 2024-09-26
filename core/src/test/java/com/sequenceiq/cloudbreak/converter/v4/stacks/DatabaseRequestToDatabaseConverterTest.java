@@ -39,7 +39,7 @@ class DatabaseRequestToDatabaseConverterTest {
         DatabaseRequest databaseRequest = new DatabaseRequest();
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NON_HA);
 
-        Database database = service.convert(CloudPlatform.AZURE, databaseRequest);
+        Database database = service.convert(CloudPlatform.AZURE, databaseRequest, false);
 
         assertNull(database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
         assertNull(database.getDatalakeDatabaseAvailabilityType());
@@ -49,7 +49,7 @@ class DatabaseRequestToDatabaseConverterTest {
     void testConvertWithAws() {
         DatabaseRequest databaseRequest = new DatabaseRequest();
 
-        Database database = service.convert(CloudPlatform.AWS, databaseRequest);
+        Database database = service.convert(CloudPlatform.AWS, databaseRequest, false);
 
         assertNull(database.getAttributes());
         assertEquals(DatabaseAvailabilityType.NONE, database.getExternalDatabaseAvailabilityType());
@@ -64,7 +64,7 @@ class DatabaseRequestToDatabaseConverterTest {
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.HA);
 
-        Database database = service.convert(CloudPlatform.AZURE, databaseRequest);
+        Database database = service.convert(CloudPlatform.AZURE, databaseRequest, false);
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER.name(), database.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
     }
@@ -77,7 +77,7 @@ class DatabaseRequestToDatabaseConverterTest {
         databaseRequest.setAvailabilityType(DatabaseAvailabilityType.NONE);
         databaseRequest.setDatabaseAzureRequest(databaseAzureRequest);
 
-        Database result = service.convert(CloudPlatform.AZURE, databaseRequest);
+        Database result = service.convert(CloudPlatform.AZURE, databaseRequest, false);
 
         assertEquals(AzureDatabaseType.FLEXIBLE_SERVER.name(), result.getAttributes().getMap().get(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY));
         assertEquals(DatabaseAvailabilityType.NONE, result.getExternalDatabaseAvailabilityType());

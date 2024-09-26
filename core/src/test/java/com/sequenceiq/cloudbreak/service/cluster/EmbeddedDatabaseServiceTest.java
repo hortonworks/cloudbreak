@@ -292,6 +292,7 @@ public class EmbeddedDatabaseServiceTest {
         }
         when(stackView.getType()).thenReturn(stackType);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
+        when(clusterView.getDbSslEnabled()).thenReturn(null);
         lenient().when(clusterView.getDatabaseServerCrn()).thenReturn(null);
 
         when(blueprintService.getByClusterId(CLUSTER_ID)).thenReturn(blueprintOptional);

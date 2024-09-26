@@ -99,6 +99,9 @@ public class StackToStackV4RequestConverter {
         stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
         prepareInputs(source, stackV4Request);
         stackV4Request.setTimeToLive(getStackTimeToLive(source));
+        if (source.getCluster().getDbSslEnabled() != null) {
+            stackV4Request.setDisableDbSslEnforcement(!source.getCluster().getDbSslEnabled());
+        }
         return stackV4Request;
     }
 

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -197,7 +198,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(SdxBasicView.builder().withCrn("crn").build()));
         lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
-        lenient().when(databaseRequestToDatabaseConverter.convert(any(CloudPlatform.class), isNull()))
+        lenient().when(databaseRequestToDatabaseConverter.convert(any(CloudPlatform.class), isNull(), anyBoolean()))
                 .thenReturn(new Database());
         // GIVEN
         InstanceGroup instanceGroup = new InstanceGroup();

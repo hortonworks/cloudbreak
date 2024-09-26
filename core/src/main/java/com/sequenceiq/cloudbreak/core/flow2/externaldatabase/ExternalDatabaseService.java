@@ -379,7 +379,8 @@ public class ExternalDatabaseService {
 
     private void configureSslEnforcement(AllocateDatabaseServerV4Request req, CloudPlatform cloudPlatform, Cluster cluster) {
         String runtime = getRuntime(cluster);
-        if (externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
+        boolean dbSslEnabled = cluster.getDbSslEnabled() != null && cluster.getDbSslEnabled();
+        if (externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime) && dbSslEnabled) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
             sslConfigV4Request.setSslMode(SslMode.ENABLED);

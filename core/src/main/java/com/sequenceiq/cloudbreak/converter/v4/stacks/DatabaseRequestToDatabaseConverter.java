@@ -26,16 +26,19 @@ public class DatabaseRequestToDatabaseConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRequestToDatabaseConverter.class);
 
+    private static final String DATABASE_SSL_ENABLED = "databaseSslEnabled";
+
     @Inject
     private EnvironmentDatabaseService environmentDatabaseService;
 
-    public Database convert(CloudPlatform cloudPlatform, DatabaseRequest source) {
+    public Database convert(CloudPlatform cloudPlatform, DatabaseRequest source, boolean disableDbSslEnforcement) {
         Database database = new Database();
         if (source != null) {
             database.setExternalDatabaseAvailabilityType(Optional.ofNullable(source.getAvailabilityType()).orElse(DatabaseAvailabilityType.NONE));
             database.setExternalDatabaseEngineVersion(source.getDatabaseEngineVersion());
             database.setAttributes(configureAzureDatabaseIfNeeded(cloudPlatform, source, source.getAvailabilityType()).orElse(null));
             database.setDatalakeDatabaseAvailabilityType(source.getDatalakeDatabaseAvailabilityType());
+            database.setAttributes(addDbSslEnabledIfNeeded(database.getAttributes(), disableDbSslEnforcement));
         }
         return database;
     }
@@ -65,6 +68,21 @@ public class DatabaseRequestToDatabaseConverter {
         } else {
             return Optional.empty();
         }
+    }
+
+    private Json addDbSslEnabledIfNeeded(Json attributes, boolean dbSslDisabled) {
+        if (dbSslDisabled) {
+            if (attributes != null) {
+                attributes.getMap().put(DATABASE_SSL_ENABLED, false);
+                return new Json(attributes);
+            } else {
+                Map<String, Object> params = new HashMap<>();
+                params.put(DATABASE_SSL_ENABLED, false);
+                return new Json(params);
+            }
+        }
+
+        return attributes;
     }
 
     private static Map<String, Object> createParamsWithDatabaseType(DatabaseRequest databaseRequest) {

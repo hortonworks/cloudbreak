@@ -157,6 +157,8 @@ public class ModelDescriptions {
 
     public static final String EXTERNAL_DATABASE_OPTIONS = "External database options.";
 
+    public static final String DISABLE_DB_SSL_ENFORCEMENT = "Option to enforce disabling database SSL encryption for clusters.";
+
     public static final String AWS_OPTIONS = "AWS options.";
 
     public static final String AZURE_OPTIONS = "Azure options.";

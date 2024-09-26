@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
@@ -63,6 +64,9 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
     private boolean enableMultiAz;
 
     private Architecture architecture;
+
+    @Schema(description = ModelDescriptions.Database.DISABLE_DB_SSL_ENFORCEMENT)
+    private boolean disableDbSslEnforcement;
 
     public String getEnvironmentName() {
         return environmentName;
@@ -194,6 +198,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setArchitecture(Architecture architecture) {
         this.architecture = architecture;
+    }
+
+    public boolean isDisableDbSslEnforcement() {
+        return disableDbSslEnforcement;
+    }
+
+    public void setDisableDbSslEnforcement(boolean disableDbSslEnforcement) {
+        this.disableDbSslEnforcement = disableDbSslEnforcement;
     }
 
     @JsonIgnore

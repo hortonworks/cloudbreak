@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +65,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
@@ -180,11 +183,20 @@ public class StackRequestManifester {
                     entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
                 stackRequest.setVariant("AWS_NATIVE");
             }
+            setupDisableDbSslEnforcement(sdxCluster, stackRequest);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
             throw new IllegalStateException("Can not parse JSON to stack request", e);
         }
+    }
+
+    private void setupDisableDbSslEnforcement(SdxCluster sdxCluster, StackV4Request stackRequest) {
+        Optional.ofNullable(sdxCluster)
+                .map(SdxCluster::getSdxDatabase)
+                .map(SdxDatabase::getAttributes)
+                .map(attributes -> (boolean) attributes.getValue(DATABASE_SSL_ENABLED))
+                .ifPresent(dbSslEnabled -> stackRequest.setDisableDbSslEnforcement(!dbSslEnabled));
     }
 
     private void validateCloudStorage(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {

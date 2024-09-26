@@ -120,6 +120,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setJavaVersion(source.getJavaVersion());
         request.setEnableMultiAz(source.isEnableMultiAz());
         request.setArchitecture(source.getArchitecture());
+        request.setDisableDbSslEnforcement(source.isDisableDbSslEnforcement());
         calculateVariant(environment, source, request);
         checkMultipleGatewayNodes(source);
         return request;
@@ -249,6 +250,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
         request.setJavaVersion(source.getJavaVersion());
+        request.setDisableDbSslEnforcement(source.isDisableDbSslEnforcement());
 
         return request;
     }

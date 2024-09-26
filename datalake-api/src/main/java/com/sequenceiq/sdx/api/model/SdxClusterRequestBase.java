@@ -66,6 +66,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @Schema(description = ModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
 
+    @Schema(description = ModelDescriptions.DISABLE_DB_SSL_ENFORCEMENT)
+    private boolean disableDbSslEnforcement;
+
     public String getEnvironment() {
         return environment;
     }
@@ -194,6 +197,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.enableRangerRms = enableRangerRms;
     }
 
+    public boolean isDisableDbSslEnforcement() {
+        return disableDbSslEnforcement;
+    }
+
+    public void setDisableDbSslEnforcement(boolean disableDbSslEnforcement) {
+        this.disableDbSslEnforcement = disableDbSslEnforcement;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -207,6 +218,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setJavaVersion(javaVersion);
         toInstance.setRecipes(recipes);
         toInstance.setImage(image);
+        toInstance.setDisableDbSslEnforcement(disableDbSslEnforcement);
     }
 
     @Override
@@ -222,6 +234,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", javaVersion=" + javaVersion +
                 ", recipes=" + recipes +
                 ", image=" + image +
+                ", disableDbSslEnforcement=" + disableDbSslEnforcement +
                 '}';
     }
 }

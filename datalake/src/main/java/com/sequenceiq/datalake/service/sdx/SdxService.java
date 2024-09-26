@@ -533,6 +533,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         sdxCluster.setSdxDatabase(externalDatabaseConfigurer.configure(environment, os, internalDatabaseRequest,
                 sdxClusterRequest.getExternalDatabase(), sdxCluster));
 
+        overrideDbSslEnabledAttribute(sdxCluster, sdxClusterRequest);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), internalStackV4Request,
                 cloudPlatform, runtimeVersion, imageSettingsV4Request);
@@ -567,6 +568,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    private void overrideDbSslEnabledAttribute(SdxCluster sdxCluster, SdxClusterRequest sdxClusterRequest) {
+        if (sdxClusterRequest != null) {
+            SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
+            if (sdxDatabase != null) {
+                Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
+                boolean dbSslDisabled = sdxClusterRequest.isDisableDbSslEnforcement();
+                attributes.put(DATABASE_SSL_ENABLED, !dbSslDisabled);
+                sdxDatabase.setAttributes(new Json(attributes));
+            }
+        }
     }
 
     private void overrideDefaultInstanceType(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups,

@@ -335,6 +335,7 @@ class ExternalDatabaseServiceTest {
         stack.setTags(new Json(stackTags));
         cluster.setBlueprint(blueprint);
         cluster.setEnvironmentCrn(ENV_CRN);
+        cluster.setDbSslEnabled(sslEnabledExpected);
         stack.setCluster(cluster);
 
         when(redbeamsClient.getByClusterCrn(ENV_CRN, CLUSTER_CRN)).thenReturn(null);
