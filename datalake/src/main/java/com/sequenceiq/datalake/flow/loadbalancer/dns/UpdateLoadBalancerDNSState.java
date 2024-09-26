@@ -7,17 +7,15 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public enum UpdateLoadBalancerDNSState implements FlowState {
     INIT_STATE,
-    UPDATE_LOAD_BALANCER_DNS_STATE,
+    UPDATE_LOAD_BALANCER_DNS_PEM_STATE,
+    UPDATE_LOAD_BALANCER_DNS_IPA_STATE,
     UPDATE_LOAD_BALANCER_DNS_FAILED_STATE,
     FINAL_STATE;
 
-    private Class<? extends DefaultRestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
+    private final Class<? extends DefaultRestartAction> restartAction =
+            FillInMemoryStateStoreRestartAction.class;
 
     UpdateLoadBalancerDNSState() {
-    }
-
-    UpdateLoadBalancerDNSState(Class<? extends DefaultRestartAction> restartAction) {
-        this.restartAction = restartAction;
     }
 
     @Override

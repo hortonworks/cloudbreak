@@ -196,8 +196,14 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public void updateLoadBalancerDNS(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        stackOperations.updateLoadBalancerDNS(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name));
+    public void updateLoadBalancerPEMDNS(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        stackOperations.updateLoadBalancerPEMDNS(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @InternalOnly
+    public void updateLoadBalancerIPADNS(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        stackOperations.updateLoadBalancerIPADNS(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name));
     }
 
     @Override

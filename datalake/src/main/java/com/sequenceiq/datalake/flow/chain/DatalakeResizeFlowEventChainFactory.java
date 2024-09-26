@@ -11,6 +11,7 @@ import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidatio
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationState.DATALAKE_BACKUP_VALIDATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationEvent.DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeRestoreValidationState.DATALAKE_RESTORE_VALIDATION_FAILED_STATE;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_IPA_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
 import java.util.Collections;
@@ -31,6 +32,7 @@ import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerBackupValidationEvent;
 import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerRestoreValidationEvent;
+import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -57,12 +59,13 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
 
         if (!event.getSkipOptions().isSkipValidation()) {
             chain.add(new DatalakeTriggerBackupValidationEvent(DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT.event(),
-                    event.getResourceId(), event.getUserId(), event.getBackupLocation(), DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));
+                    event.getResourceId(), event.getUserId(), event.getBackupLocation(), DatalakeBackupFailureReason.BACKUP_ON_RESIZE));
 
             chain.add(new DatalakeTriggerRestoreValidationEvent(DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT.event(),
-                    event.getResourceId(), event.getSdxName(), event.getUserId(), event.getBackupLocation(),
-                    DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, event.accepted()));
+                    event.getResourceId(), event.getUserId(), event.getBackupLocation(),
+                    DatalakeRestoreFailureReason.RESTORE_ON_RESIZE));
             if (event.isValidationOnly()) {
+                chain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
                 return new FlowTriggerEventQueue(getName(), event, chain);
             }
         }
@@ -71,14 +74,11 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
             // Take a backup
             chain.add(new DatalakeTriggerBackupEvent(DATALAKE_TRIGGER_BACKUP_EVENT.event(),
                     event.getResourceId(), event.getUserId(), event.getBackupLocation(), "resize" + System.currentTimeMillis(),
-                    event.getSkipOptions(),
-                    DatalakeBackupFailureReason.BACKUP_ON_RESIZE, Collections.emptyList(), 0, event.accepted()));
-            // Stop datalake
-            chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS));
-        } else {
-            chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS, event.accepted()));
+                    event.getSkipOptions(), DatalakeBackupFailureReason.BACKUP_ON_RESIZE, Collections.emptyList(), 0));
         }
 
+        // Stop datalake
+        chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS));
 
         // Detach sdx from environment
         chain.add(new SdxStartDetachEvent(SDX_DETACH_EVENT.event(), event.getResourceId(), event.getSdxCluster(), event.getUserId()));
@@ -89,12 +89,16 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         if (event.shouldPerformRestore()) {
             //restore the new cluster
             chain.add(new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(),
-                    event.getUserId(), null, event.getBackupLocation(), null, event.getSkipOptions(), DatalakeRestoreFailureReason.RESTORE_ON_RESIZE,
-                    0, false));
+                    event.getUserId(), null, event.getBackupLocation(), null, event.getSkipOptions(),
+                    DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, 0, false));
         }
 
         // Delete the detached Sdx
         chain.add(new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getResourceId(), event.getUserId(), true));
+
+        // Update FreeIPA LB DNS entry in case it was deleted during deletion of other DL with same LB endpoint.
+        chain.add(new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_IPA_EVENT.event(), event.getResourceId(),
+                event.getSdxCluster().getClusterName(), event.getUserId()));
 
         chain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
 

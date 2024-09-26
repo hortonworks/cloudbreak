@@ -47,7 +47,7 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
     }
 
     public DatalakeTriggerBackupEvent(String selector, Long sdxId, String userId, String backupLocation, String backupName,
-            DatalakeBackupFailureReason reason, DatalakeDrSkipOptions skipOptions, List<String> skipDatabaseNames,
+            DatalakeDrSkipOptions skipOptions, DatalakeBackupFailureReason reason, List<String> skipDatabaseNames,
             int fullDrMaxDurationInMin) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP, skipDatabaseNames);
         this.backupLocation = backupLocation;

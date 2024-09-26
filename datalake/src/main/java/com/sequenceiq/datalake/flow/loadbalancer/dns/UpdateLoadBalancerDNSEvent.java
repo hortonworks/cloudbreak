@@ -5,8 +5,10 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum UpdateLoadBalancerDNSEvent implements FlowEvent {
-    UPDATE_LOAD_BALANCER_DNS_EVENT(),
-    UPDATE_LOAD_BALANCER_DNS_SUCCESS_EVENT(),
+    UPDATE_LOAD_BALANCER_DNS_PEM_EVENT(),
+    UPDATE_LOAD_BALANCER_DNS_PEM_SUCCESS_EVENT(),
+    UPDATE_LOAD_BALANCER_DNS_IPA_EVENT(),
+    UPDATE_LOAD_BALANCER_DNS_IPA_SUCCESS_EVENT(),
     UPDATE_LOAD_BALANCER_DNS_FAILED_EVENT(UpdateLoadBalancerDNSFailedEvent.class),
     UPDATE_LOAD_BALANCER_DNS_FAILURE_HANDLED_EVENT();
 

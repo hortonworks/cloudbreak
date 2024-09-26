@@ -3,9 +3,10 @@ package com.sequenceiq.datalake.flow.chain;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DETACH_RECOVERY_EVENT;
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_PEM_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Queue;
@@ -26,7 +27,7 @@ import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @ExtendWith(MockitoExtension.class)
-public class DatalakeResizeRecoveryFlowEventChainTest {
+class DatalakeResizeRecoveryFlowEventChainTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -38,7 +39,7 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
     private DatalakeResizeRecoveryFlowEventChainFactory factory;
 
     @Test
-    public void chainCreationTestAllEvents() {
+    void chainCreationTestAllEvents() {
         SdxCluster oldCluster = new SdxCluster();
         oldCluster.setId(OLD_CLUSTER_SDX_ID);
         oldCluster.setDetached(true);
@@ -49,9 +50,10 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
                 oldCluster, newCluster, USER_CRN
         );
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(5, flowTriggerEventQueue.getQueue().size());
+        assertEquals(7, flowTriggerEventQueue.getQueue().size());
 
         Queue<Selectable> flowQueue = flowTriggerEventQueue.getQueue();
+        flowQueue.remove();
         checkEventIsDetach(flowQueue.remove());
         checkEventIsDeletion(flowQueue.remove());
         checkEventIsDetachRecovery(flowQueue.remove());
@@ -60,7 +62,7 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
     }
 
     @Test
-    public void chainCreationTestNewDLAlreadyDeleted() {
+    void chainCreationTestNewDLAlreadyDeleted() {
         SdxCluster oldCluster = new SdxCluster();
         oldCluster.setId(OLD_CLUSTER_SDX_ID);
         oldCluster.setDetached(true);
@@ -71,16 +73,17 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
                 oldCluster, newCluster, USER_CRN
         );
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(3, flowTriggerEventQueue.getQueue().size());
+        assertEquals(5, flowTriggerEventQueue.getQueue().size());
 
         Queue<Selectable> flowQueue = flowTriggerEventQueue.getQueue();
+        flowQueue.remove();
         checkEventIsDetachRecovery(flowQueue.remove());
         checkEventIsStart(flowQueue.remove());
         checkEventIsUpdateLoadBalancerDNS(flowQueue.remove());
     }
 
     @Test
-    public void chainCreationTestNewDLNull() {
+    void chainCreationTestNewDLNull() {
         SdxCluster oldCluster = new SdxCluster();
         oldCluster.setId(OLD_CLUSTER_SDX_ID);
         oldCluster.setDetached(true);
@@ -89,16 +92,17 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
                 oldCluster, null, USER_CRN
         );
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(3, flowTriggerEventQueue.getQueue().size());
+        assertEquals(5, flowTriggerEventQueue.getQueue().size());
 
         Queue<Selectable> flowQueue = flowTriggerEventQueue.getQueue();
+        flowQueue.remove();
         checkEventIsDetachRecovery(flowQueue.remove());
         checkEventIsStart(flowQueue.remove());
         checkEventIsUpdateLoadBalancerDNS(flowQueue.remove());
     }
 
     @Test
-    public void chainCreationTestNewDLAlreadyDeletedAndOldDLNotDetached() {
+    void chainCreationTestNewDLAlreadyDeletedAndOldDLNotDetached() {
         SdxCluster oldCluster = new SdxCluster();
         oldCluster.setId(OLD_CLUSTER_SDX_ID);
         oldCluster.setDetached(false);
@@ -109,23 +113,24 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
                 oldCluster, newCluster, USER_CRN
         );
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(2, flowTriggerEventQueue.getQueue().size());
+        assertEquals(4, flowTriggerEventQueue.getQueue().size());
 
         Queue<Selectable> flowQueue = flowTriggerEventQueue.getQueue();
+        flowQueue.remove();
         checkEventIsStart(flowQueue.remove());
         checkEventIsUpdateLoadBalancerDNS(flowQueue.remove());
     }
 
     private void checkEventIsDetach(Selectable event) {
         assertEquals(SDX_DETACH_EVENT.selector(), event.selector());
-        assertTrue(event instanceof SdxStartDetachEvent);
+        assertInstanceOf(SdxStartDetachEvent.class, event);
         assertEquals(NEW_CLUSTER_SDX_ID, event.getResourceId());
         assertTrue(((SdxStartDetachEvent) event).isDetachDuringRecovery());
     }
 
     private void checkEventIsDeletion(Selectable event) {
         assertEquals(SDX_DELETE_EVENT.selector(), event.selector());
-        assertTrue(event instanceof SdxDeleteStartEvent);
+        assertInstanceOf(SdxDeleteStartEvent.class, event);
         assertEquals(NEW_CLUSTER_SDX_ID, event.getResourceId());
         SdxDeleteStartEvent sdxDeleteStartEvent = (SdxDeleteStartEvent) event;
         assertTrue(sdxDeleteStartEvent.isForced());
@@ -133,19 +138,19 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
 
     private void checkEventIsDetachRecovery(Selectable event) {
         assertEquals(SDX_DETACH_RECOVERY_EVENT.selector(), event.selector());
-        assertTrue(event instanceof SdxStartDetachRecoveryEvent);
+        assertInstanceOf(SdxStartDetachRecoveryEvent.class, event);
         assertEquals(OLD_CLUSTER_SDX_ID, event.getResourceId());
     }
 
     private void checkEventIsStart(Selectable event) {
         assertEquals(SDX_START_EVENT.selector(), event.selector());
-        assertTrue(event instanceof SdxStartStartEvent);
+        assertInstanceOf(SdxStartStartEvent.class, event);
         assertEquals(OLD_CLUSTER_SDX_ID, event.getResourceId());
     }
 
     private void checkEventIsUpdateLoadBalancerDNS(Selectable event) {
-        assertEquals(UPDATE_LOAD_BALANCER_DNS_EVENT.selector(), event.selector());
-        assertTrue(event instanceof StartUpdateLoadBalancerDNSEvent);
+        assertEquals(UPDATE_LOAD_BALANCER_DNS_PEM_EVENT.selector(), event.selector());
+        assertInstanceOf(StartUpdateLoadBalancerDNSEvent.class, event);
         assertEquals(OLD_CLUSTER_SDX_ID, event.getResourceId());
     }
 }

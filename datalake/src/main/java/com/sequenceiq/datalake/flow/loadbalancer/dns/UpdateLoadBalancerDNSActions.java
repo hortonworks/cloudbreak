@@ -1,7 +1,8 @@
 package com.sequenceiq.datalake.flow.loadbalancer.dns;
 
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_IPA_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_PEM_SUCCESS_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
+import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeRecoveryFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.UpdateLoadBalancerDNSFailedEvent;
@@ -30,6 +32,7 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
@@ -51,8 +54,8 @@ public class UpdateLoadBalancerDNSActions {
     @Inject
     private FlowChainLogService flowChainLogService;
 
-    @Bean(name = "UPDATE_LOAD_BALANCER_DNS_STATE")
-    public Action<?, ?> updateLoadBalancerDNSAction() {
+    @Bean(name = "UPDATE_LOAD_BALANCER_DNS_PEM_STATE")
+    public Action<?, ?> updateLoadBalancerDNSPEMAction() {
         return new AbstractSdxAction<>(StartUpdateLoadBalancerDNSEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters,
@@ -65,25 +68,67 @@ public class UpdateLoadBalancerDNSActions {
             protected void doExecute(SdxContext context, StartUpdateLoadBalancerDNSEvent payload,
                     Map<Object, Object> variables) {
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                LOGGER.info("Attempting to update the load balancer DNS for cluster {}.", sdxCluster.getClusterName());
-                updateLoadBalancerDNSService.performLoadBalancerDNSUpdate(sdxCluster);
-                LOGGER.info("Successfully updated the load balancer DNS for cluster {}.", sdxCluster.getClusterName());
-                eventSenderService.notifyEvent(sdxCluster, context, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FINISHED);
-                sendNotificationInCaseOfResizeRecovery(context, sdxCluster);
-                sendEvent(context, UPDATE_LOAD_BALANCER_DNS_SUCCESS_EVENT.event(), payload);
+                LOGGER.info("Attempting to update the load balancer DNS on PEM for cluster {}.", sdxCluster.getClusterName());
+                updateLoadBalancerDNSService.performLoadBalancerDNSUpdateOnPEM(sdxCluster);
+                LOGGER.info("Successfully updated the load balancer DNS on PEM for cluster {}.", sdxCluster.getClusterName());
+                eventSenderService.notifyEvent(sdxCluster, context, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_PEM_FINISHED);
+                sendEvent(context, UPDATE_LOAD_BALANCER_DNS_PEM_SUCCESS_EVENT.event(), payload);
             }
 
-            private void sendNotificationInCaseOfResizeRecovery(SdxContext context, SdxCluster sdxCluster) {
+            @Override
+            protected Object getFailurePayload(StartUpdateLoadBalancerDNSEvent payload, Optional<SdxContext> flowContext, Exception e) {
+                LOGGER.error("Failed to update load balancer DNS of SDX with ID {} on PEM.", payload.getResourceId());
+                return UpdateLoadBalancerDNSFailedEvent.from(payload, e);
+            }
+        };
+    }
+
+    @Bean(name = "UPDATE_LOAD_BALANCER_DNS_IPA_STATE")
+    public Action<?, ?> updateLoadBalancerDNSIPAAction() {
+        return new AbstractSdxAction<>(StartUpdateLoadBalancerDNSEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters,
+                    StateContext<FlowState, FlowEvent> stateContext,
+                    StartUpdateLoadBalancerDNSEvent payload) {
+                SdxContext context = SdxContext.from(flowParameters, payload);
+
+                // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
                 if (flowChainLogService.isFlowTriggeredByFlowChain(
-                        DatalakeResizeRecoveryFlowEventChainFactory.class.getSimpleName(),
-                        flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()))) {
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
+                        flowLogService.getLastFlowLog(flowParameters.getFlowId()))) {
+                    SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
+                    LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
+                    context.setSdxId(sdxCluster.getId());
+                }
+                return context;
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, StartUpdateLoadBalancerDNSEvent payload,
+                    Map<Object, Object> variables) {
+                SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
+                LOGGER.info("Attempting to update the load balancer DNS on Free IPA for cluster {}.", sdxCluster.getClusterName());
+                updateLoadBalancerDNSService.performLoadBalancerDNSUpdateOnIPA(sdxCluster);
+                LOGGER.info("Successfully updated the load balancer DNS on Free IPA for cluster {}.", sdxCluster.getClusterName());
+                eventSenderService.notifyEvent(sdxCluster, context, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
+                sendNotificationInCaseOfResizeOrRecovery(context, sdxCluster);
+                sendEvent(context, UPDATE_LOAD_BALANCER_DNS_IPA_SUCCESS_EVENT.event(), payload);
+            }
+
+            private void sendNotificationInCaseOfResizeOrRecovery(SdxContext context, SdxCluster sdxCluster) {
+                Optional<FlowLogWithoutPayload> flowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
+                if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeRecoveryFlowEventChainFactory.class.getSimpleName(), flowLog)) {
                     eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
+                } else if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(), flowLog)) {
+                    eventSenderService.notifyEvent(context, ResourceEvent.DATALAKE_RESIZE_COMPLETE);
                 }
             }
 
             @Override
             protected Object getFailurePayload(StartUpdateLoadBalancerDNSEvent payload, Optional<SdxContext> flowContext, Exception e) {
-                LOGGER.error("Failed to update load balancer DNS of SDX with ID {}.", payload.getResourceId());
+                LOGGER.error("Failed to update load balancer DNS of SDX with ID {} on Free IPA.", payload.getResourceId());
                 return UpdateLoadBalancerDNSFailedEvent.from(payload, e);
             }
         };

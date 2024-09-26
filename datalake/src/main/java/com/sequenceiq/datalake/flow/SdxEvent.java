@@ -64,6 +64,14 @@ public class SdxEvent implements IdempotentEvent<SdxEvent> {
         this.sdxName = null;
     }
 
+    public SdxEvent(String selector, Long sdxId, String sdxName, String userId, Promise<AcceptResult> accepted) {
+        this.selector = selector;
+        this.sdxId = sdxId;
+        this.sdxName = sdxName;
+        this.userId = userId;
+        this.accepted = accepted;
+    }
+
     @Override
     public Long getResourceId() {
         return sdxId;

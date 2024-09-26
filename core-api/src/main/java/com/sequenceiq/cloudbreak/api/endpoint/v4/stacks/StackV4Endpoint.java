@@ -63,7 +63,8 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_CM_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
-import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_IPA_DNS_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_PEM_DNS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_OS_IN_WORKSPACE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DETERMINE_DATALAKE_DATA_SIZES;
@@ -234,10 +235,19 @@ public interface StackV4Endpoint {
     @PUT
     @Path("{name}/update_load_balancer_dns")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE, description = Notes.STACK_NOTES,
-            operationId = "updateLoadBalancerDNS",
+    @Operation(summary = UPDATE_LOAD_BALANCER_PEM_DNS_IN_WORKSPACE, description = Notes.STACK_NOTES,
+            operationId = "updateLoadBalancerPEMDNS",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void updateLoadBalancerDNS(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+    void updateLoadBalancerPEMDNS(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("{name}/update_load_balancer_dns_ipa")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = UPDATE_LOAD_BALANCER_IPA_DNS_IN_WORKSPACE, description = Notes.STACK_NOTES,
+            operationId = "updateLoadBalancerIPADNS",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void updateLoadBalancerIPADNS(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST

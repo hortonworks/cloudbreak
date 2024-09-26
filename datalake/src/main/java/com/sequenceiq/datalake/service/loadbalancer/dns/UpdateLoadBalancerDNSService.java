@@ -17,11 +17,19 @@ public class UpdateLoadBalancerDNSService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public void performLoadBalancerDNSUpdate(SdxCluster sdxCluster) {
+    public void performLoadBalancerDNSUpdateOnPEM(SdxCluster sdxCluster) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.updateLoadBalancerDNS(0L, sdxCluster.getClusterName(), initiatorUserCrn)
+                () -> stackV4Endpoint.updateLoadBalancerPEMDNS(0L, sdxCluster.getClusterName(), initiatorUserCrn)
+        );
+    }
+
+    public void performLoadBalancerDNSUpdateOnIPA(SdxCluster sdxCluster) {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.updateLoadBalancerIPADNS(0L, sdxCluster.getClusterName(), initiatorUserCrn)
         );
     }
 }

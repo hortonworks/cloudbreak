@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalakemetrics.DetermineDatalakeDataSizesService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerUpdateService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -171,6 +172,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private DetermineDatalakeDataSizesService determineDatalakeDataSizesService;
+
+    @Inject
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -526,9 +530,14 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return clusterOperationService.restartClusterServices(stack, refreshRemoteDataContext);
     }
 
-    public void updateLoadBalancerDNS(Long workspaceId, NameOrCrn nameOrCrn) {
+    public void updateLoadBalancerPEMDNS(Long workspaceId, NameOrCrn nameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
+    }
+
+    public void updateLoadBalancerIPADNS(Long workspaceId, NameOrCrn nameOrCrn) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        clusterPublicEndpointManagementService.registerLoadBalancerWithFreeIPA(stack);
     }
 
     public List<SubnetIdWithResourceNameAndCrn> getUsedSubnetsByEnvironment(String environmentCrn) {

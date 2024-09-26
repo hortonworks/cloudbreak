@@ -4,7 +4,7 @@ import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVEN
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DETACH_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent.SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT;
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_PEM_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 
 import java.util.Queue;
@@ -24,6 +24,8 @@ import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalanc
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @Component
 public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventChainFactory<DatalakeResizeRecoveryFlowChainStartEvent> {
@@ -37,15 +39,36 @@ public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventCha
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DatalakeResizeRecoveryFlowChainStartEvent event) {
         Queue<Selectable> flowChain = new ConcurrentLinkedQueue<>();
+        flowChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
+
         if (event.getNewCluster() != null && event.getNewCluster().getDeleted() == null) {
+            logEventCreation(SDX_DELETE_EVENT.event(), event.getNewCluster().getId());
             flowChain.add(createDetachEventForNewCluster(event));
-            flowChain.add(createForcedDeleteStartEventForNewCluster(event));
+            flowChain.add(new SdxDeleteStartEvent(
+                    SDX_DELETE_EVENT.event(),
+                    event.getNewCluster().getId(),
+                    event.getUserId(),
+                    true));
         }
         if (event.getOldCluster().isDetached()) {
-            flowChain.add(createStartDetachRecoveryEventForOldCluster(event));
+            logEventCreation(SDX_DETACH_RECOVERY_EVENT.event(), event.getOldCluster().getId());
+            flowChain.add(new SdxStartDetachRecoveryEvent(
+                    SDX_DETACH_RECOVERY_EVENT.event(),
+                    event.getOldCluster().getId(),
+                    event.getUserId()));
         }
-        flowChain.add(createStartEventForOldCluster(event));
-        flowChain.add(createUpdateLoadBalancerDNSEventForOldCluster(event));
+        logEventCreation(SDX_START_EVENT.event(), event.getOldCluster().getId());
+        flowChain.add(new SdxStartStartEvent(
+                SDX_START_EVENT.event(),
+                event.getOldCluster().getId(),
+                event.getUserId()));
+        logEventCreation(UPDATE_LOAD_BALANCER_DNS_PEM_EVENT.event(), event.getOldCluster().getId());
+        flowChain.add(new StartUpdateLoadBalancerDNSEvent(
+                UPDATE_LOAD_BALANCER_DNS_PEM_EVENT.event(),
+                event.getOldCluster().getId(),
+                event.getOldCluster().getClusterName(),
+                event.getUserId()));
+        flowChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), event, flowChain);
     }
 
@@ -53,37 +76,18 @@ public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventCha
         SdxCluster fauxCluster = new SdxCluster();
         fauxCluster.setClusterName(event.getNewCluster().getClusterName());
 
-        LOGGER.info("Generated a " + SDX_DETACH_EVENT.event() + " for the datalake resize recovery flow chain.");
+        logEventCreation(SDX_DETACH_EVENT.event(), event.getNewCluster().getId());
         SdxStartDetachEvent startDetachEvent = new SdxStartDetachEvent(
-                SDX_DETACH_EVENT.event(), event.getNewCluster().getId(), fauxCluster, event.getUserId(), event.accepted()
-        );
+                SDX_DETACH_EVENT.event(),
+                event.getNewCluster().getId(),
+                fauxCluster,
+                event.getUserId());
         startDetachEvent.setDetachDuringRecovery(true);
         return startDetachEvent;
     }
 
-    private SdxDeleteStartEvent createForcedDeleteStartEventForNewCluster(DatalakeResizeRecoveryFlowChainStartEvent event) {
-        LOGGER.info("Generated a " + SDX_DELETE_EVENT.event() + " for the datalake resize recovery flow chain.");
-        return new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getNewCluster().getId(), event.getUserId(), true);
-    }
-
-    private SdxStartDetachRecoveryEvent createStartDetachRecoveryEventForOldCluster(DatalakeResizeRecoveryFlowChainStartEvent event) {
-        LOGGER.info("Generated a " + SDX_DETACH_RECOVERY_EVENT.event() + " for the datalake resize recovery flow chain.");
-        return new SdxStartDetachRecoveryEvent(
-                SDX_DETACH_RECOVERY_EVENT.event(), event.getOldCluster().getId(), event.getUserId(), event.accepted()
-        );
-    }
-
-    private SdxStartStartEvent createStartEventForOldCluster(DatalakeResizeRecoveryFlowChainStartEvent event) {
-        LOGGER.info("Generated a " + SDX_START_EVENT.event() + " for the datalake resize recovery flow chain.");
-        return new SdxStartStartEvent(
-                SDX_START_EVENT.event(), event.getOldCluster().getId(), event.getUserId(), event.accepted()
-        );
-    }
-
-    private StartUpdateLoadBalancerDNSEvent createUpdateLoadBalancerDNSEventForOldCluster(DatalakeResizeRecoveryFlowChainStartEvent event) {
-        LOGGER.info("Generated a " + UPDATE_LOAD_BALANCER_DNS_EVENT.event() + " for the datalake resize recovery flow chain.");
-        return new StartUpdateLoadBalancerDNSEvent(
-                UPDATE_LOAD_BALANCER_DNS_EVENT.event(), event.getOldCluster().getId(), event.getUserId(), event.accepted()
-        );
+    private void logEventCreation(String event, Long datalakeId) {
+        LOGGER.info("Generated a {} for datalake {} in the datalake resize recovery flow chain.",
+                event, datalakeId);
     }
 }

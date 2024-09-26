@@ -156,8 +156,8 @@ public class UsageReportingServiceTest {
         UsageProto.CDPDatahubAutoscaleConfigChanged actual = captor.getValue();
 
         assertEquals("testUserCrn", actual.getUserCrn(), "UserCrn should match");
-        assertEquals("testCluster", actual.getClusterName(), "CluterName should match");
-        assertEquals("testStackCrn", actual.getClusterCrn(), "CluterCrn should match");
+        assertEquals("testCluster", actual.getClusterName(), "ClusterName should match");
+        assertEquals("testStackCrn", actual.getClusterCrn(), "ClusterCrn should match");
         assertEquals("testAccount", actual.getAccountId(), "AccountId should match");
         assertEquals(2, actual.getAutoscalingPolicyDefinitionCount(), "Policy Count should match");
         assertEquals(Boolean.TRUE, actual.getAutoscalingEnabled(), "Autoscaling enabled should match");

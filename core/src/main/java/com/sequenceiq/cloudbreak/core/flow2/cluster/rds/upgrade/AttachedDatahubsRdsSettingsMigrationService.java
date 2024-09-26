@@ -89,7 +89,7 @@ public class AttachedDatahubsRdsSettingsMigrationService {
                 updateCMServiceConfigs(datahubStatus);
                 updatedClusters.add(datahubStatus);
             } catch (Exception ex) {
-                LOGGER.error("Error happened during cm services db upgrade param on cluter with crn {}", datahubStatus.getCrn(), ex);
+                LOGGER.error("Error happened during cm services db upgrade param on cluster with crn {}", datahubStatus.getCrn(), ex);
                 updateFailedClusters.put(datahubStatus, ex);
             }
         }

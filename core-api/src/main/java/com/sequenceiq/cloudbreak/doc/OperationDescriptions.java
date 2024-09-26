@@ -36,7 +36,8 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE_INTERNAL = "delete stack by name in workspace, internal only";
         public static final String UPDATE_BY_NAME_IN_WORKSPACE = "update stack by name in workspace";
-        public static final String UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE = "update load balancer dns in workspace";
+        public static final String UPDATE_LOAD_BALANCER_PEM_DNS_IN_WORKSPACE = "update load balancer PEM dns in workspace";
+        public static final String UPDATE_LOAD_BALANCER_IPA_DNS_IN_WORKSPACE = "update load balancer free IPA dns in workspace";
         public static final String SYNC_BY_NAME_IN_WORKSPACE = "syncs the stack by name in workspace";
         public static final String SYNC_CM_BY_NAME_IN_WORKSPACE = "syncs from CM the parcel and CM versions by name in workspace";
         public static final String RETRY_BY_NAME_IN_WORKSPACE = "retries the stack by name in workspace";

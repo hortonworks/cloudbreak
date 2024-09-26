@@ -1,13 +1,16 @@
 package com.sequenceiq.datalake.flow.loadbalancer.dns;
 
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_EVENT;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_IPA_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_IPA_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_PEM_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_PEM_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSState.UPDATE_LOAD_BALANCER_DNS_FAILED_STATE;
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSState.UPDATE_LOAD_BALANCER_DNS_STATE;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSState.UPDATE_LOAD_BALANCER_DNS_IPA_STATE;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSState.UPDATE_LOAD_BALANCER_DNS_PEM_STATE;
 
 import java.util.List;
 
@@ -25,12 +28,20 @@ public class UpdateLoadBalancerDNSFlowConfig extends AbstractFlowConfiguration<U
         .defaultFailureEvent(UPDATE_LOAD_BALANCER_DNS_FAILED_EVENT)
 
         .from(INIT_STATE)
-        .to(UPDATE_LOAD_BALANCER_DNS_STATE)
-        .event(UPDATE_LOAD_BALANCER_DNS_EVENT).noFailureEvent()
+        .to(UPDATE_LOAD_BALANCER_DNS_PEM_STATE)
+        .event(UPDATE_LOAD_BALANCER_DNS_PEM_EVENT).noFailureEvent()
 
-        .from(UPDATE_LOAD_BALANCER_DNS_STATE)
+        .from(INIT_STATE)
+        .to(UPDATE_LOAD_BALANCER_DNS_IPA_STATE)
+        .event(UPDATE_LOAD_BALANCER_DNS_IPA_EVENT).noFailureEvent()
+
+        .from(UPDATE_LOAD_BALANCER_DNS_PEM_STATE)
+        .to(UPDATE_LOAD_BALANCER_DNS_IPA_STATE)
+        .event(UPDATE_LOAD_BALANCER_DNS_PEM_SUCCESS_EVENT).defaultFailureEvent()
+
+        .from(UPDATE_LOAD_BALANCER_DNS_IPA_STATE)
         .to(FINAL_STATE)
-        .event(UPDATE_LOAD_BALANCER_DNS_SUCCESS_EVENT).defaultFailureEvent()
+        .event(UPDATE_LOAD_BALANCER_DNS_IPA_SUCCESS_EVENT).defaultFailureEvent()
 
         .from(UPDATE_LOAD_BALANCER_DNS_FAILED_STATE)
         .to(FINAL_STATE)
@@ -53,7 +64,8 @@ public class UpdateLoadBalancerDNSFlowConfig extends AbstractFlowConfiguration<U
     @Override
     public UpdateLoadBalancerDNSEvent[] getInitEvents() {
         return new UpdateLoadBalancerDNSEvent[] {
-                UPDATE_LOAD_BALANCER_DNS_EVENT
+                UPDATE_LOAD_BALANCER_DNS_PEM_EVENT,
+                UPDATE_LOAD_BALANCER_DNS_IPA_EVENT
         };
     }
 

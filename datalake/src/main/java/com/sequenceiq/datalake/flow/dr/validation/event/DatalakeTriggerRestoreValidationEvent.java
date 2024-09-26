@@ -23,7 +23,6 @@ public class DatalakeTriggerRestoreValidationEvent extends DatalakeDatabaseDrSta
     public DatalakeTriggerRestoreValidationEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long sdxId,
-            @JsonProperty("sdxName") String sdxName,
             @JsonProperty("userId") String userId,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("reason") DatalakeRestoreFailureReason reason,

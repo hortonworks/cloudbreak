@@ -272,11 +272,11 @@ public class ScalingRequestTest {
 
     private void setupMocks() {
         lenient().when(scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(anyInt())).thenReturn(false);
-        ClusterPertain cluterPertain = mock(ClusterPertain.class);
-        when(cluster.getClusterPertain()).thenReturn(cluterPertain);
+        ClusterPertain clusterPertain = mock(ClusterPertain.class);
+        when(cluster.getClusterPertain()).thenReturn(clusterPertain);
         when(cluster.getStackCrn()).thenReturn("crn:cdp:datahub:us-west-1:accid:cluster:cluster");
-        when(cluterPertain.getTenant()).thenReturn("testTenant");
-        lenient().when(cluterPertain.getUserId()).thenReturn("userId");
+        when(clusterPertain.getTenant()).thenReturn("testTenant");
+        lenient().when(clusterPertain.getUserId()).thenReturn("userId");
 
         BaseAlert baseAlert = mock(BaseAlert.class);
         when(baseAlert.getAlertType()).thenReturn(AlertType.LOAD);

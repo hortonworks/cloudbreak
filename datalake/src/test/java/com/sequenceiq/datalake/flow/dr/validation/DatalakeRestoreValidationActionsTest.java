@@ -46,8 +46,6 @@ public class DatalakeRestoreValidationActionsTest {
 
     private static final String FLOW_ID = "flow_id";
 
-    private static final String DATALAKE_NAME = "test_dl";
-
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String BACKUP_LOCATION = "s3://cloudbreak-bucket/backup-location";
@@ -89,7 +87,7 @@ public class DatalakeRestoreValidationActionsTest {
     @Test
     public void testRestoreValidationAction() throws Exception {
         DatalakeTriggerRestoreValidationEvent event = new DatalakeTriggerRestoreValidationEvent(DATALAKE_TRIGGER_RESTORE_VALIDATION_EVENT.event(),
-                SDX_ID, DATALAKE_NAME, USER_CRN, BACKUP_LOCATION, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, null);
+                SDX_ID, USER_CRN, BACKUP_LOCATION, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE, null);
         SdxCluster sdxCluster = mock(SdxCluster.class);
         when(sdxBackupRestoreService.triggerDatalakeRestoreValidation(eq(sdxCluster), eq(USER_CRN)))
                 .thenReturn(new DatalakeRestoreStatusResponse(BACKUP_ID, RESTORE_ID, State.STARTED, null, null));

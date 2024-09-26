@@ -43,7 +43,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path("/v1/dns")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "/v1/dns", description = "Amange DNS in FreeIPA")
+@Tag(name = "/v1/dns", description = "Manage DNS in FreeIPA")
 public interface DnsV1Endpoint {
     @POST
     @Path("zone/cidr")

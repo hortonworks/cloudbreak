@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.flow.loadbalancer.dns;
 
-import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_EVENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_IPA_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_PEM_EVENT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,7 +22,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -31,7 +29,6 @@ import com.sequenceiq.datalake.flow.chain.DatalakeResizeRecoveryFlowEventChainFa
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.service.loadbalancer.dns.UpdateLoadBalancerDNSService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -53,20 +50,11 @@ class UpdateLoadBalancerDNSActionsTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
-    private static final String BACKUP_LOCATION = "s3://cloudbreak-bucket/backup-location";
-
-    private static final String BACKUP_ID = "backup_id";
-
-    private static final String RESTORE_ID = "restore_id";
-
     @Mock
     private SdxService sdxService;
 
     @Mock
     private UpdateLoadBalancerDNSService updateLoadBalancerDNSService;
-
-    @Mock
-    private SdxStatusService sdxStatusService;
 
     @Mock
     private EventSenderService eventSenderService;
@@ -90,53 +78,63 @@ class UpdateLoadBalancerDNSActionsTest {
     private UpdateLoadBalancerDNSActions underTest;
 
     @Test
-    public void updateLoadBalancerDNSActionNotResizeRecovery() throws Exception {
+    void updateLoadBalancerDNSActionResizeRecovery() throws Exception {
         SdxCluster sdxCluster = genCluster();
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, null);
-        when(sdxService.getById(eq(SDX_ID))).thenReturn(sdxCluster);
-        StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_EVENT.event(), SDX_ID, USER_CRN, new Promise<>());
-        AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSAction();
-        initActionPrivateFields(action);
-        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        SdxContext sdxContext = SdxContext.from(flowParameters, event);
-        testSupport.doExecute(sdxContext, event, new HashMap<>());
-        verify(updateLoadBalancerDNSService, times(1))
-                .performLoadBalancerDNSUpdate(eq(sdxCluster));
-        verify(eventSenderService, times(1))
-                .notifyEvent(eq(sdxCluster), eq(sdxContext), eq(ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FINISHED));
-        ArgumentCaptor<StartUpdateLoadBalancerDNSEvent> captor = ArgumentCaptor.forClass(StartUpdateLoadBalancerDNSEvent.class);
-        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
-        assertEquals(SDX_ID, captor.getValue().getResourceId());
-        assertEquals(USER_CRN, captor.getValue().getUserId());
-    }
-
-    @Test
-    public void updateLoadBalancerDNSActionResizeRecovery() throws Exception {
-        SdxCluster sdxCluster = genCluster();
-        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null);
-        when(sdxService.getById(eq(SDX_ID))).thenReturn(sdxCluster);
+        when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
         FlowLogWithoutPayload flowLogWithoutPayload = mock(FlowLogWithoutPayload.class);
-        when(flowLogService.getLastFlowLog(eq(FLOW_ID)))
+        when(flowLogService.getLastFlowLog(FLOW_ID))
                 .thenReturn(Optional.of(flowLogWithoutPayload));
         when(flowChainLogService.isFlowTriggeredByFlowChain(eq(DatalakeResizeRecoveryFlowEventChainFactory.class.getSimpleName()), any()))
                 .thenReturn(true);
-        StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_EVENT.event(), SDX_ID, USER_CRN, new Promise<>());
-        AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSAction();
+        StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_PEM_EVENT.event(),
+                SDX_ID, DATALAKE_NAME, USER_CRN);
+        AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSPEMAction();
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         SdxContext sdxContext = SdxContext.from(flowParameters, event);
         testSupport.doExecute(sdxContext, event, new HashMap<>());
         verify(updateLoadBalancerDNSService, times(1))
-                .performLoadBalancerDNSUpdate(eq(sdxCluster));
+                .performLoadBalancerDNSUpdateOnPEM(sdxCluster);
         verify(eventSenderService, times(1))
-                .notifyEvent(eq(sdxCluster), eq(sdxContext), eq(ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FINISHED));
-        verify(eventSenderService, times(1))
-                .sendEventAndNotification(eq(sdxCluster), eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED));
+                .notifyEvent(sdxCluster, sdxContext, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_PEM_FINISHED);
 
-        ArgumentCaptor<StartUpdateLoadBalancerDNSEvent> captor = ArgumentCaptor.forClass(StartUpdateLoadBalancerDNSEvent.class);
-        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
-        assertEquals(SDX_ID, captor.getValue().getResourceId());
-        assertEquals(USER_CRN, captor.getValue().getUserId());
+        action = (AbstractAction) underTest.updateLoadBalancerDNSIPAAction();
+        initActionPrivateFields(action);
+        testSupport = new AbstractActionTestSupport(action);
+        sdxContext = SdxContext.from(flowParameters, event);
+        testSupport.doExecute(sdxContext, event, new HashMap<>());
+        verify(updateLoadBalancerDNSService, times(1))
+                .performLoadBalancerDNSUpdateOnIPA(sdxCluster);
+        verify(eventSenderService, times(1))
+                .notifyEvent(sdxCluster, sdxContext, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
+        verify(eventSenderService, times(1))
+                .sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
+    }
+
+    @Test
+    void updateLoadBalancerDNSActionResize() throws Exception {
+        SdxCluster sdxCluster = genCluster();
+        FlowParameters flowParameters = new FlowParameters(FLOW_ID, null);
+        when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
+        FlowLogWithoutPayload flowLogWithoutPayload = mock(FlowLogWithoutPayload.class);
+        when(flowLogService.getLastFlowLog(FLOW_ID))
+                .thenReturn(Optional.of(flowLogWithoutPayload));
+        when(flowChainLogService.isFlowTriggeredByFlowChain(eq(DatalakeResizeRecoveryFlowEventChainFactory.class.getSimpleName()), any()))
+                .thenReturn(false);
+        StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_IPA_EVENT.event(),
+                SDX_ID, DATALAKE_NAME, USER_CRN);
+        AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSIPAAction();
+        initActionPrivateFields(action);
+        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
+        SdxContext sdxContext = SdxContext.from(flowParameters, event);
+        testSupport.doExecute(sdxContext, event, new HashMap<>());
+        verify(updateLoadBalancerDNSService, times(1))
+                .performLoadBalancerDNSUpdateOnIPA(sdxCluster);
+        verify(eventSenderService, times(1))
+                .notifyEvent(sdxCluster, sdxContext, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_IPA_FINISHED);
+        verify(eventSenderService, times(0))
+                .sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
@@ -154,5 +152,4 @@ class UpdateLoadBalancerDNSActionsTest {
         sdxCluster.setClusterName(DATALAKE_NAME);
         return sdxCluster;
     }
-
 }
