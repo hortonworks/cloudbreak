@@ -86,6 +86,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Value("${info.app.version:}")
     private String cbVersion;
 
+    @Value("${crn.region:}")
+    private String region;
+
     @Override
     @DisableCheckPermissions
     public VersionCheckResult checkClientVersion(String version) {
@@ -130,6 +133,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         response.setPlatformSelectionDisabled(providerPreferencesService.isPlatformSelectionDisabled());
         response.setPlatformEnablement(providerPreferencesService.platformEnablement());
         response.setGovPlatformEnablement(providerPreferencesService.govPlatformEnablement());
+        response.setControlPlaneRegion(region);
         return response;
     }
 

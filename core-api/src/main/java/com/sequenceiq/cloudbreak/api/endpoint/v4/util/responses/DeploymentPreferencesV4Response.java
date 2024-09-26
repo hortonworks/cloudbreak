@@ -20,6 +20,8 @@ public class DeploymentPreferencesV4Response {
 
     private Map<String, Boolean> govPlatformEnablement = new HashMap<>();
 
+    private String controlPlaneRegion;
+
     public Set<SupportedExternalDatabaseServiceEntryV4Response> getSupportedExternalDatabases() {
         return supportedExternalDatabases;
     }
@@ -59,4 +61,13 @@ public class DeploymentPreferencesV4Response {
     public void setGovPlatformEnablement(Map<String, Boolean> govPlatformEnablement) {
         this.govPlatformEnablement = govPlatformEnablement;
     }
+
+    public String getControlPlaneRegion() {
+        return controlPlaneRegion;
+    }
+
+    public void setControlPlaneRegion(String controlPlaneRegion) {
+        this.controlPlaneRegion = controlPlaneRegion;
+    }
+
 }
