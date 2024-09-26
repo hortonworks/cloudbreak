@@ -19,7 +19,7 @@ class SecretTypeConverterTest {
     @Test
     void mapSecretTypesShouldFailWhenInvalidEnumValue() {
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> SecretTypeConverter.mapSecretTypes(List.of("TEST", "INVALID")));
+                () -> SecretTypeConverter.mapSecretTypes(List.of("TEST", "INVALID"), SecretTypeConverter.AVAILABLE_SECRET_TYPES));
         assertEquals("Invalid secret type, cannot map secrets [TEST, INVALID].",
                 cloudbreakServiceException.getMessage());
     }
@@ -32,7 +32,7 @@ class SecretTypeConverterTest {
 
     @Test
     void mapSecretTypesShouldSucceed() {
-        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(List.of("TEST", "TEST_2"));
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(List.of("TEST", "TEST_2"), SecretTypeConverter.AVAILABLE_SECRET_TYPES);
         assertThat(secretTypes).containsExactly(TestSecretType.TEST, TestSecretType.TEST_2);
     }
 }

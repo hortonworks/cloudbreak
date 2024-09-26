@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
+import com.sequenceiq.freeipa.service.rotation.SecretRotationSaltService;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 
 @Component
@@ -25,12 +25,12 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStateApplyRotationExecutor.class);
 
     @Inject
-    private HostOrchestrator hostOrchestrator;
+    private SecretRotationSaltService saltService;
 
     @Override
     protected void rotate(SaltStateApplyRotationContext context) throws Exception {
         LOGGER.info("Executing salt states [{}] regarding secret rotation.", Joiner.on(",").join(context.getStates()));
-        hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getStates(), context.getExitCriteriaModel(),
+        saltService.executeSaltState(context.getGatewayConfig(), context.getTargets(), context.getStates(), context.getExitCriteriaModel(),
                 context.getMaxRetry(), context.getMaxRetryOnError());
     }
 
@@ -46,7 +46,7 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
 
     @Override
     protected void preValidate(SaltStateApplyRotationContext context) throws Exception {
-        hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
+        saltService.validateSalt(context.getTargets(), context.getGatewayConfig());
         executeStatesIfPresent(context.getPreValidateStates(), "pre validation", context);
     }
 
@@ -58,8 +58,9 @@ public class SaltStateApplyRotationExecutor extends AbstractRotationExecutor<Sal
     private void executeStatesIfPresent(Optional<List<String>> states, String message, SaltStateApplyRotationContext context)
             throws CloudbreakOrchestratorFailedException {
         if (states.isPresent()) {
-            LOGGER.info("Executing salt states [{}] regarding {} of secret rotation.", Joiner.on(",").join(states.get()), message);
-            hostOrchestrator.executeSaltState(context.getGatewayConfig(), context.getTargets(), states.get(),
+            LOGGER.info("Executing salt states [{}] regarding {} of secret rotation.",
+                    Joiner.on(",").join(states.get()), message);
+            saltService.executeSaltState(context.getGatewayConfig(), context.getTargets(), states.get(),
                     context.getExitCriteriaModel(), context.getMaxRetry(), context.getMaxRetryOnError());
         }
     }

@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
 
+import java.util.List;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -22,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -85,6 +88,10 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     .withPublicKey(commonCloudProperties().getRotationSshPublicKey())
                     .given(EnvironmentTestDto.class)
                     .when(environmentTestClient.changeAuthentication())
+                    .given(FreeIpaRotationTestDto.class)
+                    .withSecrets(List.of(FreeIpaSecretType.USER_KEYPAIR))
+                    .when(freeIpaTestClient.rotateSecret())
+                    .awaitForFlow()
                     .given(SdxInternalTestDto.class)
                     .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_USER_KEYPAIR)))
                     .awaitForFlow()

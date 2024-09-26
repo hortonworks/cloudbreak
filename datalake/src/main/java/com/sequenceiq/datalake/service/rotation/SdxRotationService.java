@@ -53,6 +53,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
 public class SdxRotationService {
@@ -178,7 +179,7 @@ public class SdxRotationService {
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
         secretRotationValidationService.validateSecretRotationEntitlement(datalakeCrn);
-        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets);
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets, Set.of(DatalakeSecretType.class));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
         SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdxCluster.getId());

@@ -14,6 +14,7 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.LAUNCH_TEMPLATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_PILLAR_UPDATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STATE_APPLY;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STATE_RUN;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,8 @@ public enum FreeIpaSecretType implements SecretType {
     CCMV2_JUMPGATE_AGENT_ACCESS_KEY(List.of(CCMV2_JUMPGATE, LAUNCH_TEMPLATE, SALT_PILLAR_UPDATE, SALT_STATE_APPLY)),
     FREEIPA_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     FREEIPA_KERBEROS_BIND_USER(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
-    FREEIPA_STACK_ENCRYPTION_KEYS(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE));
+    FREEIPA_STACK_ENCRYPTION_KEYS(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE)),
+    USER_KEYPAIR(List.of(SALT_STATE_RUN, CUSTOM_JOB));
 
     private final List<SecretRotationStep> steps;
 

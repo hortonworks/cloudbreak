@@ -31,10 +31,6 @@ public class SecretTypeConverter {
 
     }
 
-    public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypes(List<String> secrets) {
-        return mapSecretTypes(secrets, AVAILABLE_SECRET_TYPES);
-    }
-
     public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypes(List<String> secrets,
             Set<Class<? extends SecretType>> allowedSecretTypes) {
         try {

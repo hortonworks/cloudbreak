@@ -30,7 +30,7 @@ public class SaltStateApplyRotationContext extends RotationContext {
 
     private final Optional<Integer> maxRetryOnError;
 
-    private SaltStateApplyRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets, List<String> states,
+    protected SaltStateApplyRotationContext(String resourceCrn, GatewayConfig gatewayConfig, Set<String> targets, List<String> states,
             Optional<List<String>> rollBackStates, Optional<List<String>> cleanupStates, Optional<List<String>> preValidateStates,
             Optional<List<String>> postValidateStates, ExitCriteriaModel exitCriteriaModel, Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) {
         super(resourceCrn);

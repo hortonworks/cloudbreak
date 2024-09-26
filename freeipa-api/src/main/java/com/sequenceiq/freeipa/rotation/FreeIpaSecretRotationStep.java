@@ -10,6 +10,7 @@ public enum FreeIpaSecretRotationStep implements SecretRotationStep {
     CCMV2_JUMPGATE,
     LAUNCH_TEMPLATE,
     SALT_STATE_APPLY,
+    SALT_STATE_RUN,
     FREEIPA_USER_PASSWORD;
 
     @Override
