@@ -112,7 +112,7 @@ public class ImageValidatorE2ETestUtil {
         return imageValidationType == ImageValidationType.FREEIPA;
     }
 
-    public Optional<ImageV4Response> getImage(TestContext testContext) {
+    public Optional<ImageV4Response> getImageUnderValidation(TestContext testContext) {
         ImagesV4Response imagesV4Response = getImages(testContext);
         List<ImageV4Response> images = new LinkedList<>();
         images.addAll(imagesV4Response.getBaseImages());
@@ -123,9 +123,13 @@ public class ImageValidatorE2ETestUtil {
     }
 
     private ImagesV4Response getImages(TestContext testContext) {
+        return getImages(testContext, getImageCatalogName());
+    }
+
+    private ImagesV4Response getImages(TestContext testContext, String catalogName) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                    .withName(getImageCatalogName())
+                    .withName(catalogName)
                 .when(imageCatalogTestClient.getV4WithAllImages())
                 .validate();
         return testContext.get(ImageCatalogTestDto.class).getResponse().getImages();
@@ -164,11 +168,7 @@ public class ImageValidatorE2ETestUtil {
     }
 
     public ImageV4Response getUpgradeSourceImage(TestContext testContext) {
-        List<ImageV4Response> images = getImages(testContext).getCdhImages();
-        ImageV4Response imageUnderValidation = images.stream()
-                .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
-                .findFirst()
-                .orElseThrow();
+        ImageV4Response imageUnderValidation = getImageUnderValidation(testContext).orElseThrow();
         String runtimeVersion = shouldValidateWithSameRuntime(imageUnderValidation)
                 ? imageUnderValidation.getVersion()
                 : commonClusterManagerProperties.getUpgrade().getMatrix().get(imageUnderValidation.getVersion());
@@ -178,7 +178,7 @@ public class ImageValidatorE2ETestUtil {
         Architecture architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
         int cmBuildNumber = Integer.parseInt(imageUnderValidation.getCmBuildNumber());
         int stackBuildNumber = Integer.parseInt(imageUnderValidation.getStackDetails().getStackBuildNumber());
-        return images.stream()
+        return getImages(testContext, "cdp-default").getCdhImages().stream()
                 .filter(img -> img.getCreated() < imageUnderValidation.getCreated())
                 .filter(img -> Objects.equals(imageUnderValidation.getImageSetsByProvider().keySet(), img.getImageSetsByProvider().keySet()))
                 .filter(img -> Objects.equals(imageUnderValidation.getOs(), img.getOs()))
@@ -191,12 +191,17 @@ public class ImageValidatorE2ETestUtil {
     }
 
     private boolean shouldValidateWithSameRuntime(ImageV4Response imageUnderValidation) {
-        return isRhel8InitialVersion(imageUnderValidation);
+        return isRhel8InitialVersion(imageUnderValidation) || isArm64InitialVersion(imageUnderValidation);
     }
 
     private boolean isRhel8InitialVersion(ImageV4Response imageUnderValidation) {
         return OsType.RHEL8.getOs().equalsIgnoreCase(imageUnderValidation.getOs())
                 && "7.2.17".equals(imageUnderValidation.getVersion());
+    }
+
+    private boolean isArm64InitialVersion(ImageV4Response imageUnderValidation) {
+        return Architecture.ARM64.equals(Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()))
+                && "7.3.1".equals(imageUnderValidation.getVersion());
     }
 
     public List<XmlSuite> getSuites() {
@@ -244,7 +249,10 @@ public class ImageValidatorE2ETestUtil {
 
     private void addTestCaseIfNotAlreadyPassed(XmlTest xmlTest, Class<?> testClass, String methodName) {
         if (!PassedTestsReporter.isAlreadyPassedTest(testClass, methodName)) {
+            LOGGER.info("Adding test case {}::{}", testClass.getSimpleName(), methodName);
             testNGUtil.addTestCase(xmlTest, testClass, methodName);
+        } else {
+            LOGGER.debug("Skipping already passed test case {}::{}", testClass.getSimpleName(), methodName);
         }
     }
 }

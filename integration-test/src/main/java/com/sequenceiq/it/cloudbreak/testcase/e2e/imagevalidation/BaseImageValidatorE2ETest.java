@@ -80,7 +80,7 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
             given = "there is a running Cloudbreak",
             then = "based on the base image's architecture the relevant test case is selected")
     public void testProvisioningWithBaseImage(TestContext testContext) {
-        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
         Architecture architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
 
         switch (architecture) {
@@ -175,7 +175,7 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
 
     @Override
     public String getCbImageId(TestContext testContext) {
-        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
         return Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()) == Architecture.ARM64
                 ? getDistroXImage(testContext)
                 : ImageValidatorE2ETest.super.getCbImageId(testContext);

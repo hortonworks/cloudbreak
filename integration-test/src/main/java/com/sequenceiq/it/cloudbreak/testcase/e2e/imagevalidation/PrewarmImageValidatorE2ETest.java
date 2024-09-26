@@ -61,7 +61,7 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
             architecture = Architecture.X86_64;
             blueprintName = commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime();
         } else {
-            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+            ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
             architecture = Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture());
             blueprintName = commonClusterManagerProperties().getDataEngDistroXBlueprintName(imageUnderValidation.getVersion());
         }
@@ -112,7 +112,7 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
 
     @Override
     public String getCbImageId(TestContext testContext) {
-        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImage(testContext).orElseThrow();
+        ImageV4Response imageUnderValidation = imageValidatorE2ETestUtil.getImageUnderValidation(testContext).orElseThrow();
         return Architecture.fromStringWithFallback(imageUnderValidation.getArchitecture()) == Architecture.ARM64
                 ? getDistroXImage(testContext)
                 : ImageValidatorE2ETest.super.getCbImageId(testContext);
