@@ -142,7 +142,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public SdxTestDto refresh() {
         LOGGER.info("Refresh SDX with name: {}", getName());
-        return when(sdxTestClient.refresh(), key("refresh-sdx-" + getName()));
+        return when(sdxTestClient.refresh(), key("refresh-sdx-" + getName()).withSkipOnFail(false));
     }
 
     @Override

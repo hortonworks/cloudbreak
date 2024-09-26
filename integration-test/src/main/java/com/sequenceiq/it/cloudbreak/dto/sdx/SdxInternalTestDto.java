@@ -468,7 +468,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public CloudbreakTestDto refresh() {
         LOGGER.info("Refresh SDX Internal with name: {}", getName());
-        return when(sdxTestClient.refreshInternal(), key("refresh-sdx-" + getName()));
+        return when(sdxTestClient.refreshInternal(), key("refresh-sdx-" + getName()).withSkipOnFail(false));
     }
 
     @Override
