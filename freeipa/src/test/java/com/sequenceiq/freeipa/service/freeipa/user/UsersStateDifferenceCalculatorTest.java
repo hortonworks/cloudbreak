@@ -133,7 +133,7 @@ class UsersStateDifferenceCalculatorTest {
                         .addGroup(groupBoth)
                         .addGroup(groupProtected)
                         .build())
-                .setWorkloadAdministrationGroups(Set.of(groupWag))
+                .setWorkloadAdministrationGroups(ImmutableSet.of(groupWag))
                 .build();
 
         UsersState ipaUsersState = new UsersState.Builder()
@@ -167,7 +167,7 @@ class UsersStateDifferenceCalculatorTest {
                         .addGroup(groupUms)
                         .addGroup(groupBoth)
                         .build())
-                .setWorkloadAdministrationGroups(Set.of(groupWag))
+                .setWorkloadAdministrationGroups(ImmutableSet.of(groupWag))
                 .build();
 
         UsersState ipaUsersState = new UsersState.Builder()

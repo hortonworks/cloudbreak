@@ -37,7 +37,7 @@ public class UmsUsersState {
     @SuppressWarnings("checkstyle:ExecutableStatementCount")
     private UmsUsersState(
             UsersState usersState, Map<String, WorkloadCredential> usersWorkloadCredentialMap,
-            Collection<String> requestedWorkloadUsernames, Collection<FmsGroup> workloadAdministrationGroups,
+            Collection<String> requestedWorkloadUsernames, ImmutableSet<FmsGroup> workloadAdministrationGroups,
             Map<String, List<CloudIdentity>> userToCloudIdentityMap,
             Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities,
             Collection<String> groupsExceedingThreshold,
@@ -47,8 +47,7 @@ public class UmsUsersState {
                 requireNonNull(usersWorkloadCredentialMap, "workload credential map is null"));
         this.requestedWorkloadUsernames = ImmutableSet.copyOf(
                 requireNonNull(requestedWorkloadUsernames, "requested workload usernames is null"));
-        this.workloadAdministrationGroups = ImmutableSet.copyOf(
-                requireNonNull(workloadAdministrationGroups, "workloadAdministrationGroups is null"));
+        this.workloadAdministrationGroups = requireNonNull(workloadAdministrationGroups, "workloadAdministrationGroups is null");
         this.userToCloudIdentityMap = ImmutableMap.copyOf(
                 requireNonNull(userToCloudIdentityMap, "userToCloudIdentityMap is null"));
         this.servicePrincipalCloudIdentities = ImmutableList.copyOf(
@@ -102,7 +101,7 @@ public class UmsUsersState {
 
         private Set<String> requestedWorkloadUsernames = new HashSet<>();
 
-        private Collection<FmsGroup> workloadAdministrationGroups = Set.of();
+        private ImmutableSet<FmsGroup> workloadAdministrationGroups = ImmutableSet.of();
 
         private Map<String, List<CloudIdentity>> userToCloudIdentityMap = new HashMap<>();
 
@@ -132,7 +131,7 @@ public class UmsUsersState {
             return this;
         }
 
-        public Builder setWorkloadAdministrationGroups(Collection<FmsGroup> workloadAdministrationGroups) {
+        public Builder setWorkloadAdministrationGroups(ImmutableSet<FmsGroup> workloadAdministrationGroups) {
             this.workloadAdministrationGroups = requireNonNull(workloadAdministrationGroups);
             return this;
         }

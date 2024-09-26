@@ -136,11 +136,6 @@ public class CdlSdxDescribeService extends AbstractCdlSdxService implements Plat
         return Optional.empty();
     }
 
-    @Override
-    public boolean isSdxClusterHA(String environmentCrn) {
-        throw new UnsupportedOperationException("Currently we cannot decide if CDL cluster is HA or not.");
-    }
-
     private SdxFileSystemView describeServicesResponseToFileSystem(CdlCrudProto.DescribeServicesResponse servicesResponse, String cloudStorageLocation) {
         String fileSystemType = null;
         Map<String, String> fileSystemLocations = new HashMap<>();

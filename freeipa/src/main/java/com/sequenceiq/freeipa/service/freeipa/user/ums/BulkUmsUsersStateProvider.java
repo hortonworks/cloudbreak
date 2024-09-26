@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
@@ -61,18 +62,20 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                 .map(UserManagementProto.UserSyncActorDetails::getWorkloadUsername)
                 .collect(Collectors.toList());
 
+        ImmutableSet<FmsGroup> workloadAdminGroups = ImmutableSet.copyOf(wags.values());
+        LOGGER.debug("WAG size: {}", workloadAdminGroups.size());
         Map<String, UmsUsersState> umsUsersStateMap = Maps.newHashMap();
         IntStream.range(0, environmentCrnList.size())
                 .forEach(environmentIndex -> {
                     String environmentCrn = environmentCrnList.get(environmentIndex);
                     UmsUsersState.Builder umsUsersStateBuilder = UmsUsersState.newBuilder()
-                            .setWorkloadAdministrationGroups(wags.values());
+                            .setWorkloadAdministrationGroups(workloadAdminGroups);
                     UsersState.Builder usersStateBuilder = UsersState.newBuilder();
 
                     addRequestedWorkloadUsernames(umsUsersStateBuilder, requestedWorkloadUsernames);
                     addGroupsToUsersStateBuilder(usersStateBuilder, groups.values());
                     Set<String> wagNamesForOtherEnvironments =
-                            addWagsToUsersStateBuilder(usersStateBuilder, wags, environmentCrn);
+                            addWagsToUsersStateBuilder(usersStateBuilder, environmentWags, environmentCrn);
 
                     ActorHandler actorHandler = ActorHandler.newBuilder()
                             .withFmsGroupConverter(getFmsGroupConverter())
