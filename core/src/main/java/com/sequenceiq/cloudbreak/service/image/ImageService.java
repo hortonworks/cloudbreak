@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -162,7 +163,7 @@ public class ImageService {
                 .withBaseImageEnabled(baseImageEnabled)
                 .withOperatingSystems(getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform))
                 .withClusterVersion(selectBaseImage ? null : clusterVersion)
-                .withArchitecture(architecture)
+                .withArchitecture(Objects.requireNonNullElse(architecture, Architecture.X86_64))
                 .withAdditionalPredicate(imagePredicate)
                 .build();
         LOGGER.info("Image id is not specified for the stack.");

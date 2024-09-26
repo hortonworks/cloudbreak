@@ -323,6 +323,28 @@ public class ImageServiceTest {
     }
 
     @Test
+    public void testGivenNoImageIdAndNoArchitectureShouldReturnX86Image() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        imageSettingsV4Request.setId(null);
+        when(imageCatalogService.getLatestImageDefaultPreferred(imageFilterCaptor.capture(), eq(false)))
+                .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
+        StatedImage statedImage = underTest.determineImageFromCatalog(
+                WORKSPACE_ID,
+                imageSettingsV4Request,
+                null,
+                PLATFORM,
+                PLATFORM,
+                TestUtil.blueprint(),
+                false,
+                false,
+                TestUtil.user(USER_ID, USER_ID_STRING),
+                image -> true);
+        assertEquals("uuid", statedImage.getImage().getUuid());
+        assertTrue(statedImage.getImage().isPrewarmed());
+        assertEquals(Architecture.X86_64, imageFilterCaptor.getValue().getArchitecture());
+    }
+
+    @Test
     public void testGivenBaseImageIdAndTheOSIsNotSupportedByTheTemplateShouldReturnError() throws Exception {
         imageSettingsV4Request.setOs(null);
         StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
