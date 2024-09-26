@@ -1,5 +1,5 @@
-[cloudera-manager]
-name=Cloudera Manager {{ salt['pillar.get']('cloudera-manager:repo:version') }}
+[cloudera-manager-{{ salt['pillar.get']('cloudera-manager:repo:version') }}-{{ salt['pillar.get']('cloudera-manager:repo:buildNumber') }}]
+name=Cloudera Manager {{ salt['pillar.get']('cloudera-manager:repo:version') }}-{{ salt['pillar.get']('cloudera-manager:repo:buildNumber') }}
 baseurl={{ salt['pillar.get']('cloudera-manager:repo:baseUrl') }}
 {% if salt['pillar.get']('cloudera-manager:repo:gpgKeyUrl') and grains['os_family'] != 'Suse' %}
 gpgcheck=1

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -86,7 +86,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent(imageChangeDto));
 
-        assertEquals(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackDtoService).getById(STACK_ID);
         verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
         verify(parcelService).getRequiredProductsFromImage(stackDto, image);

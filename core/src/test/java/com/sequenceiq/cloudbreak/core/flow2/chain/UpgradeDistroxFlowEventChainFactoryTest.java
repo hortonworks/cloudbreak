@@ -97,7 +97,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
@@ -128,7 +127,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(host1, host2));
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
@@ -147,7 +145,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult = Result.success(new HashMap<>());
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
@@ -169,7 +166,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         Set<InstanceMetaData> instances = new HashSet<>();
         for (int i = 0; i < 500; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -196,7 +192,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 .thenReturn(Optional.of(Image.builder().withUuid(RH_IMAGE).build()));
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);

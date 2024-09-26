@@ -69,9 +69,6 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDistroxFlowEventChainFactory.class);
 
-    @Value("${cb.upgrade.validation.distrox.enabled}")
-    private boolean upgradeValidationEnabled;
-
     @Value("${cb.upgrade.batch.repair.enabled:true}")
     private boolean batchRepairEnabled;
 
@@ -165,14 +162,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     }
 
     private Optional<ClusterUpgradeValidationTriggerEvent> addUpgradeValidationTriggerEvent(DistroXUpgradeTriggerEvent event) {
-        if (upgradeValidationEnabled) {
-            LOGGER.info("Upgrade validation enabled, adding to flowchain");
-            return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
-                    event.isLockComponents(), event.isRollingUpgradeEnabled(), event.isReplaceVms()));
-        } else {
-            LOGGER.info("Upgrade validation disabled");
-            return Optional.empty();
-        }
+        LOGGER.info("Upgrade validation enabled, adding to flowchain");
+        return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
+                event.isLockComponents(), event.isRollingUpgradeEnabled(), event.isReplaceVms()));
     }
 
     private Optional<ClusterUpgradePreparationTriggerEvent> addClusterUpgradePreparationTriggerEvent(DistroXUpgradeTriggerEvent event) {

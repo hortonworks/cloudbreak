@@ -14,7 +14,6 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
@@ -38,9 +37,6 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFactory<ClusterUpgradeTriggerEvent>, ClusterUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDatalakeFlowEventChainFactory.class);
-
-    @Value("${cb.upgrade.validation.sdx.enabled}")
-    private boolean upgradeValidationEnabled;
 
     @Inject
     private LockedComponentService lockedComponentService;
@@ -86,14 +82,10 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     }
 
     private Optional<ClusterUpgradeValidationTriggerEvent> addClusterUpgradePreparationTriggerEvent(ClusterUpgradeTriggerEvent event) {
-        if (upgradeValidationEnabled) {
-            StackDto stack = stackDtoService.getById(event.getResourceId());
-            boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
-            return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageId(), lockComponents,
-                    event.isRollingUpgradeEnabled(), true));
-        } else {
-            return Optional.empty();
-        }
+        StackDto stack = stackDtoService.getById(event.getResourceId());
+        boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
+        return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageId(), lockComponents,
+                event.isRollingUpgradeEnabled(), true));
     }
 
     private Optional<ClusterUpgradeTriggerEvent> addClusterUpgradeTriggerEvent(ClusterUpgradeTriggerEvent event) {

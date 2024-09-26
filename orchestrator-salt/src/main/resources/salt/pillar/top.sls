@@ -63,6 +63,7 @@ base:
   'roles:manager_agent':
     - match: grain
     - cloudera-manager.repo
+{{ include_if_exists('cloudera-manager', 'repo-prepare') }}
     - cloudera-manager.communication
 
   'roles:manager_server':
@@ -70,6 +71,7 @@ base:
 {{ include_if_exists('cloudera-manager', 'license') }}
 {{ include_if_exists('cloudera-manager', 'cme') }}
     - cloudera-manager.repo
+{{ include_if_exists('cloudera-manager', 'repo-prepare') }}
     - cloudera-manager.database
     - cloudera-manager.communication
 {{ include_if_exists('cloudera-manager', 'autotls') }}

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.PREPARE_PARCEL_SETTINGS_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT;
 
 import java.util.Set;
 
@@ -56,7 +56,7 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
             Set<ClouderaManagerProduct> clouderaManagerProducts = getRequiredProductsFromImage(stackDto, request.getImageChangeDto());
             LOGGER.debug("The following parcels will be prepared for upgrade: {}", clouderaManagerProducts);
             clusterApiConnectors.getConnector(stackDto).updateParcelSettings(clouderaManagerProducts);
-            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), stackId, clouderaManagerProducts,
+            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT.name(), stackId, clouderaManagerProducts,
                     request.getImageChangeDto().getImageId());
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel settings preparation failed.", e);

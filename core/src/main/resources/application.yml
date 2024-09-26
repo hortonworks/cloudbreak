@@ -735,10 +735,7 @@ cb:
       sdx.enabled: false
     validation:
       distrox:
-        enabled: true
         maxNumberOfInstancesForRollingUpgrade: 20
-      sdx:
-        enabled: true
       cm:
         interruptableCommands: >
           global-estimate-host-statistics,
