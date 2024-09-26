@@ -47,6 +47,7 @@ unmount_instance_storage() {
       umount "/hadoopfs/fs${counter}" >> $LOG_FILE 2>&1
       log $LOG_FILE removing from fstab /hadoopfs/fs"$counter"
       sed -i -E "/hadoopfs\/fs${counter}/d" /etc/fstab
+      sed -i -E "/hadoopfs\/ephfs${counter}/d" /etc/fstab
       ((counter--))
   done
 }
@@ -90,10 +91,10 @@ mount_all_attached_disks_aws() {
       local hadoop_fs_dir_counter=1
       local hadoop_ephfs_dir_counter=1
       local return_value=0
+      unmount_instance_storage
       not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
       root_disk=$(get_root_disk)
-      unmount_instance_storage
       for volume in $not_mounted_volume_names; do
           uuid=$(get_disk_uuid "/dev/$volume")
           if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
