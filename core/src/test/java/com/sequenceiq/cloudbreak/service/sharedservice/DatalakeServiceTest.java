@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
@@ -35,6 +36,9 @@ public class DatalakeServiceTest {
 
     @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Mock
+    private PaasSdxDescribeService paasSdxDescribeService;
 
     @InjectMocks
     private DatalakeService underTest;
@@ -63,33 +67,33 @@ public class DatalakeServiceTest {
 
     @Test
     public void testAddSharedServiceResponse() {
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(
                 Optional.of(SdxBasicView.builder().withCrn("crn").withName("name").build()));
-        StackV4Response x = new StackV4Response();
-        x.setEnvironmentCrn("envCrn");
-        underTest.addSharedServiceResponse(x);
-        verify(platformAwareSdxConnector, times(1)).getSdxBasicViewByEnvironmentCrn(eq("envCrn"));
-        assertEquals("name", x.getSharedService().getSharedClusterName());
-        assertEquals("name", x.getSharedService().getSdxName());
-        assertEquals("crn", x.getSharedService().getSdxCrn());
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setEnvironmentCrn("envCrn");
+        underTest.addSharedServiceResponse(stackV4Response);
+        verify(paasSdxDescribeService, times(1)).getSdxByEnvironmentCrn(eq("envCrn"));
+        assertEquals("name", stackV4Response.getSharedService().getSharedClusterName());
+        assertEquals("name", stackV4Response.getSharedService().getSdxName());
+        assertEquals("crn", stackV4Response.getSharedService().getSdxCrn());
     }
 
     @Test
     public void testAddSharedServiceResponseWhenDatalakeIsMissing() {
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
-        StackV4Response x = new StackV4Response();
-        x.setEnvironmentCrn("envCrn");
-        underTest.addSharedServiceResponse(x);
-        verify(platformAwareSdxConnector, times(1)).getSdxBasicViewByEnvironmentCrn(eq("envCrn"));
-        assertNull(x.getSharedService().getSharedClusterName());
-        assertNull(x.getSharedService().getSdxCrn());
-        assertNull(x.getSharedService().getSdxName());
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setEnvironmentCrn("envCrn");
+        underTest.addSharedServiceResponse(stackV4Response);
+        verify(paasSdxDescribeService, times(1)).getSdxByEnvironmentCrn(eq("envCrn"));
+        assertNull(stackV4Response.getSharedService().getSharedClusterName());
+        assertNull(stackV4Response.getSharedService().getSdxCrn());
+        assertNull(stackV4Response.getSharedService().getSdxName());
     }
 
     @Test
     public void testAddSharedServiceResponseWhenEnvCrnIsNull() {
-        StackV4Response x = new StackV4Response();
-        underTest.addSharedServiceResponse(x);
+        StackV4Response stackV4Response = new StackV4Response();
+        underTest.addSharedServiceResponse(stackV4Response);
         verify(platformAwareSdxConnector, never()).getSdxBasicViewByEnvironmentCrn(anyString());
     }
 

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @Service
@@ -36,6 +37,10 @@ public class DatalakeService {
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
 
+    // only needed for legacy sharedresponse to skip CDL intentionally, please use PlatformAwareSdxConnector for DL functionality by default
+    @Inject
+    private PaasSdxDescribeService paasSdxDescribeService;
+
     public void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
         if (!Strings.isNullOrEmpty(source.getEnvironmentCrn())) {
             LOGGER.debug("Prepare datalake request by environmentCrn");
@@ -50,12 +55,7 @@ public class DatalakeService {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (cluster.getEnvironmentCrn() != null) {
             LOGGER.debug("Add shared service response by environmentCrn");
-            Optional<SdxBasicView> datalakeStack = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(cluster.getEnvironmentCrn());
-            datalakeStack.ifPresent(datalake -> {
-                sharedServiceResponse.setSharedClusterName(datalake.name());
-                sharedServiceResponse.setSdxCrn(datalake.crn());
-                sharedServiceResponse.setSdxName(datalake.name());
-            });
+            fillSharedResponseOnlyForPaasDL(cluster.getEnvironmentCrn(), sharedServiceResponse);
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
@@ -64,17 +64,19 @@ public class DatalakeService {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (!Strings.isNullOrEmpty(stackResponse.getEnvironmentCrn())) {
             LOGGER.debug("Checking datalake through the environmentCrn.");
-            Optional<SdxBasicView> datalakeStack = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackResponse.getEnvironmentCrn());
-            if (datalakeStack.isPresent()) {
-                SdxBasicView datalake = datalakeStack.get();
-                sharedServiceResponse.setSharedClusterName(datalake.name());
-                sharedServiceResponse.setSdxCrn(datalake.crn());
-                sharedServiceResponse.setSdxName(datalake.name());
-            } else {
-                LOGGER.debug("Unable to find datalake by environment CRN {}", stackResponse.getEnvironmentCrn());
-            }
+            fillSharedResponseOnlyForPaasDL(stackResponse.getEnvironmentCrn(), sharedServiceResponse);
         }
         stackResponse.setSharedService(sharedServiceResponse);
+    }
+
+    private void fillSharedResponseOnlyForPaasDL(String environmentCrn, SharedServiceV4Response sharedServiceResponse) {
+        // skipping CDL intentionally to enhance listing operations like DH list, please use PlatformAwareSdxConnector for DL functionality by default
+        Optional<SdxBasicView> datalakeStack = paasSdxDescribeService.getSdxByEnvironmentCrn(environmentCrn);
+        datalakeStack.ifPresent(datalake -> {
+            sharedServiceResponse.setSharedClusterName(datalake.name());
+            sharedServiceResponse.setSdxCrn(datalake.crn());
+            sharedServiceResponse.setSdxName(datalake.name());
+        });
     }
 
     public SharedServiceConfigsView createSharedServiceConfigsView(String password, StackType stackType, String environmentCrn) {
