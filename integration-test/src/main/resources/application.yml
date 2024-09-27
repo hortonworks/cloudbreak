@@ -107,14 +107,14 @@ integrationtest:
       7.2.17: 7.2.16
       7.2.18: 7.2.17
       7.3.0: 7.2.18
-    currentHARuntimeVersion: 7.2.16
+    currentHARuntimeVersion: 7.2.17
     currentGovHARuntimeVersion: 7.2.18
-    currentRuntimeVersion: 7.2.16
+    currentRuntimeVersion: 7.2.17
     currentGovRuntimeVersion: 7.2.18
     targetRuntimeVersion: 7.2.18
-    distroXUpgradeCurrentVersion: 7.2.16
+    distroXUpgradeCurrentVersion: 7.2.17
     distroXUpgradeCurrentGovVersion: 7.2.18
-    distroXUpgrade3rdPartyCurrentVersion: 7.2.16
+    distroXUpgrade3rdPartyCurrentVersion: 7.2.17
     distroXUpgrade3rdPartyCurrentGovVersion: 7.2.18
     distroXUpgradeTargetVersion: 7.2.18
     distroXUpgrade3rdPartyTargetVersion: 7.2.18
