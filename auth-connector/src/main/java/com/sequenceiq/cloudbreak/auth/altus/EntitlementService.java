@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
@@ -524,9 +525,10 @@ public class EntitlementService {
 
     public boolean isDataHubArmEnabled(String accountId) {
         if (dataHubArmEnabled) {
-            LOGGER.info("Data Hub arm64 is enabled.");
+            LOGGER.info("Data Hub arm64 is enabled by property.");
+            return true;
         }
-        return dataHubArmEnabled;
+        return isEntitledFor(accountId, CDP_AWS_ARM_DATAHUB);
     }
 
     public List<String> getEntitlements(String accountId) {
