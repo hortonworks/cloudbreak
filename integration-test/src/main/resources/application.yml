@@ -106,7 +106,7 @@ integrationtest:
       7.2.16: 7.2.15
       7.2.17: 7.2.16
       7.2.18: 7.2.17
-      7.3.0: 7.2.18
+      7.3.1: 7.2.18
     currentHARuntimeVersion: 7.2.17
     currentGovHARuntimeVersion: 7.2.18
     currentRuntimeVersion: 7.2.17

@@ -437,7 +437,7 @@ public class EnvironmentTestDto
     @Override
     public EnvironmentTestDto refresh() {
         LOGGER.info("Refresh Environment with name: {}", getName());
-        return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()));
+        return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()).withSkipOnFail(false));
     }
 
     @Override

@@ -102,8 +102,7 @@ java_security_set_keymanagerfactory_algorithm:
 
 {% else %}
 
-# Maybe we need to remove /etc/krb5.conf.d/crypto-policies content after java 17 upgrade happens?
-{% if salt['pillar.get']('java:version') == 8 and grains['osrelease'] == '8.10' %}
+{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
 change_krb5_conf_crypto_policies:
   file.managed:
     - name: /etc/krb5.conf.d/crypto-policies
