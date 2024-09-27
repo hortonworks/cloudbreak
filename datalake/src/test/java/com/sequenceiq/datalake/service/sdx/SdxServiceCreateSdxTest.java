@@ -837,20 +837,6 @@ class SdxServiceCreateSdxTest {
     }
 
     @Test
-    void testSdxCreateWithBothImageIdAndOsSet() {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(LIGHT_DUTY, "id", "catalog");
-        withCloudStorage(sdxClusterRequest);
-        StackV4Request stackV4Request = new StackV4Request();
-        sdxClusterRequest.getImage().setOs("os");
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, AWS, null);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)));
-        assertEquals("Image request can not have both image id and os parameters set.", badRequestException.getMessage());
-    }
-
-    @Test
     void testSdxCreateWithDifferingOsValues() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
         sdxClusterRequest.setOs("os1");

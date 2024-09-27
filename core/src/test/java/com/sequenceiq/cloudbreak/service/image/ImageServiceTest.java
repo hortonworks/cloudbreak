@@ -369,6 +369,55 @@ public class ImageServiceTest {
     }
 
     @Test
+    public void testGivenImageIdAndTheOSIsSameShouldReturnImage() throws Exception {
+        imageSettingsV4Request.setOs("centos7");
+        StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
+        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM,
+                image.getImage().getOs(), image.getImageCatalogName()))
+                .thenReturn(Set.of("centos7"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(image);
+        StatedImage statedImage = underTest.determineImageFromCatalog(
+                WORKSPACE_ID,
+                imageSettingsV4Request,
+                Architecture.X86_64,
+                PLATFORM,
+                PLATFORM,
+                TestUtil.blueprint(),
+                true,
+                true,
+                TestUtil.user(USER_ID, USER_ID_STRING),
+                img -> true);
+
+        assertEquals("uuid", statedImage.getImage().getUuid());
+        assertEquals("centos7", statedImage.getImage().getOs());
+    }
+
+    @Test
+    public void testGivenImageIdAndTheOSIsDifferentShouldReturnError() throws Exception {
+        imageSettingsV4Request.setOs("redhat8");
+        StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
+        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM,
+                image.getImage().getOs(), image.getImageCatalogName()))
+                .thenReturn(Set.of("centos7", "redhat8"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(image);
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        Architecture.X86_64,
+                        PLATFORM,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        true,
+                        true,
+                        TestUtil.user(USER_ID, USER_ID_STRING),
+                        img -> true));
+        assertEquals("Image with requested id has different os than requested.", exception.getMessage());
+    }
+
+    @Test
     public void testGivenPrewarmedImageIdAndDisabledBaseImageShouldReturnOk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION));

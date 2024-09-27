@@ -501,7 +501,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         platformAwareSdxConnector.validateIfOtherPlatformsHasSdx(environment.getCrn(), TargetPlatform.PAAS);
-        validateImageRequest(sdxClusterRequest, imageSettingsV4Request);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
                 .getPlatformStringForImageCatalog(environment.getCloudPlatform(), isGovCloudEnvironment(environment));
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, imageCatalogPlatform);
@@ -1415,13 +1414,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateImageRequest(SdxClusterRequest sdxClusterRequest, ImageSettingsV4Request imageSettingsV4Request) {
-        boolean hasImageId = imageSettingsV4Request != null && StringUtils.isNotBlank(imageSettingsV4Request.getId());
-        if (hasImageId && StringUtils.isNotBlank(imageSettingsV4Request.getOs())) {
-            throw new BadRequestException("Image request can not have both image id and os parameters set.");
-        }
-    }
-
     @VisibleForTesting
     void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
             ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response) {
@@ -1429,14 +1421,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
 
         if (imageV4Response != null) {
-            if (StringUtils.isNotBlank(imageV4Response.getVersion()) && StringUtils.isNotBlank(clusterRequest.getRuntime())
-                    && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
-                validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
-                        "decides runtime version.");
-            }
-            if (Architecture.fromStringWithFallback(imageV4Response.getArchitecture()) != Architecture.X86_64) {
-                validationBuilder.error("SDX cluster request image must have x86_64 architecture.");
-            }
+            validateImage(clusterRequest, imageSettingsV4Request, imageV4Response, validationBuilder);
         } else if (isImageSpecified(imageSettingsV4Request) && StringUtils.isBlank(clusterRequest.getRuntime())) {
             if (cloudPlatform.equals(MOCK)) {
                 clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
@@ -1449,6 +1434,22 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
+    private void validateImage(SdxClusterRequest clusterRequest, ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response,
+            ValidationResultBuilder validationBuilder) {
+        if (StringUtils.isNotBlank(imageV4Response.getVersion()) && StringUtils.isNotBlank(clusterRequest.getRuntime())
+                && !Objects.equals(clusterRequest.getRuntime(), imageV4Response.getVersion())) {
+            validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
+                    "decides runtime version.");
+        }
+        if (Architecture.fromStringWithFallback(imageV4Response.getArchitecture()) != Architecture.X86_64) {
+            validationBuilder.error("SDX cluster request image must have x86_64 architecture.");
+        }
+        if (imageSettingsV4Request != null && StringUtils.isNotBlank(imageSettingsV4Request.getId())
+                && StringUtils.isNotBlank(imageSettingsV4Request.getOs()) && !imageSettingsV4Request.getOs().equalsIgnoreCase(imageV4Response.getOs())) {
+            validationBuilder.error("Image with requested id has different os than requested.");
         }
     }
 

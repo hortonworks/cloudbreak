@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -124,7 +125,25 @@ public class SdxServiceValidateRuntimeAndImageTest {
         clusterRequest.setImage(image);
         imageV4Response.setArchitecture(Architecture.ARM64.getName());
 
-        assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
+        assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, image, imageV4Response))
                 .hasMessage("SDX cluster request image must have x86_64 architecture.");
+    }
+
+    @Test
+    void imageIdAndOsSetCorrectly() {
+        imageSettingsV4Request.setOs("os");
+        imageV4Response.setOs("os");
+
+        assertThatCode(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void imageIdAndOsSetIncorrectly() {
+        imageSettingsV4Request.setOs("os");
+        imageV4Response.setOs("otheros");
+
+        assertThatThrownBy(() -> underTest.validateRuntimeAndImage(clusterRequest, environment, imageSettingsV4Request, imageV4Response))
+                .hasMessage("Image with requested id has different os than requested.");
     }
 }

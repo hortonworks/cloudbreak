@@ -150,7 +150,7 @@ public class ImageService {
                 imageSettings.setCatalog(CDP_DEFAULT_CATALOG_NAME);
             }
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
-            validateSpecifiedImage(workspaceId, user, image, clusterVersion, platform, baseImageEnabled, architecture);
+            validateSpecifiedImage(workspaceId, user, imageSettings, image, clusterVersion, platform, baseImageEnabled, architecture);
             return image;
         } else if (useBaseImage && !baseImageEnabled) {
             throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
@@ -170,10 +170,10 @@ public class ImageService {
         return imageCatalogService.getLatestImageDefaultPreferred(imageFilter, selectBaseImage);
     }
 
-    private void validateSpecifiedImage(Long workspaceId, User user, StatedImage image, String clusterVersion, ImageCatalogPlatform platform, boolean baseImageEnabled,
-            Architecture architecture) throws CloudbreakImageCatalogException {
+    private void validateSpecifiedImage(Long workspaceId, User user, ImageSettingsV4Request imageSettings, StatedImage image, String clusterVersion,
+            ImageCatalogPlatform platform, boolean baseImageEnabled, Architecture architecture) throws CloudbreakImageCatalogException {
         validateIfBaseImagePermitted(image, baseImageEnabled);
-        validateBaseImageOs(workspaceId, image, clusterVersion, platform);
+        validateImageOs(workspaceId, imageSettings, image, clusterVersion, platform);
         validateArchitecture(user, image, architecture);
     }
 
@@ -184,9 +184,13 @@ public class ImageService {
         }
     }
 
-    private void validateBaseImageOs(Long workspaceId, StatedImage statedImage, String clusterVersion, ImageCatalogPlatform platform)
-            throws CloudbreakImageCatalogException {
+    private void validateImageOs(Long workspaceId, ImageSettingsV4Request imageSettings, StatedImage statedImage, String clusterVersion,
+            ImageCatalogPlatform platform) throws CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = statedImage.getImage();
+        if (imageSettings != null && StringUtils.isNotBlank(imageSettings.getId())
+                && StringUtils.isNotBlank(imageSettings.getOs()) && !imageSettings.getOs().equalsIgnoreCase(image.getOs())) {
+            throw new CloudbreakImageCatalogException("Image with requested id has different os than requested.");
+        }
         if (!image.isPrewarmed()) {
             Set<String> operatingSystems = getSupportedOperatingSystems(workspaceId, statedImage, clusterVersion, platform);
             if (!operatingSystems.contains(image.getOs())) {
