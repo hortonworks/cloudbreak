@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
@@ -64,6 +65,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         List<String> expectedVolumeIds = new ArrayList<>();
 
         SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
+                .withClusterShape(SdxClusterShape.ENTERPRISE)
                 .withCloudStorage()
                 .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
         setupSourceImage(testContext, sdxTestDto);
@@ -125,7 +127,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
 
         testContext
                 .given(SdxTestDto.class)
-                    .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                    .withClusterShape(SdxClusterShape.ENTERPRISE)
                     .withCloudStorage()
                     .withRuntimeVersion(commonClusterManagerProperties.getUpgrade()
                             .getCurrentHARuntimeVersion(testContext.getCloudProvider().getGovCloud()))
@@ -133,7 +135,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    List<String> instances = sdxUtil.getInstanceIds(testDto, client, GATEWAY.getName());
                     instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
@@ -143,7 +145,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, GATEWAY.getName());
                     instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
                     actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
                     return testDto;

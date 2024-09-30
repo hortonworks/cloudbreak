@@ -1,18 +1,11 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -26,13 +19,9 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
@@ -122,20 +111,10 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, null);
         createDatalake(testContext, currentUpgradeRuntimeVersion);
         encryptedTestUtil.assertDatalake(testContext, null);
-        createDatahubs(testContext, currentUpgradeRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
+        createDataHubs(testContext, currentUpgradeRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
         upgradeAndAssertUpgrade(testContext, targetRuntimeVersion, targetRuntimeVersion3rdParty, firstDhName, secondDhName);
-    }
-
-    protected String getUuid(TestContext testContext, String prodCatalogName, String currentRuntimeVersion3rdParty) {
-        testContext
-                .given(ImageCatalogTestDto.class).withName(prodCatalogName)
-                .when(imageCatalogTest.getV4WithAdvertisedImages());
-        ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        return dto.getResponse().getImages().getCdhImages().stream()
-                .filter(img -> img.getVersion().equals(currentRuntimeVersion3rdParty) && img.getImageSetsByProvider().keySet().stream().iterator().next()
-                        .equals(testContext.commonCloudProperties().getCloudProvider().toLowerCase(Locale.ROOT))).iterator().next().getUuid();
     }
 
     private void upgradeAndAssertUpgrade(TestContext testContext, String targetRuntimeVersion, String targetRuntimeVersion3rdParty,
@@ -158,9 +137,8 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private void createDatahubs(TestContext testContext, String currentUpgradeRuntimeVersion, String currentRuntimeVersion3rdParty,
+    private void createDataHubs(TestContext testContext, String currentUpgradeRuntimeVersion, String currentRuntimeVersion3rdParty,
             String firstDhName, String secondDhName) {
-        AtomicReference<String> uuid = new AtomicReference<>();
         String thirdPartyCatalogName = resourcePropertyProvider().getName();
         String imageName = resourcePropertyProvider().getName();
 
@@ -179,10 +157,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withName(thirdPartyCatalogName)
             .when(imageCatalogTestClient.createIfNotExistV4());
 
-        uuid.set(getUuid(testContext, thirdPartyCatalogName, currentRuntimeVersion3rdParty));
         testContext
-                .given(imageName, DistroXImageTestDto.class).withImageCatalog(thirdPartyCatalogName)
-                .withImageId(uuid.get())
+                .given(imageName, DistroXImageTestDto.class)
+                .withImageCatalog(thirdPartyCatalogName)
                 .given(secondDhName, DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentRuntimeVersion3rdParty))
                 .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
@@ -190,7 +167,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .when(distroXTestClient.create(), key(secondDhName))
                 .await(STACK_AVAILABLE, key(secondDhName))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> checkImageId(testDto, uuid.get()), key(secondDhName))
+                .then((tc, testDto, client) -> checkImageCatalog(testDto, thirdPartyCatalogName), key(secondDhName))
                 .given(secondDhName, DistroXTestDto.class)
                 .await(STACK_AVAILABLE, key(secondDhName))
                 .awaitForHealthyInstances()
@@ -217,27 +194,13 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         return sdxDatabaseRequest;
     }
 
-    private DistroXTestDto checkImageId(DistroXTestDto testDto, String expectedImageId) {
-        String currentImageId = testDto.getResponse().getImage().getId();
-        if (!currentImageId.equals(expectedImageId)) {
-            throw new TestFailException("The selected image ID is: " + currentImageId + " instead of: "
-                    + expectedImageId);
+    private DistroXTestDto checkImageCatalog(DistroXTestDto testDto, String expectedImageCatalog) {
+        String currentImageCatalog = testDto.getResponse().getImage().getCatalogName();
+        if (!currentImageCatalog.equals(expectedImageCatalog)) {
+            throw new TestFailException("The selected image catalog is: " + currentImageCatalog + " instead of: "
+                    + expectedImageCatalog);
         }
         return testDto;
     }
 
-    private EnvironmentTestDto verifyEnvironmentResponseDiskEncryptionKey(TestContext testContext, EnvironmentTestDto testDto,
-            EnvironmentClient environmentClient) {
-        DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
-        testContext.getCloudProvider().verifyDiskEncryptionKey(environment, testDto.getRequest().getName());
-        return testDto;
-    }
-
-    private FreeIpaTestDto verifyFreeIpaVolumeEncryptionKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
-        List<String> instanceIds = freeIpaInstanceUtil.getInstanceIds(testDto, freeIpaClient, MASTER.getName());
-        List<String> volumeKmsKeyIds = new ArrayList<>(testContext.getCloudProvider().getCloudFunctionality()
-                .listVolumeEncryptionKeyIds(testDto.getName(), resourceGroupForTest, instanceIds));
-        testContext.getCloudProvider().verifyVolumeEncryptionKey(volumeKmsKeyIds, testContext.given(EnvironmentTestDto.class).getRequest().getName());
-        return testDto;
-    }
 }
