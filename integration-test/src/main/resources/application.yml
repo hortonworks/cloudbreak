@@ -202,7 +202,7 @@ integrationtest:
     diskEncryption:
       environmentKey:
       datahubKey:
-    embeddedDbUpgradeSourceVersion: 10
+    embeddedDbUpgradeSourceVersion: 11
 
   # azure parameters
   azure:
