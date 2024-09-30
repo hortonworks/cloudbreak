@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -22,10 +23,11 @@ import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class ClusterServicesRestartHandler implements EventHandler<ClusterServicesRestartRequest> {
+public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<ClusterServicesRestartRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterServicesRestartHandler.class);
 
@@ -53,7 +55,12 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
     }
 
     @Override
-    public void accept(Event<ClusterServicesRestartRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterServicesRestartRequest> event) {
+        return new ClusterServicesRestartResult(e.getMessage(), e, event.getData());
+    }
+
+    @Override
+    protected Selectable doAccept(HandlerEvent<ClusterServicesRestartRequest> event) {
         ClusterServicesRestartRequest request = event.getData();
         ClusterServicesRestartResult result;
         try {
@@ -66,13 +73,16 @@ public class ClusterServicesRestartHandler implements EventHandler<ClusterServic
                 clusterServicesRestartService.refreshClusterOnRestart(stack, sdxBasicView.get(), blueprintProcessor);
             } else {
                 LOGGER.info("Restarting services");
-                apiConnectors.getConnector(stack).clusterModificationService().restartClusterServices();
+                if (request.isRollingRestart()) {
+                    apiConnectors.getConnector(stack).clusterModificationService().rollingRestartServices();
+                } else {
+                    apiConnectors.getConnector(stack).clusterModificationService().restartClusterServices();
+                }
             }
-            result = new ClusterServicesRestartResult(request);
+            return new ClusterServicesRestartResult(request);
         } catch (Exception e) {
-            result = new ClusterServicesRestartResult(e.getMessage(), e, request);
+            return new ClusterServicesRestartResult(e.getMessage(), e, request);
         }
-        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
     private CmTemplateProcessor getCmTemplateProcessor(Cluster cluster) {

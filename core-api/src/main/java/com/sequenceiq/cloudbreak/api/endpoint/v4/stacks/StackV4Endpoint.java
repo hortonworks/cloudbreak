@@ -98,6 +98,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatal
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -893,4 +894,26 @@ public interface StackV4Endpoint {
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn
     );
+
+    @POST
+    @Path("internal/crn/{crn}/set_default_java_version")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set default java version on the cluster",
+            operationId = "setDefaultJavaVersionByCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier setDefaultJavaVersionByCrnInternal(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @POST
+    @Path("internal/crn/{crn}/set_default_java_version/validate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Validate default java version is updatable on the cluster to the requested version",
+            operationId = "validateDefaultJavaVersionUpdateByCrnInternal",
+            responses = @ApiResponse(responseCode = "204", description = "successful operation", useReturnTypeSchema = true))
+    void validateDefaultJavaVersionUpdateByCrnInternal(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @NotNull @Valid SetDefaultJavaVersionRequest request);
 }

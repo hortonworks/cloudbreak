@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackInstanceMetadataUpdateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
@@ -115,4 +116,19 @@ public class CloudbreakStackService {
         }
     }
 
+    public void setDefaultJavaVersion(SdxCluster sdxCluster, String javaVersion, boolean restartServices) {
+        try {
+            SetDefaultJavaVersionRequest setDefaultJavaVersionRequest = new SetDefaultJavaVersionRequest();
+            setDefaultJavaVersionRequest.setDefaultJavaVersion(javaVersion);
+            setDefaultJavaVersionRequest.setRestartServices(restartServices);
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.setDefaultJavaVersionByCrnInternal(WORKSPACE_ID, sdxCluster.getCrn(), setDefaultJavaVersionRequest));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String message = String.format("Could not set default java version in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
+            LOGGER.warn(message, e);
+            throw new CloudbreakApiException(message, e);
+        }
+    }
 }

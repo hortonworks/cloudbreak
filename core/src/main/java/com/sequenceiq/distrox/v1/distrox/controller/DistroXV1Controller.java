@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
@@ -861,5 +862,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
     public FlowIdentifier updateRootVolumeByDatahubCrn(@ResourceCrn @TenantAwareParam String crn, DiskUpdateRequest rootDiskVolumesRequest) throws Exception {
         return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = UPGRADE_DATAHUB)
+    public FlowIdentifier setDefaultJavaVersionByName(@ResourceName String name, @RequestObject SetDefaultJavaVersionRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
+        return stackOperationService.triggerSetDefaultJavaVersion(nameOrCrn, accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = UPGRADE_DATAHUB)
+    public FlowIdentifier setDefaultJavaVersionByCrn(@TenantAwareParam @ResourceCrn String crn, @RequestObject SetDefaultJavaVersionRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
+        return stackOperationService.triggerSetDefaultJavaVersion(nameOrCrn, accountId, request);
     }
 }

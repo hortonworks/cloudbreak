@@ -654,17 +654,17 @@ public class AwsPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Architecture architecture = getArchitecture(filters);
-        boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
-        return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, getEnabledInstancePredicate(false, architecture), false);
+        boolean armInstanceEnabled = entitlementService.isArmInstanceEnabled(cloudCredential.getAccountId());
+        return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, getEnabledInstancePredicate(false, architecture), false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Architecture architecture = getArchitecture(filters);
-        boolean dataHubArmEnabled = entitlementService.isDataHubArmEnabled(cloudCredential.getAccountId());
+        boolean armInstanceEnabled = entitlementService.isArmInstanceEnabled(cloudCredential.getAccountId());
         Predicate<VmType> instanceTypeFilter = getEnabledInstancePredicate(restrictInstanceTypes, architecture);
-        return getCloudVmTypes(cloudCredential, dataHubArmEnabled, region, filters, instanceTypeFilter, true);
+        return getCloudVmTypes(cloudCredential, armInstanceEnabled, region, filters, instanceTypeFilter, true);
     }
 
     private Architecture getArchitecture(Map<String, String> filters) {
@@ -721,7 +721,7 @@ public class AwsPlatformResources implements PlatformResources {
             Set<VmType> awsInstances = new HashSet<>();
             for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
                 String[] processorArchitectures = dataHubArmEnabled && Architecture.ARM64.equals(architecture) ?
-                        new String[] {"arm64"} : new String[] {"x86_64"};
+                        new String[]{"arm64"} : new String[]{"x86_64"};
                 DescribeInstanceTypesRequest request = DescribeInstanceTypesRequest.builder()
                         .filters(Filter.builder()
                                 .name("processor-info.supported-architecture")

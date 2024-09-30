@@ -21,6 +21,6 @@ public class JavaDefaultVersionCalculator {
                     .get()
                     .getVersion();
         }
-        return javaVersion.intValue();
+        return javaVersion;
     }
 }

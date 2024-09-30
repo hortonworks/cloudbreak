@@ -306,7 +306,7 @@ public class ImageServiceTest {
     public void testGivenImageIdAndDifferentArchitectureShouldReturnError() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION, "arm64"));
-        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(true);
+        when(entitlementService.isArmInstanceEnabled(any())).thenReturn(true);
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
@@ -80,6 +81,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.COD_USE_GRAVITON;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
@@ -522,11 +524,20 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, OBSERVABILITY_DMP);
     }
 
+    public boolean isArmInstanceEnabled(String accountId) {
+        return isDataHubArmEnabled(accountId) || isCODUseGraviton(accountId);
+    }
+
     public boolean isDataHubArmEnabled(String accountId) {
         if (dataHubArmEnabled) {
-            LOGGER.info("Data Hub arm64 is enabled.");
+            LOGGER.info("Data Hub arm64 is enabled by property.");
+            return true;
         }
-        return dataHubArmEnabled;
+        return isEntitledFor(accountId, CDP_AWS_ARM_DATAHUB);
+    }
+
+    public boolean isCODUseGraviton(String accountId) {
+        return isEntitlementRegistered(accountId, COD_USE_GRAVITON);
     }
 
     public List<String> getEntitlements(String accountId) {
