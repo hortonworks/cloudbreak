@@ -14,6 +14,7 @@ import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiHostRef;
 import com.sequenceiq.mock.swagger.model.ApiHostRefList;
 import com.sequenceiq.mock.swagger.model.ApiRestartClusterArgs;
+import com.sequenceiq.mock.swagger.model.ApiRollingRestartClusterArgs;
 import com.sequenceiq.mock.swagger.v31.api.ClustersResourceApi;
 
 @Controller
@@ -54,7 +55,12 @@ public class ClusterResourceV31Controller implements ClustersResourceApi {
 
     @Override
     public ResponseEntity<ApiCommand> restartCommand(String mockUuid, String clusterName, @Valid ApiRestartClusterArgs body) {
-        return clusterResourceOperation.restartCommand(mockUuid, clusterName, body);
+        return clusterResourceOperation.restartCommand(mockUuid, clusterName);
+    }
+
+    @Override
+    public ResponseEntity<ApiCommand> rollingRestart(String mockUuid, String clusterName, ApiRollingRestartClusterArgs body) {
+        return clusterResourceOperation.restartCommand(mockUuid, clusterName);
     }
 
     @Override

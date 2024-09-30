@@ -37,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSecretInterna
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStartInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStopInstancesAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSetDefaultJavaVersionAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
@@ -192,6 +193,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> addDisks(int size, String volumeType, String instanceGroup, long numDisks) {
         return new DistroXDiskAddAction(size, volumeType, instanceGroup, numDisks);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> setDefaultJavaVersion(String javaVersion, boolean restartServices) {
+        return new DistroXSetDefaultJavaVersionAction(javaVersion, restartServices);
     }
 
 }

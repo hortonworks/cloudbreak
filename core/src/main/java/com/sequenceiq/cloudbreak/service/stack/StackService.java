@@ -1143,6 +1143,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         stackRepository.updateStackVersion(stackId, stackVersion);
     }
 
+    public void updateJavaVersion(Long stackId, String javaVersion) {
+        stackRepository.updateJavaVersion(stackId, javaVersion);
+    }
+
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
         LOGGER.info("Updating DB engine version for [{}] to [{}]", stackId, databaseVersion);
         Optional<Long> databaseId = stackRepository.findDatabaseIdByStackId(stackId);

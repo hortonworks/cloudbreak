@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -53,7 +53,7 @@ public class ClusterServicesRestartService {
         // Re-configuring DH using the Remote Data Context of Data lake.
         boolean clusterDataHub = stack.getType().equals(StackType.WORKLOAD);
         boolean dlIsRebuild = isDatalakeCreatedAfterDataHub(sdxBasicView, stack);
-        boolean resizeEntitlementEnabled = entitlementService.isDatalakeLightToMediumMigrationEnabled(ThreadBasedUserCrnProvider.getAccountId());
+        boolean resizeEntitlementEnabled = entitlementService.isDatalakeLightToMediumMigrationEnabled(Crn.fromString(stack.getResourceCrn()).getAccountId());
         LOGGER.info("Is cluster DH: {}, Is DL rebuild: {},  Is resize entitlement Enabled: {}",
                 clusterDataHub,
                 dlIsRebuild,

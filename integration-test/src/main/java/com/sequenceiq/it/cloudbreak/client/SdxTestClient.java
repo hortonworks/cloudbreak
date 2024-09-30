@@ -47,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSecretInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxScaleAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxSetDefaultJavaVersionAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
@@ -289,5 +290,9 @@ public class SdxTestClient {
     public Action<SdxInternalTestDto, SdxClient> addDisks(Long size, Long numOfDisks, String volumeType, String instanceGroup,
             CloudVolumeUsageType cloudVolumeUsageType) {
         return new SdxAddDisksAction(size, numOfDisks, volumeType, instanceGroup, cloudVolumeUsageType);
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> setDefaultJavaVersion(String defaultJavaVersion, boolean restartServices) {
+        return new SdxSetDefaultJavaVersionAction(defaultJavaVersion, restartServices);
     }
 }

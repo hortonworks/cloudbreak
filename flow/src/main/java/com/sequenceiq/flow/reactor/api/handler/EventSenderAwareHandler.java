@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 /**
- * @deprecated Please use {@link ExceptionCatcherEventSenderAwareHandler}
+ * @deprecated Please use {@link ExceptionCatcherEventHandler}
  */
 
 @Deprecated

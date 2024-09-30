@@ -545,6 +545,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("UPDATE Stack s SET s.stackVersion = :stackVersion WHERE s.id = :stackId")
     void updateStackVersion(@Param("stackId") Long stackId, @Param("stackVersion") String stackVersion);
 
+    @Modifying
+    @Query("UPDATE Stack s SET s.javaVersion = :javaVersion WHERE s.id = :stackId")
+    void updateJavaVersion(@Param("stackId") Long stackId, @Param("javaVersion") String javaVersion);
+
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :stackId")
     Optional<String> findEnvironmentCrnByStackId(@Param("stackId") Long stackId);
 

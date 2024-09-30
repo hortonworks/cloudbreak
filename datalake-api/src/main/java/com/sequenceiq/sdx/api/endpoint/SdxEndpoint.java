@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -35,6 +36,7 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -515,5 +517,23 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxMigrateDatabaseV1Response migrateDatabaseToSslByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 
+    @POST
+    @Path("name/{name}/set_default_java_version")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set default java version on the DataLake by its name",
+            operationId = "setDataLakeDefaultJavaVersionByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier setDefaultJavaVersionByName(@PathParam("name") String name, @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @POST
+    @Path("crn/{crn}/set_default_java_version")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set default java version on the DataLake by its CRN",
+            operationId = "setDataLakeDefaultJavaVersionByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
+            @NotNull @Valid SetDefaultJavaVersionRequest request);
 }
 

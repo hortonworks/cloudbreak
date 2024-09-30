@@ -199,7 +199,7 @@ public class ImageService {
 
     private void validateArchitecture(User user, StatedImage image, Architecture requestedArchitecture) throws CloudbreakImageCatalogException {
         Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
-        if (imageArchitecture == Architecture.ARM64 && !entitlementService.isDataHubArmEnabled(Crn.safeFromString(user.getUserCrn()).getAccountId())) {
+        if (imageArchitecture == Architecture.ARM64 && !entitlementService.isArmInstanceEnabled(Crn.safeFromString(user.getUserCrn()).getAccountId())) {
             throw new CloudbreakImageCatalogException(String.format("The selected image's architecture (%s) is not enabled in your account",
                     Architecture.ARM64.getName()));
         }

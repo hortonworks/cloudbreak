@@ -89,6 +89,9 @@ sdx:
     saltupdate:
       sleeptime-sec: 10
       duration-min: 120
+    set-default-java-version:
+        sleeptime-sec: 10
+        duration-min: 10
   gateway:
     topology:
       name: cdp-proxy

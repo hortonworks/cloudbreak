@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
@@ -757,7 +758,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = ADD_VOLUMES_BY_STACK_CRN, operationId = "addVolumesByStackCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier addVolumesByStackCrn(
-            @ValidCrn(resource = { CrnResourceDescriptor.VM_DATALAKE, DATAHUB }) @PathParam("crn") String crn,
+            @ValidCrn(resource = {CrnResourceDescriptor.VM_DATALAKE, DATAHUB}) @PathParam("crn") String crn,
             @Valid StackAddVolumesRequest addVolumesRequest);
 
     @PUT
@@ -793,4 +794,23 @@ public interface DistroXV1Endpoint {
     FlowIdentifier updateRootVolumeByDatahubCrn(
             @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @Valid DiskUpdateRequest rootDiskVolumesRequest) throws Exception;
+
+    @POST
+    @Path("name/{name}/set_default_java_version")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set default java version on the DataHub by its name",
+            operationId = "setDataHubDefaultJavaVersionByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier setDefaultJavaVersionByName(@PathParam("name") String name, @NotNull @Valid SetDefaultJavaVersionRequest request);
+
+    @POST
+    @Path("crn/{crn}/set_default_java_version")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Set default java version on the DataHub by its CRN",
+            operationId = "setDataHubDefaultJavaVersionByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier setDefaultJavaVersionByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
+            @NotNull @Valid SetDefaultJavaVersionRequest request);
 }

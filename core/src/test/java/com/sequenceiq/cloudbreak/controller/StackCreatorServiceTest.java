@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -120,6 +122,8 @@ public class StackCreatorServiceTest {
     private static final String ACCOUNT_ID = "accountId";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:userName";
+
+    private static final String INTERNAL_USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:__internal__actor__";
 
     @Mock
     private StackDecorator stackDecorator;
@@ -241,14 +245,8 @@ public class StackCreatorServiceTest {
     @Test
     public void shouldThrowBadRequestWhenStackNameAlreadyExists() {
         User user = new User();
-        Workspace workspace = new Workspace();
-        workspace.setId(WORKSPACE_ID);
-        StackV4Request stackRequest = new StackV4Request();
-        stackRequest.setName(STACK_NAME);
-        InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
-        instanceGroupV4Request.setName(INSTANCE_GROUP);
-        instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
-        stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
 
         lenient().doNothing().when(nodeCountLimitValidator).validateProvision(any(), any());
@@ -263,21 +261,12 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    void shouldThrowBadRequestWhenNotEntitledToArm64() {
+    void testArm64ShouldNotBeUsedOnDataLake() {
         User user = new User();
-        Workspace workspace = new Workspace();
-        workspace.setId(WORKSPACE_ID);
-        StackV4Request stackRequest = new StackV4Request();
-        stackRequest.setName(STACK_NAME);
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
         stackRequest.setArchitecture(Architecture.ARM64);
-        InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
-        instanceGroupV4Request.setName(INSTANCE_GROUP);
-        instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
-        stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
-        when(entitlementService.isDataHubArmEnabled(any())).thenReturn(false);
-
-        lenient().doNothing().when(nodeCountLimitValidator).validateProvision(any(), any());
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class, () ->
@@ -286,6 +275,113 @@ public class StackCreatorServiceTest {
 
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+        verify(entitlementService, never()).isCODUseGraviton(any());
+        verify(entitlementService, never()).isArmInstanceEnabled(any());
+        verify(entitlementService, never()).isDataHubArmEnabled(any());
+    }
+
+    @Test
+    void testArm64ShouldNotBeUsedOnDataHubWhenCODArmEntitlementIsEnabledButDataHubArmIsNot() {
+        User user = new User();
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setArchitecture(Architecture.ARM64);
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () ->
+                        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)),
+                "The selected architecture (arm64) is not enabled in your account");
+
+        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
+        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+        verify(entitlementService, never()).isCODUseGraviton(any());
+        verify(entitlementService, never()).isArmInstanceEnabled(any());
+        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
+    }
+
+    @Test
+    void testArm64ShouldNotBeUsedOnCODbWhenCODArmEntitlementIsNotEnabled() {
+        User user = new User();
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setTags(isCodClusterTag(true));
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () ->
+                        ThreadBasedUserCrnProvider.doAsInternalActor(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)),
+                "The selected architecture (arm64) is not enabled in your account");
+
+        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
+        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+        verify(entitlementService, times(1)).isCODUseGraviton(any());
+        verify(entitlementService, never()).isArmInstanceEnabled(any());
+        verify(entitlementService, never()).isDataHubArmEnabled(any());
+    }
+
+    @Test
+    void testArm64ShouldNotBeUsedOnCODbWhenCODArmEntitlementIsEnabledButUserIsNotInternal() {
+        User user = new User();
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setTags(isCodClusterTag(true));
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () ->
+                        ThreadBasedUserCrnProvider.doAsInternalActor(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)),
+                "The selected architecture (arm64) is not enabled in your account");
+
+        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
+        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+        verify(entitlementService, never()).isCODUseGraviton(any());
+        verify(entitlementService, never()).isArmInstanceEnabled(any());
+        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
+    }
+
+    @Test
+    void testArm64ShouldNotBeUsedOnCODbWhenDataHubArmEntitlementIsNotEnabledAndUserIsInternal() {
+        User user = new User();
+        Workspace workspace = getWorkspace();
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setArchitecture(Architecture.ARM64);
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () ->
+                        ThreadBasedUserCrnProvider.doAsInternalActor(INTERNAL_USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, true)),
+                "The selected architecture (arm64) is not enabled in your account");
+
+        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
+        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
+        verify(entitlementService, never()).isCODUseGraviton(any());
+        verify(entitlementService, never()).isArmInstanceEnabled(any());
+        verify(entitlementService, times(1)).isDataHubArmEnabled(any());
+    }
+
+    private TagsV4Request isCodClusterTag(boolean codRequest) {
+        TagsV4Request tagsV4Request = new TagsV4Request();
+        tagsV4Request.setApplication(Map.of("is_cod_cluster", String.valueOf(codRequest)));
+        return tagsV4Request;
+    }
+
+    private StackV4Request getStackV4Request() {
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setName(STACK_NAME);
+        InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
+        instanceGroupV4Request.setName(INSTANCE_GROUP);
+        instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
+        stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
+        return stackRequest;
+    }
+
+    private Workspace getWorkspace() {
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        return workspace;
     }
 
     @Test
@@ -572,7 +668,7 @@ public class StackCreatorServiceTest {
     }
 
     static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 // testCaseName subnetId availabilityZone
                 {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
                 {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},
