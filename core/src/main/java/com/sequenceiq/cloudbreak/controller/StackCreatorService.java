@@ -36,12 +36,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -209,7 +211,7 @@ public class StackCreatorService {
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
-        validateArchitecture(stackRequest);
+        validateArchitecture(stackRequest, distroxRequest);
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
@@ -327,12 +329,35 @@ public class StackCreatorService {
         stack.setJavaVersion(javaVersion);
     }
 
-    private void validateArchitecture(StackV4Request stackRequest) {
-        if (stackRequest.getArchitecture() == Architecture.ARM64
-                && !entitlementService.isDataHubArmEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
-                    Architecture.ARM64.getName()));
+    private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest) {
+        if (stackRequest.getArchitecture() == Architecture.ARM64) {
+            if (!distroxRequest) {
+                throw new BadRequestException(String.format("Data Lake clusters are not supported on (%s) architecture.",
+                        Architecture.ARM64.getName()));
+            }
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            if (isCodRequest(stackRequest)) {
+                if (!entitlementService.isCODUseGraviton(accountId)) {
+                    throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
+                            Architecture.ARM64.getName()));
+                }
+            } else if (!entitlementService.isDataHubArmEnabled(accountId)) {
+                throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
+                        Architecture.ARM64.getName()));
+
+            }
         }
+    }
+
+    private boolean isCodRequest(StackV4Request stackRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
+            return Optional.ofNullable(stackRequest.getTags())
+                    .map(TagsV4Request::getApplication)
+                    .map(map -> Boolean.parseBoolean(map.get("is_cod_cluster")))
+                    .orElse(Boolean.FALSE);
+        }
+        return false;
     }
 
     private String getCrnForCreation(Optional<String> externalCrn) {
