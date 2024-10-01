@@ -6,6 +6,8 @@
 {% endif %}
 {% set os = salt['grains.get']('os') %}
 {% set cpuarch = salt['grains.get']('cpuarch') %}
+{% set cdp_logging_agent_version = '1.3.3' %}
+{% set cdp_logging_agent_build_number = 'b18' %}
 {% if os == "RedHat" %}
     {% if cpuarch != 'aarch64' %}
         {% set rpm_os = 'redhat8' %}
@@ -13,10 +15,9 @@
         {% set rpm_os = 'redhat8arm64' %}
     {% endif %}
 {% elif os == "CentOS" %}
-    {% set rpm_os = 'centos7' %}
+    {% set rpm_os = 'redhat7' %}
 {% endif %}
-{% set cdp_logging_agent_build_version = '1.3.2_b1' %}
-{% set cdp_logging_agent_rpm = 'https://archive.cloudera.com/cdp-infra-tools/latest/' + rpm_os + '/yum/cdp_logging_agent-' + cdp_logging_agent_build_version + '.rpm' %}
+{% set cdp_logging_agent_rpm = 'https://archive.cloudera.com/cdp-infra-tools/' + cdp_logging_agent_version + '/' + rpm_os + '/yum/cdp_logging_agent-' + cdp_logging_agent_version + '_' +  cdp_logging_agent_build_number + '.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}
