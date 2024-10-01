@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
 import com.sequenceiq.cloudbreak.repository.StackEncryptionRepository;
 
@@ -24,7 +26,11 @@ public class StackEncryptionService {
 
     public StackEncryption getStackEncryption(Long stackId) {
         return stackEncryptionRepository.findStackEncryptionByStackId(stackId).orElseThrow(() ->
-                new CloudbreakServiceException("Stack Encryption does not exist"));
+                new NotFoundException("Stack Encryption does not exist"));
+    }
+
+    public Optional<StackEncryption> findByStackId(Long stackId) {
+        return stackEncryptionRepository.findStackEncryptionByStackId(stackId);
     }
 }
 

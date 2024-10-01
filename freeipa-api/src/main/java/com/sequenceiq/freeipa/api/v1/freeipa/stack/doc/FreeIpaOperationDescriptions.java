@@ -52,6 +52,8 @@ public final class FreeIpaOperationDescriptions {
     public static final String ROTATE_SECRETS_BY_CRN = "Rotate secrets by environment CRN.";
     public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";
 
+    public static final String GET_ENCRYPTION_KEYS = "Get encryption keys of the FreeIPA";
+
     private FreeIpaOperationDescriptions() {
     }
 }

@@ -275,4 +275,8 @@ public class OperationDescriptions {
         public static final String LIST = "List CO2 cost based on cluster CRNs";
         public static final String LIST_BY_ENV = "List CO2 costs based on cluster CRNs and environment CRNs";
     }
+
+    public static class EncryptionOpDescription {
+        public static final String GET_ENCRYPTION_KEYS = "Get encryption keys of the stack";
+    }
 }

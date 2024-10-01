@@ -2,8 +2,6 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -77,26 +76,52 @@ class FreeIpaDescribeServiceTest {
     }
 
     @Test
+    void describe() {
+        DescribeFreeIpaResponse describeResponse = mock(DescribeFreeIpaResponse.class);
+        ImageEntity image = mock(ImageEntity.class);
+        FreeIpa freeIpa = mock(FreeIpa.class);
+        UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(imageService.getByStack(stack)).thenReturn(image);
+        when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa);
+        when(userSyncStatusService.findByStack(stack)).thenReturn(Optional.of(userSyncStatus));
+        when(stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, Optional.of(userSyncStatus), false))
+                .thenReturn(describeResponse);
+
+        assertEquals(describeResponse, underTest.describe(ENVIRONMENT_CRN, ACCOUNT_ID));
+    }
+
+    @Test
     void describeAll() {
         DescribeFreeIpaResponse describeResponse = mock(DescribeFreeIpaResponse.class);
         ImageEntity image = mock(ImageEntity.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
         UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);
-        when(stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID)))
+        when(stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(ENVIRONMENT_CRN, ACCOUNT_ID))
                 .thenReturn(Collections.singletonList(stack));
-        when(imageService.getByStack(any())).thenReturn(image);
-        when(freeIpaService.findByStackId(any())).thenReturn(freeIpa);
-        when(userSyncStatusService.findByStack(any())).thenReturn(Optional.of(userSyncStatus));
-        when(stackToDescribeFreeIpaResponseConverter.convert(any(), any(), any(), any(), any())).thenReturn(describeResponse);
-        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(true);
+        when(imageService.getByStack(stack)).thenReturn(image);
+        when(freeIpaService.findByStackId(STACK_ID)).thenReturn(freeIpa);
+        when(userSyncStatusService.findByStack(stack)).thenReturn(Optional.of(userSyncStatus));
+        when(stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true))
+                .thenReturn(describeResponse);
+        when(entitlementService.isFreeIpaRebuildEnabled(ACCOUNT_ID)).thenReturn(true);
 
         assertEquals(List.of(describeResponse), underTest.describeAll(ENVIRONMENT_CRN, ACCOUNT_ID));
     }
 
     @Test
     void describeAllThrowsWhenEntitlementIsDisabled() {
-        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(false);
+        when(entitlementService.isFreeIpaRebuildEnabled(ACCOUNT_ID)).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> underTest.describeAll(ENVIRONMENT_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void getImage() {
+        Image image = mock(Image.class);
+        when(stackService.getFreeIpaStackWithMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(imageService.getImageForStack(stack)).thenReturn(image);
+
+        assertEquals(image, underTest.getImage(ENVIRONMENT_CRN, ACCOUNT_ID));
     }
 }

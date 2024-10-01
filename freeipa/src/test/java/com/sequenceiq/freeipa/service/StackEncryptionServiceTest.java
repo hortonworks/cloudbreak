@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.repository.StackEncryptionRepository;
 
@@ -30,20 +31,20 @@ class StackEncryptionServiceTest {
     private StackEncryptionService underTest;
 
     @Test
-    public void testSave() {
+    void testSave() {
         StackEncryption stackEncryption = mock(StackEncryption.class);
         underTest.save(stackEncryption);
         verify(stackEncryptionRepository).save(stackEncryption);
     }
 
     @Test
-    public void testDeleteStackEncryption() {
+    void testDeleteStackEncryption() {
         underTest.deleteStackEncryption(STACK_ID);
         verify(stackEncryptionRepository).deleteStackEncryptionByStackId(STACK_ID);
     }
 
     @Test
-    public void testGetStackEncryption() {
+    void testGetStackEncryption() {
         StackEncryption stackEncryption = mock(StackEncryption.class);
         when(stackEncryptionRepository.findStackEncryptionByStackId(STACK_ID)).thenReturn(Optional.of(stackEncryption));
         StackEncryption result = underTest.getStackEncryption(STACK_ID);
@@ -51,10 +52,23 @@ class StackEncryptionServiceTest {
     }
 
     @Test
-    public void testGetStackEncryptionThrowsException() {
+    void testGetStackEncryptionThrowsException() {
         when(stackEncryptionRepository.findStackEncryptionByStackId(STACK_ID)).thenReturn(Optional.empty());
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.getStackEncryption(STACK_ID));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.getStackEncryption(STACK_ID));
         assertEquals("Stack Encryption does not exist", exception.getMessage());
+    }
+
+    @Test
+    void testFindByStackId() {
+        when(stackEncryptionRepository.findStackEncryptionByStackId(STACK_ID)).thenReturn(Optional.of(new StackEncryption()));
+        Optional<StackEncryption> result = underTest.findByStackId(STACK_ID);
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void testFindByStackIdNotFound() {
+        when(stackEncryptionRepository.findStackEncryptionByStackId(STACK_ID)).thenReturn(Optional.empty());
+        Optional<StackEncryption> result = underTest.findByStackId(STACK_ID);
+        assertTrue(result.isEmpty());
     }
 }

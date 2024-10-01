@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetw
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
@@ -146,6 +147,12 @@ public class StackDtoService implements LocalPaasSdxService {
     public StackDto getByCrn(String crn) {
         StackView stackView = stackDtoRepository.findByCrn(crn).orElseThrow(NotFoundException.notFound("Stack by crn", crn));
         return getStackProxy(stackView, false);
+    }
+
+    public StackDto getByCrnWithMdcContext(String crn) {
+        StackDto stackDto = getByCrn(crn);
+        MDCBuilder.buildMdcContext(stackDto);
+        return stackDto;
     }
 
     private StackDto getStackProxy(StackView stackView, boolean fetchResources) {

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatalakeV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DiagnosticsV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DiskUpdateController;
+import com.sequenceiq.cloudbreak.controller.v4.EncryptionV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
@@ -107,7 +108,8 @@ public class EndpointConfig extends ResourceConfig {
             DistroXCostV1Controller.class,
             ClusterCO2V4Controller.class,
             DistroXCO2V1Controller.class,
-            OpenApiController.class
+            OpenApiController.class,
+            EncryptionV4Controller.class
     );
 
     @Value("${info.app.version:unspecified}")
