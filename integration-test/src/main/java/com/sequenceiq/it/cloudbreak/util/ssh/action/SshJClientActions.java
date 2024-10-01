@@ -655,6 +655,12 @@ public class SshJClientActions {
         return checkSystemctlServiceStatus(testDto, instanceIps, serviceStatusesByName);
     }
 
+    public <T extends CloudbreakTestDto> T checkSystemctlServiceStatusOnPrimaryGateway(T testDto, List<InstanceGroupV4Response> instanceGroups,
+            Map<String, Boolean> serviceStatusesByName) {
+        List<String> instanceIps = getPrimaryGatewayIps(instanceGroups, false);
+        return checkSystemctlServiceStatus(testDto, instanceIps, serviceStatusesByName);
+    }
+
     private <T extends CloudbreakTestDto> T checkSystemctlServiceStatus(T testDto, List<String> instanceIps, Map<String, Boolean> serviceStatusesByName) {
         serviceStatusesByName.forEach((serviceName, serviceStatus) -> {
             String systemctlServiceStatusCommand = format("systemctl is-active %s", serviceName);

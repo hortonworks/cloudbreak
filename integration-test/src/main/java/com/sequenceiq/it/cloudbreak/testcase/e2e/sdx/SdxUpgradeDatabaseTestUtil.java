@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
@@ -61,34 +60,34 @@ public class SdxUpgradeDatabaseTestUtil {
         return testDto;
     }
 
-    public <T extends AbstractSdxTestDto<?, SdxClusterDetailResponse, ?>> T checkCloudProviderDatabaseVersionFromMasterNode(
+    public <T extends AbstractSdxTestDto<?, SdxClusterDetailResponse, ?>> T checkCloudProviderDatabaseVersionFromPrimaryGateway(
             String databaseMajorVersion, TestContext tc, T testDto) {
         SdxDatabaseAvailabilityType availabilityType = testDto.getResponse().getSdxDatabaseResponse().getAvailabilityType();
         List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getStackV4Response().getInstanceGroups();
         return SdxDatabaseAvailabilityType.hasExternalDatabase(availabilityType)
-                ? checkExternalDatabaseVersionFromMasterNode(tc, testDto, instanceGroups, databaseMajorVersion)
-                : checkEmbeddedDatabaseVersionFromMasterNode(tc, testDto, instanceGroups, databaseMajorVersion);
+                ? checkExternalDatabaseVersionFromPrimaryGateway(tc, testDto, instanceGroups, databaseMajorVersion)
+                : checkEmbeddedDatabaseVersionFromPrimaryGateway(tc, testDto, instanceGroups, databaseMajorVersion);
     }
 
-    private <T extends CloudbreakTestDto> T checkEmbeddedDatabaseVersionFromMasterNode(
+    private <T extends CloudbreakTestDto> T checkEmbeddedDatabaseVersionFromPrimaryGateway(
             TestContext tc, T testDto, List<InstanceGroupV4Response> instanceGroups, String databaseMajorVersion) {
         Map<String, Boolean> serviceStatusesByName = Map.of(
                 "postgresql-10", "10".equals(databaseMajorVersion),
                 "postgresql-11", "11".equals(databaseMajorVersion),
                 "postgresql-14", "14".equals(databaseMajorVersion)
         );
-        sshJClientActions.checkSystemctlServiceStatus(
-                testDto, instanceGroups, List.of(HostGroupType.MASTER.getName()), serviceStatusesByName);
-        return checkDatabaseVersionFromMasterNode(testDto, instanceGroups, databaseMajorVersion, EMBEDDED_DBSERVER_VERSION_CMD);
+
+        sshJClientActions.checkSystemctlServiceStatusOnPrimaryGateway(testDto, instanceGroups, serviceStatusesByName);
+        return checkDatabaseVersionFromPrimaryGateway(testDto, instanceGroups, databaseMajorVersion, EMBEDDED_DBSERVER_VERSION_CMD);
     }
 
-    private <T extends CloudbreakTestDto> T checkExternalDatabaseVersionFromMasterNode(TestContext tc, T testDto, List<InstanceGroupV4Response> instanceGroups,
-            String databaseMajorVersion) {
+    private <T extends CloudbreakTestDto> T checkExternalDatabaseVersionFromPrimaryGateway(TestContext tc, T testDto,
+            List<InstanceGroupV4Response> instanceGroups, String databaseMajorVersion) {
         String command = tc.getCloudProvider().isExternalDatabaseSslEnforcementSupported() ? DBSERVER_VERSION_CMD_SSL : DBSERVER_VERSION_CMD;
-        return checkDatabaseVersionFromMasterNode(testDto, instanceGroups, databaseMajorVersion, command);
+        return checkDatabaseVersionFromPrimaryGateway(testDto, instanceGroups, databaseMajorVersion, command);
     }
 
-    private <T extends CloudbreakTestDto> T checkDatabaseVersionFromMasterNode(T testDto, List<InstanceGroupV4Response> instanceGroups,
+    private <T extends CloudbreakTestDto> T checkDatabaseVersionFromPrimaryGateway(T testDto, List<InstanceGroupV4Response> instanceGroups,
             String databaseMajorVersion, String command) {
         Map<String, Pair<Integer, String>> dbVersions = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroups, command, false);
         List<Pair<Integer, String>> wrongVersions = dbVersions.values().stream()

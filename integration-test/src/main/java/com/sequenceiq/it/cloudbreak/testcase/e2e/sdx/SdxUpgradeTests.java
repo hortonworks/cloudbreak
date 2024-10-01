@@ -65,7 +65,6 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
         List<String> expectedVolumeIds = new ArrayList<>();
 
         SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
-                .withClusterShape(SdxClusterShape.ENTERPRISE)
                 .withCloudStorage()
                 .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
         setupSourceImage(testContext, sdxTestDto);
@@ -90,7 +89,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromMasterNode(
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromPrimaryGateway(
                         testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)

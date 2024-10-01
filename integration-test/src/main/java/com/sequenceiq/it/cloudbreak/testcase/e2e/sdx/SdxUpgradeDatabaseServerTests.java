@@ -60,7 +60,7 @@ public class SdxUpgradeDatabaseServerTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkDbEngineVersionIsUpdated(targetDatabaseMajorVersion.getMajorVersion(), testDto))
-                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromMasterNode(
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromPrimaryGateway(
                         targetDatabaseMajorVersion.getMajorVersion(), tc, testDto))
                 .validate();
     }
