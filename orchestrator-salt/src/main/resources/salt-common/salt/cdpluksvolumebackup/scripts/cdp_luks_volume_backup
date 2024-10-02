@@ -97,6 +97,10 @@ upload_aws_backup() {
 }
 
 create_luks_backup() {
+    if [[ -d ${LUKS_BACKUP_LOCATION} ]]; then
+        doLog "${LUKS_BACKUP_LOCATION} already exists. Clean up the local backup"
+        remove_local_backups
+    fi
     mkdir -p "${LUKS_BACKUP_LOCATION}"
     cp ${LUKS_BACKING_FILE} "${LUKS_BACKUP_LOCATION}"
     cp ${config[luks_path]}/passphrase_ciphertext "${LUKS_BACKUP_LOCATION}"

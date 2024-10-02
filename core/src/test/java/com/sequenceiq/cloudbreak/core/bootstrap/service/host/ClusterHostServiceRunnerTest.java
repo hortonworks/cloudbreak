@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.BackUpDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.JavaPillarDecorator;
@@ -136,6 +137,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterHostServiceRunnerTest {
@@ -304,7 +306,13 @@ class ClusterHostServiceRunnerTest {
     private RangerRazDatahubConfigProvider rangerRazDatahubConfigProvider;
 
     @Mock
+    private DetailedEnvironmentResponse environmentResponse;
+
+    @Mock
     private PaywallConfigService paywallConfigService;
+
+    @Mock
+    private BackUpDecorator backUpDecorator;
 
     @BeforeEach
     void setUp() {
@@ -318,6 +326,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(stackView.getName()).thenReturn(STACK_NAME);
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
         lenient().when(cluster.getExtendedBlueprintText()).thenReturn(EXTENDED_BLUEPRINT_TEXT);
+        lenient().when(environmentConfigProvider.getEnvironmentByCrn(ENV_CRN)).thenReturn(environmentResponse);
     }
 
     @Test
@@ -562,6 +571,7 @@ class ClusterHostServiceRunnerTest {
         verifySecretEncryption(false, saltConfig.getValue());
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
+        verifyNoInteractions(backUpDecorator);
     }
 
     @Test
@@ -599,6 +609,7 @@ class ClusterHostServiceRunnerTest {
         verifySecretEncryption(false, saltConfig.getValue());
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
+        verifyNoInteractions(backUpDecorator);
     }
 
     @Test
@@ -930,7 +941,7 @@ class ClusterHostServiceRunnerTest {
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
-        when(environmentConfigProvider.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(environmentResponse.isEnableSecretEncryption()).thenReturn(true);
         when(idBrokerService.getByCluster(CLUSTER_ID)).thenReturn(mock(IdBroker.class));
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
@@ -952,6 +963,32 @@ class ClusterHostServiceRunnerTest {
 
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
+
+
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testCdpLuksVolumeBackUpToRunClusterServices() throws CloudbreakOrchestratorException, IOException {
+        setupMocksForRunClusterServices();
+        GatewayView clusterGateway = mock(GatewayView.class);
+        when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
+        when(environmentResponse.isEnableSecretEncryption()).thenReturn(true);
+        when(idBrokerService.getByCluster(CLUSTER_ID)).thenReturn(mock(IdBroker.class));
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+
+        underTest.runClusterServices(stack, Collections.emptyMap(), false);
+
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).runService(any(), any(), saltConfig.capture(), any());
+
+        verifySecretEncryption(true, saltConfig.getValue());
+
+        verify(backUpDecorator).decoratePillarWithBackup(eq(stack), eq(environmentResponse), any());
     }
 
     private void setupMocksForRunClusterServices() {

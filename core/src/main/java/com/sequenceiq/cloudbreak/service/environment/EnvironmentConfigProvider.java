@@ -22,11 +22,6 @@ public class EnvironmentConfigProvider {
         return StringUtils.isNoneEmpty(environment.getParentEnvironmentCrn());
     }
 
-    public boolean isSecretEncryptionEnabled(String environmentCrn) {
-        DetailedEnvironmentResponse environment = getEnvironmentByCrn(environmentCrn);
-        return environment.isEnableSecretEncryption();
-    }
-
     public String getParentEnvironmentCrn(String environmentCrn) {
             String result = environmentCrn;
             DetailedEnvironmentResponse environmentResponse = getEnvironmentByCrn(environmentCrn);
@@ -38,7 +33,7 @@ public class EnvironmentConfigProvider {
             return result;
     }
 
-    private DetailedEnvironmentResponse getEnvironmentByCrn(String environmentCrn) {
+    public DetailedEnvironmentResponse getEnvironmentByCrn(String environmentCrn) {
         try {
             LOGGER.info("Fetch environment details by crn:'{}' from Environment service", environmentCrn);
             return environmentClientService.getByCrn(environmentCrn);

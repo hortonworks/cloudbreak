@@ -28,6 +28,7 @@ base:
 {{ include_if_exists('postgresql', 'root-certs') }}
 {{ include_if_exists('java') }}
 {{ include_if_exists('paywall') }}
+    - cdpluksvolumebackup
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound
