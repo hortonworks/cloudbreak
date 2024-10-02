@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_UPSCALE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL;
 import static java.lang.String.format;
 
 import java.util.HashSet;
@@ -17,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Joiner;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -38,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -78,6 +81,9 @@ public class ClusterUpscaleService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
+
     public void installServicesOnNewHosts(UpscaleClusterRequest request) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(request.getResourceId());
         LOGGER.debug("Start installing CM services");
@@ -102,9 +108,20 @@ public class ClusterUpscaleService {
                 connector.hostsStartRoles(upscaledHosts);
             }
             clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, candidateAddresses.keySet());
+
+            if (request.isRollingRestartEnabled()) {
+                LOGGER.info("Rolling restart enabled, wait for CM services to be in a healthy status.");
+                flowMessageService.fireEventAndLog(stackDto.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY);
+                boolean success = connector.clusterStatusService().waitForHealthyServices(
+                        runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()));
+                if (!success) {
+                    LOGGER.warn("Waiting for CM services to be in a healthy status finished unsuccessfully, flow execution continues.");
+                    flowMessageService.fireEventAndLog(stackDto.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL);
+                }
+            }
             setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
         } catch (ScalingException se) {
-            flowMessageService.fireEventAndLog(stackDto.getId(), Status.UPDATE_IN_PROGRESS.name(),
+            flowMessageService.fireEventAndLog(stackDto.getId(), UPDATE_IN_PROGRESS.name(),
                     CLUSTER_SCALING_UPSCALE_FAILED, Joiner.on(",").join(se.getFailedInstanceIds()));
             if (Boolean.FALSE.equals(request.isRepair()) && !request.isPrimaryGatewayChanged()
                     && entitlementService.targetedUpscaleSupported(stackDto.getAccountId())) {

@@ -177,6 +177,10 @@ public interface ClusterApi {
         return clusterModificationService().isServicePresent(clusterName, serviceType);
     }
 
+    default void waitForHealthyServices(Optional<String> runtimeVersion) {
+        clusterStatusService().waitForHealthyServices(runtimeVersion);
+    }
+
     ClusterSetupService clusterSetupService();
 
     ClusterModificationService clusterModificationService();

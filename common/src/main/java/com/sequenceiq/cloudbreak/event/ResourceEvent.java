@@ -455,6 +455,8 @@ public enum ResourceEvent {
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED("cluster.scaling.stopstart.downscale.finished"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FAILED("cluster.scaling.stopstart.downscale.failed"),
     CLUSTER_SCALING_UPSCALE_FAILED("cluster.scaling.upscale.failed"),
+    CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY("cluster.scaling.waiting.for.services.healthy"),
+    CLUSTER_SCALING_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL("cluster.scaling.waiting.for.services.healthy.unsuccessful"),
     INSTANCES_RESTART_STARTED("instances.restart.started"),
     INSTANCES_RESTART_FINISHED("instances.restart.finished"),
     INSTANCES_RESTART_FAILED("instances.restart.failed"),

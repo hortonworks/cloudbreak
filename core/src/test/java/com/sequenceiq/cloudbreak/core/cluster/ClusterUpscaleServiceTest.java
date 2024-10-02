@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,6 +99,9 @@ class ClusterUpscaleServiceTest {
 
     @Mock
     private FlowMessageService flowMessageService;
+
+    @Mock
+    private RuntimeVersionService runtimeVersionService;
 
     @BeforeEach
     public void setUp() {
@@ -153,6 +158,7 @@ class ClusterUpscaleServiceTest {
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+        when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("7.3.1"));
 
         underTest.installServicesOnNewHosts(createRequest(true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false, true));
 
