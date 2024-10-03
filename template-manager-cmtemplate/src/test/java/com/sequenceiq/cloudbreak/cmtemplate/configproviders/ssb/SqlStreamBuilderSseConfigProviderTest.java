@@ -1,14 +1,12 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb;
 
-import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,21 +34,21 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
-public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
+public class SqlStreamBuilderSseConfigProviderTest {
 
     private static final String CONNECTION_URL = "jdbc:postgresql://cluster-master0.bar.com:5432/ssb_admin";
 
     private static final String CONNECTION_URL_WITH_SSL = "jdbc:postgresql://cluster-master0.bar.com:5432/ssb_admin" +
             "?sslmode=verify-full&sslrootcert=/foo/cert.pem";
 
-    private final SqlStreamBuilderAdminDatabaseConfigProvider underTest = new SqlStreamBuilderAdminDatabaseConfigProvider();
+    private final SqlStreamBuilderSseConfigProvider underTest = new SqlStreamBuilderSseConfigProvider();
 
     @Test
     public void testNoConfigNeeded() {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.10");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
 
-        assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
+        assertThat(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject)).isFalse();
     }
 
     @Test
@@ -58,7 +56,7 @@ public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.11");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
 
-        assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
+        assertThat(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject)).isTrue();
     }
 
     @Test
@@ -69,18 +67,6 @@ public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
         validateServiceConfigsNoDbSsl(serviceConfigs);
-    }
-
-    private void validateServiceConfigsNoDbSsl(List<ApiClusterTemplateConfig> serviceConfigs) {
-        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(serviceConfigs);
-        assertThat(configToValue).containsOnly(
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_TYPE, "postgresql"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_HOST, "testhost"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_PORT, "5432"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_SCHEMA, "ssb_admin"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_USER, "ssb_test_user"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_PASSWORD, "ssb_test_pw")
-        );
     }
 
     @Test
@@ -105,23 +91,59 @@ public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @ValueSource(strings = {"1.15.1", "1.15.1-csadh1.9.0.1-cdh7.2.16.0-254-37351973", "1.15.2", "1.16.0"})
+    @ValueSource(strings = {"1.15.1", "1.15.1-csadh1.9.0.1-cdh7.2.16.0-254-37351973", "1.15.2", "1.16.0", "1.19.1-csa1.14.0.0-12345678"})
     public void getServiceConfigsWhenDbSsl(String flinkVersion) {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.11");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor, true, () -> flinkVersion, true);
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
+        Map<String, String> actualConfig = ConfigTestUtil.getConfigNameToValueMap(serviceConfigs);
+        Map<String, String> expectedConfig = getNoDbSslConfig();
+        expectedConfig.put(SqlStreamBuilderSseConfigProvider.DATABASE_JDBC_URL_OVERRIDE, CONNECTION_URL_WITH_SSL);
+
+        assertThat(actualConfig).containsExactlyInAnyOrderEntriesOf(expectedConfig);
+    }
+
+    @Test
+    public void testNoReleaseNameConfigWith731AndNotUnifiedVersion() {
+        CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.3.1");
+        TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        validateServiceConfigsNoDbSsl(serviceConfigs);
+    }
+
+    @Test
+    void testReleaseNameConfig() {
+        CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.3.1");
+        TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor, true, () -> "1.19.1-csa1.14.0.0-12345678", false);
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        Map<String, String> actualConfig = ConfigTestUtil.getConfigNameToValueMap(serviceConfigs);
+        Map<String, String> expectedConfig = getNoDbSslConfig();
+        expectedConfig.put("release.name", "CSA-DH");
+
+        assertThat(actualConfig).containsExactlyInAnyOrderEntriesOf(expectedConfig);
+    }
+
+    private void validateServiceConfigsNoDbSsl(List<ApiClusterTemplateConfig> serviceConfigs) {
         Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(serviceConfigs);
-        assertThat(configToValue).containsOnly(
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_TYPE, "postgresql"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_HOST, "testhost"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_PORT, "5432"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_SCHEMA, "ssb_admin"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_USER, "ssb_test_user"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_PASSWORD, "ssb_test_pw"),
-                entry(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_JDBC_URL_OVERRIDE, CONNECTION_URL_WITH_SSL)
-        );
+        Map<String, String> expectedConfig = getNoDbSslConfig();
+
+        assertThat(configToValue).containsExactlyInAnyOrderEntriesOf(expectedConfig);
+    }
+
+    private Map<String, String> getNoDbSslConfig() {
+        return new HashMap<>(Map.of(
+                SqlStreamBuilderSseConfigProvider.DATABASE_TYPE, "postgresql",
+                SqlStreamBuilderSseConfigProvider.DATABASE_HOST, "testhost",
+                SqlStreamBuilderSseConfigProvider.DATABASE_PORT, "5432",
+                SqlStreamBuilderSseConfigProvider.DATABASE_SCHEMA, "ssb_admin",
+                SqlStreamBuilderSseConfigProvider.DATABASE_USER, "ssb_test_user",
+                SqlStreamBuilderSseConfigProvider.DATABASE_PASSWORD, "ssb_test_pw"
+        ));
     }
 
     private CmTemplateProcessor initTemplateProcessor(String cdhVersion) {
