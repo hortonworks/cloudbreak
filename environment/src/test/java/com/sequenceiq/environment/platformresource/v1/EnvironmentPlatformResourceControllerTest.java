@@ -59,7 +59,7 @@ public class EnvironmentPlatformResourceControllerTest {
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsNull() {
         PlatformResourceRequest request = mock(PlatformResourceRequest.class);
         setupMocks(request);
-        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, null, Architecture.X86_64));
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, null, Architecture.X86_64.getName()));
         verify(request, times(1)).setFilters(any());
     }
 
@@ -67,7 +67,7 @@ public class EnvironmentPlatformResourceControllerTest {
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsEmpty() {
         PlatformResourceRequest request = mock(PlatformResourceRequest.class);
         setupMocks(request);
-        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of(), Architecture.X86_64));
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of(), Architecture.X86_64.getName()));
         verify(request, times(1)).setFilters(any());
     }
 
@@ -75,7 +75,7 @@ public class EnvironmentPlatformResourceControllerTest {
     void testGetVmTypesForVerticalScalingWithAvailabilityZonesFilterAsNonEmpty() {
         PlatformResourceRequest request = mock(PlatformResourceRequest.class);
         setupMocks(request);
-        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of("1", "2", "3"), Architecture.X86_64));
+        doAsCurrentUserCrn(() -> underTest.getVmTypesForVerticalScaling(ENV_CRN, null, null, List.of("1", "2", "3"), Architecture.X86_64.getName()));
         verify(request, times(1)).setFilters(Map.of(NetworkConstants.AVAILABILITY_ZONES, "1,2,3"));
     }
 

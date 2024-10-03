@@ -15,7 +15,6 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.type.CdpResourceType;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription.OpEnvDescription;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
@@ -54,7 +53,7 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
-            @QueryParam("architecture") @DefaultValue("X86_64") Architecture architecture,
+            @QueryParam("architecture") @DefaultValue("X86_64") String architecture,
             @QueryParam("resourceType") CdpResourceType resourceType);
 
     @GET
@@ -68,7 +67,7 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("instanceType") String instanceType,
             @QueryParam("resourceType") CdpResourceType resourceType,
             @QueryParam("availabilityZones") List<String> availabilityZones,
-            @QueryParam("architecture") @DefaultValue("X86_64") Architecture architecture);
+            @QueryParam("architecture") @DefaultValue("X86_64") String architecture);
 
     @GET
     @Path("regions")
