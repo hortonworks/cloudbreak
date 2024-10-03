@@ -19,3 +19,6 @@ fi
 if [[ ! -z "${CUSTOM_UMS_SHORT_TIMEOUT}" ]]; then
   echo "export ALTUS_UMS_CLIENT_GRPC_SHORT_TIMEOUT_SEC=${CUSTOM_UMS_SHORT_TIMEOUT}" >> integcb/Profile
 fi
+if [[ "$USE_FEDRAMP_CONTAINERS" == true ]]; then
+  echo "export USE_FEDRAMP_CONTAINERS=true" >> integcb/Profile
+fi
