@@ -76,7 +76,7 @@ class RotateSaltPasswordHandlerTest {
         Assertions.assertThat(result)
                 .isInstanceOf(RotateSaltPasswordSuccessResponse.class)
                 .returns(STACK_ID, Payload::getResourceId);
-        verify(rotateSaltPasswordService).rotateSaltPasswordFallback(stack);
+        verify(rotateSaltPasswordService).rotateSaltPassword(stack);
     }
 
     @Test

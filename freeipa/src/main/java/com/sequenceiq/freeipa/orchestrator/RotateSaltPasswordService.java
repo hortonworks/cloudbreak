@@ -98,6 +98,14 @@ public class RotateSaltPasswordService {
 
     public void rotateSaltPassword(Stack stack) {
         validateRotateSaltPassword(stack);
+        if (saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
+            rotateSaltPasswordChangePassword(stack);
+        } else {
+            rotateSaltPasswordFallback(stack);
+        }
+    }
+
+    private void rotateSaltPasswordChangePassword(Stack stack) {
         try {
             String oldPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPasswordVault();
             String newPassword = PasswordUtil.generatePassword();
@@ -110,7 +118,7 @@ public class RotateSaltPasswordService {
         }
     }
 
-    public void rotateSaltPasswordFallback(Stack stack) {
+    private void rotateSaltPasswordFallback(Stack stack) {
         List<GatewayConfig> allGatewayConfig = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
         tryRemoveSaltuserFromGateways(stack, allGatewayConfig);
 

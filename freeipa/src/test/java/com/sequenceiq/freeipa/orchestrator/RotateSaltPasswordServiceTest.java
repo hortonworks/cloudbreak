@@ -161,7 +161,8 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordFallback() throws Exception {
-        underTest.rotateSaltPasswordFallback(stack);
+        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(false);
+        underTest.rotateSaltPassword(stack);
 
         verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
         verify(bootstrapService).reBootstrap(stack);
@@ -170,10 +171,11 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordFallbackWithFailedUserDelete() throws Exception {
+        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(false);
         when(hostOrchestrator.runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND))
                 .thenThrow(CloudbreakOrchestratorFailedException.class);
 
-        underTest.rotateSaltPasswordFallback(stack);
+        underTest.rotateSaltPassword(stack);
 
         verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
         verify(bootstrapService).reBootstrap(stack);
@@ -182,10 +184,11 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordFallbackWithFailedReBootstrap() throws Exception {
+        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(false);
         CloudbreakOrchestratorFailedException cause = new CloudbreakOrchestratorFailedException("");
         doThrow(cause).when(bootstrapService).reBootstrap(stack);
 
-        assertThatThrownBy(() -> underTest.rotateSaltPasswordFallback(stack))
+        assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
                 .isInstanceOf(CloudbreakServiceException.class)
                 .hasCause(cause)
                 .hasMessage("Failed to re-bootstrap gateway nodes after saltuser password delete. " +
@@ -201,6 +204,7 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordFailedOrchestrator() throws CloudbreakOrchestratorException {
+        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(true);
         CloudbreakOrchestratorFailedException orchestratorFailedException = new CloudbreakOrchestratorFailedException("message");
         doThrow(orchestratorFailedException).when(hostOrchestrator).changePassword(any(), any(), any());
 
@@ -214,6 +218,8 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordSuccess() throws CloudbreakOrchestratorException {
+        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(true);
+
         underTest.rotateSaltPassword(stack);
 
         verify(hostOrchestrator).changePassword(eq(List.of(gatewayConfig)), anyString(), eq(OLD_PASSWORD));

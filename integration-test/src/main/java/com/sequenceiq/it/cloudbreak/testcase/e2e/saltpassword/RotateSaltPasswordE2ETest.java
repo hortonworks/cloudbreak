@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.saltpassword;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -15,12 +16,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -39,6 +43,9 @@ public class RotateSaltPasswordE2ETest extends AbstractE2ETest {
 
     @Inject
     private SshSaltPasswordActions sshSaltPasswordActions;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -69,8 +76,18 @@ public class RotateSaltPasswordE2ETest extends AbstractE2ETest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
+                // legacy rotation
                 .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getFreeipaIpAddresses(testDto)))
                 .when(freeIpaTestClient.rotateSaltPassword())
+                .awaitForFlow()
+                .await(Status.AVAILABLE)
+                .then((testContext1, testDto, client) -> validateSaltPasswordRotation(testDto, getFreeipaIpAddresses(testDto)))
+                // secret rotation framework
+                .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getFreeipaIpAddresses(testDto)))
+                .given(FreeIpaRotationTestDto.class)
+                    .withSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_PASSWORD))
+                .when(freeIpaTestClient.rotateSecret())
+                .given(FreeIpaTestDto.class)
                 .awaitForFlow()
                 .await(Status.AVAILABLE)
                 .then((testContext1, testDto, client) -> validateSaltPasswordRotation(testDto, getFreeipaIpAddresses(testDto)))
