@@ -138,5 +138,29 @@
   {
     "path": "/var/log/pip*.log",
     "label": "python_pip"
+  },
+  {
+    "label": "secret_encryption_metadata_json",
+    "path": "/var/log/cdp-luks/*.json"
+  },
+  {
+    "label": "secret_encryption_log",
+    "path": "/var/log/cdp-luks/*.log"
+  },
+  {
+    "label": "retrieve_user_data_secrets",
+    "path": "/var/log/cdp-retrieve-userdata-secrets.log"
+  },
+  {
+    "label": "luks_volume_backup_log",
+    "path": "/var/log/cdpluksvolumebackup.log"
+  },
+  {
+    "label": "luks_volume_backup_config",
+    "path": "/etc/cdp_luks_volume_backup.conf"
+  },
+  {
+    "label": "luks_volume_backup_daily_bypass",
+    "path": "/tmp/cdp_luks_volume_backup_daily_bypass"
   }
 ]
