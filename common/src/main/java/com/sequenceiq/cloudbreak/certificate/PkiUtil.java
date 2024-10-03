@@ -268,6 +268,12 @@ public class PkiUtil {
         }
     }
 
+    public static String calculatePublicKeyInBase64(String privateKeyPemInBase64) {
+        PublicKey publicKey = getPublicKey(new String(BaseEncoding.base64().decode(privateKeyPemInBase64)));
+        String openSshFormatPublicKey = convertOpenSshPublicKey(publicKey);
+        return BaseEncoding.base64().encode(openSshFormatPublicKey.getBytes());
+    }
+
     private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey, int validity)
             throws Exception {
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()

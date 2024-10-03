@@ -49,7 +49,7 @@ public class BootstrapMachineHandler extends ExceptionCatcherEventHandler<Bootst
                 clusterProxyService.reRegisterCluster(request.getResourceId());
             } else {
                 LOGGER.info("Bootstrap machines");
-                clusterBootstrapper.bootstrapMachines(request.getResourceId());
+                clusterBootstrapper.bootstrapMachines(request.getResourceId(), false);
             }
             response = new BootstrapMachinesSuccess(request.getResourceId());
         } catch (Exception e) {

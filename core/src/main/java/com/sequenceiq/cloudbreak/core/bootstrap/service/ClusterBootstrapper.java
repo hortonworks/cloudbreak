@@ -168,10 +168,10 @@ public class ClusterBootstrapper {
     @Inject
     private ResourceService resourceService;
 
-    public void bootstrapMachines(Long stackId) throws CloudbreakException {
+    public void bootstrapMachines(Long stackId, boolean restartAll) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("BootstrapMachines for stack [{}] [{}]", stackDto.getName(), stackDto.getResourceCrn());
-        bootstrapOnHost(stackDto);
+        bootstrapOnHost(stackDto, restartAll);
     }
 
     public void reBootstrapMachines(Long stackId) throws CloudbreakException {
@@ -181,9 +181,9 @@ public class ClusterBootstrapper {
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    public void bootstrapOnHost(StackDto stack) throws CloudbreakException {
+    public void bootstrapOnHost(StackDto stack, boolean restartAll) throws CloudbreakException {
         LOGGER.info("BootstrapOnHost for stack [{}] [{}]", stack.getName(), stack.getResourceCrn());
-        bootstrapOnHostInternal(stack, this::saveSaltComponent);
+        bootstrapOnHostInternal(stack, this::saveSaltComponent, restartAll);
     }
 
     public void reBootstrapGateways(StackDto stack) throws CloudbreakException {
@@ -206,7 +206,7 @@ public class ClusterBootstrapper {
         }
     }
 
-    private void bootstrapOnHostInternal(StackDto stack, Consumer<StackView> saveOrUpdateSaltComponent) throws CloudbreakException {
+    private void bootstrapOnHostInternal(StackDto stack, Consumer<StackView> saveOrUpdateSaltComponent, boolean restartAll) throws CloudbreakException {
         try {
             Set<Node> nodes = transactionService.required(() -> collectNodesForBootstrap(stack));
             List<GatewayConfig> allGatewayConfig = collectAndCheckGateways(stack);
@@ -214,7 +214,7 @@ public class ClusterBootstrapper {
             saveOrUpdateSaltComponent.accept(stack.getStack());
 
             BootstrapParams params = createBootstrapParams(stack);
-            hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
+            hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null), restartAll);
 
             InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
             saveOrchestrator(stack, primaryGateway);
@@ -246,7 +246,7 @@ public class ClusterBootstrapper {
     }
 
     public void reBootstrapOnHost(StackDto stackDto) throws CloudbreakException {
-        bootstrapOnHostInternal(stackDto, this::updateSaltComponent);
+        bootstrapOnHostInternal(stackDto, this::updateSaltComponent, false);
     }
 
     private void checkIfAllNodesAvailable(StackDto stack, Set<Node> nodes, InstanceMetadataView primaryGateway)

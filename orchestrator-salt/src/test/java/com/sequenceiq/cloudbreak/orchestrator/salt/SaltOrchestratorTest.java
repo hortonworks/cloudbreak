@@ -209,9 +209,9 @@ class SaltOrchestratorTest {
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
 
-        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel, false);
 
-        verify(saltRunner, times(7)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(8)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
         verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
@@ -286,7 +286,7 @@ class SaltOrchestratorTest {
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
-        verify(saltRunner, times(6)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(7)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
                 .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }

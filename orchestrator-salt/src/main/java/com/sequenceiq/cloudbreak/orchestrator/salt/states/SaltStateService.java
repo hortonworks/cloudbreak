@@ -328,6 +328,16 @@ public class SaltStateService {
         sc.action(saltAction);
     }
 
+    public void stopMasters(SaltConnector sc, Set<String> privateIPs) {
+        SaltAction saltAction = new SaltAction(SaltActionType.STOP);
+        for (String entry : privateIPs) {
+            SaltMaster master = new SaltMaster();
+            master.setAddress(entry);
+            saltAction.addMaster(master);
+        }
+        sc.action(saltAction);
+    }
+
     public GenericResponses changePassword(SaltConnector sc, Set<String> privateIPs, String password) throws CloudbreakOrchestratorFailedException {
         SaltAuth auth = new SaltAuth(password);
         SaltAction saltAction = new SaltAction(SaltActionType.CHANGE_PASSWORD);

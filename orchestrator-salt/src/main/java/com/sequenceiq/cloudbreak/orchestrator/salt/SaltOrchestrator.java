@@ -227,7 +227,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitModel, boolean restartAll) throws CloudbreakOrchestratorException {
         LOGGER.debug("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
@@ -237,6 +237,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSaltKeys(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
+            if (restartAll) {
+                saltStateService.stopMasters(sc, gatewayTargets);
+                params.setRestartNeeded(true);
+            }
             OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runnerWithConfiguredErrorCount(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
@@ -1684,6 +1688,11 @@ public class SaltOrchestrator implements HostOrchestrator {
                 LOGGER.debug("Upload master.pem and master.pub to gateways");
                 uploadFileToTargets(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master.pem", saltMasterPrivateKey.getBytes());
                 uploadFileToTargets(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master.pub", saltMasterPublicKey.getBytes());
+            }
+
+            if (!targets.isEmpty() && saltMasterPrivateKey != null && saltMasterPublicKey != null) {
+                LOGGER.debug("Upload minion_master.pub to minions: {}", targets);
+                uploadFileToTargets(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "minion_master.pub", saltMasterPublicKey.getBytes());
             }
         } catch (SecurityException se) {
             throw new CloudbreakOrchestratorFailedException("Failed to read salt sign key: " + se.getMessage());

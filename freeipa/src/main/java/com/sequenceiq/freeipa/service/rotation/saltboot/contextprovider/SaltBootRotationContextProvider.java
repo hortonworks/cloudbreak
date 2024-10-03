@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_D
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.LAUNCH_TEMPLATE;
 
-import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -117,14 +116,8 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         RotationSecret saltBootPassword = uncachedSecretServiceForRotation.getRotation(saltBootPasswordSecret);
         RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         String privateKey = mapper.apply(saltBootPrivateKey);
-        securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(calcSaltBootPublicKey(privateKey));
+        securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(PkiUtil.calculatePublicKeyInBase64(privateKey));
         securityConfigService.save(securityConfig);
-    }
-
-    private String calcSaltBootPublicKey(String privateKey) {
-        PublicKey publicKey = PkiUtil.getPublicKey(new String(BASE64.decode(privateKey)));
-        String openSshFormatPublicKey = PkiUtil.convertOpenSshPublicKey(publicKey);
-        return BASE64.encode(openSshFormatPublicKey.getBytes());
     }
 
     @Override

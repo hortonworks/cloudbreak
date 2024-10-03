@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBO
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -105,14 +104,8 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         StackDto stack = stackService.getByCrn(resourceCrn);
         RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        saltSecurityConfig.setSaltBootSignPublicKey(calcSaltBootPublicKey(mapper.apply(saltBootPrivateKey)));
+        saltSecurityConfig.setSaltBootSignPublicKey(PkiUtil.calculatePublicKeyInBase64(mapper.apply(saltBootPrivateKey)));
         securityConfigService.save(saltSecurityConfig);
-    }
-
-    private String calcSaltBootPublicKey(String privateKey) {
-        PublicKey publicKey = PkiUtil.getPublicKey(new String(BASE64.decode(privateKey)));
-        String openSshFormatPublicKey = PkiUtil.convertOpenSshPublicKey(publicKey);
-        return BASE64.encode(openSshFormatPublicKey.getBytes());
     }
 
     private UserDataRotationContext getUserDataRotationContext(StackDto stack, Secret saltBootPasswordSecret, Secret saltBootPrivateKeySecret) {
