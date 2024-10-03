@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.platformresource.v1;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -146,7 +148,11 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 null,
                 null,
                 cdpResourceType);
-        setFilterForVmTypes(List.of(availabilityZone), architecture, request, accountId);
+        List<String> availabilityZones = new ArrayList<>();
+        if (!Strings.isNullOrEmpty(availabilityZone)) {
+            availabilityZones.add(availabilityZone);
+        }
+        setFilterForVmTypes(availabilityZones, architecture, request, accountId);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
