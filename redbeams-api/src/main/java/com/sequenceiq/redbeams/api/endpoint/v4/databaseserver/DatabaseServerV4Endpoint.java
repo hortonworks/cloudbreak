@@ -336,8 +336,8 @@ public interface DatabaseServerV4Endpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.ROTATE, description = DatabaseServerNotes.ROTATE,
             operationId = "rotateSecrets",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true), hidden = true)
-    FlowIdentifier rotateSecret(@Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST, hidden = true)
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier rotateSecret(@Valid @NotNull @Parameter(description = DatabaseServerParamDescriptions.ROTATE_DATABASE_SERVER_SECRETS_REQUEST)
             RotateDatabaseServerSecretV4Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
