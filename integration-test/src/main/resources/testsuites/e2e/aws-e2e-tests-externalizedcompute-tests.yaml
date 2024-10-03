@@ -1,0 +1,5 @@
+name: "aws-e2e-tests-externalizedcompute"
+tests:
+  - name: "aws-e2e-tests-externalizedcompute"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.externalizedcompute.ExternalizedComputeClusterTest
