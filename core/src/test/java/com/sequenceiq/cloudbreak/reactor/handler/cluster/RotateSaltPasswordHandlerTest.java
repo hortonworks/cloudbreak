@@ -89,18 +89,4 @@ class RotateSaltPasswordHandlerTest {
         verify(rotateSaltPasswordService).rotateSaltPassword(stack);
     }
 
-    @Test
-    void testFallback() throws CloudbreakOrchestratorFailedException {
-        event = new HandlerEvent<>(new Event<>(
-                new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK)));
-
-        Selectable result = underTest.doAccept(event);
-
-        assertThat(result)
-                .isInstanceOf(RotateSaltPasswordSuccessResponse.class)
-                .extracting(RotateSaltPasswordSuccessResponse.class::cast)
-                .returns(STACK_ID, StackEvent::getResourceId);
-        verify(rotateSaltPasswordService).rotateSaltPasswordFallback(stack);
-    }
-
 }

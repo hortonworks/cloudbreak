@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
@@ -85,7 +86,7 @@ public class RotateSaltPasswordE2ETest extends AbstractE2ETest {
                 // secret rotation framework
                 .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getFreeipaIpAddresses(testDto)))
                 .given(FreeIpaRotationTestDto.class)
-                    .withSecrets(List.of(FreeIpaSecretType.FREEIPA_SALT_PASSWORD))
+                    .withSecrets(List.of(FreeIpaSecretType.SALT_PASSWORD))
                 .when(freeIpaTestClient.rotateSecret())
                 .given(FreeIpaTestDto.class)
                 .awaitForFlow()
@@ -107,9 +108,15 @@ public class RotateSaltPasswordE2ETest extends AbstractE2ETest {
 
         createDefaultDatahubForExistingDatalake(testContext);
         testContext
+                // legacy rotation
                 .given(DistroXTestDto.class)
                 .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getDistroXIpAddresses(testDto)))
                 .when(distroXTestClient.rotateSaltPassword())
+                .awaitForFlow()
+                .then((testContext1, testDto, client) -> validateSaltPasswordRotation(testDto, getDistroXIpAddresses(testDto)))
+                // secret rotation framework
+                .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getDistroXIpAddresses(testDto)))
+                .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.SALT_PASSWORD)))
                 .awaitForFlow()
                 .then((testContext1, testDto, client) -> validateSaltPasswordRotation(testDto, getDistroXIpAddresses(testDto)))
                 .validate();

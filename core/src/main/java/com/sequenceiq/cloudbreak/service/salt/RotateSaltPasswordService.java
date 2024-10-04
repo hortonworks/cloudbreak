@@ -61,6 +61,14 @@ public class RotateSaltPasswordService {
 
     public void rotateSaltPassword(StackDto stack) throws CloudbreakOrchestratorException {
         rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
+        if (rotateSaltPasswordValidator.isChangeSaltuserPasswordSupported(stack)) {
+            rotateSaltPasswordChangePassword(stack);
+        } else {
+            rotateSaltPasswordFallback(stack);
+        }
+    }
+
+    private void rotateSaltPasswordChangePassword(StackDto stack) throws CloudbreakOrchestratorException {
         SecurityConfig securityConfig = stack.getSecurityConfig();
         String oldPassword = securityConfig.getSaltSecurityConfig().getSaltPassword();
         String newPassword = passwordGenerator.get();
@@ -79,7 +87,7 @@ public class RotateSaltPasswordService {
         securityConfigService.changeSaltPassword(stack.getSecurityConfig(), newPassword);
     }
 
-    public void rotateSaltPasswordFallback(StackDto stack) throws CloudbreakOrchestratorFailedException {
+    private void rotateSaltPasswordFallback(StackDto stack) throws CloudbreakOrchestratorFailedException {
         List<GatewayConfig> allGatewayConfig = gatewayConfigService.getAllGatewayConfigs(stack);
         tryRemoveSaltuserFromGateways(stack, allGatewayConfig);
 

@@ -77,7 +77,7 @@ class FreeipaSaltPasswordContextProviderTest {
 
     @Test
     void secretType() {
-        assertThat(underTest.getSecret()).isEqualTo(FreeIpaSecretType.FREEIPA_SALT_PASSWORD);
+        assertThat(underTest.getSecret()).isEqualTo(FreeIpaSecretType.SALT_PASSWORD);
     }
 
 }

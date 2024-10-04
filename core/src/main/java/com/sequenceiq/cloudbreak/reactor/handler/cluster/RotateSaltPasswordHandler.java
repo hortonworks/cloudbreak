@@ -48,16 +48,7 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
             StackDto stack = stackDtoService.getById(stackId);
             RotateSaltPasswordType rotateSaltPasswordType = event.getData().getType();
             LOGGER.info("Starting to rotate salt password for stack {} with type {}", stackId, rotateSaltPasswordType);
-            switch (rotateSaltPasswordType) {
-                case SALT_BOOTSTRAP_ENDPOINT:
-                    rotateSaltPasswordService.rotateSaltPassword(stack);
-                    break;
-                case FALLBACK:
-                    rotateSaltPasswordService.rotateSaltPasswordFallback(stack);
-                    break;
-                default:
-                    throw new IllegalStateException(String.format("RotateSaltPasswordType %s is not handled", rotateSaltPasswordType));
-            }
+            rotateSaltPasswordService.rotateSaltPassword(stack);
             return new RotateSaltPasswordSuccessResponse(stackId);
         } catch (Exception e) {
             LOGGER.warn("Failed to rotate salt password", e);

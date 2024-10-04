@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.saltpassword.contextprovider;
+package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 
@@ -6,24 +6,32 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
-import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
-import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
-public class FreeipaSaltPasswordContextProvider implements RotationContextProvider {
+public class SaltPasswordRotationContextProvider implements RotationContextProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltPasswordRotationContextProvider.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private RotateSaltPasswordValidator rotateSaltPasswordValidator;
 
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
@@ -42,23 +50,21 @@ public class FreeipaSaltPasswordContextProvider implements RotationContextProvid
     }
 
     private void preValidateJob(String resourceCrn) {
-        Stack stack = getStack(resourceCrn);
-        rotateSaltPasswordService.validateRotateSaltPassword(stack);
+        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+        rotateSaltPasswordValidator.validateRotateSaltPassword(stack);
     }
 
     private void rotationJob(String resourceCrn) {
-        Stack stack = getStack(resourceCrn);
-        rotateSaltPasswordService.rotateSaltPassword(stack);
-    }
-
-    private Stack getStack(String resourceCrn) {
-        Crn environmentCrn = Crn.safeFromString(resourceCrn);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(resourceCrn, environmentCrn.getAccountId());
-        return stack;
+        StackDto stack = stackDtoService.getByCrn(resourceCrn);
+        try {
+            rotateSaltPasswordService.rotateSaltPassword(stack);
+        } catch (CloudbreakOrchestratorException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public SecretType getSecret() {
-        return FreeIpaSecretType.SALT_PASSWORD;
+        return CloudbreakSecretType.SALT_PASSWORD;
     }
 }
