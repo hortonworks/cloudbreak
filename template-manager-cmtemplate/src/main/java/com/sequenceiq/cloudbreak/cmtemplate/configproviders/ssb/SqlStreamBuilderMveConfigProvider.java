@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class SqlStreamBuilderMveDatabaseConfigProvider extends SqlStreamBuilderConfigProvider {
+public class SqlStreamBuilderMveConfigProvider extends SqlStreamBuilderConfigProvider {
 
     static final String DATABASE_URL = "ssb.mve.datasource.url";
 
