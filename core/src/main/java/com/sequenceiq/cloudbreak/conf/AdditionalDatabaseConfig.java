@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.database.DatabaseUtil;
+import com.sequenceiq.cloudbreak.database.RdsIamAuthenticationTokenProvider;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 
 @Configuration
@@ -45,21 +46,24 @@ public class AdditionalDatabaseConfig {
     @Inject
     private NodeConfig nodeConfig;
 
+    @Inject
+    private RdsIamAuthenticationTokenProvider rdsIamAuthenticationTokenProvider;
+
     @Bean(name = QUARTZ_METERING_PREFIX + DATA_SOURCE_POSTFIX)
     public DataSource quartzMeteringDataSource() throws SQLException {
         return DatabaseUtil.getDataSource("hikari-quartz-metering-pool", databaseProperties, databaseAddress, nodeConfig,
-                Optional.of(meteringCommonThreadpoolSize));
+                Optional.of(meteringCommonThreadpoolSize), rdsIamAuthenticationTokenProvider);
     }
 
     @Bean(name = QUARTZ_METERING_SYNC_PREFIX + DATA_SOURCE_POSTFIX)
     public DataSource quartzMeteringSyncDataSource() throws SQLException {
         return DatabaseUtil.getDataSource("hikari-quartz-metering-sync-pool", databaseProperties, databaseAddress, nodeConfig,
-                Optional.of(meteringSyncThreadpoolSize));
+                Optional.of(meteringSyncThreadpoolSize), rdsIamAuthenticationTokenProvider);
     }
 
     @Bean(name = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_PREFIX + DATA_SOURCE_POSTFIX)
     public DataSource quartzDynamicEntitlementDataSource() throws SQLException {
         return DatabaseUtil.getDataSource("hikari-quartz-dynamic-entitlement-pool", databaseProperties, databaseAddress, nodeConfig,
-                Optional.of(dynamicEntitlementThreadpoolSize));
+                Optional.of(dynamicEntitlementThreadpoolSize), rdsIamAuthenticationTokenProvider);
     }
 }

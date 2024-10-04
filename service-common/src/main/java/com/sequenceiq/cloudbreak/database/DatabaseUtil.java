@@ -21,7 +21,7 @@ public class DatabaseUtil {
 
     public static final String DEFAULT_SCHEMA_NAME = "public";
 
-    private static final int CONNECTION_MAX_LIFETIME_IN_MINUTES = 13;
+    private static final int CONNECTION_MAX_LIFETIME_IN_MINUTES = 12;
 
     private DatabaseUtil() {
     }
@@ -38,13 +38,14 @@ public class DatabaseUtil {
         }
     }
 
-    public static HikariDataSource getDataSource(String poolName, DatabaseProperties databaseProperties, String databaseAddress, NodeConfig nodeConfig)
+    public static HikariDataSource getDataSource(String poolName, DatabaseProperties databaseProperties, String databaseAddress, NodeConfig nodeConfig,
+            RdsIamAuthenticationTokenProvider rdsIamAuthenticationTokenProvider)
             throws SQLException {
-        return getDataSource(poolName, databaseProperties, databaseAddress, nodeConfig, Optional.empty());
+        return getDataSource(poolName, databaseProperties, databaseAddress, nodeConfig, Optional.empty(), rdsIamAuthenticationTokenProvider);
     }
 
     public static HikariDataSource getDataSource(String poolName, DatabaseProperties databaseProperties, String databaseAddress, NodeConfig nodeConfig,
-            Optional<Integer> poolSizeOverride) throws SQLException {
+            Optional<Integer> poolSizeOverride, RdsIamAuthenticationTokenProvider rdsIamAuthenticationTokenProvider) throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, databaseProperties.getDatabase(), databaseProperties.getUser(),
                 databaseProperties.getPassword(), databaseProperties.getSchemaName());
         HikariConfig config = new HikariConfig();
@@ -76,7 +77,7 @@ public class DatabaseUtil {
             long idleTimeout = Math.min(customIdleTimeout, connectionMaxLifeTime);
             config.setMaxLifetime(connectionMaxLifeTime);
             config.setIdleTimeout(idleTimeout);
-            hikariDataSource = new RdsIamAuthBasedHikariDataSource(config);
+            hikariDataSource = new RdsIamAuthBasedHikariDataSource(config, rdsIamAuthenticationTokenProvider);
         } else {
             config.setPassword(databaseProperties.getPassword());
             hikariDataSource = new HikariDataSource(config);

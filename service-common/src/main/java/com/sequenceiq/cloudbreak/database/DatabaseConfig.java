@@ -58,14 +58,18 @@ public class DatabaseConfig {
     @Named("databaseAddress")
     private String databaseAddress;
 
+    @Inject
+    private RdsIamAuthenticationTokenProvider rdsIamAuthenticationTokenProvider;
+
     @Bean(name = DEFAULT_DATA_SOURCE)
     public DataSource defaultDataSource() throws SQLException {
-        return DatabaseUtil.getDataSource("hikari-app-pool", databaseProperties, databaseAddress, nodeConfig);
+        return DatabaseUtil.getDataSource("hikari-app-pool", databaseProperties, databaseAddress, nodeConfig, rdsIamAuthenticationTokenProvider);
     }
 
     @Bean(name = SchedulerFactoryConfig.QUARTZ_PREFIX + DATA_SOURCE_POSTFIX)
     public DataSource quartzDataSource() throws SQLException {
-        return DatabaseUtil.getDataSource("hikari-quartz-pool", databaseProperties, databaseAddress, nodeConfig, Optional.of(quartzThreadpoolSize));
+        return DatabaseUtil.getDataSource("hikari-quartz-pool", databaseProperties, databaseAddress, nodeConfig, Optional.of(quartzThreadpoolSize),
+                rdsIamAuthenticationTokenProvider);
     }
 
     @Primary
