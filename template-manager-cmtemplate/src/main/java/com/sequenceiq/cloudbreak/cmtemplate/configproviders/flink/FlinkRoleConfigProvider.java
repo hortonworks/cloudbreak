@@ -26,6 +26,8 @@ public class FlinkRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String HIGH_AVAILABILITY_STORAGE_DIR = "high_availability_storage_dir";
 
+    private static final String ATLAS_COLLECTION_ENABLED = "atlas_collection_enabled";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         if (FlinkConstants.FLINK_HISTORY_SERVER.equals(roleType)) {
@@ -48,6 +50,8 @@ public class FlinkRoleConfigProvider extends AbstractRoleConfigProvider {
                 .ifPresent(location -> serviceConfigs.add(config(STATE_SAVEPOINTS_DIR, location.getValue())));
         ConfigUtils.getStorageLocationForServiceProperty(source, HIGH_AVAILABILITY_STORAGE_DIR)
                 .ifPresent(location -> serviceConfigs.add(config(HIGH_AVAILABILITY_STORAGE_DIR, location.getValue())));
+        serviceConfigs.add(config(ATLAS_COLLECTION_ENABLED, "true"));
+
         return serviceConfigs;
     }
 

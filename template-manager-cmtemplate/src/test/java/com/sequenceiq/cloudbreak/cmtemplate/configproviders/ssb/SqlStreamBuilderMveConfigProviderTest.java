@@ -25,9 +25,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SqlStreamBuilderMveDatabaseConfigProviderTest {
+public class SqlStreamBuilderMveConfigProviderTest {
 
-    private final SqlStreamBuilderMveDatabaseConfigProvider underTest = new SqlStreamBuilderMveDatabaseConfigProvider();
+    private final SqlStreamBuilderMveConfigProvider underTest = new SqlStreamBuilderMveConfigProvider();
 
     @Test
     public void testNoConfigNeeded() {
@@ -54,9 +54,9 @@ public class SqlStreamBuilderMveDatabaseConfigProviderTest {
 
         assertThat(roleConfigs).hasSameElementsAs(
                 List.of(
-                        config(SqlStreamBuilderMveDatabaseConfigProvider.DATABASE_URL, "jdbc:postgresql://testhost:5432/ssb_mve"),
-                        config(SqlStreamBuilderMveDatabaseConfigProvider.DATABASE_USER, "ssb_test_user"),
-                        config(SqlStreamBuilderMveDatabaseConfigProvider.DATABASE_PASSWORD, "ssb_test_pw")
+                        config(SqlStreamBuilderMveConfigProvider.DATABASE_URL, "jdbc:postgresql://testhost:5432/ssb_mve"),
+                        config(SqlStreamBuilderMveConfigProvider.DATABASE_USER, "ssb_test_user"),
+                        config(SqlStreamBuilderMveConfigProvider.DATABASE_PASSWORD, "ssb_test_pw")
                 ));
     }
 

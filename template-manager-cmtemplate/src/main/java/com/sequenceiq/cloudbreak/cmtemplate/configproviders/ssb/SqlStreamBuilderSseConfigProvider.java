@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.FLINK_VERSION_1_15_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,7 +24,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilderConfigProvider {
+public class SqlStreamBuilderSseConfigProvider extends SqlStreamBuilderConfigProvider {
 
     static final String DATABASE_TYPE = "database_type";
 
@@ -38,7 +40,7 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
 
     static final String DATABASE_JDBC_URL_OVERRIDE = "database_jdbc_url_override";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqlStreamBuilderAdminDatabaseConfigProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlStreamBuilderSseConfigProvider.class);
 
     private static final String FLINK_PRODUCT = "FLINK";
 
@@ -66,10 +68,23 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView ssbRdsView = getRdsView(source);
 
+        Optional<ClouderaManagerProduct> flinkProduct = getFlinkProduct(source.getProductDetailsView().getProducts());
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
         addDbConfigs(ssbRdsView, configList);
-        addDbSslConfigsIfNeeded(ssbRdsView, configList, getFlinkProduct(source.getProductDetailsView().getProducts()));
+        addDbSslConfigsIfNeeded(ssbRdsView, configList, flinkProduct);
+        addReleaseNameIfNeeded(source, configList, flinkProduct);
+
         return configList;
+    }
+
+    @Override
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+        return emptyList();
+    }
+
+    @Override
+    public DatabaseType dbType() {
+        return DatabaseType.SQL_STREAM_BUILDER_ADMIN;
     }
 
     private void addDbConfigs(RdsView ssbRdsView, List<ApiClusterTemplateConfig> configList) {
@@ -92,10 +107,26 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
         return flinkProductOptional;
     }
 
-    private void addDbSslConfigsIfNeeded(RdsView ssbRdsView, List<ApiClusterTemplateConfig> configList, Optional<ClouderaManagerProduct> flinkProductOptional) {
-        flinkProductOptional.ifPresent(flinkProduct -> {
-            if (isVersionNewerOrEqualThanLimited(getFlinkVersion(flinkProduct), FLINK_VERSION_1_15_1) && ssbRdsView.isUseSsl()) {
+    private void addDbSslConfigsIfNeeded(
+            RdsView ssbRdsView,
+            List<ApiClusterTemplateConfig> configList,
+            Optional<ClouderaManagerProduct> flinkProduct) {
+        flinkProduct.ifPresent(fp -> {
+            if (isVersionNewerOrEqualThanLimited(getFlinkVersion(fp), FLINK_VERSION_1_15_1) && ssbRdsView.isUseSsl()) {
                 configList.add(config(DATABASE_JDBC_URL_OVERRIDE, ssbRdsView.getConnectionURL()));
+            }
+        });
+    }
+
+    private void addReleaseNameIfNeeded(
+            TemplatePreparationObject source,
+            List<ApiClusterTemplateConfig> configList,
+            Optional<ClouderaManagerProduct> flinkProduct) {
+        flinkProduct.ifPresent(fp -> {
+            String cdhVersion = getCdhVersion(source);
+
+            if (isUnifiedFlinkVersion(fp) && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1)) {
+                configList.add(config("release.name", "CSA-DH"));
             }
         });
     }
@@ -105,14 +136,8 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
         return flinkProduct.getVersion().split("-")[0];
     }
 
-    @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        return emptyList();
+    private boolean isUnifiedFlinkVersion(ClouderaManagerProduct flinkProduct) {
+        // Unified version scheme: 1.19.1-csa1.14.0.0-12345678
+        return !StringUtils.containsIgnoreCase(flinkProduct.getVersion(), "csadh");
     }
-
-    @Override
-    public DatabaseType dbType() {
-        return DatabaseType.SQL_STREAM_BUILDER_ADMIN;
-    }
-
 }

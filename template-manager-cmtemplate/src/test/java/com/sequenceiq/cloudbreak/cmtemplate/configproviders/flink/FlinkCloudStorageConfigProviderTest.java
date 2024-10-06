@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.flink;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FlinkCloudStorageConfigProviderTest {
 
     private static final String HISTORY_SERVER_ARCHIVE_FS_DIR_NAME = "historyserver_archive_fs_dir";
@@ -47,62 +47,69 @@ public class FlinkCloudStorageConfigProviderTest {
 
     private static final String HIGH_AVAILABILITY_STORAGE_DIR_VALUE = "s3a://bucket/flink/ha";
 
+    private static final String ATLAS_COLLECTION_ENABLED_NAME = "atlas_collection_enabled";
+
+    private static final String ATLAS_COLLECTION_ENABLED_VALUE = "true";
+
     private final FlinkRoleConfigProvider underTest = new FlinkRoleConfigProvider();
 
     @Test
     public void testGetFlinkCloudStorageRoleConfigs() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true);
-        String inputJson = getBlueprintText("input/flink.bp");
+        String inputJson = getFlinkBlueprintText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> flinkRoleConfigs = roleConfigs.get("flink-FLINK_HISTORY_SERVER-BASE");
-
-        Map<String, String> actual = flinkRoleConfigs.stream().collect(Collectors.toMap(
-                ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
+        Map<String, String> actual = ConfigTestUtil.getConfigNameToValueMap(flinkRoleConfigs);
 
         Map<String, String> expectedRoleConfigs = Map.of(
                 HISTORY_SERVER_ARCHIVE_FS_DIR_NAME, HISTORY_SERVER_ARCHIVE_FS_DIR_VALUE);
 
-        assertEquals(expectedRoleConfigs, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expectedRoleConfigs);
     }
 
     @Test
-    public void testGetFlinkCloudStorageServiceConfigs() {
+    public void testGetFlinkServiceConfigs() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true);
-        String inputJson = getBlueprintText("input/flink.bp");
+        String inputJson = getFlinkBlueprintText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
-        Map<String, String> actual = serviceConfigs.stream().collect(Collectors.toMap(
-                ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
+        Map<String, String> actual = ConfigTestUtil.getConfigNameToValueMap(serviceConfigs);
 
         Map<String, String> expectedServiceConfigs = Map.of(
                 JOBMANAGER_ARCHIVE_FS_DIR_NAME, JOBMANAGER_ARCHIVE_FS_DIR_VALUE,
                 STATE_CHECKPOINTS_DIR_NAME, STATE_CHECKPOINTS_DIR_VALUE,
                 STATE_SAVEPOINTS_DIR_NAME, STATE_SAVEPOINTS_DIR_VALUE,
-                HIGH_AVAILABILITY_STORAGE_DIR_NAME, HIGH_AVAILABILITY_STORAGE_DIR_VALUE);
+                HIGH_AVAILABILITY_STORAGE_DIR_NAME, HIGH_AVAILABILITY_STORAGE_DIR_VALUE,
+                ATLAS_COLLECTION_ENABLED_NAME, ATLAS_COLLECTION_ENABLED_VALUE);
 
-        assertEquals(expectedServiceConfigs, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expectedServiceConfigs);
     }
 
     @Test
     public void testGetFlinkCloudStorageRoleConfigsWhenNoCloudStorageProvided() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false);
-        String inputJson = getBlueprintText("input/flink.bp");
+        String inputJson = getFlinkBlueprintText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         List<ApiClusterTemplateConfig> flinkRoleConfigs = roleConfigs.get("flink-FLINK_HISTORY_SERVER-BASE");
 
-        assertEquals(0, flinkRoleConfigs.size());
+        assertThat(flinkRoleConfigs).isEmpty();
     }
 
     @Test
-    public void testGetFlinkCloudStorageServiceConfigsWhenNoCloudStorageProvided() {
+    public void testGetFlinkServiceConfigsWhenNoCloudStorageProvided() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false);
-        String inputJson = getBlueprintText("input/flink.bp");
+        String inputJson = getFlinkBlueprintText();
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(0, serviceConfigs.size());
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        Map<String, String> actual = ConfigTestUtil.getConfigNameToValueMap(serviceConfigs);
+
+        assertThat(actual).containsOnly(Map.entry(ATLAS_COLLECTION_ENABLED_NAME, ATLAS_COLLECTION_ENABLED_VALUE));
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(boolean includeLocations) {
@@ -132,7 +139,7 @@ public class FlinkCloudStorageConfigProviderTest {
         return new StorageLocationView(storageLocation);
     }
 
-    private String getBlueprintText(String path) {
-        return FileReaderUtils.readFileFromClasspathQuietly(path);
+    private String getFlinkBlueprintText() {
+        return FileReaderUtils.readFileFromClasspathQuietly("input/flink.bp");
     }
 }
