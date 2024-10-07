@@ -2,11 +2,9 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -15,12 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.dyngr.Polling;
-import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -70,18 +62,13 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.service.FlowService;
 
 @Service
 public class ClusterCommonService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCommonService.class);
-
-    private static final int SLEEP_INTERVAL_IN_SECONDS = 5;
 
     @Inject
     private HostGroupDecorator hostGroupDecorator;
@@ -103,12 +90,6 @@ public class ClusterCommonService {
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private FlowService flowService;
-
-    @Inject
-    private StackCommonService stackCommonService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
@@ -354,49 +335,8 @@ public class ClusterCommonService {
             CertificatesRotationV4Request certificatesRotationV4Request) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-
-        String hostGroup = "";
-        List<String> stoppedInstances = new ArrayList<>();
-        for (InstanceMetadataView instanceMetadataView : instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stack.getId())) {
-            if (instanceMetadataView.getInstanceStatus().equals(InstanceStatus.STOPPED)) {
-                stoppedInstances.add(instanceMetadataView.getInstanceId());
-                hostGroup = instanceMetadataView.getInstanceGroupName();
-            }
-        }
-
-        if (stoppedInstances.isEmpty()) {
-            LOGGER.info("There are no stopped instances present.");
-        } else {
-            LOGGER.info("There are stopped instances present. Trying to start them before private certificate rotation. Stopped instances: {}",
-                    stoppedInstances);
-            FlowIdentifier flowIdentifier = stackCommonService.putStartInstancesInDefaultWorkspace(nameOrCrn, accountId,
-                    populateUpdateStackJson(stoppedInstances.size(), hostGroup), ScalingStrategy.STOPSTART);
-            Polling.waitPeriodly(SLEEP_INTERVAL_IN_SECONDS, TimeUnit.SECONDS)
-                    .stopIfException(true)
-                    .run(() -> pollFlowState(flowIdentifier));
-        }
-
         validateOperationOnStack(stack, "Certificates rotation");
         return new CertificatesRotationV4Response(clusterOperationService.rotateAutoTlsCertificates(stack.getId(), certificatesRotationV4Request));
-    }
-
-    private AttemptResult<Boolean> pollFlowState(FlowIdentifier flowIdentifier) {
-        FlowCheckResponse flowState = flowService.getFlowChainState(flowIdentifier.getPollableId());
-        LOGGER.info("Instances start polling has active flow: {}, with latest fail: {}",
-                flowState.getHasActiveFlow(), flowState.getLatestFlowFinalizedAndFailed());
-        return flowState.getHasActiveFlow()
-                ? AttemptResults.justContinue()
-                : AttemptResults.finishWith(!flowState.getLatestFlowFinalizedAndFailed());
-    }
-
-    private UpdateStackV4Request populateUpdateStackJson(int scalingAdjustment, String hostGroup) {
-        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-        updateStackJson.setWithClusterEvent(true);
-        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
-        instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
-        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-        return updateStackJson;
     }
 
     public UpdateRecipesV4Response refreshRecipes(NameOrCrn nameOrCrn, Long workspaceId, UpdateRecipesV4Request request) {
@@ -422,9 +362,9 @@ public class ClusterCommonService {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. %s can only be made when the underlying stack is 'AVAILABLE'.",
                     stack.getName(), stack.getStatus(), operationDescription));
-        } else if (instanceMetaDataService.anyInstanceStopped(stack.getId())) {
-            throw new BadRequestException(String.format("Please start all stopped instances. %s can only be made when all your nodes in running state.",
-                    operationDescription));
+        } else if (stack.isDatalake() && instanceMetaDataService.anyInstanceStopped(stack.getId())) {
+            throw new BadRequestException(String.format("Please start all stopped instances in Datalake. " +
+                    "%s can only be made when all your nodes in running state.", operationDescription));
         }
     }
 

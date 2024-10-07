@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,11 +30,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -50,7 +46,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -66,9 +61,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.service.FlowService;
@@ -152,41 +145,18 @@ public class ClusterCommonServiceTest {
     }
 
     @Test
-    public void testRotateAutoTlsCertificatesWithStoppedInstancesThrowsException() {
+    public void testRotateAutoTlsCertificatesWithStoppedInstances() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
         StackView stack = mock(StackView.class);
         when(stack.isAvailable()).thenReturn(true);
+        when(stack.isDatalake()).thenReturn(true);
         when(instanceMetaDataService.anyInstanceStopped(any())).thenReturn(true);
         when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request));
-        assertEquals("Please start all stopped instances. Certificates rotation can only be made when all your nodes in running state.",
+        assertEquals("Please start all stopped instances in Datalake. Certificates rotation can only be made when all your nodes in running state.",
                 badRequestException.getMessage());
-    }
-
-    @Test
-    public void testRotateAutoTlsCertificateWithStoppedInstances() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
-        StackView stack = mock(StackView.class);
-        when(stack.isAvailable()).thenReturn(true);
-
-        HostGroup hostGroup1 = new HostGroup();
-        hostGroup1.setName("hostGroup1");
-        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
-        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.STOPPED, InstanceGroupType.CORE);
-        host1.setClusterManagerServer(true);
-        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
-        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(host1));
-        when(stackCommonService.putStartInstancesInDefaultWorkspace(any(), anyString(), any(),
-                any())).thenReturn(flowIdentifier);
-        setFlowState(true, false);
-
-        when(instanceMetaDataService.anyInstanceStopped(any())).thenReturn(false);
-        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
-        CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
-        when(clusterOperationService.rotateAutoTlsCertificates(anyLong(), any())).thenReturn(flowIdentifier);
-        underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request);
     }
 
     @Test
@@ -602,27 +572,5 @@ public class ClusterCommonServiceTest {
         } else {
             verifyNoInteractions(cmTemplateValidator);
         }
-    }
-
-    private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setInstanceGroupType(instanceGroupType);
-        instanceGroup.setGroupName(groupName);
-
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN(hostName);
-        instanceMetaData.setInstanceGroup(instanceGroup);
-        instanceMetaData.setInstanceStatus(instanceStatus);
-        instanceMetaData.setInstanceId(hostName);
-        instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
-
-        return instanceMetaData;
-    }
-
-    private void setFlowState(boolean finished, boolean failed) {
-        FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
-        flowCheckResponse.setHasActiveFlow(!finished);
-        flowCheckResponse.setLatestFlowFinalizedAndFailed(failed);
-        when(flowService.getFlowChainState(any())).thenReturn(flowCheckResponse);
     }
 }
