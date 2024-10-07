@@ -33,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSaltPasswordActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class RotateSaltPasswordE2ETest extends AbstractE2ETest {
 
@@ -98,10 +99,16 @@ public class RotateSaltPasswordE2ETest extends AbstractE2ETest {
         createDatalakeWithoutDatabase(testContext);
         testContext
                 .given(SdxInternalTestDto.class)
+                // legacy rotation
                 .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getSdxIpAddresses(testDto)))
                 .when(sdxTestClient.rotateSaltPassword())
                 .awaitForFlow()
                 .await(SdxClusterStatusResponse.RUNNING)
+                .then((testContext1, testDto, client) -> validateSaltPasswordRotation(testDto, getSdxIpAddresses(testDto)))
+                // secret rotation framework
+                .then((testContext1, testDto, client) -> preSaltPasswordRotation(testDto, getSdxIpAddresses(testDto)))
+                .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.SALT_PASSWORD)))
+                .awaitForFlow()
                 .then((testContext1, testDto, client) -> validateSaltPasswordRotation(testDto, getSdxIpAddresses(testDto)))
                 .validate();
         LOGGER.info("SDX salt password rotation test PASSED");
