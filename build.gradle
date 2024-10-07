@@ -115,7 +115,7 @@ allprojects {
         force "org.testng:testng:$testNgVersion"
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "org.springframework.security:spring-security-web:$springSecurityVersion"
-        force "org.ow2.asm:asm:9.7"
+        force "org.ow2.asm:asm:9.7.1"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
         force "junit:junit:$junitVersion"
