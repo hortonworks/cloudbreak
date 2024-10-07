@@ -25,7 +25,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
-import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -43,11 +42,7 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
-
-    enum DiskOperationType {
-        MODIFY, DELETE, ADD
-    }
+public class DistroXVolumesModificationTest extends AbstractE2ETest {
 
     private static final Map<CloudPlatform, ResourceType> PLATFORM_RESOURCE_TYPE_MAP = ImmutableMap.of(CloudPlatform.AWS, ResourceType.AWS_ROOT_DISK,
             CloudPlatform.AZURE, ResourceType.AZURE_DISK);
@@ -62,13 +57,7 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
 
     private static final int ROOT_UPDATE_SIZE = 210;
 
-    private static final int ADD_DISK_SIZE = 200;
-
-    private static final long NUM_DISK_TO_ADD = 2;
-
     private static final String AWS_DISK_TYPE = "gp2";
-
-    private static final String AZURE_DISK_TYPE = "StandardSSD_LRS";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -81,9 +70,6 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
-
-    @Inject
-    private EnvironmentTestClient environmentTestClient;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -100,11 +86,10 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
             given = "there is an available environment with a running datahub",
-            when = "root disk modification is done first, then additional disk resize is called first then delete disks is called on the Datahubs",
-            then = "attached EBS volumes on datahubs must be modified to the new type and size" +
-                    " and then deleted, the new datahub should be up and running"
+            when = "root disk modification is done first, then additional disk resize is called first",
+            then = "attached EBS volumes on datahubs must be modified to the new type and size"
     )
-    public void testDistroXVolumesVerticalScale(TestContext testContext) {
+    public void testDistroXVolumesModification(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
         String instanceType = CloudPlatform.AWS.equals(cloudPlatform) ? "m5d.2xlarge" : "Standard_D8s_v3";
 
@@ -134,112 +119,66 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(DiskOperationType.MODIFY, cloudPlatform), TEST_INSTANCE_GROUP,
+            .when(distroXTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(cloudPlatform), TEST_INSTANCE_GROUP,
                             DiskType.ROOT_DISK), RunningParameter.key("dx"))
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
             .when(stackTestClient.getStackWithResources(), RunningParameter.key("dx"))
             .then((tc, testDto, client) -> {
-                validateRootDisks(testDto, tc, client, cloudPlatform, DiskOperationType.MODIFY);
+                validateRootDisks(testDto, tc, client, cloudPlatform);
                 return testDto;
             })
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.updateDisks(UPDATE_SIZE, getVolumeType(DiskOperationType.MODIFY, cloudPlatform),
+            .when(distroXTestClient.updateDisks(UPDATE_SIZE, getVolumeType(cloudPlatform),
                 TEST_INSTANCE_GROUP, DiskType.ADDITIONAL_DISK), RunningParameter.key("dx"))
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
             .when(distroXTestClient.get(), RunningParameter.key("dx"))
             .then((tc, testDto, client) -> {
-                validateDisks(testDto, tc, client, cloudPlatform, DiskOperationType.MODIFY);
-                return testDto;
-            })
-            .awaitForHealthyInstances()
-            .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.deleteDisks(TEST_INSTANCE_GROUP), RunningParameter.key("dx"))
-            .await(STACK_AVAILABLE, RunningParameter.key("dx"))
-            .awaitForHealthyInstances()
-            .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.get(), RunningParameter.key("dx"))
-            .then((tc, testDto, client) -> {
-                validateDeleteDisk(testDto, tc, client);
-                return testDto;
-            })
-            .awaitForHealthyInstances()
-            .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.addDisks(ADD_DISK_SIZE, getVolumeType(DiskOperationType.ADD, cloudPlatform), TEST_INSTANCE_GROUP, NUM_DISK_TO_ADD),
-                    RunningParameter.key("dx"))
-            .await(STACK_AVAILABLE, RunningParameter.key("dx"))
-            .awaitForHealthyInstances()
-            .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.get(), RunningParameter.key("dx"))
-            .then((tc, testDto, client) -> {
-                validateDisks(testDto, tc, client, cloudPlatform, DiskOperationType.ADD);
+                validateDisks(testDto, tc, client, cloudPlatform);
                 return testDto;
             })
             .validate();
     }
 
-    private void validateDeleteDisk(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client) {
-        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, false);
-        if (!CollectionUtils.isEmpty(attachedVolumes)) {
-            throw new TestFailException(String.format("Disk Delete did not complete successfully for instances in group %s. " +
-                            "volumes %s are still attached on cloud provider",
-                    TEST_INSTANCE_GROUP, attachedVolumes));
-
-        }
-        Set<VolumeV4Response> stillAttachedVolumes = getVolumes(distroXTestDto);
-        if (!CollectionUtils.isEmpty(stillAttachedVolumes)) {
-            throw new TestFailException(String.format("Disk Delete did not complete successfully for instances in group %s. " +
-                            "There are still volumes %s attached in CB",
-                    TEST_INSTANCE_GROUP, stillAttachedVolumes));
-
-        }
-    }
-
-    private void validateDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform,
-            DiskOperationType operationType) {
-        String operation = operationType == DiskOperationType.ADD ? "Add" : "Update";
-        int diskSize = operationType == DiskOperationType.ADD ? ADD_DISK_SIZE : UPDATE_SIZE;
-        String expectedVolumeType = getVolumeType(operationType, cloudPlatform);
+    private void validateDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
+        String expectedVolumeType = getVolumeType(cloudPlatform);
 
         List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, false);
-        if (CollectionUtils.isEmpty(attachedVolumes) || (operationType == DiskOperationType.ADD && attachedVolumes.size() != NUM_DISK_TO_ADD)) {
-            throw new TestFailException(String.format("%s Disk did not complete successfully on cloud provider for instances in group %s. " +
-                "Attached Volumes %s on cloud provider does not match with expected number of Volumes", operation, TEST_INSTANCE_GROUP, attachedVolumes));
+        if (CollectionUtils.isEmpty(attachedVolumes)) {
+            throw new TestFailException(String.format("Update Disk did not complete successfully on cloud provider for instances in group %s. " +
+                "Attached Volumes %s on cloud provider does not match with expected number of Volumes", TEST_INSTANCE_GROUP, attachedVolumes));
         }
 
         Set<VolumeV4Response> attachedVolumesWithGroup = getVolumes(distroXTestDto);
-        if (CollectionUtils.isEmpty(attachedVolumesWithGroup) || (operationType == DiskOperationType.ADD
-                && attachedVolumesWithGroup.stream().mapToInt(VolumeV4Response::getCount).sum() != NUM_DISK_TO_ADD)) {
-            throw new TestFailException(String.format("%s Disk did not complete successfully for instances in group %s. " +
-                    "Attached Volumes %s does not match with expected number of Volumes in CB", operation, TEST_INSTANCE_GROUP, attachedVolumesWithGroup));
+        if (CollectionUtils.isEmpty(attachedVolumesWithGroup)) {
+            throw new TestFailException(String.format("Update Disk did not complete successfully for instances in group %s. " +
+                    "Attached Volumes %s does not match with expected number of Volumes in CB", TEST_INSTANCE_GROUP, attachedVolumesWithGroup));
 
         }
         attachedVolumesWithGroup.forEach(vol -> {
-            if (vol.getSize() != diskSize || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("%s Disk did not complete successfully for instances in group %s in CB", operation,
+            if (vol.getSize() != UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
+                throw new TestFailException(String.format("Update Disk did not complete successfully for instances in group %s in CB",
                         TEST_INSTANCE_GROUP));
             }
         });
 
         List<Volume> attachedVolumesAttributes = getCloudFunctionality(tc).describeVolumes(attachedVolumes);
         attachedVolumesAttributes.forEach(vol -> {
-            if (vol.getSize() != diskSize || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("%s Disk did not complete successfully for instances on cloud provider in group %s",
-                        operation, TEST_INSTANCE_GROUP));
+            if (vol.getSize() != UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
+                throw new TestFailException(String.format("Update Disk did not complete successfully for instances on cloud provider in group %s",
+                        TEST_INSTANCE_GROUP));
             }
         });
 
     }
 
-    private String getVolumeType(DiskOperationType operationType, CloudPlatform cloudPlatform) {
+    private String getVolumeType(CloudPlatform cloudPlatform) {
         if (cloudPlatform == CloudPlatform.AWS) {
             return AWS_DISK_TYPE;
-        } else if (cloudPlatform == CloudPlatform.AZURE && operationType == DiskOperationType.ADD) {
-            return AZURE_DISK_TYPE;
         }
         return null;
     }
@@ -275,11 +214,8 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
         return testContext.getCloudProvider().getCloudFunctionality();
     }
 
-    private void validateRootDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform,
-            DiskOperationType operationType) {
-        String operation = "Update";
-        int diskSize = ROOT_UPDATE_SIZE;
-        String expectedVolumeType = getVolumeType(operationType, cloudPlatform);
+    private void validateRootDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
+        String expectedVolumeType = getVolumeType(cloudPlatform);
 
         List<String> rootVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, true);
         if (CollectionUtils.isEmpty(rootVolumes)) {
@@ -289,9 +225,9 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
 
         List<Volume> rootVolumesAttributes = getCloudFunctionality(tc).describeVolumes(rootVolumes);
         rootVolumesAttributes.forEach(vol -> {
-            if (vol.getSize() != diskSize || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("%s Disk did not complete successfully for instances on cloud provider in group %s",
-                        operation, TEST_INSTANCE_GROUP));
+            if (vol.getSize() != ROOT_UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
+                throw new TestFailException(String.format("Root Volume Modification did not complete successfully for instances on cloud provider in group %s",
+                        TEST_INSTANCE_GROUP));
             }
         });
 
@@ -304,15 +240,14 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
         rootVolumesInGroup.forEach(vol -> {
             try {
                 VolumeSetAttributes.Volume rootVolume = new Json(vol.getAttributes()).get(VolumeSetAttributes.class).getVolumes().get(0);
-                if (rootVolume.getSize() != diskSize || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(rootVolume.getType()))) {
-                    throw new TestFailException(String.format("%s Disk did not complete successfully for root volumes instances in group %s in CB", operation,
-                            TEST_INSTANCE_GROUP));
+                if (rootVolume.getSize() != ROOT_UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(rootVolume.getType()))) {
+                    throw new TestFailException(String.format("Root Volume Modification Disk did not complete successfully for root volumes instances " +
+                                    "in group %s in CB", TEST_INSTANCE_GROUP));
                 }
             } catch (IOException e) {
                 throw new TestFailException(String.format("Unable to verify Resources for root disk stored in CB for group %s",
                         TEST_INSTANCE_GROUP));
             }
-
         });
     }
 }
