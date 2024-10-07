@@ -107,7 +107,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public CloudbreakTestDto refresh() {
-        return when(stackTestClient.refreshV4(), key("refresh-stack-" + getName()).withSkipOnFail(false));
+        return when(stackTestClient.refreshV4(), key("refresh-stack-" + getName()).withSkipOnFail(false).withLogError(false));
     }
 
     @Override

@@ -527,7 +527,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public CloudbreakTestDto refresh() {
         LOGGER.info("Refresh FreeIPA with name: {}", getName());
-        return when(freeIpaTestClient.refresh(), key("refresh-freeipa-" + getName()).withSkipOnFail(false));
+        return when(freeIpaTestClient.refresh(), key("refresh-freeipa-" + getName()).withSkipOnFail(false).withLogError(false));
     }
 
     @Override

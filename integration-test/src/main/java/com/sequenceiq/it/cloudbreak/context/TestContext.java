@@ -329,8 +329,8 @@ public abstract class TestContext implements ApplicationContextAware {
             if (runningParameter.isLogError()) {
                 LOGGER.error("when [{}] action is failed: {}, name: {}", key, ResponseUtil.getErrorMessage(e), entity.getName(), e);
                 Log.when(null, action.getClass().getSimpleName() + " action is failed: " + ResponseUtil.getErrorMessage(e));
+                getExceptionMap().put(key, e);
             }
-            getExceptionMap().put(key, e);
         }
         return entity;
     }
