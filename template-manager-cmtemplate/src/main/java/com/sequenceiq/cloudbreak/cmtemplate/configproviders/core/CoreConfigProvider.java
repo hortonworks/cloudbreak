@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionOlderThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_DEFAULTFS;
@@ -8,12 +7,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRole
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_SERVICE_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.ENVIRONMENT_ACCOUNT_ID;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.ENVIRONMENT_CLOUD_PROVIDER;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.ENVIRONMENT_CRN;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.RESOURCE_CRN;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.STORAGEOPERATIONS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.NAMENODE;
@@ -43,7 +38,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigPr
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -85,15 +79,6 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
         if (source.getGeneralClusterConfigs().isGovCloud()) {
             apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
-        }
-
-        if (templateProcessor.getCmVersion().isPresent()
-                && isVersionNewerOrEqualThanLimited(templateProcessor.getCmVersion().get(), CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_12_0_500)) {
-            CloudPlatform cloudPlatform = source.getCloudPlatform();
-            apiClusterTemplateConfigs.add(config(ENVIRONMENT_CRN, source.getGeneralClusterConfigs().getEnvironmentCrn()));
-            apiClusterTemplateConfigs.add(config(RESOURCE_CRN, source.getGeneralClusterConfigs().getResourceCrn()));
-            apiClusterTemplateConfigs.add(config(ENVIRONMENT_ACCOUNT_ID, source.getGeneralClusterConfigs().getAccountId().orElse("UNKNOWN")));
-            apiClusterTemplateConfigs.add(config(ENVIRONMENT_CLOUD_PROVIDER, cloudPlatform == null ? null : cloudPlatform.name()));
         }
 
         return apiClusterTemplateConfigs;

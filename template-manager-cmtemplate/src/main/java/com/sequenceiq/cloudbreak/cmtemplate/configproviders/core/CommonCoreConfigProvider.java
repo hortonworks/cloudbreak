@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class CommonServiceConfigProvider extends CoreConfigProvider {
+public class CommonCoreConfigProvider extends CoreConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {

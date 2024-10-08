@@ -2,16 +2,13 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_12_0_500;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +24,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
-class CommonServiceConfigProviderTest {
+class CommonCoreConfigProviderTest {
 
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
@@ -41,7 +38,7 @@ class CommonServiceConfigProviderTest {
     private AutoCloseable closeable;
 
     @InjectMocks
-    private CommonServiceConfigProvider commonServiceConfigProvider;
+    private CommonCoreConfigProvider commonCoreConfigProvider;
 
     @BeforeEach
     void setUp() {
@@ -68,7 +65,7 @@ class CommonServiceConfigProviderTest {
         when(generalClusterConfigs.getEnvironmentCrn()).thenReturn(environmentCrn);
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
         when(cmTemplateProcessor.getCmVersion()).thenReturn(Optional.ofNullable(CLOUDERAMANAGER_VERSION_7_12_0_500.getVersion()));
-        List<ApiClusterTemplateConfig> serviceConfigs = commonServiceConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
+        List<ApiClusterTemplateConfig> serviceConfigs = commonCoreConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
         assertEquals(4, serviceConfigs.size());
         assertEquals("environment_crn", serviceConfigs.get(0).getName());
         assertEquals(environmentCrn, serviceConfigs.get(0).getValue());
@@ -81,13 +78,40 @@ class CommonServiceConfigProviderTest {
     }
 
     @Test
-    public void testGetAdditionalServicesCallsCommonServiceConfigProviderHostGroupViewFilter() {
-        Set<HostgroupView> hostgroupViews = mock(Set.class);
-        when(source.getHostgroupViews()).thenReturn(hostgroupViews);
-        when(cmTemplateProcessor.getServiceByType(anyString())).thenReturn(Optional.empty());
-        when(hostgroupViews.stream()).thenReturn(mock(Stream.class));
-        CommonServiceConfigProvider spyCommonServiceConfigProvider = spy(CommonServiceConfigProvider.class);
-        spyCommonServiceConfigProvider.getAdditionalServices(cmTemplateProcessor, source);
-        verify(spyCommonServiceConfigProvider).filterByHostGroupViewType();
+    void testGetServiceConfigsWhenAccountIdIsEmpty() {
+        String resourceCrn = "test-resource-crn";
+
+        when(generalClusterConfigs.getResourceCrn()).thenReturn(resourceCrn);
+        when(generalClusterConfigs.getAccountId()).thenReturn(Optional.empty());
+        when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
+        when(cmTemplateProcessor.getCmVersion()).thenReturn(Optional.ofNullable(CLOUDERAMANAGER_VERSION_7_12_0_500.getVersion()));
+
+        List<ApiClusterTemplateConfig> configs = commonCoreConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
+
+        assertEquals(4, configs.size());
+        assertEquals("UNKNOWN", configs.get(2).getValue());
+    }
+
+    @Test
+    void testIsConfigurationRequiredReturnsTrue() {
+        assertTrue(commonCoreConfigProvider.isConfigurationNeeded(cmTemplateProcessor, source));
+    }
+
+    @Test
+    void testFilterByHostGroupViewTypeReturnsCorrectPredicate() {
+        assertTrue(commonCoreConfigProvider.filterByHostGroupViewType().test(mock(HostgroupView.class)));
+        assertTrue(commonCoreConfigProvider.filterByHostGroupViewType().test(null));
+    }
+
+    @Test
+    void testShouldNotReturnAnyClusterConfigIfCMVersionIsNotApplicable() {
+        // anything less than 7.12.0.500 or empty is not applicable
+        Set<String> cmVersions = Set.of("7.12.0", "7.11.0", "7.12.0.400", "");
+        cmVersions.forEach(cmVersion -> {
+            when(cmTemplateProcessor.getCmVersion()).thenReturn(Optional.ofNullable(cmVersion));
+            List<ApiClusterTemplateConfig> serviceConfigs = commonCoreConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
+            assertEquals(0, serviceConfigs.size());
+        });
+
     }
 }
