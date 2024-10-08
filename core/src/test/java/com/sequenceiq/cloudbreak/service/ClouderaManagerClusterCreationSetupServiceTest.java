@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerClusterCreationSetupServiceTest {
@@ -75,6 +76,8 @@ class ClouderaManagerClusterCreationSetupServiceTest {
     private static final String REDHAT_7 = "redhat7";
 
     private static final String CENTOS_7 = "centos7";
+
+    private static final Architecture ARCH = Architecture.X86_64;
 
     private static final String IMAGE_CATALOG_NAME = "imgcatname";
 
@@ -126,6 +129,7 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         stack.setWorkspace(workspace);
         stack.setCloudPlatform("AWS");
         stack.setPlatformVariant("AWS");
+        stack.setArchitecture(ARCH);
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         Image image = Image.builder()
@@ -153,11 +157,11 @@ class ClouderaManagerClusterCreationSetupServiceTest {
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)),
                 NEWER_CDH_VERSION, new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(NEWER_CDH_VERSION),
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)));
-        lenient().when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), imageCatalogPlatform("AWS"), CENTOS_7, IMAGE_CATALOG_NAME))
+        lenient().when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), imageCatalogPlatform("AWS"), CENTOS_7, ARCH, IMAGE_CATALOG_NAME))
                 .thenReturn(defaultCDHInfoMap);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(OLDER_CDH_VERSION, null));
-        lenient().when(stackMatrixService.getStackMatrix(eq(workspace.getId()), eq(imageCatalogPlatform("AWS")), eq(CENTOS_7), anyString()))
+        lenient().when(stackMatrixService.getStackMatrix(workspace.getId(), imageCatalogPlatform("AWS"), CENTOS_7, ARCH, IMAGE_CATALOG_NAME))
                 .thenReturn(stackMatrixV4Response);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
     }
@@ -267,13 +271,13 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     private void setupDefaultClouderaManagerEntries() throws CloudbreakImageCatalogException {
         ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(true);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", SOME_CDH_VERSION, imageCatalogPlatform("AWS")))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(WORKSPACE_ID), eq(SOME_CDH_VERSION), eq(imageCatalogPlatform("AWS")), any()))
                 .thenReturn(clouderaManagerRepo);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", NEWER_CDH_VERSION, (imageCatalogPlatform("AWS"))))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(WORKSPACE_ID), eq(NEWER_CDH_VERSION), eq(imageCatalogPlatform("AWS")), any()))
                 .thenReturn(clouderaManagerRepo);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", OLDER_CDH_VERSION, imageCatalogPlatform("AWS")))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(WORKSPACE_ID), eq(OLDER_CDH_VERSION), eq(imageCatalogPlatform("AWS")), any()))
                 .thenReturn(clouderaManagerRepo);
-        lenient().when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, CENTOS_7, "CDH", null, imageCatalogPlatform("AWS")))
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(WORKSPACE_ID), eq(null), eq(imageCatalogPlatform("AWS")), any()))
                 .thenReturn(clouderaManagerRepo);
     }
 

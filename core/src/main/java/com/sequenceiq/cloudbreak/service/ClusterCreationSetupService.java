@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
@@ -123,7 +124,7 @@ public class ClusterCreationSetupService {
                         Component stackImageComponent = allComponent.stream()
                                 .filter(c -> c.getComponentType().equals(ComponentType.IMAGE) && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name()))
                                 .findAny()
-                                .orElse(null);
+                                .orElseThrow(() -> new NotFoundException("Image component not found for stack " + stackName));
                         return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
                                 request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
                     }

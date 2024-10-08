@@ -6,21 +6,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.RepoTestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerInfoV4Response;
@@ -33,20 +32,21 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.common.model.Architecture;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DefaultClouderaManagerRepoServiceTest {
 
-    private static final String CDH = "CDH";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    private static final Architecture ARCH = Architecture.X86_64;
 
     @Mock
     private StackMatrixService stackMatrixService;
 
     @Mock
     private Image image;
+
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.model.Image imageModel;
 
     @Mock
     private StackTypeResolver stackTypeResolver;
@@ -57,7 +57,7 @@ public class DefaultClouderaManagerRepoServiceTest {
     @InjectMocks
     private DefaultClouderaManagerRepoService underTest;
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         Map<String, ClouderaManagerStackDescriptorV4Response> cdhMap = new HashMap<>();
@@ -79,30 +79,29 @@ public class DefaultClouderaManagerRepoServiceTest {
         cdhMap.put("6.2.0", cdhDescriptor620);
 
         stackMatrixV4Response.setCdh(cdhMap);
-        when(stackMatrixService.getStackMatrix(any(), any())).thenReturn(stackMatrixV4Response);
+        lenient().when(stackMatrixService.getStackMatrix(any(), any(), any(), any(), any())).thenReturn(stackMatrixV4Response);
+
+        lenient().when(imageModel.getOs()).thenReturn("centos7");
+        lenient().when(imageModel.getOsType()).thenReturn("redhat7");
     }
 
     @Test
     public void testDefaultRepoWithCDHWhichDoesNotExists() throws Exception {
-        ClouderaManagerRepo repo = underTest.getDefault("redhat7", "centos7", CDH, "2.6", null);
+        ClouderaManagerRepo repo = underTest.getDefault(0L, "2.6", null, imageModel);
         assertNull(repo);
     }
 
     @Test
     public void testDefaultRepoWithOSWhichDoesNotExists() throws Exception {
-        ClouderaManagerRepo repo = underTest.getDefault("ubuntu", "ubuntu", CDH, "6.1.0", null);
-        assertNull(repo);
-    }
-
-    @Test
-    public void testDefaultRepoWithStackTypeWhichDoesNotExists() throws Exception {
-        ClouderaManagerRepo repo = underTest.getDefault("redhat7", "centos7", "NA", "6.1.0", null);
+        when(imageModel.getOs()).thenReturn("ubuntu");
+        when(imageModel.getOsType()).thenReturn("ubuntu");
+        ClouderaManagerRepo repo = underTest.getDefault(0L, "6.1.0", null, imageModel);
         assertNull(repo);
     }
 
     @Test
     public void testDefaultRepoWithCDHWhichExists() throws Exception {
-        ClouderaManagerRepo repo = underTest.getDefault("redhat7", "centos7", CDH, "6.1.0", null);
+        ClouderaManagerRepo repo = underTest.getDefault(0L, "6.1.0", null, imageModel);
         assertEquals("6.1.0", repo.getVersion());
         assertEquals("http://redhat7-base/6.1.0", repo.getBaseUrl());
         assertEquals("http://redhat7-gpg/6.1.0", repo.getGpgKeyUrl());

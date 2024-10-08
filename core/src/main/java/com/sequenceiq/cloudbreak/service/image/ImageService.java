@@ -160,7 +160,7 @@ public class ImageService {
                 .withImageCatalog(getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user))
                 .withPlatforms(Set.of(platform))
                 .withBaseImageEnabled(baseImageEnabled)
-                .withOperatingSystems(getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform))
+                .withOperatingSystems(getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform, architecture))
                 .withClusterVersion(selectBaseImage ? null : clusterVersion)
                 .withArchitecture(architecture)
                 .withAdditionalPredicate(imagePredicate)
@@ -225,20 +225,21 @@ public class ImageService {
             throws CloudbreakImageCatalogException {
         String imageCatalogName = image.getImageCatalogName();
         String os = image.getImage().getOs();
-        return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+        Architecture architecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
+        return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, architecture, imageCatalogName);
     }
 
-    private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, ImageCatalogPlatform platform)
-            throws CloudbreakImageCatalogException {
+    private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, ImageCatalogPlatform platform,
+            Architecture architecture) throws CloudbreakImageCatalogException {
         String imageCatalogName = imageSettings != null ? imageSettings.getCatalog() : null;
         String os = imageSettings != null ? imageSettings.getOs() : null;
-        return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+        return getSupportedOperationSystems(workspaceId, clusterVersion, platform, os, architecture, imageCatalogName);
     }
 
-    private Set<String> getSupportedOperationSystems(Long workspaceId, String clusterVersion, ImageCatalogPlatform platform, String os, String imageCatalogName)
-            throws CloudbreakImageCatalogException {
+    private Set<String> getSupportedOperationSystems(Long workspaceId, String clusterVersion, ImageCatalogPlatform platform, String os,
+            Architecture architecture, String imageCatalogName) throws CloudbreakImageCatalogException {
         try {
-            Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, imageCatalogName);
+            Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, os, architecture, imageCatalogName);
             if (StringUtils.isNotEmpty(os)) {
                 if (operatingSystems.isEmpty()) {
                     operatingSystems = Collections.singleton(os);
