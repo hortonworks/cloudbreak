@@ -202,7 +202,7 @@ public class PkiUtil {
         }
     }
 
-    public static String convert(PublicKey publicKey) {
+    public static String convertPemPublicKey(PublicKey publicKey) {
         try {
             return convertToString(publicKey);
         } catch (Exception e) {
@@ -268,10 +268,10 @@ public class PkiUtil {
         }
     }
 
-    public static String calculatePublicKeyInBase64(String privateKeyPemInBase64) {
-        PublicKey publicKey = getPublicKey(new String(BaseEncoding.base64().decode(privateKeyPemInBase64)));
-        String openSshFormatPublicKey = convertOpenSshPublicKey(publicKey);
-        return BaseEncoding.base64().encode(openSshFormatPublicKey.getBytes());
+    public static String calculatePemPublicKeyInBase64(String pemPrivateKeyInBase64) {
+        PublicKey publicKey = getPublicKey(new String(BaseEncoding.base64().decode(pemPrivateKeyInBase64)));
+        String pemFormatPublicKey = convertPemPublicKey(publicKey);
+        return BaseEncoding.base64().encode(pemFormatPublicKey.getBytes());
     }
 
     private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey, int validity)

@@ -104,7 +104,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         StackDto stack = stackService.getByCrn(resourceCrn);
         RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        saltSecurityConfig.setSaltBootSignPublicKey(PkiUtil.calculatePublicKeyInBase64(mapper.apply(saltBootPrivateKey)));
+        saltSecurityConfig.setSaltBootSignPublicKey(PkiUtil.calculatePemPublicKeyInBase64(mapper.apply(saltBootPrivateKey)));
         securityConfigService.save(saltSecurityConfig);
     }
 

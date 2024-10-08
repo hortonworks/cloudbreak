@@ -166,4 +166,8 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
         this.saltSignPrivateKey = new Secret(saltSignPrivateKey);
     }
 
+    public Secret getSaltSignPrivateKeySecret() {
+        return saltSignPrivateKey;
+    }
+
 }

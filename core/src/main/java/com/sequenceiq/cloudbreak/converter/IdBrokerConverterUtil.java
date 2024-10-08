@@ -22,7 +22,7 @@ public class IdBrokerConverterUtil {
         X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
 
         idBroker.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
-        idBroker.setSignPub(PkiUtil.convert(identityKey.getPublic()));
+        idBroker.setSignPub(PkiUtil.convertPemPublicKey(identityKey.getPublic()));
         idBroker.setSignCert(PkiUtil.convert(cert));
         idBroker.setMasterSecret(PasswordUtil.generatePassword());
 

@@ -93,7 +93,7 @@ public class TlsSecurityService {
 
     private Pair<String, String> convertKeyPair(KeyPair keyPair) {
         String privateKey = PkiUtil.convert(keyPair.getPrivate());
-        String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
+        String publicKey = PkiUtil.convertPemPublicKey(keyPair.getPublic());
         return new ImmutablePair<>(privateKey, publicKey);
     }
 

@@ -56,7 +56,7 @@ public class GatewayService {
         X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
 
         String signKey = PkiUtil.convert(identityKey.getPrivate());
-        String signPub = PkiUtil.convert(identityKey.getPublic());
+        String signPub = PkiUtil.convertPemPublicKey(identityKey.getPublic());
         String signCert = PkiUtil.convert(cert);
         gateway.setSignKey(signKey);
         gateway.setSignPub(signPub);
@@ -92,7 +92,7 @@ public class GatewayService {
             KeyPair keyPairFromClusterProxy = clusterProxyRotationService.readClusterProxyTokenKeys(readConfigResponse);
             if (gateway.getTokenKeySecret() == null || gateway.getTokenKeySecret().getRaw() == null) {
                 gateway.setTokenKeySecret(PkiUtil.convert(keyPairFromClusterProxy.getPrivate()));
-                gateway.setTokenPubSecret(PkiUtil.convert(keyPairFromClusterProxy.getPublic()));
+                gateway.setTokenPubSecret(PkiUtil.convertPemPublicKey(keyPairFromClusterProxy.getPublic()));
             }
             if (gateway.getTokenCertSecret() == null || gateway.getTokenCertSecret().getRaw() == null) {
                 gateway.setTokenCertSecret(gateway.getTokenCert());

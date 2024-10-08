@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
@@ -99,6 +100,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                     USER_KEYPAIR,
                     SALT_BOOT_SECRETS,
                     SALT_MASTER_KEY_PAIR,
+                    SALT_SIGN_KEY_PAIR,
                     CLUSTER_MGMT_CM_ADMIN_PASSWORD,
                     CLUSTER_CB_CM_ADMIN_PASSWORD,
                     CLUSTER_CM_DB_PASSWORD,

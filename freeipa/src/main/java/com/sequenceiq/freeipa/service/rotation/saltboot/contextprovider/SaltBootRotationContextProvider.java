@@ -116,7 +116,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         RotationSecret saltBootPassword = uncachedSecretServiceForRotation.getRotation(saltBootPasswordSecret);
         RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         String privateKey = mapper.apply(saltBootPrivateKey);
-        securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(PkiUtil.calculatePublicKeyInBase64(privateKey));
+        securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(PkiUtil.calculatePemPublicKeyInBase64(privateKey));
         securityConfigService.save(securityConfig);
     }
 

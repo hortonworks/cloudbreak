@@ -3,15 +3,12 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
-import java.security.KeyPair;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,11 +35,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
-public class SaltMasterKeyPairRotationContextProvider implements RotationContextProvider {
+public class SaltSignKeyPairRotationContextProvider implements RotationContextProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltMasterKeyPairRotationContextProvider.class);
-
-    private static final BaseEncoding BASE64 = BaseEncoding.base64();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltSignKeyPairRotationContextProvider.class);
 
     @Inject
     private StackDtoService stackDtoService;
@@ -58,46 +53,34 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
 
     @Override
     public SecretType getSecret() {
-        return CloudbreakSecretType.SALT_MASTER_KEY_PAIR;
+        return CloudbreakSecretType.SALT_SIGN_KEY_PAIR;
     }
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
-        Map<SecretRotationStep, RotationContext> contexts = new HashMap<>();
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        generateAndStoreSaltMasterKeyPairIfMissing(saltSecurityConfig);
-        String saltMasterPrivateKeySecretPath = saltSecurityConfig.getSaltMasterPrivateKeySecret().getSecret();
+        String saltSignPrivateKeySecretPath = saltSecurityConfig.getSaltSignPrivateKeySecret().getSecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
-                .put(VAULT, getVaultRotationContext(resourceCrn, saltMasterPrivateKeySecretPath))
-                .put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn, saltMasterPrivateKeySecretPath))
+                .put(VAULT, getVaultRotationContext(resourceCrn, saltSignPrivateKeySecretPath))
+                .put(CUSTOM_JOB, getCustomJobRotationContext(resourceCrn, saltSignPrivateKeySecretPath))
                 .build();
     }
 
-    private void generateAndStoreSaltMasterKeyPairIfMissing(SaltSecurityConfig saltSecurityConfig) {
-        if (StringUtils.isEmpty(saltSecurityConfig.getSaltMasterPrivateKey())) {
-            LOGGER.info("Salt master key pair is missing from the database, generate and store new key pair");
-            KeyPair keyPair = PkiUtil.generateKeypair();
-            saltSecurityConfig.setSaltMasterPublicKey(BaseEncoding.base64().encode(PkiUtil.convertPemPublicKey(keyPair.getPublic()).getBytes()));
-            saltSecurityConfig.setSaltMasterPrivateKey(BaseEncoding.base64().encode(PkiUtil.convert(keyPair.getPrivate()).getBytes()));
-            saltSecurityConfigService.save(saltSecurityConfig);
-        }
-    }
-
-    private VaultRotationContext getVaultRotationContext(String resourceCrn, String saltMasterPrivateKeySecretPath) {
+    private VaultRotationContext getVaultRotationContext(String resourceCrn, String saltSignPrivateKeySecretPath) {
         return VaultRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withVaultPathSecretMap(Map.of(saltMasterPrivateKeySecretPath,
+                .withVaultPathSecretMap(Map.of(saltSignPrivateKeySecretPath,
                         BaseEncoding.base64().encode(PkiUtil.convert(PkiUtil.generateKeypair().getPrivate()).getBytes())))
                 .build();
     }
 
-    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn, String saltMasterPrivateKeySecretPath) {
+    private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn, String saltSignPrivateKeySecretPath) {
         return CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
                 .withPreValidateJob(() -> validateAllInstancesAreReachable(resourceCrn))
-                .withRotationJob(() -> updateSaltMasterKeyPair(resourceCrn, RotationSecret::getSecret))
-                .withRollbackJob(() -> updateSaltMasterKeyPair(resourceCrn, RotationSecret::getBackupSecret))
+                .withRotationJob(() -> updateSaltSignKeyPair(resourceCrn, RotationSecret::getSecret))
+                .withRollbackJob(() -> updateSaltSignKeyPair(resourceCrn, RotationSecret::getBackupSecret))
                 .build();
     }
 
@@ -108,20 +91,20 @@ public class SaltMasterKeyPairRotationContextProvider implements RotationContext
                 .map(InstanceMetadataView::getInstanceId)
                 .toList();
         if (!unreachableInstances.isEmpty()) {
-            throw new SecretRotationException(String.format("Unreachable instances found: %s, salt master key rotation is not possible!", unreachableInstances));
+            throw new SecretRotationException(String.format("Unreachable instances found: %s, salt sign key rotation is not possible!", unreachableInstances));
         }
     }
 
-    private void updateSaltMasterKeyPair(String resourceCrn, Function<RotationSecret, String> mapper) {
+    private void updateSaltSignKeyPair(String resourceCrn, Function<RotationSecret, String> mapper) {
         StackDto stack = stackDtoService.getByCrn(resourceCrn);
-        updateSaltMasterPublicKeyBasedOnPrivateKeyInVault(stack, mapper);
+        updateSaltSignPublicKeyBasedOnPrivateKeyInVault(stack, mapper);
         runSaltBootstrap(stack.getId());
     }
 
-    private void updateSaltMasterPublicKeyBasedOnPrivateKeyInVault(StackDto stack, Function<RotationSecret, String> mapper) {
+    private void updateSaltSignPublicKeyBasedOnPrivateKeyInVault(StackDto stack, Function<RotationSecret, String> mapper) {
         SaltSecurityConfig saltSecurityConfig = stack.getSecurityConfig().getSaltSecurityConfig();
-        RotationSecret saltMasterPrivateKey = uncachedSecretServiceForRotation.getRotation(saltSecurityConfig.getSaltMasterPrivateKeySecret().getSecret());
-        saltSecurityConfig.setSaltMasterPublicKey(PkiUtil.calculatePemPublicKeyInBase64(mapper.apply(saltMasterPrivateKey)));
+        RotationSecret saltSignPrivateKey = uncachedSecretServiceForRotation.getRotation(saltSecurityConfig.getSaltSignPrivateKeySecret().getSecret());
+        saltSecurityConfig.setSaltSignPublicKey(PkiUtil.calculatePemPublicKeyInBase64(mapper.apply(saltSignPrivateKey)));
         saltSecurityConfigService.save(saltSecurityConfig);
     }
 

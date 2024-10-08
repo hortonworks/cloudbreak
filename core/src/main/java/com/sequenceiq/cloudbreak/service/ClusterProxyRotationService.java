@@ -130,7 +130,7 @@ public class ClusterProxyRotationService {
             X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKeyPair);
 
             String tokenKey = PkiUtil.convert(identityKey.getPrivate());
-            String tokenPub = PkiUtil.convert(identityKey.getPublic());
+            String tokenPub = PkiUtil.convertPemPublicKey(identityKey.getPublic());
             String tokenCert = Base64.getEncoder().encodeToString(cert.getEncoded());
             return new TokenCertInfo(tokenKey, tokenPub, tokenCert);
         } catch (CertificateEncodingException e) {
