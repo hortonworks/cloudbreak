@@ -29,6 +29,10 @@ public interface FlowConfiguration<E extends FlowEvent> {
         return OperationType.UNKNOWN;
     }
 
+    default String getOperationName() {
+        return FlowToOperationNameConverter.toOperationName(getClass().getSimpleName().replace("FlowConfig", ""));
+    }
+
     default FlowFinalizerCallback getFinalizerCallBack() {
         return new FlowFinalizerCallback() {
             @Override

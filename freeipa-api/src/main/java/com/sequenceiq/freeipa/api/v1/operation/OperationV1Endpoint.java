@@ -10,8 +10,11 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.operation.doc.OperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -43,4 +46,13 @@ public interface OperationV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OperationView getOperationProgressByEnvironmentCrn(@PathParam("environmentCrn") String environmentCrn,
             @DefaultValue("false") @QueryParam("detailed") boolean detailed);
+
+    @GET
+    @Path("/resource/crn/{environmentCrn}/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = OperationDescriptions.GET_FLOW_OPERATION_STATUS, description = OperationDescriptions.NOTES,
+            operationId = "getFlowOperationStatus",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    OperationStatusResponse getFlowOperationStatus(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
+            @QueryParam("flowOperationId") String flowOperationId);
 }

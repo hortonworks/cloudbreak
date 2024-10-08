@@ -148,7 +148,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             "fl.resourceType as resourceType, " +
             "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
             "fl.operationType as operationType, " +
-            "fl.reason as reason " +
+            "fl.reason as reason, " +
+            "fl.endTime as endTime " +
             "FROM FlowLog fl " +
             "WHERE fl.flowId = :flowId " +
             "ORDER BY fl.created desc")

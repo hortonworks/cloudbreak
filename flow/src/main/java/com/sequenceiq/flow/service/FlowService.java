@@ -6,6 +6,9 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
@@ -41,8 +45,14 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.operation.OperationProgressStatus;
+import com.sequenceiq.flow.api.model.operation.OperationStatusResponse;
 import com.sequenceiq.flow.converter.FlowLogConverter;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -68,6 +78,15 @@ public class FlowService {
 
     @Inject
     private FlowLogConverter flowLogConverter;
+
+    @Inject
+    private ResourceIdProvider resourceIdProvider;
+
+    @Resource
+    private List<FlowConfiguration<?>> flowConfigs;
+
+    @Resource
+    private List<FlowEventChainFactory<?>> flowChainFactories;
 
     public boolean isPreviousFlowFailed(Long stackId, String flowChainId) {
         if (flowChainId != null) {
@@ -161,7 +180,7 @@ public class FlowService {
             Map<String, Optional<FlowLogWithoutPayload>> latestFlowsByCreatedMap = relatedFlowLogs.stream()
                     .filter(s -> !Objects.equals(s.getCurrentState(), "FINISHED"))
                     .collect(groupingBy(FlowLogWithoutPayload::getFlowId,
-                        Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(FlowLogWithoutPayload::getCreated)))));
+                            Collectors.reducing(BinaryOperator.maxBy(Comparator.comparing(FlowLogWithoutPayload::getCreated)))));
             List<FlowLogWithoutPayload> flowLogForEndTime = latestFlowsByCreatedMap.values().stream()
                     .filter(Optional::isPresent).map(Optional::get).collect(toList());
             Optional<Long> flowEndTime = flowLogForEndTime.stream().map(FlowLogWithoutPayload::getEndTime)
@@ -210,6 +229,115 @@ public class FlowService {
         flowCheckResponse.setReason(getLatestFlowReason(allByFlowIdOrderByCreatedDesc));
         setStateEventFlowTypeOnFlowCheckResponse(flowCheckResponse, allByFlowIdOrderByCreatedDesc, FlowConstants.FLOW, flowId);
         return flowCheckResponse;
+    }
+
+    public OperationStatusResponse getOperationStatus(String resourceCrn, String operationId) {
+        Objects.requireNonNull(resourceCrn, "resourceCrn must not be null");
+        Preconditions.checkState(Crn.isCrn(resourceCrn), "resourceCrn is not a valid crn");
+        Long resourceId = resourceIdProvider.getResourceIdByResourceCrn(resourceCrn);
+        if (operationId != null) {
+            LOGGER.info("Get operation status. Resource crn: {}, operation id: {}", resourceCrn, operationId);
+            OperationStatusResponse operationByFlowId = getOperationByFlowId(operationId, resourceId);
+            if (operationByFlowId != null) {
+                return operationByFlowId;
+            }
+            OperationStatusResponse operationByFlowChainId = getOperationByFlowChainId(operationId, resourceId, false);
+            if (operationByFlowChainId != null) {
+                return operationByFlowChainId;
+            } else {
+                throw new NotFoundException("Not found operation.");
+            }
+        } else {
+            LOGGER.info("Get operation status. Resource crn: {}", resourceCrn);
+            return flowLogDBService.getLastFlowLog(resourceId)
+                    .map(lastFlowLog -> {
+                        if (lastFlowLog.getFlowChainId() != null) {
+                            return getOperationByFlowChainId(lastFlowLog.getFlowChainId(), resourceId, true);
+                        } else {
+                            return getOperationByFlowId(lastFlowLog.getFlowId(), resourceId);
+                        }
+                    }).orElseThrow(() -> new NotFoundException("Not found operation."));
+        }
+    }
+
+    private OperationStatusResponse getOperationByFlowId(String operationId, Long resourceId) {
+        List<FlowLogWithoutPayload> flowLogs = flowLogDBService.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(operationId);
+        if (!flowLogs.isEmpty()) {
+            LOGGER.info("{} operation is running in a flow.", operationId);
+            validateResourceId(flowLogs, List.of(resourceId));
+            boolean completed = completed(FlowConstants.FLOW, operationId, List.of(), flowLogs);
+            boolean flowIsInFailedState = isFlowInFailedState(flowLogs, failHandledEvents);
+            Long created = flowLogs.getLast().getCreated();
+            Long endTime = flowLogs.getFirst().getEndTime();
+            String name = getNameFromFlowType(flowLogs.getFirst().getFlowType());
+            return convertToOperationResponse(operationId, name, completed, flowIsInFailedState, created, endTime);
+        } else {
+            return null;
+        }
+    }
+
+    private String getNameFromFlowType(ClassValue flowType) {
+        return flowConfigs.stream()
+                .filter(flowConfiguration -> flowType.getName().equals(flowConfiguration.getClass().getName()))
+                .findFirst()
+                .map(FlowConfiguration::getOperationName)
+                .orElse(flowType.getSimpleName().replace("FlowConfig", ""));
+    }
+
+    private OperationStatusResponse getOperationByFlowChainId(String operationId, Long resourceId, boolean returnRootFlowChain) {
+        List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(operationId);
+        if (!flowChains.isEmpty()) {
+            LOGGER.info("{} operation is running in a flow chain.", operationId);
+            List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
+            Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
+            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(relatedChainIds);
+            validateResourceId(relatedFlowLogs, List.of(resourceId));
+            boolean completed = completed(FlowConstants.FLOW_CHAIN, operationId, relatedChains, relatedFlowLogs);
+            boolean flowIsInFailedState = isFlowInFailedState(relatedFlowLogs, failHandledEvents);
+            Long created = relatedFlowLogs.getLast().getCreated();
+            Long endTime = relatedFlowLogs.getFirst().getEndTime();
+            String flowChainId = returnRootFlowChain ? relatedChains.stream()
+                    .filter(chain -> StringUtils.isEmpty(chain.getParentFlowChainId()))
+                    .map(FlowChainLog::getFlowChainId)
+                    .findFirst()
+                    .orElse(operationId) : operationId;
+            String name = returnRootFlowChain ? relatedChains.stream()
+                    .filter(chain -> StringUtils.isEmpty(chain.getParentFlowChainId()))
+                    .map(FlowChainLog::getFlowChainType)
+                    .findFirst()
+                    .orElse(flowChains.getFirst().getFlowChainType()) : flowChains.getFirst().getFlowChainType();
+            return convertToOperationResponse(flowChainId, getNameFromFlowChainType(name), completed, flowIsInFailedState, created, endTime);
+        } else {
+            return null;
+        }
+    }
+
+    private String getNameFromFlowChainType(String name) {
+        return flowChainFactories
+                .stream()
+                .filter(flowEventChainFactory -> flowEventChainFactory.getClass().getSimpleName().equals(name))
+                .findFirst()
+                .map(FlowEventChainFactory::getOperationName)
+                .orElse(name.replace("FlowEventChainFactory", ""));
+    }
+
+    private OperationStatusResponse convertToOperationResponse(String operationId, String name, boolean completed, boolean failed, Long startTime,
+            Long endTime) {
+        OperationStatusResponse operation = new OperationStatusResponse();
+        operation.setOperationId(operationId);
+        operation.setOperationName(name);
+        if (startTime != null) {
+            operation.setStarted(convertToUtcDate(startTime));
+        }
+        if (completed && endTime != null) {
+            operation.setEnded(convertToUtcDate(endTime));
+        }
+        operation.setOperationStatus(!completed ? OperationProgressStatus.RUNNING : failed ? OperationProgressStatus.FAILED : OperationProgressStatus.FINISHED);
+        return operation;
+    }
+
+    private static OffsetDateTime convertToUtcDate(Long created) {
+        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(created), ZoneOffset.UTC);
     }
 
     private String getLatestFlowReason(List<FlowLogWithoutPayload> flowLogs) {
