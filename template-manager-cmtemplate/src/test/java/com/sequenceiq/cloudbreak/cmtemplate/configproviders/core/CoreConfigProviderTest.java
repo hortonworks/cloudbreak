@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_12_0_500;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_DEFAULTFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS;
@@ -38,7 +37,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -304,36 +302,6 @@ class CoreConfigProviderTest {
             assertEquals(coreSafetyValveProperty, serviceConfigs.get(0).getValue());
             assertEquals("hadoop_rpc_protection", serviceConfigs.get(1).getName());
             assertEquals("privacy", serviceConfigs.get(1).getValue());
-        });
-    }
-
-    @Test
-    void testGetServiceConfigsShouldContainClusterSpecificProperties() {
-        String resourceCrn = "test-resource-crn";
-        String accountId = "test-account-id";
-        String environmentCrn = "test-environment-crn";
-        String cloudProvider = "AWS";
-        CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
-        GeneralClusterConfigs generalClusterConfigs = mock(GeneralClusterConfigs.class);
-        TemplatePreparationObject source = mock(TemplatePreparationObject.class);
-        when(source.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
-        when(generalClusterConfigs.isGovCloud()).thenReturn(false);
-        when(generalClusterConfigs.getResourceCrn()).thenReturn(resourceCrn);
-        when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of(accountId));
-        when(generalClusterConfigs.getEnvironmentCrn()).thenReturn(environmentCrn);
-        when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
-        when(mockTemplateProcessor.getCmVersion()).thenReturn(Optional.ofNullable(CLOUDERAMANAGER_VERSION_7_12_0_500.getVersion()));
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> {
-            List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(mockTemplateProcessor, source);
-            assertEquals(5, serviceConfigs.size());
-            assertEquals("environment_crn", serviceConfigs.get(1).getName());
-            assertEquals(environmentCrn, serviceConfigs.get(1).getValue());
-            assertEquals("resource_crn", serviceConfigs.get(2).getName());
-            assertEquals(resourceCrn, serviceConfigs.get(2).getValue());
-            assertEquals("environment_account_id", serviceConfigs.get(3).getName());
-            assertEquals(accountId, serviceConfigs.get(3).getValue());
-            assertEquals("environment_cloud_provider", serviceConfigs.get(4).getName());
-            assertEquals(cloudProvider, serviceConfigs.get(4).getValue());
         });
     }
 }

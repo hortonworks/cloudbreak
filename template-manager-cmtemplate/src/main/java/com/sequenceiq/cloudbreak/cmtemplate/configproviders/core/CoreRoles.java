@@ -26,13 +26,5 @@ public class CoreRoles {
 
     public static final String HADOOP_RPC_PROTECTION = "hadoop_rpc_protection";
 
-    public static final String ENVIRONMENT_CLOUD_PROVIDER = "environment_cloud_provider";
-
-    public static final String ENVIRONMENT_CRN = "environment_crn";
-
-    public static final String ENVIRONMENT_ACCOUNT_ID = "environment_account_id";
-
-    public static final String RESOURCE_CRN = "resource_crn";
-
     private CoreRoles() { }
 }
