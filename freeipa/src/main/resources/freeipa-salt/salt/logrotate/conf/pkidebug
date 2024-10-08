@@ -6,5 +6,6 @@
     size 128M
     rotate 6
     su pkiuser pkiuser
-    nocompress
+    compress
+    delaycompress
 }

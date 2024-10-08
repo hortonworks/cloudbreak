@@ -3,4 +3,6 @@
     notifempty
     size 1M
     rotate 6
+    compress
+    delaycompress
 }

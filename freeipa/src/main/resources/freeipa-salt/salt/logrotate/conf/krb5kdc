@@ -1,5 +1,7 @@
 /var/log/krb5kdc.log {
     missingok
+    compress
+    delaycompress
     notifempty
     monthly
     size 1G
