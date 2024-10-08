@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpdateVersionResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.WaitForDatabaseServerUpgradeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.WaitForDatabaseServerUpgradeResult;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
@@ -103,11 +105,27 @@ public class UpgradeRdsActions {
         };
     }
 
-    @Bean(name = "UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE")
-    public Action<?, ?> migrateDatabaseSettings() {
+    @Bean(name = "UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_STATE")
+    public Action<?, ?> waitForDatabaseServerUpgrade() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsUpgradeDatabaseServerResult.class) {
             @Override
-            protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) {
+                Selectable selectable;
+                if (payload.getFlowIdentifier() != null) {
+                    selectable = new WaitForDatabaseServerUpgradeRequest(context.getStackId(), context.getVersion(), payload.getFlowIdentifier());
+                } else {
+                    selectable = new WaitForDatabaseServerUpgradeResult(context.getStackId(), context.getVersion(), payload.getFlowIdentifier());
+                }
+                sendEvent(context, selectable);
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE")
+    public Action<?, ?> migrateDatabaseSettings() {
+        return new AbstractUpgradeRdsAction<>(WaitForDatabaseServerUpgradeResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, WaitForDatabaseServerUpgradeResult payload, Map<Object, Object> variables) throws Exception {
                 if (externalDatabaseService.isMigrationNeededDuringUpgrade(context)) {
                     upgradeRdsService.migrateDatabaseSettingsState(payload.getResourceId());
                 }

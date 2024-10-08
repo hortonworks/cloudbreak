@@ -236,7 +236,7 @@ public class ExternalDatabaseService {
         }
     }
 
-    public void upgradeDatabase(ClusterView cluster, UpgradeTargetMajorVersion targetMajorVersion, DatabaseServerV4StackRequest newSettings) {
+    public FlowIdentifier upgradeDatabase(ClusterView cluster, UpgradeTargetMajorVersion targetMajorVersion, DatabaseServerV4StackRequest newSettings) {
         LOGGER.info("Upgrading external database server to version {} for DataHub {}",
                 targetMajorVersion.name(), cluster.getName());
         String databaseCrn = cluster.getDatabaseServerCrn();
@@ -247,16 +247,23 @@ public class ExternalDatabaseService {
                 request.setUpgradedDatabaseSettings(newSettings);
                 request.setUpgradeTargetMajorVersion(targetMajorVersion);
                 UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
-                if (null == response.getFlowIdentifier()) {
+                if (response.getFlowIdentifier() == null) {
                     LOGGER.info(response.getReason());
-                } else {
-                    pollUntilFlowFinished(databaseCrn, response.getFlowIdentifier());
                 }
+                return response.getFlowIdentifier();
             } catch (NotFoundException notFoundException) {
                 LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+                return null;
             }
         } else {
             LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
+            return null;
+        }
+    }
+
+    public void waitForDatabaseToBeUpgraded(ClusterView cluster, FlowIdentifier flowIdentifier) {
+        if (flowIdentifier != null) {
+            pollUntilFlowFinished(cluster.getDatabaseServerCrn(), flowIdentifier);
         }
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver;
 
 import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.DENY;
 
+import java.util.List;
 import java.util.Set;
 
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
@@ -364,4 +366,19 @@ public interface DatabaseServerV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn
     );
 
+    @PUT
+    @Path("retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerNotes.RETRY, description = DatabaseServerNotes.RETRY, operationId = "retryV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier retry(
+            @QueryParam("database") @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn);
+
+    @GET
+    @Path("retry")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = DatabaseServerNotes.LIST_RETRYABLE_FLOWS, description = DatabaseServerNotes.LIST_RETRYABLE_FLOWS, operationId = "listRetryableFlowsV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<RetryableFlowResponse> listRetryableFlows(
+            @QueryParam("database") @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn);
 }

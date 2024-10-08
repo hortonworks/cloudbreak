@@ -504,20 +504,17 @@ class ExternalDatabaseServiceTest {
 
         UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
 
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
         UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
         response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
 
-        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
-                createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
-                createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
-
-        underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
+        FlowIdentifier actualResult = underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
         assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
-        verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+        assertEquals(flowIdentifier, actualResult);
     }
 
     @Test
@@ -534,37 +531,6 @@ class ExternalDatabaseServiceTest {
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
         assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
-        verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
-    }
-
-    @Test
-    void upgradeDatabaseFlowFailed() {
-        Cluster cluster = spy(new Cluster());
-        cluster.setDatabaseServerCrn(RDBMS_CRN);
-
-        UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
-
-        UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
-        response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
-        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
-        dbServerResponse.setCrn(RDBMS_CRN);
-        dbServerResponse.setStatusReason(UPGRADE_ERROR_REASON);
-        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenReturn(dbServerResponse);
-        when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
-
-        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
-
-        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest));
-        String expected = String.format("Database flow failed in Redbeams with error: 'upgrade error happened'. "
-                        + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
-                RDBMS_CRN, RDBMS_FLOW_ID);
-        assertEquals(expected, cloudbreakServiceException.getMessage());
-
-        ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
-        verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
-        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
-        verify(redbeamsClient, times(1)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
     }
 
     @Test
@@ -578,12 +544,82 @@ class ExternalDatabaseServiceTest {
         response.setFlowIdentifier(null);
         when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
 
-        underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
+        FlowIdentifier flowIdentifier = underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest);
 
         ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
         verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
-        verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
         assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+        assertNull(flowIdentifier);
+    }
+
+    @Test
+    void testWaitForDatabaseToBeUpgraded() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
+                createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
+                createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
+
+        underTest.waitForDatabaseToBeUpgraded(cluster, new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
+
+        verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+        verify(redbeamsClient, never()).getByCrn(any());
+    }
+
+    @Test
+    void testWaitForDatabaseToBeUpgradedWhenFlowFailed() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
+        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
+        dbServerResponse.setCrn(RDBMS_CRN);
+        dbServerResponse.setStatusReason(UPGRADE_ERROR_REASON);
+
+        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenReturn(dbServerResponse);
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.waitForDatabaseToBeUpgraded(cluster, flowIdentifier));
+
+        String expected = String.format("Database flow failed in Redbeams with error: 'upgrade error happened'. "
+                        + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
+                RDBMS_CRN, RDBMS_FLOW_ID);
+        assertEquals(expected, cloudbreakServiceException.getMessage());
+        verify(redbeamsClient, times(1)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+        verify(redbeamsClient, times(1)).getByCrn(any());
+    }
+
+    @Test
+    void testWaitForDatabaseToBeUpgradedWhenFlowFailedAndNoDbFound() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID);
+
+        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenThrow(new NotFoundException("notfound"));
+        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
+                createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
+                createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
+
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.waitForDatabaseToBeUpgraded(cluster, flowIdentifier));
+
+        String expected = String.format("Database flow failed in Redbeams with error: 'notfound'. "
+                        + "Database crn: %s, flow: FlowIdentifier{type=FLOW, pollableId='%s'}",
+                RDBMS_CRN, RDBMS_FLOW_ID);
+        assertEquals(expected, cloudbreakServiceException.getMessage());
+        verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
+        verify(redbeamsClient, times(1)).getByCrn(RDBMS_CRN);
+    }
+
+    @Test
+    void testWaitForDatabaseToBeUpgradedWhenNoFlowId() {
+        Cluster cluster = spy(new Cluster());
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+
+        underTest.waitForDatabaseToBeUpgraded(cluster, null);
+
+        verify(redbeamsClient, never()).hasFlowRunningByFlowId(any());
+        verify(redbeamsClient, never()).getByCrn(any());
     }
 
     @ParameterizedTest
@@ -740,35 +776,6 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.getLastFlowId(eq(RDBMS_CRN))).thenReturn(lastFlow);
         underTest.preValidateDatabaseSecretRotation(RDBMS_CRN);
         verify(redbeamsClient, times(1)).getLastFlowId(eq(RDBMS_CRN));
-    }
-
-    @Test
-    void upgradeDatabaseFlowFetchDatabaseFromRedbeamsFailed() {
-        Cluster cluster = spy(new Cluster());
-        cluster.setDatabaseServerCrn(RDBMS_CRN);
-
-        UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
-
-        UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
-        response.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, RDBMS_FLOW_ID));
-
-        when(redbeamsClient.getByCrn(RDBMS_CRN)).thenThrow(new NotFoundException(DATABASE_NOT_FOUND));
-        when(redbeamsClient.upgradeByCrn(eq(RDBMS_CRN), any())).thenReturn(response);
-        when(redbeamsClient.hasFlowRunningByFlowId(RDBMS_FLOW_ID)).thenReturn(
-                createFlowCheckResponse(Boolean.TRUE, Boolean.FALSE),
-                createFlowCheckResponse(Boolean.FALSE, Boolean.TRUE));
-
-        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.upgradeDatabase(cluster, targetMajorVersion, databaseServerV4StackRequest));
-        String expected = String.format("Database flow failed in Redbeams with error: '%s'. Database crn: %s, flow: "
-                        + "FlowIdentifier{type=%s, pollableId='%s'}",
-                DATABASE_NOT_FOUND, RDBMS_CRN, FlowType.FLOW, RDBMS_FLOW_ID);
-        assertEquals(expected, cloudbreakServiceException.getMessage());
-
-        ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
-        verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
-        assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
-        verify(redbeamsClient, times(2)).hasFlowRunningByFlowId(RDBMS_FLOW_ID);
     }
 
     private static FlowCheckResponse createFlowCheckResponse(Boolean hasActiveFlow, Boolean failed) {

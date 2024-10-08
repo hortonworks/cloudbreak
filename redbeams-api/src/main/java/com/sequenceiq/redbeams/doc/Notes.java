@@ -98,8 +98,9 @@ public final class Notes {
                 "Changes the certificate on mock provider";
         public static final String LATEST_CERT =
                 "Query latest certificate for provider and region";
+        public static final String RETRY = "Retries the latest failed operation";
+        public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
         private DatabaseServerNotes() {
         }
     }
-
 }

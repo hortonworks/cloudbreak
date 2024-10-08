@@ -108,14 +108,18 @@ restore_database_for_service() {
 }
 
 run_restore() {
-  BACKUP_DIR=$(ls -td $BACKUPS_DIR/*/ | head -1)
-  restore_global_objects
-  restore_passwords
-  {% for service, values in pillar.get('postgres', {}).items()  %}
-  {% if values['user'] is defined %}
-  restore_database_for_service {{ service }}
-  {% endif %}
-  {% endfor %}
+  if find "${BACKUPS_DIR}" -mindepth 1 -type d | read; then
+    BACKUP_DIR=$(ls -td $BACKUPS_DIR/*/ | head -1)
+    restore_global_objects
+    restore_passwords
+    {% for service, values in pillar.get('postgres', {}).items()  %}
+    {% if values['user'] is defined %}
+    restore_database_for_service {{ service }}
+    {% endif %}
+    {% endfor %}
+  else
+    doLog "No backup directory found in ${BACKUPS_DIR}, restore is skipped."
+  fi
   rm -rfv "${BACKUPS_DIR}"/* > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }
 

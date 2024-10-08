@@ -7,9 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.dyngr.exception.PollerException;
-import com.dyngr.exception.PollerStoppedException;
-import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -29,6 +26,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -89,15 +87,6 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
             }
         } catch (CloudbreakOrchestratorException e) {
             return upgradeFailedEvent(stackId, e);
-        } catch (UserBreakException e) {
-            LOGGER.error("Database 'upgrade' polling exited before timeout. Cause: ", e);
-            return upgradeFailedEvent(stackId, e);
-        } catch (PollerStoppedException e) {
-            LOGGER.error(String.format("Database 'upgrade' poller stopped for stack: %s", stack.getName()), e);
-            return upgradeFailedEvent(stackId, e);
-        } catch (PollerException e) {
-            LOGGER.error(String.format("Database 'upgrade' polling failed for stack: %s", stack.getName()), e);
-            return upgradeFailedEvent(stackId, e);
         } catch (Exception e) {
             LOGGER.error(String.format("Exception during DB upgrade for stack: %s", stack.getName()), e);
             return upgradeFailedEvent(stackId, e);
@@ -109,8 +98,8 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
         UpgradeTargetMajorVersion upgradeTargetMajorVersion = targetMajorVersionToUpgradeTargetVersionConverter.convert(targetMajorVersion);
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackDto.getEnvironmentCrn());
         DatabaseServerV4StackRequest migratedRequest = databaseService.migrateDatabaseSettingsIfNeeded(stackDto, targetMajorVersion, environment);
-        databaseService.upgradeDatabase(stackDto.getCluster(), upgradeTargetMajorVersion, migratedRequest);
-        return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion());
+        FlowIdentifier flowIdentifier = databaseService.upgradeDatabase(stackDto.getCluster(), upgradeTargetMajorVersion, migratedRequest);
+        return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion(), flowIdentifier);
     }
 
     private UpgradeRdsUpgradeDatabaseServerResult upgradeEmbeddedDatabase(UpgradeRdsUpgradeDatabaseServerRequest request, Long stackId, StackDto stackDto)
@@ -123,7 +112,7 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
         stackDto.getDatabase().setExternalDatabaseEngineVersion(targetMajorVersion);
         LOGGER.debug("Upgrading embedded database version in salt pillars to {} version...", targetMajorVersion);
         rdsUpgradeOrchestratorService.updateDatabaseEngineVersion(stackDto);
-        return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion());
+        return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion(), null);
     }
 
     private StackEvent upgradeFailedEvent(Long stackId, Exception e) {

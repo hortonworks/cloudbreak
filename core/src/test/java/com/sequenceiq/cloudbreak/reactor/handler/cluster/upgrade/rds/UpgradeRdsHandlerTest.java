@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -34,6 +35,8 @@ import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorServi
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -105,7 +108,8 @@ class UpgradeRdsHandlerTest {
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(environment);
         DatabaseServerV4StackRequest newSettings = new DatabaseServerV4StackRequest();
         when(databaseService.migrateDatabaseSettingsIfNeeded(stackDto, TARGET_MAJOR_VERSION, environment)).thenReturn(newSettings);
-
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flowid");
+        when(databaseService.upgradeDatabase(cluster, UpgradeTargetMajorVersion.VERSION_11, newSettings)).thenReturn(flowIdentifier);
         Selectable result = underTest.doAccept(event);
 
         verify(targetMajorVersionToUpgradeTargetVersionConverter).convert(TARGET_MAJOR_VERSION);
@@ -113,6 +117,7 @@ class UpgradeRdsHandlerTest {
         verify(rdsUpgradeOrchestratorService, never()).upgradeEmbeddedDatabase(stackDto);
         verify(embeddedDatabaseService, never()).isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPGRADEDATABASESERVERRESULT");
+        assertThat(((UpgradeRdsUpgradeDatabaseServerResult) result).getFlowIdentifier()).isEqualTo(flowIdentifier);
     }
 
     @Test

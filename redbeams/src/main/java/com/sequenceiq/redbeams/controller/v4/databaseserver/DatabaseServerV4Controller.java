@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -69,6 +70,7 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.exception.NotFoundException;
+import com.sequenceiq.redbeams.service.RedBeamsRetryService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerSslCertificateConfigService;
 import com.sequenceiq.redbeams.service.rotation.RedbeamsRotationService;
@@ -135,6 +137,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedbeamsRotationService redbeamsRotationService;
+
+    @Inject
+    private RedBeamsRetryService retryService;
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
@@ -362,5 +367,20 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public FlowIdentifier rotateSecret(@Valid @NotNull RotateDatabaseServerSecretV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
         return redbeamsRotationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType(),
                 request.getAdditionalProperties());
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public FlowIdentifier retry(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
+        return retryService.retry(databaseCrn);
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public List<RetryableFlowResponse> listRetryableFlows(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String databaseCrn) {
+        return retryService.getRetryableFlows(databaseCrn);
     }
 }

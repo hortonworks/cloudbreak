@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_STOP_SERVICES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_VERSION_UPDATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_DATA_BACKUP_STATE;
@@ -32,6 +33,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_STOP_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_VERSION_UPDATE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_STATE;
 
 import java.util.List;
 
@@ -66,8 +68,13 @@ public class UpgradeRdsFlowConfig extends StackStatusFinalizerAbstractFlowConfig
                     .defaultFailureEvent()
 
                     .from(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE)
-                    .to(UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE)
+                    .to(UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_STATE)
                     .event(UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_STATE)
+                    .to(UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE)
+                    .event(UPGRADE_RDS_WAIT_FOR_DATABASE_SERVER_UPGRADE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE).to(UPGRADE_RDS_DATA_RESTORE_STATE)

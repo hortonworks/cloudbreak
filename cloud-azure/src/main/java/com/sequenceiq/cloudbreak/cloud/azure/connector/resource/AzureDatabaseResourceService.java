@@ -419,8 +419,8 @@ public class AzureDatabaseResourceService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         try {
-            deleteDatabaseServer(persistenceNotifier, cloudContext, resources, client);
             deleteAllPrivateEndpointResources(persistenceNotifier, cloudContext, resources, client);
+            deleteDatabaseServer(persistenceNotifier, cloudContext, resources, client);
 
             stack.getDatabaseServer().putParameter(DB_VERSION, targetMajorVersion.getMajorVersion());
             String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);

@@ -45,9 +45,14 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.WaitForDatabaseServerUpgradeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.WaitForDatabaseServerUpgradeResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -135,9 +140,43 @@ class UpgradeRdsActionsTest {
     }
 
     @Test
+    public void testShouldUpgradeDatabaseServer() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.upgradeDatabaseServer();
+        UpgradeRdsDataBackupResult triggerEvent = new UpgradeRdsDataBackupResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
+
+        verify(upgradeRdsService, times(1)).upgradeRdsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsUpgradeDatabaseServerRequest.class);
+    }
+
+    @Test
+    public void testShouldWaitForDatabaseServerUpgrade() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.waitForDatabaseServerUpgrade();
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "flowid");
+        UpgradeRdsUpgradeDatabaseServerResult triggerEvent = new UpgradeRdsUpgradeDatabaseServerResult(STACK_ID, TargetMajorVersion.VERSION_11, flowIdentifier);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
+
+        WaitForDatabaseServerUpgradeRequest actualEvent =
+                (WaitForDatabaseServerUpgradeRequest) verifyBackupRestoreAction(WaitForDatabaseServerUpgradeRequest.class);
+        assertEquals(flowIdentifier, actualEvent.getFlowIdentifier());
+    }
+
+    @Test
+    public void testShouldNotWaitForDatabaseServerUpgrade() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.waitForDatabaseServerUpgrade();
+        UpgradeRdsUpgradeDatabaseServerResult triggerEvent = new UpgradeRdsUpgradeDatabaseServerResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, false);
+
+        verify(upgradeRdsService, never()).migrateDatabaseSettingsState(STACK_ID);
+        WaitForDatabaseServerUpgradeResult actualEvent =
+                (WaitForDatabaseServerUpgradeResult) verifyBackupRestoreAction(WaitForDatabaseServerUpgradeResult.class);
+        assertNull(actualEvent.getFlowIdentifier());
+    }
+
+    @Test
     public void testShouldMigrateDatabaseSettings() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.migrateDatabaseSettings();
-        UpgradeRdsUpgradeDatabaseServerResult triggerEvent = new UpgradeRdsUpgradeDatabaseServerResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        WaitForDatabaseServerUpgradeResult triggerEvent = new WaitForDatabaseServerUpgradeResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
 
         verify(upgradeRdsService).migrateDatabaseSettingsState(STACK_ID);
@@ -147,7 +186,7 @@ class UpgradeRdsActionsTest {
     @Test
     public void testShouldNotMigrateDatabaseSettings() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.migrateDatabaseSettings();
-        UpgradeRdsUpgradeDatabaseServerResult triggerEvent = new UpgradeRdsUpgradeDatabaseServerResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        WaitForDatabaseServerUpgradeResult triggerEvent = new WaitForDatabaseServerUpgradeResult(STACK_ID, TargetMajorVersion.VERSION_11, null);
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, false);
 
         verify(upgradeRdsService, never()).migrateDatabaseSettingsState(STACK_ID);
@@ -256,12 +295,13 @@ class UpgradeRdsActionsTest {
         return variables;
     }
 
-    private void verifyBackupRestoreAction(Object expectedEvent) {
+    private AbstractUpgradeRdsEvent verifyBackupRestoreAction(Object expectedEvent) {
         ArgumentCaptor<AbstractUpgradeRdsEvent> captor = ArgumentCaptor.forClass(AbstractUpgradeRdsEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         AbstractUpgradeRdsEvent captorValue = captor.getValue();
         assertEquals(expectedEvent, captorValue.getClass());
         assertEquals(STACK_ID, captorValue.getResourceId());
         assertEquals(TargetMajorVersion.VERSION_11, captorValue.getVersion());
+        return captorValue;
     }
 }

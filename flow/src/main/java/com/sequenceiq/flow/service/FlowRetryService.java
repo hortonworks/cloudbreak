@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -86,6 +87,10 @@ public class FlowRetryService {
     }
 
     public RetryResponse retry(Long stackId) {
+        return retry(stackId, lastSuccessfulStateFlowLog -> { });
+    }
+
+    public RetryResponse retry(Long stackId, Consumer<FlowLog> beforeRestart) {
         RetryableStateResponse retryableStateResponse = getRetryableStateResponse(stackId);
         switch (retryableStateResponse.getState()) {
             case FLOW_PENDING:
@@ -103,6 +108,7 @@ public class FlowRetryService {
                 throw new BadRequestException(noSuccessfulStateMessage);
             case RETRYABLE:
                 FlowLog lastSuccessfulStateFlowLog = retryableStateResponse.getLastSuccessfulStateFlowLog();
+                beforeRestart.accept(lastSuccessfulStateFlowLog);
                 flow2Handler.restartFlow(lastSuccessfulStateFlowLog);
                 if (lastSuccessfulStateFlowLog.getFlowChainId() != null) {
                     return new RetryResponse(retryableStateResponse.getName(),

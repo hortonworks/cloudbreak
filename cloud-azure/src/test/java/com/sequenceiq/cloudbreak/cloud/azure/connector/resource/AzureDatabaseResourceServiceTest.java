@@ -337,14 +337,14 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(eq(cloudContext));
 
         InOrder inOrder = inOrder(azureUtils);
-        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
@@ -385,14 +385,14 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(eq(cloudContext));
 
         InOrder inOrder = inOrder(azureUtils);
-        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
@@ -432,14 +432,14 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(eq(cloudContext));
 
         InOrder inOrder = inOrder(azureUtils);
-        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(peResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
@@ -472,16 +472,16 @@ class AzureDatabaseResourceServiceTest {
         verify(azureUtils).getStackName(eq(cloudContext));
 
         InOrder inOrder = inOrder(azureUtils);
-        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         inOrder.verify(azureUtils, times(3)).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_ENDPOINT);
         inOrder.verify(azureUtils).deleteGenericResourceById(client, RESOURCE_REFERENCE, PRIVATE_DNS_ZONE_GROUP);
+        inOrder.verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         inOrder = inOrder(persistenceNotifier);
-        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(pe1Resource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(pe2Resource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(pe3Resource, cloudContext);
         inOrder.verify(persistenceNotifier).notifyDeletion(dzgResource, cloudContext);
+        inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);

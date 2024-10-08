@@ -20,7 +20,6 @@ public class RedbeamsStartUpgradeRequest extends RedbeamsEvent {
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("targetMajorVersion") TargetMajorVersion targetMajorVersion,
             @JsonProperty("migrationParams") UpgradeDatabaseMigrationParams migrationParams) {
-
         super(RedbeamsUpgradeEvent.REDBEAMS_START_UPGRADE_EVENT.selector(), resourceId);
         this.targetMajorVersion = targetMajorVersion;
         this.migrationParams = migrationParams;
@@ -62,5 +61,12 @@ public class RedbeamsStartUpgradeRequest extends RedbeamsEvent {
         int result = targetMajorVersion != null ? targetMajorVersion.hashCode() : 0;
         result = 31 * result + (migrationParams != null ? migrationParams.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public boolean equalsEvent(RedbeamsEvent other) {
+        return isClassAndEqualsEvent(RedbeamsStartUpgradeRequest.class, other,
+                event -> Objects.equals(migrationParams, event.migrationParams)
+                        && targetMajorVersion == event.targetMajorVersion);
     }
 }

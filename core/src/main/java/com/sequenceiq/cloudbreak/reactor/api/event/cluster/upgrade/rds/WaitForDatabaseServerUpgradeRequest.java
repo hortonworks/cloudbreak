@@ -5,11 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-public class UpgradeRdsUpgradeDatabaseServerResult extends AbstractUpgradeRdsEvent {
+public class WaitForDatabaseServerUpgradeRequest extends AbstractUpgradeRdsEvent {
     private final FlowIdentifier flowIdentifier;
 
     @JsonCreator
-    public UpgradeRdsUpgradeDatabaseServerResult(
+    public WaitForDatabaseServerUpgradeRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("version") TargetMajorVersion version,
             @JsonProperty("flowIdentifier") FlowIdentifier flowIdentifier) {
@@ -23,7 +23,7 @@ public class UpgradeRdsUpgradeDatabaseServerResult extends AbstractUpgradeRdsEve
 
     @Override
     public String toString() {
-        return "UpgradeRdsUpgradeDatabaseServerResult{" +
+        return "WaitForDatabaseServerUpgradeRequest{" +
                 "flowIdentifier=" + flowIdentifier +
                 "} " + super.toString();
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -102,6 +104,27 @@ public class FlowRetryServiceTest {
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         underTest.retry(STACK_ID);
 
+        verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
+    }
+
+    @Test
+    public void retryWithBeforeRestartFunction() {
+        FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, TestFlowEvent.TEST_FINISHED_EVENT.event());
+        List<FlowLog> pendingFlowLogs = Lists.newArrayList(
+                createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 7, null),
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, 6, TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()),
+                lastSuccessfulState,
+                createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 4, null),
+                createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()),
+                createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, TestFlowEvent.TEST_FINISHED_EVENT.event()),
+                createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, TestFlowEvent.TEST_FLOW_EVENT.event())
+        );
+        Consumer<FlowLog> beforeRestart = mock(Consumer.class);
+        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
+
+        underTest.retry(STACK_ID, beforeRestart);
+
+        verify(beforeRestart, times(1)).accept(lastSuccessfulState);
         verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
     }
 
