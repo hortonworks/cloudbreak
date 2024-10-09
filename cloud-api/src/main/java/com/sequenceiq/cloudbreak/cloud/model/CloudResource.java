@@ -29,6 +29,8 @@ public class CloudResource extends DynamicModel {
 
     public static final String INSTANCE_TYPE = "instanceType";
 
+    public static final String ARCHITECTURE = "architecture";
+
     private final ResourceType type;
 
     private CommonStatus status;
