@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigPro
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -73,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMapping
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -86,6 +90,7 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
+import com.sequenceiq.cloudbreak.template.views.DatabusCredentialView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -97,6 +102,7 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
+import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -104,6 +110,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 
 @Component
 public class StackToTemplatePreparationObjectConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToTemplatePreparationObjectConverter.class);
 
     @Inject
     private HostGroupService hostGroupService;
@@ -242,7 +250,6 @@ public class StackToTemplatePreparationObjectConverter {
             Set<RdsView> rdsViews = rdsConfigWithoutClusters.stream()
                     .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath, environment.getCloudPlatform(), externalDatabaseRequested))
                     .collect(Collectors.toSet());
-
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withPlatformVariant(source.getPlatformVariant())
@@ -271,6 +278,7 @@ public class StackToTemplatePreparationObjectConverter {
                 builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()), getEphemeralVolumeWhichMustBeProvisioned());
             });
 
+            decorateDatabusCredential(source.getCluster().getDatabusCredentialSecret(), builder);
             decorateBuilderWithPlacement(source.getStack(), builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
             decorateBuilderWithServicePrincipals(source, builder, servicePrincipalCloudIdentities);
@@ -281,6 +289,16 @@ public class StackToTemplatePreparationObjectConverter {
             throw new CloudbreakServiceException(aTVF);
         } catch (BlueprintProcessingException | IOException | TransactionService.TransactionExecutionException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private void decorateDatabusCredential(Secret databusCredentialSecret, Builder builder) {
+        DataBusCredential dataBusCredential = null;
+        if (databusCredentialSecret != null) {
+            dataBusCredential = convertOrReturnNull(databusCredentialSecret.getRaw(), DataBusCredential.class);
+        }
+        if (dataBusCredential != null) {
+            builder.withDatabusCredentialView(new DatabusCredentialView(dataBusCredential));
         }
     }
 
@@ -491,5 +509,16 @@ public class StackToTemplatePreparationObjectConverter {
                 fileSystemConfigurationView.getLocations().add(backupLocationView);
             }
         }
+    }
+
+    private <T> T convertOrReturnNull(String value, Class<T> type) {
+        if (StringUtils.isNotBlank(value)) {
+            try {
+                return new Json(value).get(type);
+            } catch (IOException e) {
+                LOGGER.error("Cannot read {} from cluster entity. Continue without value.", type.getSimpleName(), e);
+            }
+        }
+        return null;
     }
 }

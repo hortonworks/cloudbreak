@@ -460,7 +460,18 @@
           "base": true
         }
       ]
-    }
+      },
+      {
+        "refName": "meteringv2",
+        "serviceType": "METERINGV2",
+        "roleConfigGroups": [
+          {
+            "refName": "meteringv2-METERINGV2_SERVER-BASE",
+            "roleType": "METERINGV2_SERVER",
+            "base": true
+          }
+        ]
+      }
     ],
     "hostTemplates": [
       {
@@ -474,6 +485,7 @@
           "hms-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
           "dlm-DLM_SERVER-BASE",
+          "meteringv2-METERINGV2_SERVER-BASE",
           "hive_on_tez-HIVESERVER2-BASE",
           "hive_on_tez-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
+import com.sequenceiq.cloudbreak.template.views.DatabusCredentialView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -96,6 +97,8 @@ public class TemplatePreparationObject {
 
     private final Map<String, String> servicePrincipals;
 
+    private final DatabusCredentialView databusCredentialView;
+
     private final boolean enableSecretEncryption;
 
     private TemplatePreparationObject(Builder builder) {
@@ -127,6 +130,7 @@ public class TemplatePreparationObject {
         datalakeView = builder.datalakeView;
         idBroker = builder.idBroker;
         servicePrincipals = builder.servicePrincipals;
+        databusCredentialView = builder.databusCredentialView;
         enableSecretEncryption = builder.enableSecretEncryption;
     }
 
@@ -245,6 +249,10 @@ public class TemplatePreparationObject {
         return enableSecretEncryption;
     }
 
+    public DatabusCredentialView getDatabusCredentialView() {
+        return databusCredentialView;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -297,6 +305,8 @@ public class TemplatePreparationObject {
 
         private Map<String, String> servicePrincipals;
 
+        private DatabusCredentialView databusCredentialView;
+
         private boolean enableSecretEncryption;
 
         public static Builder builder() {
@@ -320,6 +330,11 @@ public class TemplatePreparationObject {
 
         public Builder withRdsSslCertificateFilePath(String rdsSslCertificateFilePath) {
             this.rdsSslCertificateFilePath = rdsSslCertificateFilePath;
+            return this;
+        }
+
+        public Builder withDatabusCredentialView(DatabusCredentialView databusCredentialView) {
+            this.databusCredentialView = databusCredentialView;
             return this;
         }
 
