@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -16,6 +17,8 @@ public class StackMatrixTestDto extends AbstractCloudbreakTestDto<Object, StackM
     private boolean govCloud;
 
     private String os;
+
+    private Architecture architecture;
 
     protected StackMatrixTestDto(TestContext testContext) {
         super(null, testContext);
@@ -36,12 +39,21 @@ public class StackMatrixTestDto extends AbstractCloudbreakTestDto<Object, StackM
         return this;
     }
 
+    public StackMatrixTestDto withArchitecture(Architecture architecture) {
+        this.architecture = architecture;
+        return this;
+    }
+
     public boolean isGovCloud() {
         return govCloud;
     }
 
     public String getOs() {
         return os;
+    }
+
+    public Architecture getArchitecture() {
+        return architecture;
     }
 
     @Override

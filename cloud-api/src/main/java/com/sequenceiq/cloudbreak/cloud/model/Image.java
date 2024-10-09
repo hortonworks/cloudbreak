@@ -126,6 +126,10 @@ public class Image {
         return architecture;
     }
 
+    public Architecture getArchitectureEnum() {
+        return Architecture.fromStringWithFallback(architecture);
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {

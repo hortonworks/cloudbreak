@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageOsService;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
@@ -46,8 +47,8 @@ public class ImageBasedDefaultCDHEntries {
     @Inject
     private ImageOsService imageOsService;
 
-    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String os, String imageCatalogName)
-            throws CloudbreakImageCatalogException {
+    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Long workspaceId, ImageCatalogPlatform platform, String os, Architecture architecture,
+            String imageCatalogName) throws CloudbreakImageCatalogException {
         String catalogName = Optional.ofNullable(imageCatalogName).orElse(ImageCatalogService.CDP_DEFAULT_CATALOG_NAME);
         StatedImages images = imageCatalogService.getImages(workspaceId, catalogName, null, platform, true);
         if (images.getImages().getCdhImages().isEmpty()) {
@@ -55,18 +56,19 @@ public class ImageBasedDefaultCDHEntries {
             images = imageCatalogService.getImages(workspaceId, catalogName, null, imageCatalogPlatform(CloudPlatform.AWS.name()), true);
         }
 
-        return getEntries(images.getImages(), os);
+        return getEntries(images.getImages(), os, architecture);
     }
 
     public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images) {
-        return getEntries(images, null);
+        return getEntries(images, null, null);
     }
 
-    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images, String os) {
+    public Map<String, ImageBasedDefaultCDHInfo> getEntries(Images images, String os, Architecture architecture) {
         return images.getCdhImages().stream()
                 .filter(Image::isDefaultImage)
                 .filter(image -> imageOsService.isSupported(image.getOs()))
                 .filter(image -> ObjectUtils.isEmpty(os) || os.equalsIgnoreCase(image.getOs()))
+                .filter(image -> architecture == null || Architecture.fromStringWithFallback(image.getArchitecture()) == architecture)
                 .collect(Collectors.toMap(Image::getVersion, this::createImageBasedDefaultCDHInfo, preferOs()));
     }
 

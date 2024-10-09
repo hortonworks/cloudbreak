@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
+import com.sequenceiq.common.model.Architecture;
 
 @Controller
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
@@ -97,9 +98,10 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     @DisableCheckPermissions
-    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud, String os) throws Exception {
+    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud, String os, Architecture architecture)
+            throws Exception {
         return stackMatrixService.getStackMatrix(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), os, imageCatalogName);
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), os, architecture, imageCatalogName);
     }
 
     @Override

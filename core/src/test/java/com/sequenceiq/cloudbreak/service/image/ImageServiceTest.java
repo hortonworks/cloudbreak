@@ -174,7 +174,7 @@ public class ImageServiceTest {
         when(cloudPlatformConnectors.getDefault(Platform.platform(CloudPlatform.YARN.name()))).thenReturn(connector);
         when(connector.regionToDisplayName(REGION)).thenReturn(REGION);
         when(platformStringTransformer.getPlatformStringForImageCatalog(PLATFORM, PLATFORM)).thenReturn(IMAGE_CATALOG_PLATFORM);
-        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM, OS, IMAGE_CATALOG_NAME))
+        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM, OS, Architecture.X86_64, IMAGE_CATALOG_NAME))
                 .thenReturn(Set.of(OS));
     }
 
@@ -349,7 +349,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setOs(null);
         StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
         when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM,
-                image.getImage().getOs(), image.getImageCatalogName()))
+                image.getImage().getOs(), Architecture.X86_64, image.getImageCatalogName()))
                 .thenReturn(Set.of("redhat8"));
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(image);
@@ -373,7 +373,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setOs("centos7");
         StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
         when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM,
-                image.getImage().getOs(), image.getImageCatalogName()))
+                image.getImage().getOs(), Architecture.X86_64, image.getImageCatalogName()))
                 .thenReturn(Set.of("centos7"));
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(image);
@@ -398,7 +398,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setOs("redhat8");
         StatedImage image = ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION);
         when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM,
-                image.getImage().getOs(), image.getImageCatalogName()))
+                image.getImage().getOs(), Architecture.X86_64, image.getImageCatalogName()))
                 .thenReturn(Set.of("centos7", "redhat8"));
         when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
                 .thenReturn(image);
