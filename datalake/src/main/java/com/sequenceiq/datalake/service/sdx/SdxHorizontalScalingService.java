@@ -173,7 +173,7 @@ public class SdxHorizontalScalingService {
                     "and try again");
         }
         if (isDownscaleBlocked(targetInstanceGroupName) && isDownscale(stack, request)) {
-            return Optional.of("The storage hostgroup down scale is not supported, because it can cause data loss");
+            return Optional.of(String.format(" %s can not be downscaled as it will cause data loss", targetInstanceGroupName));
         }
         return Optional.empty();
     }
