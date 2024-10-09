@@ -142,7 +142,6 @@ import com.sequenceiq.datalake.service.sdx.database.DatabaseParameterFallbackUti
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.datalake.service.validation.resize.SdxResizeValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -283,9 +282,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
-
-    @Inject
-    private SdxResizeValidator sdxResizeValidator;
 
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
@@ -502,7 +498,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         LOGGER.info("Creating SDX cluster with name {}", name);
         String accountId = getAccountIdFromCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
-        validateJavaVersion(sdxClusterRequest.getJavaVersion());
+        validateJavaVersion(sdxClusterRequest.getJavaVersion(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         platformAwareSdxConnector.validateIfOtherPlatformsHasSdx(environment.getCrn(), TargetPlatform.PAAS);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
@@ -617,6 +613,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
+    private boolean isCustomInstanceTypeSelected(List<SdxInstanceGroupRequest> customInstanceGroups) {
+        return CollectionUtils.isNotEmpty(customInstanceGroups)
+                && customInstanceGroups.stream().anyMatch(customInstanceGroup -> StringUtils.isNotEmpty(customInstanceGroup.getInstanceType()));
+    }
+
     private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType) {
         InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
         if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
@@ -684,13 +685,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 Set.of(StackResponseEntries.HARDWARE_INFO.getEntryName(), StackResponseEntries.EVENTS.getEntryName()), accountIdFromCrn);
 
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(environmentName);
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        sdxResizeValidator.validateDatabaseTypeForResize(sdxCluster.getSdxDatabase(), cloudPlatform);
 
         SdxCluster newSdxCluster = validateAndCreateNewSdxClusterForResize(sdxCluster, shape, sdxCluster.isEnableMultiAz()
                 || sdxClusterResizeRequest.isEnableMultiAz(), clusterName, userCrn, environment);
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (!StringUtils.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
             newSdxCluster.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
             newSdxCluster.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
@@ -1290,7 +1290,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateJavaVersion(Integer javaVersion) {
+    private void validateJavaVersion(Integer javaVersion, String accountId) {
         if (javaVersion != null) {
             if (!virtualMachineConfiguration.getSupportedJavaVersions().contains(javaVersion)) {
                 throw new BadRequestException(String.format("Java version %d is not supported.", javaVersion));
@@ -1402,11 +1402,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 .ifPresent(existedSdx -> {
                     throw new BadRequestException("SDX which is detached already exists for the environment. SDX name: " + existedSdx.getClusterName());
                 });
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        if (sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(), userCrn)) {
+        Boolean datalakeIsInBackupProgress = sdxBackupRestoreService.isDatalakeInBackupProgress(sdxCluster.getClusterName(),
+                ThreadBasedUserCrnProvider.getUserCrn());
+        if (datalakeIsInBackupProgress) {
             throw new BadRequestException("SDX cluster is in the process of backup. Resize can not get started.");
         }
-        if (sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(), userCrn)) {
+        Boolean datalakeIsInRestoreProgress = sdxBackupRestoreService.isDatalakeInRestoreProgress(sdxCluster.getClusterName(),
+                ThreadBasedUserCrnProvider.getUserCrn());
+        if (datalakeIsInRestoreProgress) {
             throw new BadRequestException("SDX cluster is in the process of restore. Resize can not get started.");
         }
     }

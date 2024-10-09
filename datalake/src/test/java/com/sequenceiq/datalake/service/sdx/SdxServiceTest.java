@@ -135,7 +135,6 @@ import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.datalake.service.validation.resize.SdxResizeValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -255,9 +254,6 @@ class SdxServiceTest {
 
     @Mock
     private PlatformAwareSdxConnector platformAwareSdxConnector;
-
-    @Mock
-    private SdxResizeValidator sdxResizeValidator;
 
     @InjectMocks
     private SdxService underTest;
