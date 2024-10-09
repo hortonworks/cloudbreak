@@ -269,7 +269,7 @@ public class StackCreatorServiceTest {
         workspace.setId(WORKSPACE_ID);
         StackV4Request stackRequest = new StackV4Request();
         stackRequest.setName(STACK_NAME);
-        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setArchitecture(Architecture.ARM64.getName());
         InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
         instanceGroupV4Request.setName(INSTANCE_GROUP);
         instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));

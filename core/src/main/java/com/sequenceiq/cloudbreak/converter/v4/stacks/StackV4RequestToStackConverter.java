@@ -236,7 +236,7 @@ public class StackV4RequestToStackConverter {
         Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source);
         stack.setLoadBalancers(loadBalancers);
         stack.setJavaVersion(source.getJavaVersion());
-        stack.setArchitecture(source.getArchitecture());
+        stack.setArchitecture(Architecture.fromStringWithValidation(source.getArchitecture()));
         return stack;
     }
 
@@ -436,7 +436,7 @@ public class StackV4RequestToStackConverter {
                 null,
                 imageSettings.getOs(),
                 null,
-                getIfNotNull(source.getArchitecture(), Architecture::getName),
+                source.getArchitecture(),
                 null,
                 imageSettings.getCatalog(),
                 imageSettings.getId(),

@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.cloud.model.Architecture;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -62,7 +61,7 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     private boolean enableMultiAz;
 
-    private Architecture architecture;
+    private String architecture;
 
     public String getEnvironmentName() {
         return environmentName;
@@ -188,11 +187,11 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
         this.enableMultiAz = enableMultiAz;
     }
 
-    public Architecture getArchitecture() {
+    public String getArchitecture() {
         return architecture;
     }
 
-    public void setArchitecture(Architecture architecture) {
+    public void setArchitecture(String architecture) {
         this.architecture = architecture;
     }
 

@@ -114,7 +114,7 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     private boolean enableMultiAz;
 
     @Schema(description = ModelDescriptions.ARCHITECTURE)
-    private Architecture architecture;
+    private String architecture;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -288,11 +288,16 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
         this.enableMultiAz = enableMultiAz;
     }
 
-    public Architecture getArchitecture() {
+    public String getArchitecture() {
         return architecture;
     }
 
-    public void setArchitecture(Architecture architecture) {
+    @Schema(hidden = true)
+    public Architecture getArchitectureEnum() {
+        return Architecture.fromStringWithValidation(architecture);
+    }
+
+    public void setArchitecture(String architecture) {
         this.architecture = architecture;
     }
 }

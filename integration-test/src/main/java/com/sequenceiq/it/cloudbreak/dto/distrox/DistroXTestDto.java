@@ -348,7 +348,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public DistroXTestDto withArchitecture(Architecture architecture) {
         DistroXImageV1Request image = getRequest().getImage();
         if (image == null || Strings.isNullOrEmpty(image.getId())) {
-            getRequest().setArchitecture(architecture);
+            getRequest().setArchitecture(architecture.getName());
         }
         getCloudProvider().template(getTestContext().given(DistroXInstanceTemplateTestDto.class), architecture);
         return this;
