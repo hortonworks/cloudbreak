@@ -44,15 +44,18 @@ public class DistroXJavaTests extends AbstractMockTest {
         testContext
                 .given(distroXName, DistroXTestDto.class)
                 .withJavaVersion(8)
+                .withName(distroXName)
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .resetCalls()
-                .when(distroXTestClient.setDefaultJavaVersion("17", true), key(distroXName))
+                .when(distroXTestClient.setDefaultJavaVersion("17", true, true), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
                 .mockSalt().run().post().bodyContains(Set.of("fun=cmd.run",
                         URLEncoder.encode("rm /var/log/set-default-java-version-executed", StandardCharsets.UTF_8)), 1).times(1).verify()
                 .mockSalt().run().post().bodyContains("state.highstate", 1).times(1).verify()
+                .mockSalt().run().post().bodyContains(Set.of("state.apply", "cloudera.manager.restart"), 1).times(1).verify()
+                .mockCm().rollingRestartServices().post().pathVariable("clusterName", distroXName).times(1).verify()
                 .then((testContext1, testDto, client) -> {
                     if (testDto.getResponse().getJavaVersion() != 17) {
                         throw new TestFailException("Java version is not 17");

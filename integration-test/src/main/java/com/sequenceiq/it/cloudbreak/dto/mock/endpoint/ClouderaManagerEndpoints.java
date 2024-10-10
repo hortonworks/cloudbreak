@@ -79,6 +79,11 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
                 CmRecentCommandsApi.Cm.RecentCommandTable.class, testDto, mockedTestContext);
     }
 
+    public CmV31Api.ClustersByClusterName.Commands.RollingRestart<T> rollingRestartServices() {
+        return (CmV31Api.ClustersByClusterName.Commands.RollingRestart<T>) EndpointProxyFactory.create(
+                CmV31Api.ClustersByClusterName.Commands.RollingRestart.class, testDto, mockedTestContext);
+    }
+
     public CommandsApplyHostTemplate<T> clustersByClusterNameHostTemplatesByHostTemplateNameCommandsApplyHostTemplate() {
         return (CommandsApplyHostTemplate<T>)
                 EndpointProxyFactory.create(CommandsApplyHostTemplate.class, testDto, mockedTestContext);
@@ -247,11 +252,16 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
                 interface ByCommand<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
                     DefaultResponseConfigure<T, ApiCommand> post();
                 }
+
+                interface RollingRestart<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+                    DefaultResponseConfigure<T, ApiCommand> post();
+                }
             }
 
             interface Parcels<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
                 DefaultResponseConfigure<T, ApiParcelList> get();
             }
+
         }
     }
 }

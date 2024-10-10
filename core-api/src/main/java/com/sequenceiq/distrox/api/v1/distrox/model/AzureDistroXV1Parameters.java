@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class AzureDistroXV1Parameters implements Serializable {
 
-    @Schema
     private String resourceGroupName;
 
     @Deprecated

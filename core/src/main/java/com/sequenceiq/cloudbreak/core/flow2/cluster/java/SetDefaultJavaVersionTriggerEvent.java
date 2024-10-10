@@ -13,10 +13,13 @@ public class SetDefaultJavaVersionTriggerEvent extends StackEvent {
 
     private final boolean restartServices;
 
-    public SetDefaultJavaVersionTriggerEvent(String selector, Long stackId, String defaultJavaVersion, boolean restartServices) {
+    private final boolean restartCM;
+
+    public SetDefaultJavaVersionTriggerEvent(String selector, Long stackId, String defaultJavaVersion, boolean restartServices, boolean restartCM) {
         super(selector, stackId);
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
+        this.restartCM = restartCM;
     }
 
     @JsonCreator
@@ -24,10 +27,12 @@ public class SetDefaultJavaVersionTriggerEvent extends StackEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("defaultJavaVersion") String defaultJavaVersion,
             @JsonProperty("restartServices") boolean restartServices,
+            @JsonProperty("restartCM") boolean restartCM,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
+        this.restartCM = restartCM;
     }
 
     public String getDefaultJavaVersion() {
@@ -36,6 +41,10 @@ public class SetDefaultJavaVersionTriggerEvent extends StackEvent {
 
     public boolean isRestartServices() {
         return restartServices;
+    }
+
+    public boolean isRestartCM() {
+        return restartCM;
     }
 
     @Override

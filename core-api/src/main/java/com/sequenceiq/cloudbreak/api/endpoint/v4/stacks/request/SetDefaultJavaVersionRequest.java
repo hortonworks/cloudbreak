@@ -20,6 +20,9 @@ public class SetDefaultJavaVersionRequest {
     @Schema(description = "Restart services after setting the default java version", defaultValue = "false")
     private boolean restartServices;
 
+    @Schema(description = "Restart CM after setting the default java version", defaultValue = "false")
+    private boolean restartCM;
+
     public String getDefaultJavaVersion() {
         return defaultJavaVersion;
     }
@@ -34,5 +37,13 @@ public class SetDefaultJavaVersionRequest {
 
     public void setRestartServices(boolean restartServices) {
         this.restartServices = restartServices;
+    }
+
+    public boolean isRestartCM() {
+        return restartCM;
+    }
+
+    public void setRestartCM(boolean restartCM) {
+        this.restartCM = restartCM;
     }
 }

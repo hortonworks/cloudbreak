@@ -195,8 +195,8 @@ public class DistroXTestClient {
         return new DistroXDiskAddAction(size, volumeType, instanceGroup, numDisks);
     }
 
-    public Action<DistroXTestDto, CloudbreakClient> setDefaultJavaVersion(String javaVersion, boolean restartServices) {
-        return new DistroXSetDefaultJavaVersionAction(javaVersion, restartServices);
+    public Action<DistroXTestDto, CloudbreakClient> setDefaultJavaVersion(String javaVersion, boolean restartServices, boolean restartCM) {
+        return new DistroXSetDefaultJavaVersionAction(javaVersion, restartServices, restartCM);
     }
 
 }

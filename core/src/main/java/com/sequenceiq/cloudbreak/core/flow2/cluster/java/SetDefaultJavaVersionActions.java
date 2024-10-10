@@ -75,13 +75,14 @@ public class SetDefaultJavaVersionActions {
     }
 
     @Bean(name = "SET_DEFAULT_JAVA_VERSION_FAILED_STATE")
-    public Action<?, ?> clusterStopFailedAction() {
+    public Action<?, ?> setDefaultJavaVersionFailed() {
         return new AbstractStackFailureAction<SetDefaultJavaVersionFlowState, SetDefaultJavaVersionFlowEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Set default java version failed: {}", payload.getException().getMessage());
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.SET_DEFAULT_JAVA_VERSION_FAILED);
-                flowMessageService.fireEventAndLog(payload.getResourceId(), AVAILABLE.name(), CLUSTER_SET_DEFAULT_JAVA_VERSION_FAILED);
+                flowMessageService.fireEventAndLog(payload.getResourceId(), AVAILABLE.name(), CLUSTER_SET_DEFAULT_JAVA_VERSION_FAILED,
+                        payload.getException().getMessage());
                 sendEvent(context, SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
