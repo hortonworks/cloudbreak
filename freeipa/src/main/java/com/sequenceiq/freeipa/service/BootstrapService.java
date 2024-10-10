@@ -61,30 +61,35 @@ public class BootstrapService {
     private CompressUtil compressUtil;
 
     public void bootstrap(Long stackId) throws CloudbreakOrchestratorException {
-        bootstrap(stackId, null);
+        bootstrap(stackId, null, false);
     }
 
-    public void bootstrap(Long stackId, List<String> instanceIds) throws CloudbreakOrchestratorException {
+    public void bootstrap(Long stackId, boolean restartAll) throws CloudbreakOrchestratorException {
+        bootstrap(stackId, null, restartAll);
+    }
+
+    public void bootstrap(Long stackId, List<String> instanceIds, boolean restartAll) throws CloudbreakOrchestratorException {
         Stack stack = stackRepository.findById(stackId).get();
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
                 .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toSet());
         Set<String> hostNames = instanceMetaDatas.stream().map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
         LOGGER.info("Bootstrapping nodes {} of stack {}", hostNames, stack.getResourceCrn());
-        bootstrap(stack, instanceMetaDatas, false);
+        bootstrap(stack, instanceMetaDatas, false, restartAll);
     }
 
     public void reBootstrap(Stack stack) throws CloudbreakOrchestratorException {
         LOGGER.info("Re-bootstrapping nodes of stack {}", stack.getResourceCrn());
-        bootstrap(stack, stack.getNotDeletedInstanceMetaDataSet(), true);
+        bootstrap(stack, stack.getNotDeletedInstanceMetaDataSet(), true, false);
     }
 
     public void reBootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas) throws CloudbreakOrchestratorException {
         LOGGER.info("Re-bootstrapping nodes {} of stack {}", instanceMetaDatas, stack.getResourceCrn());
-        bootstrap(stack, instanceMetaDatas, true);
+        bootstrap(stack, instanceMetaDatas, true, false);
     }
 
-    private void bootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas, boolean reBootstrap) throws CloudbreakOrchestratorException {
+    private void bootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas, boolean reBootstrap, boolean restartAll)
+            throws CloudbreakOrchestratorException {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);
 
@@ -109,7 +114,7 @@ public class BootstrapService {
             } else {
                 byte[] stateConfigZip = getStateConfigZip();
                 hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,
-                        stateConfigZip, params, exitCriteriaModel);
+                        stateConfigZip, params, exitCriteriaModel, restartAll);
             }
         } catch (IOException e) {
             LOGGER.error("Couldn't read state config", e);

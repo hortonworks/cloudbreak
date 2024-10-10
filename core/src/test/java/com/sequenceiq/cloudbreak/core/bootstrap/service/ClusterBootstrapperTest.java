@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -187,7 +188,7 @@ public class ClusterBootstrapperTest {
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
         verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
-        verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any());
+        verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any(), anyBoolean());
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertEquals(12, bootstrapParams.getMasterWorkerThreads());
     }
@@ -222,7 +223,7 @@ public class ClusterBootstrapperTest {
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(Set.of(instanceMetaData));
         verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
-        verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any());
+        verify(hostOrchestrator).bootstrapNewNodes(any(), any(), any(), any(), bootstrapParamsCaptor.capture(), any(), anyBoolean());
         BootstrapParams bootstrapParams = bootstrapParamsCaptor.getValue();
         assertNull(bootstrapParams.getMasterWorkerThreads());
     }

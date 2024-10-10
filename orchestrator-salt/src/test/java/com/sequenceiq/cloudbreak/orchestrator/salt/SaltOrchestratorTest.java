@@ -283,7 +283,7 @@ class SaltOrchestratorTest {
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
         when(compressUtil.generateCompressedOutputFromFolders("salt-common", "salt")).thenReturn(new byte[] {});
 
-        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
+        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel, false);
 
         verify(saltRunner, times(1)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltRunner, times(7)).runnerWithConfiguredErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));

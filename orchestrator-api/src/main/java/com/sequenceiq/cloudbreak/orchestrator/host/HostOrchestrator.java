@@ -31,7 +31,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             ExitCriteriaModel exitCriteriaModel, boolean restartAll) throws CloudbreakOrchestratorException;
 
     void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, byte[] stateConfigZip,
-            BootstrapParams params, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+            BootstrapParams params, ExitCriteriaModel exitCriteriaModel, boolean restartAll) throws CloudbreakOrchestratorException;
 
     void reBootstrapExistingNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, BootstrapParams params,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;

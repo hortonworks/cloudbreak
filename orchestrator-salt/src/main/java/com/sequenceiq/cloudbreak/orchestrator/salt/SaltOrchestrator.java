@@ -463,7 +463,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, byte[] stateConfigZip, BootstrapParams params,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+            ExitCriteriaModel exitModel, boolean restartAll) throws CloudbreakOrchestratorException {
         LOGGER.info("Bootstrap new nodes: {}", targets);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
@@ -475,6 +475,9 @@ public class SaltOrchestrator implements HostOrchestrator {
                 uploadSaltMasterConfig(sc, params, gatewayTargets, exitModel);
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
                 params.setRestartNeeded(true);
+                if (restartAll) {
+                    saltStateService.stopMasters(sc, gatewayTargets);
+                }
             }
             uploadSaltKeys(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes

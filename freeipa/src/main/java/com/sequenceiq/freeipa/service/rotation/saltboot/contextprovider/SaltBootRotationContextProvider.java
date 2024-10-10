@@ -86,7 +86,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
         String saltBootPrivateKeySecret = securityConfig.getSaltSecurityConfig().getSaltBootSignPrivateKeyVaultSecret();
         return ImmutableMap.<SecretRotationStep, RotationContext>builder()
                 .put(VAULT, getVaultRotationContext(resourceCrn, saltBootPasswordSecret, saltBootPrivateKeySecret))
-                .put(CUSTOM_JOB, getUpdateDatabaseJob(resourceCrn, environmentCrn.getAccountId(), saltBootPasswordSecret, saltBootPrivateKeySecret))
+                .put(CUSTOM_JOB, getUpdateDatabaseJob(resourceCrn, environmentCrn.getAccountId(), saltBootPrivateKeySecret))
                 .put(SALTBOOT_CONFIG, getServiceConfigRotationContext(stack, saltBootPasswordSecret, saltBootPrivateKeySecret))
                 .put(USER_DATA, new UserDataRotationContext(resourceCrn,
                         List.of(Pair.of(saltBootPasswordUserDataModifier, saltBootPasswordSecret),
@@ -95,25 +95,19 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
                 .build();
     }
 
-    private CustomJobRotationContext getUpdateDatabaseJob(String environmentCrn, String accountId,
-            String saltBootPasswordSecret, String saltBootPrivateKeySecret) {
+    private CustomJobRotationContext getUpdateDatabaseJob(String environmentCrn, String accountId, String saltBootPrivateKeySecret) {
         return CustomJobRotationContext
                 .builder()
                 .withResourceCrn(environmentCrn)
-                .withRotationJob(() ->
-                        updateSaltSecurityConfigColumns(environmentCrn, accountId, saltBootPasswordSecret, saltBootPrivateKeySecret,
-                                RotationSecret::getSecret))
-                .withRollbackJob(() ->
-                        updateSaltSecurityConfigColumns(environmentCrn, accountId, saltBootPasswordSecret, saltBootPrivateKeySecret,
-                                RotationSecret::getBackupSecret))
+                .withRotationJob(() -> updateSaltSecurityConfigColumns(environmentCrn, accountId, saltBootPrivateKeySecret, RotationSecret::getSecret))
+                .withRollbackJob(() -> updateSaltSecurityConfigColumns(environmentCrn, accountId, saltBootPrivateKeySecret, RotationSecret::getBackupSecret))
                 .build();
     }
 
-    private void updateSaltSecurityConfigColumns(String resourceCrn, String accountId, String saltBootPasswordSecret, String saltBootPrivateKeySecret,
+    private void updateSaltSecurityConfigColumns(String resourceCrn, String accountId, String saltBootPrivateKeySecret,
             Function<RotationSecret, String> mapper) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, accountId);
         SecurityConfig securityConfig = securityConfigService.findOneByStack(stack);
-        RotationSecret saltBootPassword = uncachedSecretServiceForRotation.getRotation(saltBootPasswordSecret);
         RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         String privateKey = mapper.apply(saltBootPrivateKey);
         securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(PkiUtil.calculatePemPublicKeyInBase64(privateKey));

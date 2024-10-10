@@ -117,14 +117,14 @@ class BootstrapServiceTest {
         when(imageService.getByStack(stack)).thenReturn(image);
         when(hostDiscoveryService.generateHostname(anyString(), any(), anyLong(), anyBoolean())).thenCallRealMethod();
 
-        underTest.bootstrap(STACK_ID, List.of(INSTANCE_WITH_FQDN, INSTANCE_WO_FQDN, INSTANCE_WRONG_DOMAIN));
+        underTest.bootstrap(STACK_ID, List.of(INSTANCE_WITH_FQDN, INSTANCE_WO_FQDN, INSTANCE_WRONG_DOMAIN), false);
 
         ArgumentCaptor<Set<Node>> targetCaptor = ArgumentCaptor.forClass((Class) Set.class);
         ArgumentCaptor<Set<Node>> allCaptor = ArgumentCaptor.forClass((Class) Set.class);
         ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor = ArgumentCaptor.forClass(BootstrapParams.class);
         ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
         verify(hostOrchestrator).bootstrapNewNodes(eq(gatewayConfigs), targetCaptor.capture(), allCaptor.capture(), eq(bytes), bootstrapParamsCaptor.capture(),
-                exitCriteriaModelCaptor.capture());
+                exitCriteriaModelCaptor.capture(), eq(Boolean.FALSE));
         Set<Node> targetNodes = targetCaptor.getValue();
         Set<Node> allNodes = allCaptor.getValue();
         assertEquals(targetNodes, allNodes);
@@ -189,7 +189,7 @@ class BootstrapServiceTest {
         ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor = ArgumentCaptor.forClass(BootstrapParams.class);
         ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
         verify(hostOrchestrator).bootstrapNewNodes(eq(gatewayConfigs), targetCaptor.capture(), allCaptor.capture(), eq(bytes), bootstrapParamsCaptor.capture(),
-                exitCriteriaModelCaptor.capture());
+                exitCriteriaModelCaptor.capture(), eq(Boolean.FALSE));
         Set<Node> targetNodes = targetCaptor.getValue();
         Set<Node> allNodes = allCaptor.getValue();
         assertEquals(targetNodes, allNodes);
@@ -330,7 +330,8 @@ class BootstrapServiceTest {
         image.setOs("ZOS");
         when(imageService.getByStack(stack)).thenReturn(image);
         when(hostDiscoveryService.generateHostname(anyString(), any(), anyLong(), anyBoolean())).thenCallRealMethod();
-        doThrow(new CloudbreakOrchestratorCancelledException("wow")).when(hostOrchestrator).bootstrapNewNodes(any(), anySet(), anySet(), any(), any(), any());
+        doThrow(new CloudbreakOrchestratorCancelledException("wow"))
+                .when(hostOrchestrator).bootstrapNewNodes(any(), anySet(), anySet(), any(), any(), any(), anyBoolean());
 
         assertThrows(CloudbreakOrchestratorException.class, () -> underTest.bootstrap(STACK_ID));
     }

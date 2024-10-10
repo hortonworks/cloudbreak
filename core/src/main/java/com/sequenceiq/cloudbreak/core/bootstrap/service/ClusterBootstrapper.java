@@ -506,7 +506,7 @@ public class ClusterBootstrapper {
         byte[] stateZip = getSaltStateZip(cluster);
         BootstrapParams params = createBootstrapParams(stack);
 
-        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null));
+        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null), false);
 
         InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack.getStack(), stack.getSecurityConfig(), primaryGateway, enableKnox);
