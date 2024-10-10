@@ -9,7 +9,7 @@ ext {
   // Spring
   caffeineVersion = '3.1.8'
   quartzVersion = '2.5.0-rc1'
-  springBootVersion = '3.3.1'
+  springBootVersion = '3.3.2'
   springDataJpaFrameworkVersion = '3.2.3'
   springFrameworkVersion = '6.1.6'
   springRetryVersion = '2.0.5'
