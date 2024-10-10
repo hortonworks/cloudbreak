@@ -15,12 +15,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @Component
 public class LatestDefaultImageUuidProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LatestDefaultImageUuidProvider.class);
 
     private final ImageComparator comparator;
 
@@ -44,7 +45,7 @@ public class LatestDefaultImageUuidProvider {
     }
 
     private String getImageGroupingKey(Image image) {
-        return image.getOs() + ";" + image.getVersion();
+        return image.getOs() + ";" + image.getVersion() + ";" + Architecture.fromStringWithFallback(image.getArchitecture()).getName();
     }
 
     private Predicate<Image> isPlatformMatching(String platform) {
