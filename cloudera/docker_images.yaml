@@ -1,21 +1,69 @@
 docker_images:
-  cloudbreak: hortonworks/cloudbreak
-  cloudbreak-fedramp: hortonworks/cloudbreak-fedramp
-  cloudbreak-autoscale: hortonworks/cloudbreak-autoscale
-  cloudbreak-autoscale-fedramp: hortonworks/cloudbreak-autoscale-fedramp
-  cloudbreak-datalake: hortonworks/cloudbreak-datalake
-  cloudbreak-datalake-fedramp: hortonworks/cloudbreak-datalake-fedramp
-  cloudbreak-environment: hortonworks/cloudbreak-environment
-  cloudbreak-environment-fedramp: hortonworks/cloudbreak-environment-fedramp
-  cloudbreak-freeipa: hortonworks/cloudbreak-freeipa
-  cloudbreak-freeipa-fedramp: hortonworks/cloudbreak-freeipa-fedramp
-  cloudbreak-redbeams: hortonworks/cloudbreak-redbeams
-  cloudbreak-redbeams-fedramp: hortonworks/cloudbreak-redbeams-fedramp
+  cloudbreak:
+    image: hortonworks/cloudbreak
+    env:
+      govcloud: exclude
+  cloudbreak-govcloud:
+    image: hortonworks/cloudbreak-govcloud
+    env:
+      govcloud: exclusive
+  cloudbreak-autoscale:
+    image: hortonworks/cloudbreak-autoscale
+    env:
+      govcloud: exclude
+  cloudbreak-autoscale-govcloud:
+    image: hortonworks/cloudbreak-autoscale-govcloud
+    env:
+      govcloud: exclusive
+  cloudbreak-datalake:
+    image: hortonworks/cloudbreak-datalake
+    env:
+      govcloud: exclude
+  cloudbreak-datalake-govcloud:
+    image: hortonworks/cloudbreak-datalake-govcloud
+    env:
+      govcloud: exclusive
+  cloudbreak-environment:
+    image: hortonworks/cloudbreak-environment
+    env:
+      govcloud: exclude
+  cloudbreak-environment-govcloud:
+    image: hortonworks/cloudbreak-environment-govcloud
+    env:
+      govcloud: exclusive
+  cloudbreak-freeipa:
+    image: hortonworks/cloudbreak-freeipa
+    env:
+      govcloud: exclude
+  cloudbreak-freeipa-govcloud:
+    image: hortonworks/cloudbreak-freeipa-govcloud
+    env:
+      govcloud: exclusive
+  cloudbreak-redbeams:
+    image: hortonworks/cloudbreak-redbeams
+    env:
+      govcloud: exclude
+  cloudbreak-redbeams-govcloud:
+    image: hortonworks/cloudbreak-redbeams-govcloud
+    env:
+      govcloud: exclusive
   cloudbreak-mock-thunderhead: hortonworks/cloudbreak-mock-thunderhead
   cloudbreak-mock-infrastructure: hortonworks/cloudbreak-mock-infrastructure
-  cloudbreak-externalizedcompute: hortonworks/cloudbreak-externalizedcompute
-  cloudbreak-externalizedcompute-fedramp: hortonworks/cloudbreak-externalizedcompute-fedramp
-  cloudbreak-remote-environment: hortonworks/cloudbreak-remote-environment
-  cloudbreak-remote-environment-fedramp: hortonworks/cloudbreak-remote-environment-fedramp
+  cloudbreak-externalizedcompute:
+    image: hortonworks/cloudbreak-externalizedcompute
+    env:
+      govcloud: exclude
+  cloudbreak-externalizedcompute-govcloud:
+    image: hortonworks/cloudbreak-externalizedcompute-govcloud
+    env:
+      govcloud: exclusive
+  cloudbreak-remote-environment:
+    image: hortonworks/cloudbreak-remote-environment
+    env:
+      govcloud: exclude
+  cloudbreak-remote-environment-govcloud:
+    image: hortonworks/cloudbreak-remote-environment-govcloud
+    env:
+      govcloud: exclusive
 external_images:
   java-init-container: docker-private.infra.cloudera.com/cloudera/thunderhead-java-init-container-17:1.0.0-b10775
