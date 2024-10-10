@@ -22,8 +22,10 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
@@ -40,6 +42,9 @@ public class CoreVerticalScaleService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private StackService stackService;
 
     public void verticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
         if (payload.getTemplate().getInstanceType() != null) {
@@ -80,6 +85,7 @@ public class CoreVerticalScaleService {
 
     public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request,
             int instanceStorageCount, int instanceStorageSize) {
+        Stack stack = stackService.getById(stackId);
         Optional<InstanceGroupView> optionalGroup = instanceGroupService
                 .findInstanceGroupViewByStackIdAndGroupName(stackId, stackVerticalScaleV4Request.getGroup());
         if (optionalGroup.isPresent() && stackVerticalScaleV4Request.getTemplate() != null) {
@@ -97,8 +103,10 @@ public class CoreVerticalScaleService {
                 template.setRootVolumeSize(rootVolumeSize);
             }
             updateVolumeTemplate(requestedTemplate, template);
-            if (instanceStorageCount > 0 && template.getTemporaryStorage().equals(TemporaryStorage.ATTACHED_VOLUMES)) {
+            if (instanceStorageCount > 0 && template.getTemporaryStorage().equals(TemporaryStorage.ATTACHED_VOLUMES) && !stack.isDatalake()) {
                 template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+            } else if (instanceStorageCount == 0) {
+                template.setTemporaryStorage(TemporaryStorage.ATTACHED_VOLUMES);
             }
             templateService.savePure(template);
         }
