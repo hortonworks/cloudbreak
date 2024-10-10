@@ -65,6 +65,10 @@ public interface PlatformResources {
     CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
         boolean availabilityZonesNeeded) throws Exception;
 
+    default CloudRegions cdpEnabledRegions() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
     /**
      * Return the virtual machines in the defined region
      * @param cloudCredential credentials to connect to the cloud provider

@@ -104,6 +104,10 @@ public class AzureRegionProvider {
                 .collect(Collectors.toSet());
     }
 
+    public String getArmZoneParameterDefault() {
+        return armZoneParameterDefault;
+    }
+
     public Map<Region, AzureCoordinate> enabledRegions() {
         return enabledRegions;
     }
@@ -140,6 +144,7 @@ public class AzureRegionProvider {
                                 .displayName(RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).label())
                                 .key(RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name())
                                 .k8sSupported(regionCoordinateSpecification.isK8sSupported())
+                                .cdpSupportedServices(regionCoordinateSpecification.getCdpSupportedServices())
                                 .entitlements(regionCoordinateSpecification.getEntitlements())
                                 .defaultDbVmType(regionCoordinateSpecification.getDefaultDbVmtype())
                                 .build());

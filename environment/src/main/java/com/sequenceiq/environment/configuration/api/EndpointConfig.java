@@ -28,6 +28,7 @@ import com.sequenceiq.environment.environment.v1.EnvironmentDefaultComputeCluste
 import com.sequenceiq.environment.environment.v1.EnvironmentInternalV1Controller;
 import com.sequenceiq.environment.environment.v1.co2.EnvironmentCO2Controller;
 import com.sequenceiq.environment.environment.v1.cost.EnvironmentCostController;
+import com.sequenceiq.environment.expressonboarding.v1.ExpressOnboardingController;
 import com.sequenceiq.environment.marketplace.v1.controller.AzureMarketplaceTermsController;
 import com.sequenceiq.environment.operation.v1.OperationController;
 import com.sequenceiq.environment.platformresource.v1.CredentialPlatformResourceController;
@@ -68,6 +69,7 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentCO2Controller.class,
             AzureMarketplaceTermsController.class,
             CDPEventV1Endpoint.class,
+            ExpressOnboardingController.class,
             OpenApiController.class);
 
     private final String contextPath;

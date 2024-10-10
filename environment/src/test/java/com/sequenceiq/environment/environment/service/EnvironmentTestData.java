@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -122,8 +123,9 @@ public class EnvironmentTestData {
     public static CloudRegions getCloudRegions() {
         List<Region> regions = List.of(Region.region("r1"), Region.region("r2"));
         List<String> displayNames = List.of("region 1", "region 2");
-        List<Coordinate> coordinates = List.of(Coordinate.coordinate("1", "2", "Here", "region-1", false, null, null),
-                Coordinate.coordinate("2", "2", "There", "region-2", false, null, null));
+        List<Coordinate> coordinates = List.of(
+                Coordinate.coordinate("1", "2", "Here", "region-1", false, null, null, Set.of()),
+                Coordinate.coordinate("2", "2", "There", "region-2", false, null, null, Set.of()));
         List<List<AvailabilityZone>> availabilityZones = List.of(List.of(AvailabilityZone.availabilityZone("r1z1")),
                 List.of(AvailabilityZone.availabilityZone("r2z1")));
 

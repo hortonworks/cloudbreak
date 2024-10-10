@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetCdpPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRequest;
@@ -213,6 +215,16 @@ public class CloudParameterService {
         LOGGER.debug("Get platform resource groups for credential: [{}]", cloudCredential.getName());
         GetPlatformResourceGroupsRequest request = new GetPlatformResourceGroupsRequest(cloudCredential, cloudCredential, platformVariant, region, null);
         return executeRequestAndHandleErrors(request, "resource group tables").getResourceGroups();
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public CloudRegions getCdpRegions(String platform, String platformVariant) {
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(platform)
+                .withVariant(platformVariant)
+                .build();
+        GetCdpPlatformRegionsRequest request = new GetCdpPlatformRegionsRequest(cloudContext);
+        return executeRequestAndHandleErrors(request, "resource group tables").getCloudRegions();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))

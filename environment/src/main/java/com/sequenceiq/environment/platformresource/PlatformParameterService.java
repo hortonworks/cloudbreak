@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetCdpPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -55,6 +57,14 @@ public class PlatformParameterService {
 
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    public GetCdpPlatformRegionsRequest getCdpPlatformRegionsRequestV2(String cloudPlatform, String platformVariant) {
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(cloudPlatform)
+                .withVariant(platformVariant)
+                .build();
+        return new GetCdpPlatformRegionsRequest(cloudContext);
+    }
 
     public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
             String accountId,
@@ -352,6 +362,12 @@ public class PlatformParameterService {
     public CloudRegions getRegionsByCredential(PlatformResourceRequest request, boolean availabilityZonesNeeded) {
         return cloudParameterService.getRegionsV2(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters(), availabilityZonesNeeded);
+    }
+
+    public CloudRegions getCdpRegions(GetCdpPlatformRegionsRequest request) {
+        return cloudParameterService.getCdpRegions(
+                request.getCloudContext().getPlatform().getValue(),
+                request.getCloudContext().getVariant().getValue());
     }
 
     public PlatformDisks getDiskTypes() {

@@ -38,6 +38,10 @@ public enum CloudPlatform {
         return AWS.equalsIgnoreCase(cloudPlatform) || AZURE.equalsIgnoreCase(cloudPlatform);
     }
 
+    public static Set<CloudPlatform> publicCloudPlatforms() {
+        return Set.of(AZURE, AWS, GCP);
+    }
+
     public static CloudPlatform fromName(String name) {
         if (name == null) {
             return null;

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 
 public class RegionCoordinateSpecification {
     @JsonProperty("name")
@@ -25,6 +27,9 @@ public class RegionCoordinateSpecification {
 
     @JsonProperty("defaultDbVmtype")
     private String defaultDbVmtype;
+
+    @JsonProperty("cdpSupportedServices")
+    private Set<CdpSupportedServices> cdpSupportedServices;
 
     public String getName() {
         return name;
@@ -80,5 +85,13 @@ public class RegionCoordinateSpecification {
 
     public void setDefaultDbVmtype(String defaultDbVmtype) {
         this.defaultDbVmtype = defaultDbVmtype;
+    }
+
+    public Set<CdpSupportedServices> getCdpSupportedServices() {
+        return cdpSupportedServices;
+    }
+
+    public void setCdpSupportedServices(Set<CdpSupportedServices> cdpSupportedServices) {
+        this.cdpSupportedServices = cdpSupportedServices;
     }
 }

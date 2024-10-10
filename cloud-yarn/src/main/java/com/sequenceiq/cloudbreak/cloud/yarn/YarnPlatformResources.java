@@ -69,7 +69,8 @@ public class YarnPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype()));
+                                regionCoordinateSpecification.getDefaultDbVmtype(),
+                                regionCoordinateSpecification.getCdpSupportedServices()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;

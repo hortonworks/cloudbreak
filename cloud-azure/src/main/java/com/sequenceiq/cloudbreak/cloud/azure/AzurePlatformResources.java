@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
@@ -43,10 +44,12 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureHostEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -61,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
@@ -75,6 +79,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
+import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
@@ -247,6 +252,42 @@ public class AzurePlatformResources implements PlatformResources {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Collection<com.azure.core.management.Region> azureRegions = client.getRegion(region);
         return azureRegionProvider.regions(region, azureRegions, cloudCredential.getEntitlements());
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cdpCloudResourceRegionCache", key = "'AZURE'")
+    public CloudRegions cdpEnabledRegions() {
+        Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
+        Map<Region, String> displayNames = new HashMap<>();
+        Map<Region, Coordinate> coordinates = new HashMap<>();
+
+        for (Entry<Region, AzureCoordinate> enabledRegion : azureRegionProvider.enabledRegions().entrySet()) {
+            regionListMap.put(enabledRegion.getKey(), List.of());
+            Coordinate regionCoordinateSpecification = enabledRegion.getValue();
+            displayNames.put(enabledRegion.getKey(), enabledRegion.getValue().getDisplayName());
+
+            Set<CdpSupportedServices> cdpServices = regionCoordinateSpecification.getCdpSupportedServices()
+                    .stream()
+                    .map(e -> e.services())
+                    .flatMap(list -> list.stream())
+                    .collect(Collectors.toSet());
+            Coordinate coordinate =  coordinate(
+                    regionCoordinateSpecification.getLongitude().toString(),
+                    regionCoordinateSpecification.getLatitude().toString(),
+                    regionCoordinateSpecification.getDisplayName(),
+                    regionCoordinateSpecification.getKey(),
+                    regionCoordinateSpecification.isK8sSupported(),
+                    regionCoordinateSpecification.getEntitlements(),
+                    regionCoordinateSpecification.getDefaultDbVmType(),
+                    cdpServices);
+            coordinates.put(enabledRegion.getKey(), coordinate);
+        }
+        return new CloudRegions(
+                regionListMap,
+                displayNames,
+                coordinates,
+                azureRegionProvider.getArmZoneParameterDefault(),
+                true);
     }
 
     @Override

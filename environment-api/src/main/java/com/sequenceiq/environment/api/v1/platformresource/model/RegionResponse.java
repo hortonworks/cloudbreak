@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,6 +27,9 @@ public class RegionResponse extends CompactRegionResponse {
 
     @Schema(description = PlatformResourceModelDescription.K8S_SUPPORTED_LOCATIONS)
     private List<String> k8sSupportedlocations;
+
+    @Schema(description = PlatformResourceModelDescription.CDP_SERVICES)
+    private Map<String, Set<String>> cdpSupportedServices;
 
     public RegionResponse() {
         availabilityZones = new HashMap<>();
@@ -75,12 +79,21 @@ public class RegionResponse extends CompactRegionResponse {
         this.locations = locations;
     }
 
+    public Map<String, Set<String>> getCdpSupportedServices() {
+        return cdpSupportedServices;
+    }
+
+    public void setCdpSupportedServices(Map<String, Set<String>> cdpSupportedServices) {
+        this.cdpSupportedServices = cdpSupportedServices;
+    }
+
     @Override
     public String toString() {
         return "RegionResponse{" +
                 "availabilityZones=" + availabilityZones +
                 ", defaultRegion='" + defaultRegion + '\'' +
                 ", locations=" + locations +
+                ", cdpSupportedServices=" + cdpSupportedServices +
                 '}';
     }
 }

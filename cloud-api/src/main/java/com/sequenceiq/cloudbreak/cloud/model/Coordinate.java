@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 
 public class Coordinate {
 
@@ -20,8 +23,10 @@ public class Coordinate {
 
     private final List<String> entitlements;
 
+    private final Set<CdpSupportedServices> cdpSupportedServices;
+
     protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported,
-        List<String> entitlements, String defaultDbVmType) {
+        List<String> entitlements, String defaultDbVmType, Set<CdpSupportedServices> cdpSupportedServices) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.displayName = displayName;
@@ -29,6 +34,7 @@ public class Coordinate {
         this.k8sSupported = k8sSupported;
         this.entitlements = entitlements;
         this.defaultDbVmType = defaultDbVmType;
+        this.cdpSupportedServices = cdpSupportedServices;
     }
 
     public Double getLongitude() {
@@ -63,14 +69,25 @@ public class Coordinate {
         return defaultDbVmType;
     }
 
+    public Set<CdpSupportedServices> getCdpSupportedServices() {
+        return cdpSupportedServices;
+    }
+
     public boolean isMatchedRegion(Region region) {
         return Objects.equals(key, region.getRegionName()) || Objects.equals(displayName, region.getRegionName());
     }
 
-    public static Coordinate coordinate(String longitude, String latitude, String  displayName, String key, boolean k8sSupported,
-        List<String> entitlements, String defaultDbVmType) {
-        return new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude), displayName, key, k8sSupported, entitlements,
-                defaultDbVmType);
+    public static Coordinate coordinate(String longitude, String latitude, String displayName, String key, boolean k8sSupported,
+        List<String> entitlements, String defaultDbVmType, Set<CdpSupportedServices> cdpSupportedServices) {
+        return new Coordinate(
+                Double.parseDouble(longitude),
+                Double.parseDouble(latitude),
+                displayName,
+                key,
+                k8sSupported,
+                entitlements,
+                defaultDbVmType,
+                cdpSupportedServices);
     }
 
     public static Coordinate defaultCoordinate() {
@@ -81,6 +98,7 @@ public class Coordinate {
                 "us-west-1",
                 false,
                 new ArrayList<>(),
-                null);
+                null,
+                Set.of());
     }
 }

@@ -32,6 +32,10 @@ public class AwsDefaultZoneProvider {
         return awsZoneParameterDefault;
     }
 
+    public String getAwsZoneParameterDefault() {
+        return awsZoneParameterDefault;
+    }
+
     @Override
     public String toString() {
         return "AwsDefaultZoneProvider{" +

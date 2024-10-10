@@ -6,8 +6,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
@@ -45,12 +47,18 @@ public class PlatformRegionsToRegionV1ResponseConverter {
 
         List<String> locations = new ArrayList<>();
         List<String> k8sSupportedLocations = new ArrayList<>();
+        Map<String, Set<String>> cdpSupportedServices = new HashMap<>();
         for (Entry<Region, Coordinate> coordinateEntry : source.getCoordinates().entrySet()) {
             locations.add(coordinateEntry.getKey().getRegionName());
             displayNames.put(coordinateEntry.getKey().getRegionName(), coordinateEntry.getValue().getDisplayName());
             if (coordinateEntry.getValue().getK8sSupported()) {
                 k8sSupportedLocations.add(coordinateEntry.getKey().getRegionName());
             }
+            cdpSupportedServices.put(coordinateEntry.getKey().getRegionName(), coordinateEntry.getValue()
+                    .getCdpSupportedServices()
+                    .stream()
+                    .map(e -> e.name().toLowerCase(Locale.ROOT))
+                    .collect(Collectors.toSet()));
         }
 
         Collections.sort(regions);
@@ -77,6 +85,7 @@ public class PlatformRegionsToRegionV1ResponseConverter {
         json.setDisplayNames(displayNames);
         json.setLocations(locations);
         json.setK8sSupportedlocations(k8sSupportedLocations);
+        json.setCdpSupportedServices(cdpSupportedServices);
 
         return json;
     }

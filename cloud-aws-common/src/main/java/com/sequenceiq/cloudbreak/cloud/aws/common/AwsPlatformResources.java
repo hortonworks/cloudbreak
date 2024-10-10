@@ -105,6 +105,7 @@ import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
+import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
@@ -321,6 +322,11 @@ public class AwsPlatformResources implements PlatformResources {
                         .filter(e -> e.getKey().getRegionName().equalsIgnoreCase(regionCoordinateSpecification.getName()))
                         .findFirst();
 
+                Set<CdpSupportedServices> cdpServices = regionCoordinateSpecification.getCdpSupportedServices()
+                        .stream()
+                        .flatMap(e -> e.services().stream())
+                        .collect(Collectors.toSet());
+
                 regionCoordinates.put(region,
                         coordinate(
                                 regionCoordinateSpecification.getLongitude(),
@@ -329,7 +335,8 @@ public class AwsPlatformResources implements PlatformResources {
                                 regionEntry.isPresent() ? regionEntry.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype()));
+                                regionCoordinateSpecification.getDefaultDbVmtype(),
+                                cdpServices));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -592,6 +599,36 @@ public class AwsPlatformResources implements PlatformResources {
             defaultRegion = region.value();
         }
         return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cdpCloudResourceRegionCache", key = "'AWS'")
+    public CloudRegions cdpEnabledRegions() {
+        Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
+        Map<Region, String> displayNames = new HashMap<>();
+        Map<Region, Coordinate> coordinates = new HashMap<>();
+
+        for (Entry<Region, Coordinate> enabledRegion : regionCoordinates.entrySet()) {
+            regionListMap.put(enabledRegion.getKey(), List.of());
+            Coordinate regionCoordinateSpecification = enabledRegion.getValue();
+            displayNames.put(enabledRegion.getKey(), enabledRegion.getValue().getDisplayName());
+            Coordinate coordinate =  coordinate(
+                    regionCoordinateSpecification.getLongitude().toString(),
+                    regionCoordinateSpecification.getLatitude().toString(),
+                    regionCoordinateSpecification.getDisplayName(),
+                    regionCoordinateSpecification.getKey(),
+                    regionCoordinateSpecification.isK8sSupported(),
+                    regionCoordinateSpecification.getEntitlements(),
+                    regionCoordinateSpecification.getDefaultDbVmType(),
+                    regionCoordinateSpecification.getCdpSupportedServices());
+            coordinates.put(enabledRegion.getKey(), coordinate);
+        }
+        return new CloudRegions(
+                regionListMap,
+                displayNames,
+                coordinates,
+                awsDefaultZoneProvider.getAwsZoneParameterDefault(),
+                true);
     }
 
     private void fetchAZsIfNeeded(boolean availabilityZonesNeeded, Map<Region, List<AvailabilityZone>> regionListMap,

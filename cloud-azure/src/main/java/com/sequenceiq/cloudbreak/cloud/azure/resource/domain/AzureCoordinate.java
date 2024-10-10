@@ -1,15 +1,25 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 
 public class AzureCoordinate extends Coordinate {
 
     public AzureCoordinate(AzureCoordinateBuilder builder) {
-        super(builder.longitude, builder.latitude, builder.displayName, builder.key, builder.k8sSupported,
-                builder.entitlements, builder.defaultDbVmType);
+        super(
+                builder.longitude,
+                builder.latitude,
+                builder.displayName,
+                builder.key,
+                builder.k8sSupported,
+                builder.entitlements,
+                builder.defaultDbVmType,
+                builder.cdpSupportedServices);
     }
 
     public static AzureCoordinate coordinate(AzureCoordinateBuilder builder) {
@@ -31,6 +41,8 @@ public class AzureCoordinate extends Coordinate {
         private List<String> entitlements = new ArrayList<>();
 
         private String defaultDbVmType;
+
+        private Set<CdpSupportedServices> cdpSupportedServices = new HashSet<>();
 
         public AzureCoordinateBuilder longitude(Double longitude) {
             this.longitude = longitude;
@@ -77,6 +89,11 @@ public class AzureCoordinate extends Coordinate {
             return this;
         }
 
+        public AzureCoordinateBuilder cdpSupportedServices(Set<CdpSupportedServices> cdpSupportedServices) {
+            this.cdpSupportedServices = cdpSupportedServices;
+            return this;
+        }
+
         public static AzureCoordinateBuilder builder() {
             return new AzureCoordinateBuilder();
         }
@@ -93,7 +110,8 @@ public class AzureCoordinate extends Coordinate {
                     .key("us-west-1")
                     .k8sSupported(false)
                     .defaultDbVmType(null)
-                    .entitlements(new ArrayList<>());
+                    .entitlements(new ArrayList<>())
+                    .cdpSupportedServices(new HashSet<>());
         }
     }
 

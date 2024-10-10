@@ -6,10 +6,11 @@ import java.util.concurrent.TimeUnit;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 
-public class CloudPlatformRequest<T> implements Selectable {
+public class CloudPlatformRequest<T> implements Selectable, Payload {
 
     private final CloudContext cloudContext;
 

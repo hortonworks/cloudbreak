@@ -112,7 +112,7 @@ public class CoreVerticalScaleService {
         }
     }
 
-    private static void updateVolumeTemplate(InstanceTemplateV4Request requestedTemplate, Template template) {
+    private void updateVolumeTemplate(InstanceTemplateV4Request requestedTemplate, Template template) {
         Set<VolumeV4Request> requestedAttachedVolumes = requestedTemplate.getAttachedVolumes();
         if (requestedAttachedVolumes != null) {
             for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {

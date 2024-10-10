@@ -18,8 +18,12 @@ public class CloudRegions {
 
     private final boolean regionsSupported;
 
-    public CloudRegions(Map<Region, List<AvailabilityZone>> cloudRegions, Map<Region, String> displayNames, Map<Region, Coordinate> coordinates,
-            String defaultRegion, boolean regionsSupported) {
+    public CloudRegions(
+            Map<Region, List<AvailabilityZone>> cloudRegions,
+            Map<Region, String> displayNames,
+            Map<Region, Coordinate> coordinates,
+            String defaultRegion,
+            boolean regionsSupported) {
         this.cloudRegions = cloudRegions;
         this.displayNames = displayNames;
         this.coordinates = coordinates;

@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
+import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
@@ -168,7 +169,8 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype()));
+                                regionCoordinateSpecification.getDefaultDbVmtype(),
+                                regionCoordinateSpecification.getCdpSupportedServices()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -388,6 +390,43 @@ public class GcpPlatformResources implements PlatformResources {
             defaultRegion = region.value();
         }
         return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cdpCloudResourceRegionCache", key = "'GCP'")
+    public CloudRegions cdpEnabledRegions() {
+        Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
+        Map<Region, String> displayNames = new HashMap<>();
+        Map<Region, Coordinate> coordinates = new HashMap<>();
+
+
+        for (Map.Entry<Region, Coordinate> enabledRegion : regionCoordinates.entrySet()) {
+            Set<CdpSupportedServices> cdpServices = enabledRegion.getValue().getCdpSupportedServices()
+                    .stream()
+                    .map(e -> e.services())
+                    .flatMap(list -> list.stream())
+                    .collect(Collectors.toSet());
+
+            regionListMap.put(enabledRegion.getKey(), List.of());
+            Coordinate regionCoordinateSpecification = enabledRegion.getValue();
+            displayNames.put(enabledRegion.getKey(), enabledRegion.getValue().getDisplayName());
+            Coordinate coordinate =  coordinate(
+                    regionCoordinateSpecification.getLongitude().toString(),
+                    regionCoordinateSpecification.getLatitude().toString(),
+                    regionCoordinateSpecification.getDisplayName(),
+                    regionCoordinateSpecification.getKey(),
+                    regionCoordinateSpecification.isK8sSupported(),
+                    regionCoordinateSpecification.getEntitlements(),
+                    regionCoordinateSpecification.getDefaultDbVmType(),
+                    cdpServices);
+            coordinates.put(enabledRegion.getKey(), coordinate);
+        }
+        return new CloudRegions(
+                regionListMap,
+                displayNames,
+                coordinates,
+                gcpZoneParameterDefault,
+                true);
     }
 
     public void addCoordinate(Map<Region, Coordinate> coordinates, com.google.api.services.compute.model.Region gcpRegion) {
