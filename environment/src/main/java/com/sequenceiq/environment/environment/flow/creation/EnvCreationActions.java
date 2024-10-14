@@ -32,6 +32,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -354,7 +355,8 @@ public class EnvCreationActions {
                             environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FAILED, environmentDto, exception);
-                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_CREATION_FAILED);
+                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_CREATION_FAILED,
+                                    Set.of(exception.getMessage()));
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FAILED_STATE");
