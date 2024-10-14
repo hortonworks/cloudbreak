@@ -302,6 +302,24 @@ class ExternalizedComputeServiceTest {
     }
 
     @Test
+    public void testReInitializeComputeClusterCreationInProgress() {
+        ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
+        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
+        Environment environment = new Environment();
+        String environmentName = "environmentName";
+        environment.setName(environmentName);
+        String envCrn = "envCrn";
+        environment.setResourceCrn(envCrn);
+        ExternalizedComputeClusterResponse externalizedComputeClusterResponse = new ExternalizedComputeClusterResponse();
+        externalizedComputeClusterResponse.setStatus(ExternalizedComputeClusterApiStatus.CREATE_IN_PROGRESS);
+        when(externalizedComputeClientService.getComputeCluster(envCrn, "default-" + environmentName + "-compute-cluster"))
+                .thenReturn(Optional.of(externalizedComputeClusterResponse));
+        underTest.reInitializeComputeCluster(environment, true);
+        verify(externalizedComputeClientService, times(0)).reInitializeComputeCluster(any(),
+                eq(true));
+    }
+
+    @Test
     public void testCredentialValidation() {
         String region = "region";
         String credential = "credential";

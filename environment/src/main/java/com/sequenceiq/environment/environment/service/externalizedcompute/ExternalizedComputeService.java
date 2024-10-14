@@ -100,12 +100,18 @@ public class ExternalizedComputeService {
         try {
             externalizedComputeValidation(environment.getAccountId());
             String computeClusterName = getDefaultComputeClusterName(environment.getName());
-            LOGGER.info("Reinitialize compute cluster with name {}", computeClusterName);
-            ExternalizedComputeClusterInternalRequest request = new ExternalizedComputeClusterInternalRequest();
-            request.setEnvironmentCrn(environment.getResourceCrn());
-            request.setName(computeClusterName);
-            request.setDefaultCluster(true);
-            externalizedComputeClientService.reInitializeComputeCluster(request, force);
+            boolean creationInProgress = externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), computeClusterName)
+                    .map(cluster -> cluster.getStatus().isCreationInProgress()).orElse(false);
+            if (creationInProgress) {
+                LOGGER.info("Compute cluster is in progress, skipping reinitialization.");
+            } else {
+                LOGGER.info("Reinitialize compute cluster with name {}", computeClusterName);
+                ExternalizedComputeClusterInternalRequest request = new ExternalizedComputeClusterInternalRequest();
+                request.setEnvironmentCrn(environment.getResourceCrn());
+                request.setName(computeClusterName);
+                request.setDefaultCluster(true);
+                externalizedComputeClientService.reInitializeComputeCluster(request, force);
+            }
         } catch (ExternalizedComputeOperationFailedException e) {
             throw e;
         } catch (Exception e) {
