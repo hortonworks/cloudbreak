@@ -37,6 +37,7 @@ Rotation framework has been created based on this idea.
   - child rotation: after first parent rotation, user should execute rotation for the same `MultiSecretType` for every child resources
   - 2nd phase parent rotation: if every child is rotated regarding the type, parent rotation can be finalized.
 - framework will handle these scenarios, developer only need to implement context providers and additional required executors for related parent and child secret type.
+- when there is stopped workload cluster which is a child resource for a multi-cluster rotation, then start will execute the child rotation automatically 
 
 ## API
 - for internal usage we have API, where we can define only one secret, and we can define the execution type of the rotation flow, we can tell the framework to execute only specific phase of the rotation (only rotation, only rollback, etc.). With that we can execute specific phase in a service initiated by another service, and later we can poll the status of the flow.

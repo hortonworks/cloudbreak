@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.secret.rotation;
 
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_DEMO_SECRET;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_DEMO_SECRET;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DEMO_SECRET;
 
@@ -68,7 +67,10 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
                 .when(sdxTestClient.rotateSecretInternal(List.of(DATALAKE_DEMO_SECRET)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecretInternal(List.of(DATAHUB_DEMO_SECRET)))
+                .when(distroXTestClient.stop())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.start())
                 .awaitForFlow()
                 .given(FreeIpaRotationTestDto.class)
                 .withSecrets(List.of(FREEIPA_DEMO_SECRET))

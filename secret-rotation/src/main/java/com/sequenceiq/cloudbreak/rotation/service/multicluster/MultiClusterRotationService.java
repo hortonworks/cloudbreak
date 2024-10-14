@@ -35,6 +35,10 @@ public class MultiClusterRotationService {
         return multiClusterRotationResourceRepository.findAllBySecretTypeAndResourceCrn(secretType, resourceCrn);
     }
 
+    public Set<MultiClusterRotationResource> getMultiRotationChildEntriesForResource(String resourceCrn) {
+        return multiClusterRotationResourceRepository.findAllByResourceCrnAndType(resourceCrn, PENDING_CHILD);
+    }
+
     public Set<MultiClusterRotationResource> getMultiRotationEntriesForSecretAndResources(MultiSecretType secretType, Set<String> crns) {
         return multiClusterRotationResourceRepository.findAllBySecretTypeAndResourceCrnIn(secretType, crns);
     }
