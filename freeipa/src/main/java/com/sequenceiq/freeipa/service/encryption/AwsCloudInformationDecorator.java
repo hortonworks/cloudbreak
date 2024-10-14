@@ -80,6 +80,11 @@ public class AwsCloudInformationDecorator implements CloudInformationDecorator {
         return List.of(arnService.buildEc2InstanceArn(getArnPartition(), stack.getRegion(), accountId, instanceId));
     }
 
+    @Override
+    public ResourceType getUserdataSecretResourceType() {
+        return ResourceType.AWS_SECRETSMANAGER_SECRET;
+    }
+
     private String getCrossAccountRoleArnFromCredential(CredentialResponse credentialResponse) {
         if (credentialResponse != null && credentialResponse.getAws() != null
                 && credentialResponse.getAws().getRoleBased() != null

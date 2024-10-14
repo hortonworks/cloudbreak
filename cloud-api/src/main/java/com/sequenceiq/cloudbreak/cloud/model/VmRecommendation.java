@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -63,5 +65,27 @@ public class VmRecommendation {
 
     public void setVolumeSizeGB(long volumeSizeGB) {
         this.volumeSizeGB = volumeSizeGB;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        VmRecommendation that = (VmRecommendation) o;
+        return cardinality == that.cardinality &&
+                volumeCount == that.volumeCount &&
+                volumeSizeGB == that.volumeSizeGB &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(flavor, that.flavor) &&
+                Objects.equals(volumeType, that.volumeType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, flavor, cardinality, volumeType, volumeCount, volumeSizeGB);
     }
 }

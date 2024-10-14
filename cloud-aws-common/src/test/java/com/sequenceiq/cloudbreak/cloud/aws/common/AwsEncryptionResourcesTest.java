@@ -125,8 +125,8 @@ class AwsEncryptionResourcesTest {
                     "{\"Sid\":\"Enable IAM user permissions\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:root\"}," +
                     "\"Action\":\"kms:*\",\"Resource\":\"*\"},{\"Sid\":\"Allow access for the CDP credential IAM role as a key administrator\"," +
                     "\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"arn:aws-us-gov:iam::123456789012:role/my-credential-role\"," +
-                    "\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-2\"]},\"Action\":[\"kms:GetKeyPolicy\",\"kms:PutKeyPolicy\"," +
-                    "\"kms:ScheduleKeyDeletion\"]," +
+                    "\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-2\"]},\"Action\":[\"kms:EnableKeyRotation\",\"kms:GetKeyPolicy\"," +
+                    "\"kms:ListResourceTags\",\"kms:PutKeyPolicy\",\"kms:RotateKeyOnDemand\",\"kms:ScheduleKeyDeletion\"]," +
                     "\"Resource\":\"*\"},{\"Sid\":\"Allow use of the key by CDP clusters for cryptographic operations\",\"Effect\":\"Allow\"," +
                     "\"Principal\":{\"AWS\":[\"arn:aws-us-gov:iam::123456789012:role/my-role\",\"arn:aws-us-gov:iam::123456789012:role/my-role-2\"]}," +
                     "\"Action\":[\"kms:Decrypt\",\"kms:Encrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"*\",\"Condition\":{\"ArnEquals\":{" +
@@ -579,7 +579,8 @@ class AwsEncryptionResourcesTest {
                         "\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}," +
                         "{\"Sid\":\"Allow access for the CDP credential IAM role as a key administrator\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:role/my-credential-role\"}," +
-                        "\"Action\":[\"kms:GetKeyPolicy\",\"kms:PutKeyPolicy\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
+                        "\"Action\":[\"kms:EnableKeyRotation\",\"kms:GetKeyPolicy\",\"kms:ListResourceTags\",\"kms:PutKeyPolicy\"," +
+                        "\"kms:RotateKeyOnDemand\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
                         "{\"Sid\":\"Allow use of the key by CDP clusters for cryptographic operations\"," +
                         "\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:role/my-role\"}," +
                         "\"Action\":[\"kms:Decrypt\",\"kms:Encrypt\",\"kms:GenerateDataKey\"],\"Resource\":\"*\"}]}");
@@ -1039,7 +1040,8 @@ class AwsEncryptionResourcesTest {
                         "{\"Sid\":\"Allow access for the CDP credential IAM role as a key administrator\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":[\"arn:aws-us-gov:iam::123456789012:role/my-credential-role\"," +
                         "\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-2\",\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-3\"]}," +
-                        "\"Action\":[\"kms:GetKeyPolicy\",\"kms:PutKeyPolicy\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
+                        "\"Action\":[\"kms:EnableKeyRotation\",\"kms:GetKeyPolicy\",\"kms:ListResourceTags\",\"kms:PutKeyPolicy\"," +
+                        "\"kms:RotateKeyOnDemand\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
                         "{\"Sid\":\"Allow use of the key by CDP clusters for cryptographic operations\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":[\"arn:aws-us-gov:iam::123456789012:role/my-role\",\"arn:aws-us-gov:iam::123456789012:role/my-role-2\"," +
                         "\"arn:aws-us-gov:iam::123456789012:role/my-role-3\"]},\"Action\":[\"kms:Decrypt\",\"kms:Encrypt\",\"kms:GenerateDataKey\"]," +
@@ -1086,7 +1088,8 @@ class AwsEncryptionResourcesTest {
                         "\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:root\"},\"Action\":\"kms:*\",\"Resource\":\"*\"}," +
                         "{\"Sid\":\"Allow access for the CDP credential IAM role as a key administrator\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-2\"}," +
-                        "\"Action\":[\"kms:GetKeyPolicy\",\"kms:PutKeyPolicy\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
+                        "\"Action\":[\"kms:EnableKeyRotation\",\"kms:GetKeyPolicy\",\"kms:ListResourceTags\",\"kms:PutKeyPolicy\"," +
+                        "\"kms:RotateKeyOnDemand\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
                         "{\"Sid\":\"Allow use of the key by CDP clusters for cryptographic operations\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":\"arn:aws-us-gov:iam::123456789012:role/my-role-2\"}," +
                         "\"Action\":[\"kms:Decrypt\",\"kms:Encrypt\",\"kms:GenerateDataKey\"]," +
@@ -1131,7 +1134,8 @@ class AwsEncryptionResourcesTest {
                         "{\"Sid\":\"Allow access for the CDP credential IAM role as a key administrator\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":[" +
                         "\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-2\",\"arn:aws-us-gov:iam::123456789012:role/my-credential-role-3\"]}," +
-                        "\"Action\":[\"kms:GetKeyPolicy\",\"kms:PutKeyPolicy\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
+                        "\"Action\":[\"kms:EnableKeyRotation\",\"kms:GetKeyPolicy\",\"kms:ListResourceTags\",\"kms:PutKeyPolicy\"," +
+                        "\"kms:RotateKeyOnDemand\",\"kms:ScheduleKeyDeletion\"],\"Resource\":\"*\"}," +
                         "{\"Sid\":\"Allow use of the key by CDP clusters for cryptographic operations\",\"Effect\":\"Allow\"," +
                         "\"Principal\":{\"AWS\":[\"arn:aws-us-gov:iam::123456789012:role/my-role-2\"," +
                         "\"arn:aws-us-gov:iam::123456789012:role/my-role-3\"]},\"Action\":[\"kms:Decrypt\",\"kms:Encrypt\",\"kms:GenerateDataKey\"]," +

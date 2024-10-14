@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class StackParamValidation {
@@ -35,4 +36,23 @@ public class StackParamValidation {
         return regex;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StackParamValidation that = (StackParamValidation) o;
+        return required == that.required &&
+                Objects.equals(paramName, that.paramName) &&
+                Objects.equals(clazz, that.clazz) &&
+                Objects.equals(regex, that.regex);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paramName, clazz, required, regex);
+    }
 }

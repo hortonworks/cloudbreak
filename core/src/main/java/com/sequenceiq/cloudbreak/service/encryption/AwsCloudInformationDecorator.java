@@ -177,6 +177,11 @@ public class AwsCloudInformationDecorator implements CloudInformationDecorator {
     }
 
     @Override
+    public ResourceType getUserdataSecretResourceType() {
+        return ResourceType.AWS_SECRETSMANAGER_SECRET;
+    }
+
+    @Override
     public Platform platform() {
         return AwsConstants.AWS_PLATFORM;
     }

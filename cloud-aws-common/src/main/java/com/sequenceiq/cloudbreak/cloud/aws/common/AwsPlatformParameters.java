@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,8 @@ public class AwsPlatformParameters implements PlatformParameters {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformParameters.class);
 
     private static final String CDP_SUB_RESOURCE_DIR = "/cdp";
+
+    private static final String GOV_CDP_SUB_RESOURCE_DIR = CDP_SUB_RESOURCE_DIR + "/gov";
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -285,7 +288,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initEnvironmentMinimalJson() {
         String resourceDefinition = resourceDefinition("environment-minimal-policy");
-        return getPolicyJson(resourceDefinition);
+        String govResourceDefinition = resourceDefinition("gov-environment-minimal-policy");
+
+        return getPolicyJson(resourceDefinition, Optional.of(govResourceDefinition));
     }
 
     private Map<PolicyType, String> initCdpBucketAccessPolicyJson() {
@@ -305,7 +310,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initCdpLogPolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-log-policy");
-        return getPolicyJson(resourceDefinition);
+        String govResourceDefinition = resourceDefinitionInSubDir(GOV_CDP_SUB_RESOURCE_DIR, "cdp-log-policy");
+
+        return getPolicyJson(resourceDefinition, Optional.of(govResourceDefinition));
     }
 
     private Map<PolicyType, String> initCdpRangerAuditS3PolicyJson() {
@@ -330,7 +337,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<PolicyType, String> initCdpIdbrokerAssumerPolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-idbroker-assume-role-policy");
-        return getPolicyJson(resourceDefinition);
+        String govResourceDefinition = resourceDefinitionInSubDir(GOV_CDP_SUB_RESOURCE_DIR, "cdp-idbroker-assume-role-policy");
+
+        return getPolicyJson(resourceDefinition, Optional.of(govResourceDefinition));
     }
 
     private Map<PolicyType, String> getPolicyJson(String resourceDefinition) {
@@ -348,14 +357,16 @@ public class AwsPlatformParameters implements PlatformParameters {
             LOGGER.info(message);
             throw new CloudConnectorException(message);
         }
-        Map<PolicyType, String> policy = new HashMap<>();
+        Map<PolicyType, String> policy = new EnumMap<>(PolicyType.class);
         policy.put(PolicyType.GOV, Base64.encodeBase64String(tranformToGovCloud(govMinified).getBytes()));
         policy.put(PolicyType.PUBLIC, Base64.encodeBase64String(minified.getBytes()));
         return policy;
     }
 
     private String tranformToGovCloud(String minified) {
-        return minified.replaceAll(":aws:", ":aws-us-gov:");
+        return minified
+                .replaceAll(":aws:", ":aws-us-gov:")
+                .replaceAll(":cdp:", ":cdp-us-gov:");
     }
 
 }

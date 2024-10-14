@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyType;
 import com.sequenceiq.cloudbreak.cloud.model.secret.CloudSecret;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretReq
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -107,6 +110,8 @@ class UserdataSecretsServiceTest {
             .build();
 
     private static final String USERDATA = "userdata_with_secrets";
+
+    private static final StackTags STACK_TAGS = new StackTags(Map.of(), Map.of("key1", "value1"), Map.of("key2", "value2"));
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -169,6 +174,7 @@ class UserdataSecretsServiceTest {
         lenient().when(secretConnector.getDefaultEncryptionKeySource()).thenReturn(DEFAULT_ENCRYPTION_KEY_SOURCE);
         lenient().when(cloudInformationDecoratorProvider.getForStack(any())).thenReturn(cloudInformationDecorator);
         lenient().when(cloudInformationDecorator.getUserdataSecretEncryptionKeyType()).thenReturn(EncryptionKeyType.AWS_KMS_KEY_ARN);
+        lenient().when(cloudInformationDecorator.getUserdataSecretResourceType()).thenReturn(ResourceType.AWS_SECRETSMANAGER_SECRET);
     }
 
     @Test
@@ -194,6 +200,7 @@ class UserdataSecretsServiceTest {
             assertEquals(DEFAULT_ENCRYPTION_KEY_SOURCE, request.encryptionKeySource().get());
             assertEquals("PLACEHOLDER", request.secretValue());
             assertEquals("Created by CDP. This secret stores the sensitive values needed on the instance during first boot.", request.description());
+            assertEquals(Map.of("key1", "value1", "key2", "value2"), request.tags());
         }
         assertEquals(NODE_COUNT, resourceReferencesCaptor.getValue().size());
     }
@@ -410,6 +417,7 @@ class UserdataSecretsServiceTest {
         logging.setS3(s3CloudStorageV1Parameters);
         telemetry.setLogging(logging);
         stack.setTelemetry(telemetry);
+        stack.setTags(new Json(STACK_TAGS));
         return stack;
     }
 

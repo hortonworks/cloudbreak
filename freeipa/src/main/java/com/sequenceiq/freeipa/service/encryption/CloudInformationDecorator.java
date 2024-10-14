@@ -45,6 +45,10 @@ public interface CloudInformationDecorator {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    default ResourceType getUserdataSecretResourceType() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
     Platform platform();
 
     Variant variant();

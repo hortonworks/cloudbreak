@@ -287,6 +287,35 @@
       "Resource": [
         "*"
       ]
+    },
+    {
+      "Sid": "KeyManagementServiceForSecretEncryption",
+      "Effect": "Allow",
+      "Action": [
+        "kms:CreateKey",
+        "kms:DescribeKey",
+        "kms:ListKeys",
+        "kms:TagResource"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "SecretsManagerForSecretEncryption",
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:CreateSecret",
+        "secretsmanager:DeleteSecret",
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:PutResourcePolicy",
+        "secretsmanager:TagResource",
+        "secretsmanager:UpdateSecret"
+      ],
+      "Resource": [
+        "*"
+      ]
     }
   ],
   "Version": "2012-10-17"

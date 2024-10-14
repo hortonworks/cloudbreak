@@ -14,7 +14,9 @@ find_working_ciphertext() {
   for ciphertext in "${ciphertexts[@]}"; do
     decrypt_ciphertext "$ciphertext" "rollback"
     if cryptsetup open "$LOOP_DEVICE" --key-file "$PASSPHRASE_PLAINTEXT" --type luks2 --test-passphrase; then
-      mv -f "$ciphertext" "$PASSPHRASE_CIPHERTEXT"
+      if [[ "$ciphertext" != "$PASSPHRASE_CIPHERTEXT" ]]; then
+        mv -f "$ciphertext" "$PASSPHRASE_CIPHERTEXT"
+      fi
       working_ciphertext_found=true
       break
     fi

@@ -138,6 +138,11 @@ class AwsCloudInformationDecoratorTest {
     }
 
     @Test
+    void testGetUserdataSecretResourceType() {
+        assertEquals(ResourceType.AWS_SECRETSMANAGER_SECRET, underTest.getUserdataSecretResourceType());
+    }
+
+    @Test
     void testPlatform() {
         assertEquals(AwsConstants.AWS_PLATFORM, underTest.platform());
     }

@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "IdBrokerAssumerPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "KeyManagementServiceForSecretEncryption",
+      "Effect": "Allow",
+      "Action": [
+        "kms:GenerateRandom"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

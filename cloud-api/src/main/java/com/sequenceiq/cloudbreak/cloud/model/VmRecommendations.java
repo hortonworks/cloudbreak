@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -43,5 +45,25 @@ public class VmRecommendations {
 
     public void setQuorum(VmRecommendation quorum) {
         this.quorum = quorum;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        VmRecommendations that = (VmRecommendations) o;
+        return Objects.equals(master, that.master) &&
+                Objects.equals(worker, that.worker) &&
+                Objects.equals(broker, that.broker) &&
+                Objects.equals(quorum, that.quorum);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(master, worker, broker, quorum);
     }
 }

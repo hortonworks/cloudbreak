@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.encryption;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
 import com.sequenceiq.cloudbreak.cloud.model.secret.CloudSecret;
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.CreateCloudSecretRequest;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretReq
 import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretResourceAccessRequest;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -80,13 +83,15 @@ public class UserdataSecretsService {
     public List<Resource> createUserdataSecrets(Stack stack, List<Long> privateIds, CloudContext cloudContext, CloudCredential cloudCredential) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         SecretConnector secretConnector = cloudConnector.secretConnector();
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
         LOGGER.info("Creating userdata secrets for instances with privateIds [{}] in stack [{}]...", privateIds, stack.getName());
         CreateCloudSecretRequest.Builder createRequestBuilder = CreateCloudSecretRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
                 .withEncryptionKeySource(Optional.of(secretConnector.getDefaultEncryptionKeySource()))
                 .withSecretValue("PLACEHOLDER")
-                .withDescription("Created by CDP. This secret stores the sensitive values needed on the instance during first boot.");
+                .withDescription("Created by CDP. This secret stores the sensitive values needed on the instance during first boot.")
+                .withTags(getTags(stack));
 
         List<String> secretReferences = new ArrayList<>();
         for (Long privateId : privateIds) {
@@ -94,8 +99,23 @@ public class UserdataSecretsService {
             CloudSecret cloudSecret = secretConnector.createCloudSecret(createRequestBuilder.build());
             secretReferences.add(cloudSecret.secretId());
         }
-        return resourceService.findByResourceReferencesAndStatusAndTypeAndStack(secretReferences, CommonStatus.CREATED, ResourceType.AWS_SECRETSMANAGER_SECRET,
-                stack.getId());
+        ResourceType resourceType = cloudInformationDecorator.getUserdataSecretResourceType();
+        return resourceService.findByResourceReferencesAndStatusAndTypeAndStack(secretReferences, CommonStatus.CREATED, resourceType, stack.getId());
+    }
+
+    private Map<String, String> getTags(Stack stack) {
+        Optional<Json> stackTagsJson = Optional.ofNullable(stack.getTags());
+        try {
+            Map<String, String> tags = new HashMap<>();
+            if (stackTagsJson.isPresent()) {
+                StackTags stackTags = stackTagsJson.get().get(StackTags.class);
+                tags.putAll(stackTags.getDefaultTags());
+                tags.putAll(stackTags.getApplicationTags());
+            }
+            return tags;
+        } catch (IOException e) {
+            throw new UserdataSecretsException("Failed to prepare tags for userdata secrets.", e);
+        }
     }
 
     private Optional<EncryptionKeySource> getEncryptionKeySource(Stack stack, SecretConnector secretConnector) {
@@ -199,13 +219,14 @@ public class UserdataSecretsService {
     public void deleteUserdataSecretsForStack(Stack stack, CloudContext cloudContext, CloudCredential cloudCredential) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         SecretConnector secretConnector = cloudConnector.secretConnector();
+        CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
         List<InstanceMetaData> instances = stack.getInstanceMetaDataAsList();
         LOGGER.info("Removing all associations between instances and userdata secrets for stack [{}]...", stack.getName());
         instances.forEach(imd -> imd.setUserdataSecretResourceId(null));
         instanceMetaDataService.saveAll(instances);
 
-        List<CloudResource> secretCloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED,
-                ResourceType.AWS_SECRETSMANAGER_SECRET, stack.getId());
+        ResourceType resourceType = cloudInformationDecorator.getUserdataSecretResourceType();
+        List<CloudResource> secretCloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, resourceType, stack.getId());
         DeleteCloudSecretRequest.Builder deleteRequestBuilder = DeleteCloudSecretRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential);
