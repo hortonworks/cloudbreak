@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2;
+package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
@@ -62,15 +62,12 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTrigg
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
-import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreRootVolumeUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -409,14 +406,11 @@ class ReactorFlowManagerTest {
 
     @Test
     void testTriggerRootVolumeUpdateFlow() {
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         Map<String, List<String>> updatedNodesMap = Map.of();
-        underTest.triggerRootVolumeUpdateFlow(1L, updatedNodesMap, diskUpdateRequest);
-        ArgumentCaptor<ClusterRepairTriggerEvent> eventCaptor = ArgumentCaptor.forClass(ClusterRepairTriggerEvent.class);
-        verify(reactorNotifier).notify(eq(1L), eq(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT), eventCaptor.capture());
-        assertEquals(1L, eventCaptor.getValue().getStackId());
-        assertEquals(RepairType.ONE_BY_ONE, eventCaptor.getValue().getRepairType());
-        assertEquals(diskUpdateRequest, eventCaptor.getValue().getDiskUpdateRequest());
+        underTest.triggerRootVolumeUpdateFlow(1L, updatedNodesMap);
+        ArgumentCaptor<CoreRootVolumeUpdateTriggerEvent> eventCaptor = ArgumentCaptor.forClass(CoreRootVolumeUpdateTriggerEvent.class);
+        verify(reactorNotifier).notify(eq(1L), eq(FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT), eventCaptor.capture());
+        assertEquals(1L, eventCaptor.getValue().getResourceId());
     }
 
     private static class TestAcceptable implements Acceptable {

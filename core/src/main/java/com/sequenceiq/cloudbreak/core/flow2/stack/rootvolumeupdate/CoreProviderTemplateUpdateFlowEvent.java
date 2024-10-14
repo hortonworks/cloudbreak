@@ -1,0 +1,27 @@
+package com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate;
+
+import com.sequenceiq.flow.core.FlowEvent;
+
+public enum CoreProviderTemplateUpdateFlowEvent implements FlowEvent {
+    CORE_PROVIDER_TEMPLATE_UPDATE_EVENT("CORE_PROVIDER_TEMPLATE_UPDATE_EVENT"),
+    CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT("CORE_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT"),
+    CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT("CORE_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT"),
+    CORE_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT("CORE_PROVIDER_TEMPLATE_UPDATE_FAILURE_EVENT"),
+    CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT("CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT");
+
+    private final String event;
+
+    CoreProviderTemplateUpdateFlowEvent(String event) {
+        this.event = event;
+    }
+
+    @Override
+    public String event() {
+        return event;
+    }
+
+    @Override
+    public  String selector() {
+        return event;
+    }
+}

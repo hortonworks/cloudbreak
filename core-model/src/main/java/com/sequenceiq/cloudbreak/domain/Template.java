@@ -77,8 +77,18 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     private Integer instanceStorageSize;
 
+    private String rootVolumeType;
+
     public Template() {
         deleted = false;
+    }
+
+    public String getRootVolumeType() {
+        return rootVolumeType;
+    }
+
+    public void setRootVolumeType(String rootVolumeType) {
+        this.rootVolumeType = rootVolumeType;
     }
 
     public Long getId() {

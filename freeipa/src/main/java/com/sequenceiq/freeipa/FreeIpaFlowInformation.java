@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent;
@@ -57,7 +58,8 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),
             ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event(),
             FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
-            FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event());
+            FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(),
+            FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
 

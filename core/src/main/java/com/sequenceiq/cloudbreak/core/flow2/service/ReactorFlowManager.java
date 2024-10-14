@@ -95,6 +95,7 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.config.Externa
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreRootVolumeUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -564,9 +565,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new RotateRdsCertificateTriggerRequest(selector, stackId, MIGRATE));
     }
 
-    public FlowIdentifier triggerRootVolumeUpdateFlow(Long stackId, Map<String, List<String>> updatedNodesMap, DiskUpdateRequest updateRequest) {
-        return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, updatedNodesMap, RepairType.ONE_BY_ONE, true, null, false, updateRequest, false));
+    public FlowIdentifier triggerRootVolumeUpdateFlow(Long stackId, Map<String, List<String>> updatedNodesMap) {
+        return reactorNotifier.notify(stackId, FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT,
+                new CoreRootVolumeUpdateTriggerEvent(FlowChainTriggers.CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT, stackId, updatedNodesMap));
     }
 
     public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices, boolean restartCM, boolean rollingRestart) {

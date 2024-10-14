@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType.ROOT_DISK;
-import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -15,27 +16,18 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
-import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
-import com.sequenceiq.cloudbreak.util.CloudConnectResources;
-import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @Service
 public class RootDiskValidationService {
@@ -45,88 +37,78 @@ public class RootDiskValidationService {
     private static final Map<String, ResourceType> PLATFORM_RESOURCE_TYPE_MAP = ImmutableMap.of(CloudPlatform.AWS.name(), ResourceType.AWS_ROOT_DISK,
             CloudPlatform.AZURE.name(), ResourceType.AZURE_DISK);
 
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private CloudConnectorHelper cloudConnectorHelper;
-
-    @Inject
-    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
-
-    @Inject
-    private CloudResourceToResourceConverter cloudResourceToResourceConverter;
+    private static final Map<String, List<String>> PLATFORM_DISK_TYPE_MAP = ImmutableMap.of(CloudPlatform.AWS.name(), List.of(
+                    AwsDiskType.Gp2.value(), AwsDiskType.Gp3.value(), AwsDiskType.Standard.value()),
+            CloudPlatform.AZURE.name(), List.of(AzureDiskType.STANDARD_SSD_LRS.value(), AzureDiskType.LOCALLY_REDUNDANT.value(),
+                    AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.value()));
 
     @Inject
     private TemplateService templateService;
 
-    public List<Resource> fetchRootDiskResourcesForGroup(StackDto stack, DiskUpdateRequest updateRequest) {
+    @Inject
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
+    public void validateRootDiskResourcesForGroupAndUpdateStackTemplate(StackDto stack, DiskUpdateRequest updateRequest) {
         String platform = stack.getCloudPlatform();
-        List<Resource> resources = new ArrayList<>();
-        String groupName = updateRequest.getGroup();
-        if (PLATFORM_RESOURCE_TYPE_MAP.containsKey(platform)) {
-            CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stack);
-            CloudStack cloudStack = cloudConnectResources.getCloudStack();
-            CloudConnector connector = cloudConnectResources.getCloudConnector();
-            AuthenticatedContext ac = cloudConnectResources.getAuthenticatedContext();
-            Group group = cloudStack.getGroups().stream().filter(grp -> grp.getName().equals(groupName)).findFirst()
-                    .orElseThrow();
-            List<String> instanceIdsInGroup = group.getInstances().stream().map(CloudInstance::getInstanceId).toList();
-            resources.addAll(resourceService.findByStackIdAndType(stack.getId(), PLATFORM_RESOURCE_TYPE_MAP.get(platform)).stream()
-                    .filter(res -> instanceIdsInGroup.contains(res.getInstanceId())).toList());
-            LOGGER.debug("Resources from database for root disk: {}", resources);
-            if (resources.isEmpty()) {
-                List<CloudResource> instancesAsCloudResource = getInstancesAsCloudResourceForAzure(group, platform, stack.getId());
-                String resourceGroupName = cloudStack.getParameters().getOrDefault("resourceGroupName", "");
-                RootVolumeFetchDto rootVolumeFetchDto = new RootVolumeFetchDto(ac, group, resourceGroupName, instancesAsCloudResource);
-                List<CloudResource> cloudResources = connector.volumeConnector().getRootVolumes(rootVolumeFetchDto);
-                LOGGER.debug("Fetched cloud resource from cloud provider for root disk: {}", cloudResources);
-                resources.addAll(cloudResources.stream().map(res -> cloudResourceToResourceConverter.convert(res)).toList());
-            }
-            checkUpdateRequired(resources.getFirst(), updateRequest);
-            LOGGER.debug("Deleting Root Disk Resources in database as new resources will be added when instances get created - Resources: {}", resources);
-            resourceService.deleteAll(resources);
-            LOGGER.debug("Deleted Root Disk Resources in database - Resources: {}", resources);
-            updateStackTemplate(stack, updateRequest);
-        }
-        return resources;
-    }
-
-    private void checkUpdateRequired(Resource resource, DiskUpdateRequest diskUpdateRequest) throws BadRequestException {
-        try {
-            VolumeSetAttributes volumeSetAttributes = resource.getAttributes().get(VolumeSetAttributes.class);
-            VolumeSetAttributes.Volume rootDisk = volumeSetAttributes.getVolumes().getFirst();
-            if (rootDisk.getSize() == diskUpdateRequest.getSize() && rootDisk.getType().equalsIgnoreCase(diskUpdateRequest.getVolumeType())) {
-                throw new BadRequestException("No update required.");
-            }
-        } catch (BadRequestException ex) {
-            throw ex;
-        } catch (Exception e) {
-            LOGGER.warn("Exception while trying to parse VolumeSetAttributes from resource: ", e);
+        if (PLATFORM_RESOURCE_TYPE_MAP.containsKey(platform) && checkPlatformVolumeType(updateRequest, platform)) {
+            InstanceMetadataView pgwInstanceMetadata = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stack.getId()).orElseThrow();
+            Integer defaultRootVolumeSize = defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(platform,
+                    updateRequest.getGroup().toLowerCase(Locale.ROOT).equals(pgwInstanceMetadata.getInstanceGroupName().toLowerCase(Locale.ROOT)));
+            checkUpdateRequiredStackTemplate(stack, updateRequest, defaultRootVolumeSize);
+            updateStackTemplate(stack, updateRequest, defaultRootVolumeSize);
+        } else {
+            throw new BadRequestException("Root Volume Update is not supported for cloud platform: " + stack.getCloudPlatform() + " and volume type: "
+                + updateRequest.getVolumeType());
         }
     }
 
-    private void updateStackTemplate(StackDto stackDto, DiskUpdateRequest updateRequest) {
-        LOGGER.debug("Updating template with root update request: {}", updateRequest);
+    private void checkUpdateRequiredStackTemplate(StackDto stackDto, DiskUpdateRequest updateRequest,
+            Integer defaultRootVolumeSize) throws BadRequestException {
+        Template template = getTemplate(stackDto, updateRequest);
+        int updateSize = updateRequest.getSize();
+        String updateVolumeType = updateRequest.getVolumeType();
+        if (!updateSizeRequired(updateSize, template, defaultRootVolumeSize) && !updateVolumeTypeRequired(updateVolumeType, template)) {
+            throw new BadRequestException("No update required.");
+        }
+    }
+
+    private Template getTemplate(StackDto stackDto, DiskUpdateRequest updateRequest) {
         InstanceGroupDto instanceGroupDto = stackDto.getInstanceGroupByInstanceGroupName(updateRequest.getGroup());
-        Template template = instanceGroupDto.getInstanceGroup().getTemplate();
-        if (updateRequest.getDiskType().equals(ROOT_DISK)) {
-            if (updateRequest.getSize() > 0) {
-                template.setRootVolumeSize(updateRequest.getSize());
-            }
+        return instanceGroupDto.getInstanceGroup().getTemplate();
+    }
+
+    private boolean updateSizeRequired(int updateSize, Template template, Integer defaultRootVolumeSize) {
+        if (updateSize != 0 && updateSize < defaultRootVolumeSize) {
+            throw new BadRequestException("Requested size for root volume " + updateSize +
+                    " should not be lesser than the default root volume size " + defaultRootVolumeSize + ".");
+        }
+        return updateSize > 0 && updateSize > defaultRootVolumeSize && updateSize != template.getRootVolumeSize();
+    }
+
+    private boolean updateVolumeTypeRequired(String updateVolumeType, Template template) {
+        return isNotEmpty(updateVolumeType) && !updateVolumeType.equals(defaultIfEmpty(template.getRootVolumeType(), ""));
+    }
+
+    private void updateStackTemplate(StackDto stackDto, DiskUpdateRequest updateRequest, Integer defaultRootVolumeSize) {
+        LOGGER.debug("Updating template for group {} with root update request: {}", updateRequest.getGroup(), updateRequest);
+        Template template = getTemplate(stackDto, updateRequest);
+        int updateSize = updateRequest.getSize();
+        String updateVolumeType = updateRequest.getVolumeType();
+        if (updateSizeRequired(updateSize, template, defaultRootVolumeSize)) {
+            template.setRootVolumeSize(updateRequest.getSize());
+        }
+        if (updateVolumeTypeRequired(updateVolumeType, template)) {
+            template.setRootVolumeType(updateRequest.getVolumeType());
         }
         templateService.savePure(template);
         LOGGER.debug("Updated template after save: {}", template);
     }
 
-    private List<CloudResource> getInstancesAsCloudResourceForAzure(Group group, String platform, Long stackId) {
-        List<CloudResource> cloudResources = new ArrayList<>();
-        if ("AZURE".equalsIgnoreCase(platform)) {
-            List<String> instanceIdsInGroup = group.getInstances().stream().map(ins -> ins.getInstanceId()).toList();
-            List<Resource> resources = resourceService.findByStackIdAndType(stackId, AZURE_INSTANCE).stream()
-                    .filter(res -> instanceIdsInGroup.contains(res.getInstanceId())).toList();
-            cloudResources.addAll(resources.stream().map(res -> resourceToCloudResourceConverter.convert(res)).toList());
-        }
-        return cloudResources;
+    private boolean checkPlatformVolumeType(DiskUpdateRequest updateRequest, String platform) {
+        String updateVolumeType = defaultIfEmpty(updateRequest.getVolumeType(), "");
+        return isEmpty(updateVolumeType) || PLATFORM_DISK_TYPE_MAP.get(platform).contains(updateVolumeType);
     }
 }

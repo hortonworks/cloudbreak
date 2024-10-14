@@ -16,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachRecipeAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDownscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindGroupsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersAction;
@@ -181,4 +182,7 @@ public class FreeIpaTestClient {
         return new FreeipaInstanceMetadataUpdateAction();
     }
 
+    public Action<FreeIpaTestDto, FreeIpaClient> updateDisks(int size, String volumeType) {
+        return new FreeIpaDiskUpdateAction(size, volumeType);
+    }
 }

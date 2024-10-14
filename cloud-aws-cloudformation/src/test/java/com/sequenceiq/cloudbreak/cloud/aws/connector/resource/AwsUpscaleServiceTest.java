@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,13 +34,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.aws.AutoScalingGroupHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsSyncUserDataService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
@@ -77,9 +75,6 @@ import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
 import software.amazon.awssdk.services.autoscaling.model.Instance;
-import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMapping;
-import software.amazon.awssdk.services.ec2.model.LaunchTemplateEbsBlockDevice;
-import software.amazon.awssdk.services.ec2.model.VolumeType;
 
 @ExtendWith(MockitoExtension.class)
 class AwsUpscaleServiceTest {
@@ -119,12 +114,6 @@ class AwsUpscaleServiceTest {
 
     @Mock
     private PersistenceNotifier resourceNotifier;
-
-    @Mock
-    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
-
-    @Mock
-    private AutoScalingGroupHandler autoScalingGroupHandler;
 
     @Test
     void upscaleTest() throws AmazonAutoscalingFailedException {
@@ -446,7 +435,7 @@ class AwsUpscaleServiceTest {
         CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
         InstanceTemplate newInstanceTemplate = mock(InstanceTemplate.class);
-        when(newInstanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        lenient().when(newInstanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
         CloudInstance workerInstance4 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
         CloudInstance workerInstance5 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
         cloudInstances.add(workerInstance1);
@@ -501,109 +490,5 @@ class AwsUpscaleServiceTest {
     private CloudResource newInstanceResource(String name, String group, String instanceId) {
         return CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.CREATED)
                 .withName(name).withGroup(group).withInstanceId(instanceId).build();
-    }
-
-    @Test
-    void upscaleTestWithUpdateLaunchTemplate() throws AmazonAutoscalingFailedException {
-        AutoScalingGroup asg1 = newAutoScalingGroup("masterASG", List.of("i-master1", "i-master2"));
-        AutoScalingGroup asg2 = newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3"));
-        AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
-        AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
-        List<CloudResource> rootVolumeResources = List.of(mock(CloudResource.class));
-        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
-        DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
-                .autoScalingGroups(asg1, asg2).build();
-
-        Map<String, AutoScalingGroup> autoScalingGroupMap = Map.of("masterASG", asg1, "workerASG", asg2);
-
-        when(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
-                .thenReturn(describeAutoScalingGroupsResult);
-        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
-        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
-
-        when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("worker")))
-                .thenReturn("workerASG");
-
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(1L)
-                .withName("teststack")
-                .withCrn("crn")
-                .withPlatform("AWS")
-                .withVariant("AWS")
-                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
-                .withAccountId("1")
-                .build();
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, new CloudCredential());
-
-        List<CloudResource> allInstances = new ArrayList<>();
-        allInstances.add(newInstanceResource("worker1", "worker", "i-worker1"));
-        allInstances.add(newInstanceResource("worker2", "worker", "i-worker2"));
-        allInstances.add(newInstanceResource("worker3", "worker", "i-worker3"));
-        CloudResource workerInstance4 = newInstanceResource("worker4", "worker", "i-worker4");
-        allInstances.add(workerInstance4);
-        CloudResource workerInstance5 = newInstanceResource("worker5", "worker", "i-worker5");
-        allInstances.add(workerInstance5);
-        when(cfStackUtil.getInstanceCloudResources(eq(authenticatedContext), eq(amazonCloudFormationClient), eq(amazonAutoScalingClient), anyList()))
-                .thenReturn(allInstances);
-        doNothing().when(cloudResourceHelper).updateDeleteOnTerminationFlag(anyList(), anyBoolean(), any());
-
-        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        List<Group> groups = new ArrayList<>();
-
-        Group masterGroup = getMasterGroup(instanceAuthentication);
-        masterGroup.setRootVolumeType(null);
-        masterGroup.setRootVolumeSize(20);
-        groups.add(masterGroup);
-
-        Group worker = getWorkerGroup(instanceAuthentication);
-        groups.add(worker);
-
-        Map<String, String> tags = new HashMap<>();
-        tags.put("owner", "cbuser");
-        tags.put("created", "yesterday");
-        CloudStack cloudStack = CloudStack.builder()
-                .groups(groups)
-                .network(getNetwork())
-                .tags(tags)
-                .instanceAuthentication(instanceAuthentication)
-                .build();
-
-        when(autoScalingGroupHandler.autoScalingGroupByName(any(), any(), any())).thenReturn(autoScalingGroupMap);
-        LaunchTemplateBlockDeviceMapping masterBlockDeviceMapping = LaunchTemplateBlockDeviceMapping.builder().ebs(LaunchTemplateEbsBlockDevice.builder()
-                .volumeSize(20).volumeType(VolumeType.GP2).build()).build();
-        when(awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(authenticatedContext, asg2))
-                .thenReturn(List.of(masterBlockDeviceMapping));
-        when(awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(authenticatedContext, asg1))
-                .thenReturn(List.of(masterBlockDeviceMapping));
-        Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "50",
-                LaunchTemplateField.ROOT_VOLUME_TYPE, "gp3");
-
-        List<CloudResource> cloudResourceList = Collections.emptyList();
-        when(awsTaggingService.tagRootVolumes(authenticatedContext, ec2Client, allInstances, tags)).thenReturn(rootVolumeResources);
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
-        awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold);
-        verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
-                eq(amazonCloudFormationClient), any(), any());
-        verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
-        ArgumentCaptor<List<CloudResource>> captor = ArgumentCaptor.forClass(List.class);
-        verify(awsComputeResourceService, times(1))
-                .buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack), anyList(), captor.capture(), any(), any(),
-                        eq(adjustmentTypeWithThreshold));
-        verify(awsTaggingService, times(1)).tagRootVolumes(eq(authenticatedContext), any(AmazonEc2Client.class), eq(allInstances), eq(tags));
-        verify(awsCloudWatchService, times(1)).addCloudWatchAlarmsForSystemFailures(any(), eq("eu-west-1"),
-                any(AwsCredentialView.class), any());
-        List<CloudResource> newInstances = captor.getValue();
-        assertEquals("Two new instances should be created", 2, newInstances.size());
-        assertThat(newInstances, hasItem(workerInstance4));
-        assertThat(newInstances, hasItem(workerInstance5));
-        verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
-        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
-        verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
-        verify(syncUserDataService).syncUserData(any(), any(), any());
-        verify(resourceNotifier).notifyDeletions(rootVolumeResources, cloudContext);
-        verify(resourceNotifier).notifyAllocations(rootVolumeResources, cloudContext);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(updatableFields, false, amazonAutoScalingClient, ec2Client, asg2, cloudStack);
     }
 }

@@ -14,7 +14,6 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -64,8 +63,6 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     static final String NEW_INSTANCE_ENTITY_IDS = "NEW_INSTANCE_ENTITY_IDS";
 
-    static final String ROOT_DISK_UPDATE_REQUEST = "ROOT_DISK_UPDATE_REQUEST";
-
     @Inject
     private StackDtoService stackDtoService;
 
@@ -103,26 +100,21 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
             Map<String, Set<Long>> hostGroupsWithPrivateIds = stackScaleTriggerEvent.getHostGroupsWithPrivateIds();
             NetworkScaleDetails networkScaleDetails = stackScaleTriggerEvent.getNetworkScaleDetails();
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = stackScaleTriggerEvent.getAdjustmentTypeWithThreshold();
-            DiskUpdateRequest diskUpdateRequest = stackScaleTriggerEvent.getDiskUpdateRequest() != null ? stackScaleTriggerEvent.getDiskUpdateRequest() : null;
             variables.put(REPAIR, repair);
             variables.put(HOST_GROUP_WITH_ADJUSTMENT, hostGroupsWithAdjustment);
             variables.put(HOST_GROUP_WITH_HOSTNAMES, hostgroupsWithHostnames);
             variables.put(NETWORK_SCALE_DETAILS, networkScaleDetails);
             variables.put(ADJUSTMENT_WITH_THRESHOLD, adjustmentTypeWithThreshold);
-            if (diskUpdateRequest != null) {
-                variables.put(ROOT_DISK_UPDATE_REQUEST, diskUpdateRequest);
-            }
             return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, hostGroupsWithAdjustment,
-                    hostGroupsWithPrivateIds, hostgroupsWithHostnames, repair, networkScaleDetails, adjustmentTypeWithThreshold, diskUpdateRequest);
+                    hostGroupsWithPrivateIds, hostgroupsWithHostnames, repair, networkScaleDetails, adjustmentTypeWithThreshold);
         } else {
             Map<String, Integer> hostGroupWithAdjustment = getHostGroupWithAdjustment(variables);
             Map<String, Set<String>> hostgroupWithHostnames = getHostGroupWithHostnames(variables);
             NetworkScaleDetails stackNetworkScaleDetails = getStackNetworkScaleDetails(variables);
             AdjustmentTypeWithThreshold adjustmentWithThreshold = getAdjustmentWithThreshold(variables);
-            DiskUpdateRequest diskUpdateRequest = getDiskUpdateRequest(variables);
             return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                     hostGroupWithAdjustment, null, hostgroupWithHostnames, isRepair(variables), stackNetworkScaleDetails,
-                    adjustmentWithThreshold, diskUpdateRequest);
+                    adjustmentWithThreshold);
         }
     }
 
@@ -164,12 +156,4 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     private AdjustmentTypeWithThreshold getAdjustmentWithThreshold(Map<Object, Object> variables) {
         return (AdjustmentTypeWithThreshold) variables.get(ADJUSTMENT_WITH_THRESHOLD);
     }
-
-    private DiskUpdateRequest getDiskUpdateRequest(Map<Object, Object> variables) {
-        if (variables.containsKey(ROOT_DISK_UPDATE_REQUEST)) {
-            return (DiskUpdateRequest) variables.get(ROOT_DISK_UPDATE_REQUEST);
-        }
-        return null;
-    }
-
 }

@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
@@ -99,6 +100,15 @@ public interface PlatformParameters {
      */
     default Optional<ImageFilter> imageFilter() {
         return Optional.empty();
+    }
+
+    /**
+     * Default DiskType of a platform
+     *
+     * @return the {@link DiskType} of a platform
+     */
+    default DiskType defaultRootDiskType() {
+        return null;
     }
 
     /**

@@ -35,7 +35,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -322,14 +321,12 @@ class ClusterRepairFlowEventChainFactoryTest {
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
         setupPrimaryGateway();
 
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
                 .withFailedPrimaryGateway()
                 .withFailedSecondaryGateway()
                 .with3FailedCore()
                 .withFailedAuxiliary()
                 .withRepairType(RepairType.ALL_AT_ONCE)
-                .withDiskUpdateRequest(diskUpdateRequest)
                 .build();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
@@ -354,7 +351,6 @@ class ClusterRepairFlowEventChainFactoryTest {
         assertGroupWithHosts(upscale, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN_1));
         assertGroupWithHosts(upscale, HG_CORE, Set.of("core1", "core2", "core3"));
         assertGroupWithHosts(upscale, HG_AUXILIARY, Set.of("aux1"));
-        assertEquals(diskUpdateRequest, upscale.getDiskUpdateRequest());
 
         RescheduleStatusCheckTriggerEvent statusCheckTriggerEvent = (RescheduleStatusCheckTriggerEvent) eventQueues.getQueue().poll();
         assertNotNull(statusCheckTriggerEvent);
@@ -760,8 +756,6 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         private boolean rollingRestartEnabled;
 
-        private DiskUpdateRequest diskUpdateRequest;
-
         private TriggerEventBuilder(Stack stack) {
             this.stack = stack;
         }
@@ -784,11 +778,6 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         private TriggerEventBuilder withFailedCore() {
             failedCoreNodes.add(FAILED_CORE_FQDN);
-            return this;
-        }
-
-        private TriggerEventBuilder withDiskUpdateRequest(DiskUpdateRequest diskUpdateRequest) {
-            this.diskUpdateRequest = diskUpdateRequest;
             return this;
         }
 
@@ -838,7 +827,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 failedNodes.put(HG_AUXILIARY, failedAuxiliaryNodes);
             }
 
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade, diskUpdateRequest, rollingRestartEnabled);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade, rollingRestartEnabled);
         }
     }
 }

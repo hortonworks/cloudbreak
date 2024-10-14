@@ -109,4 +109,12 @@ public class ResourceService {
     public List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeIn(Long stackId, String instanceGroup, Collection<ResourceType> resourceTypes) {
         return repository.findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(stackId, instanceGroup, resourceTypes);
     }
+
+    public List<Resource> findByStackIdAndType(Long stackId, ResourceType type) {
+        return repository.findByStackIdAndType(stackId, type);
+    }
+
+    public void deleteAll(List<Resource> resources) {
+        repository.deleteAll(resources);
+    }
 }

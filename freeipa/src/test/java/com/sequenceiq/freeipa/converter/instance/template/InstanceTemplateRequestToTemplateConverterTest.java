@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -61,6 +62,9 @@ class InstanceTemplateRequestToTemplateConverterTest {
 
     @InjectMocks
     private InstanceTemplateRequestToTemplateConverter underTest;
+
+    @Mock
+    private CloudParameterCache cloudParameterCache;
 
     @Test
     void shouldSetInstanceTypeWhenProvided() {

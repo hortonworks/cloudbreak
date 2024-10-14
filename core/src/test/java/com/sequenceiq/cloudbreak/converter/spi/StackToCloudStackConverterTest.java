@@ -47,8 +47,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
@@ -57,7 +55,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -66,7 +63,6 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -235,7 +231,6 @@ public class StackToCloudStackConverterTest {
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
-        when(stack.getId()).thenReturn(TEST_STACK_ID);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
         when(cluster.getExtendedBlueprintText()).thenReturn(BLUEPRINT_TEXT);
@@ -320,8 +315,8 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         when(template.getCloudPlatform()).thenReturn("AWS");
         when(template.getVolumeTemplates()).thenReturn(Set.of());
+        when(template.getRootVolumeType()).thenReturn("gp2");
         when(instanceGroup.getTemplate()).thenReturn(template);
-        when(instanceGroup.getGroupName()).thenReturn("TEST_GROUP");
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
@@ -333,7 +328,7 @@ public class StackToCloudStackConverterTest {
         assertEquals(1L, result.getGroups().size());
         assertTrue(result.getGroups().get(0).getInstances().isEmpty());
         assertEquals(new HashSet<>(az1), result.getGroups().get(0).getNetwork().getAvailabilityZones());
-        assertNull(result.getGroups().get(0).getRootVolumeType());
+        assertEquals("gp2", result.getGroups().get(0).getRootVolumeType());
     }
 
     @Test
@@ -369,7 +364,6 @@ public class StackToCloudStackConverterTest {
         assertEquals(fqdnParsedName, result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
         assertEquals(instanceMetaData.getSubnetId(), result.getGroups().get(0).getInstances().get(0).getParameters().get(NetworkConstants.SUBNET_ID));
         assertEquals(instanceMetaData.getInstanceName(), result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
-        assertNull(result.getGroups().get(0).getRootVolumeType());
     }
 
     @Test
@@ -536,14 +530,8 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
         when(stack.getStack()).thenReturn(stack);
-        when(stack.getCloudPlatform()).thenReturn("AWS");
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(template.getRootVolumeSize()).thenReturn(expected);
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("1", "testDevice", 100, "gp2", CloudVolumeUsageType.GENERAL);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "/test", List.of(volume), 100, "General");
-        Resource resource = mock(Resource.class);
-        when(resource.getAttributes()).thenReturn(new Json(volumeSetAttributes));
-        when(resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(any(), any(), any())).thenReturn(List.of(resource));
 
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setSeLinux(SeLinux.PERMISSIVE);
@@ -553,7 +541,6 @@ public class StackToCloudStackConverterTest {
         assertEquals(1L, result.getGroups().size());
         assertEquals(expected, result.getGroups().get(0).getRootVolumeSize());
         verify(defaultRootVolumeSizeProvider, times(0)).getDefaultRootVolumeForPlatform(any(String.class), eq(true));
-        assertEquals("gp2", result.getGroups().get(0).getRootVolumeType());
     }
 
     @Test
@@ -1573,75 +1560,5 @@ public class StackToCloudStackConverterTest {
         instanceTemplateRequest.setRootVolume(rootVolumeRequest);
         verticalScaleRequest.setTemplate(instanceTemplateRequest);
         return verticalScaleRequest;
-    }
-
-    @Test
-    public void testConvertWhenDiskUpdateRequestIsNotNull() {
-        when(stack.getId()).thenReturn(TEST_STACK_ID);
-        when(componentConfigProviderService.getStackTemplate(TEST_STACK_ID)).thenReturn(null);
-        when(stack.getStack()).thenReturn(stack);
-        SecurityConfig securityConfig = mock(SecurityConfig.class);
-        when(securityConfig.getSeLinux()).thenReturn(SeLinux.PERMISSIVE);
-        when(stack.getSecurityConfig()).thenReturn(securityConfig);
-        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest("gp2", 200, TEST_NAME, DiskType.ROOT_DISK);
-        List<InstanceGroupDto> instanceGroups = new ArrayList<>();
-        InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
-        InstanceMetadataView instanceMetadata1 = mock(InstanceMetadataView.class);
-        InstanceMetadataView instanceMetadata2 = mock(InstanceMetadataView.class);
-        when(instanceMetadata1.getUserdataSecretResourceId()).thenReturn(null);
-        when(instanceMetadata2.getUserdataSecretResourceId()).thenReturn(null);
-        instanceGroups.add(new InstanceGroupDto(instanceGroup, List.of(instanceMetadata1, instanceMetadata2)));
-        String groupName = TEST_NAME;
-        Template template = mock(Template.class);
-        when(instanceMetadata1.isDeletedOnProvider()).thenReturn(true);
-        when(instanceMetadata2.isDeletedOnProvider()).thenReturn(true);
-        when(template.getCloudPlatform()).thenReturn("AWS");
-        when(template.getVolumeTemplates()).thenReturn(Sets.newHashSet());
-        when(instanceGroup.getGroupName()).thenReturn(groupName);
-        when(instanceGroup.getTemplate()).thenReturn(template);
-        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
-        CloudStack result = underTest.convert(stack, new ArrayList<>(), diskUpdateRequest);
-
-        assertNull(result.getTemplate());
-        Group resultGroup = result.getGroups().get(0);
-        assertEquals(200, resultGroup.getRootVolumeSize());
-        assertEquals("gp2", resultGroup.getRootVolumeType());
-    }
-
-    @Test
-    public void testConvertWhenDiskUpdateRequestIsNotNullWhenDiskSizeAndTypeForRootIsDefault() {
-        when(stack.getId()).thenReturn(TEST_STACK_ID);
-        when(componentConfigProviderService.getStackTemplate(TEST_STACK_ID)).thenReturn(null);
-        when(stack.getStack()).thenReturn(stack);
-        SecurityConfig securityConfig = mock(SecurityConfig.class);
-        when(securityConfig.getSeLinux()).thenReturn(SeLinux.PERMISSIVE);
-        when(stack.getSecurityConfig()).thenReturn(securityConfig);
-        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest(null, 0, TEST_NAME, DiskType.ROOT_DISK);
-        List<InstanceGroupDto> instanceGroups = new ArrayList<>();
-        InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
-        InstanceMetadataView instanceMetadata1 = mock(InstanceMetadataView.class);
-        InstanceMetadataView instanceMetadata2 = mock(InstanceMetadataView.class);
-        when(instanceMetadata1.getUserdataSecretResourceId()).thenReturn(null);
-        when(instanceMetadata2.getUserdataSecretResourceId()).thenReturn(null);
-        instanceGroups.add(new InstanceGroupDto(instanceGroup, List.of(instanceMetadata1, instanceMetadata2)));
-        String groupName = TEST_NAME;
-        int expected = 100;
-        when(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform("AWS", false)).thenReturn(expected);
-        Template template = mock(Template.class);
-        when(instanceMetadata1.isDeletedOnProvider()).thenReturn(true);
-        when(instanceMetadata2.isDeletedOnProvider()).thenReturn(true);
-        when(template.getCloudPlatform()).thenReturn("AWS");
-        when(template.getVolumeTemplates()).thenReturn(Sets.newHashSet());
-        when(template.getRootVolumeSize()).thenReturn(null);
-        when(instanceGroup.getGroupName()).thenReturn(groupName);
-        when(instanceGroup.getTemplate()).thenReturn(template);
-        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.CORE);
-        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
-        CloudStack result = underTest.convert(stack, new ArrayList<>(), diskUpdateRequest);
-
-        assertNull(result.getTemplate());
-        Group resultGroup = result.getGroups().get(0);
-        assertEquals(expected, resultGroup.getRootVolumeSize());
-        assertEquals(null, resultGroup.getRootVolumeType());
     }
 }

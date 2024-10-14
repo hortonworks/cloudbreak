@@ -28,13 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
@@ -153,13 +151,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         Template template = mock(Template.class);
+        when(template.getRootVolumeType()).thenReturn("gp2");
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getGroupName()).thenReturn(GROUP_NAME);
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("1", "testDevice", 100, "gp2", CloudVolumeUsageType.GENERAL);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "/test", List.of(volume), 100, "General");
-        Resource resource = mock(Resource.class);
-        when(resource.getAttributes()).thenReturn(new Json(volumeSetAttributes));
-        when(resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(any(), any(), any())).thenReturn(List.of(resource));
         List<String> az = List.of("us-west2-a", "us-west2-b");
         Json attributes = mock(Json.class);
         when(attributes.getMap()).thenReturn(Map.of(NetworkConstants.AVAILABILITY_ZONES, az));

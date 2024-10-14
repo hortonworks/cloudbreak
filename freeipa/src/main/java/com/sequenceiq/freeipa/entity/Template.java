@@ -57,8 +57,18 @@ public class Template implements AccountIdAwareResource {
 
     private String accountId;
 
+    private String rootVolumeType;
+
     public Template() {
         deleted = false;
+    }
+
+    public String getRootVolumeType() {
+        return rootVolumeType;
+    }
+
+    public void setRootVolumeType(String rootVolumeType) {
+        this.rootVolumeType = rootVolumeType;
     }
 
     public Long getId() {
@@ -182,6 +192,7 @@ public class Template implements AccountIdAwareResource {
                 .add("attributes='" + attributes + "'")
                 .add("secretAttributes='***'")
                 .add("accountId=" + accountId)
+                .add("rootVolumeType=" + rootVolumeType)
                 .toString();
     }
 }

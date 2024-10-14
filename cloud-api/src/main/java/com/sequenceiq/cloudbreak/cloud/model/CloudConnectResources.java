@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.util;
+package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.StringJoiner;
 
@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class CloudConnectResources {
 

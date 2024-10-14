@@ -64,8 +64,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DiskUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpdateRootVolumeResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
@@ -102,6 +104,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.FreeipaInstanceMetadataUpdateService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
+import com.sequenceiq.freeipa.service.stack.RootVolumeUpdateService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -196,6 +199,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeipaInstanceMetadataUpdateService instanceMetadataUpdateService;
+
+    @Inject
+    private RootVolumeUpdateService rootVolumeUpdateService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -504,5 +510,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
         return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
                 .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType()))
                 .collect(Collectors.toList()));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
+    public UpdateRootVolumeResponse updateRootVolumeByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+            @Valid @NotNull DiskUpdateRequest rootDiskVolumesRequest) {
+        return rootVolumeUpdateService.updateRootVolume(environmentCrn, rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
     }
 }

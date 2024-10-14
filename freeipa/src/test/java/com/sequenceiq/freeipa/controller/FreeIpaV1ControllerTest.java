@@ -26,8 +26,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -37,6 +40,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DiskUpdateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpdateRootVolumeResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.authorization.FreeIpaFiltering;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
@@ -53,6 +58,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
+import com.sequenceiq.freeipa.service.stack.RootVolumeUpdateService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +71,8 @@ class FreeIpaV1ControllerTest {
     private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
 
     private static final String ROOT_CERTIFICATE = "rootCertificate";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
 
     @InjectMocks
     private FreeIpaV1Controller underTest;
@@ -113,6 +121,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private RotateSaltPasswordService rotateSaltPasswordService;
+
+    @Mock
+    private RootVolumeUpdateService rootVolumeUpdateService;
 
     @BeforeEach
     void setUp() {
@@ -322,6 +333,19 @@ class FreeIpaV1ControllerTest {
         underTest.rotateSaltPassword(ENVIRONMENT_CRN);
 
         verify(rotateSaltPasswordService).triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
+    }
+
+    @Test
+    void testUpdateRootVolumeByCrn() {
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
+        when(rootVolumeUpdateService.updateRootVolume(ENVIRONMENT_CRN, diskUpdateRequest, "hortonworks"))
+                .thenReturn(new UpdateRootVolumeResponse(flowIdentifier));
+
+        UpdateRootVolumeResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRootVolumeByCrn(ENVIRONMENT_CRN, diskUpdateRequest));
+
+        verify(rootVolumeUpdateService).updateRootVolume(ENVIRONMENT_CRN, diskUpdateRequest, "hortonworks");
+        assertEquals("1", result.getFlowIdentifier().getPollableId());
     }
 
 }

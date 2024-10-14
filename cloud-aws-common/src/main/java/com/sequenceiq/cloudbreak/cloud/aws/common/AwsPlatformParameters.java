@@ -166,6 +166,11 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public DiskType defaultRootDiskType() {
+        return diskType(AwsDiskType.Gp3.value());
+    }
+
+    @Override
     public String resourceDefinition(String resource) {
         return cloudbreakResourceReaderService.resourceDefinition("aws", resource);
     }

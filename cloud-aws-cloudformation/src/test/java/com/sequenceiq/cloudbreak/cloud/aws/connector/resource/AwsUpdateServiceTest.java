@@ -2,17 +2,21 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,24 +29,48 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
+import com.sequenceiq.cloudbreak.cloud.aws.AutoScalingGroupHandler;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchConfigurationUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.Instance;
 import software.amazon.awssdk.services.ec2.model.HttpTokensState;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateEbsBlockDevice;
+import software.amazon.awssdk.services.ec2.model.VolumeType;
 
 @ExtendWith(MockitoExtension.class)
 class AwsUpdateServiceTest {
@@ -61,6 +89,15 @@ class AwsUpdateServiceTest {
 
     @Mock
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
+
+    @Mock
+    private AutoScalingGroupHandler autoScalingGroupHandler;
+
+    @Mock
+    private AwsCloudFormationClient awsClient;
+
+    @Mock
+    private CloudFormationStackUtil cfStackUtil;
 
     @InjectMocks
     private AwsUpdateService underTest;
@@ -315,5 +352,139 @@ class AwsUpdateServiceTest {
                 "100");
         verify(launchConfigurationUpdateService, times(1))
                 .updateLaunchConfigurations(any(), eq(stack), eq(cloudResource), eq(updatableFields), eq(gatewayGroup), eq(Boolean.TRUE));
+    }
+
+    @Test
+    void updateLaunchTemplateForGroup() {
+        AutoScalingGroup asg1 = newAutoScalingGroup("masterASG", List.of("i-master1", "i-master2"));
+        AutoScalingGroup asg2 = newAutoScalingGroup("workerASG", List.of("i-worker1", "i-worker2", "i-worker3"));
+        AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
+        AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
+
+        Map<String, AutoScalingGroup> autoScalingGroupMap = Map.of("masterASG", asg1, "workerASG", asg2);
+
+        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
+
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, new CloudCredential());
+
+        List<CloudResource> allInstances = new ArrayList<>();
+        allInstances.add(newInstanceResource("worker1", "worker", "i-worker1"));
+        allInstances.add(newInstanceResource("worker2", "worker", "i-worker2"));
+        allInstances.add(newInstanceResource("worker3", "worker", "i-worker3"));
+        CloudResource workerInstance4 = newInstanceResource("worker4", "worker", "i-worker4");
+        allInstances.add(workerInstance4);
+        CloudResource workerInstance5 = newInstanceResource("worker5", "worker", "i-worker5");
+        allInstances.add(workerInstance5);
+
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        List<Group> groups = new ArrayList<>();
+
+        Group masterGroup = getMasterGroup(instanceAuthentication);
+        masterGroup.setRootVolumeType(null);
+        masterGroup.setRootVolumeSize(20);
+        groups.add(masterGroup);
+
+        Group worker = getWorkerGroup(instanceAuthentication);
+        groups.add(worker);
+
+        Map<String, String> tags = new HashMap<>();
+        tags.put("owner", "cbuser");
+        tags.put("created", "yesterday");
+        CloudStack cloudStack = CloudStack.builder()
+                .groups(groups)
+                .network(getNetwork())
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .build();
+
+        when(autoScalingGroupHandler.autoScalingGroupByName(any(), any(), any())).thenReturn(autoScalingGroupMap);
+        LaunchTemplateBlockDeviceMapping masterBlockDeviceMapping = LaunchTemplateBlockDeviceMapping.builder().ebs(LaunchTemplateEbsBlockDevice.builder()
+                .volumeSize(20).volumeType(VolumeType.GP2).build()).build();
+        when(awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(authenticatedContext, asg2))
+                .thenReturn(List.of(masterBlockDeviceMapping));
+        when(awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(authenticatedContext, asg1))
+                .thenReturn(List.of(masterBlockDeviceMapping));
+        Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "50",
+                LaunchTemplateField.ROOT_VOLUME_TYPE, "gp3");
+
+        List<CloudResourceStatus> statuses = underTest.update(authenticatedContext, cloudStack, List.of(),
+                UpdateType.PROVIDER_TEMPLATE_UPDATE, Optional.empty());
+
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(updatableFields, false, amazonAutoScalingClient, ec2Client, asg2, cloudStack);
+    }
+
+    private AutoScalingGroup newAutoScalingGroup(String groupName, List<String> instances) {
+        return AutoScalingGroup.builder()
+                .autoScalingGroupName(groupName)
+                .instances(instances.stream().map(instance -> Instance.builder().instanceId(instance).build()).collect(Collectors.toList()))
+                .build();
+    }
+
+    private CloudResource newInstanceResource(String name, String group, String instanceId) {
+        return CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName(name).withGroup(group).withInstanceId(instanceId).build();
+    }
+
+    private Group getMasterGroup(InstanceAuthentication instanceAuthentication) {
+        List<CloudInstance> masterInstances = new ArrayList<>();
+        CloudInstance masterInstance1 = new CloudInstance("i-master1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance masterInstance2 = new CloudInstance("i-master2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        masterInstances.add(masterInstance1);
+        masterInstances.add(masterInstance2);
+        return Group.builder()
+                .withName("master")
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(masterInstances)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(50)
+                .withRootVolumeType("GP3")
+                .build();
+    }
+
+    private Group getWorkerGroup(InstanceAuthentication instanceAuthentication) {
+        List<CloudInstance> cloudInstances = new ArrayList<>();
+        CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance2 = new CloudInstance("i-worker2", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance3 = new CloudInstance("i-worker3", mock(InstanceTemplate.class), instanceAuthentication, "subnet-1", "az1");
+        InstanceTemplate newInstanceTemplate = mock(InstanceTemplate.class);
+        lenient().when(newInstanceTemplate.getStatus()).thenReturn(InstanceStatus.CREATE_REQUESTED);
+        CloudInstance workerInstance4 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
+        CloudInstance workerInstance5 = new CloudInstance(null, newInstanceTemplate, instanceAuthentication, "subnet-1", "az1");
+        cloudInstances.add(workerInstance1);
+        cloudInstances.add(workerInstance2);
+        cloudInstances.add(workerInstance3);
+        cloudInstances.add(workerInstance4);
+        cloudInstances.add(workerInstance5);
+        return Group.builder()
+                .withName("worker")
+                .withType(InstanceGroupType.CORE)
+                .withInstances(cloudInstances)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(50)
+                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .build();
+    }
+
+    private Network getNetwork() {
+        Map<String, Object> networkParameters = new HashMap<>();
+        networkParameters.put("vpcId", "vpc-12345678");
+        networkParameters.put("internetGatewayId", "igw-12345678");
+        return new Network(new Subnet(null), networkParameters);
     }
 }

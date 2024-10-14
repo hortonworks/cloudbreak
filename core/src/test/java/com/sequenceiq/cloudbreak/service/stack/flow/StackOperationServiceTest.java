@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -632,8 +631,6 @@ public class StackOperationServiceTest {
         when(stack.getInstanceGroupByInstanceGroupName(anyString())).thenReturn(instanceGroupDto);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ROOT_DISK);
-        when(diskUpdateRequest.getSize()).thenReturn(200);
         when(diskUpdateRequest.getGroup()).thenReturn("test");
         InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
         when(instanceMetadataView.getInstanceGroupName()).thenReturn("test");
@@ -645,19 +642,7 @@ public class StackOperationServiceTest {
         Map<String, List<String>> updatedNodesMap = Map.of("test", List.of("test-fqdn"));
         underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST");
 
-        verify(flowManager).triggerRootVolumeUpdateFlow(STACK_ID, updatedNodesMap, diskUpdateRequest);
-    }
-
-    @Test
-    public void testRootVolumeDiskUpdateThrowsBadRequest() throws Exception {
-        StackDto stack = mock(StackDto.class);
-        when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ADDITIONAL_DISK);
-        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rootVolumeDiskUpdate(nameOrCrn, diskUpdateRequest, "TEST"));
-
-        assertEquals("Invalid Request: Size for root disk modification should be greater than or equal to 200GB", exception.getMessage());
+        verify(flowManager).triggerRootVolumeUpdateFlow(STACK_ID, updatedNodesMap);
     }
 
     @Test
@@ -666,8 +651,6 @@ public class StackOperationServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(stackDtoService.getByNameOrCrn(any(), anyString())).thenReturn(stack);
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        when(diskUpdateRequest.getDiskType()).thenReturn(DiskType.ROOT_DISK);
-        when(diskUpdateRequest.getSize()).thenReturn(200);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
         when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(List.of());
         when(stack.getInstanceGroupByInstanceGroupName(any())).thenReturn(instanceGroupDto);

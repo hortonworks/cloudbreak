@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
@@ -71,6 +72,9 @@ public class TemplateDecoratorTest {
 
     @Mock
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Mock
+    private CloudParameterCache cloudParameterCache;
 
     @Mock
     private Credential cloudCredential;

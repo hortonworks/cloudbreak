@@ -293,7 +293,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
             UpdateType type, Optional<String> group) throws Exception {
         LOGGER.info("Update stack with resources: {}", resources);
-        if (type.equals(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES)) {
+        if (type.equals(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES) || type.equals(UpdateType.PROVIDER_TEMPLATE_UPDATE)) {
             LOGGER.debug("Update type is {}, no further action required.", type);
             return new ArrayList<>();
         }

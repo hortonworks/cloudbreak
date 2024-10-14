@@ -230,7 +230,11 @@ class StackV4ControllerTest {
     void testUpdateRootVolumeByStackCrn() throws Exception {
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         doAs(USER_CRN, () -> {
-            underTest.updateRootVolumeByStackCrnInternal(WORKSPACE_ID, STACK_CRN, diskUpdateRequest, USER_CRN);
+            try {
+                underTest.updateRootVolumeByStackCrnInternal(WORKSPACE_ID, STACK_CRN, diskUpdateRequest, USER_CRN);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
 
         verify(stackOperationService).rootVolumeDiskUpdate(NameOrCrn.ofCrn(STACK_CRN), diskUpdateRequest, "hortonworks");

@@ -63,4 +63,7 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     List<Resource> findAllByStackIdAndInstanceGroupAndResourceTypeInAndInstanceIdIsNotNull(Long stackId, String instanceGroup,
             Collection<ResourceType> resourceTypes);
+
+    @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId AND r.resourceType = :type")
+    List<Resource> findByStackIdAndType(@Param("stackId") Long stackId, @Param("type") ResourceType type);
 }

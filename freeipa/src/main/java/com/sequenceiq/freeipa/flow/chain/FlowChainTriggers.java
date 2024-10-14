@@ -13,6 +13,8 @@ public class FlowChainTriggers {
 
     public static final String REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT = "REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT";
 
+    public static final String ROOT_VOLUME_UPDATE_TRIGGER_EVENT = "ROOT_VOLUME_UPDATE_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

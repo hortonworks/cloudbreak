@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
@@ -94,8 +93,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterD
 public class StackOperationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperationService.class);
-
-    private static final Integer MINIMUM_DISK_SIZE = 200;
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -555,23 +552,19 @@ public class StackOperationService {
 
     public FlowIdentifier rootVolumeDiskUpdate(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        if (updateRequest.getDiskType().equals(DiskType.ROOT_DISK) && updateRequest.getSize() >= MINIMUM_DISK_SIZE) {
-            Set<String> selectedNodes = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup())
-                    .getInstanceMetadataViews().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toSet());
-            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = clusterRepairService.validateRepair(
-                    ManualClusterRepairMode.NODE_ID, stack.getId(), selectedNodes, false);
-            if (repairValidationResult.isError()) {
-                throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
-            }
-            rootDiskValidationService.fetchRootDiskResourcesForGroup(stack, updateRequest);
-            List<String> discoveryFqdnList = stack.getAllAvailableInstances().stream()
-                    .filter(instanceMetadataView -> instanceMetadataView.getInstanceGroupName().equals(updateRequest.getGroup()))
-                    .map(InstanceMetadataView::getDiscoveryFQDN).toList();
-            Map<String, List<String>> updatedNodesMap = Map.of(updateRequest.getGroup(), discoveryFqdnList);
-            return flowManager.triggerRootVolumeUpdateFlow(stack.getId(), updatedNodesMap, updateRequest);
-        } else {
-            throw new BadRequestException("Invalid Request: Size for root disk modification should be greater than or equal to 200GB");
+        Set<String> selectedNodes = stack.getInstanceGroupByInstanceGroupName(updateRequest.getGroup())
+                .getInstanceMetadataViews().stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toSet());
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult = clusterRepairService.validateRepair(
+                ManualClusterRepairMode.NODE_ID, stack.getId(), selectedNodes, false);
+        if (repairValidationResult.isError()) {
+            throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         }
+        rootDiskValidationService.validateRootDiskResourcesForGroupAndUpdateStackTemplate(stack, updateRequest);
+        List<String> discoveryFqdnList = stack.getAllAvailableInstances().stream()
+                .filter(instanceMetadataView -> instanceMetadataView.getInstanceGroupName().equals(updateRequest.getGroup()))
+                .map(InstanceMetadataView::getDiscoveryFQDN).toList();
+        Map<String, List<String>> updatedNodesMap = Map.of(updateRequest.getGroup(), discoveryFqdnList);
+        return flowManager.triggerRootVolumeUpdateFlow(stack.getId(), updatedNodesMap);
     }
 
     public FlowIdentifier triggerSetDefaultJavaVersion(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {

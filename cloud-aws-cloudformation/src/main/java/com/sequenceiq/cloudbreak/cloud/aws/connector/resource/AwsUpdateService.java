@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -16,11 +18,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
+import com.sequenceiq.cloudbreak.cloud.aws.AutoScalingGroupHandler;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchConfigurationUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -32,8 +41,12 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.HttpTokensState;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateEbsBlockDevice;
 
 @Service
 public class AwsUpdateService {
@@ -51,6 +64,15 @@ public class AwsUpdateService {
 
     @Inject
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
+
+    @Inject
+    private AutoScalingGroupHandler autoScalingGroupHandler;
+
+    @Inject
+    private AwsCloudFormationClient awsClient;
+
+    @Inject
+    private CloudFormationStackUtil cfStackUtil;
 
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             UpdateType type, Optional<String> targetGroupName) {
@@ -77,6 +99,8 @@ public class AwsUpdateService {
             } else if (AwsImdsUtil.APPLICABLE_UPDATE_TYPES.contains(type)) {
                 updateInstanceMetadataOptions(authenticatedContext, stack, resources, type);
             }
+        } else if (type.equals(UpdateType.PROVIDER_TEMPLATE_UPDATE)) {
+            updateLauchTemplateOfAutoscalingGroup(authenticatedContext, stack);
         }
         return cloudResourceStatuses;
     }
@@ -158,5 +182,45 @@ public class AwsUpdateService {
     private CloudResource getCloudFormationStack(List<CloudResource> resources) {
         return resources.stream().filter(resource -> ResourceType.CLOUDFORMATION_STACK == resource.getType()).findFirst()
                 .orElseThrow(() -> new NotFoundException("CloudFormation stack is not found, the resource might have been deleted."));
+    }
+
+    private void updateLauchTemplateOfAutoscalingGroup(AuthenticatedContext ac, CloudStack stack) {
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
+        AmazonAutoScalingClient autoScalingClient = awsClient.createAutoScalingClient(credentialView, regionName);
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(credentialView, regionName);
+        Map<String, Group> groupByName = stack.getGroups().stream().collect(Collectors.toMap(Group::getName, group -> group));
+        Map<String, AutoScalingGroup> autoScalingGroupMap = autoScalingGroupHandler
+                .autoScalingGroupByName(cloudFormationClient, autoScalingClient, cfStackUtil.getCfStackName(ac));
+        for (String groupName : groupByName.keySet()) {
+            Group group = groupByName.get(groupName);
+            Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, String.valueOf(group.getRootVolumeSize()),
+                    LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
+                            : AwsDiskType.Gp3.value());
+            Optional<AutoScalingGroup> autoScalingGroupOptional = autoScalingGroupMap.keySet().stream().filter(key -> key.contains(groupName))
+                    .map(autoScalingGroupMap::get).findFirst();
+            if (autoScalingGroupOptional.isPresent()) {
+                AutoScalingGroup autoScalingGroup = autoScalingGroupOptional.get();
+                List<LaunchTemplateBlockDeviceMapping> currentBlockDeviceMappings =
+                        awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(ac, autoScalingGroup);
+                boolean updateLaunchTemplate = shouldUpdateLaunchTemplate(currentBlockDeviceMappings, group);
+                if (updateLaunchTemplate) {
+                    awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, false, autoScalingClient, ec2Client, autoScalingGroup, stack);
+                }
+            }
+        }
+    }
+
+    private static boolean shouldUpdateLaunchTemplate(List<LaunchTemplateBlockDeviceMapping> currentBlockDeviceMappings, Group group) {
+        boolean updateLaunchTemplate = false;
+        for (LaunchTemplateBlockDeviceMapping bdm : currentBlockDeviceMappings) {
+            if (bdm.ebs() != null) {
+                LaunchTemplateEbsBlockDevice ebs = bdm.ebs();
+                updateLaunchTemplate = ebs.volumeSize() != group.getRootVolumeSize()
+                        || (null != group.getRootVolumeType() && !ebs.volumeTypeAsString().equals(group.getRootVolumeType().toLowerCase(Locale.ROOT)));
+            }
+        }
+        return updateLaunchTemplate;
     }
 }

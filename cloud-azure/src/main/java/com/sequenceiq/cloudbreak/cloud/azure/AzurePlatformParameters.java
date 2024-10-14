@@ -143,6 +143,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public DiskType defaultRootDiskType() {
+        return diskType(STANDARD_SSD_LRS.value());
+    }
+
+    @Override
     public String resourceDefinition(String resource) {
         return FileReaderUtils.readFileFromClasspathQuietly("definitions/azure-" + resource + ".json");
     }

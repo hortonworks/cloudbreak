@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.util.OneOfEnum;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +17,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
@@ -237,17 +234,5 @@ public class DistroXVolumesModificationTest extends AbstractE2ETest {
                     TEST_INSTANCE_GROUP));
 
         }
-        rootVolumesInGroup.forEach(vol -> {
-            try {
-                VolumeSetAttributes.Volume rootVolume = new Json(vol.getAttributes()).get(VolumeSetAttributes.class).getVolumes().get(0);
-                if (rootVolume.getSize() != ROOT_UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(rootVolume.getType()))) {
-                    throw new TestFailException(String.format("Root Volume Modification Disk did not complete successfully for root volumes instances " +
-                                    "in group %s in CB", TEST_INSTANCE_GROUP));
-                }
-            } catch (IOException e) {
-                throw new TestFailException(String.format("Unable to verify Resources for root disk stored in CB for group %s",
-                        TEST_INSTANCE_GROUP));
-            }
-        });
     }
 }

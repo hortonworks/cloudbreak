@@ -174,6 +174,11 @@ public class GcpPlatformParameters implements PlatformParameters {
         return diskType(GcpDiskType.HDD.value());
     }
 
+    @Override
+    public DiskType defaultRootDiskType() {
+        return diskType(GcpDiskType.HDD.value());
+    }
+
     public String getPrerequisitesCreationCommand(CredentialType type) {
         if (CredentialType.AUDIT.equals(type)) {
             return prerequisitesAuditCreationCommand;

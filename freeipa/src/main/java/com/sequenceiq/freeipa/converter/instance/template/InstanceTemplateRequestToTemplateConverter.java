@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -49,6 +50,9 @@ public class InstanceTemplateRequestToTemplateConverter {
 
     @Inject
     private HostEncryptionCalculator hostEncryptionCalculator;
+
+    @Inject
+    private CloudParameterCache cloudParameterCache;
 
     public Template convert(DetailedEnvironmentResponse environmentResponse, InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
         String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
@@ -114,6 +118,7 @@ public class InstanceTemplateRequestToTemplateConverter {
             template.setVolumeSize(0);
         }
         template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
+        template.setRootVolumeType(cloudParameterCache.getDefaultVolumeType(cloudPlatform.name()));
     }
 
 }

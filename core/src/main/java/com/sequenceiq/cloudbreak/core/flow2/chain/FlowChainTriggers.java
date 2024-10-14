@@ -68,6 +68,8 @@ public class FlowChainTriggers {
 
     public static final String SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT = "SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT";
 
+    public static final String CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT = "CORE_ROOT_VOLUME_UPDATE_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

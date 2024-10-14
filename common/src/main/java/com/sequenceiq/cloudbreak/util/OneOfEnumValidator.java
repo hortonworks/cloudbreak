@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
+package com.sequenceiq.cloudbreak.util;
 
 import java.util.Locale;
 import java.util.Set;

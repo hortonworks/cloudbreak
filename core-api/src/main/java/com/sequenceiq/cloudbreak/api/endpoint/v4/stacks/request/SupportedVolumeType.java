@@ -7,5 +7,6 @@ public enum SupportedVolumeType {
     ST1,
     STANDARDSSD_LRS,
     PREMIUM_LRS,
-    STANDARD_GRS;
+    STANDARD_GRS,
+    STANDARD_LRS
 }

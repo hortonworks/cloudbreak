@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
@@ -44,9 +47,13 @@ public class TemplateDecorator {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Inject
+    private CloudParameterCache cloudParameterCache;
+
     public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant, CdpResourceType cdpResourceType,
             boolean gatewayType) {
         setRootVolumeSize(template, gatewayType);
+        setRootVolumeType(template, credential.cloudPlatform());
         boolean needToFetchVolumeCountAndSize = template.getVolumeTemplates().stream()
                 .anyMatch(it -> it.getVolumeCount() == null || it.getVolumeSize() == null);
         if (needToFetchVolumeCountAndSize) {
@@ -101,6 +108,13 @@ public class TemplateDecorator {
         if (template.getRootVolumeSize() == null) {
             LOGGER.debug("No root volume size was set in the request. Getting default value for platform '{}'", template.getCloudPlatform());
             template.setRootVolumeSize(defaultRootVolumeSizeProvider.getDefaultRootVolumeForPlatform(template.getCloudPlatform(), gatewayType));
+        }
+    }
+
+    private void setRootVolumeType(Template template, String cloudPlatform) {
+        if (isEmpty(template.getRootVolumeType())) {
+            LOGGER.debug("Setting root volume type with default value for platform '{}'", template.getCloudPlatform());
+            template.setRootVolumeType(cloudParameterCache.getDefaultVolumeType(cloudPlatform));
         }
     }
 }

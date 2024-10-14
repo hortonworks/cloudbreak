@@ -41,6 +41,15 @@ public class CloudParameterCache {
         return result == null || result;
     }
 
+    public String getDefaultVolumeType(String cloudPlatform) {
+        Platform platform = Platform.platform(cloudPlatform);
+        PlatformParameters platformParameters = getPlatformParameters().get(platform);
+        if (platformParameters == null) {
+            return null;
+        }
+        return null != platformParameters.defaultRootDiskType() ? platformParameters.defaultRootDiskType().value() : null;
+    }
+
     public boolean isDownScalingSupported(String platform) {
         return isDownScalingSupported(Platform.platform(platform));
     }
