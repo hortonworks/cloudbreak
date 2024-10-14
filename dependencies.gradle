@@ -9,10 +9,10 @@ ext {
   // Spring
   caffeineVersion = '3.1.8'
   quartzVersion = '2.5.0-rc1'
-  springBootVersion = '3.3.1'
+  springBootVersion = '3.3.4'
   springDataJpaFrameworkVersion = '3.2.3'
-  springFrameworkVersion = '6.1.6'
-  springRetryVersion = '2.0.5'
+  springFrameworkVersion = '6.1.13'
+  springRetryVersion = '2.0.9'
   springSecurityJwtVersion = '1.1.1.RELEASE'
   springSecurityVersion = '6.3.3'
   springStateMachineCoreVersion = '2.5.0'
@@ -36,7 +36,7 @@ ext {
   nettyVersion = '4.1.114.Final'
   reactorNettyHttp = '1.1.23'
   okhttpVersion = '4.12.0'
-  tomcatVersion = '10.1.24'
+  tomcatVersion = '10.1.30'
 
   // Cloud SDKs
   awsSdkVersion = '2.28.3'
@@ -65,7 +65,7 @@ ext {
   commonsBeanutilsVersion = '1.9.4'
 
   // Logging
-  logbackVersion = '1.5.6'
+  logbackVersion = '1.5.10'
   logbackJsonClassicVersion = '0.1.5'
   slf4jApiVersion = '2.0.16'
 
@@ -93,7 +93,7 @@ ext {
   jakartaPersistenceApiVersion = '3.1.0'
   jakartaTransactionApiVersion = '2.0.1'
   mybatisMigrationVersion = '3.3.9'
-  postgreSQLVersion = '42.5.5'
+  postgreSQLVersion = '42.7.4'
   hikariCPVersion = '5.0.1'
 
   // Crypto
@@ -117,7 +117,7 @@ ext {
   podamVersion = '7.2.11.RELEASE'
 
   // Tracing
-  micrometerVersion = '1.11.7'
+  micrometerVersion = '1.13.4'
   microMeterJvmExtrasVersion = '0.2.2'
 
   // JavaX Legacy

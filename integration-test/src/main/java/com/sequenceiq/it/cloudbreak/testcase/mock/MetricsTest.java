@@ -11,8 +11,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.WebTarget;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
@@ -21,6 +24,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.util.ResourceUtil;
 
 public class MetricsTest extends AbstractMockTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsTest.class);
 
     private static final String EXPECTED_CLOUDBREAK_METRICS_PATH = "classpath:/metrics/cloudbreak_metrics.txt";
 
@@ -55,6 +60,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getCloudbreakAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_CLOUDBREAK_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -67,6 +73,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getEnvironmentAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_ENVIRONMENT_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -79,6 +86,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getSdxAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_DATALAKE_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -91,6 +99,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getFreeipaAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_FREE_IPA_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -103,6 +112,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getRedbeamsAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_REDBEAMS_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -115,6 +125,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getPeriscopeAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_PERISCOPE_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -127,6 +138,7 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getRemoteEnvironmentAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_REMOTE_ENVIRONMENT_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
     }
 
@@ -139,7 +151,15 @@ public class MetricsTest extends AbstractMockTest {
         Set<String> actualMetricNames = collectMetrics(testContext, serverProperties.getExternalizedComputeAddress());
         Set<String> expectedMetricNames = collectExpectedMetrics(testContext, EXPECTED_EXTERNALIZED_COMPUTE_CLUSTER_METRICS_PATH);
 
+        showMissingMetrics(expectedMetricNames, actualMetricNames);
         assertTrue(actualMetricNames.containsAll(expectedMetricNames));
+    }
+
+    private void showMissingMetrics(Set<String> expectedMetricNames, Set<String> actualMetricNames) {
+        Set<String> missingMetrics = Sets.difference(expectedMetricNames, actualMetricNames);
+        if (!missingMetrics.isEmpty()) {
+            LOGGER.info("Missing metrics: {}", String.join(", ", missingMetrics));
+        }
     }
 
     private Set<String> collectMetrics(TestContext testContext, String address) {
