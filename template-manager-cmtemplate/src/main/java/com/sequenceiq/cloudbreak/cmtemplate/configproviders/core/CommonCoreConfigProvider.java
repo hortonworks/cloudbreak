@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 @Component
 public class CommonCoreConfigProvider extends CoreConfigProvider {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonCoreConfigProvider.class);
+
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return true;
@@ -31,15 +35,28 @@ public class CommonCoreConfigProvider extends CoreConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
-        if (templateProcessor.getCmVersion().isPresent()
-                && isVersionNewerOrEqualThanLimited(templateProcessor.getCmVersion().get(), CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_12_0_500)) {
+        String cmGbn = templateProcessor.getCmVersion().orElse("");
+        if (isVersionNewerOrEqualThanLimited(cmVersionFromGbn(cmGbn), CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_12_0_500)) {
             CloudPlatform cloudPlatform = source.getCloudPlatform();
             apiClusterTemplateConfigs.add(config(ENVIRONMENT_CRN, source.getGeneralClusterConfigs().getEnvironmentCrn()));
             apiClusterTemplateConfigs.add(config(RESOURCE_CRN, source.getGeneralClusterConfigs().getResourceCrn()));
             apiClusterTemplateConfigs.add(config(ENVIRONMENT_ACCOUNT_ID, source.getGeneralClusterConfigs().getAccountId().orElse("UNKNOWN")));
             apiClusterTemplateConfigs.add(config(ENVIRONMENT_CLOUD_PROVIDER, cloudPlatform == null ? null : cloudPlatform.name()));
+        } else {
+            LOGGER.info("Service Configuration not applicable for {} ", cmGbn);
         }
         return apiClusterTemplateConfigs;
+    }
+
+    /**
+     * Need to get CM version (gbn) irrespective of it's build number, which is separated by '-'
+     * for example, for "7.12.0.500-58279810" it should be "7.12.0.500"
+     *
+     * @param cmGbn the full CM version string, potentially containing a build number after a hyphen.
+     * @return the CM version without the build number, or the original version string if no hyphen is found.
+     */
+    private String cmVersionFromGbn(String cmGbn) {
+        return cmGbn.split("-")[0];
     }
 
     @Override

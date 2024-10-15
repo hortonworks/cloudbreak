@@ -13,6 +13,8 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -53,8 +55,9 @@ class CommonCoreConfigProviderTest {
         }
     }
 
-    @Test
-    void testGetServiceConfigsShouldContainClusterSpecificProperties() {
+    @ParameterizedTest
+    @ValueSource(strings = {"7.12.0.500", "7.12.0.500-58279810", "7.12.0.600"})
+    void testGetServiceConfigsShouldContainClusterSpecificProperties(String cmGbn) {
         String resourceCrn = "test-resource-crn";
         String accountId = "test-account-id";
         String environmentCrn = "test-environment-crn";
@@ -64,7 +67,7 @@ class CommonCoreConfigProviderTest {
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of(accountId));
         when(generalClusterConfigs.getEnvironmentCrn()).thenReturn(environmentCrn);
         when(source.getCloudPlatform()).thenReturn(CloudPlatform.AWS);
-        when(cmTemplateProcessor.getCmVersion()).thenReturn(Optional.ofNullable(CLOUDERAMANAGER_VERSION_7_12_0_500.getVersion()));
+        when(cmTemplateProcessor.getCmVersion()).thenReturn(Optional.of(cmGbn));
         List<ApiClusterTemplateConfig> serviceConfigs = commonCoreConfigProvider.getServiceConfigs(cmTemplateProcessor, source);
         assertEquals(4, serviceConfigs.size());
         assertEquals("environment_crn", serviceConfigs.get(0).getName());
