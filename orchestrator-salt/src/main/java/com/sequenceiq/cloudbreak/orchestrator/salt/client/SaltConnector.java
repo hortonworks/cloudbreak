@@ -88,7 +88,8 @@ public class SaltConnector implements Closeable {
     public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug,
             int connectTimeoutMs, OptionalInt readTimeout) {
         try {
-            restClient = RestClientUtil.createClient(gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(),
+            restClient = RestClientUtil.createClient(gatewayConfig.getServerCert(), gatewayConfig.getNewServerCert(),
+                    gatewayConfig.getClientCert(), gatewayConfig.getClientKey(),
                     connectTimeoutMs, readTimeout, debug);
             this.hostname = gatewayConfig.getHostname();
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);

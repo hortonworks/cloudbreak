@@ -61,6 +61,11 @@ public class InstanceMetaDataService {
     @Inject
     private Clock clock;
 
+    public void updateServerCert(String serverCert, String instanceId, String discoveryFQDN) {
+        int modifiedRows = instanceMetaDataRepository.updateServerCert(serverCert, instanceId, discoveryFQDN);
+        LOGGER.debug("{} row was updated", modifiedRows);
+    }
+
     public void saveInstanceRequests(Stack stack, List<Group> groups) {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
         Json image = new Json(imageService.getCloudImageByStackId(stack.getId()));

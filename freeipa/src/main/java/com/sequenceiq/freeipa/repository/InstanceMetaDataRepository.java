@@ -7,6 +7,7 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -57,5 +58,10 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "WHERE s.environmentCrn = :environmentCrn " +
             "AND im.instanceStatus <> 'TERMINATED' ")
     List<SubnetIdWithResourceNameAndCrn> findAllUsedSubnetsByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+
+    @Modifying
+    @Query("UPDATE InstanceMetaData SET serverCert = :serverCert " +
+            "WHERE instanceId = :instanceId AND discoveryFQDN = :discoveryFQDN")
+    int updateServerCert(@Param("serverCert") String serverCert, @Param("instanceId") String instanceId, @Param("discoveryFQDN") String discoveryFQDN);
 
 }

@@ -14,6 +14,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Optional;
 
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -40,18 +41,26 @@ public class KeyStoreUtil {
         return keyStore;
     }
 
-    public static KeyStore createTrustStore(String serverCert) throws Exception {
-        try (Reader reader = new StringReader(serverCert)) {
-            try (PEMParser pemParser = new PEMParser(reader)) {
-                X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
-                Certificate caCertificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
-
-                KeyStore trustStore = KeyStore.getInstance("JKS");
-                trustStore.load(null);
-                trustStore.setCertificateEntry("ca", caCertificate);
-                return trustStore;
+    public static KeyStore createTrustStore(String serverCert, Optional<String> additionalServerCert) throws Exception {
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        trustStore.load(null);
+        try (Reader reader1 = new StringReader(serverCert)) {
+            try (PEMParser pemParser1 = new PEMParser(reader1)) {
+                X509CertificateHolder certificateHolder1 = (X509CertificateHolder) pemParser1.readObject();
+                Certificate caCertificate1 = new JcaX509CertificateConverter().getCertificate(certificateHolder1);
+                trustStore.setCertificateEntry("ca", caCertificate1);
             }
         }
+        if (additionalServerCert.isPresent()) {
+            try (Reader reader2 = new StringReader(additionalServerCert.get())) {
+                try (PEMParser pemParser2 = new PEMParser(reader2)) {
+                    X509CertificateHolder certificateHolder2 = (X509CertificateHolder) pemParser2.readObject();
+                    Certificate caCertificate2 = new JcaX509CertificateConverter().getCertificate(certificateHolder2);
+                    trustStore.setCertificateEntry("newca", caCertificate2);
+                }
+            }
+        }
+        return trustStore;
     }
 
     public static KeyPair createKeyPair(String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {

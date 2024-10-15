@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.client;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
@@ -122,7 +123,7 @@ public class ClouderaManagerApiClientProvider {
         try {
             if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyEnabled()) {
                 SSLContext sslContext = SSLContexts.custom()
-                        .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert()), null)
+                        .loadTrustMaterial(KeyStoreUtil.createTrustStore(clientConfig.getServerCert(), Optional.empty()), null)
                         .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientConfig.getClientCert(), clientConfig.getClientKey()), "consul".toCharArray())
                         .build();
                 cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());

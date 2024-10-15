@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -54,20 +55,21 @@ public class RestClientUtil {
     }
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug) throws Exception {
-        return createClient(serverCert, clientCert, clientKey, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug);
+        return createClient(serverCert, Optional.empty(), clientCert, clientKey, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug);
     }
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, int connectionTimeout, int readTimeout, boolean debug)
             throws Exception {
-        return createClient(serverCert, clientCert, clientKey, connectionTimeout, OptionalInt.of(readTimeout), debug);
+        return createClient(serverCert, Optional.empty(), clientCert, clientKey, connectionTimeout, OptionalInt.of(readTimeout), debug);
     }
 
-    public static Client createClient(String serverCert, String clientCert, String clientKey, int connectionTimeout, OptionalInt readTimeout, boolean debug)
+    public static Client createClient(String serverCert, Optional<String> additionalServerCert, String clientCert, String clientKey, int connectionTimeout,
+            OptionalInt readTimeout, boolean debug)
             throws Exception {
         SSLContext sslContext;
         if (StringUtils.isNoneBlank(serverCert, clientCert, clientKey)) {
             sslContext = SSLContexts.custom()
-                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
+                    .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert, additionalServerCert), null)
                     .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
                     .build();
         } else {

@@ -75,4 +75,9 @@ public class SecretRotationSaltService {
     public void executeSaltRun(OrchestratorStateParams stateParams) throws CloudbreakOrchestratorFailedException {
         hostOrchestrator.runOrchestratorState(stateParams);
     }
+
+    public Map<String, String> executeCommand(List<GatewayConfig> gatewayConfigs, Set<String> targets, String command)
+            throws CloudbreakOrchestratorFailedException {
+        return hostOrchestrator.runCommandOnHosts(gatewayConfigs, targets, command);
+    }
 }

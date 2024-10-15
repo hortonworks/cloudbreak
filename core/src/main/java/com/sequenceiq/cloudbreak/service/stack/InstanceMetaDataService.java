@@ -78,6 +78,11 @@ public class InstanceMetaDataService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    public void updateServerCert(String serverCert, String instanceId, String discoveryFQDN) {
+        int modifiedRows = repository.updateServerCert(serverCert, instanceId, discoveryFQDN);
+        LOGGER.debug("{} row was updated", modifiedRows);
+    }
+
     public void updateInstanceStatuses(Collection<Long> instanceIds, InstanceStatus newStatus,
             String statusReason) {
         LOGGER.info("Update {} status to {} with statusReason {}", instanceIds, newStatus, statusReason);

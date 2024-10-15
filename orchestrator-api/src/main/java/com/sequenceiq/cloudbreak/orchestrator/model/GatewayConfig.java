@@ -1,11 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.annotation.Nonnull;
-
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
 import com.sequenceiq.cloudbreak.util.HostUtil;
 
 public final class GatewayConfig {
@@ -20,6 +16,8 @@ public final class GatewayConfig {
     private final String hostname;
 
     private final String serverCert;
+
+    private Optional<String> newServerCert = Optional.empty();
 
     private final String clientCert;
 
@@ -88,18 +86,6 @@ public final class GatewayConfig {
         this.userFacingKey = userFacingKey;
     }
 
-    private GatewayConfig(GatewayConfig gatewayConfig, @Nonnull ServiceEndpoint serviceEndpoint) {
-        this(serviceEndpoint.getHostEndpoint().getHostAddressString(), gatewayConfig.publicAddress, gatewayConfig.privateAddress,
-                gatewayConfig.hostname, Objects.requireNonNull(serviceEndpoint.getPort().orElse(null), "serviceEndpoint port unspecified"),
-                gatewayConfig.instanceId,
-                gatewayConfig.serverCert, gatewayConfig.clientCert, gatewayConfig.clientKey,
-                gatewayConfig.saltPassword, gatewayConfig.saltBootPassword, gatewayConfig.signatureKey,
-                gatewayConfig.knoxGatewayEnabled, gatewayConfig.primary,
-                gatewayConfig.saltMasterPrivateKey, gatewayConfig.saltMasterPublicKey,
-                gatewayConfig.saltSignPrivateKey, gatewayConfig.saltSignPublicKey,
-                gatewayConfig.getUserFacingCert(), gatewayConfig.getUserFacingKey());
-    }
-
     public static Builder builder() {
         return new Builder();
     }
@@ -137,6 +123,10 @@ public final class GatewayConfig {
 
     public String getServerCert() {
         return serverCert;
+    }
+
+    public Optional<String> getNewServerCert() {
+        return newServerCert;
     }
 
     public String getClientCert() {
@@ -199,6 +189,10 @@ public final class GatewayConfig {
     public GatewayConfig withProtocol(String protocol) {
         this.protocol = protocol;
         return this;
+    }
+
+    public void withNewServerCert(String newServerCert) {
+        this.newServerCert = Optional.ofNullable(newServerCert);
     }
 
     public Builder toBuilder() {
@@ -270,8 +264,8 @@ public final class GatewayConfig {
         public Builder() {
         }
 
-        public Builder(String connectionAddress, String publicAddress, String privateAddress, String hostname, String serverCert, String clientCert,
-                String clientKey,
+        public Builder(String connectionAddress, String publicAddress, String privateAddress, String hostname,
+                String serverCert, String clientCert, String clientKey,
                 Integer gatewayPort, String instanceId, String saltPassword, String saltBootPassword, String signatureKey, Boolean knoxGatewayEnabled,
                 boolean primary,
                 String saltMasterPrivateKey, String saltMasterPublicKey, String saltSignPrivateKey, String saltSignPublicKey,

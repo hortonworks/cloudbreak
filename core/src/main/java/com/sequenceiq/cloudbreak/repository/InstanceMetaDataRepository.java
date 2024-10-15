@@ -293,6 +293,11 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
     int updateStatusIfNotTerminated(@Param("ids") Collection<Long> ids, @Param("newInstanceStatus") InstanceStatus newInstanceStatus,
             @Param("newStatusReason") String newStatusReason);
 
+    @Modifying
+    @Query("UPDATE InstanceMetaData SET serverCert = :serverCert " +
+            "WHERE instanceId = :instanceId AND discoveryFQDN = :discoveryFQDN")
+    int updateServerCert(@Param("serverCert") String serverCert, @Param("instanceId") String instanceId, @Param("discoveryFQDN") String discoveryFQDN);
+
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceStatus = 'TERMINATED' AND i.instanceGroup.stack.id= :stackId " +
             "AND i.terminationDate < :thresholdTerminationDate ORDER BY i.terminationDate ASC")
     Page<InstanceMetaData> findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(@Param("stackId") Long stackId,
