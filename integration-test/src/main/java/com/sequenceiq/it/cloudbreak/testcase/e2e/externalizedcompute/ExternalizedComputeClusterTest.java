@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -35,10 +36,13 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
     @Inject
     private ServerProperties serverProperties;
 
+    @Inject
+    private CredentialTestClient credentialTestClient;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
+        createExtendedCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }

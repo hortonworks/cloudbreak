@@ -236,6 +236,8 @@ public class AwsProperties {
 
         private String roleArn;
 
+        private String roleArnExtended;
+
         private String accessKeyId;
 
         private String secretKey;
@@ -254,6 +256,14 @@ public class AwsProperties {
 
         public void setRoleArn(String roleArn) {
             this.roleArn = roleArn;
+        }
+
+        public String getRoleArnExtended() {
+            return roleArnExtended;
+        }
+
+        public void setRoleArnExtended(String roleArnExtended) {
+            this.roleArnExtended = roleArnExtended;
         }
 
         public String getAccessKeyId() {

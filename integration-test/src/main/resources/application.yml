@@ -163,6 +163,7 @@ integrationtest:
     credential:
       type: role
       roleArn:
+      roleArnExtended:
       accessKeyId:
       secretKey:
     instance:

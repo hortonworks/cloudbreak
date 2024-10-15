@@ -1,6 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.credential;
 
 import java.util.Collection;
+import java.util.Optional;
+
+import jakarta.inject.Inject;
 
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
@@ -11,6 +14,7 @@ import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequ
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
@@ -20,6 +24,9 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialRequest, CredentialResponse, CredentialTestDto, CredentialResponse> {
 
     private static final String CREDENTIAL_RESOURCE_NAME = "credentialName";
+
+    @Inject
+    private AwsProperties awsProperties;
 
     public CredentialTestDto(TestContext testContext) {
         super(new CredentialRequest(), testContext);
@@ -35,6 +42,17 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
         getRequest().setName(name);
         setName(name);
         return this;
+    }
+
+    public CredentialTestDto withExtendedArn() {
+        getExtendedRoleArn().ifPresent(arn -> getRequest().getAws().getRoleBased().setRoleArn(arn));
+        return this;
+    }
+
+    private Optional<String> getExtendedRoleArn() {
+        return Optional.ofNullable(awsProperties)
+                .map(AwsProperties::getCredential)
+                .map(AwsProperties.Credential::getRoleArnExtended);
     }
 
     @Override

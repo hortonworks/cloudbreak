@@ -140,9 +140,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void initiateDatalakeCreation(TestContext testContext) {
         testContext
                 .given(SdxInternalTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withEnableMultiAz()
-                    .withTelemetry("telemetry")
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withEnableMultiAz()
+                .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .validate();
     }
@@ -153,11 +153,11 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
         testContext
                 .given(SdxInternalTestDto.class)
-                    .withDatabase(databaseRequest)
-                    .withAutoTls()
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withEnableMultiAz()
-                    .withTelemetry("telemetry")
+                .withDatabase(databaseRequest)
+                .withAutoTls()
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withEnableMultiAz()
+                .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .validate();
     }
@@ -177,10 +177,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
         testContext
                 .given(SdxInternalTestDto.class)
-                    .withDatabase(database)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withEnableMultiAz()
-                    .withTelemetry("telemetry")
+                .withDatabase(database)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withEnableMultiAz()
+                .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -283,6 +283,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void createExtendedCredential(TestContext testContext) {
+        testContext.given(CredentialTestDto.class)
+                .withExtendedArn()
+                .when(credentialTestClient.create())
+                .validate();
+    }
+
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
@@ -297,9 +304,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         if (Strings.isNotNullAndNotEmpty(catalogName) && Strings.isNotNullAndNotEmpty(catalogUrl)) {
             testContext
                     .given(ImageCatalogTestDto.class)
-                        .withName(catalogName)
-                        .withUrl(catalogUrl)
-                        .withoutCleanup()
+                    .withName(catalogName)
+                    .withUrl(catalogUrl)
+                    .withoutCleanup()
                     .when(imageCatalogTestClient.createIfNotExistV4())
                     .validate();
         }
@@ -368,16 +375,16 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void initiateEnvironmentCreation(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
+                .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                    .withNetwork()
-                    .withTelemetry("telemetry")
-                    .withTunnel(testContext.getTunnel())
-                    .withCreateFreeIpa(Boolean.TRUE)
-                    .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
-                    .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                            commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+                .withNetwork()
+                .withTelemetry("telemetry")
+                .withTunnel(testContext.getTunnel())
+                .withCreateFreeIpa(Boolean.TRUE)
+                .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
+                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .validate();
     }
@@ -448,7 +455,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void useExistingEnvironment(TestContext testContext, String environmentName) {
         testContext
                 .given(EnvironmentTestDto.class)
-                    .withName(environmentName)
+                .withName(environmentName)
                 .when(environmentTestClient.describe())
                 .validate();
     }
@@ -467,7 +474,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void useExistingDatalake(TestContext testContext, String datalakeName) {
         testContext
                 .given(SdxTestDto.class)
-                    .withName(datalakeName)
+                .withName(datalakeName)
                 .when(sdxTestClient.describe());
     }
 
@@ -487,7 +494,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void useExistingDatahub(TestContext testContext, String datahubName) {
         testContext
                 .given(DistroXTestDto.class)
-                    .withName(datahubName)
+                .withName(datahubName)
                 .when(distroXTestClient.get())
                 .validate();
     }
