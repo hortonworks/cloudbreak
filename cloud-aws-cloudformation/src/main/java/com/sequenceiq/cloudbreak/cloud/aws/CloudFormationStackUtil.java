@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -217,7 +219,15 @@ public class CloudFormationStackUtil {
 
     public String getCfStackName(AuthenticatedContext ac) {
         return String.format("%s-%s", Splitter.fixedLength(maxResourceNameLength - (ac.getCloudContext().getId().toString().length() + 1))
-                .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
+                .splitToList(getClusterName(ac.getCloudContext())).getFirst(), ac.getCloudContext().getId());
+    }
+
+    private String getClusterName(CloudContext cloudContext) {
+        if (StringUtils.isNotEmpty(cloudContext.getOriginalName())) {
+            return cloudContext.getOriginalName();
+        } else {
+            return cloudContext.getName();
+        }
     }
 
     public Map<Group, List<String>> getInstanceIdsByGroups(AmazonAutoScalingClient amazonASClient, Map<String, Group> groupNameMapping) {

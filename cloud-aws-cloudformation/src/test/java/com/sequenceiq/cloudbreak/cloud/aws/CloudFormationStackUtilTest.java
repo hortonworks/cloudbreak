@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalanc
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
@@ -194,5 +195,28 @@ public class CloudFormationStackUtilTest {
         verify(elbClient, times(1)).registerTargets(captor.capture());
         List<TargetDescription> targets = captor.getValue().targets();
         assertEquals(cloudResource.getInstanceId(), targets.get(0).id());
+    }
+
+    @Test
+    void testGetCfStackName() {
+        String stackName = underTest.getCfStackName(authenticatedContext);
+
+        assertEquals("teststack-12", stackName);
+    }
+
+    @Test
+    void testGetCfStackNameWithOriginalNameInTheContext() {
+        CloudContext cloudContext =
+                Builder
+                        .builder()
+                        .withId(32L)
+                        .withName("stackName")
+                        .withOriginalName("stackOriginalName")
+                        .build();
+        AuthenticatedContext authContext = new AuthenticatedContext(cloudContext, new CloudCredential());
+
+        String stackName = underTest.getCfStackName(authContext);
+
+        assertEquals("stackOriginalName-32", stackName);
     }
 }
