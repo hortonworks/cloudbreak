@@ -35,6 +35,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesReques
 import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesRequest;
@@ -200,6 +202,10 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeInstancesResponse describeInstances(DescribeInstancesRequest describeInstancesRequest) {
         return client.describeInstances(describeInstancesRequest);
+    }
+
+    public DescribeInstanceStatusResponse describeInstanceStatus(DescribeInstanceStatusRequest describeInstanceStatusRequest) {
+        return client.describeInstanceStatus(describeInstanceStatusRequest);
     }
 
     public CreateTagsResponse createTags(CreateTagsRequest createTagsRequest) {
