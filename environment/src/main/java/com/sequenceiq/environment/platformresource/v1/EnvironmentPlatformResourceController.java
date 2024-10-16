@@ -134,7 +134,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String region,
             String platformVariant,
             String availabilityZone,
-            Architecture architecture,
+            String architecture,
             CdpResourceType cdpResourceType) {
         String accountId = getAccountId();
         validateEnvironmentCrnPattern(environmentCrn);
@@ -167,7 +167,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String instanceType,
             CdpResourceType cdpResourceType,
             List<String> availabilityZones,
-            Architecture architecture) {
+            String architecture) {
         String accountId = getAccountId();
         validateEnvironmentCrnPattern(environmentCrn);
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(environmentCrn, accountId);
@@ -189,16 +189,16 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         return response;
     }
 
-    private void setFilterForVmTypes(List<String> availabilityZones, Architecture architecture, PlatformResourceRequest request, String accountId) {
+    private void setFilterForVmTypes(List<String> availabilityZones, String architecture, PlatformResourceRequest request, String accountId) {
         Map<String, String> filter = new HashMap<>();
         if (CollectionUtils.isNotEmpty(availabilityZones)) {
             LOGGER.debug("Setting filter for Availability Zones {}", availabilityZones);
             filter.put(NetworkConstants.AVAILABILITY_ZONES, String.join(",", availabilityZones));
         }
-        architecture = architecture == null ? Architecture.X86_64 : architecture;
-        if (Architecture.ARM64.equals(architecture)) {
+        Architecture architectureEnum = Architecture.fromStringWithFallback(architecture);
+        if (Architecture.ARM64.equals(architectureEnum)) {
             if (entitlementService.isDataHubArmEnabled(accountId)) {
-                filter.put(AwsPlatformResourcesFilterConstants.ARCHITECTURE, architecture.name());
+                filter.put(AwsPlatformResourcesFilterConstants.ARCHITECTURE, architectureEnum.name());
             } else {
                 throw new BadRequestException("Graviton support is not enabled for your account.");
             }

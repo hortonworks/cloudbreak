@@ -172,6 +172,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.instanceId());
         }
         cloudResource.setInstanceId(instance.instanceId());
+        cloudInstance.getTemplate().putParameter(CloudResource.ARCHITECTURE, instance.architecture().name());
         return buildableResource;
     }
 

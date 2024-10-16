@@ -66,6 +66,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.ec2.model.ArchitectureValues;
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
@@ -178,7 +179,7 @@ class AwsNativeInstanceResourceBuilderTest {
     @MethodSource("testBuildWhenInstanceNoExistSource")
     void testBuildWhenInstanceNoExist(String supportedImdsVersionOfStack, HttpTokensState expectedTokenState,
             boolean secretEncryptionEnabled) throws Exception {
-        Instance instance = Instance.builder().instanceId(INSTANCE_ID).build();
+        Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
         CloudResource cloudResource = CloudResource.builder()
@@ -205,6 +206,7 @@ class AwsNativeInstanceResourceBuilderTest {
         when(cloudStack.getSupportedImdsVersion()).thenReturn(supportedImdsVersionOfStack);
         when(cloudStack.getUserDataByType(any())).thenReturn(TEST_USERDATA);
         when(cloudInstance.hasParameter(USERDATA_SECRET_ID)).thenReturn(secretEncryptionEnabled);
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
         if (secretEncryptionEnabled) {
             when(cloudInstance.getStringParameter(USERDATA_SECRET_ID)).thenReturn("testsecretid");
             when(userdataSecretsUtil.replaceSecretsWithSecretId(TEST_USERDATA, "testsecretid")).thenReturn(USERDATA_WITH_SECRETS_REPLACED);
@@ -232,11 +234,12 @@ class AwsNativeInstanceResourceBuilderTest {
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
         verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
                 eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
+        verify(instanceTemplate, times(1)).putParameter(eq(CloudResource.ARCHITECTURE), eq(ArchitectureValues.X86_64.name()));
     }
 
     @Test
     void testBuildWhenExistingNameTagShouldNotOverride() throws Exception {
-        Instance instance = Instance.builder().instanceId(INSTANCE_ID).build();
+        Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
         CloudResource cloudResource = CloudResource.builder()
@@ -260,7 +263,7 @@ class AwsNativeInstanceResourceBuilderTest {
         when(cloudStack.getInstanceAuthentication()).thenReturn(authentication);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
-
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
         ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
@@ -284,9 +287,11 @@ class AwsNativeInstanceResourceBuilderTest {
         long privateId = 0;
         Instance instance = Instance.builder()
                 .instanceId(INSTANCE_ID)
+                .architecture(ArchitectureValues.X86_64)
                 .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
                 .build();
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(instance));
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         assertEquals(actual.get(0).getInstanceId(), INSTANCE_ID);
@@ -304,10 +309,12 @@ class AwsNativeInstanceResourceBuilderTest {
         long privateId = 0;
         Instance instance = Instance.builder()
                 .instanceId(INSTANCE_ID)
+                .architecture(ArchitectureValues.X86_64)
                 .state(InstanceState.builder().code(0).build())
                 .build();
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(instance));
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         assertEquals(actual.get(0).getInstanceId(), INSTANCE_ID);
@@ -316,7 +323,7 @@ class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     void testBuildWhenInstanceExistButTerminated() throws Exception {
-        Instance instance = Instance.builder().instanceId(INSTANCE_ID).build();
+        Instance instance = Instance.builder().instanceId(INSTANCE_ID).architecture(ArchitectureValues.X86_64).build();
         CloudResource cloudResource = CloudResource.builder()
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
@@ -328,6 +335,7 @@ class AwsNativeInstanceResourceBuilderTest {
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
         Instance terminatedInstance = Instance.builder()
                 .instanceId("terminatedInstanceId")
+                .architecture(ArchitectureValues.X86_64)
                 .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE).build())
                 .build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
@@ -344,6 +352,7 @@ class AwsNativeInstanceResourceBuilderTest {
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(group.getName()).thenReturn("groupName");
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
+        when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         assertEquals(actual.get(0).getInstanceId(), INSTANCE_ID);
