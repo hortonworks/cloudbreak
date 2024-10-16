@@ -127,6 +127,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         List<com.sequenceiq.cloudbreak.cloud.model.Volume> volumes = group.getReferenceInstanceTemplate().getVolumes();
+        Optional<String> architecture = Optional.ofNullable(group.getReferenceInstanceTemplate().getStringParameter(CloudResource.ARCHITECTURE));
         String instanceId = awsInstanceFinder.getInstanceId(privateId, context.getComputeResources(privateId));
         LOGGER.debug("Create volume resources for {} in group: {} for volumes {}", instanceId, group.getName(), volumes);
         boolean allVolumeEphemeral = Optional.ofNullable(volumes).orElse(List.of()).stream()
@@ -139,7 +140,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             Optional<CloudResource> attachableVolumeSet = attachableVolumeSet(context, privateId, instanceId, auth, group);
             String subnetId = getSubnetId(context, instance);
             Optional<String> availabilityZone = getAvailabilityZone(context, instance);
-            return List.of(attachableVolumeSet.orElseGet(() -> createVolumeSet(privateId, instanceId, auth, group, subnetId, availabilityZone)));
+            return List.of(attachableVolumeSet.orElseGet(() ->
+                    createVolumeSet(privateId, instanceId, architecture.orElse(""), auth, group, subnetId, availabilityZone)));
         }
     }
 
@@ -194,12 +196,20 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return Optional.ofNullable(cloudInstance.getAvailabilityZone());
     }
 
-    private CloudResource createVolumeSet(long privateId, String instanceId, AuthenticatedContext auth, Group group, String subnetId,
+    private CloudResource createVolumeSet(long privateId, String instanceId, String architecture, AuthenticatedContext auth, Group group, String subnetId,
             Optional<String> availabilityZone) {
         String groupName = group.getName();
         String stackName = auth.getCloudContext().getName();
         String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
         LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
+        VolumeSetAttributes attributes = new VolumeSetAttributes.Builder()
+                .withAvailabilityZone(targetAvailabilityZone)
+                .withDeleteOnTermination(Boolean.TRUE)
+                .withVolumes(group.getReferenceInstanceTemplate().getVolumes().stream()
+                        .filter(vol -> !isVolumeEphemeral(vol))
+                        .map(vol -> new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()))
+                        .collect(Collectors.toList()))
+                .build();
         return CloudResource.builder()
                 .withPersistent(true)
                 .withType(resourceType())
@@ -208,15 +218,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .withGroup(group.getName())
                 .withStatus(CommonStatus.REQUESTED)
                 .withInstanceId(instanceId)
-                .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                        .withAvailabilityZone(targetAvailabilityZone)
-                        .withDeleteOnTermination(Boolean.TRUE)
-                        .withVolumes(group.getReferenceInstanceTemplate().getVolumes().stream()
-                                .filter(vol -> !isVolumeEphemeral(vol))
-                                .map(vol -> new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()))
-                                .collect(Collectors.toList()))
-                        .build(),
-                        PRIVATE_ID, privateId))
+                .withParameters(Map.of(
+                        CloudResource.ATTRIBUTES, attributes,
+                        PRIVATE_ID, privateId,
+                        CloudResource.ARCHITECTURE, architecture
+                ))
                 .build();
     }
 
