@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.computecluster;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -143,7 +143,8 @@ class ComputeClusterCreationRetrievalTaskTest {
         assertTrue(result);
 
         verify(externalizedComputeService, times(3)).getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME));
-        verify(eventSenderService, times(1)).sendEventAndNotification(environmentDto, userCrn, ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED);
+        verify(eventSenderService, times(1)).sendEventAndNotification(environmentDto, userCrn,
+                ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED);
     }
 
 }

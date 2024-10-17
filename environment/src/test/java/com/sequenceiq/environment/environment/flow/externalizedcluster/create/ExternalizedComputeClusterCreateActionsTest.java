@@ -73,7 +73,7 @@ class ExternalizedComputeClusterCreateActionsTest {
     }
 
     @Test
-    public void testDefaultComputeClusterCreation() throws Exception {
+    public void testDefaultCompzuteClusterCreation() throws Exception {
         AbstractExternalizedComputeCreationAction<ExternalizedComputeClusterCreationEvent> externalizedComputeClusterDelete =
                 (AbstractExternalizedComputeCreationAction<ExternalizedComputeClusterCreationEvent>) underTest.defaultComputeClusterCreation();
         initActionPrivateFields(externalizedComputeClusterDelete);
@@ -82,7 +82,7 @@ class ExternalizedComputeClusterCreateActionsTest {
         EnvironmentDto envDto = new EnvironmentDto();
         envDto.setId(1L);
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, createEvent, EnvironmentStatus.COMPUTE_CLUSTER_CREATION_IN_PROGRESS,
-                ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED,
+                ResourceEvent.ENVIRONMENT_INITIALIZE_COMPUTE_CLUSTER_STARTED,
                 ExternalizedComputeClusterCreationState.DEFAULT_COMPUTE_CLUSTER_CREATION_START_STATE))
                 .thenReturn(envDto);
         Environment environment = new Environment();
@@ -93,7 +93,8 @@ class ExternalizedComputeClusterCreateActionsTest {
         new AbstractActionTestSupport<>(externalizedComputeClusterDelete).doExecute(context, createEvent, Map.of());
 
         verify(environmentStatusUpdateService, times(1)).updateEnvironmentStatusAndNotify(
-                context, createEvent, EnvironmentStatus.COMPUTE_CLUSTER_CREATION_IN_PROGRESS, ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED,
+                context, createEvent, EnvironmentStatus.COMPUTE_CLUSTER_CREATION_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_INITIALIZE_COMPUTE_CLUSTER_STARTED,
                 ExternalizedComputeClusterCreationState.DEFAULT_COMPUTE_CLUSTER_CREATION_START_STATE
         );
         verify(environmentService, times(1)).findEnvironmentByIdOrThrow(1L);

@@ -49,7 +49,7 @@ public class ExternalizedComputeClusterCreateActions {
             protected void doExecute(CommonContext context, ExternalizedComputeClusterCreationEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Default compute cluster creation started.");
                 EnvironmentStatus environmentStatus = EnvironmentStatus.COMPUTE_CLUSTER_CREATION_IN_PROGRESS;
-                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
+                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_INITIALIZE_COMPUTE_CLUSTER_STARTED;
                 EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent,
                         ExternalizedComputeClusterCreationState.DEFAULT_COMPUTE_CLUSTER_CREATION_START_STATE);
                 Environment environment = environmentService.findEnvironmentByIdOrThrow(envDto.getId());

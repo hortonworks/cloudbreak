@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.computecluster;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED;
 import static com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus.LIFTIE_CLUSTER_CREATION_IN_PROGRESS;
 
 import java.util.Optional;
@@ -84,7 +84,7 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
         if (!pollerObject.isCreationInProgressNotificationSent() && LIFTIE_CLUSTER_CREATION_IN_PROGRESS.equals(status)) {
             EnvironmentDto environmentDto = environmentService.internalGetByCrn(environmentCrn);
             eventService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(),
-                    ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED);
+                    ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED);
             pollerObject.creationInProgressNotificationSent();
         }
     }

@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_WAITING_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_WAITING_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CREATION_FAILED;
@@ -10,6 +9,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_INITIALIZATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_INITIALIZATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_INITIALIZE_COMPUTE_CLUSTER_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_NETWORK_CREATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_FAILED;
@@ -148,7 +148,7 @@ public class EnvCreationActions {
                         LOGGER.info("Creation of compute cluster has started. Current state is - COMPUTE_CLUSTER_CREATION_STARTED_STATE");
                         EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                         eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
-                                ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED);
+                                ENVIRONMENT_INITIALIZE_COMPUTE_CLUSTER_STARTED);
                         sendEvent(context, CREATE_COMPUTE_CLUSTER_EVENT.selector(), environmentDto);
                     } else {
                         LOGGER.info("Creation of compute cluster is not required, proceed to the next state.");
