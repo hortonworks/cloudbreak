@@ -553,6 +553,9 @@ public enum ResourceEvent {
     CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_DBSETTINGS_STARTED("cluster.externaldatabase.upgrade.attached.datahubs.migrate.dbsettings.started"),
     CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_DBSETTINGS_FINISHED("cluster.externaldatabase.upgrade.attached.datahubs.migrate.dbsettings.finished"),
     CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_SETTINGS_FAILED("cluster.externaldatabase.upgrade.attached.datahubs.migrate.dbsettings.failed"),
+    CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUB_MIGRATE_DBSETTINGS_STARTED("cluster.externaldatabase.upgrade.attached.datahub.migrate.dbsettings.started"),
+    CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUB_MIGRATE_DBSETTINGS_FINISHED("cluster.externaldatabase.upgrade.attached.datahub.migrate.dbsettings.finished"),
+    CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUB_MIGRATE_SETTINGS_FAILED("cluster.externaldatabase.upgrade.attached.datahub.migrate.dbsettings.failed"),
     CLUSTER_RDS_UPGRADE_FINISHED("cluster.externaldatabase.upgrade.finished"),
     CLUSTER_RDS_UPGRADE_FAILED("cluster.externaldatabase.upgrade.failed"),
 

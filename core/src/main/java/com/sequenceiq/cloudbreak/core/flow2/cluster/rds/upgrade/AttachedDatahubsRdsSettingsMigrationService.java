@@ -138,11 +138,19 @@ public class AttachedDatahubsRdsSettingsMigrationService {
                 StackDtoDelegate datahub = stackDtoService.getById(datahubStatusView.getId());
                 if (shouldReloadDatabaseConfig(getCmTemplateProcessor(datahub))) {
                     try {
+                        cloudbreakEventService.fireCloudbreakEvent(datahub.getStack().getId(), Status.UPDATE_IN_PROGRESS.name(),
+                                ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUB_MIGRATE_DBSETTINGS_STARTED);
                         InMemoryStateStore.putStack(datahub.getStack().getId(), PollGroup.POLLABLE);
                         InMemoryStateStore.putCluster(datahub.getCluster().getId(), PollGroup.POLLABLE);
                         Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
                         LOGGER.debug("The following db params will be updated in {}: {}", datahub.getName(), cmServiceConfigs);
                         rdsSettingsMigrationService.updateCMServiceConfigs(datahub, cmServiceConfigs, FALLBACK_TO_ROLLCONFIG, true);
+                        cloudbreakEventService.fireCloudbreakEvent(datahub.getStack().getId(), Status.AVAILABLE.name(),
+                                ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUB_MIGRATE_DBSETTINGS_FINISHED);
+                    } catch (Exception exception) {
+                        cloudbreakEventService.fireCloudbreakEvent(datahub.getStack().getId(), Status.UPDATE_FAILED.name(),
+                                ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUB_MIGRATE_SETTINGS_FAILED, List.of(exception.getMessage()));
+                        throw exception;
                     } finally {
                         InMemoryStateStore.deleteCluster(datahub.getCluster().getId());
                         InMemoryStateStore.deleteStack(datahub.getStack().getId());

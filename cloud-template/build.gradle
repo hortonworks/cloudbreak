@@ -26,4 +26,5 @@ dependencies {
     testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
+    testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: byteBuddyVersion
 }

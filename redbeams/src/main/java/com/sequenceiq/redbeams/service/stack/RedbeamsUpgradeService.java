@@ -104,7 +104,7 @@ public class RedbeamsUpgradeService {
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
-        databaseEncryptionValidator.validateEncryption(dbStack.getCloudPlatform(), dbStack.getEnvironmentId(), databaseStack.getDatabaseServer());
+        databaseEncryptionValidator.validateEncryption(dbStack.getCloudPlatform(), dbStack.getEnvironmentId(), databaseStack.getDatabaseServer(), targetVersion);
 
         ResourceConnector resourceConnector = connector.resources();
         try {

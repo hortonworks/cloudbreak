@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.validation;
 
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION14;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
@@ -7,7 +8,6 @@ import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +32,6 @@ class DatabaseEncryptionValidatorTest {
 
     private static final String ENVIRONMENT_CRN = "env-crn";
 
-    private static final String MANAGED_IDENTITY = "managed-identity";
-
     private static final String KEY_VAULT_URL = "keyVaultUrl";
 
     @InjectMocks
@@ -44,33 +42,32 @@ class DatabaseEncryptionValidatorTest {
 
     @Test
     void testValidateEncryptionShouldNotThrowExceptionWhenTheDatabaseIsEncryptedAndTheEnvironmentContainsEncryptionKey() {
-        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(createEnvironmentResponse(MANAGED_IDENTITY));
-        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"));
+        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"), VERSION14);
     }
 
     @Test
     void testValidateEncryptionShouldNotThrowExceptionWhenTheCloudPlatformIsNotAzure() {
-        underTest.validateEncryption(AWS.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"));
+        underTest.validateEncryption(AWS.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url"), VERSION14);
         verifyNoInteractions(environmentService);
     }
 
     @Test
-    void testValidateEncryptionShouldNotThrowExceptionWhenTheDatabaseTypeIsSingleServer() {
-        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(SINGLE_SERVER, "url"));
+    void testValidateEncryptionShouldThrowExceptionWhenTheDatabaseTypeIsSingleServer() {
+        assertThrows(BadRequestException.class,
+                () -> underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(SINGLE_SERVER, "url"), VERSION14));
         verifyNoInteractions(environmentService);
     }
 
     @Test
     void testValidateEncryptionShouldNotThrowExceptionWhenTheDatabaseIsNotEncrypted() {
-        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, null));
+        underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, null), VERSION14);
         verifyNoInteractions(environmentService);
     }
 
     @Test
     void testValidateEncryptionShouldThrowExceptionWhenTheDatabaseIsEncryptedAndTheEnvironmentNotContainsEncryptionKey() {
-        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(createEnvironmentResponse(null));
         assertThrows(BadRequestException.class,
-                () -> underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(FLEXIBLE_SERVER, "url")));
+                () -> underTest.validateEncryption(AZURE.name(), ENVIRONMENT_CRN, createDatabaseStack(SINGLE_SERVER, "url"), VERSION14));
     }
 
     private DatabaseServer createDatabaseStack(AzureDatabaseType azureDatabaseType, String keyVaultUrl) {

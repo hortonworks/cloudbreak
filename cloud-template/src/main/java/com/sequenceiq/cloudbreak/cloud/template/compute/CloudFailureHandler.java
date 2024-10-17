@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -172,12 +174,7 @@ public class CloudFailureHandler {
             fireResourceCreationFailedEvent(auth, statuses.stream()
                     .filter(cloudResourceStatus -> ResourceStatus.FAILED.equals(cloudResourceStatus.getStatus()))
                     .collect(Collectors.toList()));
-            Set<CloudResource> cloudResources = new LinkedHashSet<>();
-            for (CloudResourceStatus cloudResourceStatus : statuses) {
-                if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
-                    cloudResources.add(cloudResourceStatus.getCloudResource());
-                }
-            }
+            Set<CloudResource> cloudResources = getUniqueCloudResources(statuses, rollbackIds);
             LOGGER.debug("Rollback cloud resources: {}", cloudResources);
             List<CloudResourceStatus> deleteStatuses = computeResourceService.deleteResources(ctx, auth, cloudResources, false, false);
 
@@ -189,6 +186,18 @@ public class CloudFailureHandler {
                 fireResourceDeletionFailedEvent(auth, failedResourcesWithReason);
             }
         }
+    }
+
+    private Set<CloudResource> getUniqueCloudResources(List<CloudResourceStatus> statuses, Collection<Long> rollbackIds) {
+        Map<String, CloudResource> nameToResourceMap = new LinkedHashMap<>();
+        for (CloudResourceStatus cloudResourceStatus : statuses) {
+            if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
+                CloudResource cloudResource = cloudResourceStatus.getCloudResource();
+                String key = cloudResource.getName() + '-' + cloudResource.getType();
+                nameToResourceMap.putIfAbsent(key, cloudResource);
+            }
+        }
+        return new LinkedHashSet<>(nameToResourceMap.values());
     }
 
     private Collection<InstanceTemplate> getRemovableInstanceTemplates(Group group, Collection<Long> ids) {
