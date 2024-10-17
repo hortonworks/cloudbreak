@@ -6,8 +6,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalGrpc;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse;
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest;
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -29,7 +32,7 @@ public class RemoteClusterServiceClient {
     private final StubProvider stubProvider;
 
     public RemoteClusterServiceClient(ManagedChannel channel, String actorCrn,
-        RemoteClusterServiceConfig remoteClusterConfig, StubProvider stubProvider) {
+            RemoteClusterServiceConfig remoteClusterConfig, StubProvider stubProvider) {
         this.channel = channel;
         this.actorCrn = actorCrn;
         this.remoteClusterConfig = remoteClusterConfig;
@@ -39,23 +42,18 @@ public class RemoteClusterServiceClient {
     public List<PvcControlPlaneConfiguration> listAllPrivateControlPlanes() {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         String nextToken = null;
+        RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub internalBlockingStub = stubProvider.newInternalStub(channel, requestId,
+                remoteClusterConfig.getGrpcTimeoutSec(), remoteClusterConfig.internalCrnForIamServiceAsString(), remoteClusterConfig.getCallingServiceName());
 
         List<PvcControlPlaneConfiguration> items = new ArrayList<>();
         do {
-            ListAllPvcControlPlanesRequest.Builder listAllPvcControlPlanesRequestBuilder = ListAllPvcControlPlanesRequest.newBuilder()
-                    .setPageSize(PAGE_SIZE);
+            ListAllPvcControlPlanesRequest.Builder listAllPvcControlPlanesRequestBuilder = ListAllPvcControlPlanesRequest.newBuilder().setPageSize(PAGE_SIZE);
             if (nextToken != null) {
                 listAllPvcControlPlanesRequestBuilder.setPageToken(nextToken);
             }
             ListAllPvcControlPlanesRequest listAllPvcControlPlanesRequest = listAllPvcControlPlanesRequestBuilder.build();
 
-            ListAllPvcControlPlanesResponse listAllPvcControlPlanesResponse =
-                    stubProvider.newInternalStub(channel,
-                                    requestId,
-                                    remoteClusterConfig.getGrpcTimeoutSec(),
-                                    remoteClusterConfig.internalCrnForIamServiceAsString(),
-                                    remoteClusterConfig.getCallingServiceName())
-                    .listAllPvcControlPlanes(listAllPvcControlPlanesRequest);
+            ListAllPvcControlPlanesResponse listAllPvcControlPlanesResponse = internalBlockingStub.listAllPvcControlPlanes(listAllPvcControlPlanesRequest);
             if (listAllPvcControlPlanesResponse != null) {
                 items.addAll(listAllPvcControlPlanesResponse.getControlPlaneConfigurationsList());
                 if (!Strings.isNullOrEmpty(listAllPvcControlPlanesResponse.getNextPageToken())) {
@@ -68,6 +66,16 @@ public class RemoteClusterServiceClient {
         } while (!Strings.isNullOrEmpty(nextToken));
 
         return items;
+    }
+
+    public String registerPrivateEnvironmentBaseClusters(RegisterPvcBaseClusterRequest registerPvcBaseClusterRequest) {
+        String requestId = MDCBuilder.getOrGenerateRequestId();
+        RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub internalBlockingStub = stubProvider.newInternalStub(channel, requestId,
+                remoteClusterConfig.getGrpcTimeoutSec(), remoteClusterConfig.internalCrnForIamServiceAsString(), remoteClusterConfig.getCallingServiceName());
+
+
+        RegisterPvcBaseClusterResponse registerPvcBaseClusterResponse = internalBlockingStub.registerPvcBaseCluster(registerPvcBaseClusterRequest);
+        return registerPvcBaseClusterResponse.getClusterCrn();
     }
 
 }

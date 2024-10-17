@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.IterableUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
@@ -143,7 +144,7 @@ public class PrivateControlPlaneService extends AbstractAccountAwareResourceServ
     }
 
     public List<PrivateControlPlane> findAll() {
-        return (List<PrivateControlPlane>) repository().findAll();
+        return IterableUtils.toList(repository().findAll());
     }
 
     public void deleteByResourceCrns(Set<String> crns) {

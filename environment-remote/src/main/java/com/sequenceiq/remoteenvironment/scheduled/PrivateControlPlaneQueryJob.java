@@ -74,7 +74,7 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
                 updateDataInOurDatabase(remoteControlPlanes, controlPlanesInOurDatabase);
             }
         } catch (Exception e) {
-            LOGGER.error("Could not query remote clusters {}.", e);
+            LOGGER.error("Could not query remote clusters.", e);
             throw new JobExecutionException("Could not query and update private control planes.", e);
         }
     }

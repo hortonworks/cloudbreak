@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
@@ -44,6 +46,9 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private GrpcUmsClient umsClient;
+
     public Set<SimpleRemoteEnvironmentResponse> listRemoteEnvironments(String publicCloudAccountId) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
@@ -60,10 +65,11 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             try {
                 String privateCloudAccountId = Crn.safeFromString(environmentCrn).getAccountId();
-                Optional<PrivateControlPlane> privateControlPlanes =
+                Optional<PrivateControlPlane> privateControlPlane =
                         privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
-                if (privateControlPlanes.isPresent()) {
-                    response = describeRemoteEnvironment(privateControlPlanes.get(), environmentCrn);
+                if (privateControlPlane.isPresent()) {
+                    String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                    response = describeRemoteEnvironmentWithActor(privateControlPlane.get(), environmentCrn, userCrn);
                 } else {
                     throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
                 }
@@ -77,11 +83,26 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     }
 
     private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlane(PrivateControlPlane controlPlane) {
-        LOGGER.debug("The processing of private control plane('{}') is executed by thread: {}", controlPlane.getName(), Thread.currentThread().getName());
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return listEnvironmentsFromPrivateControlPlaneWithActor(controlPlane, userCrn);
+    }
+
+    public List<SimpleRemoteEnvironmentResponse> listRemoteEnvironmentsInternal(PrivateControlPlane controlPlane) {
+        MachineUser actor = umsClient.getOrCreateMachineUserWithoutAccessKey(Crn.Service.REMOTECLUSTER.getName(), controlPlane.getAccountId());
+        return listEnvironmentsFromPrivateControlPlaneWithActor(controlPlane, actor.getCrn());
+    }
+
+    public DescribeEnvironmentResponse describeRemoteEnvironmentInternal(PrivateControlPlane controlPlane, String environmentCrn) {
+        MachineUser actor = umsClient.getOrCreateMachineUserWithoutAccessKey(Crn.Service.REMOTECLUSTER.getName(), controlPlane.getAccountId());
+        return describeRemoteEnvironmentWithActor(controlPlane, environmentCrn, actor.getCrn());
+    }
+
+    private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlaneWithActor(PrivateControlPlane controlPlane, String actorCrn) {
+        LOGGER.debug("The listing of private environments on control plane('{}') with actor('{}') is executed by thread: {}", controlPlane.getName(),
+                actorCrn, Thread.currentThread().getName());
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn(), userCrn)
+            responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn(), actorCrn)
                     .getEnvironments()
                     .stream()
                     .filter(resp -> isCrnValidAndWithinAccount(controlPlane.getPrivateCloudAccountId(), resp.getCrn()))
@@ -98,15 +119,15 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return responses;
     }
 
-    private DescribeEnvironmentResponse describeRemoteEnvironment(PrivateControlPlane controlPlane, String environmentCrn) {
-        LOGGER.debug("The processing of remote environment('{}') is executed by thread: {}", environmentCrn, Thread.currentThread().getName());
+    private DescribeEnvironmentResponse describeRemoteEnvironmentWithActor(PrivateControlPlane controlPlane, String environmentCrn, String actorCrn) {
+        LOGGER.debug("The describe of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
+                Thread.currentThread().getName());
         DescribeEnvironmentResponse response = null;
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
             response = measure(() ->
                             clusterProxyHybridClient.getEnvironment(
                                     controlPlane.getResourceCrn(),
-                                    userCrn,
+                                    actorCrn,
                                     environmentCrn),
                     LOGGER,
                     "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());

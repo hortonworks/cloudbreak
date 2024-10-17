@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
@@ -34,6 +35,13 @@ public class GrpcRemoteClusterClient {
                 channelWrapper.getChannel(),
                 remoteClusterConfig.internalCrnForIamServiceAsString());
         return client.listAllPrivateControlPlanes();
+    }
+
+    public String registerPrivateEnvironmentBaseCluster(RegisterPvcBaseClusterRequest registerPvcBaseClusterRequest) {
+        RemoteClusterServiceClient client = makeClient(
+                channelWrapper.getChannel(),
+                remoteClusterConfig.internalCrnForIamServiceAsString());
+        return client.registerPrivateEnvironmentBaseClusters(registerPvcBaseClusterRequest);
     }
 
     private RemoteClusterServiceClient makeClient(ManagedChannel channel, String actorCrn) {

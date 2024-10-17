@@ -4,6 +4,7 @@ package remotecluster;
 
 option java_package = "com.cloudera.thunderhead.service.remotecluster";
 option java_outer_classname = "RemoteClusterProto";
+option go_package = "com/cloudera/cdp/protobuf";
 
 import "options.proto";
 
@@ -50,7 +51,7 @@ service RemoteCluster {
 
   // Test the connectivity to the Private Cloud control plane. :: Test the connectivity from Public Cloud control plane to the registered Private Cloud control plane.
   rpc TestPvcControlPlaneConnectivity (TestPvcControlPlaneConnectivityRequest)
-    returns (TestPvcControlPlaneConnectivityResponse) {
+      returns (TestPvcControlPlaneConnectivityResponse) {
     option (options.MethodExtension.mutating) = false;
     option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
   }
@@ -64,18 +65,19 @@ message RegisterPvcControlPlaneRequest {
   string name = 2 [(options.FieldExtension.required) = true];
   // The base URL of the Private Cloud control plane.
   string baseUrl = 3 [(options.FieldExtension.required) = true, (options.FieldExtension.noParamfile) = true];
-  // The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-  string accessKeyId = 4;
-  // The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-  string privateKey = 5 [(options.FieldExtension.sensitive) = true];
+  // The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+  // The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
+  string samlIdentityProvider = 4 [(options.FieldExtension.required) = true];
   // The description of the Private Cloud control plane.
-  string description = 6;
+  string description = 5;
 }
 
 // Response object for the RegisterPvcControlPlaneResponse method.
 message RegisterPvcControlPlaneResponse {
   // The Private Cloud control plane configuration.
   PvcControlPlaneConfiguration controlPlaneConfiguration = 1;
+  // The connectivity configuration to be used by the Private Cloud control plane.
+  string connectivityConfiguration = 2;
 }
 
 // Request object for the UnregisterPvcControlPlaneRequest method.
@@ -142,10 +144,14 @@ message PvcControlPlaneConfiguration {
   string description = 5;
   // The base URL of the Private Cloud control plane.
   string baseUrl = 6;
-  // The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-  string accessKeyId = 7;
-  // The jump-gate agent configuration to be used by the Private Cloud control plane.
-  string jumpgateAgentConfiguration = 8;
+  // The IDP CRN of the user.
+  string idpCrn = 7;
+  // The status of the Private Cloud control plane.
+  string pvcStatus = 8;
+  // The total number of environments in the Private Cloud control plane.
+  int32 pvcEnvironmentCount = 9;
+  // The date/time for the last updated time.
+  int64 lastUpdatedTime = 10 [(options.FieldExtension.datetime) = true];
 }
 
 // The type of a remote cluster.

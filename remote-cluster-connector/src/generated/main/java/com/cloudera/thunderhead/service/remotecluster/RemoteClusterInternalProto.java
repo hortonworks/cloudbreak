@@ -50,6 +50,10 @@ public final class RemoteClusterInternalProto {
         getPageTokenBytes();
   }
   /**
+   * <pre>
+   * Request object for the ListAllPvcControlPlanes method.
+   * </pre>
+   *
    * Protobuf type {@code remotecluster.ListAllPvcControlPlanesRequest}
    */
   public static final class ListAllPvcControlPlanesRequest extends
@@ -315,6 +319,10 @@ public final class RemoteClusterInternalProto {
       return builder;
     }
     /**
+     * <pre>
+     * Request object for the ListAllPvcControlPlanes method.
+     * </pre>
+     *
      * Protobuf type {@code remotecluster.ListAllPvcControlPlanesRequest}
      */
     public static final class Builder extends
@@ -764,6 +772,10 @@ public final class RemoteClusterInternalProto {
         getNextPageTokenBytes();
   }
   /**
+   * <pre>
+   * Response object for the ListAllPvcControlPlanes method.
+   * </pre>
+   *
    * Protobuf type {@code remotecluster.ListAllPvcControlPlanesResponse}
    */
   public static final class ListAllPvcControlPlanesResponse extends
@@ -1078,6 +1090,10 @@ public final class RemoteClusterInternalProto {
       return builder;
     }
     /**
+     * <pre>
+     * Response object for the ListAllPvcControlPlanes method.
+     * </pre>
+     *
      * Protobuf type {@code remotecluster.ListAllPvcControlPlanesResponse}
      */
     public static final class Builder extends
@@ -1798,6 +1814,10 @@ public final class RemoteClusterInternalProto {
         getPvcIdBytes();
   }
   /**
+   * <pre>
+   * Request object for the GeneratePvcControlPlaneAuthToken method.
+   * </pre>
+   *
    * Protobuf type {@code remotecluster.GeneratePvcControlPlaneAuthTokenRequest}
    */
   public static final class GeneratePvcControlPlaneAuthTokenRequest extends
@@ -2037,6 +2057,10 @@ public final class RemoteClusterInternalProto {
       return builder;
     }
     /**
+     * <pre>
+     * Request object for the GeneratePvcControlPlaneAuthToken method.
+     * </pre>
+     *
      * Protobuf type {@code remotecluster.GeneratePvcControlPlaneAuthTokenRequest}
      */
     public static final class Builder extends
@@ -2386,6 +2410,10 @@ public final class RemoteClusterInternalProto {
         getTokenBytes();
   }
   /**
+   * <pre>
+   * Response object for the GeneratePvcControlPlaneAuthToken method.
+   * </pre>
+   *
    * Protobuf type {@code remotecluster.GeneratePvcControlPlaneAuthTokenResponse}
    */
   public static final class GeneratePvcControlPlaneAuthTokenResponse extends
@@ -2625,6 +2653,10 @@ public final class RemoteClusterInternalProto {
       return builder;
     }
     /**
+     * <pre>
+     * Response object for the GeneratePvcControlPlaneAuthToken method.
+     * </pre>
+     *
      * Protobuf type {@code remotecluster.GeneratePvcControlPlaneAuthTokenResponse}
      */
     public static final class Builder extends
@@ -2949,6 +2981,2027 @@ public final class RemoteClusterInternalProto {
 
   }
 
+  public interface RegisterPvcBaseClusterRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.RegisterPvcBaseClusterRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvcCrn.
+     */
+    java.lang.String getPvcCrn();
+    /**
+     * <pre>
+     * The CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvcCrn.
+     */
+    com.google.protobuf.ByteString
+        getPvcCrnBytes();
+
+    /**
+     * <pre>
+     * The Cloudera Manager Hostname.
+     * </pre>
+     *
+     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The cmHostname.
+     */
+    java.lang.String getCmHostname();
+    /**
+     * <pre>
+     * The Cloudera Manager Hostname.
+     * </pre>
+     *
+     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for cmHostname.
+     */
+    com.google.protobuf.ByteString
+        getCmHostnameBytes();
+
+    /**
+     * <pre>
+     * The Cloudera Manager Port.
+     * </pre>
+     *
+     * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+     * @return The cmPort.
+     */
+    int getCmPort();
+
+    /**
+     * <pre>
+     * The Data Center name.
+     * </pre>
+     *
+     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The dcName.
+     */
+    java.lang.String getDcName();
+    /**
+     * <pre>
+     * The Data Center name.
+     * </pre>
+     *
+     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for dcName.
+     */
+    com.google.protobuf.ByteString
+        getDcNameBytes();
+
+    /**
+     * <pre>
+     * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
+     * </pre>
+     *
+     * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+     * @return The isHttpSecure.
+     */
+    boolean getIsHttpSecure();
+
+    /**
+     * <pre>
+     * The optional Knox IP Address.
+     * </pre>
+     *
+     * <code>string knoxIpAddress = 6;</code>
+     * @return The knoxIpAddress.
+     */
+    java.lang.String getKnoxIpAddress();
+    /**
+     * <pre>
+     * The optional Knox IP Address.
+     * </pre>
+     *
+     * <code>string knoxIpAddress = 6;</code>
+     * @return The bytes for knoxIpAddress.
+     */
+    com.google.protobuf.ByteString
+        getKnoxIpAddressBytes();
+
+    /**
+     * <pre>
+     * The optional Knox IP Port.
+     * </pre>
+     *
+     * <code>int32 knoxPort = 7;</code>
+     * @return The knoxPort.
+     */
+    int getKnoxPort();
+  }
+  /**
+   * <pre>
+   * Request Object for RegisterPvcBaseCluster method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.RegisterPvcBaseClusterRequest}
+   */
+  public static final class RegisterPvcBaseClusterRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.RegisterPvcBaseClusterRequest)
+      RegisterPvcBaseClusterRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RegisterPvcBaseClusterRequest.newBuilder() to construct.
+    private RegisterPvcBaseClusterRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RegisterPvcBaseClusterRequest() {
+      pvcCrn_ = "";
+      cmHostname_ = "";
+      dcName_ = "";
+      knoxIpAddress_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RegisterPvcBaseClusterRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.Builder.class);
+    }
+
+    public static final int PVCCRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pvcCrn_ = "";
+    /**
+     * <pre>
+     * The CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvcCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getPvcCrn() {
+      java.lang.Object ref = pvcCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvcCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvcCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvcCrnBytes() {
+      java.lang.Object ref = pvcCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvcCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CMHOSTNAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmHostname_ = "";
+    /**
+     * <pre>
+     * The Cloudera Manager Hostname.
+     * </pre>
+     *
+     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The cmHostname.
+     */
+    @java.lang.Override
+    public java.lang.String getCmHostname() {
+      java.lang.Object ref = cmHostname_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmHostname_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Cloudera Manager Hostname.
+     * </pre>
+     *
+     * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for cmHostname.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmHostnameBytes() {
+      java.lang.Object ref = cmHostname_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmHostname_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CMPORT_FIELD_NUMBER = 3;
+    private int cmPort_ = 0;
+    /**
+     * <pre>
+     * The Cloudera Manager Port.
+     * </pre>
+     *
+     * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+     * @return The cmPort.
+     */
+    @java.lang.Override
+    public int getCmPort() {
+      return cmPort_;
+    }
+
+    public static final int DCNAME_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object dcName_ = "";
+    /**
+     * <pre>
+     * The Data Center name.
+     * </pre>
+     *
+     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The dcName.
+     */
+    @java.lang.Override
+    public java.lang.String getDcName() {
+      java.lang.Object ref = dcName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        dcName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Data Center name.
+     * </pre>
+     *
+     * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for dcName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDcNameBytes() {
+      java.lang.Object ref = dcName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        dcName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ISHTTPSECURE_FIELD_NUMBER = 5;
+    private boolean isHttpSecure_ = false;
+    /**
+     * <pre>
+     * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
+     * </pre>
+     *
+     * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+     * @return The isHttpSecure.
+     */
+    @java.lang.Override
+    public boolean getIsHttpSecure() {
+      return isHttpSecure_;
+    }
+
+    public static final int KNOXIPADDRESS_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object knoxIpAddress_ = "";
+    /**
+     * <pre>
+     * The optional Knox IP Address.
+     * </pre>
+     *
+     * <code>string knoxIpAddress = 6;</code>
+     * @return The knoxIpAddress.
+     */
+    @java.lang.Override
+    public java.lang.String getKnoxIpAddress() {
+      java.lang.Object ref = knoxIpAddress_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        knoxIpAddress_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The optional Knox IP Address.
+     * </pre>
+     *
+     * <code>string knoxIpAddress = 6;</code>
+     * @return The bytes for knoxIpAddress.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKnoxIpAddressBytes() {
+      java.lang.Object ref = knoxIpAddress_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        knoxIpAddress_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KNOXPORT_FIELD_NUMBER = 7;
+    private int knoxPort_ = 0;
+    /**
+     * <pre>
+     * The optional Knox IP Port.
+     * </pre>
+     *
+     * <code>int32 knoxPort = 7;</code>
+     * @return The knoxPort.
+     */
+    @java.lang.Override
+    public int getKnoxPort() {
+      return knoxPort_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvcCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmHostname_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, cmHostname_);
+      }
+      if (cmPort_ != 0) {
+        output.writeInt32(3, cmPort_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dcName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, dcName_);
+      }
+      if (isHttpSecure_ != false) {
+        output.writeBool(5, isHttpSecure_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxIpAddress_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, knoxIpAddress_);
+      }
+      if (knoxPort_ != 0) {
+        output.writeInt32(7, knoxPort_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvcCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmHostname_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, cmHostname_);
+      }
+      if (cmPort_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, cmPort_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dcName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, dcName_);
+      }
+      if (isHttpSecure_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, isHttpSecure_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxIpAddress_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, knoxIpAddress_);
+      }
+      if (knoxPort_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, knoxPort_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest) obj;
+
+      if (!getPvcCrn()
+          .equals(other.getPvcCrn())) return false;
+      if (!getCmHostname()
+          .equals(other.getCmHostname())) return false;
+      if (getCmPort()
+          != other.getCmPort()) return false;
+      if (!getDcName()
+          .equals(other.getDcName())) return false;
+      if (getIsHttpSecure()
+          != other.getIsHttpSecure()) return false;
+      if (!getKnoxIpAddress()
+          .equals(other.getKnoxIpAddress())) return false;
+      if (getKnoxPort()
+          != other.getKnoxPort()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVCCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getPvcCrn().hashCode();
+      hash = (37 * hash) + CMHOSTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getCmHostname().hashCode();
+      hash = (37 * hash) + CMPORT_FIELD_NUMBER;
+      hash = (53 * hash) + getCmPort();
+      hash = (37 * hash) + DCNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getDcName().hashCode();
+      hash = (37 * hash) + ISHTTPSECURE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIsHttpSecure());
+      hash = (37 * hash) + KNOXIPADDRESS_FIELD_NUMBER;
+      hash = (53 * hash) + getKnoxIpAddress().hashCode();
+      hash = (37 * hash) + KNOXPORT_FIELD_NUMBER;
+      hash = (53 * hash) + getKnoxPort();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request Object for RegisterPvcBaseCluster method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.RegisterPvcBaseClusterRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.RegisterPvcBaseClusterRequest)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        pvcCrn_ = "";
+        cmHostname_ = "";
+        cmPort_ = 0;
+        dcName_ = "";
+        isHttpSecure_ = false;
+        knoxIpAddress_ = "";
+        knoxPort_ = 0;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pvcCrn_ = pvcCrn_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.cmHostname_ = cmHostname_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.cmPort_ = cmPort_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.dcName_ = dcName_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.isHttpSecure_ = isHttpSecure_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.knoxIpAddress_ = knoxIpAddress_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.knoxPort_ = knoxPort_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.getDefaultInstance()) return this;
+        if (!other.getPvcCrn().isEmpty()) {
+          pvcCrn_ = other.pvcCrn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getCmHostname().isEmpty()) {
+          cmHostname_ = other.cmHostname_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (other.getCmPort() != 0) {
+          setCmPort(other.getCmPort());
+        }
+        if (!other.getDcName().isEmpty()) {
+          dcName_ = other.dcName_;
+          bitField0_ |= 0x00000008;
+          onChanged();
+        }
+        if (other.getIsHttpSecure() != false) {
+          setIsHttpSecure(other.getIsHttpSecure());
+        }
+        if (!other.getKnoxIpAddress().isEmpty()) {
+          knoxIpAddress_ = other.knoxIpAddress_;
+          bitField0_ |= 0x00000020;
+          onChanged();
+        }
+        if (other.getKnoxPort() != 0) {
+          setKnoxPort(other.getKnoxPort());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                pvcCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                cmHostname_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 24: {
+                cmPort_ = input.readInt32();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 24
+              case 34: {
+                dcName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000008;
+                break;
+              } // case 34
+              case 40: {
+                isHttpSecure_ = input.readBool();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 50: {
+                knoxIpAddress_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 50
+              case 56: {
+                knoxPort_ = input.readInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object pvcCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The pvcCrn.
+       */
+      public java.lang.String getPvcCrn() {
+        java.lang.Object ref = pvcCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvcCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for pvcCrn.
+       */
+      public com.google.protobuf.ByteString
+          getPvcCrnBytes() {
+        java.lang.Object ref = pvcCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvcCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The pvcCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        pvcCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvcCrn() {
+        pvcCrn_ = getDefaultInstance().getPvcCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for pvcCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        pvcCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cmHostname_ = "";
+      /**
+       * <pre>
+       * The Cloudera Manager Hostname.
+       * </pre>
+       *
+       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The cmHostname.
+       */
+      public java.lang.String getCmHostname() {
+        java.lang.Object ref = cmHostname_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmHostname_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager Hostname.
+       * </pre>
+       *
+       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for cmHostname.
+       */
+      public com.google.protobuf.ByteString
+          getCmHostnameBytes() {
+        java.lang.Object ref = cmHostname_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmHostname_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager Hostname.
+       * </pre>
+       *
+       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The cmHostname to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmHostname(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmHostname_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager Hostname.
+       * </pre>
+       *
+       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmHostname() {
+        cmHostname_ = getDefaultInstance().getCmHostname();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager Hostname.
+       * </pre>
+       *
+       * <code>string cmHostname = 2 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for cmHostname to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmHostnameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmHostname_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private int cmPort_ ;
+      /**
+       * <pre>
+       * The Cloudera Manager Port.
+       * </pre>
+       *
+       * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+       * @return The cmPort.
+       */
+      @java.lang.Override
+      public int getCmPort() {
+        return cmPort_;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager Port.
+       * </pre>
+       *
+       * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+       * @param value The cmPort to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmPort(int value) {
+
+        cmPort_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager Port.
+       * </pre>
+       *
+       * <code>int32 cmPort = 3 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmPort() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        cmPort_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object dcName_ = "";
+      /**
+       * <pre>
+       * The Data Center name.
+       * </pre>
+       *
+       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return The dcName.
+       */
+      public java.lang.String getDcName() {
+        java.lang.Object ref = dcName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          dcName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Data Center name.
+       * </pre>
+       *
+       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for dcName.
+       */
+      public com.google.protobuf.ByteString
+          getDcNameBytes() {
+        java.lang.Object ref = dcName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          dcName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Data Center name.
+       * </pre>
+       *
+       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+       * @param value The dcName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDcName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        dcName_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Data Center name.
+       * </pre>
+       *
+       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDcName() {
+        dcName_ = getDefaultInstance().getDcName();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Data Center name.
+       * </pre>
+       *
+       * <code>string dcName = 4 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for dcName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDcNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        dcName_ = value;
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return this;
+      }
+
+      private boolean isHttpSecure_ ;
+      /**
+       * <pre>
+       * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
+       * </pre>
+       *
+       * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+       * @return The isHttpSecure.
+       */
+      @java.lang.Override
+      public boolean getIsHttpSecure() {
+        return isHttpSecure_;
+      }
+      /**
+       * <pre>
+       * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
+       * </pre>
+       *
+       * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+       * @param value The isHttpSecure to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsHttpSecure(boolean value) {
+
+        isHttpSecure_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
+       * </pre>
+       *
+       * <code>bool isHttpSecure = 5 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsHttpSecure() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        isHttpSecure_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object knoxIpAddress_ = "";
+      /**
+       * <pre>
+       * The optional Knox IP Address.
+       * </pre>
+       *
+       * <code>string knoxIpAddress = 6;</code>
+       * @return The knoxIpAddress.
+       */
+      public java.lang.String getKnoxIpAddress() {
+        java.lang.Object ref = knoxIpAddress_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          knoxIpAddress_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The optional Knox IP Address.
+       * </pre>
+       *
+       * <code>string knoxIpAddress = 6;</code>
+       * @return The bytes for knoxIpAddress.
+       */
+      public com.google.protobuf.ByteString
+          getKnoxIpAddressBytes() {
+        java.lang.Object ref = knoxIpAddress_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          knoxIpAddress_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The optional Knox IP Address.
+       * </pre>
+       *
+       * <code>string knoxIpAddress = 6;</code>
+       * @param value The knoxIpAddress to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxIpAddress(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        knoxIpAddress_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional Knox IP Address.
+       * </pre>
+       *
+       * <code>string knoxIpAddress = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKnoxIpAddress() {
+        knoxIpAddress_ = getDefaultInstance().getKnoxIpAddress();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional Knox IP Address.
+       * </pre>
+       *
+       * <code>string knoxIpAddress = 6;</code>
+       * @param value The bytes for knoxIpAddress to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxIpAddressBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        knoxIpAddress_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+
+      private int knoxPort_ ;
+      /**
+       * <pre>
+       * The optional Knox IP Port.
+       * </pre>
+       *
+       * <code>int32 knoxPort = 7;</code>
+       * @return The knoxPort.
+       */
+      @java.lang.Override
+      public int getKnoxPort() {
+        return knoxPort_;
+      }
+      /**
+       * <pre>
+       * The optional Knox IP Port.
+       * </pre>
+       *
+       * <code>int32 knoxPort = 7;</code>
+       * @param value The knoxPort to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxPort(int value) {
+
+        knoxPort_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional Knox IP Port.
+       * </pre>
+       *
+       * <code>int32 knoxPort = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKnoxPort() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        knoxPort_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.RegisterPvcBaseClusterRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.RegisterPvcBaseClusterRequest)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RegisterPvcBaseClusterRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RegisterPvcBaseClusterRequest>() {
+      @java.lang.Override
+      public RegisterPvcBaseClusterRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RegisterPvcBaseClusterRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RegisterPvcBaseClusterRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RegisterPvcBaseClusterResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.RegisterPvcBaseClusterResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The registered PvC Base Cluster CRN.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1;</code>
+     * @return The clusterCrn.
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The registered PvC Base Cluster CRN.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1;</code>
+     * @return The bytes for clusterCrn.
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
+  }
+  /**
+   * <pre>
+   * Response Object for RegisterPvcBaseCluster method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.RegisterPvcBaseClusterResponse}
+   */
+  public static final class RegisterPvcBaseClusterResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.RegisterPvcBaseClusterResponse)
+      RegisterPvcBaseClusterResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RegisterPvcBaseClusterResponse.newBuilder() to construct.
+    private RegisterPvcBaseClusterResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RegisterPvcBaseClusterResponse() {
+      clusterCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RegisterPvcBaseClusterResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.Builder.class);
+    }
+
+    public static final int CLUSTERCRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object clusterCrn_ = "";
+    /**
+     * <pre>
+     * The registered PvC Base Cluster CRN.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1;</code>
+     * @return The clusterCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The registered PvC Base Cluster CRN.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1;</code>
+     * @return The bytes for clusterCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, clusterCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, clusterCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse) obj;
+
+      if (!getClusterCrn()
+          .equals(other.getClusterCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response Object for RegisterPvcBaseCluster method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.RegisterPvcBaseClusterResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.RegisterPvcBaseClusterResponse)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        clusterCrn_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.clusterCrn_ = clusterCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse.getDefaultInstance()) return this;
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                clusterCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The registered PvC Base Cluster CRN.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1;</code>
+       * @return The clusterCrn.
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The registered PvC Base Cluster CRN.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1;</code>
+       * @return The bytes for clusterCrn.
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The registered PvC Base Cluster CRN.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1;</code>
+       * @param value The clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        clusterCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The registered PvC Base Cluster CRN.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterCrn() {
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The registered PvC Base Cluster CRN.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1;</code>
+       * @param value The bytes for clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        clusterCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.RegisterPvcBaseClusterResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.RegisterPvcBaseClusterResponse)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RegisterPvcBaseClusterResponse>
+        PARSER = new com.google.protobuf.AbstractParser<RegisterPvcBaseClusterResponse>() {
+      @java.lang.Override
+      public RegisterPvcBaseClusterResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<RegisterPvcBaseClusterResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RegisterPvcBaseClusterResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_remotecluster_ListAllPvcControlPlanesRequest_descriptor;
   private static final 
@@ -2969,6 +5022,16 @@ public final class RemoteClusterInternalProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_RegisterPvcBaseClusterRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_RegisterPvcBaseClusterResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2979,29 +5042,42 @@ public final class RemoteClusterInternalProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\033remoteclusterinternal.proto\022\rremoteclu" +
-      "ster\032\023remotecluster.proto\"E\n\036ListAllPvcC" +
-      "ontrolPlanesRequest\022\020\n\010pageSize\030\001 \001(\005\022\021\n" +
-      "\tpageToken\030\002 \001(\t\"\211\001\n\037ListAllPvcControlPl" +
-      "anesResponse\022O\n\032controlPlaneConfiguratio" +
-      "ns\030\001 \003(\0132+.remotecluster.PvcControlPlane" +
-      "Configuration\022\025\n\rnextPageToken\030\002 \001(\t\"8\n\'" +
-      "GeneratePvcControlPlaneAuthTokenRequest\022" +
-      "\r\n\005pvcId\030\001 \001(\t\"9\n(GeneratePvcControlPlan" +
-      "eAuthTokenResponse\022\r\n\005token\030\001 \001(\t2\253\002\n\025Re" +
-      "moteClusterInternal\022z\n\027ListAllPvcControl" +
-      "Planes\022-.remotecluster.ListAllPvcControl" +
-      "PlanesRequest\032..remotecluster.ListAllPvc" +
-      "ControlPlanesResponse\"\000\022\225\001\n GeneratePvcC" +
-      "ontrolPlaneAuthToken\0226.remotecluster.Gen" +
-      "eratePvcControlPlaneAuthTokenRequest\0327.r" +
-      "emotecluster.GeneratePvcControlPlaneAuth" +
-      "TokenResponse\"\000BL\n.com.cloudera.thunderh" +
-      "ead.service.remoteclusterB\032RemoteCluster" +
-      "InternalProtob\006proto3"
+      "ster\032\roptions.proto\032\023remotecluster.proto" +
+      "\"E\n\036ListAllPvcControlPlanesRequest\022\020\n\010pa" +
+      "geSize\030\001 \001(\005\022\021\n\tpageToken\030\002 \001(\t\"\211\001\n\037List" +
+      "AllPvcControlPlanesResponse\022O\n\032controlPl" +
+      "aneConfigurations\030\001 \003(\0132+.remotecluster." +
+      "PvcControlPlaneConfiguration\022\025\n\rnextPage" +
+      "Token\030\002 \001(\t\"8\n\'GeneratePvcControlPlaneAu" +
+      "thTokenRequest\022\r\n\005pvcId\030\001 \001(\t\"9\n(Generat" +
+      "ePvcControlPlaneAuthTokenResponse\022\r\n\005tok" +
+      "en\030\001 \001(\t\"\300\001\n\035RegisterPvcBaseClusterReque" +
+      "st\022\024\n\006pvcCrn\030\001 \001(\tB\004\320\265\030\001\022\030\n\ncmHostname\030\002" +
+      " \001(\tB\004\320\265\030\001\022\024\n\006cmPort\030\003 \001(\005B\004\320\265\030\001\022\024\n\006dcNa" +
+      "me\030\004 \001(\tB\004\320\265\030\001\022\032\n\014isHttpSecure\030\005 \001(\010B\004\320\265" +
+      "\030\001\022\025\n\rknoxIpAddress\030\006 \001(\t\022\020\n\010knoxPort\030\007 " +
+      "\001(\005\"4\n\036RegisterPvcBaseClusterResponse\022\022\n" +
+      "\nclusterCrn\030\001 \001(\t2\330\003\n\025RemoteClusterInter" +
+      "nal\022z\n\027ListAllPvcControlPlanes\022-.remotec" +
+      "luster.ListAllPvcControlPlanesRequest\032.." +
+      "remotecluster.ListAllPvcControlPlanesRes" +
+      "ponse\"\000\022\225\001\n GeneratePvcControlPlaneAuthT" +
+      "oken\0226.remotecluster.GeneratePvcControlP" +
+      "laneAuthTokenRequest\0327.remotecluster.Gen" +
+      "eratePvcControlPlaneAuthTokenResponse\"\000\022" +
+      "w\n\026RegisterPvcBaseCluster\022,.remotecluste" +
+      "r.RegisterPvcBaseClusterRequest\032-.remote" +
+      "cluster.RegisterPvcBaseClusterResponse\"\000" +
+      "\0322\212\304\023.\n\025remoteclusterinternal\022\025RemoteClu" +
+      "sterInternalBg\n.com.cloudera.thunderhead" +
+      ".service.remoteclusterB\032RemoteClusterInt" +
+      "ernalProtoZ\031com/cloudera/cdp/protobufb\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
+          com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.getDescriptor(),
         });
     internal_static_remotecluster_ListAllPvcControlPlanesRequest_descriptor =
@@ -3028,6 +5104,25 @@ public final class RemoteClusterInternalProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenResponse_descriptor,
         new java.lang.String[] { "Token", });
+    internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_remotecluster_RegisterPvcBaseClusterRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor,
+        new java.lang.String[] { "PvcCrn", "CmHostname", "CmPort", "DcName", "IsHttpSecure", "KnoxIpAddress", "KnoxPort", });
+    internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_remotecluster_RegisterPvcBaseClusterResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor,
+        new java.lang.String[] { "ClusterCrn", });
+    com.google.protobuf.ExtensionRegistry registry =
+        com.google.protobuf.ExtensionRegistry.newInstance();
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.apiServiceName);
+    com.google.protobuf.Descriptors.FileDescriptor
+        .internalUpdateFileDescriptor(descriptor, registry);
+    com.cloudera.thunderhead.service.common.options.Options.getDescriptor();
     com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.getDescriptor();
   }
 

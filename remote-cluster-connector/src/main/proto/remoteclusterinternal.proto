@@ -4,23 +4,36 @@ package remotecluster;
 
 option java_package = "com.cloudera.thunderhead.service.remotecluster";
 option java_outer_classname = "RemoteClusterInternalProto";
+option go_package = "com/cloudera/cdp/protobuf";
 
+import "options.proto";
 import "remotecluster.proto";
 
-// RemoteCluster endpoints for internal use only.
+// RemoteClusterInternal Service :: RemoteClusterInternal Service lists RemoteCluster endpoints for internal use only.
 service RemoteClusterInternal {
 
-  // List all registered Private Cloud control plane configurations across all accounts.
+  option (options.ServiceExtension.apiServiceName) = {
+    lowercase: "remoteclusterinternal"
+    camelcase: "RemoteClusterInternal"
+  };
+
+  // ListAllPvcControlPlanes method :: Lists all registered Private Cloud control plane configurations across all accounts.
   rpc ListAllPvcControlPlanes (ListAllPvcControlPlanesRequest)
       returns (ListAllPvcControlPlanesResponse) {
   }
 
-  // Generate an auth token for the requests sent to Private Cloud control plane.
+  // GeneratePvcControlPlaneAuthToken method :: Generates an auth token for the requests sent to Private Cloud control plane.
   rpc GeneratePvcControlPlaneAuthToken (GeneratePvcControlPlaneAuthTokenRequest)
       returns (GeneratePvcControlPlaneAuthTokenResponse) {
   }
+
+  // RegisterPvcBaseCluster method :: Partially registers a base cluster from an already registered PvC Control Plane.
+  rpc RegisterPvcBaseCluster (RegisterPvcBaseClusterRequest)
+      returns (RegisterPvcBaseClusterResponse) {
+  }
 }
 
+// Request object for the ListAllPvcControlPlanes method.
 message ListAllPvcControlPlanesRequest {
   // The page size.
   int32 pageSize = 1;
@@ -28,6 +41,7 @@ message ListAllPvcControlPlanesRequest {
   string pageToken = 2;
 }
 
+// Response object for the ListAllPvcControlPlanes method.
 message ListAllPvcControlPlanesResponse {
   // The Private Cloud control plane configurations.
   repeated PvcControlPlaneConfiguration controlPlaneConfigurations = 1;
@@ -35,12 +49,38 @@ message ListAllPvcControlPlanesResponse {
   string nextPageToken = 2;
 }
 
+// Request object for the GeneratePvcControlPlaneAuthToken method.
 message GeneratePvcControlPlaneAuthTokenRequest {
   // The account ID of the Private Cloud control plane.
   string pvcId = 1;
 }
 
+// Response object for the GeneratePvcControlPlaneAuthToken method.
 message GeneratePvcControlPlaneAuthTokenResponse {
   // The authentication token.
   string token = 1;
+}
+
+// Request Object for RegisterPvcBaseCluster method.
+message RegisterPvcBaseClusterRequest {
+  // The CRN of the Private Cloud control plane.
+  string pvcCrn = 1 [(options.FieldExtension.required) = true];
+  // The Cloudera Manager Hostname.
+  string cmHostname = 2 [(options.FieldExtension.required) = true];
+  // The Cloudera Manager Port.
+  int32 cmPort = 3 [(options.FieldExtension.required) = true];
+  // The Data Center name.
+  string dcName = 4 [(options.FieldExtension.required) = true];
+  // The boolean to represent if Cloudera Manager is running on HTTP Secure Connection or not.
+  bool isHttpSecure = 5 [(options.FieldExtension.required) = true];
+  // The optional Knox IP Address.
+  string knoxIpAddress = 6;
+  // The optional Knox IP Port.
+  int32 knoxPort = 7;
+}
+
+// Response Object for RegisterPvcBaseCluster method.
+message RegisterPvcBaseClusterResponse {
+  // The registered PvC Base Cluster CRN.
+  string clusterCrn = 1;
 }

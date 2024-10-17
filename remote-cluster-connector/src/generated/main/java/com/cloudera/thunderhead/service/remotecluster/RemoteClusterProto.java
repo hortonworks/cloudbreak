@@ -81,50 +81,32 @@ public final class RemoteClusterProto {
 
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
      * </pre>
      *
-     * <code>string accessKeyId = 4;</code>
-     * @return The accessKeyId.
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The samlIdentityProvider.
      */
-    java.lang.String getAccessKeyId();
+    java.lang.String getSamlIdentityProvider();
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
      * </pre>
      *
-     * <code>string accessKeyId = 4;</code>
-     * @return The bytes for accessKeyId.
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for samlIdentityProvider.
      */
     com.google.protobuf.ByteString
-        getAccessKeyIdBytes();
-
-    /**
-     * <pre>
-     * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-     * </pre>
-     *
-     * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The privateKey.
-     */
-    java.lang.String getPrivateKey();
-    /**
-     * <pre>
-     * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-     * </pre>
-     *
-     * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The bytes for privateKey.
-     */
-    com.google.protobuf.ByteString
-        getPrivateKeyBytes();
+        getSamlIdentityProviderBytes();
 
     /**
      * <pre>
      * The description of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string description = 6;</code>
+     * <code>string description = 5;</code>
      * @return The description.
      */
     java.lang.String getDescription();
@@ -133,7 +115,7 @@ public final class RemoteClusterProto {
      * The description of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string description = 6;</code>
+     * <code>string description = 5;</code>
      * @return The bytes for description.
      */
     com.google.protobuf.ByteString
@@ -159,8 +141,7 @@ public final class RemoteClusterProto {
       pvcId_ = "";
       name_ = "";
       baseUrl_ = "";
-      accessKeyId_ = "";
-      privateKey_ = "";
+      samlIdentityProvider_ = "";
       description_ = "";
     }
 
@@ -325,101 +306,56 @@ public final class RemoteClusterProto {
       }
     }
 
-    public static final int ACCESSKEYID_FIELD_NUMBER = 4;
+    public static final int SAMLIDENTITYPROVIDER_FIELD_NUMBER = 4;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object accessKeyId_ = "";
+    private volatile java.lang.Object samlIdentityProvider_ = "";
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
      * </pre>
      *
-     * <code>string accessKeyId = 4;</code>
-     * @return The accessKeyId.
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The samlIdentityProvider.
      */
     @java.lang.Override
-    public java.lang.String getAccessKeyId() {
-      java.lang.Object ref = accessKeyId_;
+    public java.lang.String getSamlIdentityProvider() {
+      java.lang.Object ref = samlIdentityProvider_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        accessKeyId_ = s;
+        samlIdentityProvider_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+     * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
      * </pre>
      *
-     * <code>string accessKeyId = 4;</code>
-     * @return The bytes for accessKeyId.
+     * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for samlIdentityProvider.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getAccessKeyIdBytes() {
-      java.lang.Object ref = accessKeyId_;
+        getSamlIdentityProviderBytes() {
+      java.lang.Object ref = samlIdentityProvider_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        accessKeyId_ = b;
+        samlIdentityProvider_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    public static final int PRIVATEKEY_FIELD_NUMBER = 5;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object privateKey_ = "";
-    /**
-     * <pre>
-     * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-     * </pre>
-     *
-     * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The privateKey.
-     */
-    @java.lang.Override
-    public java.lang.String getPrivateKey() {
-      java.lang.Object ref = privateKey_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        privateKey_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-     * </pre>
-     *
-     * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-     * @return The bytes for privateKey.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPrivateKeyBytes() {
-      java.lang.Object ref = privateKey_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        privateKey_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int DESCRIPTION_FIELD_NUMBER = 6;
+    public static final int DESCRIPTION_FIELD_NUMBER = 5;
     @SuppressWarnings("serial")
     private volatile java.lang.Object description_ = "";
     /**
@@ -427,7 +363,7 @@ public final class RemoteClusterProto {
      * The description of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string description = 6;</code>
+     * <code>string description = 5;</code>
      * @return The description.
      */
     @java.lang.Override
@@ -448,7 +384,7 @@ public final class RemoteClusterProto {
      * The description of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string description = 6;</code>
+     * <code>string description = 5;</code>
      * @return The bytes for description.
      */
     @java.lang.Override
@@ -489,14 +425,11 @@ public final class RemoteClusterProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baseUrl_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, baseUrl_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessKeyId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accessKeyId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(privateKey_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, privateKey_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(samlIdentityProvider_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, samlIdentityProvider_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, description_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, description_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -516,14 +449,11 @@ public final class RemoteClusterProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baseUrl_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, baseUrl_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessKeyId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accessKeyId_);
-      }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(privateKey_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, privateKey_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(samlIdentityProvider_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, samlIdentityProvider_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, description_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, description_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -546,10 +476,8 @@ public final class RemoteClusterProto {
           .equals(other.getName())) return false;
       if (!getBaseUrl()
           .equals(other.getBaseUrl())) return false;
-      if (!getAccessKeyId()
-          .equals(other.getAccessKeyId())) return false;
-      if (!getPrivateKey()
-          .equals(other.getPrivateKey())) return false;
+      if (!getSamlIdentityProvider()
+          .equals(other.getSamlIdentityProvider())) return false;
       if (!getDescription()
           .equals(other.getDescription())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
@@ -569,10 +497,8 @@ public final class RemoteClusterProto {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + BASEURL_FIELD_NUMBER;
       hash = (53 * hash) + getBaseUrl().hashCode();
-      hash = (37 * hash) + ACCESSKEYID_FIELD_NUMBER;
-      hash = (53 * hash) + getAccessKeyId().hashCode();
-      hash = (37 * hash) + PRIVATEKEY_FIELD_NUMBER;
-      hash = (53 * hash) + getPrivateKey().hashCode();
+      hash = (37 * hash) + SAMLIDENTITYPROVIDER_FIELD_NUMBER;
+      hash = (53 * hash) + getSamlIdentityProvider().hashCode();
       hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
       hash = (53 * hash) + getDescription().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
@@ -713,8 +639,7 @@ public final class RemoteClusterProto {
         pvcId_ = "";
         name_ = "";
         baseUrl_ = "";
-        accessKeyId_ = "";
-        privateKey_ = "";
+        samlIdentityProvider_ = "";
         description_ = "";
         return this;
       }
@@ -759,12 +684,9 @@ public final class RemoteClusterProto {
           result.baseUrl_ = baseUrl_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.accessKeyId_ = accessKeyId_;
+          result.samlIdentityProvider_ = samlIdentityProvider_;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.privateKey_ = privateKey_;
-        }
-        if (((from_bitField0_ & 0x00000020) != 0)) {
           result.description_ = description_;
         }
       }
@@ -828,19 +750,14 @@ public final class RemoteClusterProto {
           bitField0_ |= 0x00000004;
           onChanged();
         }
-        if (!other.getAccessKeyId().isEmpty()) {
-          accessKeyId_ = other.accessKeyId_;
+        if (!other.getSamlIdentityProvider().isEmpty()) {
+          samlIdentityProvider_ = other.samlIdentityProvider_;
           bitField0_ |= 0x00000008;
-          onChanged();
-        }
-        if (!other.getPrivateKey().isEmpty()) {
-          privateKey_ = other.privateKey_;
-          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (!other.getDescription().isEmpty()) {
           description_ = other.description_;
-          bitField0_ |= 0x00000020;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -885,20 +802,15 @@ public final class RemoteClusterProto {
                 break;
               } // case 26
               case 34: {
-                accessKeyId_ = input.readStringRequireUtf8();
+                samlIdentityProvider_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
-                privateKey_ = input.readStringRequireUtf8();
+                description_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000010;
                 break;
               } // case 42
-              case 50: {
-                description_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000020;
-                break;
-              } // case 50
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1192,22 +1104,23 @@ public final class RemoteClusterProto {
         return this;
       }
 
-      private java.lang.Object accessKeyId_ = "";
+      private java.lang.Object samlIdentityProvider_ = "";
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
        * </pre>
        *
-       * <code>string accessKeyId = 4;</code>
-       * @return The accessKeyId.
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return The samlIdentityProvider.
        */
-      public java.lang.String getAccessKeyId() {
-        java.lang.Object ref = accessKeyId_;
+      public java.lang.String getSamlIdentityProvider() {
+        java.lang.Object ref = samlIdentityProvider_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          accessKeyId_ = s;
+          samlIdentityProvider_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1215,20 +1128,21 @@ public final class RemoteClusterProto {
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
        * </pre>
        *
-       * <code>string accessKeyId = 4;</code>
-       * @return The bytes for accessKeyId.
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for samlIdentityProvider.
        */
       public com.google.protobuf.ByteString
-          getAccessKeyIdBytes() {
-        java.lang.Object ref = accessKeyId_;
+          getSamlIdentityProviderBytes() {
+        java.lang.Object ref = samlIdentityProvider_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          accessKeyId_ = b;
+          samlIdentityProvider_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -1236,142 +1150,53 @@ public final class RemoteClusterProto {
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
        * </pre>
        *
-       * <code>string accessKeyId = 4;</code>
-       * @param value The accessKeyId to set.
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @param value The samlIdentityProvider to set.
        * @return This builder for chaining.
        */
-      public Builder setAccessKeyId(
+      public Builder setSamlIdentityProvider(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        accessKeyId_ = value;
+        samlIdentityProvider_ = value;
         bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
        * </pre>
        *
-       * <code>string accessKeyId = 4;</code>
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
        * @return This builder for chaining.
        */
-      public Builder clearAccessKeyId() {
-        accessKeyId_ = getDefaultInstance().getAccessKeyId();
+      public Builder clearSamlIdentityProvider() {
+        samlIdentityProvider_ = getDefaultInstance().getSamlIdentityProvider();
         bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The name or ID or CRN of the SAML identity provider from Public Cloud control plane in which users are allowed to operate on the Private Cloud control plane.
+       * The same or equivalent SAML IDP should be used by the Public Cloud control plane and the Private Cloud control plane, in order for the user to be mapped by SAML user ID.
        * </pre>
        *
-       * <code>string accessKeyId = 4;</code>
-       * @param value The bytes for accessKeyId to set.
+       * <code>string samlIdentityProvider = 4 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for samlIdentityProvider to set.
        * @return This builder for chaining.
        */
-      public Builder setAccessKeyIdBytes(
+      public Builder setSamlIdentityProviderBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        accessKeyId_ = value;
+        samlIdentityProvider_ = value;
         bitField0_ |= 0x00000008;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object privateKey_ = "";
-      /**
-       * <pre>
-       * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-       * </pre>
-       *
-       * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-       * @return The privateKey.
-       */
-      public java.lang.String getPrivateKey() {
-        java.lang.Object ref = privateKey_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          privateKey_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-       * </pre>
-       *
-       * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-       * @return The bytes for privateKey.
-       */
-      public com.google.protobuf.ByteString
-          getPrivateKeyBytes() {
-        java.lang.Object ref = privateKey_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          privateKey_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-       * </pre>
-       *
-       * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-       * @param value The privateKey to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPrivateKey(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        privateKey_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-       * </pre>
-       *
-       * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPrivateKey() {
-        privateKey_ = getDefaultInstance().getPrivateKey();
-        bitField0_ = (bitField0_ & ~0x00000010);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
-       * </pre>
-       *
-       * <code>string privateKey = 5 [(.options.FieldExtension.sensitive) = true];</code>
-       * @param value The bytes for privateKey to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPrivateKeyBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        privateKey_ = value;
-        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -1382,7 +1207,7 @@ public final class RemoteClusterProto {
        * The description of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string description = 6;</code>
+       * <code>string description = 5;</code>
        * @return The description.
        */
       public java.lang.String getDescription() {
@@ -1402,7 +1227,7 @@ public final class RemoteClusterProto {
        * The description of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string description = 6;</code>
+       * <code>string description = 5;</code>
        * @return The bytes for description.
        */
       public com.google.protobuf.ByteString
@@ -1423,7 +1248,7 @@ public final class RemoteClusterProto {
        * The description of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string description = 6;</code>
+       * <code>string description = 5;</code>
        * @param value The description to set.
        * @return This builder for chaining.
        */
@@ -1431,7 +1256,7 @@ public final class RemoteClusterProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         description_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -1440,12 +1265,12 @@ public final class RemoteClusterProto {
        * The description of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string description = 6;</code>
+       * <code>string description = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearDescription() {
         description_ = getDefaultInstance().getDescription();
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -1454,7 +1279,7 @@ public final class RemoteClusterProto {
        * The description of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string description = 6;</code>
+       * <code>string description = 5;</code>
        * @param value The bytes for description to set.
        * @return This builder for chaining.
        */
@@ -1463,7 +1288,7 @@ public final class RemoteClusterProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         description_ = value;
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -1561,6 +1386,26 @@ public final class RemoteClusterProto {
      * <code>.remotecluster.PvcControlPlaneConfiguration controlPlaneConfiguration = 1;</code>
      */
     com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfigurationOrBuilder getControlPlaneConfigurationOrBuilder();
+
+    /**
+     * <pre>
+     * The connectivity configuration to be used by the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string connectivityConfiguration = 2;</code>
+     * @return The connectivityConfiguration.
+     */
+    java.lang.String getConnectivityConfiguration();
+    /**
+     * <pre>
+     * The connectivity configuration to be used by the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string connectivityConfiguration = 2;</code>
+     * @return The bytes for connectivityConfiguration.
+     */
+    com.google.protobuf.ByteString
+        getConnectivityConfigurationBytes();
   }
   /**
    * <pre>
@@ -1579,6 +1424,7 @@ public final class RemoteClusterProto {
       super(builder);
     }
     private RegisterPvcControlPlaneResponse() {
+      connectivityConfiguration_ = "";
     }
 
     @java.lang.Override
@@ -1640,6 +1486,53 @@ public final class RemoteClusterProto {
       return controlPlaneConfiguration_ == null ? com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration.getDefaultInstance() : controlPlaneConfiguration_;
     }
 
+    public static final int CONNECTIVITYCONFIGURATION_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object connectivityConfiguration_ = "";
+    /**
+     * <pre>
+     * The connectivity configuration to be used by the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string connectivityConfiguration = 2;</code>
+     * @return The connectivityConfiguration.
+     */
+    @java.lang.Override
+    public java.lang.String getConnectivityConfiguration() {
+      java.lang.Object ref = connectivityConfiguration_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        connectivityConfiguration_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The connectivity configuration to be used by the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string connectivityConfiguration = 2;</code>
+     * @return The bytes for connectivityConfiguration.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getConnectivityConfigurationBytes() {
+      java.lang.Object ref = connectivityConfiguration_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        connectivityConfiguration_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1657,6 +1550,9 @@ public final class RemoteClusterProto {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(1, getControlPlaneConfiguration());
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(connectivityConfiguration_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, connectivityConfiguration_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1669,6 +1565,9 @@ public final class RemoteClusterProto {
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getControlPlaneConfiguration());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(connectivityConfiguration_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, connectivityConfiguration_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -1690,6 +1589,8 @@ public final class RemoteClusterProto {
         if (!getControlPlaneConfiguration()
             .equals(other.getControlPlaneConfiguration())) return false;
       }
+      if (!getConnectivityConfiguration()
+          .equals(other.getConnectivityConfiguration())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -1705,6 +1606,8 @@ public final class RemoteClusterProto {
         hash = (37 * hash) + CONTROLPLANECONFIGURATION_FIELD_NUMBER;
         hash = (53 * hash) + getControlPlaneConfiguration().hashCode();
       }
+      hash = (37 * hash) + CONNECTIVITYCONFIGURATION_FIELD_NUMBER;
+      hash = (53 * hash) + getConnectivityConfiguration().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1851,6 +1754,7 @@ public final class RemoteClusterProto {
           controlPlaneConfigurationBuilder_.dispose();
           controlPlaneConfigurationBuilder_ = null;
         }
+        connectivityConfiguration_ = "";
         return this;
       }
 
@@ -1890,6 +1794,9 @@ public final class RemoteClusterProto {
               ? controlPlaneConfiguration_
               : controlPlaneConfigurationBuilder_.build();
           to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.connectivityConfiguration_ = connectivityConfiguration_;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -1941,6 +1848,11 @@ public final class RemoteClusterProto {
         if (other.hasControlPlaneConfiguration()) {
           mergeControlPlaneConfiguration(other.getControlPlaneConfiguration());
         }
+        if (!other.getConnectivityConfiguration().isEmpty()) {
+          connectivityConfiguration_ = other.connectivityConfiguration_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -1974,6 +1886,11 @@ public final class RemoteClusterProto {
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 18: {
+                connectivityConfiguration_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -2146,6 +2063,98 @@ public final class RemoteClusterProto {
           controlPlaneConfiguration_ = null;
         }
         return controlPlaneConfigurationBuilder_;
+      }
+
+      private java.lang.Object connectivityConfiguration_ = "";
+      /**
+       * <pre>
+       * The connectivity configuration to be used by the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string connectivityConfiguration = 2;</code>
+       * @return The connectivityConfiguration.
+       */
+      public java.lang.String getConnectivityConfiguration() {
+        java.lang.Object ref = connectivityConfiguration_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          connectivityConfiguration_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The connectivity configuration to be used by the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string connectivityConfiguration = 2;</code>
+       * @return The bytes for connectivityConfiguration.
+       */
+      public com.google.protobuf.ByteString
+          getConnectivityConfigurationBytes() {
+        java.lang.Object ref = connectivityConfiguration_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          connectivityConfiguration_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The connectivity configuration to be used by the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string connectivityConfiguration = 2;</code>
+       * @param value The connectivityConfiguration to set.
+       * @return This builder for chaining.
+       */
+      public Builder setConnectivityConfiguration(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        connectivityConfiguration_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The connectivity configuration to be used by the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string connectivityConfiguration = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearConnectivityConfiguration() {
+        connectivityConfiguration_ = getDefaultInstance().getConnectivityConfiguration();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The connectivity configuration to be used by the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string connectivityConfiguration = 2;</code>
+       * @param value The bytes for connectivityConfiguration to set.
+       * @return This builder for chaining.
+       */
+      public Builder setConnectivityConfigurationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        connectivityConfiguration_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -7388,43 +7397,63 @@ public final class RemoteClusterProto {
 
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The IDP CRN of the user.
      * </pre>
      *
-     * <code>string accessKeyId = 7;</code>
-     * @return The accessKeyId.
+     * <code>string idpCrn = 7;</code>
+     * @return The idpCrn.
      */
-    java.lang.String getAccessKeyId();
+    java.lang.String getIdpCrn();
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The IDP CRN of the user.
      * </pre>
      *
-     * <code>string accessKeyId = 7;</code>
-     * @return The bytes for accessKeyId.
+     * <code>string idpCrn = 7;</code>
+     * @return The bytes for idpCrn.
      */
     com.google.protobuf.ByteString
-        getAccessKeyIdBytes();
+        getIdpCrnBytes();
 
     /**
      * <pre>
-     * The jump-gate agent configuration to be used by the Private Cloud control plane.
+     * The status of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string jumpgateAgentConfiguration = 8;</code>
-     * @return The jumpgateAgentConfiguration.
+     * <code>string pvcStatus = 8;</code>
+     * @return The pvcStatus.
      */
-    java.lang.String getJumpgateAgentConfiguration();
+    java.lang.String getPvcStatus();
     /**
      * <pre>
-     * The jump-gate agent configuration to be used by the Private Cloud control plane.
+     * The status of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string jumpgateAgentConfiguration = 8;</code>
-     * @return The bytes for jumpgateAgentConfiguration.
+     * <code>string pvcStatus = 8;</code>
+     * @return The bytes for pvcStatus.
      */
     com.google.protobuf.ByteString
-        getJumpgateAgentConfigurationBytes();
+        getPvcStatusBytes();
+
+    /**
+     * <pre>
+     * The total number of environments in the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>int32 pvcEnvironmentCount = 9;</code>
+     * @return The pvcEnvironmentCount.
+     */
+    int getPvcEnvironmentCount();
+
+    /**
+     * <pre>
+     * The date/time for the last updated time.
+     * </pre>
+     *
+     * <code>int64 lastUpdatedTime = 10 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The lastUpdatedTime.
+     */
+    long getLastUpdatedTime();
   }
   /**
    * <pre>
@@ -7449,8 +7478,8 @@ public final class RemoteClusterProto {
       name_ = "";
       description_ = "";
       baseUrl_ = "";
-      accessKeyId_ = "";
-      jumpgateAgentConfiguration_ = "";
+      idpCrn_ = "";
+      pvcStatus_ = "";
     }
 
     @java.lang.Override
@@ -7734,98 +7763,128 @@ public final class RemoteClusterProto {
       }
     }
 
-    public static final int ACCESSKEYID_FIELD_NUMBER = 7;
+    public static final int IDPCRN_FIELD_NUMBER = 7;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object accessKeyId_ = "";
+    private volatile java.lang.Object idpCrn_ = "";
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The IDP CRN of the user.
      * </pre>
      *
-     * <code>string accessKeyId = 7;</code>
-     * @return The accessKeyId.
+     * <code>string idpCrn = 7;</code>
+     * @return The idpCrn.
      */
     @java.lang.Override
-    public java.lang.String getAccessKeyId() {
-      java.lang.Object ref = accessKeyId_;
+    public java.lang.String getIdpCrn() {
+      java.lang.Object ref = idpCrn_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        accessKeyId_ = s;
+        idpCrn_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+     * The IDP CRN of the user.
      * </pre>
      *
-     * <code>string accessKeyId = 7;</code>
-     * @return The bytes for accessKeyId.
+     * <code>string idpCrn = 7;</code>
+     * @return The bytes for idpCrn.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getAccessKeyIdBytes() {
-      java.lang.Object ref = accessKeyId_;
+        getIdpCrnBytes() {
+      java.lang.Object ref = idpCrn_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        accessKeyId_ = b;
+        idpCrn_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    public static final int JUMPGATEAGENTCONFIGURATION_FIELD_NUMBER = 8;
+    public static final int PVCSTATUS_FIELD_NUMBER = 8;
     @SuppressWarnings("serial")
-    private volatile java.lang.Object jumpgateAgentConfiguration_ = "";
+    private volatile java.lang.Object pvcStatus_ = "";
     /**
      * <pre>
-     * The jump-gate agent configuration to be used by the Private Cloud control plane.
+     * The status of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string jumpgateAgentConfiguration = 8;</code>
-     * @return The jumpgateAgentConfiguration.
+     * <code>string pvcStatus = 8;</code>
+     * @return The pvcStatus.
      */
     @java.lang.Override
-    public java.lang.String getJumpgateAgentConfiguration() {
-      java.lang.Object ref = jumpgateAgentConfiguration_;
+    public java.lang.String getPvcStatus() {
+      java.lang.Object ref = pvcStatus_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        jumpgateAgentConfiguration_ = s;
+        pvcStatus_ = s;
         return s;
       }
     }
     /**
      * <pre>
-     * The jump-gate agent configuration to be used by the Private Cloud control plane.
+     * The status of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string jumpgateAgentConfiguration = 8;</code>
-     * @return The bytes for jumpgateAgentConfiguration.
+     * <code>string pvcStatus = 8;</code>
+     * @return The bytes for pvcStatus.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString
-        getJumpgateAgentConfigurationBytes() {
-      java.lang.Object ref = jumpgateAgentConfiguration_;
+        getPvcStatusBytes() {
+      java.lang.Object ref = pvcStatus_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        jumpgateAgentConfiguration_ = b;
+        pvcStatus_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int PVCENVIRONMENTCOUNT_FIELD_NUMBER = 9;
+    private int pvcEnvironmentCount_ = 0;
+    /**
+     * <pre>
+     * The total number of environments in the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>int32 pvcEnvironmentCount = 9;</code>
+     * @return The pvcEnvironmentCount.
+     */
+    @java.lang.Override
+    public int getPvcEnvironmentCount() {
+      return pvcEnvironmentCount_;
+    }
+
+    public static final int LASTUPDATEDTIME_FIELD_NUMBER = 10;
+    private long lastUpdatedTime_ = 0L;
+    /**
+     * <pre>
+     * The date/time for the last updated time.
+     * </pre>
+     *
+     * <code>int64 lastUpdatedTime = 10 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The lastUpdatedTime.
+     */
+    @java.lang.Override
+    public long getLastUpdatedTime() {
+      return lastUpdatedTime_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -7860,11 +7919,17 @@ public final class RemoteClusterProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baseUrl_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, baseUrl_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessKeyId_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, accessKeyId_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idpCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, idpCrn_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(jumpgateAgentConfiguration_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, jumpgateAgentConfiguration_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcStatus_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, pvcStatus_);
+      }
+      if (pvcEnvironmentCount_ != 0) {
+        output.writeInt32(9, pvcEnvironmentCount_);
+      }
+      if (lastUpdatedTime_ != 0L) {
+        output.writeInt64(10, lastUpdatedTime_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -7894,11 +7959,19 @@ public final class RemoteClusterProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baseUrl_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, baseUrl_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessKeyId_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, accessKeyId_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(idpCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, idpCrn_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(jumpgateAgentConfiguration_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, jumpgateAgentConfiguration_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcStatus_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, pvcStatus_);
+      }
+      if (pvcEnvironmentCount_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, pvcEnvironmentCount_);
+      }
+      if (lastUpdatedTime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(10, lastUpdatedTime_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -7926,10 +7999,14 @@ public final class RemoteClusterProto {
           .equals(other.getDescription())) return false;
       if (!getBaseUrl()
           .equals(other.getBaseUrl())) return false;
-      if (!getAccessKeyId()
-          .equals(other.getAccessKeyId())) return false;
-      if (!getJumpgateAgentConfiguration()
-          .equals(other.getJumpgateAgentConfiguration())) return false;
+      if (!getIdpCrn()
+          .equals(other.getIdpCrn())) return false;
+      if (!getPvcStatus()
+          .equals(other.getPvcStatus())) return false;
+      if (getPvcEnvironmentCount()
+          != other.getPvcEnvironmentCount()) return false;
+      if (getLastUpdatedTime()
+          != other.getLastUpdatedTime()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -7953,10 +8030,15 @@ public final class RemoteClusterProto {
       hash = (53 * hash) + getDescription().hashCode();
       hash = (37 * hash) + BASEURL_FIELD_NUMBER;
       hash = (53 * hash) + getBaseUrl().hashCode();
-      hash = (37 * hash) + ACCESSKEYID_FIELD_NUMBER;
-      hash = (53 * hash) + getAccessKeyId().hashCode();
-      hash = (37 * hash) + JUMPGATEAGENTCONFIGURATION_FIELD_NUMBER;
-      hash = (53 * hash) + getJumpgateAgentConfiguration().hashCode();
+      hash = (37 * hash) + IDPCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getIdpCrn().hashCode();
+      hash = (37 * hash) + PVCSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getPvcStatus().hashCode();
+      hash = (37 * hash) + PVCENVIRONMENTCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getPvcEnvironmentCount();
+      hash = (37 * hash) + LASTUPDATEDTIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLastUpdatedTime());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8098,8 +8180,10 @@ public final class RemoteClusterProto {
         name_ = "";
         description_ = "";
         baseUrl_ = "";
-        accessKeyId_ = "";
-        jumpgateAgentConfiguration_ = "";
+        idpCrn_ = "";
+        pvcStatus_ = "";
+        pvcEnvironmentCount_ = 0;
+        lastUpdatedTime_ = 0L;
         return this;
       }
 
@@ -8152,10 +8236,16 @@ public final class RemoteClusterProto {
           result.baseUrl_ = baseUrl_;
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.accessKeyId_ = accessKeyId_;
+          result.idpCrn_ = idpCrn_;
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.jumpgateAgentConfiguration_ = jumpgateAgentConfiguration_;
+          result.pvcStatus_ = pvcStatus_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.pvcEnvironmentCount_ = pvcEnvironmentCount_;
+        }
+        if (((from_bitField0_ & 0x00000200) != 0)) {
+          result.lastUpdatedTime_ = lastUpdatedTime_;
         }
       }
 
@@ -8231,15 +8321,21 @@ public final class RemoteClusterProto {
           bitField0_ |= 0x00000020;
           onChanged();
         }
-        if (!other.getAccessKeyId().isEmpty()) {
-          accessKeyId_ = other.accessKeyId_;
+        if (!other.getIdpCrn().isEmpty()) {
+          idpCrn_ = other.idpCrn_;
           bitField0_ |= 0x00000040;
           onChanged();
         }
-        if (!other.getJumpgateAgentConfiguration().isEmpty()) {
-          jumpgateAgentConfiguration_ = other.jumpgateAgentConfiguration_;
+        if (!other.getPvcStatus().isEmpty()) {
+          pvcStatus_ = other.pvcStatus_;
           bitField0_ |= 0x00000080;
           onChanged();
+        }
+        if (other.getPvcEnvironmentCount() != 0) {
+          setPvcEnvironmentCount(other.getPvcEnvironmentCount());
+        }
+        if (other.getLastUpdatedTime() != 0L) {
+          setLastUpdatedTime(other.getLastUpdatedTime());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -8298,15 +8394,25 @@ public final class RemoteClusterProto {
                 break;
               } // case 50
               case 58: {
-                accessKeyId_ = input.readStringRequireUtf8();
+                idpCrn_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000040;
                 break;
               } // case 58
               case 66: {
-                jumpgateAgentConfiguration_ = input.readStringRequireUtf8();
+                pvcStatus_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000080;
                 break;
               } // case 66
+              case 72: {
+                pvcEnvironmentCount_ = input.readInt32();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 72
+              case 80: {
+                lastUpdatedTime_ = input.readInt64();
+                bitField0_ |= 0x00000200;
+                break;
+              } // case 80
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -8857,22 +8963,22 @@ public final class RemoteClusterProto {
         return this;
       }
 
-      private java.lang.Object accessKeyId_ = "";
+      private java.lang.Object idpCrn_ = "";
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The IDP CRN of the user.
        * </pre>
        *
-       * <code>string accessKeyId = 7;</code>
-       * @return The accessKeyId.
+       * <code>string idpCrn = 7;</code>
+       * @return The idpCrn.
        */
-      public java.lang.String getAccessKeyId() {
-        java.lang.Object ref = accessKeyId_;
+      public java.lang.String getIdpCrn() {
+        java.lang.Object ref = idpCrn_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          accessKeyId_ = s;
+          idpCrn_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -8880,20 +8986,20 @@ public final class RemoteClusterProto {
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The IDP CRN of the user.
        * </pre>
        *
-       * <code>string accessKeyId = 7;</code>
-       * @return The bytes for accessKeyId.
+       * <code>string idpCrn = 7;</code>
+       * @return The bytes for idpCrn.
        */
       public com.google.protobuf.ByteString
-          getAccessKeyIdBytes() {
-        java.lang.Object ref = accessKeyId_;
+          getIdpCrnBytes() {
+        java.lang.Object ref = idpCrn_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          accessKeyId_ = b;
+          idpCrn_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -8901,70 +9007,70 @@ public final class RemoteClusterProto {
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The IDP CRN of the user.
        * </pre>
        *
-       * <code>string accessKeyId = 7;</code>
-       * @param value The accessKeyId to set.
+       * <code>string idpCrn = 7;</code>
+       * @param value The idpCrn to set.
        * @return This builder for chaining.
        */
-      public Builder setAccessKeyId(
+      public Builder setIdpCrn(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        accessKeyId_ = value;
+        idpCrn_ = value;
         bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The IDP CRN of the user.
        * </pre>
        *
-       * <code>string accessKeyId = 7;</code>
+       * <code>string idpCrn = 7;</code>
        * @return This builder for chaining.
        */
-      public Builder clearAccessKeyId() {
-        accessKeyId_ = getDefaultInstance().getAccessKeyId();
+      public Builder clearIdpCrn() {
+        idpCrn_ = getDefaultInstance().getIdpCrn();
         bitField0_ = (bitField0_ & ~0x00000040);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+       * The IDP CRN of the user.
        * </pre>
        *
-       * <code>string accessKeyId = 7;</code>
-       * @param value The bytes for accessKeyId to set.
+       * <code>string idpCrn = 7;</code>
+       * @param value The bytes for idpCrn to set.
        * @return This builder for chaining.
        */
-      public Builder setAccessKeyIdBytes(
+      public Builder setIdpCrnBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        accessKeyId_ = value;
+        idpCrn_ = value;
         bitField0_ |= 0x00000040;
         onChanged();
         return this;
       }
 
-      private java.lang.Object jumpgateAgentConfiguration_ = "";
+      private java.lang.Object pvcStatus_ = "";
       /**
        * <pre>
-       * The jump-gate agent configuration to be used by the Private Cloud control plane.
+       * The status of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string jumpgateAgentConfiguration = 8;</code>
-       * @return The jumpgateAgentConfiguration.
+       * <code>string pvcStatus = 8;</code>
+       * @return The pvcStatus.
        */
-      public java.lang.String getJumpgateAgentConfiguration() {
-        java.lang.Object ref = jumpgateAgentConfiguration_;
+      public java.lang.String getPvcStatus() {
+        java.lang.Object ref = pvcStatus_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          jumpgateAgentConfiguration_ = s;
+          pvcStatus_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -8972,20 +9078,20 @@ public final class RemoteClusterProto {
       }
       /**
        * <pre>
-       * The jump-gate agent configuration to be used by the Private Cloud control plane.
+       * The status of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string jumpgateAgentConfiguration = 8;</code>
-       * @return The bytes for jumpgateAgentConfiguration.
+       * <code>string pvcStatus = 8;</code>
+       * @return The bytes for pvcStatus.
        */
       public com.google.protobuf.ByteString
-          getJumpgateAgentConfigurationBytes() {
-        java.lang.Object ref = jumpgateAgentConfiguration_;
+          getPvcStatusBytes() {
+        java.lang.Object ref = pvcStatus_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          jumpgateAgentConfiguration_ = b;
+          pvcStatus_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -8993,50 +9099,138 @@ public final class RemoteClusterProto {
       }
       /**
        * <pre>
-       * The jump-gate agent configuration to be used by the Private Cloud control plane.
+       * The status of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string jumpgateAgentConfiguration = 8;</code>
-       * @param value The jumpgateAgentConfiguration to set.
+       * <code>string pvcStatus = 8;</code>
+       * @param value The pvcStatus to set.
        * @return This builder for chaining.
        */
-      public Builder setJumpgateAgentConfiguration(
+      public Builder setPvcStatus(
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
-        jumpgateAgentConfiguration_ = value;
+        pvcStatus_ = value;
         bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The jump-gate agent configuration to be used by the Private Cloud control plane.
+       * The status of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string jumpgateAgentConfiguration = 8;</code>
+       * <code>string pvcStatus = 8;</code>
        * @return This builder for chaining.
        */
-      public Builder clearJumpgateAgentConfiguration() {
-        jumpgateAgentConfiguration_ = getDefaultInstance().getJumpgateAgentConfiguration();
+      public Builder clearPvcStatus() {
+        pvcStatus_ = getDefaultInstance().getPvcStatus();
         bitField0_ = (bitField0_ & ~0x00000080);
         onChanged();
         return this;
       }
       /**
        * <pre>
-       * The jump-gate agent configuration to be used by the Private Cloud control plane.
+       * The status of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string jumpgateAgentConfiguration = 8;</code>
-       * @param value The bytes for jumpgateAgentConfiguration to set.
+       * <code>string pvcStatus = 8;</code>
+       * @param value The bytes for pvcStatus to set.
        * @return This builder for chaining.
        */
-      public Builder setJumpgateAgentConfigurationBytes(
+      public Builder setPvcStatusBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
-        jumpgateAgentConfiguration_ = value;
+        pvcStatus_ = value;
         bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+
+      private int pvcEnvironmentCount_ ;
+      /**
+       * <pre>
+       * The total number of environments in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>int32 pvcEnvironmentCount = 9;</code>
+       * @return The pvcEnvironmentCount.
+       */
+      @java.lang.Override
+      public int getPvcEnvironmentCount() {
+        return pvcEnvironmentCount_;
+      }
+      /**
+       * <pre>
+       * The total number of environments in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>int32 pvcEnvironmentCount = 9;</code>
+       * @param value The pvcEnvironmentCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcEnvironmentCount(int value) {
+
+        pvcEnvironmentCount_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The total number of environments in the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>int32 pvcEnvironmentCount = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvcEnvironmentCount() {
+        bitField0_ = (bitField0_ & ~0x00000100);
+        pvcEnvironmentCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long lastUpdatedTime_ ;
+      /**
+       * <pre>
+       * The date/time for the last updated time.
+       * </pre>
+       *
+       * <code>int64 lastUpdatedTime = 10 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The lastUpdatedTime.
+       */
+      @java.lang.Override
+      public long getLastUpdatedTime() {
+        return lastUpdatedTime_;
+      }
+      /**
+       * <pre>
+       * The date/time for the last updated time.
+       * </pre>
+       *
+       * <code>int64 lastUpdatedTime = 10 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The lastUpdatedTime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLastUpdatedTime(long value) {
+
+        lastUpdatedTime_ = value;
+        bitField0_ |= 0x00000200;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The date/time for the last updated time.
+       * </pre>
+       *
+       * <code>int64 lastUpdatedTime = 10 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLastUpdatedTime() {
+        bitField0_ = (bitField0_ & ~0x00000200);
+        lastUpdatedTime_ = 0L;
         onChanged();
         return this;
       }
@@ -9686,59 +9880,61 @@ public final class RemoteClusterProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\023remotecluster.proto\022\rremotecluster\032\rop" +
-      "tions.proto\"\250\001\n\036RegisterPvcControlPlaneR" +
+      "tions.proto\"\235\001\n\036RegisterPvcControlPlaneR" +
       "equest\022\023\n\005pvcId\030\001 \001(\tB\004\320\265\030\001\022\022\n\004name\030\002 \001(" +
-      "\tB\004\320\265\030\001\022\031\n\007baseUrl\030\003 \001(\tB\010\320\265\030\001\200\266\030\001\022\023\n\013ac" +
-      "cessKeyId\030\004 \001(\t\022\030\n\nprivateKey\030\005 \001(\tB\004\200\265\030" +
-      "\001\022\023\n\013description\030\006 \001(\t\"q\n\037RegisterPvcCon" +
-      "trolPlaneResponse\022N\n\031controlPlaneConfigu" +
-      "ration\030\001 \001(\0132+.remotecluster.PvcControlP" +
-      "laneConfiguration\"5\n UnregisterPvcContro" +
-      "lPlaneRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265\030\001\"#\n!Unre" +
-      "gisterPvcControlPlaneResponse\"3\n\036Describ" +
-      "ePvcControlPlaneRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265" +
-      "\030\001\"q\n\037DescribePvcControlPlaneResponse\022N\n" +
-      "\031controlPlaneConfiguration\030\001 \001(\0132+.remot" +
-      "ecluster.PvcControlPlaneConfiguration\"V\n" +
-      "\033ListPvcControlPlanesRequest\022\036\n\010pageSize" +
-      "\030\001 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB" +
-      "\004\230\265\030\001\"\222\001\n\034ListPvcControlPlanesResponse\022U" +
-      "\n\032controlPlaneConfigurations\030\001 \003(\0132+.rem" +
-      "otecluster.PvcControlPlaneConfigurationB" +
-      "\004\240\265\030\001\022\033\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001\";\n&Te" +
-      "stPvcControlPlaneConnectivityRequest\022\021\n\003" +
-      "pvc\030\001 \001(\tB\004\320\265\030\001\")\n\'TestPvcControlPlaneCo" +
-      "nnectivityResponse\"\332\001\n\034PvcControlPlaneCo" +
-      "nfiguration\022\r\n\005pvcId\030\001 \001(\t\022\016\n\006pvcCrn\030\002 \001" +
-      "(\t\022.\n\004type\030\003 \001(\0162 .remotecluster.Cluster" +
-      "Type.Value\022\014\n\004name\030\004 \001(\t\022\023\n\013description\030" +
-      "\005 \001(\t\022\017\n\007baseUrl\030\006 \001(\t\022\023\n\013accessKeyId\030\007 " +
-      "\001(\t\022\"\n\032jumpgateAgentConfiguration\030\010 \001(\t\"" +
-      "#\n\013ClusterType\"\024\n\005Value\022\013\n\007CDP_PVC\020\0002\342\006\n" +
-      "\rRemoteCluster\022\273\001\n\027RegisterPvcControlPla" +
-      "ne\022-.remotecluster.RegisterPvcControlPla" +
-      "neRequest\032..remotecluster.RegisterPvcCon" +
-      "trolPlaneResponse\"A\202\246\035%remotecluster/reg" +
-      "isterPvcControlPlane\212\246\035\020CDP_HYBRID_CLOUD" +
-      "\310\246\035\001\022\230\001\n\031UnregisterPvcControlPlane\022/.rem" +
-      "otecluster.UnregisterPvcControlPlaneRequ" +
-      "est\0320.remotecluster.UnregisterPvcControl" +
-      "PlaneResponse\"\030\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\001\022" +
-      "\222\001\n\027DescribePvcControlPlane\022-.remoteclus" +
-      "ter.DescribePvcControlPlaneRequest\032..rem" +
-      "otecluster.DescribePvcControlPlaneRespon" +
-      "se\"\030\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\000\022\221\001\n\024ListPvc" +
-      "ControlPlanes\022*.remotecluster.ListPvcCon" +
-      "trolPlanesRequest\032+.remotecluster.ListPv" +
-      "cControlPlanesResponse\" \212\246\035\020CDP_HYBRID_C" +
-      "LOUD\220\246\035\001\230\246\035\024\310\246\035\000\022\252\001\n\037TestPvcControlPlane" +
-      "Connectivity\0225.remotecluster.TestPvcCont" +
-      "rolPlaneConnectivityRequest\0326.remoteclus" +
-      "ter.TestPvcControlPlaneConnectivityRespo" +
-      "nse\"\030\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\000\032\"\212\304\023\036\n\rrem" +
-      "otecluster\022\rRemoteClusterBH\n.com.clouder" +
-      "a.thunderhead.service.remoteclusterB\022Rem" +
-      "oteClusterProto\200\210\'\001b\006proto3"
+      "\tB\004\320\265\030\001\022\031\n\007baseUrl\030\003 \001(\tB\010\320\265\030\001\200\266\030\001\022\"\n\024sa" +
+      "mlIdentityProvider\030\004 \001(\tB\004\320\265\030\001\022\023\n\013descri" +
+      "ption\030\005 \001(\t\"\224\001\n\037RegisterPvcControlPlaneR" +
+      "esponse\022N\n\031controlPlaneConfiguration\030\001 \001" +
+      "(\0132+.remotecluster.PvcControlPlaneConfig" +
+      "uration\022!\n\031connectivityConfiguration\030\002 \001" +
+      "(\t\"5\n UnregisterPvcControlPlaneRequest\022\021" +
+      "\n\003pvc\030\001 \001(\tB\004\320\265\030\001\"#\n!UnregisterPvcContro" +
+      "lPlaneResponse\"3\n\036DescribePvcControlPlan" +
+      "eRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265\030\001\"q\n\037DescribeP" +
+      "vcControlPlaneResponse\022N\n\031controlPlaneCo" +
+      "nfiguration\030\001 \001(\0132+.remotecluster.PvcCon" +
+      "trolPlaneConfiguration\"V\n\033ListPvcControl" +
+      "PlanesRequest\022\036\n\010pageSize\030\001 \001(\005B\014\220\265\030\001\330\265\030" +
+      "\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265\030\001\"\222\001\n\034ListP" +
+      "vcControlPlanesResponse\022U\n\032controlPlaneC" +
+      "onfigurations\030\001 \003(\0132+.remotecluster.PvcC" +
+      "ontrolPlaneConfigurationB\004\240\265\030\001\022\033\n\rnextPa" +
+      "geToken\030\002 \001(\tB\004\250\265\030\001\";\n&TestPvcControlPla" +
+      "neConnectivityRequest\022\021\n\003pvc\030\001 \001(\tB\004\320\265\030\001" +
+      "\")\n\'TestPvcControlPlaneConnectivityRespo" +
+      "nse\"\200\002\n\034PvcControlPlaneConfiguration\022\r\n\005" +
+      "pvcId\030\001 \001(\t\022\016\n\006pvcCrn\030\002 \001(\t\022.\n\004type\030\003 \001(" +
+      "\0162 .remotecluster.ClusterType.Value\022\014\n\004n" +
+      "ame\030\004 \001(\t\022\023\n\013description\030\005 \001(\t\022\017\n\007baseUr" +
+      "l\030\006 \001(\t\022\016\n\006idpCrn\030\007 \001(\t\022\021\n\tpvcStatus\030\010 \001" +
+      "(\t\022\033\n\023pvcEnvironmentCount\030\t \001(\005\022\035\n\017lastU" +
+      "pdatedTime\030\n \001(\003B\004\260\265\030\001\"#\n\013ClusterType\"\024\n" +
+      "\005Value\022\013\n\007CDP_PVC\020\0002\342\006\n\rRemoteCluster\022\273\001" +
+      "\n\027RegisterPvcControlPlane\022-.remotecluste" +
+      "r.RegisterPvcControlPlaneRequest\032..remot" +
+      "ecluster.RegisterPvcControlPlaneResponse" +
+      "\"A\202\246\035%remotecluster/registerPvcControlPl" +
+      "ane\212\246\035\020CDP_HYBRID_CLOUD\310\246\035\001\022\230\001\n\031Unregist" +
+      "erPvcControlPlane\022/.remotecluster.Unregi" +
+      "sterPvcControlPlaneRequest\0320.remoteclust" +
+      "er.UnregisterPvcControlPlaneResponse\"\030\212\246" +
+      "\035\020CDP_HYBRID_CLOUD\310\246\035\001\022\222\001\n\027DescribePvcCo" +
+      "ntrolPlane\022-.remotecluster.DescribePvcCo" +
+      "ntrolPlaneRequest\032..remotecluster.Descri" +
+      "bePvcControlPlaneResponse\"\030\212\246\035\020CDP_HYBRI" +
+      "D_CLOUD\310\246\035\000\022\221\001\n\024ListPvcControlPlanes\022*.r" +
+      "emotecluster.ListPvcControlPlanesRequest" +
+      "\032+.remotecluster.ListPvcControlPlanesRes" +
+      "ponse\" \212\246\035\020CDP_HYBRID_CLOUD\220\246\035\001\230\246\035\024\310\246\035\000\022" +
+      "\252\001\n\037TestPvcControlPlaneConnectivity\0225.re" +
+      "motecluster.TestPvcControlPlaneConnectiv" +
+      "ityRequest\0326.remotecluster.TestPvcContro" +
+      "lPlaneConnectivityResponse\"\030\212\246\035\020CDP_HYBR" +
+      "ID_CLOUD\310\246\035\000\032\"\212\304\023\036\n\rremotecluster\022\rRemot" +
+      "eClusterBc\n.com.cloudera.thunderhead.ser" +
+      "vice.remoteclusterB\022RemoteClusterProtoZ\031" +
+      "com/cloudera/cdp/protobuf\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -9750,13 +9946,13 @@ public final class RemoteClusterProto {
     internal_static_remotecluster_RegisterPvcControlPlaneRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_RegisterPvcControlPlaneRequest_descriptor,
-        new java.lang.String[] { "PvcId", "Name", "BaseUrl", "AccessKeyId", "PrivateKey", "Description", });
+        new java.lang.String[] { "PvcId", "Name", "BaseUrl", "SamlIdentityProvider", "Description", });
     internal_static_remotecluster_RegisterPvcControlPlaneResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_remotecluster_RegisterPvcControlPlaneResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_RegisterPvcControlPlaneResponse_descriptor,
-        new java.lang.String[] { "ControlPlaneConfiguration", });
+        new java.lang.String[] { "ControlPlaneConfiguration", "ConnectivityConfiguration", });
     internal_static_remotecluster_UnregisterPvcControlPlaneRequest_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_remotecluster_UnregisterPvcControlPlaneRequest_fieldAccessorTable = new
@@ -9810,7 +10006,7 @@ public final class RemoteClusterProto {
     internal_static_remotecluster_PvcControlPlaneConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_PvcControlPlaneConfiguration_descriptor,
-        new java.lang.String[] { "PvcId", "PvcCrn", "Type", "Name", "Description", "BaseUrl", "AccessKeyId", "JumpgateAgentConfiguration", });
+        new java.lang.String[] { "PvcId", "PvcCrn", "Type", "Name", "Description", "BaseUrl", "IdpCrn", "PvcStatus", "PvcEnvironmentCount", "LastUpdatedTime", });
     internal_static_remotecluster_ClusterType_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_remotecluster_ClusterType_fieldAccessorTable = new
@@ -9819,6 +10015,7 @@ public final class RemoteClusterProto {
         new java.lang.String[] { });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.datetime);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.maximum);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.minimum);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.noParamfile);
@@ -9827,7 +10024,6 @@ public final class RemoteClusterProto {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pagingPageSize);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pagingResult);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
-    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.audit);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.entitlement);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.mutating);
