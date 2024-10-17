@@ -1530,9 +1530,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
         when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
-        BaseStackDetailsV4Response baseStackDetailsV4Response = new BaseStackDetailsV4Response();
         ImageV4Response imageV4Response = new ImageV4Response();
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
@@ -1590,50 +1588,42 @@ class SdxServiceTest {
         sdxClusterRequest.setRuntime(null);
 
         // MEDIUM_DUTY and 7.2.17 => non throws
-        baseStackDetailsV4Response.setVersion("7.2.17");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.17");
         sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // MEDIUM_DUTY and 7.2.18 => throws
-        baseStackDetailsV4Response.setVersion("7.2.18");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.18");
         assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // MEDIUM_DUTY and 7.2.16 => non throws
-        baseStackDetailsV4Response.setVersion("7.2.16");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.16");
         sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // LIGHT_DUTY and 7.2.18 => non throws
-        baseStackDetailsV4Response.setVersion("7.2.18");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.18");
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // LIGHT_DUTY and 7.2.17 => non throws
-        baseStackDetailsV4Response.setVersion("7.2.17");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.17");
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // ENTERPRISE and 7.2.18 => non throws
-        baseStackDetailsV4Response.setVersion("7.2.18");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.18");
         sdxClusterRequest.setClusterShape(ENTERPRISE);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // ENTERPRISE and 7.2.17 => non throws
-        baseStackDetailsV4Response.setVersion("7.2.17");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.17");
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // ENTERPRISE and 7.2.16 => throws
-        baseStackDetailsV4Response.setVersion("7.2.16");
-        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        imageV4Response.setVersion("7.2.16");
         assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
     }

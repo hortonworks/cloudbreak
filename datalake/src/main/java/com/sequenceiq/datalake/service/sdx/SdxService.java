@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CD
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
 import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -389,14 +390,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         } else {
             throw notFound("SDX cluster", clusterCrn).get();
         }
-    }
-
-    public String getRuntimeVersionFromImageResponse(ImageV4Response imageV4Response) {
-        if (imageV4Response != null && imageV4Response.getStackDetails() != null) {
-            return imageV4Response.getStackDetails() != null ? imageV4Response.getStackDetails().getVersion() : null;
-        }
-
-        return null;
     }
 
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
@@ -988,7 +981,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, ImageV4Response imageV4Response) {
-        return Optional.ofNullable(getRuntimeVersionFromImageResponse(imageV4Response))
+        return Optional.ofNullable(getIfNotNull(imageV4Response, ImageV4Response::getVersion))
                 .or(() -> Optional.ofNullable(sdxClusterRequest.getRuntime()))
                 .or(() -> extractRuntimeFromCdhProductVersion(stackV4Request))
                 .orElse(cdpConfigService.getDefaultRuntime());
