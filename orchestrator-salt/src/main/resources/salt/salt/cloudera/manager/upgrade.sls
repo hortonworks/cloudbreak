@@ -5,7 +5,7 @@ include:
   - cloudera.repo
   - cloudera.csd
 
-stop-cloudera-scm-server:
+stop-cloudera-scm-server-during-upgrade:
   service.dead:
     - name: cloudera-scm-server
 
