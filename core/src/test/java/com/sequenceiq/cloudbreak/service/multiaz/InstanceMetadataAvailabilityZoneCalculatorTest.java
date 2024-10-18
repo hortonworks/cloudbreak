@@ -406,10 +406,21 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         Set<String> groupNamesToScale = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet());
         Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
         when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId())).thenReturn(notDeletedInstanceMetaDataSet);
-        notDeletedInstanceMetaDataSet.forEach(im -> im.setInstanceStatus(InstanceStatus.REQUESTED));
+        notDeletedInstanceMetaDataSet.forEach(im -> {
+            if (!"test-1-1".equals(im.getInstanceId()) && "is1".equals(im.getInstanceGroup().getGroupName())) {
+                im.setInstanceStatus(InstanceStatus.REQUESTED);
+                im.setAvailabilityZone(null);
+                im.setRackId(null);
+            }
+        });
         when(instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(any(), anyBoolean(), anyString(), anyString())).thenReturn(null);
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.populateForScaling(stack, groupNamesToScale, repair, NetworkScaleDetails.getEmpty()));
+        underTest.populateForScaling(stack, groupNamesToScale, repair, NetworkScaleDetails.getEmpty());
+
+        Map<String, Long> zoneNodeCount = new HashMap<>();
+        notDeletedInstanceMetaDataSet.stream().filter(im -> "is1".equals(im.getInstanceGroup().getGroupName()))
+                .forEach(im -> zoneNodeCount.put(im.getAvailabilityZone(), 1 + zoneNodeCount.getOrDefault(im.getAvailabilityZone(), 0L)));
+        assertEquals(Map.of("1", 1L, "2", 1L, "3", 1L), zoneNodeCount);
     }
 
     private Stack getStackWithGroupsAndInstances(List<String> groupAvailabilityZonesForMetadata, List<String> groupAvailabilityZonesForGroup) {
