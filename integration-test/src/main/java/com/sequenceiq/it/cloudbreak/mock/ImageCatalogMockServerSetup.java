@@ -17,6 +17,8 @@ public class ImageCatalogMockServerSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogMockServerSetup.class);
 
+    private String cdhUpgradeRuntime;
+
     private String cdhRuntime;
 
     private String cbVersion;
@@ -34,6 +36,7 @@ public class ImageCatalogMockServerSetup {
         mockImageCatalogServer = serverProperties.getMockImageCatalogAddr();
         cbVersion = serverProperties.getCbVersion();
         cdhRuntime = commonClusterManagerProperties.getRuntimeVersion();
+        cdhUpgradeRuntime = commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(false);
     }
 
     // DYNAMIC address http://localhost:10080/thunderhead/mock-image-catalog?catalog-name=cb-catalog&cb-version=CB-2.29.0&runtime=7.2.2
@@ -99,7 +102,7 @@ public class ImageCatalogMockServerSetup {
                 mockImageCatalogServer,
                 "catalog-with-for-upgrade",
                 cbVersion,
-                cdhRuntime,
+                cdhUpgradeRuntime,
                 mockImageCatalogServer);
     }
 }

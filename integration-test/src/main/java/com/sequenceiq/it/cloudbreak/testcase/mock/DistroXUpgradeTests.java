@@ -63,7 +63,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         String upgradeImageCatalogName = resourcePropertyProvider().getName();
         createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String distroXName = resourcePropertyProvider().getName();
-        String targetRuntimeVersion = getNextRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
+        String targetRuntimeVersion = getNextRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(false));
         testContext
                 .given(imageSettings, DistroXImageTestDto.class)
                 .withImageId("73f5db23-293d-4934-b124-1d5361375480")

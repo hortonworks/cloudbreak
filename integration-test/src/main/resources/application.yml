@@ -100,25 +100,25 @@ integrationtest:
     defaultPort: 7180
   cloudProvider: MOCK
   ycloudTest: false
-  runtimeVersion: 7.2.18
+  runtimeVersion: 7.3.1
   upgrade:
     matrix:
       7.2.16: 7.2.15
       7.2.17: 7.2.16
       7.2.18: 7.2.17
       7.3.1: 7.2.18
-    currentHARuntimeVersion: 7.2.17
+    currentHARuntimeVersion: 7.2.18
     currentGovHARuntimeVersion: 7.2.18
-    currentRuntimeVersion: 7.2.17
+    currentRuntimeVersion: 7.2.18
     currentGovRuntimeVersion: 7.2.18
-    targetRuntimeVersion: 7.2.18
-    distroXUpgradeCurrentVersion: 7.2.17
+    targetRuntimeVersion: 7.3.1
+    distroXUpgradeCurrentVersion: 7.2.18
     distroXUpgradeCurrentGovVersion: 7.2.18
-    distroXUpgrade3rdPartyCurrentVersion: 7.2.17
+    distroXUpgrade3rdPartyCurrentVersion: 7.2.18
     distroXUpgrade3rdPartyCurrentGovVersion: 7.2.18
-    distroXUpgradeTargetVersion: 7.2.18
-    distroXUpgrade3rdPartyTargetVersion: 7.2.18
-    imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-cb-image-catalog.json
+    distroXUpgradeTargetVersion: 7.3.1
+    distroXUpgrade3rdPartyTargetVersion: 7.3.1
+    imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   upgradeDatabaseServer:
     originalDatabaseMajorVersion: 11
     targetDatabaseMajorVersion: 14
