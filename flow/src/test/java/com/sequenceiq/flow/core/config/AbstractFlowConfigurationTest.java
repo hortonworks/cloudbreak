@@ -74,7 +74,7 @@ public class AbstractFlowConfigurationTest {
                         ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
                 .willReturn(flowEventListener);
         BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventMetricListener.class),
-                        ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
+                        ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyLong()))
                 .willReturn(flowEventMetricListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)

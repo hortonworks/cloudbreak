@@ -96,10 +96,11 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 getEdgeConfig().finalState, flowChainType, getClass().getSimpleName(), flowChainId, flowId, stackId);
         Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);
+        long startTimeInMillis = System.currentTimeMillis();
         sm.addStateListener(fl);
 
         FlowEventMetricListener<S, E> flowEventMetricsListener = applicationContext.getBean(FlowEventMetricListener.class,
-                getEdgeConfig().finalState, flowChainType, getClass().getSimpleName());
+                getEdgeConfig().finalState, flowChainType, getClass().getSimpleName(), startTimeInMillis);
         sm.addStateListener(flowEventMetricsListener);
         return flow;
     }

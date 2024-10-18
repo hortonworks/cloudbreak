@@ -25,10 +25,13 @@ public class FlowEventMetricListener<S, E> extends StateMachineListenerAdapter<S
 
     private final String flowType;
 
-    public FlowEventMetricListener(S finalState, String flowChainType, String flowType) {
+    private final long startTimeInMillis;
+
+    public FlowEventMetricListener(S finalState, String flowChainType, String flowType, long startTimeInMillis) {
         this.finalState = finalState;
         this.flowChainType = flowChainType;
         this.flowType = flowType;
+        this.startTimeInMillis = startTimeInMillis;
     }
 
     @Override
@@ -42,12 +45,12 @@ public class FlowEventMetricListener<S, E> extends StateMachineListenerAdapter<S
         if (transition != null && transition.getTrigger() != null && transition.getTrigger().getEvent() != null) {
             flowEvent = transition.getTrigger().getEvent().toString();
         }
-        flowMetricSender.send(flowType, flowChainType, nextFlowState, flowEvent);
+        flowMetricSender.send(flowType, flowChainType, nextFlowState, flowEvent, startTimeInMillis);
     }
 
     @Override
     public void stateMachineStopped(StateMachine<S, E> stateMachine) {
         LOGGER.info("State machine stopped: {}", stateMachine);
-        flowMetricSender.send(flowType, flowChainType, finalState.toString(), null);
+        flowMetricSender.send(flowType, flowChainType, finalState.toString(), null, startTimeInMillis);
     }
 }

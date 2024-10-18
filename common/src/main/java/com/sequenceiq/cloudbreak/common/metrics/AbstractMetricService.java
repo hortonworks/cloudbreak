@@ -84,7 +84,7 @@ public abstract class AbstractMetricService implements MetricService {
         return metric.getMetricName().contains("state") || metric.getMetricName().contains("leader") || metric.getMetricName().contains("threadpool");
     }
 
-    protected void recordTimer(long millisToRecord, Metric metric, String... tags) {
+    public void recordTimer(long millisToRecord, Metric metric, String... tags) {
         Timer.builder(getMetricName(metric))
                 .tags(tags)
                 .register(Metrics.globalRegistry)

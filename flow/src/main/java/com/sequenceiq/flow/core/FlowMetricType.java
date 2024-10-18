@@ -7,6 +7,7 @@ public enum FlowMetricType implements Metric {
     ACTIVE_FLOWS("activeflow"),
     FLOW_STARTED("flow.started"),
     FLOW_FINISHED("flow.finished"),
+    FLOW_TIME("flow.time"),
     FLOW_FAILED("flow.failed");
 
     private final String metricName;

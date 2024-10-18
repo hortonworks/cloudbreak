@@ -6,6 +6,7 @@ import static com.sequenceiq.flow.core.FlowMetricTag.ROOT_FLOW_CHAIN;
 import static com.sequenceiq.flow.core.FlowMetricType.FLOW_FAILED;
 import static com.sequenceiq.flow.core.FlowMetricType.FLOW_FINISHED;
 import static com.sequenceiq.flow.core.FlowMetricType.FLOW_STARTED;
+import static com.sequenceiq.flow.core.FlowMetricType.FLOW_TIME;
 import static java.util.function.Function.identity;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class FlowMetricSender {
                 .collect(Collectors.toMap(flowConfiguration -> flowConfiguration.getClass().getSimpleName(), identity()));
     }
 
-    public void send(String flowType, String flowChainType, String nextFlowState, String flowEvent) {
+    public void send(String flowType, String flowChainType, String nextFlowState, String flowEvent, long startTimeInMillis) {
         try {
             AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flowType);
             String rootFlowChainType = getRootFlowChainType(flowChainType);
@@ -62,6 +63,14 @@ public class FlowMetricSender {
                         ACTUAL_FLOW_CHAIN.name(), actualFlowChainType,
                         FLOW.name(), flowType);
             } else if (edgeConfig.getFinalState().equals(nextFlowStateEnum)) {
+                long duration = System.currentTimeMillis() - startTimeInMillis;
+                if (flowEvent != null) {
+                    metricService.recordTimer(duration,
+                            FLOW_TIME,
+                            ROOT_FLOW_CHAIN.name(), rootFlowChainType,
+                            ACTUAL_FLOW_CHAIN.name(), actualFlowChainType,
+                            FLOW.name(), flowType);
+                }
                 metricService.incrementMetricCounter(FLOW_FINISHED,
                         ROOT_FLOW_CHAIN.name(), rootFlowChainType,
                         ACTUAL_FLOW_CHAIN.name(), actualFlowChainType,

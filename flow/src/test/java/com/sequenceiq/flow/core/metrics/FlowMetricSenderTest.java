@@ -42,43 +42,47 @@ class FlowMetricSenderTest {
 
     @Test
     void testRequiredFlowParametersAreNull() {
-        underTest.send(null, null, null, null);
+        underTest.send(null, null, null, null, System.currentTimeMillis());
         verifyNoInteractions(metricService);
     }
 
     @Test
     void testUnknownFlowType() {
-        underTest.send("unknown", null, "INIT_STATE", null);
+        underTest.send("unknown", null, "INIT_STATE", null, System.currentTimeMillis());
         verifyNoInteractions(metricService);
     }
 
     @Test
     void testUnknownNextFlowStateEnum() {
-        underTest.send("TestFlowConfig", null, "UNKNOWN_STATE", null);
+        underTest.send("TestFlowConfig", null, "UNKNOWN_STATE", null, System.currentTimeMillis());
         verifyNoInteractions(metricService);
     }
 
     @Test
     void testNextFlowStateIsInit() {
-        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "INIT_STATE", null);
+        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "INIT_STATE", null,
+                System.currentTimeMillis());
         verify(metricService, times(1)).incrementMetricCounter(eq(FlowMetricType.FLOW_STARTED), any(String[].class));
     }
 
     @Test
     void testNextFlowStateIsFinal() {
-        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "FINAL_STATE", null);
+        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "FINAL_STATE", null,
+                System.currentTimeMillis());
         verify(metricService, times(1)).incrementMetricCounter(eq(FlowMetricType.FLOW_FINISHED), any(String[].class));
     }
 
     @Test
     void testNextFlowStateIsFailed() {
-        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "TEST_FAILED_STATE", null);
+        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "TEST_FAILED_STATE", null,
+                System.currentTimeMillis());
         verify(metricService, times(1)).incrementMetricCounter(eq(FlowMetricType.FLOW_FAILED), any(String[].class));
     }
 
     @Test
     void testNextFlowStateIsOther() {
-        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "TEMP_STATE", null);
+        underTest.send("TestFlowConfig", "RootFlowChain/ActualFlowChain", "TEMP_STATE", null,
+                System.currentTimeMillis());
         verifyNoInteractions(metricService);
     }
 }

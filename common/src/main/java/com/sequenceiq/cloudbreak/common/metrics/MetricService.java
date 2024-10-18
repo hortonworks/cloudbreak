@@ -16,6 +16,8 @@ public interface MetricService {
 
     void incrementMetricCounter(Metric metric, String... tags);
 
+    void recordTimer(long duration, Metric metric, String... tags);
+
     void incrementMetricCounter(String metric, String... tags);
 
     void incrementMetricCounter(String metric, double amount, String... tags);
