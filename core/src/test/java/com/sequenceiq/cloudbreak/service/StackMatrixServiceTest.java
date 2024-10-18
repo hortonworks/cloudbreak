@@ -78,7 +78,7 @@ public class StackMatrixServiceTest {
         assertNull(cdh.getClouderaManager().getRepository());
         assertNull(cdh.getClouderaManager().getVersion());
         assertEquals(cdh.getOs(), OS);
-        assertEquals(cdh.getArchitecture(), ARCH);
+        assertEquals(cdh.getArchitecture(), ARCH.getName());
     }
 
     @Test

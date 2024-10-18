@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -95,7 +96,7 @@ public class StackMatrixService {
         }
         stackDescriptorV4.setProductDefinitions(stackInfo.getCsd());
         stackDescriptorV4.setOs(image.getOs());
-        stackDescriptorV4.setArchitecture(Architecture.fromStringWithFallback(image.getArchitecture()));
+        stackDescriptorV4.setArchitecture(Objects.requireNonNullElse(image.getArchitecture(), Architecture.X86_64.getName()));
         return stackDescriptorV4;
     }
 }

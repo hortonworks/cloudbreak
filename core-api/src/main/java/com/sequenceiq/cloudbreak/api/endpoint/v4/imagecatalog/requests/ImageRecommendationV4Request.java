@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.common.model.Architecture;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -35,7 +34,7 @@ public class ImageRecommendationV4Request {
     private String region;
 
     @Schema(description = ARCHITECTURE)
-    private Architecture architecture;
+    private String architecture;
 
     @Schema(description = IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
@@ -72,11 +71,11 @@ public class ImageRecommendationV4Request {
         this.region = region;
     }
 
-    public Architecture getArchitecture() {
+    public String getArchitecture() {
         return architecture;
     }
 
-    public void setArchitecture(Architecture architecture) {
+    public void setArchitecture(String architecture) {
         this.architecture = architecture;
     }
 
