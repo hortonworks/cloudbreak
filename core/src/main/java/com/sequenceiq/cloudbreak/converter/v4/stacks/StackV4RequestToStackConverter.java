@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -237,7 +236,7 @@ public class StackV4RequestToStackConverter {
         Set<LoadBalancer> loadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, source);
         stack.setLoadBalancers(loadBalancers);
         stack.setJavaVersion(source.getJavaVersion());
-        stack.setArchitecture(Objects.requireNonNullElse(source.getArchitecture(), Architecture.X86_64));
+        stack.setArchitecture(Architecture.fromStringWithValidation(source.getArchitecture()));
         return stack;
     }
 
@@ -437,7 +436,7 @@ public class StackV4RequestToStackConverter {
                 null,
                 imageSettings.getOs(),
                 null,
-                getIfNotNull(source.getArchitecture(), Architecture::getName),
+                source.getArchitecture(),
                 null,
                 imageSettings.getCatalog(),
                 imageSettings.getId(),
