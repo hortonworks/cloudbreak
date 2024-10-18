@@ -33,6 +33,13 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
     @SecretValue
     private Secret saltSignPrivateKeyVault;
 
+    @Column(columnDefinition = "TEXT")
+    private String saltMasterPublicKey;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret saltMasterPrivateKeyVault = Secret.EMPTY;
+
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret saltBootPasswordVault;
@@ -77,16 +84,16 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltPasswordVault.getRaw();
     }
 
-    public String getSaltPasswordVaultSecret() {
-        return saltPasswordVault.getSecret();
-    }
-
     public void setSaltPasswordVault(Secret saltPasswordVault) {
         this.saltPasswordVault = saltPasswordVault;
     }
 
     public void setSaltPasswordVault(String saltPasswordVault) {
         this.saltPasswordVault = new Secret(saltPasswordVault);
+    }
+
+    public String getSaltPasswordVaultSecret() {
+        return saltPasswordVault.getSecret();
     }
 
     public String getSaltSignPublicKey() {
@@ -101,10 +108,6 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         return saltSignPrivateKeyVault.getRaw();
     }
 
-    public String getSaltSignPrivateKeyVaultSecret() {
-        return saltSignPrivateKeyVault.getSecret();
-    }
-
     public void setSaltSignPrivateKeyVault(String saltSignPrivateKeyVault) {
         this.saltSignPrivateKeyVault = new Secret(saltSignPrivateKeyVault);
     }
@@ -113,12 +116,36 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltSignPrivateKeyVault = saltSignPrivateKeyVault;
     }
 
-    public String getSaltBootPasswordVault() {
-        return saltBootPasswordVault.getRaw();
+    public String getSaltSignPrivateKeyVaultSecret() {
+        return saltSignPrivateKeyVault.getSecret();
     }
 
-    public String getSaltBootPasswordVaultSecret() {
-        return saltBootPasswordVault.getSecret();
+    public String getSaltMasterPublicKey() {
+        return saltMasterPublicKey;
+    }
+
+    public void setSaltMasterPublicKey(String saltMasterPublicKey) {
+        this.saltMasterPublicKey = saltMasterPublicKey;
+    }
+
+    public String getSaltMasterPrivateKeyVault() {
+        return saltMasterPrivateKeyVault.getRaw();
+    }
+
+    public void setSaltMasterPrivateKeyVault(Secret saltMasterPrivateKeyVault) {
+        this.saltMasterPrivateKeyVault = saltMasterPrivateKeyVault;
+    }
+
+    public void setSaltMasterPrivateKeyVault(String saltMasterPrivateKeyVault) {
+        this.saltMasterPrivateKeyVault = new Secret(saltMasterPrivateKeyVault);
+    }
+
+    public String getSaltMasterPrivateKeyVaultSecret() {
+        return saltMasterPrivateKeyVault.getSecret();
+    }
+
+    public String getSaltBootPasswordVault() {
+        return saltBootPasswordVault.getRaw();
     }
 
     public void setSaltBootPasswordVault(Secret saltBootPasswordVault) {
@@ -129,12 +156,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
         this.saltBootPasswordVault = new Secret(saltBootPasswordVault);
     }
 
-    public String getSaltBootSignPrivateKeyVault() {
-        return saltBootSignPrivateKeyVault.getRaw();
+    public String getSaltBootPasswordVaultSecret() {
+        return saltBootPasswordVault.getSecret();
     }
 
-    public String getSaltBootSignPrivateKeyVaultSecret() {
-        return saltBootSignPrivateKeyVault.getSecret();
+    public String getSaltBootSignPrivateKeyVault() {
+        return saltBootSignPrivateKeyVault.getRaw();
     }
 
     public void setSaltBootSignPrivateKeyVault(Secret saltBootSignPrivateKeyVault) {
@@ -143,6 +170,10 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
 
     public void setSaltBootSignPrivateKeyVault(String saltBootSignPrivateKeyVault) {
         this.saltBootSignPrivateKeyVault = new Secret(saltBootSignPrivateKeyVault);
+    }
+
+    public String getSaltBootSignPrivateKeyVaultSecret() {
+        return saltBootSignPrivateKeyVault.getSecret();
     }
 
     @Override

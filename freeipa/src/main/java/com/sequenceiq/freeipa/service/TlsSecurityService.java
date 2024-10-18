@@ -44,6 +44,7 @@ public class TlsSecurityService {
         generateClientKeys(securityConfig);
         generateSaltBootSignKeypair(saltSecurityConfig);
         generateSaltSignKeypair(securityConfig);
+        generateSaltMasterKeypair(saltSecurityConfig);
         generateSaltPassword(saltSecurityConfig);
         generateSaltBootPassword(saltSecurityConfig);
         return securityConfig;
@@ -82,6 +83,14 @@ public class TlsSecurityService {
         saltSecurityConfig.setSaltSignPrivateKeyVault(saltSignPrivateKey);
     }
 
+    private void generateSaltMasterKeypair(SaltSecurityConfig saltSecurityConfig) {
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        String privateKey = PkiUtil.convert(keyPair.getPrivate());
+        String publicKey = PkiUtil.convertPemPublicKey(keyPair.getPublic());
+        saltSecurityConfig.setSaltMasterPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
+        saltSecurityConfig.setSaltMasterPrivateKeyVault(BaseEncoding.base64().encode(privateKey.getBytes()));
+    }
+
     private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {
         String saltBootPassword = PasswordUtil.generatePassword();
         saltSecurityConfig.setSaltBootPasswordVault(saltBootPassword);
@@ -99,13 +108,17 @@ public class TlsSecurityService {
         HttpClientConfig conf = buildTLSClientConfig(stack, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKeyVault();
+        String saltMasterPrivateKey = saltSecurityConfig.getSaltMasterPrivateKeyVault() != null
+                ? new String(decodeBase64(saltSecurityConfig.getSaltMasterPrivateKeyVault())) : null;
+        String saltMasterPublicKey = saltSecurityConfig.getSaltMasterPublicKey() != null
+                ? new String(decodeBase64(saltSecurityConfig.getSaltMasterPublicKey())) : null;
         GatewayConfig gatewayConfig =
                 new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
                         getGatewayPort(stack.getGatewayport(), stack), gatewayInstance.getInstanceId(), conf.getServerCert(),
                         conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
                         saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
                         InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                        null, null,
+                        saltMasterPrivateKey, saltMasterPublicKey,
                         new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
                         null, null);
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
