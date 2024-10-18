@@ -2,10 +2,11 @@ package com.sequenceiq.datalake.flow.datalake.scale;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_HORIZONTAL_SCALE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_START_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_HANDLER;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_HANDLER;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_IN_PROGRESS_HANDLER;
 
 import java.util.List;
@@ -134,7 +135,29 @@ public class DatalakeHorizontalScaleActions {
                         "Rolling restart of services in progress",
                         sdxCluster);
                 LOGGER.info("Datalake Horizontal scale, RollingRestart of services started!");
-                String selector = DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_HANDLER.selector();
+                sdxHorizontalScalingService.rollingRestartServices(payload.getResourceId(), payload.getResourceCrn());
+                sendEvent(context, DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_EVENT.event(), payload);
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeHorizontalScaleFlowEvent payload, Optional<CommonContext> flowContext, Exception ex) {
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_HORIZONTAL_SCALE_FAILED,
+                        "CM rolling restart failed",
+                        payload.getResourceId());
+                LOGGER.warn("Datalake Horizontal scale CM rolling restart Failed with error {}", ex.getMessage());
+                return payload;
+            }
+        };
+    }
+
+    @Bean(name = "DATALAKE_HORIZONTAL_SCALE_SERVICES_RESTART_IN_PROGRESS_STATE")
+    public Action<?, ?> rollingRestartServicesInProgress() {
+        return new AbstractDatalakeHorizontalScaleAction<>(DatalakeHorizontalScaleFlowEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, DatalakeHorizontalScaleFlowEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Rolling restart of services is in progress for {}", payload.getResourceId());
+                String selector = DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_HANDLER.selector();
                 DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
                         .datalakeHorizontalScaleFlowEventBuilderFactory(payload)
                         .setSelector(selector);
@@ -146,7 +169,7 @@ public class DatalakeHorizontalScaleActions {
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_HORIZONTAL_SCALE_FAILED,
                         "CM rolling restart failed",
                         payload.getResourceId());
-                LOGGER.warn("Datalake Horizontal scale CM rolling restart Failed with error {}", ex.getMessage());
+                LOGGER.warn("Datalake Horizontal scale CM rolling restart failed with error {}", ex.getMessage());
                 return payload;
             }
         };

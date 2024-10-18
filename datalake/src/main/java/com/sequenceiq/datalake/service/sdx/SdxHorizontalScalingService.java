@@ -72,6 +72,9 @@ public class SdxHorizontalScalingService {
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
 
+    @Inject
+    private SdxService sdxService;
+
     public FlowIdentifier horizontalScaleDatalake(String name, DatalakeHorizontalScaleRequest scaleRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (!entitlementService.isDatalakeHorizontalScaleEnabled(accountId)) {
@@ -128,6 +131,13 @@ public class SdxHorizontalScalingService {
         if (nodeRequestValid.isPresent()) {
             throw new BadRequestException(nodeRequestValid.get());
         }
+    }
+
+    public FlowIdentifier rollingRestartServices(Long resourceId, String resourceCrn) {
+        SdxCluster sdxCluster = sdxService.getById(resourceId);
+        FlowIdentifier flowId = stackV4Endpoint.rollingRestartServices(0L, resourceCrn);
+        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowId);
+        return flowId;
     }
 
     private Optional<String> validateNodeRequest(StackV4Response stack, DatalakeHorizontalScaleRequest request, SdxCluster sdxCluster) {

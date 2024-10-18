@@ -1,7 +1,8 @@
 package com.sequenceiq.datalake.flow.datalake.scale.handler;
 
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent.DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT;
-import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_HANDLER;
+import static com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleHandlerEvent.DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_HANDLER;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.dyngr.exception.PollerException;
+import com.dyngr.exception.PollerStoppedException;
+import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleFlowEvent;
@@ -20,13 +24,11 @@ import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScale
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends EventSenderAwareHandler<DatalakeHorizontalScaleFlowEvent> {
+public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends ExceptionCatcherEventHandler<DatalakeHorizontalScaleFlowEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeHorizontalScaleServicesRollingRestartWaitHandler.class);
 
@@ -37,40 +39,65 @@ public class DatalakeHorizontalScaleServicesRollingRestartWaitHandler extends Ev
     private int durationInMinutes;
 
     @Inject
-    private StackV4Endpoint stackV4Endpoint;
-
-    @Inject
     private CloudbreakPoller cloudbreakPoller;
 
     @Inject
     private SdxService sdxService;
 
-    @Inject
-    private CloudbreakFlowService cloudbreakFlowService;
-
-    protected DatalakeHorizontalScaleServicesRollingRestartWaitHandler(EventSender eventSender) {
-        super(eventSender);
-    }
-
     @Override
     public String selector() {
-        return DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_HANDLER.selector();
+        return DATALAKE_HORIZONTAL_SCALE_CM_ROLLING_RESTART_IN_PROGRESS_HANDLER.selector();
     }
 
     @Override
-    public void accept(Event<DatalakeHorizontalScaleFlowEvent> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception exception, Event<DatalakeHorizontalScaleFlowEvent> event) {
+        LOGGER.error("Datalake horizontal scale rolling restart failed {}", exception.getMessage());
+        return createFailureEvent(resourceId, exception, event.getData());
+    }
+
+    @Override
+    protected Selectable doAccept(HandlerEvent<DatalakeHorizontalScaleFlowEvent> event) {
         DatalakeHorizontalScaleFlowEvent data = event.getData();
         SdxCluster sdxCluster = sdxService.getById(data.getResourceId());
-        FlowIdentifier flowId = stackV4Endpoint.rollingRestartServices(0L, data.getResourceCrn());
-        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowId);
-        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
-                .withStopPollingIfExceptionOccurred(true);
-        cloudbreakPoller.pollFlowStateBySdxClusterUntilComplete("Datalake horizontal scaling",
-                sdxCluster, pollingConfig);
-        LOGGER.debug("Services Rolling restart finsihed");
-        DatalakeHorizontalScaleFlowEventBuilder resultEventBuilder = DatalakeHorizontalScaleFlowEvent
-                .datalakeHorizontalScaleFlowEventBuilderFactory(data)
-                .setSelector(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector());
-        eventSender().sendEvent(resultEventBuilder.build(), event.getHeaders());
+        Long sdxId = data.getResourceId();
+        String userId = data.getUserId();
+        Selectable response;
+        try {
+            LOGGER.debug("Start CM polling for services rolling restart process with id: {}", sdxId);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
+                    .withStopPollingIfExceptionOccurred(true);
+            cloudbreakPoller.pollFlowStateBySdxClusterUntilComplete("Datalake horizontal scaling",
+                    sdxCluster, pollingConfig);
+            LOGGER.debug("Services Rolling restart finsihed");
+            response = DatalakeHorizontalScaleFlowEvent
+                    .datalakeHorizontalScaleFlowEventBuilderFactory(event.getData())
+                    .setSelector(DATALAKE_HORIZONTAL_SCALE_FINISHED_EVENT.selector())
+                    .build();
+        } catch (UserBreakException userBreakException) {
+            LOGGER.error("Services rolling restart polling exited before timeout. Cause: ", userBreakException);
+            response = createFailureEvent(sdxId, userBreakException, event.getData());
+        } catch (PollerStoppedException pollerStoppedException) {
+            LOGGER.error("Services rolling restart poller stopped for stack: {}", sdxId);
+            response = createFailureEvent(sdxId,
+                    new PollerStoppedException("Services rolling restart timed out after " + durationInMinutes + " minutes"), event.getData());
+        } catch (PollerException exception) {
+            LOGGER.error("Services rolling restart polling failed for stack: {}", sdxId);
+            response = createFailureEvent(sdxId, exception, event.getData());
+        }
+        return response;
+    }
+
+    private Selectable createFailureEvent(Long resourceId, Exception exception, DatalakeHorizontalScaleFlowEvent event) {
+        return new DatalakeHorizontalScaleFlowEventBuilder()
+                .setSelector(DATALAKE_HORIZONTAL_SCALE_FAILED_EVENT.selector())
+                .setResourceId(resourceId)
+                .setResourceName(event.getResourceName())
+                .setUserId(event.getUserId())
+                .setResourceCrn(event.getResourceCrn())
+                .setScaleRequest(event.getScaleRequest())
+                .setException(exception)
+                .setFlowId(event.getFlowId())
+                .setCommandId(event.getCommandId())
+                .build();
     }
 }
