@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentMarketplaceError.INVALID_REQUEST_CONTENT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentMarketplaceError.MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED;
 
 import java.util.Optional;
@@ -97,6 +98,14 @@ public class AzureMarketplaceValidatorService {
                 String errorMessage = String.format(MISSING_WHAT_IF_PERMISSION_ERROR + " Message: %s", e.getMessage());
                 LOGGER.info(errorMessage);
                 return ValidationResult.builder().warning(errorMessage).build();
+                // FIXME: we are skipping error until we get to know its cause, there is an open Azure support ticket #2410180050001855
+                // "Cannot deserialize the current JSON array (e.g. [1,2,3]) into type 'Azure.Deployments.Core.Definitions.Schema.Template'"
+            } else if (Optional.ofNullable(e.getValue())
+                    .map(ManagementError::getCode)
+                    .orElse("").equals(INVALID_REQUEST_CONTENT.getCode())) {
+                String errorMessage = String.format(INVALID_REQUEST_CONTENT + " Message: %s", e.getMessage());
+                LOGGER.warn(errorMessage);
+                return ValidationResult.builder().build();
             }
             throw e;
         }

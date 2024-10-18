@@ -285,6 +285,33 @@ class AzureMarketplaceValidatorServiceTest {
     }
 
     @Test
+    void validateMarketplaceImageShouldHandleFallbackOnWhatIfJsonError() {
+        // Given
+        Image image = mock(Image.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+
+        when(azureImageFormatValidator.isMarketplaceImageFormat(image)).thenReturn(true);
+        when(azureImageTermsSignerService.getImageTermStatus(any(), any(), any())).thenReturn(AzureImageTermStatus.NOT_ACCEPTED);
+        String errorMessage = "Cannot deserialize the current JSON array";
+        ManagementException managementException = new ManagementException(errorMessage, mock(HttpResponse.class),
+                new ManagementError("InvalidRequestContent", errorMessage));
+        doThrow(managementException).when(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
+        when(azureExceptionHandler.isForbidden(eq(managementException))).thenReturn(false);
+
+        // When
+        MarketplaceValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> azureMarketplaceValidatorService.validateMarketplaceImage(image,
+                PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, "fallbackTarget", mock(AzureClient.class), cloudStack, ac));
+
+        assertFalse(result.isFallbackRequired());
+        assertTrue(result.isSkipVhdCopy());
+        verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
+        verify(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
+        verify(entitlementService).azureOnlyMarketplaceImagesEnabled(anyString());
+        verify(azureExceptionHandler).isForbidden(any(ManagementException.class));
+        verifyNoMoreInteractions(azureTemplateDeploymentService, entitlementService);
+    }
+
+    @Test
     void validateMarketplaceImageShouldHandleFallbackOnWhatIfNonPermissionError() {
         // Given
         Image image = mock(Image.class);
