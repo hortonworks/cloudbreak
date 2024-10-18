@@ -29,6 +29,9 @@ public class UpgradePermissionProvider {
     @Inject
     private VersionComparisonContextFactory versionComparisonContextFactory;
 
+    @Inject
+    private UpgradePathRestrictionService upgradePathRestrictionService;
+
     public boolean permitCmUpgrade(ImageFilterParams imageFilterParams, Image candiateImage) {
         VersionComparisonContext currentImageVersions = versionComparisonContextFactory.buildForCm(imageFilterParams.getCurrentImage().getPackageVersions());
         VersionComparisonContext candidateImageVersions = versionComparisonContextFactory.buildForCm(candiateImage.getPackageVersions());
@@ -41,7 +44,8 @@ public class UpgradePermissionProvider {
         VersionComparisonContext candidateImageVersions = versionComparisonContextFactory.buildForStack(candidateImage);
         return isRuntimeVersionSupported(candidateImage)
                 && permitByComponentVersion(currentImageVersions, candidateImageVersions,
-                checkUpgradeMatrix(currentImageVersions, candidateImageVersions, filterParams));
+                    checkUpgradeMatrix(currentImageVersions, candidateImageVersions, filterParams))
+                && permitByUpgradePatchRestriction(currentImageVersions, candidateImageVersions);
     }
 
     private boolean checkUpgradeMatrix(VersionComparisonContext currentImageVersionContext, VersionComparisonContext candidateImageVersionContext,
@@ -61,6 +65,10 @@ public class UpgradePermissionProvider {
 
     private boolean permitByComponentVersion(VersionComparisonContext currentVersion, VersionComparisonContext newVersion) {
         return componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, newVersion);
+    }
+
+    private boolean permitByUpgradePatchRestriction(VersionComparisonContext currentVersion, VersionComparisonContext newVersion) {
+        return upgradePathRestrictionService.permitUpgrade(currentVersion, newVersion);
     }
 
     private boolean permitByUpgradeMatrix(VersionComparisonContext currentVersion, VersionComparisonContext newVersion) {

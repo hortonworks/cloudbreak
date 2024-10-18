@@ -57,6 +57,9 @@ public class UpgradePermissionProviderTest {
     @Mock
     private VersionComparisonContextFactory versionComparisonContextFactory;
 
+    @Mock
+    private UpgradePathRestrictionService upgradePathRestrictionService;
+
     @Test
     public void testPermitStackUpgradeShouldReturnTrueWhenTheVersionsAreEqualAndTheBuildNumberIsGreater() {
         String componentVersion = "7.2.1";
@@ -69,6 +72,7 @@ public class UpgradePermissionProviderTest {
         when(versionComparisonContextFactory.buildForStack(candidateImage))
                 .thenReturn(createVersionComparisonContext(componentVersion, "2001"));
         when(supportedRuntimes.isSupported("7.2.1")).thenReturn(true);
+        when(upgradePathRestrictionService.permitUpgrade(any(), any())).thenReturn(true);
 
         assertTrue(underTest.permitStackUpgrade(imageFilterParams, candidateImage));
         verifyNoInteractions(upgradeMatrixService);
@@ -119,10 +123,31 @@ public class UpgradePermissionProviderTest {
                 .thenReturn(createVersionComparisonContext(targetVersion, "2001"));
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(true);
         when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
+        when(upgradePathRestrictionService.permitUpgrade(any(), any())).thenReturn(true);
 
         assertTrue(underTest.permitStackUpgrade(imageFilterParams, candidateImage));
         verify(componentVersionComparator).permitCmAndStackUpgradeByComponentVersion(any(), any());
         verify(upgradeMatrixService).permitByUpgradeMatrix(currentVersion, targetVersion);
+    }
+
+    @Test
+    public void testPermitStackUpgradeShouldReturnFalseWhenTheUpgradePathIsNotSupported() {
+        String currentVersion = "7.2.1";
+        String targetVersion = "7.2.2";
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
+        Image candidateImage = createCandidateImage(targetVersion, "2001");
+        ImageFilterParams imageFilterParams = createImageFilterParams(currentImage, DATALAKE_STACK_TYPE);
+
+        when(versionComparisonContextFactory.buildForStack(imageFilterParams.getCurrentImage().getPackageVersions(), imageFilterParams.getStackRelatedParcels()))
+                .thenReturn(createVersionComparisonContext(currentVersion, "2002"));
+        when(versionComparisonContextFactory.buildForStack(candidateImage))
+                .thenReturn(createVersionComparisonContext(targetVersion, "2001"));
+        when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
+        when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(true);
+        when(upgradePathRestrictionService.permitUpgrade(any(), any())).thenReturn(false);
+
+        assertFalse(underTest.permitStackUpgrade(imageFilterParams, candidateImage));
+        verify(componentVersionComparator).permitCmAndStackUpgradeByComponentVersion(any(), any());
     }
 
     @Test
@@ -176,6 +201,7 @@ public class UpgradePermissionProviderTest {
         when(versionComparisonContextFactory.buildForStack(candidateImage))
                 .thenReturn(createVersionComparisonContext(targetVersion, "2001"));
         when(supportedRuntimes.isSupported("7.2.2")).thenReturn(true);
+        when(upgradePathRestrictionService.permitUpgrade(any(), any())).thenReturn(true);
 
         assertTrue(underTest.permitStackUpgrade(imageFilterParams, candidateImage));
         verify(componentVersionComparator).permitCmAndStackUpgradeByComponentVersion(any(), any());

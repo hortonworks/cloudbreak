@@ -43,7 +43,9 @@ import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
@@ -53,7 +55,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies.ServiceDepend
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.DeclaredVersionService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.SupportedVersionService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.GeneratedCmTemplateService;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -62,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
@@ -99,6 +104,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentVersionsComparato
 import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOptionsResponseFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradePathRestrictionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
@@ -147,7 +153,7 @@ import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeSe
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
         "cb.stoprestriction.restrictedCloudPlatform=AWS",
-        "cb.runtimes.latest=7.2.18"
+        "cb.runtimes.latest=7.3.1"
 })
 public class DistroXUpgradeRetrievalComponentTest {
 
@@ -275,7 +281,7 @@ public class DistroXUpgradeRetrievalComponentTest {
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(1, actual);
-        assertUpgradeCandidate(actual, "3d617c75-f252-4879-8da8-f60f2e57324b", "7.2.17 runtime upgrade");
+        assertUpgradeCandidate(actual, "d45e1ab0-0de6-4c8b-8417-18e3ec30a325", "7.2.17 runtime upgrade");
     }
 
     @Test
@@ -290,11 +296,11 @@ public class DistroXUpgradeRetrievalComponentTest {
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(1, actual);
-        assertUpgradeCandidate(actual, "16c21dea-03f8-4178-8afd-2e1c89bea2da", "7.2.16 OS upgrade candidate for the current image");
+        assertUpgradeCandidate(actual, "ef21e621-b3e6-422b-9ab3-bfc01bbd86b8", "7.2.16 OS upgrade candidate for the current image");
     }
 
     @Test
-    void testUpgradeClusterByNameWhenTheCurrentIs7217RedHat() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    void testUpgradeClusterByNameWhenTheCurrentIs7217p700RedHat() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, RHEL8);
         setupImageCatalogMocks(currentCatalogImage);
 
@@ -302,7 +308,37 @@ public class DistroXUpgradeRetrievalComponentTest {
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(1, actual);
-        assertUpgradeCandidate(actual, "85e571ef-725e-4b3e-a6ce-2c2878ff207c", "7.2.18 RedHat runtime upgrade");
+        assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat runtime upgrade");
+    }
+
+    @Test
+    void testUpgradeClusterByNameWhenTheCurrentIs7217RedHatAndInternalTenantEnabled() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, RHEL8);
+        setupImageCatalogMocks(currentCatalogImage);
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
+
+        DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
+
+        assertTrue(actual.reason().isEmpty(), actual.reason());
+        assertUpgradeCandidateNumber(2, actual);
+        assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat runtime upgrade");
+        assertUpgradeCandidate(actual, "918aeb9c-75cb-4bce-b637-facfdda414af", "7.3.1 RedHat runtime upgrade");
+    }
+
+    @Test
+    void testUpgradeClusterByNameWhenTheCurrentIs7217p200RedHatAndInternalTenantDisabled()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image currentCatalogImage = imageCatalogMock.getImage("e40a5467-4237-4c86-a6d5-ab3639024cd6");
+        setupImageCatalogMocks(currentCatalogImage);
+        when(entitlementService.internalTenant(anyString())).thenReturn(false);
+
+        DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
+
+        assertTrue(actual.reason().isEmpty(), actual.reason());
+        assertUpgradeCandidateNumber(3, actual);
+        assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat patch upgrade");
+        assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat runtime upgrade");
+        assertUpgradeCandidate(actual, "918aeb9c-75cb-4bce-b637-facfdda414af", "7.3.1 RedHat runtime upgrade");
     }
 
     @Test
@@ -315,8 +351,8 @@ public class DistroXUpgradeRetrievalComponentTest {
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(2, actual);
-        assertUpgradeCandidate(actual, "3d617c75-f252-4879-8da8-f60f2e57324b", "7.2.17 OS upgrade candidate for the current image");
-        assertUpgradeCandidate(actual, "4b6a691a-bdb3-4ef2-9be8-5d64a4636e31", "7.2.17 RedHat OS upgrade");
+        assertUpgradeCandidate(actual, "d45e1ab0-0de6-4c8b-8417-18e3ec30a325", "7.2.17 OS upgrade candidate for the current image");
+        assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat OS upgrade");
     }
 
     @Test
@@ -328,7 +364,7 @@ public class DistroXUpgradeRetrievalComponentTest {
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(1, actual);
-        assertUpgradeCandidate(actual, "4b6a691a-bdb3-4ef2-9be8-5d64a4636e31", "7.2.17 RedHat runtime upgrade");
+        assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat OS upgrade");
     }
 
     @Test
@@ -342,26 +378,35 @@ public class DistroXUpgradeRetrievalComponentTest {
         assertUpgradeCandidateNumber(4, actual);
         assertUpgradeCandidate(actual, "ddf985e2-781a-40e7-b4d0-17673b306bad", "7.2.14 runtime upgrade");
         assertUpgradeCandidate(actual, "21ef3ca1-51e5-4d97-880e-06998c51c707", "7.2.15 runtime upgrade");
-        assertUpgradeCandidate(actual, "16c21dea-03f8-4178-8afd-2e1c89bea2da", "7.2.16 runtime upgrade");
-        assertUpgradeCandidate(actual, "3d617c75-f252-4879-8da8-f60f2e57324b", "7.2.17 runtime upgrade");
+        assertUpgradeCandidate(actual, "ef21e621-b3e6-422b-9ab3-bfc01bbd86b8", "7.2.16 runtime upgrade");
+        assertUpgradeCandidate(actual, "d45e1ab0-0de6-4c8b-8417-18e3ec30a325", "7.2.17 runtime upgrade");
     }
 
     private void assertUpgradeCandidateNumber(int expected, DistroXUpgradeV1Response actual) {
-        assertEquals(expected, actual.upgradeCandidates().size(), String.format("Upgrade candidates: %s", actual.upgradeCandidates()));
+        assertEquals(expected, actual.upgradeCandidates().size(), String.format("Upgrade candidates: %s", actual));
     }
 
-    private void setupImageCatalogMocks(com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    private void setupImageCatalogMocks(Image currentCatalogImage) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageFilterResult imageFilterResult = imageCatalogMock.getAvailableImages(currentCatalogImage.getUuid(), CLOUD_PLATFORM);
         com.sequenceiq.cloudbreak.cloud.model.Image currentModelImage = createCurrentModelImage(currentCatalogImage);
         when(imageService.getImage(STACK_ID)).thenReturn(currentModelImage);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(createStatedImage(currentCatalogImage));
         when(imageCatalogService.getImageFilterResult(any(), any(), any(), anyBoolean(), any())).thenReturn(imageFilterResult);
+        when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(Set.of(createClusterComponent(currentCatalogImage)));
+    }
+
+    private ClusterComponentView createClusterComponent(Image currentCatalogImage) {
+        ClusterComponentView clusterComponentView = new ClusterComponentView();
+        clusterComponentView.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        clusterComponentView.setAttributes(new Json(new ClouderaManagerProduct()
+                .withName("CDH")
+                .withVersion(currentCatalogImage.getStackDetails().getRepo().getStack().get(StackRepoDetails.REPOSITORY_VERSION))));
+        return clusterComponentView;
     }
 
     private void assertUpgradeCandidate(DistroXUpgradeV1Response actual, String imageId, String description) {
         assertTrue(actual.upgradeCandidates().stream().anyMatch(image -> image.getImageId().equals(imageId)),
-                String.format("%s not found with image id %s", description, imageId));
+                String.format("%s not found with image id %s. The available candidates: %s", description, imageId, actual));
     }
 
     private StatedImage createStatedImage(com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage) {
@@ -495,7 +540,8 @@ public class DistroXUpgradeRetrievalComponentTest {
             ManifestRetrieverService.class,
             CloudbreakRestRequestThreadLocalService.class,
             VersionComparisonContextFactory.class,
-            CdhPatchVersionProvider.class
+            CdhPatchVersionProvider.class,
+            UpgradePathRestrictionService.class
     })
     static class Config {
 
