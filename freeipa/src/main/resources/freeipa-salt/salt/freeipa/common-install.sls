@@ -47,8 +47,7 @@ copy_krb5_keytab:
   file.copy:
     - name: {{ kerberosConfigPath }}/krb5.keytab
     - source: {{ kerberosConfigOriginalPath }}/krb5.keytab
-    - force: True
-    - onlyif: test -f {{ kerberosConfigOriginalPath }}/krb5.keytab
+    - onlyif: test ! -h {{ kerberosConfigOriginalPath }}/krb5.keytab
 {{ kerberosConfigOriginalPath }}/krb5.keytab:
   file.symlink:
     - target: {{ kerberosConfigPath }}/krb5.keytab
@@ -58,7 +57,8 @@ add_keytab_krb5:
     - name: /etc/krb5.conf
     - mode: ensure
     - content: default_keytab_name = {{ kerberosConfigPath }}/krb5.keytab
-    - after: "default_ccache_name.*"
+    - after: "udp_preference_limit.*"
+    - before: "default_ccache_name.*"
 add_keytab_sssd:
   file.line:
     - name: /etc/sssd/sssd.conf

@@ -56,8 +56,7 @@ copy_krb5_keytab:
   file.copy:
     - name: {{ kerberosConfigPath }}/krb5.keytab
     - source: {{ kerberosConfigOriginalPath }}/krb5.keytab
-    - force: True
-    - onlyif: test -f {{ kerberosConfigOriginalPath }}/krb5.keytab
+    - onlyif: test ! -h {{ kerberosConfigOriginalPath }}/krb5.keytab
 {{ kerberosConfigOriginalPath }}/krb5.keytab:
   file.symlink:
     - target: {{ kerberosConfigPath }}/krb5.keytab
