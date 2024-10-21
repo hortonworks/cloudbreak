@@ -55,7 +55,7 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     public boolean populateForScaling(StackDtoDelegate stack, Set<String> hostGroupsWithInstancesToCreate,
-        boolean repair, NetworkScaleDetails networkScaleDetails) {
+            boolean repair, NetworkScaleDetails networkScaleDetails) {
         boolean updateHappened = Boolean.FALSE;
         if (populateSupportedOnStack(stack)) {
             Set<InstanceMetaData> updatedInstances = new HashSet<>();
@@ -111,13 +111,11 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     protected Set<InstanceMetaData> populateAvailabilityZoneOfInstances(Set<String> availabilityZonesForGroup, Set<InstanceMetaData> instanceMetaDataSet,
             String groupName) {
         Set<InstanceMetaData> updatedInstances = new HashSet<>();
-        Map<String, Long> zoneToNodeCountMap = availabilityZonesForGroup.stream().collect(Collectors.toMap(Function.identity(),
-                availabilityZone -> countInstancesForAvailabilityZone(instanceMetaDataSet, availabilityZone)));
+        Map<String, Long> zoneToNodeCountMap = getAvailabilityZoneNodeCountMap(availabilityZonesForGroup, instanceMetaDataSet);
         LOGGER.debug("Initialized zoneToNodeCountMap {} for group '{}'", zoneToNodeCountMap, groupName);
         for (InstanceMetaData instance : instanceMetaDataSet) {
             if (StringUtils.isEmpty(instance.getAvailabilityZone())) {
-                String availabilityZone = Collections.min(zoneToNodeCountMap.entrySet(), Map.Entry.comparingByValue()).getKey();
-                zoneToNodeCountMap.put(availabilityZone, zoneToNodeCountMap.get(availabilityZone) + 1);
+                String availabilityZone = getAndIncreaseAvailabilityZoneUsage(zoneToNodeCountMap);
                 instance.setAvailabilityZone(availabilityZone);
                 String previousRackId = instance.getRackId();
                 instance.setRackId(multiAzCalculatorService.determineRackId(instance.getSubnetId(), availabilityZone));
@@ -127,6 +125,17 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             }
         }
         return updatedInstances;
+    }
+
+    private Map<String, Long> getAvailabilityZoneNodeCountMap(Set<String> availabilityZones, Set<InstanceMetaData> instances) {
+        return availabilityZones.stream().collect(Collectors.toMap(Function.identity(),
+                availabilityZone -> countInstancesForAvailabilityZone(instances, availabilityZone)));
+    }
+
+    private String getAndIncreaseAvailabilityZoneUsage(Map<String, Long> zoneToNodeCountMap) {
+        String availabilityZone = Collections.min(zoneToNodeCountMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+        zoneToNodeCountMap.put(availabilityZone, zoneToNodeCountMap.get(availabilityZone) + 1);
+        return availabilityZone;
     }
 
     protected void updateInstancesMetaData(Set<InstanceMetaData> instancesToBeUpdated) {
@@ -162,7 +171,9 @@ public class InstanceMetadataAvailabilityZoneCalculator {
             updatedInstances.addAll(populateOnInstancesOfGroupForRepair(
                     stack,
                     hostGroupName,
-                    notDeletedInstancesForGroup));
+                    instanceGroupId,
+                    notDeletedInstancesForGroup,
+                    networkScaleDetails));
         } else {
             updatedInstances.addAll(populateOnInstancesOfGroupForScaling(
                     stack,
@@ -187,13 +198,14 @@ public class InstanceMetadataAvailabilityZoneCalculator {
     }
 
     private Set<InstanceMetaData> populateOnInstancesOfGroupForRepair(StackDtoDelegate stack, String hostGroupName,
-            Set<InstanceMetaData> notDeletedInstancesForGroup) {
+            Long instanceGroupId, Set<InstanceMetaData> notDeletedInstancesForGroup, NetworkScaleDetails networkScaleDetails) {
         LOGGER.info("Populating availability zones of instances for repair in group: '{}'", hostGroupName);
         Set<InstanceMetaData> updatedInstances = new HashSet<>();
         StackView stackView = stack.getStack();
         Set<InstanceMetaData> instancesToUpdate = notDeletedInstancesForGroup.stream()
                 .filter(im -> InstanceStatus.REQUESTED.equals(im.getInstanceStatus()) && StringUtils.isEmpty(im.getAvailabilityZone()))
                 .collect(Collectors.toSet());
+        boolean hasInstanceWithoutDiskWithAZ = false;
         for (InstanceMetaData im : instancesToUpdate) {
             String discoveryFQDN = im.getDiscoveryFQDN();
             String zoneFromDisk = instanceMetaDataService.getAvailabilityZoneFromDiskIfRepair(stackView, Boolean.TRUE, hostGroupName, discoveryFQDN);
@@ -204,11 +216,13 @@ public class InstanceMetadataAvailabilityZoneCalculator {
                 im.setRackId(multiAzCalculatorService.determineRackId(im.getSubnetId(), zoneFromDisk));
                 updatedInstances.add(im);
             } else {
-                String msg = String.format("Repair could not be initiated because availability zone could not be found for instances as no disk " +
-                        "resource in our metadata for instance with FQDN '%s' in group '%s'.", discoveryFQDN, hostGroupName);
-                LOGGER.warn(msg);
-                throw new CloudbreakServiceException(msg);
+                LOGGER.info("Availability zone not found for instance(fqdn: {}) based on disk.", discoveryFQDN);
+                hasInstanceWithoutDiskWithAZ = true;
             }
+        }
+        if (hasInstanceWithoutDiskWithAZ) {
+            Set<String> zonesOfInstanceGroup = getZonesOfInstanceGroupOrFromScaleDetails(stack, instanceGroupId, networkScaleDetails);
+            updatedInstances.addAll(populateAvailabilityZoneOfInstances(zonesOfInstanceGroup, notDeletedInstancesForGroup, hostGroupName));
         }
         return updatedInstances;
     }

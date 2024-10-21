@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -77,12 +78,12 @@ public class VolumeBuilderUtil {
     public BlockDeviceMapping getRootVolume(AwsInstanceView awsInstanceView, Group group, CloudStack cloudStack, AuthenticatedContext ac) {
         return BlockDeviceMapping.builder()
                 .deviceName(getRootDeviceName(ac, cloudStack))
-                .ebs(getRootEbs(awsInstanceView, group, ac.getCloudCredential().getAccountId()))
+                .ebs(getRootEbs(awsInstanceView, group))
                 .build();
     }
 
-    public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group, String accountId) {
-        String volumeType = group.getRootVolumeType() != null ? group.getRootVolumeType() : AwsDiskType.Gp3.value();
+    public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group) {
+        String volumeType = group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT) : AwsDiskType.Gp3.value();
         int rootVolumeSize = group.getRootVolumeSize();
 
         LOGGER.debug("AwsInstanceView: {},  root volume type: {}, size: {}", awsInstanceView, volumeType, rootVolumeSize);
