@@ -4,9 +4,7 @@ public enum AzureDeploymentMarketplaceError {
 
     AUTHORIZATION_FAILED("AuthorizationFailed", "Microsoft.Marketplace"),
 
-    MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED("MarketplacePurchaseEligibilityFailed", ""),
-
-    INVALID_REQUEST_CONTENT("InvalidRequestContent", "Cannot deserialize the current JSON array");
+    MARKETPLACE_PURCHASE_ELIGIBILITY_FAILED("MarketplacePurchaseEligibilityFailed", "");
 
     private final String code;
 
