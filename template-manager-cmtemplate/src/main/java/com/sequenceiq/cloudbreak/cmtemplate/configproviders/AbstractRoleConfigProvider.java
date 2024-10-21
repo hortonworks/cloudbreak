@@ -63,6 +63,10 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
         return Optional.empty();
     }
 
+    protected String getCdhVersion(TemplatePreparationObject source) {
+        return source.getBlueprintView().getProcessor().getStackVersion() == null ? "" : source.getBlueprintView().getProcessor().getStackVersion();
+    }
+
     protected static Optional<ClouderaManagerProduct> getCdhProduct(TemplatePreparationObject source) {
         if (source.getProductDetailsView() != null) {
             return source.getProductDetailsView().getProducts()

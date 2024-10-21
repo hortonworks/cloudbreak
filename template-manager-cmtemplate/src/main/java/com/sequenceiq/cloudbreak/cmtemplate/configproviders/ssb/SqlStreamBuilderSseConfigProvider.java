@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.FLINK_VERSION_1_15_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
@@ -11,15 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.flink.FlinkConfigProviderUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -40,9 +39,8 @@ public class SqlStreamBuilderSseConfigProvider extends SqlStreamBuilderConfigPro
 
     static final String DATABASE_JDBC_URL_OVERRIDE = "database_jdbc_url_override";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqlStreamBuilderSseConfigProvider.class);
-
-    private static final String FLINK_PRODUCT = "FLINK";
+    @Inject
+    private FlinkConfigProviderUtils utils;
 
     @Override
     public String dbUserKey() {
@@ -68,11 +66,13 @@ public class SqlStreamBuilderSseConfigProvider extends SqlStreamBuilderConfigPro
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView ssbRdsView = getRdsView(source);
 
-        Optional<ClouderaManagerProduct> flinkProduct = getFlinkProduct(source.getProductDetailsView().getProducts());
+        Optional<ClouderaManagerProduct> flinkProduct = utils.getFlinkProduct(source.getProductDetailsView().getProducts());
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
         addDbConfigs(ssbRdsView, configList);
         addDbSslConfigsIfNeeded(ssbRdsView, configList, flinkProduct);
-        addReleaseNameIfNeeded(source, configList, flinkProduct);
+
+        String cdhVersion = getCdhVersion(source);
+        utils.addReleaseNameIfNeeded(cdhVersion, configList, flinkProduct);
 
         return configList;
     }
@@ -96,17 +96,6 @@ public class SqlStreamBuilderSseConfigProvider extends SqlStreamBuilderConfigPro
         configList.add(config(DATABASE_PASSWORD, ssbRdsView.getConnectionPassword()));
     }
 
-    private Optional<ClouderaManagerProduct> getFlinkProduct(List<ClouderaManagerProduct> products) {
-        Optional<ClouderaManagerProduct> flinkProductOptional = products
-                .stream()
-                .filter(e -> e.getName().equalsIgnoreCase(FLINK_PRODUCT))
-                .findFirst();
-        if (flinkProductOptional.isEmpty()) {
-            LOGGER.warn("FLINK product not found!");
-        }
-        return flinkProductOptional;
-    }
-
     private void addDbSslConfigsIfNeeded(
             RdsView ssbRdsView,
             List<ApiClusterTemplateConfig> configList,
@@ -118,26 +107,8 @@ public class SqlStreamBuilderSseConfigProvider extends SqlStreamBuilderConfigPro
         });
     }
 
-    private void addReleaseNameIfNeeded(
-            TemplatePreparationObject source,
-            List<ApiClusterTemplateConfig> configList,
-            Optional<ClouderaManagerProduct> flinkProduct) {
-        flinkProduct.ifPresent(fp -> {
-            String cdhVersion = getCdhVersion(source);
-
-            if (isUnifiedFlinkVersion(fp) && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1)) {
-                configList.add(config("release.name", "CSA-DH"));
-            }
-        });
-    }
-
     private String getFlinkVersion(ClouderaManagerProduct flinkProduct) {
         // 1.15.1-csadh1.9.0.1-cdh7.2.16.0-254-37351973 -> 1.15.1
         return flinkProduct.getVersion().split("-")[0];
-    }
-
-    private boolean isUnifiedFlinkVersion(ClouderaManagerProduct flinkProduct) {
-        // Unified version scheme: 1.19.1-csa1.14.0.0-12345678
-        return !StringUtils.containsIgnoreCase(flinkProduct.getVersion(), "csadh");
     }
 }
