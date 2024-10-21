@@ -3,12 +3,16 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.externalizedcompute;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
@@ -29,6 +33,8 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class ExternalizedComputeClusterTest extends AbstractE2ETest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterTest.class);
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -80,7 +86,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
             given = "there is a running cloudbreak",
             when = "create an env without externalized compute service, then migrate it, then force reinitialize",
             then = "externalized cluster should be successfully created")
-    public void testCreateV1EnvAndMigrateToV2ThenForceReinitializeAsPrivate(TestContext testContext) {
+    public void testCreateEnvAndExtendWithComputeThenForceReinitializeAsPrivate(TestContext testContext) {
         String environmentName = resourcePropertyProvider().getName();
         testContext
                 .given("telemetry", TelemetryTestDto.class)
@@ -136,14 +142,25 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
         webTarget.register(new ApiKeyRequestFilter(testContext.getActingUserAccessKey(), testContext.getActingUser().getSecretKey()));
         String requestjson = String.format("{\"envNameOrCrn\": \"%s\"}", environmentName);
         String response = webTarget.request().post(Entity.json(requestjson)).readEntity(String.class);
+        LOGGER.info("ListClusters response from Liftie service: {}", response);
         Map<String, Object> responseMap = new Json(response).getMap();
-        Map<String, Object> defaultCluster = ((List<Map<String, Object>>) responseMap.get("clusters")).get(0);
-        String status = (String) defaultCluster.get("status");
-        if (!"RUNNING".equalsIgnoreCase(status)) {
-            throw new TestFailException(String.format("Test failed. Default compute cluster status is not RUNNING. Status: '%s'\n" +
-                    "Cluster response: %s", status, responseMap));
-        }
-        return (String) defaultCluster.get("clusterCrn");
+        Optional<Map<String, Object>> defaultCluster = Optional.ofNullable(responseMap)
+                .map(resp -> resp.get("clusters"))
+                .map(resp -> (List<Map<String, Object>>) resp)
+                .map(List::stream)
+                .flatMap(Stream::findFirst);
+        defaultCluster.ifPresentOrElse(def -> {
+                    String status = (String) def.get("status");
+                    if (!"RUNNING".equalsIgnoreCase(status)) {
+                        throw new TestFailException(String.format("Test failed. Default compute cluster status is not RUNNING. Status: '%s'\n" +
+                                "Cluster response: %s", status, responseMap));
+                    }
+
+                }, () -> {
+                    throw new TestFailException(String.format("Test failed. Reading cluster list from liftie was not successful. Response: %s", response));
+                }
+        );
+        return (String) defaultCluster.get().get("clusterCrn");
     }
 
 }
