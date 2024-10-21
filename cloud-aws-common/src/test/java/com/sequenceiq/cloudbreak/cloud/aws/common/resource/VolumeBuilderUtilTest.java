@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeThrou
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -64,7 +63,6 @@ public class VolumeBuilderUtilTest {
     @Test
     public void testGetRootVolume() {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
-        when(ac.getCloudCredential()).thenReturn(new CloudCredential());
         software.amazon.awssdk.services.ec2.model.Image ecImage = software.amazon.awssdk.services.ec2.model.Image.builder().build();
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().images(ecImage).build());
         when(cloudStack.getImage()).thenReturn(image);
@@ -139,7 +137,7 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(true);
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
 
-        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertTrue(actual.encrypted());
         Assertions.assertEquals("gp3", actual.volumeType().toString());
@@ -155,7 +153,7 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(true);
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
 
-        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertTrue(actual.encrypted());
         Assertions.assertEquals("gp2", actual.volumeType().toString());
@@ -169,7 +167,35 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(false);
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
 
-        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group, null);
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
+        Assertions.assertTrue(actual.deleteOnTermination());
+        Assertions.assertNull(actual.encrypted());
+        Assertions.assertEquals("gp3", actual.volumeType().toString());
+        Assertions.assertEquals(1, actual.volumeSize());
+        Assertions.assertNull(actual.kmsKeyId());
+    }
+
+    @Test
+    public void testGetEbsWhenNotEncryptedAndRootVolumeTypeIsUpperCase() {
+        when(group.getRootVolumeSize()).thenReturn(1);
+        when(group.getRootVolumeType()).thenReturn("GP3");
+        when(awsInstanceView.isKmsCustom()).thenReturn(false);
+
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
+        Assertions.assertTrue(actual.deleteOnTermination());
+        Assertions.assertNull(actual.encrypted());
+        Assertions.assertEquals("gp3", actual.volumeType().toString());
+        Assertions.assertEquals(1, actual.volumeSize());
+        Assertions.assertNull(actual.kmsKeyId());
+    }
+
+    @Test
+    public void testGetEbsWhenNotEncryptedAndRootVolumeTypeIsLowerCase() {
+        when(group.getRootVolumeSize()).thenReturn(1);
+        when(group.getRootVolumeType()).thenReturn("gp3");
+        when(awsInstanceView.isKmsCustom()).thenReturn(false);
+
+        EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         Assertions.assertTrue(actual.deleteOnTermination());
         Assertions.assertNull(actual.encrypted());
         Assertions.assertEquals("gp3", actual.volumeType().toString());
