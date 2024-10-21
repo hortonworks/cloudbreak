@@ -117,6 +117,17 @@ public class UncachedSecretServiceForRotationTest {
     }
 
     @Test
+    void testGetLatestCPSecretByPathAndFieldPath() {
+        Map<String, String> value = Collections.singletonMap("clusterProxyKey", "value");
+        when(persistentEngine.getWithoutCache("path")).thenReturn(value);
+
+        String result = underTest.getBySecretPath("path", "clusterProxyKey");
+
+        verify(persistentEngine, times(1)).getWithoutCache(eq("path"));
+        assertEquals("value", result);
+    }
+
+    @Test
     public void testPutRotation() throws Exception {
         String vaultSecretJson = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
                 "\"path\":\"app/path\",\"version\":1}";

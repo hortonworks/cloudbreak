@@ -92,8 +92,9 @@ public class VaultKvV2Engine implements SecretEngine {
         Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(enginePath).get(fullSecretPath);
         if (response != null && response.getData() != null) {
             ret = new HashMap<>();
-            ret.put(VaultConstants.FIELD_SECRET, String.valueOf(response.getData().get(VaultConstants.FIELD_SECRET)));
-            ret.put(VaultConstants.FIELD_BACKUP, String.valueOf(response.getData().get(VaultConstants.FIELD_BACKUP)));
+            for (String field : response.getData().keySet()) {
+                ret.put(field, String.valueOf(response.getData().get(field)));
+            }
         }
         long duration = System.currentTimeMillis() - start;
         metricService.recordTimerMetric(MetricType.VAULT_READ, Duration.ofMillis(duration));

@@ -19,6 +19,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -70,6 +71,7 @@ public class ClusterProxyRotationService {
         try {
             checkPathAndField(pathAndField);
             String jwkJson = uncachedSecretServiceForRotation.getBySecretPath(pathAndField[0], pathAndField[1]);
+            LOGGER.info("JWK json read from cluster-proxy, length: {}", StringUtils.length(jwkJson));
             return convertJWKToPEMKeys(jwkJson);
         } catch (IllegalArgumentException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new CloudbreakServiceException("Cannot read JWK format token keys from cluster-proxy.", e);

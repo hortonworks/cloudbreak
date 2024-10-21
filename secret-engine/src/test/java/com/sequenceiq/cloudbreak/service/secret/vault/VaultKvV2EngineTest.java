@@ -145,6 +145,21 @@ public class VaultKvV2EngineTest {
     }
 
     @Test
+    public void testGetClusterProxySecretWithoutCache() {
+        Map<String, Object> vaultData = Map.of("clusterProxyKey", "value");
+
+        Versioned<Map<String, Object>> versioned = Versioned.create(vaultData, versionedMetadata());
+
+        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
+
+        Map<String, String> result = underTest.getWithoutCache("testPath/" + UUID.randomUUID());
+
+        assertEquals("value", result.get("clusterProxyKey"));
+        assertNull(result.get(VaultConstants.FIELD_SECRET));
+        assertNull(result.get(VaultConstants.FIELD_BACKUP));
+    }
+
+    @Test
     public void testGetWithCacheWithNullResponse() {
         Versioned<Map<String, Object>> versioned = Versioned.create(null, versionedMetadata());
 
