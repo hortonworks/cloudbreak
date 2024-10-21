@@ -97,7 +97,7 @@ public class VerticalScalingValidatorService {
                     cloudCredential,
                     stack.getRegion(),
                     stack.getPlatformvariant(),
-                    CdpResourceType.DEFAULT,
+                    CdpResourceType.FREEIPA,
                     Map.of(ARCHITECTURE, X86_64.getName()));
             Optional<VmType> requestInstanceForVerticalScaling = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes);
             boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
@@ -108,7 +108,8 @@ public class VerticalScalingValidatorService {
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     requestInstanceForVerticalScaling,
                     availabilityZones,
-                    attributes == null ? Map.of() : attributes.getMap());
+                    attributes == null ? Map.of() : attributes.getMap(),
+                    CdpResourceType.FREEIPA);
         } else {
             throw new BadRequestException(String.format("Define a group which exists in FreeIpa. It can be [%s].",
                     stack.getInstanceGroups()

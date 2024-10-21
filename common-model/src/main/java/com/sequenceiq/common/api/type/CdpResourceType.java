@@ -5,6 +5,7 @@ import java.util.Locale;
 public enum CdpResourceType {
     DATAHUB,
     DATALAKE,
+    FREEIPA,
     DEFAULT;
 
     public static CdpResourceType fromStackType(String type) {

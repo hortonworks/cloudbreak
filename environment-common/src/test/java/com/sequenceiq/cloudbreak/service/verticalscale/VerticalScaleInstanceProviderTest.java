@@ -70,8 +70,8 @@ public class VerticalScaleInstanceProviderTest {
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(false);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(false);
         when(minimalHardwareFilter.minMemory()).thenReturn(16);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
@@ -107,8 +107,8 @@ public class VerticalScaleInstanceProviderTest {
                 List.of()
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
             underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of(), Map.of(ENCRYPTION_AT_HOST_ENABLED, true));
@@ -166,7 +166,7 @@ public class VerticalScaleInstanceProviderTest {
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(false);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(false);
         when(minimalHardwareFilter.minCpu()).thenReturn(4);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
@@ -196,8 +196,8 @@ public class VerticalScaleInstanceProviderTest {
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 0, 0, 0)
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
             underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
@@ -226,8 +226,8 @@ public class VerticalScaleInstanceProviderTest {
                         new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1)
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
             underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
@@ -262,8 +262,8 @@ public class VerticalScaleInstanceProviderTest {
                 List.of()
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
             underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
@@ -299,8 +299,8 @@ public class VerticalScaleInstanceProviderTest {
                 List.of("1", "2")
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
             underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of("2", "3"), Map.of());
@@ -336,8 +336,8 @@ public class VerticalScaleInstanceProviderTest {
                 List.of("1", "2")
         );
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of("1", "2"), Map.of()));
     }
@@ -371,8 +371,8 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         CloudVmTypes result = underTest.listInstanceTypes(availabilityZone, INSTANCE_TYPE_1, allVmTypes);
 
@@ -460,7 +460,7 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(false);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(false);
         when(minimalHardwareFilter.minCpu()).thenReturn(4);
 
         CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
@@ -486,8 +486,8 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any())).thenReturn(true);
-        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
 

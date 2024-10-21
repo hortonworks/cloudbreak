@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
 
 @Service
@@ -37,11 +38,16 @@ public class VerticalScaleInstanceProvider {
     private MinimalHardwareFilter minimalHardwareFilter;
 
     public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return listInstanceTypes(availabilityZone, currentInstanceType, allVmTypes, null);
+        return listInstanceTypes(availabilityZone, currentInstanceType, allVmTypes, null, CdpResourceType.DEFAULT);
     }
 
     public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes,
             Set<String> instanceGroupAvailabilityZones) {
+        return listInstanceTypes(availabilityZone, currentInstanceType, allVmTypes, instanceGroupAvailabilityZones, CdpResourceType.DEFAULT);
+    }
+
+    public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes,
+            Set<String> instanceGroupAvailabilityZones, CdpResourceType cdpResourceType) {
         Map<String, Set<VmType>> cloudVmResponses = allVmTypes.getCloudVmResponses();
         LOGGER.debug("cloudVmResponses: {}", cloudVmResponses);
         if (cloudVmResponses.isEmpty()) {
@@ -62,7 +68,7 @@ public class VerticalScaleInstanceProvider {
                 .stream()
                 .filter(availableVmType -> {
                     try {
-                        validateInstanceType(currentInstance, Optional.of(availableVmType), instanceGroupAvailabilityZones, Map.of());
+                        validateInstanceType(currentInstance, Optional.of(availableVmType), instanceGroupAvailabilityZones, Map.of(), cdpResourceType);
                         return true;
                     } catch (BadRequestException ex) {
                         return false;
@@ -82,13 +88,20 @@ public class VerticalScaleInstanceProvider {
     }
 
     public void validateInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-        Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
+            Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
+        validateInstanceTypeForVerticalScaling(currentInstanceTypeOptional, requestedInstanceTypeOptional, instanceGroupAvailabilityZones, additionalProperties,
+                CdpResourceType.DEFAULT);
+    }
+
+    public void validateInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
+            Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
         try {
             validateInstanceType(
                     currentInstanceTypeOptional,
                     requestedInstanceTypeOptional,
                     instanceGroupAvailabilityZones,
-                    additionalProperties);
+                    additionalProperties,
+                    cdpResourceType);
         } catch (Exception e) {
             LOGGER.warn("Vertical scale validation error: {}", e.getMessage());
             throw e;
@@ -96,7 +109,7 @@ public class VerticalScaleInstanceProvider {
     }
 
     private void validateInstanceType(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-        Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
+            Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
         if (currentInstanceTypeOptional.isEmpty()) {
             throw new BadRequestException("The current instancetype does not exist on provider side.");
         }
@@ -110,8 +123,8 @@ public class VerticalScaleInstanceProvider {
             VmTypeMeta requestedInstanceTypeMetaData = requestedInstanceType.getMetaData();
 
             validateArchitecture(currentInstanceType, requestedInstanceType);
-            validateCPU(requestedInstanceTypeName, requestedInstanceTypeMetaData);
-            validateMemory(requestedInstanceTypeName, requestedInstanceTypeMetaData);
+            validateCPU(requestedInstanceTypeName, requestedInstanceTypeMetaData, cdpResourceType);
+            validateMemory(requestedInstanceTypeName, requestedInstanceTypeMetaData, cdpResourceType);
             validateEphemeral(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
@@ -178,7 +191,7 @@ public class VerticalScaleInstanceProvider {
     }
 
     private void validateAutoAttached(String currentInstanceTypeName, String requestedInstanceTypeName,
-        VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
+            VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
         validateVolumeParameterConfig(
                 currentInstanceTypeName,
                 requestedInstanceTypeName,
@@ -188,7 +201,7 @@ public class VerticalScaleInstanceProvider {
     }
 
     private void validateEphemeral(String currentInstanceTypeName, String requestedInstanceTypeName,
-        VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
+            VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
         validateVolumeParameterConfig(
                 currentInstanceTypeName,
                 requestedInstanceTypeName,
@@ -198,7 +211,7 @@ public class VerticalScaleInstanceProvider {
     }
 
     private void validateVolumeParameterConfig(String currentInstanceTypeName, String requestedInstanceTypeName,
-        VolumeParameterConfig currentVolumeParameterConfig, VolumeParameterConfig requestedVolumeParameterConfig, String type) {
+            VolumeParameterConfig currentVolumeParameterConfig, VolumeParameterConfig requestedVolumeParameterConfig, String type) {
         if (currentVolumeParameterConfig != null) {
             if (requestedVolumeParameterConfig == null) {
                 throw new BadRequestException(String.format(
@@ -220,19 +233,21 @@ public class VerticalScaleInstanceProvider {
         }
     }
 
-    private void validateMemory(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData) {
-        if (!minimalHardwareFilter.suitableAsMinimumHardwareForMemory(requestedInstanceTypeMetaData.getMemoryInGb())) {
+    private void validateMemory(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData, CdpResourceType cdpResourceType) {
+        if (!minimalHardwareFilter.suitableAsMinimumHardwareForMemory(requestedInstanceTypeMetaData.getMemoryInGb(), cdpResourceType)) {
             throw new BadRequestException(String.format(
                     "The requested instancetype %s has less Memory than the minimum %s GB.",
-                    requestedInstanceTypeName, minimalHardwareFilter.minMemory()));
+                    requestedInstanceTypeName, CdpResourceType.FREEIPA.equals(cdpResourceType) ? minimalHardwareFilter.minFreeIpaCpu()
+                            : minimalHardwareFilter.minMemory()));
         }
     }
 
-    private void validateCPU(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData) {
-        if (!minimalHardwareFilter.suitableAsMinimumHardwareForCpu(requestedInstanceTypeMetaData.getCPU())) {
+    private void validateCPU(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData, CdpResourceType cdpResourceType) {
+        if (!minimalHardwareFilter.suitableAsMinimumHardwareForCpu(requestedInstanceTypeMetaData.getCPU(), cdpResourceType)) {
             throw new BadRequestException(String.format(
                     "The requested instancetype %s has less Cpu than the minimum %s core.",
-                    requestedInstanceTypeName, minimalHardwareFilter.minCpu()));
+                    requestedInstanceTypeName, CdpResourceType.FREEIPA.equals(cdpResourceType) ? minimalHardwareFilter.minFreeIpaCpu()
+                            : minimalHardwareFilter.minCpu()));
         }
     }
 

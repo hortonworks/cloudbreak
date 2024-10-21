@@ -182,7 +182,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(
                 null,
                 instanceType,
-                cloudVmTypes);
+                cloudVmTypes,
+                null,
+                cdpResourceType);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
         LOGGER.debug("Resp /platform_resources/machine_types_for_vertical_scaling, request: {}, cloudVmTypes: {}, response: {}",
                 request, cloudVmTypes, response);
