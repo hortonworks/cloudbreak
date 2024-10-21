@@ -7,6 +7,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -58,12 +59,12 @@ public class EventSender {
         Event<BaseFlowEvent> eventWithErrHandler = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), event);
         reactor.notify(event.selector(), eventWithErrHandler);
         Promise<AcceptResult> accepted = eventWithErrHandler.getData().accepted();
-        String resourceCrn = event.getResourceCrn();
+        String resourceIdentifier = StringUtils.isBlank(resourceName) ? event.getResourceCrn() : resourceName;
         if (accepted != null) {
             try {
                 FlowAcceptResult acceptResult = (FlowAcceptResult) accepted.await(TIMEOUT, TimeUnit.SECONDS);
                 if (acceptResult != null) {
-                    return createFlowIdentifier(acceptResult, resourceCrn);
+                    return createFlowIdentifier(acceptResult, resourceIdentifier);
                 } else {
                     LOGGER.info("The acceptedResult is null, the flow identifier couldn't be created");
                 }
@@ -78,16 +79,16 @@ public class EventSender {
         }
         LOGGER.error("Accepted is null, header does not contains flow or flow chain id, event: {}, header: {}", event, headers);
         reactorReporter.logErrorReport();
-        throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", resourceCrn));
+        throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", resourceIdentifier));
     }
 
-    private FlowIdentifier createFlowIdentifier(FlowAcceptResult accepted, String resourceCrn) {
+    private FlowIdentifier createFlowIdentifier(FlowAcceptResult accepted, String resourceIdentifier) {
         switch (accepted.getResultType()) {
             case ALREADY_EXISTING_FLOW:
                 reactorReporter.logErrorReport();
                 throw new FlowsAlreadyRunningException(String.format("Request not allowed, cluster '%s' already has a running operation. " +
                                 "Running operation(s): [%s]",
-                        resourceCrn,
+                        resourceIdentifier,
                         flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
             case RUNNING_IN_FLOW:
                 return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
