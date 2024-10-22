@@ -45,7 +45,8 @@ ext {
   azureSdkIdentityVersion = '1.12.2'
   azureSdkStorageBlobVersion = '12.20.1'
   azureSdkStorageDatalakeVersion = '12.15.0'
-  azureSdkResourceManagerVersion = '2.42.0'
+  // What-if analysis is broken in 2.42.0 (Support request ID	2410180050001855), please try it before upgrading to a newer ARM version
+  azureSdkResourceManagerVersion = '2.40.0'
   azureSdkResourceManagerMarketplaceVersion = '1.0.0-beta.2'
   azureSdkResourceManagerDataLakeStoreVersion = '1.0.0-beta.1'
   azureSdkResourceManagerPostgresqlVersion = '1.0.2'
