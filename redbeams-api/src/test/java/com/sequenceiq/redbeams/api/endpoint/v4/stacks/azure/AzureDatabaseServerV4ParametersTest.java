@@ -50,8 +50,10 @@ public class AzureDatabaseServerV4ParametersTest {
         underTest.setBackupRetentionDays(3);
         underTest.setDbVersion("1.2.3");
 
-        assertThat(underTest.asMap()).containsOnly(Map.entry("backupRetentionDays", 3),
+        assertThat(underTest.asMap()).containsOnly(
+                Map.entry("backupRetentionDays", 3),
                 Map.entry("dbVersion", "1.2.3"),
+                Map.entry("geoRedundantBackup", false),
                 Map.entry("cloudPlatform", "AZURE"),
                 Map.entry(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.SINGLE_SERVER.name()),
                 Map.entry(AzureHighAvailabiltyMode.AZURE_HA_MODE_KEY, AzureHighAvailabiltyMode.DISABLED.name()));
