@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -38,6 +39,15 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
     @Inject
     private AltusDatabusConfiguration altusDatabusConfiguration;
 
+    @Value("${meteringv2.dbus.app.name:}")
+    private String dbusAppName;
+
+    @Value("${meteringv2.dbus.stream.name:}")
+    private String dbusStreamName;
+
+    @Value("${crn.region:}")
+    private String region;
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         DatabusCredentialView databusCredentialView = source.getDatabusCredentialView();
@@ -45,7 +55,11 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID, databusCredentialView.getAccessKey()),
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY, databusCredentialView.getPrivateKey()),
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO, databusCredentialView.getAccessKeyType()),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_HOST, altusDatabusConfiguration.getAltusDatabusEndpoint())
+                config(MeteringV2ServiceRoles.METERINGV2_DBUS_HOST, altusDatabusConfiguration.getAltusDatabusEndpoint()),
+                config(MeteringV2ServiceRoles.METERINGV2_DBUS_STREAM, dbusStreamName),
+                config(MeteringV2ServiceRoles.METERINGV2_DBUS_APPNAME, dbusAppName),
+                config(MeteringV2ServiceRoles.METERINGV2_DBUS_PARTITION_KEY, source.getGeneralClusterConfigs().getEnvironmentCrn()),
+                config(MeteringV2ServiceRoles.METERINGV2_DBUS_REGION, region)
         );
     }
 
