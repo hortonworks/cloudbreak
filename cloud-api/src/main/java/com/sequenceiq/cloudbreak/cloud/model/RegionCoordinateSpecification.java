@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +30,7 @@ public class RegionCoordinateSpecification {
     private String defaultDbVmtype;
 
     @JsonProperty("cdpSupportedServices")
-    private Set<CdpSupportedServices> cdpSupportedServices;
+    private Set<CdpSupportedServices> cdpSupportedServices = new HashSet<>();
 
     public String getName() {
         return name;
