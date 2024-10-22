@@ -187,6 +187,6 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
     }
 
     private boolean containsFailed(List<CloudResourceStatus> results) {
-        return results.stream().filter(resultStatus -> ResourceStatus.FAILED.equals(resultStatus.getStatus())).findAny().isPresent();
+        return results.stream().anyMatch(resultStatus -> ResourceStatus.FAILED.equals(resultStatus.getStatus()));
     }
 }

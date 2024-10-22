@@ -10,12 +10,17 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public class ResourceBuilderContext extends DynamicModel {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceBuilderContext.class);
 
     private final Location location;
 
@@ -88,7 +93,13 @@ public class ResourceBuilderContext extends DynamicModel {
     public void addComputeResources(Long privateId, Collection<CloudResource> resources) {
         withLock(() -> {
             List<CloudResource> list = computeResources.computeIfAbsent(privateId, k -> new ArrayList<>());
-            list.addAll(resources);
+            for (CloudResource resource : resources) {
+                if (list.contains(resource)) {
+                    LOGGER.info("Resource {} already exists for private id {}", resource, privateId);
+                } else {
+                    list.add(resource);
+                }
+            }
         });
     }
 

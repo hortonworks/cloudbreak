@@ -43,8 +43,9 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
     @Override
     public List<CloudResource> create(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        LOGGER.info("Prepare instance resource to attach to");
-        return context.getComputeResources(privateId);
+        LOGGER.info("Getting volume set resources for private id {}", privateId);
+        return context.getComputeResources(privateId).stream().filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_VOLUMESET))
+                .collect(Collectors.toList());
     }
 
     @Override

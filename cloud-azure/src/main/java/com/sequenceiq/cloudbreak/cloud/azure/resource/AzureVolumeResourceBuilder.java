@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -236,8 +235,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                     if (!CollectionUtils.isEmpty(volumes)) {
                         getVolumeSetAttributes(resource).setVolumes(volumes);
                     }
+                    resource.setStatus(CommonStatus.CREATED);
                 })
-                .map(copyResourceWithNewStatus(CommonStatus.CREATED))
                 .collect(toList());
     }
 
@@ -253,19 +252,6 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         CloudInstance cloudInstance = group.getReferenceInstanceConfiguration();
         AzureInstanceView azureInstanceView = AzureInstanceView.builder(cloudInstance).build();
         return azureInstanceView.isManagedDiskEncryptionWithCustomKeyEnabled() ? azureInstanceView.getDiskEncryptionSetId() : null;
-    }
-
-    private Function<CloudResource, CloudResource> copyResourceWithNewStatus(CommonStatus status) {
-        return resource -> CloudResource.builder()
-                .withPersistent(true)
-                .withGroup(resource.getGroup())
-                .withType(resource.getType())
-                .withStatus(status)
-                .withInstanceId(resource.getInstanceId())
-                .withName(resource.getName())
-                .withParameters(resource.getParameters())
-                .withAvailabilityZone(resource.getAvailabilityZone())
-                .build();
     }
 
     @Override
