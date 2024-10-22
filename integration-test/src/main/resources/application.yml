@@ -79,7 +79,7 @@ integrationtest:
   subnetCidr: 10.0.0.0/16
   accessCidr: 0.0.0.0/0
   imageCatalogName: cloudbreak-default
-  imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
+  imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   gatewayPort: null
   imageValidation:
     sourceCatalogName:
