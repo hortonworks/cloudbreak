@@ -480,7 +480,7 @@ class AwsUpscaleServiceTest {
                 .withLoginUserName(instanceAuthentication.getLoginUserName())
                 .withPublicKey(instanceAuthentication.getPublicKey())
                 .withRootVolumeSize(50)
-                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .withRootVolumeType("GP3")
                 .build();
     }
 

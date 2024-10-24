@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -403,7 +404,8 @@ public class AwsUpscaleService {
         for (String groupName : groupByName.keySet()) {
             Group group = groupByName.get(groupName);
             Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, String.valueOf(group.getRootVolumeSize()),
-                    LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType() != null ? group.getRootVolumeType() : AwsDiskType.Gp3.value());
+                    LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
+                            : AwsDiskType.Gp3.value());
             Optional<AutoScalingGroup> autoScalingGroupOptional = autoScalingGroupMap.keySet().stream().filter(key -> key.contains(groupName))
                     .map(autoScalingGroupMap::get).findFirst();
             if (autoScalingGroupOptional.isPresent()) {
@@ -414,7 +416,8 @@ public class AwsUpscaleService {
                 for (LaunchTemplateBlockDeviceMapping bdm : currentBlockDeviceMappings) {
                     if (bdm.ebs() != null) {
                         LaunchTemplateEbsBlockDevice ebs = bdm.ebs();
-                        updateLaunchTemplate = ebs.volumeSize() != group.getRootVolumeSize() || !ebs.volumeTypeAsString().equals(group.getRootVolumeType());
+                        updateLaunchTemplate = ebs.volumeSize() != group.getRootVolumeSize()
+                                || !ebs.volumeTypeAsString().equals(group.getRootVolumeType().toLowerCase(Locale.ROOT));
                     }
                 }
                 if (updateLaunchTemplate) {

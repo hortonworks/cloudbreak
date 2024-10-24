@@ -782,7 +782,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withType(InstanceGroupType.CORE)
                 .withSecurity(security)
                 .withSkeleton(instance)
-                .withRootVolumeType(AwsDiskType.Gp3.value())
+                .withRootVolumeType("GP3")
                 .build());
         CloudStack cloudStack = CloudStack.builder()
                 .groups(groups)
@@ -809,6 +809,8 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SecurityGroupIngress")));
         assertThat(templateString, containsString("\"single-sg-id\""));
+        assertThat(templateString, not(containsString("\"GP3\"")));
+        assertThat(templateString, containsString("\"gp3\""));
     }
 
     @Test
