@@ -146,7 +146,7 @@ public class ClusterRepairService {
         return triggerRepairOrThrowBadRequest(
                 stackView.getId(),
                 repairStart,
-                RepairType.ONE_FROM_EACH_HOSTGROUP,
+                RepairType.ALL_AT_ONCE,
                 false,
                 repairableHostGroups,
                 upgradeVariant,

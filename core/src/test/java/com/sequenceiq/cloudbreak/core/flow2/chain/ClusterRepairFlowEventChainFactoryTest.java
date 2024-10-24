@@ -314,23 +314,20 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairOneNodeFromEachHostGroupAtOnce() {
+    public void testRepairAllAtOnce() {
         Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
         setupPrimaryGateway();
 
-        InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
-        primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
-        when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
                 .withFailedPrimaryGateway()
                 .withFailedSecondaryGateway()
                 .with3FailedCore()
                 .withFailedAuxiliary()
-                .withRepairType(RepairType.ONE_FROM_EACH_HOSTGROUP)
+                .withRepairType(RepairType.ALL_AT_ONCE)
                 .withDiskUpdateRequest(diskUpdateRequest)
                 .build();
 
@@ -340,41 +337,23 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
-                "FULL_DOWNSCALE_TRIGGER_EVENT",
-                "FULL_UPSCALE_TRIGGER_EVENT",
-                "FULL_DOWNSCALE_TRIGGER_EVENT",
-                "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
-        assertThat(eventQueues.getQueue(), hasSize(9));
+        assertThat(eventQueues.getQueue(), hasSize(5));
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainInitPayload);
 
         StackDownscaleTriggerEvent downscale1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHost(downscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
-        assertGroupWithHost(downscale1, HG_CORE, "core1");
-        assertGroupWithHost(downscale1, HG_AUXILIARY, "aux1");
+        assertGroupWithHosts(downscale1, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN));
+        assertGroupWithHosts(downscale1, HG_CORE, Set.of("core1", "core2", "core3"));
+        assertGroupWithHosts(downscale1, HG_AUXILIARY, Set.of("aux1"));
 
         StackAndClusterUpscaleTriggerEvent upscale1 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHost(upscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
-        assertGroupWithHost(upscale1, HG_CORE, "core1");
-        assertGroupWithHost(upscale1, HG_AUXILIARY, "aux1");
+        assertGroupWithHosts(upscale1, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN));
+        assertGroupWithHosts(upscale1, HG_CORE, Set.of("core1", "core2", "core3"));
+        assertGroupWithHosts(upscale1, HG_AUXILIARY, Set.of("aux1"));
         assertEquals(diskUpdateRequest, upscale1.getDiskUpdateRequest());
-
-        ClusterAndStackDownscaleTriggerEvent downscale2 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHost(downscale2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
-        assertGroupWithHost(downscale2, HG_CORE, "core2");
-
-        StackAndClusterUpscaleTriggerEvent upscale2 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHost(upscale2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
-        assertGroupWithHost(upscale2, HG_CORE, "core2");
-
-        ClusterAndStackDownscaleTriggerEvent downscale3 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHost(downscale3, HG_CORE, "core3");
-
-        StackAndClusterUpscaleTriggerEvent upscale3 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHost(upscale3, HG_CORE, "core3");
 
         RescheduleStatusCheckTriggerEvent statusCheckTriggerEvent = (RescheduleStatusCheckTriggerEvent) eventQueues.getQueue().poll();
         assertNotNull(statusCheckTriggerEvent);

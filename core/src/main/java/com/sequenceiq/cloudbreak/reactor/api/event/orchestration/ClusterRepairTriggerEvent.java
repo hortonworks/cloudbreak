@@ -132,13 +132,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
                         && Objects.equals(stackId, event.stackId));
     }
 
-    public enum RepairType {
-        ALL_AT_ONCE,
-        BATCH,
-        ONE_FROM_EACH_HOSTGROUP,
-        ONE_BY_ONE
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(", ", ClusterRepairTriggerEvent.class.getSimpleName() + "[", "]")
@@ -151,5 +144,11 @@ public class ClusterRepairTriggerEvent extends StackEvent {
                 .add("rollingRestartEnabled=" + rollingRestartEnabled)
                 .add(super.toString())
                 .toString();
+    }
+
+    public enum RepairType {
+        ALL_AT_ONCE,
+        BATCH,
+        ONE_BY_ONE
     }
 }

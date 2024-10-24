@@ -286,8 +286,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw =
                 collectHostsByHostGroupAndSortByPgwAndName(primaryGwFQDN, repairableGroupsWithHostNameMultimap);
         switch (repairType) {
-            case ONE_FROM_EACH_HOSTGROUP ->
-                    addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
             case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
             case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
             default -> throw new IllegalStateException("Unknown repair type:" + repairType);
