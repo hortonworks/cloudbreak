@@ -17,9 +17,10 @@ public class LiftieValidationResponseUtil {
             Set<String> failedValidationMessages = new LinkedHashSet<>();
             validationResponse.getValidationsList().forEach(validation -> {
                 if ("FAILED".equals(validation.getStatus())) {
-                    String message = validation.getMessage();
-                    if (StringUtils.isNoneEmpty(message)) {
-                        failedValidationMessages.add(message);
+                    String error = validation.getMessage();
+                    String errorReason = validation.getDetailedMessage();
+                    if (StringUtils.isNotEmpty(error)) {
+                        failedValidationMessages.add("Error: " + error + " Reason: " + errorReason);
                     }
                 }
             });

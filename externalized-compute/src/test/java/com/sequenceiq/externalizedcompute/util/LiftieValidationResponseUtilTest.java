@@ -24,20 +24,24 @@ class LiftieValidationResponseUtilTest {
                 .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
                         .setStatus("FAILED")
                         .setMessage("Failed 1 message.")
+                        .setDetailedMessage("Detailed message 1.")
                         .build())
                 .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
                         .setStatus("SKIPPED")
+                        .setDetailedMessage("Skipped")
                         .build())
                 .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
                         .setStatus("FAILED")
                         .setMessage("Failed 2 message.")
+                        .setDetailedMessage("Detailed message 2.")
                         .build())
                 .build();
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.throwException(validationResponse));
 
-        assertEquals("Validation failed: Failed 1 message. Failed 2 message.", exception.getMessage());
+        assertEquals("Validation failed: Error: Failed 1 message. Reason: Detailed message 1. Error: Failed 2 message. Reason: Detailed message 2.",
+                exception.getMessage());
     }
 
     @Test
@@ -46,13 +50,16 @@ class LiftieValidationResponseUtilTest {
                 .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
                         .setStatus("SUCCESS")
                         .setMessage("Success 1.")
+                        .setDetailedMessage("Detailed message 1.")
                         .build())
                 .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
                         .setStatus("SKIPPED")
+                        .setDetailedMessage("Detailed message 2.")
                         .build())
                 .addValidations(LiftiePublicProto.ValidationResult.newBuilder()
                         .setStatus("SKIPPED")
                         .setMessage("Skipped 1.")
+                        .setDetailedMessage("Detailed message 3.")
                         .build())
                 .build();
 
