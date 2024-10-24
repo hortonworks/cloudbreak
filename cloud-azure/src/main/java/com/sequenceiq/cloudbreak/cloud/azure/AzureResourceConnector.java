@@ -239,7 +239,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Override
     public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
-        azureDatabaseResourceService.validateUpgradeDatabaseServer(authenticatedContext);
+        azureDatabaseResourceService.validateUpgradeDatabaseServer(authenticatedContext, stack);
     }
 
     @Override
