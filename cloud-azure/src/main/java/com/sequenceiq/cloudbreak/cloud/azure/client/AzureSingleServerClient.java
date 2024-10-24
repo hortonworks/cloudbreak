@@ -44,7 +44,7 @@ public class AzureSingleServerClient extends AbstractAzureServiceClient {
         }
     }
 
-    private Server getSingleServer(String resourceGroupName, String serverName) {
+    public Server getSingleServer(String resourceGroupName, String serverName) {
         return handleException(() -> postgreSqlManager.servers().getByResourceGroup(resourceGroupName, serverName));
     }
 }

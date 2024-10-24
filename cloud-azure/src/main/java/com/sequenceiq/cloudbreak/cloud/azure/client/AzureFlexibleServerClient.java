@@ -87,7 +87,7 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
         }
     }
 
-    private Server getFlexibleServer(String resourceGroupName, String serverName) {
+    public Server getFlexibleServer(String resourceGroupName, String serverName) {
         return handleException(() -> postgreSqlFlexibleManager.servers().getByResourceGroup(resourceGroupName, serverName));
     }
 }

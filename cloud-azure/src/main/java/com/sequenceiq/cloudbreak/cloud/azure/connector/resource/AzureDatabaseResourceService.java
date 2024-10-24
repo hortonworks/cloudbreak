@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureSingleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureRDSAutoMigrationValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -112,6 +113,9 @@ public class AzureDatabaseResourceService {
 
     @Inject
     private AzureFlexibleServerPermissionValidator azureFlexibleServerPermissionValidator;
+
+    @Inject
+    private AzureRDSAutoMigrationValidator azureRDSAutoMigrationValidator;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -406,9 +410,10 @@ public class AzureDatabaseResourceService {
         return azureDatabaseTemplateProvider.getDBTemplateString(databaseStack);
     }
 
-    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext) {
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack dbStack) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         azureFlexibleServerPermissionValidator.validatePermission(client);
+        azureRDSAutoMigrationValidator.validate(authenticatedContext, dbStack);
     }
 
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
