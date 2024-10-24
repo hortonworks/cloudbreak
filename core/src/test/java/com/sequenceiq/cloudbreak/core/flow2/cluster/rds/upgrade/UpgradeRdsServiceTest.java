@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -146,9 +147,10 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testShouldRunDataBackupRestore() {
-        underTest.shouldRunDataBackupRestore(stackView, clusterView);
+        Database database = mock(Database.class);
+        underTest.shouldRunDataBackupRestore(stackView, clusterView, database);
 
-        verify(backupRestoreChecker).shouldRunDataBackupRestore(eq(stackView), eq(clusterView));
+        verify(backupRestoreChecker).shouldRunDataBackupRestore(eq(stackView), eq(clusterView), eq(database));
     }
 
     @Test

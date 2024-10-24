@@ -19,6 +19,9 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -34,6 +37,7 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerC
 import com.azure.resourcemanager.postgresqlflexibleserver.models.LocationBasedCapabilities;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Servers;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -200,6 +204,51 @@ class AzureFlexibleServerClientTest {
         verify(postgreSqlFlexibleManager, times(1)).servers();
         verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
         assertThat(cloudConnectorException.getMessage()).contains("Flexible server not found with name");
+    }
+
+    // Successfully upgrades the server to the specified target version
+    @ParameterizedTest
+    @MethodSource("provideTargetVersions")
+    void testDifferentUpgradePaths(String targetVersion, boolean assertException) {
+        if (assertException) {
+            CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                    () -> underTest.upgrade(RESOURCE_GROUP_NAME, SERVER_NAME, targetVersion));
+            assertEquals("Upgrading Azure PostgreSQL Flexible Server to version " + targetVersion + " is not supported",
+                    cloudConnectorException.getMessage());
+
+        } else {
+            Servers servers = mock(Servers.class);
+            when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+            Server server = mock(Server.class);
+            when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
+            Server.Update update = mock(Server.Update.class);
+            when(server.update()).thenReturn(update);
+            when(update.withVersion(any(ServerVersion.class))).thenReturn(update);
+            when(update.apply()).thenReturn(server);
+
+            underTest.upgrade(RESOURCE_GROUP_NAME, SERVER_NAME, targetVersion);
+            verify(postgreSqlFlexibleManager, times(1)).servers();
+            verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
+            verify(server, times(1)).update();
+            verify(update, times(1)).withVersion(eq(ServerVersion.fromString(targetVersion)));
+            verify(update, times(1)).apply();
+        }
+}
+
+    static Stream<Arguments> provideTargetVersions() {
+        return Stream.of(
+                Arguments.of(null, true),
+                Arguments.of("", true),
+                Arguments.of("9.6", true),
+                Arguments.of("10", true),
+                Arguments.of("11", false),
+                Arguments.of("12", false),
+                Arguments.of("13", false),
+                Arguments.of("14", false),
+                Arguments.of("15", false),
+                Arguments.of("16", false),
+                Arguments.of("target", true)
+                );
     }
 
     private AzureCoordinate azureCoordinate(String name) {

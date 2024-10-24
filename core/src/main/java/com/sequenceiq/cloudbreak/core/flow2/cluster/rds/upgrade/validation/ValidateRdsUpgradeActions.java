@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
 public class ValidateRdsUpgradeActions {
+
     private static final String TARGET_MAJOR_VERSION_KEY = "TARGET_MAJOR_VERSION";
 
     @Inject
@@ -54,7 +55,7 @@ public class ValidateRdsUpgradeActions {
         return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradePushSaltStatesResult.class) {
             @Override
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradePushSaltStatesResult payload, Map<Object, Object> variables) {
-                if (validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
+                if (validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase())) {
                     validateRdsUpgradeService.validateBackup(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -62,7 +63,7 @@ public class ValidateRdsUpgradeActions {
 
             @Override
             protected Selectable createRequest(ValidateRdsUpgradeContext context) {
-                return validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster()) ?
+                return validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase()) ?
                         new ValidateRdsUpgradeBackupValidationRequest(context.getStackId()) :
                         new ValidateRdsUpgradeBackupValidationResult(context.getStackId());
             }

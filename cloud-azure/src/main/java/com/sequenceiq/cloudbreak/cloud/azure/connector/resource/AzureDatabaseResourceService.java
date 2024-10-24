@@ -460,12 +460,24 @@ public class AzureDatabaseResourceService {
         azureRDSAutoMigrationValidator.validate(authenticatedContext, dbStack);
     }
 
-    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
 
         CloudContext cloudContext = authenticatedContext.getCloudContext();
-        String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+
+        if (getAzureDatabaseType(originalStack) == AzureDatabaseType.FLEXIBLE_SERVER) {
+            upgradeFlexibleServer(authenticatedContext, targetMajorVersion, resources, resourceGroupName);
+        } else {
+            upgradeSingleServer(authenticatedContext, stack, persistenceNotifier, targetMajorVersion, resources, cloudContext,
+                    resourceGroupName);
+        }
+    }
+
+    private void upgradeSingleServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            TargetMajorVersion targetMajorVersion, List<CloudResource> resources, CloudContext cloudContext, String resourceGroupName) {
+        LOGGER.debug("Upgrading Single Server to version {}", targetMajorVersion.getMajorVersion());
+        String stackName = azureUtils.getStackName(cloudContext);
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         try {
             deleteAllPrivateEndpointResources(persistenceNotifier, cloudContext, resources, client);
@@ -479,9 +491,35 @@ public class AzureDatabaseResourceService {
         } catch (CloudConnectorException e) {
             throw e;
         } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Error in upgrading database stack %s: %s", stackName, e.getMessage()), e);
+            throw new CloudConnectorException(String.format("Error occurred in upgrading database stack %s: %s", stackName, e.getMessage()), e);
         } finally {
             recreateCloudResourcesInDeployment(persistenceNotifier, cloudContext, stackName, resourceGroupName, client);
+        }
+    }
+
+    private void upgradeFlexibleServer(AuthenticatedContext authenticatedContext, TargetMajorVersion targetMajorVersion, List<CloudResource> resources,
+            String resourceGroupName) {
+        try {
+            LOGGER.debug("Upgrading Flexible Server to version {}", targetMajorVersion.getMajorVersion());
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            Optional<CloudResource> databaseServer = getResources(resources, AZURE_DATABASE).stream().findFirst();
+            databaseServer.ifPresentOrElse(
+                    databaseServerResource -> client.getFlexibleServerClient().upgrade(
+                            resourceGroupName,
+                            databaseServerResource.getName(),
+                            targetMajorVersion.getMajorVersion()),
+                    () -> {
+                        String message = "Azure database server cloud resource does not exist for stack, this should not happen. " +
+                                "Please contact Cloudera support to get this resolved.";
+                        LOGGER.warn(message);
+                        throw new CloudConnectorException(message);
+                    });
+        } catch (ManagementException e) {
+            throw azureUtils.convertToCloudConnectorException(e, "Database stack upgrade");
+        } catch (CloudConnectorException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CloudConnectorException(String.format("Error occurred in upgrading database stack: %s", e.getMessage()), e);
         }
     }
 

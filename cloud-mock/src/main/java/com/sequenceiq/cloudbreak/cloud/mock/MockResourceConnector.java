@@ -140,7 +140,7 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
         mockUrlFactory.get(authenticatedContext, "/db/upgrade").put(Entity.entity(targetMajorVersion.getMajorVersion(), MediaType.APPLICATION_JSON_TYPE));
     }

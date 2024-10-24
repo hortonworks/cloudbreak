@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -90,8 +91,8 @@ public class ValidateRdsUpgradeService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED, errorMsg);
     }
 
-    boolean shouldRunDataBackupRestore(StackView stack, ClusterView cluster) {
-        return backupRestoreChecker.shouldRunDataBackupRestore(stack, cluster);
+    boolean shouldRunDataBackupRestore(StackView stack, ClusterView cluster, Database database) {
+        return backupRestoreChecker.shouldRunDataBackupRestore(stack, cluster, database);
     }
 
     private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent) {
@@ -119,4 +120,3 @@ public class ValidateRdsUpgradeService {
         return messagesService.getMessageWithArgs(resourceEvent.getMessage(), args);
     }
 }
-

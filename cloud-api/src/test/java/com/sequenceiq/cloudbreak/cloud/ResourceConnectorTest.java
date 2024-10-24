@@ -61,7 +61,7 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+        public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
                 PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) {
         }
 

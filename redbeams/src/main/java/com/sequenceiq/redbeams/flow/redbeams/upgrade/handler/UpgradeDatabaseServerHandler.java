@@ -123,7 +123,7 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
             CloudCredential cloudCredential, CloudContext cloudContext, CloudConnector connector) throws Exception {
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         List<CloudResource> cloudResources = dbResourceService.getAllAsCloudResource(request.getResourceId());
-        connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetMajorVersion, cloudResources);
+        connector.resources().upgradeDatabaseServer(ac, request.getDatabaseStack(), databaseStack, persistenceNotifier, targetMajorVersion, cloudResources);
     }
 
     private void updateDbStack(DBStack dbStack, TargetMajorVersion targetMajorVersion, DatabaseStack mergedDatabaseStack) {

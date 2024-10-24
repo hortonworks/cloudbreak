@@ -14,10 +14,13 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.CapabilityStatu
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerVersion;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+
+import io.micrometer.common.util.StringUtils;
 
 public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
 
@@ -64,12 +67,29 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
     public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
         Server server = getFlexibleServer(resourceGroupName, serverName);
         if (server == null) {
-            String message = String.format("Flexible server not found with name %s in resource group %s", serverName, resourceGroupName);
-            LOGGER.warn(message);
-            throw new CloudConnectorException(message);
+            throwNotFound(resourceGroupName, serverName);
         } else {
             handleException(() -> server.update().withAdministratorLoginPassword(newPassword).apply());
         }
+    }
+
+    public void upgrade(String resourceGroupName, String serverName, String targetVersion) {
+        if (StringUtils.isNotBlank(targetVersion) && ServerVersion.values().contains(ServerVersion.fromString(targetVersion))) {
+            Server server = getFlexibleServer(resourceGroupName, serverName);
+            if (server == null) {
+                throwNotFound(resourceGroupName, serverName);
+            } else {
+                handleException(() -> server.update().withVersion(ServerVersion.fromString(targetVersion)).apply());
+            }
+        } else {
+            throw new CloudConnectorException(String.format("Upgrading Azure PostgreSQL Flexible Server to version %s is not supported", targetVersion));
+        }
+    }
+
+    private void throwNotFound(String resourceGroupName, String serverName) {
+        String message = String.format("Flexible server not found with name %s in resource group %s", serverName, resourceGroupName);
+        LOGGER.warn(message);
+        throw new CloudConnectorException(message);
     }
 
     private Optional<FlexibleServerCapability> getFlexibleServerCapability(String locationName) {

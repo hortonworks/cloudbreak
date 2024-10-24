@@ -77,7 +77,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStopServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStopServicesResult payload, Map<Object, Object> variables) {
-                if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
+                if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase())) {
                     String backupLocation = Objects.toString(variables.get(CLOUD_STORAGE_BACKUP_LOCATION), null);
                     String backupInstanceProfile = Objects.toString(variables.get(CLOUD_STORAGE_INSTANCE_PROFILE), null);
                     upgradeRdsService.backupRdsState(payload.getResourceId());
@@ -147,7 +147,7 @@ public class UpgradeRdsActions {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsMigrateDatabaseSettingsResponse payload, Map<Object, Object> variables)
                     throws Exception {
-                if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
+                if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase())) {
                     upgradeRdsService.restoreRdsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -155,7 +155,7 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster()) ?
+                return upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster(), context.getDatabase()) ?
                         new UpgradeRdsDataRestoreRequest(context.getStackId(), context.getVersion()) :
                         new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion());
             }

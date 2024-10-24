@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.AbstractValidateRdsUpgradeEvent;
@@ -116,8 +117,10 @@ class ValidateRdsUpgradeActionsTest {
         StackView stack = mock(StackView.class);
         when(stack.getId()).thenReturn(STACK_ID);
         ClusterView cluster = mock(ClusterView.class);
-        lenient().when(validateRdsUpgradeService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
-        ValidateRdsUpgradeContext context = new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster);
+        Database database = new Database();
+
+        lenient().when(validateRdsUpgradeService.shouldRunDataBackupRestore(stack, cluster, database)).thenReturn(shouldRunDataBackupRestore);
+        ValidateRdsUpgradeContext context = new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         Map<Object, Object> variables = new HashMap<>();

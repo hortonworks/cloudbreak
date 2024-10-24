@@ -285,7 +285,7 @@ class UpgradeRdsActionsTest {
         ClusterView cluster = mock(ClusterView.class);
         Database database = new Database();
         UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID), stack, cluster, database, TargetMajorVersion.VERSION_11);
-        lenient().when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
+        lenient().when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster, context.getDatabase())).thenReturn(shouldRunDataBackupRestore);
         lenient().when(upgradeRdsService.shouldStopStartServices(stack)).thenReturn(shouldStopServices);
         lenient().when(externalDatabaseService.isMigrationNeededDuringUpgrade(context)).thenReturn(shouldMigrateDBSettings);
 

@@ -9,10 +9,13 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureResourceType.PRIVATE_EN
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.DB_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.DELETED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION14;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DNS_ZONE_GROUP;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
+import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
+import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -216,7 +219,7 @@ class AzureDatabaseResourceServiceTest {
     @MethodSource("flexibleServerStates")
     void testGetDatabaseServerParametersWhenFlexibleServer(ServerState serverState, ExternalDatabaseStatus externalDatabaseStatus, int storageSizeGB) {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
-        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name());
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
@@ -235,7 +238,7 @@ class AzureDatabaseResourceServiceTest {
     @Test
     void testGetDatabaseServerStatusWhenException() {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
-        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name());
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
@@ -307,7 +310,7 @@ class AzureDatabaseResourceServiceTest {
     @Test
     void shouldReturnDeletedDbServerButNotDeleteAccessPolicyWhenTerminateFlexibleDatabaseServerAndSingleResourceGroup() {
         Map<String, Object> params = new HashMap<>();
-        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name());
         params.put("keyVaultUrl", "dummyKeyVaultUrl");
         params.put("keyVaultResourceGroupName", "dummyKeyVaultResourceGroupName");
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withParams(params).build());
@@ -329,12 +332,14 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldUpgradeDatabaseWhenUpgradeDatabaseServerAndPrivateEndpoint() {
-        DatabaseServer databaseServer = buildDatabaseServer();
+        DatabaseServer databaseServer = buildDatabaseServer(SINGLE_SERVER);
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
         CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
         List<CloudResource> cloudResourceList = List.of(peResource, dzgResource, dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(SINGLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
@@ -343,6 +348,8 @@ class AzureDatabaseResourceServiceTest {
         when(azureCloudResourceService.getPrivateEndpointRdsResourceTypes()).thenReturn(List.of(AZURE_PRIVATE_ENDPOINT, AZURE_DNS_ZONE_GROUP));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
@@ -350,7 +357,7 @@ class AzureDatabaseResourceServiceTest {
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         when(azureDatabaseTemplateBuilder.build(eq(cloudContext), databaseStackArgumentCaptor.capture())).thenReturn(TEMPLATE);
 
-        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -365,14 +372,14 @@ class AzureDatabaseResourceServiceTest {
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
-        assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
         verify(client).createTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME, TEMPLATE, "{}");
     }
 
     @Test
     void testUpgradeThrowsMgmtExWithConflict() {
-        DatabaseServer databaseServer = buildDatabaseServer();
+        DatabaseServer databaseServer = buildDatabaseServer(SINGLE_SERVER);
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
@@ -398,7 +405,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
-                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList));
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -413,13 +420,13 @@ class AzureDatabaseResourceServiceTest {
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
-        assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
     }
 
     @Test
     void testUpgradeThrowsMgmtExWithNonConflict() {
-        DatabaseServer databaseServer = buildDatabaseServer();
+        DatabaseServer databaseServer = buildDatabaseServer(SINGLE_SERVER);
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
@@ -445,7 +452,7 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("fda"));
 
         assertThrows(CloudConnectorException.class,
-                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList));
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -460,14 +467,14 @@ class AzureDatabaseResourceServiceTest {
         inOrder.verify(persistenceNotifier).notifyDeletion(dbResource, cloudContext);
 
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
-        assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(cloudResourceList, cloudContext);
         verify(azureUtils, never()).convertToActionFailedExceptionCausedByCloudConnectorException(managementException, "Database server deployment");
     }
 
     @Test
     void shouldUpgradeDatabaseAndDeleteAllResourcesWhenUpgradeDatabaseServerAndMultiplePrivateEndpointResourcesExist() {
-        DatabaseServer databaseServer = buildDatabaseServer();
+        DatabaseServer databaseServer = buildDatabaseServer(SINGLE_SERVER);
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         CloudResource pe1Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe1");
@@ -485,7 +492,7 @@ class AzureDatabaseResourceServiceTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
-        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
 
@@ -504,15 +511,84 @@ class AzureDatabaseResourceServiceTest {
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         verify(azureDatabaseTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
-        assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(expectedCloudResourceList, cloudContext);
+    }
+
+    // Correctly upgrades a Flexible Server when the type is FLEXIBLE_SERVER
+    @Test
+    public void testUpgradeFlexibleServerSuccessfully() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
+        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
+
+        underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList);
+
+        verify(client).getFlexibleServerClient();
+        verify(flexibleServerClientMock).upgrade(RESOURCE_GROUP_NAME, "name", targetMajorVersion.getMajorVersion());
+    }
+
+    @Test
+    public void testUpgradeFlexibleServerWithNoCloudResourcePresent() {
+        CloudResource dbResource = buildResource(AZURE_PRIVATE_ENDPOINT);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList));
+
+        verify(flexibleServerClientMock, never()).upgrade(RESOURCE_GROUP_NAME, "name", targetMajorVersion.getMajorVersion());
+        assertEquals("Azure database server cloud resource does not exist for stack, this should not happen. " +
+                "Please contact Cloudera support to get this resolved.", exception.getMessage());
+    }
+
+    @Test
+    public void testUpgradeFlexibleServerWithException() {
+        CloudResource dbResource = buildResource(AZURE_DATABASE);
+        List<CloudResource> cloudResourceList = List.of(dbResource);
+        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION14;
+        AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
+        when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+
+        ManagementException managementException = new ManagementException("anError", mock(HttpResponse.class), new ManagementError("not_conflict", "anError"));
+        doThrow(managementException).when(flexibleServerClientMock).upgrade(any(), any(), any());
+        when(azureUtils.convertToCloudConnectorException(managementException, "Database stack upgrade")).thenReturn(new CloudConnectorException("anError"));
+
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, targetMajorVersion, cloudResourceList));
+
+        verify(client).getFlexibleServerClient();
+        verify(flexibleServerClientMock).upgrade(RESOURCE_GROUP_NAME, "name", targetMajorVersion.getMajorVersion());
+        assertEquals("anError", exception.getMessage());
     }
 
     @Test
     void shouldUpgradeDatabaseWhenUpgradeDatabaseServerAndNoPrivateEndpoint() {
         CloudResource dbResource = buildResource(AZURE_DATABASE);
         List<CloudResource> cloudResourceList = List.of(dbResource);
-        DatabaseServer databaseServer = buildDatabaseServer();
+        DatabaseServer databaseServer = buildDatabaseServer(FLEXIBLE_SERVER);
+        DatabaseServer originalDatabaseServer = buildDatabaseServer(SINGLE_SERVER);
+        DatabaseStack originalDatabaseStack = mock(DatabaseStack.class);
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
@@ -520,8 +596,9 @@ class AzureDatabaseResourceServiceTest {
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(originalDatabaseStack.getDatabaseServer()).thenReturn(originalDatabaseServer);
 
-        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, originalDatabaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
@@ -531,7 +608,7 @@ class AzureDatabaseResourceServiceTest {
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
         ArgumentCaptor<DatabaseStack> databaseStackArgumentCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
         verify(azureDatabaseTemplateBuilder).build(eq(cloudContext), databaseStackArgumentCaptor.capture());
-        assertEquals("11", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
+        assertEquals("14", databaseStackArgumentCaptor.getValue().getDatabaseServer().getParameters().get(DB_VERSION));
         verify(persistenceNotifier).notifyAllocations(List.of(dbResource), cloudContext);
     }
 
@@ -546,13 +623,15 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(List.of(dbResource));
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, SINGLE_SERVER.name());
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
 
         doThrow(new RuntimeException("delete failed")).when(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList));
+                () -> underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList));
 
-        assertEquals("Error in upgrading database stack aStack: delete failed", exception.getMessage());
+        assertEquals("Error occurred in upgrading database stack aStack: delete failed", exception.getMessage());
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
         verify(azureResourceGroupMetadataProvider).getResourceGroupName(cloudContext, databaseStack);
@@ -564,7 +643,7 @@ class AzureDatabaseResourceServiceTest {
     void shouldNotReturnExceptionWhenUpgradeDatabaseServerDbResourceIsNotFound() {
         CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
         CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
-        DatabaseServer databaseServer = buildDatabaseServer();
+        DatabaseServer databaseServer = buildDatabaseServer(SINGLE_SERVER);
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
@@ -574,7 +653,7 @@ class AzureDatabaseResourceServiceTest {
         when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(DELETED);
 
-        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, cloudResourceList);
+        underTest.upgradeDatabaseServer(ac, databaseStack, databaseStack, persistenceNotifier, VERSION14, cloudResourceList);
 
         verify(azureUtils).getStackName(eq(cloudContext));
         verify(azureUtils, never()).deleteDatabaseServer(client, RESOURCE_REFERENCE, false);
@@ -829,7 +908,7 @@ class AzureDatabaseResourceServiceTest {
     void updateFlexibleServerAdministratorLoginPasswordShouldSucceed() {
         AzureFlexibleServerClient azureFlexibleServerClient = mock(AzureFlexibleServerClient.class);
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME)
-                .withParams(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER)).build());
+                .withParams(Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER)).build());
         when(azureResourceGroupMetadataProvider.getResourceGroupName(eq(cloudContext), eq(databaseStack))).thenReturn(RESOURCE_GROUP_NAME);
         when(client.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         underTest.updateAdministratorLoginPassword(ac, databaseStack, NEW_PASSWORD);
@@ -841,7 +920,7 @@ class AzureDatabaseResourceServiceTest {
     @Test
     void testStartDatabaseServerFlexible() {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
-        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name());
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
@@ -859,7 +938,7 @@ class AzureDatabaseResourceServiceTest {
     @Test
     void testStopDatabaseServerFlexible() {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
-        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, FLEXIBLE_SERVER.name());
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
@@ -888,9 +967,10 @@ class AzureDatabaseResourceServiceTest {
                 .build();
     }
 
-    private DatabaseServer buildDatabaseServer() {
+    private DatabaseServer buildDatabaseServer(AzureDatabaseType databaseType) {
         Map<String, Object> map = new HashMap<>();
         map.put("dbVersion", "10");
+        map.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, databaseType.name());
 
         return DatabaseServer.builder()
                 .withConnectionDriver("driver")

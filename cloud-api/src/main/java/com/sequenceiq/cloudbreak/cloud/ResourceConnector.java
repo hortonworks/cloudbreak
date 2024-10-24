@@ -131,8 +131,8 @@ public interface ResourceConnector {
      * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
      * @throws Exception in case of any error
      */
-    void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
-            TargetMajorVersion targetMajorVersion, List<CloudResource> resources) throws Exception;
+    void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack originalStack, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion, List<CloudResource> resources) throws Exception;
 
     /**
      * Invoked to check whether the resources have already reached a StatusGroup.PERMANENT state.

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -92,9 +93,10 @@ class ValidateRdsUpgradeServiceTest {
 
     @Test
     public void testShouldRunDataBackupRestore() {
-        underTest.shouldRunDataBackupRestore(stack, cluster);
+        Database database = new Database();
+        underTest.shouldRunDataBackupRestore(stack, cluster, database);
 
-        verify(backupRestoreChecker).shouldRunDataBackupRestore(eq(stack), eq(cluster));
+        verify(backupRestoreChecker).shouldRunDataBackupRestore(eq(stack), eq(cluster), eq(database));
     }
 
     @Test
