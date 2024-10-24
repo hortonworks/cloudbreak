@@ -45,6 +45,9 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -57,6 +60,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -183,6 +187,44 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .setAccountId("accountid")
                 .setResource("1")
                 .build());
+    }
+
+    @Test
+    void conversionTestWhenAzureFlexibleAndCMKDefinedWithGeoredundant() throws IOException {
+        setupAllocateRequest(true);
+        allocateRequest.getDatabaseServer().setAzure(new AzureDatabaseServerV4Parameters());
+        allocateRequest.getDatabaseServer().getAzure().setGeoRedundantBackup(true);
+        allocateRequest.getDatabaseServer().getAzure().setAzureDatabaseType(AzureDatabaseType.FLEXIBLE_SERVER);
+
+        AzureEnvironmentParameters azureEnvironmentParameters = new AzureEnvironmentParameters();
+        AzureResourceEncryptionParameters azureResourceEncryptionParameters = new AzureResourceEncryptionParameters();
+        azureResourceEncryptionParameters.setEncryptionKeyUrl("encryptionKeyUrl");
+        azureEnvironmentParameters.setResourceEncryptionParameters(azureResourceEncryptionParameters);
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
+                .withCloudPlatform(CloudPlatform.AZURE.name())
+                .withCrn(ENVIRONMENT_CRN)
+                .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
+                .withName(ENVIRONMENT_NAME)
+                .withTag(new TagResponse())
+                .withAzure(azureEnvironmentParameters)
+                .build();
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+
+        SslConfig sslConfig = new SslConfig();
+        sslConfig.setId(16L);
+        when(sslConfigService.createSslConfig(eq(allocateRequest), any(DBStack.class))).thenReturn(sslConfig);
+        when(databaseServerV4StackRequestToDatabaseServerConverter.buildDatabaseServer(any(DatabaseServerV4StackRequest.class),
+                any(CloudPlatform.class),
+                any(Crn.class),
+                any())).thenReturn(databaseServer);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertEquals(badRequestException.getMessage(),
+                "Flexible server with GeoRedundant backup not supported with Azure CMK. See more info " +
+                        "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/" +
+                        "concepts-data-encryption#using-data-encryption-with-cmks-and-geo-redundant-business-continuity-features.");
     }
 
     @Test

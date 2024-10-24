@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
@@ -28,6 +29,9 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -95,6 +99,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         CrnUser user = crnUserDetailsService.loadUserByUsername(ownerCrnString);
 
         DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
+        validateGeoRedundantAzureCMK(source, environment);
         DBStack dbStack = new DBStack();
         dbStack.setOwnerCrn(ownerCrn);
         dbStack.setUserName(user.getEmail());
@@ -123,6 +128,29 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setTags(getTags(dbStack, source, environment));
         dbStack.setSslConfig(sslConfigService.createSslConfig(source, dbStack).getId());
         return dbStack;
+    }
+
+    private void validateGeoRedundantAzureCMK(AllocateDatabaseServerV4Request source, DetailedEnvironmentResponse environment) {
+        if (azureAndCMKPresented(environment) && flexibleRequest(source)) {
+            Boolean geoRedundantBackup = source.getDatabaseServer().getAzure().getGeoRedundantBackup();
+            if (Boolean.TRUE.equals(geoRedundantBackup)) {
+                throw new BadRequestException("Flexible server with GeoRedundant backup not supported with Azure CMK. " +
+                        "See more info https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/" +
+                        "concepts-data-encryption#using-data-encryption-with-cmks-and-geo-redundant-business-continuity-features.");
+            }
+        }
+    }
+
+    private boolean flexibleRequest(AllocateDatabaseServerV4Request source) {
+        return source.getDatabaseServer().getAzure() != null
+                && AzureDatabaseType.FLEXIBLE_SERVER.equals(source.getDatabaseServer().getAzure().getAzureDatabaseType());
+    }
+
+    private boolean azureAndCMKPresented(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment.getAzure())
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getEncryptionKeyUrl)
+                .isPresent();
     }
 
     private Json getTags(DBStack dbStack, AllocateDatabaseServerV4Request dbRequest, DetailedEnvironmentResponse environment) {

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.AzureDatabaseServerModelDescriptions;
@@ -201,7 +202,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, BACKUP_RETENTION_DAYS, backupRetentionDays);
         putIfValueNotNull(map, DB_VERSION, dbVersion);
-        putIfValueNotNull(map, GEO_REDUNDANT_BACKUP, geoRedundantBackup);
+        putIfValueNotNull(map, GEO_REDUNDANT_BACKUP, NullUtil.getIfNotNullOtherwise(geoRedundantBackup, Boolean.FALSE));
         putIfValueNotNull(map, SKU_CAPACITY, skuCapacity);
         putIfValueNotNull(map, SKU_FAMILY, skuFamily);
         putIfValueNotNull(map, SKU_TIER, skuTier);
