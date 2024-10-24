@@ -417,7 +417,7 @@ public class AwsUpscaleService {
                     if (bdm.ebs() != null) {
                         LaunchTemplateEbsBlockDevice ebs = bdm.ebs();
                         updateLaunchTemplate = ebs.volumeSize() != group.getRootVolumeSize()
-                                || !ebs.volumeTypeAsString().equals(group.getRootVolumeType().toLowerCase(Locale.ROOT));
+                                || (null != group.getRootVolumeType() && !ebs.volumeTypeAsString().equals(group.getRootVolumeType().toLowerCase(Locale.ROOT)));
                     }
                 }
                 if (updateLaunchTemplate) {
