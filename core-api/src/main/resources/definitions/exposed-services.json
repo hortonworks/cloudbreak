@@ -879,6 +879,21 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true
+    },
+    {
+      "name": "DLM",
+      "displayName": "Data Lifecycle Manager",
+      "serviceName": "DLM_SERVER",
+      "knoxService": "DLM",
+      "knoxUrl": "/dlm/",
+      "ssoSupported": false,
+      "port": 8085,
+      "tlsPort": 8085,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.18"
     }
   ]
 }

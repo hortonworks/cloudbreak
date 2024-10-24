@@ -656,4 +656,13 @@
     </service>
     {%- endif %}
     {%- endif %}
+
+    {% if 'DLM' in exposed -%}
+    <service>
+        <role>DLM</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['HIVESERVER2'] -%}
+        <url>http://{{ hostloc }}:{{ ports['DLM'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
 </topology>
