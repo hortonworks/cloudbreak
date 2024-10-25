@@ -302,6 +302,10 @@ public interface DistroXV1Endpoint {
     void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns,
             @QueryParam("refreshRemoteDataContext") @DefaultValue("false") Boolean refreshRemoteDataContext);
 
+    /**
+     * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead
+     */
+    @Deprecated
     @POST
     @Path("crn/{crn}/rotate_salt_password")
     @Operation(summary = ROTATE_SALT_PASSWORD_BY_CRN, description = Notes.STACK_NOTES,

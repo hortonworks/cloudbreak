@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event;
+package com.sequenceiq.freeipa.dto;
 
 public enum RotateSaltPasswordReason {
     UNSET,

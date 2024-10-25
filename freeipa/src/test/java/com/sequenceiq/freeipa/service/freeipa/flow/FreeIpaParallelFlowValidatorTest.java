@@ -44,7 +44,6 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
@@ -144,7 +143,7 @@ class FreeIpaParallelFlowValidatorTest {
     @Test
     public void testNewParallelFlows() {
         List<String> allowedParallelFlows = new FreeIpaFlowInformation().getAllowedParallelFlows();
-        assertEquals(20, allowedParallelFlows.size(),
+        assertEquals(19, allowedParallelFlows.size(),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
         assertTrue(Set.of(
                         RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_PARAMS_TRIGGER_EVENT.event(),
@@ -163,7 +162,6 @@ class FreeIpaParallelFlowValidatorTest {
                         AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(),
                         UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(),
                         UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),
-                        RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event(),
                         ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event(),
                         FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
                         FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event()).containsAll(allowedParallelFlows),

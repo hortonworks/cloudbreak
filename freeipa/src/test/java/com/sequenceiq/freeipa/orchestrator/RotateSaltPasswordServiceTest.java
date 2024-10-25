@@ -44,17 +44,17 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
+import com.sequenceiq.freeipa.dto.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,9 +69,6 @@ class RotateSaltPasswordServiceTest {
     private static final long STACK_ID = 1L;
 
     private static final String FQDN = "fqdn";
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private EntitlementService entitlementService;
@@ -92,7 +89,7 @@ class RotateSaltPasswordServiceTest {
     private BootstrapService bootstrapService;
 
     @Mock
-    private FreeIpaFlowManager flowManager;
+    private FreeIpaSecretRotationService freeIpaSecretRotationService;
 
     @Mock
     private UsageReporter usageReporter;
@@ -118,13 +115,15 @@ class RotateSaltPasswordServiceTest {
     @Captor
     private ArgumentCaptor<UsageProto.CDPSaltPasswordRotationEvent> eventArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<FreeIpaSecretRotationRequest> requestCaptor;
+
     @BeforeEach
     void setUp() {
         lenient().when(gatewayConfig.getPrivateAddress()).thenReturn("8.8.8.8");
 
         lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
         lenient().when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(true);
-        lenient().when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         lenient().when(gatewayConfigService.getNotDeletedGatewayConfigs(stack)).thenReturn(List.of(gatewayConfig));
 
         lenient().when(stack.getId()).thenReturn(STACK_ID);
@@ -228,19 +227,13 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void triggerRotateSaltPassword() {
-        when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollable-id");
-        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
 
-        assertThat(result)
-                .isEqualTo(flowIdentifier);
-        String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        verify(flowManager).notify(eq(selector), stackEventArgumentCaptor.capture());
-        StackEvent stackEvent = stackEventArgumentCaptor.getValue();
-        assertThat(stackEvent)
-                .returns(stack.getId(), StackEvent::getResourceId);
+        verify(freeIpaSecretRotationService).rotateSecretsByCrn(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), requestCaptor.capture());
+        FreeIpaSecretRotationRequest request = requestCaptor.getValue();
+        assertThat(request.getSecrets()).containsOnly(FreeIpaSecretType.SALT_PASSWORD.value());
     }
 
     @Test

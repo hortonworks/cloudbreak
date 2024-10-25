@@ -318,6 +318,10 @@ public interface StackV4Endpoint {
     FlowIdentifier putStartInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
+    /**
+     * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead
+     */
+    @Deprecated
     @POST
     @Path("internal/{crn}/rotate_salt_password")
     @Produces(MediaType.APPLICATION_JSON)

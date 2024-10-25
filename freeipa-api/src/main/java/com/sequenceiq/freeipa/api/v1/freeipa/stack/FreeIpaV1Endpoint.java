@@ -229,6 +229,10 @@ public interface FreeIpaV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void stop(@QueryParam("environment") @NotEmpty String environmentCrn);
 
+    /**
+     * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead
+     */
+    @Deprecated
     @POST
     @Path("rotate_salt_password")
     @Produces(MediaType.APPLICATION_JSON)

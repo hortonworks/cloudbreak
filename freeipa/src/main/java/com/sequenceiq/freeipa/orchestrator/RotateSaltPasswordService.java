@@ -30,16 +30,14 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
+import com.sequenceiq.freeipa.dto.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordType;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 @Service
@@ -60,9 +58,6 @@ public class RotateSaltPasswordService {
     private Clock clock;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private EntitlementService entitlementService;
 
     @Inject
@@ -81,19 +76,15 @@ public class RotateSaltPasswordService {
     private BootstrapService bootstrapService;
 
     @Inject
-    private FreeIpaFlowManager flowManager;
+    private FreeIpaSecretRotationService freeIpaSecretRotationService;
 
     @Inject
     private UsageReporter usageReporter;
 
     public FlowIdentifier triggerRotateSaltPassword(String environmentCrn, String accountId, RotateSaltPasswordReason reason) {
-        Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-        validateRotateSaltPassword(stack);
-        RotateSaltPasswordType type = saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)
-                ? RotateSaltPasswordType.SALT_BOOTSTRAP_ENDPOINT
-                : RotateSaltPasswordType.FALLBACK;
-        String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        return flowManager.notify(selector, new RotateSaltPasswordRequest(stack.getId(), reason, type));
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        request.setSecrets(List.of(FreeIpaSecretType.SALT_PASSWORD.value()));
+        return freeIpaSecretRotationService.rotateSecretsByCrn(accountId, environmentCrn, request);
     }
 
     public void rotateSaltPassword(Stack stack) {

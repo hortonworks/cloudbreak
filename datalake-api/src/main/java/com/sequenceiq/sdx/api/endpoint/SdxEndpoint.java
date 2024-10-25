@@ -244,6 +244,10 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier stopByCrn(@PathParam("crn") String crn);
 
+    /**
+     * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead
+     */
+    @Deprecated
     @POST
     @Path("{crn}/rotate_salt_password")
     @Produces(MediaType.APPLICATION_JSON)

@@ -83,7 +83,6 @@ import com.sequenceiq.datalake.flow.imdupdate.event.SdxInstanceMetadataUpdateEve
 import com.sequenceiq.datalake.flow.java.SetDatalakeDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
-import com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerEvent;
 import com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent;
 import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateTriggerEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
@@ -95,6 +94,7 @@ import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskU
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
 import com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -108,6 +108,7 @@ import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
 public class SdxReactorFlowManager {
@@ -139,6 +140,9 @@ public class SdxReactorFlowManager {
 
     @Inject
     private NodeValidator nodeValidator;
+
+    @Inject
+    private SdxRotationService sdxRotationService;
 
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
@@ -366,9 +370,7 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerSaltPasswordRotationTracker(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake salt password rotation tracker for: {}", cluster);
-        String selector = RotateSaltPasswordTrackerEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
+        return sdxRotationService.triggerSecretRotation(cluster.getCrn(), List.of(DatalakeSecretType.SALT_PASSWORD.value()), null, null);
     }
 
     public FlowIdentifier triggerModifyProxyConfigTracker(SdxCluster cluster) {

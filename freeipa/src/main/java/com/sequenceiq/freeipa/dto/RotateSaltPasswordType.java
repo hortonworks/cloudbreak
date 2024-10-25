@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword;
+package com.sequenceiq.freeipa.dto;
 
 public enum RotateSaltPasswordType {
     FALLBACK,
