@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.externalizedcluster.create.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.COMPUTE_CLUSTER_CREATION_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.COMPUTE_CLUSTER_CREATION_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.COMPUTE_CLUSTER_CREATION_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.externalizedcluster.create.ExternalizedComputeClusterCreationState.DEFAULT_COMPUTE_CLUSTER_CREATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.externalizedcluster.create.ExternalizedComputeClusterCreationState.DEFAULT_COMPUTE_CLUSTER_CREATION_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.externalizedcluster.create.ExternalizedComputeClusterCreationState.DEFAULT_COMPUTE_CLUSTER_CREATION_START_STATE;
@@ -15,15 +19,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.ExternalizedComputeClusterCreationState;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class ExternalizedComputeClusterCreationFlowConfig
         extends AbstractFlowConfiguration<ExternalizedComputeClusterCreationState, ExternalizedComputeClusterCreationStateSelectors>
-        implements RetryableFlowConfiguration<ExternalizedComputeClusterCreationStateSelectors> {
+        implements RetryableFlowConfiguration<ExternalizedComputeClusterCreationStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<ExternalizedComputeClusterCreationState, ExternalizedComputeClusterCreationStateSelectors>> TRANSITIONS =
             new Transition.Builder<ExternalizedComputeClusterCreationState, ExternalizedComputeClusterCreationStateSelectors>()
@@ -73,5 +80,18 @@ public class ExternalizedComputeClusterCreationFlowConfig
     @Override
     public ExternalizedComputeClusterCreationStateSelectors getRetryableEvent() {
         return DEFAULT_COMPUTE_CLUSTER_CREATION_FAILED_HANDLED_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return COMPUTE_CLUSTER_CREATION_STARTED;
+        } else if (DEFAULT_COMPUTE_CLUSTER_CREATION_FINISHED_STATE.equals(flowState)) {
+            return COMPUTE_CLUSTER_CREATION_FINISHED;
+        } else if (DEFAULT_COMPUTE_CLUSTER_CREATION_FAILED_STATE.equals(flowState)) {
+            return COMPUTE_CLUSTER_CREATION_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

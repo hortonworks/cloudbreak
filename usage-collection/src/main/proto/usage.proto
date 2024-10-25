@@ -323,6 +323,16 @@ message Event {
     CDPCDEServiceMaintenanceRequested cdpCDEServiceMaintenanceRequested = 156;
     // A CDP DataEngineering service's status changed during enter/exit maintenance.
     CDPCDEServiceMaintenanceStatusChanged cdpCDEServiceMaintenanceStatusChanged = 157;
+    // A CDP DataFlow shared parameter group lifecycle event was triggered
+    CDPDFSharedParameterGroupLifecycle cdpDFSharedParameterGroupLifecycle = 158;
+    // An Altus account.
+    AltusIamAccountState altusIamAccountState = 159;
+    // An Altus user.
+    AltusIamUserState altusIamUserState = 160;
+    // A feedback given by the user on the new landing page.
+    NewLandingPageFeedback newLandingPageFeedback = 161;
+    // Feedback given while switching from New Landing Page to Old Landing Page.
+    SwitchNewLandingPageFeedback switchNewLandingPageFeedback = 162;
   }
 }
 
@@ -354,12 +364,55 @@ message AltusIamAccountCreated {
   // same SFDC account can have multiple identity provider associations across
   // multiple Altus accounts. We do this for cloudera.com for example to enable
   // Altus administrative and test accounts.
-  string identifyProviderId = 3;
+  // DEPRECATED - use identityProviderId instead.
+  // TODO remove field CDPCP-12976
+  string identifyProviderId = 3 [deprecated = true];
   // The SFDC account ID associated with this account. This will always be set
   // for non-trial accounts. This may or may not be set for trial accounts.
   string sfdcAccountId = 4;
   // The type of Altus account being created.
   AltusIamAccountType.Value accountType = 5;
+  // The identity provider ID for this account. The identity provider for an
+  // account provides user identity information for the account. Note that the
+  // same SFDC account can have multiple identity provider associations across
+  // multiple Altus accounts. We do this for cloudera.com for example to enable
+  // Altus administrative and test accounts.
+  string identityProviderId = 6;
+}
+
+// Generated when an Altus account has been modified.
+// It's preferable to include all information in the event from a data
+// engineering perspective since it removes the need to preserve the initial
+// creation events. This will allow data engineering to be more efficient
+// about how they store and process events.
+message AltusIamAccountState {
+  // The Altus account ID of the new account. This uniquely identifies the
+  // account within Altus. This ID is immutable.
+  string accountId = 1;
+  // The identity provider ID for this account. The identity provider for an
+  // account provides user identity information for the account. Note that the
+  // same SFDC account can have multiple identity provider associations across
+  // multiple Altus accounts. We do this for cloudera.com for example to enable
+  // Altus administrative and test accounts.
+  string identityProviderId = 2;
+  // The SFDC account ID associated with this account. This will always be set
+  // for non-trial accounts. This may or may not be set for trial accounts.
+  string sfdcAccountId = 3;
+  // The type of Altus account being created.
+  AltusIamAccountType.Value accountType = 4;
+  // Whether login using Cloudera SSO is enabled. When disabled, only account
+  // administrators are permitted to login through Cloudera SSO. This setting
+  // can be overridden by `clouderaSSOStrictModeEnabled`.
+  bool clouderaSSOLoginEnabled = 5;
+  // Whether strict mode is enabled on the account. The default value is
+  // 'false'. When it is 'true', it means that strict mode is enabled on the
+  // account and interactive login through Cloudera SSO is disabled for all
+  // users including account administrators of the account. The 'true' value
+  // also overrides the setting for `clouderaSSOLoginDisabled`.
+  bool clouderaSSOStrictModeEnabled = 6;
+  // The reason this event was published. This same event will be published
+  // for multiple RPCs.
+  string reason = 7;
 }
 
 // Generated when a new Altus user has been created.
@@ -388,8 +441,8 @@ message AltusIamUserCreated {
   string crn = 10;
   // The CRN of the identity provider that the user authenticate with. The value
   // can be one of three:
-  // 1) <Cloudera-Default> - the ID for the Cloudera Okta identity provider.
-  // 2) Altus-Administration - the ID for te Cloudera Altus Administration
+  // 1) <Cloudera-Default> - the ID for the ClouderaSSO identity provider.
+  // 2) Altus-Administration - the ID for the Cloudera Altus Administration
   //    identity provider.
   // 3) an arbitrary CRN: The CRN for the identity provider connector in a
   //    a customer account used to establish identity federation with Altus.
@@ -411,6 +464,48 @@ message AltusIamUserUpdated {
   string userId = 1;
   // Whether the user is an admin in their Altus account.
   bool admin = 5;
+  // State of the user. Expected values are:
+  // 1) ACTIVE
+  // 2) DELETING - user is being deleted. This is a transient state used for reliable
+  //               deletion of users.
+  // 3) DEACTIVATED - user is deactivated for both control plane and workloads.
+  // 4) CONTROL_PLANE_LOCKED_OUT - user is locked out of control plane.
+  string state = 6;
+}
+
+// Generated to give the current state of a User.
+message AltusIamUserState {
+  // The Altus user ID of the user.
+  string userId = 1;
+  // Whether the user is an admin in their Altus account.
+  bool admin = 2;
+  // The Altus account ID of the user.
+  string accountId = 3;
+  // The ID of this user in the identity provider. This is not set for all
+  // users. If this is not set sfdcContactId will be set.
+  string identityProviderUserId = 4;
+  // The SFDC contact ID associated with this user. This may or may not be set
+  // for trial accounts or for accounts using a non-SFDC identity provider. If
+  // this is not set identityProviderUserId will be set.
+  string sfdcContactId = 5;
+  // The CRN for the user.
+  string crn = 6;
+  // The CRN of the identity provider that the user authenticate with. The value
+  // can be one of three:
+  // 1) <Cloudera-Default> - the ID for the ClouderaSSO identity provider.
+  // 2) Altus-Administration - the ID for the Cloudera Altus Administration
+  //    identity provider.
+  // 3) an arbitrary CRN: The CRN for the identity provider connector in a
+  //    a customer account used to establish identity federation with Altus.
+  string identityProviderCrn = 7;
+  // State of the user. Expected values are:
+  // 1) ACTIVE
+  // 2) DELETING - user is being deleted. This is a transient state used for reliable
+  //               deletion of users.
+  // 3) DEACTIVATED - user is deactivated for both control plane and workloads.
+  // 4) CONTROL_PLANE_LOCKED_OUT - user is locked out of control plane.
+  string state = 8;
+  string reason = 9;
 }
 
 // Generated when an Altus IAM user has been deleted.
@@ -423,12 +518,70 @@ message AltusIamUserDeleted {
 message AltusIamUserInteractiveLogin {
   // The Altus user ID of the user logging in.
   string userId = 1;
+  // The Altus account ID of the user.
+  string accountId = 2;
+  // The ID of this user in the identity provider. This is not set for all
+  // users. If this is not set sfdcContactId will be set.
+  string identityProviderUserId = 3;
+  // The SFDC contact ID associated with this user. This may or may not be set
+  // for trial accounts or for accounts using a non-SFDC identity provider. If
+  // this is not set identityProviderUserId will be set.
+  string sfdcContactId = 4;
+  // Whether the user is an admin in their Altus account.
+  bool thunderheadAdmin = 5;
+  // The CRN for the user.
+  string crn = 6;
+  // The CRN of the identity provider that the user authenticates with. The value
+  // can be one of three:
+  // 1) <Cloudera-Default> - the ID for the ClouderaSSO identity provider.
+  // 2) Altus-Administration - the ID for the Cloudera Altus Administration
+  //    identity provider.
+  // 3) an arbitrary CRN: The CRN for the identity provider connector in a
+  //    a customer account used to establish identity federation with Altus.
+  string identityProviderCrn = 7;
+  // State of the user. Expected values are:
+  // 1) ACTIVE
+  // 2) DELETING - user is being deleted. This is a transient state used for reliable
+  //               deletion of users.
+  // 3) DEACTIVATED - user is deactivated for both control plane and workloads.
+  //                  Deactivated users should not be able to successfully login.
+  // 4) CONTROL_PLANE_LOCKED_OUT - user is locked out of control plane.
+  //                               Locked out users should not be able to successfully login.
+  string state = 8;
 }
 
 // Generated when an Altus user interactive login fails.
 message AltusIamUserInteractiveLoginFailure {
   // The Altus user ID of the user logging in.
   string userId = 1;
+  // The Altus account ID of the user.
+  string accountId = 2;
+  // The ID of this user in the identity provider. This is not set for all
+  // users. If this is not set sfdcContactId will be set.
+  string identityProviderUserId = 3;
+  // The SFDC contact ID associated with this user. This may or may not be set
+  // for trial accounts or for accounts using a non-SFDC identity provider. If
+  // this is not set identityProviderUserId will be set.
+  string sfdcContactId = 4;
+  // Whether the user is an admin in their Altus account.
+  bool thunderheadAdmin = 5;
+  // The CRN for the user.
+  string crn = 6;
+  // The CRN of the identity provider that the user authenticates with. The value
+  // can be one of three:
+  // 1) <Cloudera-Default> - the ID for the ClouderaSSO identity provider.
+  // 2) Altus-Administration - the ID for the Cloudera Altus Administration
+  //    identity provider.
+  // 3) an arbitrary CRN: The CRN for the identity provider connector in a
+  //    a customer account used to establish identity federation with Altus.
+  string identityProviderCrn = 7;
+  // State of the user. Expected values are:
+  // 1) ACTIVE
+  // 2) DELETING - user is being deleted. This is a transient state used for reliable
+  //               deletion of users.
+  // 3) DEACTIVATED - user is deactivated for both control plane and workloads.
+  // 4) CONTROL_PLANE_LOCKED_OUT - user is locked out of control plane.
+  string state = 8;
 }
 
 // Generated when an Altus IAM machine user has been created.
@@ -1766,7 +1919,7 @@ message CDPLiftieClusterNodeStatesHeartbeatSummary {
   string liftieVersion = 4;
   // The Kubernetes version.
   string kubernetesVersion = 5;
-  // workload CRN for which this cluster
+  // workload CRN for this cluster (should NOT be set for external clusters)
   string workloadCRN = 6;
   // Summary of info for all the nodes
   CDPLiftieClusterNodesSummary nodesSummary = 7;
@@ -1774,6 +1927,22 @@ message CDPLiftieClusterNodeStatesHeartbeatSummary {
   CDPLiftieClusterMeteringPodsSummary meteringPodsSummary = 8;
   // The workload region
   string workloadRegion = 9;
+  // The Compute Cluster type (Dedicated or Shared)
+  string clusterType = 10;
+  // Summary info for all the workload nodes (should NOT be set for embedded clusters)
+  repeated CDPLiftieClusterWorkloadNodesSummary workloadNodesSummary = 11;
+}
+
+// Summary info for all the workload nodes
+message CDPLiftieClusterWorkloadNodesSummary {
+  // Total number of metered nodes for this workload
+  int32 numNodesMetered = 1;
+  // Total number of healthy metered nodes
+  int32 numNodesMeteredHealthy = 2;
+  // Total number of unhealthy metered nodes
+  int32 numNodesMeteredUnhealthy = 3;
+  // workload CRN for this workload
+  string workloadCRN = 4;
 }
 
 message CDPLiftieClusterNodesSummary {
@@ -1791,9 +1960,9 @@ message CDPLiftieClusterNodesSummary {
   int32 numNodesNonmeteredUnhealthy = 6;
   // The names of any unhealthy nodes
   repeated string unhealthyNodes = 7;
-  // The number of CDE Tier1 (CORE) nodes
+  // The number of CDE Tier1 (CORE) nodes (should NOT be set for external clusters)
   int32 numNodesTier1 = 8;
-  // The number of CDE Tier2 (ALLP) nodes
+  // The number of CDE Tier2 (ALLP) nodes (should NOT be set for external clusters)
   int32 numNodesTier2 = 9;
 }
 
@@ -1867,8 +2036,10 @@ message CDPLiftieClusterPodStatesHeartbeatSummary {
   string liftieVersion = 13;
   // The Kubernetes version.
   string kubernetesVersion = 14;
-  // workload CRN for which this cluster
+  // workload CRN (comma separated list for external clusters)
   string workloadCRN = 15;
+  // Summary Info of Metering v2 Pods
+  CDPLiftieClusterPodSummmary meteringv2Pods = 16;
 }
 
 message CDPLiftieClusterPodSummmary {
@@ -1974,6 +2145,20 @@ message CDPEnvironmentStatus {
     LOAD_BALANCER_UPDATE_FINISHED = 26;
     // The status when load balancer update has been failed on the environment.
     LOAD_BALANCER_UPDATE_FAILED = 27;
+
+    // The status when default compute cluster creation has been triggered on the environment
+    COMPUTE_CLUSTER_CREATION_STARTED = 28;
+    // The status when default compute cluster creation has been finished on the environment
+    COMPUTE_CLUSTER_CREATION_FINISHED = 29;
+    // The status when default compute cluster creation has been failed on the environment
+    COMPUTE_CLUSTER_CREATION_FAILED = 30;
+
+    // The status when default compute cluster reinitialization has been triggered on the environment
+    COMPUTE_CLUSTER_REINIT_STARTED = 31;
+    // The status when default compute cluster reinitialization has been finished on the environment
+    COMPUTE_CLUSTER_REINIT_FINISHED = 32;
+    // The status when default compute cluster reinitialization has been failed on the environment
+    COMPUTE_CLUSTER_REINIT_FAILED = 33;
   }
 }
 
@@ -2837,6 +3022,46 @@ message CDPDFFlowDesignLifecycle {
   string basisFlowVersionCrn = 9;
   // Optional. The crn of the flow after it is successfully published into the flow catalog. (Only ever included for CDPDFFlowDesignAction.PUBLISHED action)
   string publishedFlowVersionCrn = 10;
+}
+
+// Generated when users interact with shared parameter groups.
+message CDPDFSharedParameterGroupLifecycle {
+  // The id of the shared parameter group.
+  string parameterGroupId = 1;
+  // The crn of the shared parameter group.
+  string parameterGroupCrn = 2;
+  // The name of the shared parameter group.
+  string parameterGroupName = 3;
+  // The lifecycle action taken on the shared parameter group.
+  CDPDFSharedParameterGroupAction.Value action = 4;
+  // The count of the parameters in the shared parameter group.
+  int32 parameterCount = 5;
+  // The count of the associated flow drafts for the shared parameter group.
+  int32 associatedFlowDraftCount = 6;
+  // The crn of the data flow service.
+  string dfServiceCrn = 7;
+  // The id of the data flow service.
+  string dfServiceId = 8;
+  // The crn of the CDP environment where the shared parameter group is used.
+  string environmentCrn = 9;
+  // Username of the actor that triggered the action.
+  string username = 10;
+}
+
+// The various lifecycle actions that can be taken on shared parameter groups.
+message CDPDFSharedParameterGroupAction {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating the shared parameter group was created.
+    CREATED = 1;
+    // A value indicating the shared parameter group was deleted.
+    DELETED = 2;
+    // A value indicating the shared parameter group was updated.
+    UPDATED = 3;
+    // A value indicating the shared parameter group association was updated.
+    FLOW_DRAFT_ASSOCIATION_UPDATED = 4;
+  }
 }
 
 // The status of a CDP DataFlow service.
@@ -4416,8 +4641,9 @@ message CDPCDESessionRequested {
 // operation type: suspend OR resume.
 message CDPCDESuspendResumeOperationType {
   enum Value {
-    SUSPEND = 0;
-    RESUME  = 1;
+    UNSET   = 0;
+    SUSPEND = 1;
+    RESUME  = 2;
   }
 }
 
@@ -4460,15 +4686,17 @@ message CDPCDEServiceSuspendResumeStatusChanged {
 
 message CDPCDEServiceMaintenancePhase {
   enum Value {
-    ENTER_MAINTENANCE = 0;
-    QUIT_MAINTENANCE = 1;
+    UNSET             = 0;
+    ENTER_MAINTENANCE = 1;
+    QUIT_MAINTENANCE  = 2;
   }
 }
 
 message CDPCDEServiceMaintenanceOperationType {
   enum Value {
-    UPGRADE = 0;
-    SUSPEND_RESUME = 1;
+    UNSET          = 0;
+    UPGRADE        = 1;
+    SUSPEND_RESUME = 2;
   }
 }
 
@@ -5250,6 +5478,16 @@ message CDPMEMValidationResult {
   string errorDetails = 14;
   // A string containing JSON to provide further validation details.
   string validationDetails = 15;
+  // The validation version.
+  CDPMEMValidationVersion.Value version = 16;
+  // The instance type being used comes from the validation of V2.
+  string instanceType = 17;
+  // The service feature being used comes from the validation of V2.
+  string serviceFeature = 18;
+  // A JSON formatted string containing validation details from metering V2.
+  string meteringValidationDetails =19;
+  // A JSON formatted string containing validation details from usage event.
+  string usageEventValidationDetails =20;
 }
 
 // The status for a MEM Validation result.
@@ -5261,6 +5499,16 @@ message CDPMEMValidationStatus {
     PASSED = 1;
     // The validation failed.
     FAILED = 2;
+  }
+}
+
+// The version for a MEM Validation result.
+message CDPMEMValidationVersion {
+  enum Value {
+    // Validation of V1.
+    V1 = 0;
+    // Validation of V2.
+    V2 = 1;
   }
 }
 
@@ -5980,4 +6228,34 @@ message CDPCODStorageDetailsForWorker {
   int32 volumeSize = 3;
   // The volume type.
   string volumeType = 4;
+}
+
+// NewLandingPageFeedback event.
+message NewLandingPageFeedback {
+  // Crn of the user.
+  string userCrn = 1;
+  // Account Id of the user.
+  string accountId = 2;
+  // How do you like the new UI.
+  string howDoYouLike = 3;
+  // Feedback message provided by the user.
+  string message = 4;
+  // Open to be contacted for additional feedback.
+  bool openToBeContacted = 5;
+  // Choice to skip feedback.
+  bool skipFeedback = 6;
+}
+
+// SwitchNewLandingPageFeedback event.
+message SwitchNewLandingPageFeedback {
+  // Crn of the user.
+  string userCrn = 1;
+  // Account Id of the user.
+  string accountId = 2;
+  // Reason why the user switched from the New UI to Old UI of CDP Landing Page.
+  string switchReason = 3;
+  // Feedback message provided by the user.
+  string message = 4;
+  // Choice to skip feedback.
+  bool skipFeedback = 5;
 }

@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.COMPUTE_CLUSTER_REINIT_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.COMPUTE_CLUSTER_REINIT_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.COMPUTE_CLUSTER_REINIT_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.ExternalizedComputeClusterReInitializationState.DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.ExternalizedComputeClusterReInitializationState.DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.ExternalizedComputeClusterReInitializationState.DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_START_STATE;
@@ -15,15 +19,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseAware;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.ExternalizedComputeClusterReInitializationState;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationStateSelectors;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class ExternalizedComputeClusterReInitializationFlowConfig
         extends AbstractFlowConfiguration<ExternalizedComputeClusterReInitializationState, ExternalizedComputeClusterReInitializationStateSelectors>
-        implements RetryableFlowConfiguration<ExternalizedComputeClusterReInitializationStateSelectors> {
+        implements RetryableFlowConfiguration<ExternalizedComputeClusterReInitializationStateSelectors>, EnvironmentUseCaseAware {
 
     private static final List<Transition<ExternalizedComputeClusterReInitializationState, ExternalizedComputeClusterReInitializationStateSelectors>>
             TRANSITIONS = new Transition.Builder<ExternalizedComputeClusterReInitializationState, ExternalizedComputeClusterReInitializationStateSelectors>()
@@ -73,5 +80,18 @@ public class ExternalizedComputeClusterReInitializationFlowConfig
     @Override
     public ExternalizedComputeClusterReInitializationStateSelectors getRetryableEvent() {
         return DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_FAILED_HANDLED_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return COMPUTE_CLUSTER_REINIT_STARTED;
+        } else if (DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_FINISHED_STATE.equals(flowState)) {
+            return COMPUTE_CLUSTER_REINIT_FINISHED;
+        } else if (DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_FAILED_STATE.equals(flowState)) {
+            return COMPUTE_CLUSTER_REINIT_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }
