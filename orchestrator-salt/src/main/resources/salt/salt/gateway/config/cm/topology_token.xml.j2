@@ -657,12 +657,14 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'DLM_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'DLM' in exposed -%}
     <service>
         <role>DLM</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['HIVESERVER2'] -%}
+        {% for hostloc in salt['pillar.get']('gateway:location')['DLM_SERVER'] -%}
         <url>http://{{ hostloc }}:{{ ports['DLM'] }}</url>
         {%- endfor %}
     </service>
+    {%- endif %}
     {%- endif %}
 </topology>
