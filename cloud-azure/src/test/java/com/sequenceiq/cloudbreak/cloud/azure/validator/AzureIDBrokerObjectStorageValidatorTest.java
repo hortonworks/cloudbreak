@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -44,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -55,7 +55,7 @@ import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureIDBrokerObjectStorageValidatorTest {
+class AzureIDBrokerObjectStorageValidatorTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
@@ -67,11 +67,19 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     private static final String ASSUMER_IDENTITY
             = "/subscriptions/" + SUBSCRIPTION_ID + "/resourcegroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/assumer";
 
-    private static final String LOG_IDENTITY_PRINCIPAL_ID
-            = "e2589f51-53e9-4ad0-998a-1e801618e070";
+    private static final String DATA_ACCESS_IDENTITY
+            = "/subscriptions/" + SUBSCRIPTION_ID + "/resourcegroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/dataAccess";
 
-    private static final String ASSUMER_IDENTITY_PRINCIPAL_ID
-            = "a2589f51-53e9-4ad0-998a-1e801618e071";
+    private static final String RANGER_IDENTITY
+            = "/subscriptions/" + SUBSCRIPTION_ID + "/resourcegroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/ranger";
+
+    private static final String LOG_IDENTITY_PRINCIPAL_ID = "e2589f51-53e9-4ad0-998a-1e801618e070";
+
+    private static final String ASSUMER_IDENTITY_PRINCIPAL_ID = "a2589f51-53e9-4ad0-998a-1e801618e071";
+
+    private static final String DATA_ACCESS_IDENTITY_PRINCIPAL_ID = "a2589f51-53e9-4ad0-998a-1e801618e072";
+
+    private static final String RANGER_IDENTITY_PRINCIPAL_ID = "a2589f51-53e9-4ad0-998a-1e801618e073";
 
     private static final String STORAGE_LOCATION_RANGER = "abfs://fs@storageaccount.dfs.core.windows.net/ranger/audit";
 
@@ -81,17 +89,16 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
     private static final String ABFS_STORAGE_ACCOUNT_NAME = "anAccount";
 
+    private static final String STORAGE_NAME = "rg-storage";
+
     private static final String SUBSCRIPTION_FULL_ID = "/subscriptions/" + SUBSCRIPTION_ID;
 
-    private static final String STORAGE_RESOURCE_GROUP_NAME = "rg-storage";
-
-    private static final String MANAGEMENT_GROUP_SCOPE = "/providers/Microsoft.Management/managementGroups/";
-
-    private static final String STORAGE_RESOURCE_GROUP_ID = SUBSCRIPTION_FULL_ID
-            + "/resourceGroups/" + STORAGE_RESOURCE_GROUP_NAME;
+    private static final String STORAGE_RESOURCE_GROUP_ID = SUBSCRIPTION_FULL_ID + "/resourceGroups/" + STORAGE_NAME;
 
     private static final String ABFS_STORAGE_ACCOUNT_ID = STORAGE_RESOURCE_GROUP_ID
             + "/providers/Microsoft.Storage/storageAccounts/" + ABFS_STORAGE_ACCOUNT_NAME;
+
+    private static final String MANAGEMENT_GROUP_SCOPE = "/providers/Microsoft.Management/managementGroups/";
 
     private static final String ABFS_FILESYSTEM_NAME = "aFileSystem";
 
@@ -142,8 +149,27 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Spy
     private Identity assumer;
 
+    @Spy
+    private Identity user;
+
+    @Spy
+    private Identity group;
+
+    @Spy
+    private Identity ranger;
+
+    @Spy
+    private Identity dataAccess;
+
+    static Stream<Arguments> parameterScenarios() {
+        return Stream.of(
+                Arguments.of(true, 2),
+                Arguments.of(false, 3)
+        );
+    }
+
     @BeforeEach
-    public void setup() {
+    void setup() {
         lenient().when(client.getIdentityById(LOG_IDENTITY)).thenReturn(logger);
         lenient().when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(assumer);
         lenient().when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
@@ -158,12 +184,21 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         lenient().when(logger.principalId()).thenReturn(LOG_IDENTITY_PRINCIPAL_ID);
         lenient().when(assumer.id()).thenReturn(ASSUMER_IDENTITY);
         lenient().when(assumer.principalId()).thenReturn(ASSUMER_IDENTITY_PRINCIPAL_ID);
+        lenient().when(ranger.id()).thenReturn(RANGER_IDENTITY);
+        lenient().when(ranger.principalId()).thenReturn(RANGER_IDENTITY_PRINCIPAL_ID);
+        lenient().when(dataAccess.id()).thenReturn(DATA_ACCESS_IDENTITY);
+        lenient().when(dataAccess.principalId()).thenReturn(DATA_ACCESS_IDENTITY_PRINCIPAL_ID);
+        lenient().when(user.id()).thenReturn(USER_IDENTITY_1);
+        lenient().when(group.id()).thenReturn(GROUP_IDENTITY_1);
         lenient().when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString(), any())).thenReturn(Optional.of(ABFS_STORAGE_ACCOUNT_ID));
         lenient().when(entitlementService.isDatalakeBackupRestorePrechecksEnabled(any())).thenReturn(true);
+        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
+        lenient().when(azureListResult.getAll()).thenReturn(List.of(assumer, logger, dataAccess, ranger, user, group));
+        lenient().when(client.listIdentities()).thenReturn(azureListResult);
     }
 
     @Test
-    public void testValidateObjectStorageWithoutFileSystems() {
+    void testValidateObjectStorageWithoutFileSystems() {
         SpiFileSystem fileSystem = new SpiFileSystem("test", FileSystemType.ADLS_GEN_2, null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
@@ -177,7 +212,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWhenLoggerStorageAccountScopeThenNoError() {
+    void testValidateObjectStorageWhenLoggerStorageAccountScopeThenNoError() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
@@ -186,7 +221,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
 
@@ -200,16 +235,16 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWhenLoggerResourceGroupScopeThenNoError() {
+    void testValidateObjectStorageWhenLoggerResourceGroupScopeThenNoError() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
@@ -219,16 +254,16 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWhenLoggerSubscriptionScopeThenNoError() {
+    void testValidateObjectStorageWhenLoggerSubscriptionScopeThenNoError() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, RESOURCE_GROUP_NAME, resultBuilder);
 
@@ -237,16 +272,16 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageNonExistingAssumerIdentity() {
+    void testValidateObjectStorageNonExistingAssumerIdentity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         when(client.getIdentityById(ASSUMER_IDENTITY)).thenReturn(null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, "", resultBuilder);
@@ -260,7 +295,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageNonExistingLoggerIdentity() {
+    void testValidateObjectStorageNonExistingLoggerIdentity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID);
@@ -269,7 +304,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
@@ -283,18 +318,16 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageNonExistingMapperIdentity() {
+    void testValidateObjectStorageNonExistingCustomMapperIdentity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        List<Identity> identityPagedList = new ArrayList<>();
-        identityPagedList.add(assumer);
-        identityPagedList.add(logger);
         AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getAll()).thenReturn(identityPagedList);
+        when(azureListResult.getAll()).thenReturn(List.of(assumer, logger, dataAccess, ranger));
         when(client.listIdentities()).thenReturn(azureListResult);
-
         new RoleAssignmentBuilder(client)
+                .withAssignment(DATA_ACCESS_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(RANGER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
@@ -315,23 +348,20 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageMappingCaseSensitivityCB6600() {
+    void testValidateObjectStorageMappingCaseSensitivity() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        List<Identity> identityPagedList = new ArrayList<>();
-        when(assumer.id()).thenReturn(USER_IDENTITY_1);
-        when(logger.id()).thenReturn(GROUP_IDENTITY_1);
-        identityPagedList.add(assumer);
-        identityPagedList.add(logger);
-        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getAll()).thenReturn(identityPagedList);
-        when(client.listIdentities()).thenReturn(azureListResult);
+        fileSystem.getCloudFileSystems().stream()
+                .filter(cloudFileSystemView -> CloudIdentityType.ID_BROKER.equals(cloudFileSystemView.getCloudIdentityType()))
+                .forEach(cloudFileSystemView -> cloudFileSystemView.getAccountMapping().getUserMappings().put(USER_1, USER_IDENTITY_1_CASE));
         new RoleAssignmentBuilder(client)
+                .withAssignment(DATA_ACCESS_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(RANGER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
 
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -341,19 +371,13 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageLogLocation() {
+    void testValidateObjectStorageLogLocation() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        List<Identity> identityPagedList = new ArrayList<>();
-        when(assumer.id()).thenReturn(USER_IDENTITY_1);
-        when(logger.id()).thenReturn(GROUP_IDENTITY_1);
-        identityPagedList.add(assumer);
-        identityPagedList.add(logger);
-        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getAll()).thenReturn(identityPagedList);
-        when(client.listIdentities()).thenReturn(azureListResult);
         new RoleAssignmentBuilder(client)
+                .withAssignment(DATA_ACCESS_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(RANGER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
@@ -368,23 +392,14 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageNoMappedRoles() {
+    void testValidateObjectStorageNoMappedRoles() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        List<Identity> identityPagedList = new ArrayList<>();
-        when(assumer.id()).thenReturn(USER_IDENTITY_1);
-        when(logger.id()).thenReturn(GROUP_IDENTITY_1);
-        identityPagedList.add(assumer);
-        identityPagedList.add(logger);
-        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getAll()).thenReturn(identityPagedList);
-        when(client.listIdentities()).thenReturn(azureListResult);
-
         final String wrongAssumerIdentityPrincipalid = "489e3729-aed1-4d54-a95b-b231b70d383f";
         final String wrongLoggerIdentityPrincipalid = "61a70b9b-7331-4fa3-8717-2652fc70434e";
 
         new RoleAssignmentBuilder(client)
                 .withAssignment(wrongAssumerIdentityPrincipalid, SUBSCRIPTION_FULL_ID)
-                .withAssignment(wrongLoggerIdentityPrincipalid, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(wrongLoggerIdentityPrincipalid, STORAGE_NAME);
 
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
@@ -397,19 +412,20 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
-        assertEquals(6, validationResult.getErrors().size());
+        assertEquals(7, validationResult.getErrors().size());
         List<String> actual = validationResult.getErrors();
         assertTrue(actual.stream().anyMatch(item ->
-                item.contains(String.format("Identity with id %s has no role assignment.", USER_IDENTITY_1))));
+                item.contains(String.format("Identity with id %s has no role assignment.", ASSUMER_IDENTITY))));
         assertTrue(actual.stream().anyMatch(item ->
-                item.contains(String.format("Identity with id %s has no role assignment on scope", GROUP_IDENTITY_1))));
+                item.contains(String.format("Identity with id %s has no role assignment on scope", ASSUMER_IDENTITY))));
         assertTrue(actual.stream().anyMatch(item ->
-                item.contains(String.format("Identity with id %s has no role assignment on scope", USER_IDENTITY_1))));
-
+                item.contains(String.format("Identity with id %s has no role assignment on scope", RANGER_IDENTITY))));
+        assertTrue(actual.stream().anyMatch(item ->
+                item.contains(String.format("Identity with id %s has no role assignment on scope", DATA_ACCESS_IDENTITY))));
     }
 
     @Test
-    public void testValidateObjectStorageWithNoRoleAssignments() {
+    void testValidateObjectStorageWithNoRoleAssignments() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
@@ -431,15 +447,15 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWithNoSubscriptionScopeRoleAssignment() {
+    void testValidateObjectStorageWithNoSubscriptionScopeRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
@@ -455,15 +471,15 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWithSingleResourceGroupAndNoResourceGroupRoleAssignment() {
+    void testValidateObjectStorageWithSingleResourceGroupAndNoResourceGroupRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
-                        .withLogsLocationBase("")
+                        .withLogsLocationBase(LOG_LOCATION)
                         .build();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, RESOURCE_GROUP_NAME, resultBuilder);
@@ -481,7 +497,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWithManagementGroupScopeRoleAssignment() {
+    void testValidateObjectStorageWithManagementGroupScopeRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, MANAGEMENT_GROUP_SCOPE);
@@ -501,7 +517,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
-    public void testValidateObjectStorageWithNoStorageAccountScopeRoleAssignment() {
+    void testValidateObjectStorageWithNoStorageAccountScopeRoleAssignment() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID);
@@ -520,15 +536,15 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         String actual = validationResult.getErrors().get(0);
         assertEquals(actual, String.format("Identity with id %s has no role assignment on scope(s) [%s, %s, %s, %s]. " +
                         "Please check if you've used the correct Identity when setting up Logs-Storage and Audit.", LOG_IDENTITY,
-                ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, STORAGE_RESOURCE_GROUP_NAME, SUBSCRIPTION_ID));
+                ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, STORAGE_NAME, SUBSCRIPTION_ID));
     }
 
     @Test
-    public void testValidateObjectStorageWithNoStorageAccount() {
+    void testValidateObjectStorageWithNoStorageAccount() {
         SpiFileSystem fileSystem = setupSpiFileSystem(false);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString(), any())).thenReturn(Optional.empty());
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ObjectStorageValidateRequest objectStorageValidateRequest =
@@ -547,28 +563,13 @@ public class AzureIDBrokerObjectStorageValidatorTest {
                 "Please check if you've used the correct Storage Location when setting up Data Access.", ABFS_STORAGE_ACCOUNT_NAME));
     }
 
-    static Stream<Arguments> parameterScenarios() {
-        return Stream.of(
-                Arguments.of(true, 2),
-                Arguments.of(false, 3)
-        );
-    }
-
     @ParameterizedTest(name = "skipLogRoleValidationforBackup = {0}, calls = {1}")
     @MethodSource("parameterScenarios")
-    public void testValidateObjectStorageSkipLogRoleValidationforBackup(boolean skipLogRoleValidationforBackup, int calls) {
+    void testValidateObjectStorageSkipLogRoleValidationForBackup(boolean skipLogRoleValidationforBackup, int calls) {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
-        List<Identity> identityPagedList = new ArrayList<>();
-        when(assumer.id()).thenReturn(USER_IDENTITY_1);
-        when(logger.id()).thenReturn(GROUP_IDENTITY_1);
-        identityPagedList.add(assumer);
-        identityPagedList.add(logger);
-        AzureListResult<Identity> azureListResult = mock(AzureListResult.class);
-        when(azureListResult.getAll()).thenReturn(identityPagedList);
-        when(client.listIdentities()).thenReturn(azureListResult);
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
-                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
         ObjectStorageValidateRequest objectStorageValidateRequest =
                 ObjectStorageValidateRequest
                         .builder()
@@ -580,7 +581,28 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
 
+        verify(adlsGen2ConfigGenerator, times(1)).generateStorageConfig(LOG_LOCATION);
         verify(adlsGen2ConfigGenerator, times(calls)).generateStorageConfig(BACKUP_LOCATION);
+    }
+
+    @Test
+    void testValidateObjectStorageSkipBackupRoleValidationWhenBackupLocationIsSameAsLog() {
+        SpiFileSystem fileSystem = setupSpiFileSystem(true);
+        new RoleAssignmentBuilder(client)
+                .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_NAME);
+        ObjectStorageValidateRequest objectStorageValidateRequest =
+                ObjectStorageValidateRequest
+                        .builder()
+                        .withLogsLocationBase(LOG_LOCATION)
+                        .withBackupLocationBase(LOG_LOCATION)
+                        .withSkipLogRoleValidationforBackup(false)
+                        .build();
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
+
+        verify(adlsGen2ConfigGenerator, times(3)).generateStorageConfig(LOG_LOCATION);
     }
 
     private List<CloudFileSystemView> getCloudFileSystemViews(boolean addMapping) {
@@ -589,8 +611,10 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         idBrokerCloudFileSystem.setLocations(getStorageLocation());
         if (addMapping) {
             AccountMappingBase accountMapping = new AccountMappingBase();
-            accountMapping.setGroupMappings(Map.ofEntries(Map.entry(GROUP_1, GROUP_IDENTITY_1)));
-            accountMapping.setUserMappings(Map.ofEntries(Map.entry(USER_1, USER_IDENTITY_1_CASE)));
+            AccountMappingSubject.DATA_ACCESS_USERS.stream().forEach(service -> accountMapping.getUserMappings().put(service, DATA_ACCESS_IDENTITY));
+            AccountMappingSubject.RANGER_AUDIT_USERS.stream().forEach(service -> accountMapping.getUserMappings().put(service, RANGER_IDENTITY));
+            accountMapping.getGroupMappings().put(GROUP_1, GROUP_IDENTITY_1);
+            accountMapping.getUserMappings().put(USER_1, USER_IDENTITY_1);
             idBrokerCloudFileSystem.setAccountMapping(accountMapping);
         }
         CloudAdlsGen2View loggerCloudFileSystem = new CloudAdlsGen2View(CloudIdentityType.LOG);
