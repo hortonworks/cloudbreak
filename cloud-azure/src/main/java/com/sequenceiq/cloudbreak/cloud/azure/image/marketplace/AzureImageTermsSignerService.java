@@ -36,7 +36,7 @@ public class AzureImageTermsSignerService {
             "If it still does not work, please open a Microsoft Azure support ticket!";
 
     private static final String AGREEMENTS_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/" +
-            "offerTypes/virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
+            "offerTypes/virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2021-01-01";
 
     @Inject
     private AzureRestOperationsService azureRestOperationsService;

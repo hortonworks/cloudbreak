@@ -133,7 +133,7 @@ public class AzureImageTermsSignerServiceTest {
         inOrder.verify(azureRestOperationsService).httpPut(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         URI signURI = argumentCaptor.getValue();
         assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
-                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2015-06-01");
+                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2021-01-01");
     }
 
     @Test
@@ -254,6 +254,6 @@ public class AzureImageTermsSignerServiceTest {
         inOrder.verify(azureRestOperationsService).httpPut(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         URI signURI = argumentCaptor.getValue();
         assertEquals(signURI.toString(), "https://management.azure.com/subscriptions/azureSubscriptionId/providers/Microsoft.MarketplaceOrdering/" +
-                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2015-06-01");
+                "offerTypes/virtualmachine/publishers/cloudera/offers/my-offer/plans/my-plan/agreements/current?api-version=2021-01-01");
     }
 }
