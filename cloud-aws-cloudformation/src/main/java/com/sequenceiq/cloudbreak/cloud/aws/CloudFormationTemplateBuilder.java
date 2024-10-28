@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getOnDemandPercentage(),
                     awsInstanceView.getSpotMaxPrice(),
                     awsInstanceView.getPlacementGroupStrategy().name(),
-                    group.getRootVolumeType() != null ? group.getRootVolumeType() : AwsDiskType.Gp3.value());
+                    group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT)  : AwsDiskType.Gp3.value());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

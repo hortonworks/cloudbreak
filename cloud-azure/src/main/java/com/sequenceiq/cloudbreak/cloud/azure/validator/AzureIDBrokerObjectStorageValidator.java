@@ -10,9 +10,9 @@ import static com.sequenceiq.common.model.CloudIdentityType.ID_BROKER;
 import static com.sequenceiq.common.model.CloudIdentityType.LOG;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
+import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -93,28 +94,19 @@ public class AzureIDBrokerObjectStorageValidator {
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
                 if (identity != null) {
                     if (ID_BROKER.equals(cloudIdentityType)) {
-                        List<RoleAssignmentInner> roleAssignments;
-                        Optional<ResourceGroup> singleResourceGroup;
-                        if (singleResourceGroupName != null) {
-                            ResourceGroup resourceGroup = client.getResourceGroup(singleResourceGroupName);
-                            roleAssignments = client.listRoleAssignmentsByScopeInner(resourceGroup.id());
-                            singleResourceGroup = Optional.of(resourceGroup);
-                        } else {
-                            roleAssignments = client.listRoleAssignments().getAll();
-                            singleResourceGroup = Optional.empty();
-                        }
-
-                        validateIDBroker(client, roleAssignments, identity, cloudFileSystem, singleResourceGroup, accountId, resultBuilder);
+                        List<Identity> existingIdentities = client.listIdentities().getAll();
+                        validateIDBroker(client, identity, cloudFileSystem, singleResourceGroupName, accountId, existingIdentities, resultBuilder);
                         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
-                            Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
-                            validateLocation(client, allMappedExistingIdentity,
-                                    (StringUtils.isNotEmpty(backupLocationBase)) ? backupLocationBase : logsLocationBase,
-                                    accountId, resultBuilder);
+                            Set<Identity> existingServiceIdentities = getServiceIdentities(cloudFileSystem.getAccountMapping(), existingIdentities);
+                            String actualBackupLocationBase = StringUtils.isNotEmpty(backupLocationBase) ? backupLocationBase : logsLocationBase;
+                            validateLocation(client, existingServiceIdentities, actualBackupLocationBase, accountId, resultBuilder);
                         }
                     } else if (LOG.equals(cloudIdentityType)) {
                         validateLocation(client, identity, logsLocationBase, accountId, resultBuilder);
-                        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId) &&
-                                !objectStorageValidateRequest.getSkipLogRoleValidationforBackup()) {
+                        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)
+                                && !objectStorageValidateRequest.getSkipLogRoleValidationforBackup()
+                                && StringUtils.isNotEmpty(backupLocationBase)
+                                && !backupLocationBase.equals(logsLocationBase)) {
                             validateLocation(client, identity, backupLocationBase, accountId, resultBuilder);
                         }
                     }
@@ -164,11 +156,22 @@ public class AzureIDBrokerObjectStorageValidator {
         return storageAccountNames;
     }
 
-    private void validateIDBroker(AzureClient client, List<RoleAssignmentInner> roleAssignments, Identity identity,
-            CloudAdlsGen2View cloudFileSystem, Optional<ResourceGroup> singleResourceGroup, String accountId, ValidationResultBuilder resultBuilder) {
+    private void validateIDBroker(AzureClient client, Identity identity, CloudAdlsGen2View cloudFileSystem, String singleResourceGroupName,
+            String accountId, List<Identity> existingIdentities, ValidationResultBuilder resultBuilder) {
         LOGGER.debug(String.format("Validating IDBroker identity %s", identity.name()));
 
-        Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
+        List<RoleAssignmentInner> roleAssignments;
+        Optional<ResourceGroup> singleResourceGroup;
+        if (singleResourceGroupName != null) {
+            ResourceGroup resourceGroup = client.getResourceGroup(singleResourceGroupName);
+            roleAssignments = client.listRoleAssignmentsByScopeInner(resourceGroup.id());
+            singleResourceGroup = Optional.of(resourceGroup);
+        } else {
+            roleAssignments = client.listRoleAssignments().getAll();
+            singleResourceGroup = Optional.empty();
+        }
+
+        validateAllMappedIdentities(client, cloudFileSystem, existingIdentities, resultBuilder);
 
         validateRoleAssigment(roleAssignments, resultBuilder, Set.of(identity));
         validateRoleAssigmentAndScope(roleAssignments, resultBuilder, identity,
@@ -177,9 +180,10 @@ public class AzureIDBrokerObjectStorageValidator {
 
         List<StorageLocationBase> locations = cloudFileSystem.getLocations();
         if (Objects.nonNull(locations) && !locations.isEmpty()) {
-            validateStorageAccount(client, allMappedExistingIdentity, locations.get(0).getValue(), ID_BROKER, accountId, resultBuilder);
+            validateStorageAccount(client, getServiceIdentities(cloudFileSystem.getAccountMapping(), existingIdentities),
+                    locations.get(0).getValue(), ID_BROKER, accountId, resultBuilder);
         } else {
-            LOGGER.debug("There is no storage location set for logger identity, this should not happen!");
+            LOGGER.warn("There is no storage location set for IDBroker identity, this should not happen!");
         }
         LOGGER.debug("Validating IDBroker identity is finished");
 
@@ -203,7 +207,7 @@ public class AzureIDBrokerObjectStorageValidator {
         if (StringUtils.isNotEmpty(locationBase)) {
             validateStorageAccount(client, Set.of(identity), locationBase, LOG, accountId, resultBuilder);
         } else {
-            LOGGER.debug("There is no storage location set for identity, this should not happen!");
+            LOGGER.warn("There is no storage location set for identity {}, this should not happen!", identity.name());
         }
         LOGGER.info("Validating identity {} is finished", identity.name());
     }
@@ -211,7 +215,7 @@ public class AzureIDBrokerObjectStorageValidator {
     private void validateStorageAccount(AzureClient client, Set<Identity> identities, String location, CloudIdentityType cloudIdentityType,
             String accountId, ValidationResultBuilder resultBuilder) {
         identities.stream().forEach(identity -> {
-            LOGGER.debug(String.format("Validating identity on %s Location: %s", identity.name(), location));
+            LOGGER.debug("Validating identity on {} Location: {}", identity.name(), location);
         });
         AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(location);
         String storageAccountName = adlsGen2Config.getAccount();
@@ -246,29 +250,53 @@ public class AzureIDBrokerObjectStorageValidator {
         return azureListResultFactory.create(client.listRoleAssignmentsBySubscription(targetSubscriptionId)).getAll();
     }
 
-    private Set<Identity> validateAllMappedIdentities(AzureClient client, CloudFileSystemView cloudFileSystemView,
-            ValidationResultBuilder resultBuilder) {
-        Set<Identity> validMappedIdentities = Collections.emptySet();
+    private void validateAllMappedIdentities(AzureClient client, CloudFileSystemView cloudFileSystemView,
+            List<Identity> existingIdentities, ValidationResultBuilder resultBuilder) {
         AccountMappingBase accountMappings = cloudFileSystemView.getAccountMapping();
+        Set<String> mappedIdentityIds = getAllMappedIdentityIds(accountMappings);
+        Set<String> existingIdentityIds = existingIdentities.stream().map(Identity::id).collect(Collectors.toSet());
+        MutableSet<String> nonExistingIdentityIds = Sets.difference(mappedIdentityIds, existingIdentityIds);
+        nonExistingIdentityIds.stream().forEach(identityId ->
+                addError(resultBuilder, String.format("Identity with id %s does not exist in the given Azure subscription. %s",
+                        identityId, getAdviceMessage(IDENTITY, ID_BROKER)))
+        );
+    }
+
+    private Set<Identity> getServiceIdentities(AccountMappingBase accountMappings, List<Identity> existingIdentities) {
+        Set<String> mappedServiceIdentityIds = getMappedServiceIdentityIds(accountMappings);
+        return existingIdentities.stream()
+                .filter(identity -> mappedServiceIdentityIds.contains(identity.id()))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getMappedServiceIdentityIds(AccountMappingBase accountMappings) {
+        Set<String> mappedServiceIdentityIds = new HashSet<>();
         if (accountMappings != null) {
-            Set<String> mappedIdentityIds = new HashSet<>();
+            mappedServiceIdentityIds.addAll(accountMappings.getUserMappings().entrySet().stream()
+                    .filter(entry -> AccountMappingSubject.ALL_SPECIAL_USERS.contains(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toSet()));
+            mappedServiceIdentityIds.addAll(accountMappings.getGroupMappings().entrySet().stream()
+                    .filter(entry -> AccountMappingSubject.ALL_SPECIAL_USERS.contains(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toSet()));
+            mappedServiceIdentityIds = mappedServiceIdentityIds.stream()
+                    .map(id -> id.replaceFirst("(?i)/resourceGroups/", "/resourcegroups/"))
+                    .collect(Collectors.toSet());
+        }
+        return mappedServiceIdentityIds;
+    }
+
+    public Set<String> getAllMappedIdentityIds(AccountMappingBase accountMappings) {
+        Set<String> mappedIdentityIds = new HashSet<>();
+        if (accountMappings != null) {
             mappedIdentityIds.addAll(accountMappings.getUserMappings().values());
             mappedIdentityIds.addAll(accountMappings.getGroupMappings().values());
             mappedIdentityIds = mappedIdentityIds.stream()
                     .map(id -> id.replaceFirst("(?i)/resourceGroups/", "/resourcegroups/"))
                     .collect(Collectors.toSet());
-            List<Identity> existingIdentities = client.listIdentities().getAll();
-
-            Set<String> existingIdentityIds = existingIdentities.stream().map(Identity::id).collect(Collectors.toSet());
-            MutableSet<String> nonExistingIdentityIds = Sets.difference(mappedIdentityIds, existingIdentityIds);
-            nonExistingIdentityIds.stream().forEach(identityId ->
-                    addError(resultBuilder, String.format("Identity with id %s does not exist in the given Azure subscription. %s",
-                            identityId, getAdviceMessage(IDENTITY, ID_BROKER)))
-            );
-            Set<String> validMappedIdentityIds = Sets.difference(mappedIdentityIds, nonExistingIdentityIds);
-            validMappedIdentities = existingIdentities.stream().filter(identity -> validMappedIdentityIds.contains(identity.id())).collect(Collectors.toSet());
         }
-        return validMappedIdentities;
+        return mappedIdentityIds;
     }
 
     private void validateRoleAssigment(List<RoleAssignmentInner> roleAssignments, ValidationResultBuilder resultBuilder, Set<Identity> identities) {
