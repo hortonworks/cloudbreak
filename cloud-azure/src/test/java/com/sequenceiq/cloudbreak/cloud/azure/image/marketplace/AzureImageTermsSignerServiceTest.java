@@ -146,8 +146,9 @@ public class AzureImageTermsSignerServiceTest {
         assertEquals("Error when signing marketplace image terms and conditions for " +
                 "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
                 "Reason: could not get access token. Please try again. " +
-                "Alternatively you can also sign it manually, please refer to azure documentation at " +
-                "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", exception.getMessage());
+                "Alternatively you can also sign it manually, please refer to Azure documentation at " +
+                "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest. " +
+                "If it still does not work, please open a Microsoft Azure support ticket!", exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService, never()).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
@@ -165,8 +166,9 @@ public class AzureImageTermsSignerServiceTest {
         assertEquals(String.format("Error when signing marketplace image terms and conditions for " +
                         "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
                         "Reason: error when signing vm image terms and conditions, message is '%s'. Please try again. " +
-                        "Alternatively you can also sign it manually, please refer to azure documentation at " +
-                        "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", customErrorMessage),
+                        "Alternatively you can also sign it manually, please refer to Azure documentation at " +
+                        "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest. " +
+                        "If it still does not work, please open a Microsoft Azure support ticket!", customErrorMessage),
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
@@ -187,8 +189,9 @@ public class AzureImageTermsSignerServiceTest {
         assertEquals(String.format("Error when signing marketplace image terms and conditions for " +
                         "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
                         "Reason: error when signing vm image terms and conditions, message is '%s'. Please try again. " +
-                        "Alternatively you can also sign it manually, please refer to azure documentation at " +
-                        "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", customErrorMessage),
+                        "Alternatively you can also sign it manually, please refer to Azure documentation at " +
+                        "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest. " +
+                        "If it still does not work, please open a Microsoft Azure support ticket!", customErrorMessage),
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));

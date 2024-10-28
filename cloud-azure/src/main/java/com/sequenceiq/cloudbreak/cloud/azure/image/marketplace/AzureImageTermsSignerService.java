@@ -31,8 +31,9 @@ public class AzureImageTermsSignerService {
 
     private static final String SIGN_ERROR_MESSAGE_TEMPLATE = "Error when signing marketplace image terms and conditions for %s.";
 
-    private static final String SIGN_ERROR_MESSAGE_HINTS = "Please try again. Alternatively you can also sign it manually, please refer to azure " +
-            "documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.";
+    private static final String SIGN_ERROR_MESSAGE_HINTS = "Please try again. Alternatively you can also sign it manually, please refer to Azure " +
+            "documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest. " +
+            "If it still does not work, please open a Microsoft Azure support ticket!";
 
     private static final String AGREEMENTS_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/" +
             "offerTypes/virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
