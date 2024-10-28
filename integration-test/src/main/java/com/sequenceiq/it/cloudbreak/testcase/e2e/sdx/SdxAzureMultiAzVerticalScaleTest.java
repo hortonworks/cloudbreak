@@ -26,7 +26,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -88,6 +87,8 @@ public class SdxAzureMultiAzVerticalScaleTest extends PreconditionSdxE2ETest {
                     }
                     return dto;
                 })
+                .when(sdxTestClient.start(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .validate();
     }
 
@@ -111,9 +112,4 @@ public class SdxAzureMultiAzVerticalScaleTest extends PreconditionSdxE2ETest {
                     String.join(",", instancesWithNoAz), sdxName));
         }
     }
-
-    protected CloudFunctionality getCloudFunctionality(TestContext testContext) {
-        return testContext.getCloudProvider().getCloudFunctionality();
-    }
-
 }
