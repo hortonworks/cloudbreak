@@ -4,10 +4,14 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -27,6 +31,9 @@ public class FlinkRoleConfigProvider extends AbstractRoleConfigProvider {
     private static final String HIGH_AVAILABILITY_STORAGE_DIR = "high_availability_storage_dir";
 
     private static final String ATLAS_COLLECTION_ENABLED = "atlas_collection_enabled";
+
+    @Inject
+    private FlinkConfigProviderUtils utils;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -51,6 +58,10 @@ public class FlinkRoleConfigProvider extends AbstractRoleConfigProvider {
         ConfigUtils.getStorageLocationForServiceProperty(source, HIGH_AVAILABILITY_STORAGE_DIR)
                 .ifPresent(location -> serviceConfigs.add(config(HIGH_AVAILABILITY_STORAGE_DIR, location.getValue())));
         serviceConfigs.add(config(ATLAS_COLLECTION_ENABLED, "true"));
+
+        String cdhVersion = getCdhVersion(source);
+        Optional<ClouderaManagerProduct> flinkProduct = utils.getFlinkProduct(source.getProductDetailsView().getProducts());
+        utils.addReleaseNameIfNeeded(cdhVersion, serviceConfigs, flinkProduct);
 
         return serviceConfigs;
     }

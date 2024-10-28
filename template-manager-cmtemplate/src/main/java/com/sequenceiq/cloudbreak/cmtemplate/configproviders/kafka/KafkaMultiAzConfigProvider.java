@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtils.getCdhVersion;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.DEFAULT_REPLICATION_FACTOR;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.ENABLE_RACK_AWARENESS;
 
