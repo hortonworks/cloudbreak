@@ -7,13 +7,7 @@ import static com.sequenceiq.flow.core.FlowMetricType.FLOW_FAILED;
 import static com.sequenceiq.flow.core.FlowMetricType.FLOW_FINISHED;
 import static com.sequenceiq.flow.core.FlowMetricType.FLOW_STARTED;
 import static com.sequenceiq.flow.core.FlowMetricType.FLOW_TIME;
-import static java.util.function.Function.identity;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 
 @Component
 public class FlowMetricSender {
@@ -32,28 +26,16 @@ public class FlowMetricSender {
 
     private static final String NONE = "NONE";
 
-    @Inject
-    private List<? extends AbstractFlowConfiguration> flowConfigurations;
-
-    private Map<String, ? extends AbstractFlowConfiguration> flowConfigurationMap;
-
     @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
 
-    @PostConstruct
-    void init() {
-        flowConfigurationMap = flowConfigurations.stream()
-                .collect(Collectors.toMap(flowConfiguration -> flowConfiguration.getClass().getSimpleName(), identity()));
-    }
-
-    public void send(String flowType, String flowChainType, String nextFlowState, String flowEvent, long startTimeInMillis) {
+    public void send(FlowEdgeConfig edgeConfig, String flowType, String flowChainType, Class<? extends Enum> stateType, long startTimeInMillis,
+            String nextFlowState, String flowEvent) {
         try {
-            AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flowType);
             String rootFlowChainType = getRootFlowChainType(flowChainType);
             String actualFlowChainType = getActualFlowChainType(flowChainType);
-            AbstractFlowConfiguration.FlowEdgeConfig edgeConfig = flowConfiguration.getEdgeConfig();
-            Enum nextFlowStateEnum = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), nextFlowState, flowEvent);
+            Enum nextFlowStateEnum = FlowStateUtil.getFlowStateEnum(stateType, nextFlowState, flowEvent);
             if (nextFlowStateEnum == null) {
                 LOGGER.debug("nextFlowStateEnum is null for flow type: '{}', flow chain type: '{}', next flow state: '{}', flow event: '{}'," +
                                 " flow metrics is not recorded!", flowType, flowChainType, nextFlowState, flowEvent);

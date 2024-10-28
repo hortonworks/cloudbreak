@@ -56,11 +56,11 @@ import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
 
-    private StateMachineFactory<S, E> stateMachineFactory;
-
     private final Class<S> stateType;
 
     private final Class<E> eventType;
+
+    private StateMachineFactory<S, E> stateMachineFactory;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -96,11 +96,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 getEdgeConfig().finalState, flowChainType, getClass().getSimpleName(), flowChainId, flowId, stackId);
         Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);
-        long startTimeInMillis = System.currentTimeMillis();
         sm.addStateListener(fl);
 
         FlowEventMetricListener<S, E> flowEventMetricsListener = applicationContext.getBean(FlowEventMetricListener.class,
-                getEdgeConfig().finalState, flowChainType, getClass().getSimpleName(), startTimeInMillis);
+                getEdgeConfig(), flowChainType, getClass().getSimpleName(), getStateType(), System.currentTimeMillis());
         sm.addStateListener(flowEventMetricsListener);
         return flow;
     }
