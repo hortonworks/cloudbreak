@@ -514,7 +514,7 @@ class AwsUpscaleServiceTest {
         DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
                 .autoScalingGroups(asg1, asg2).build();
 
-        Map<String, AutoScalingGroup> autoScalingGroupMap = Map.of("masterASG", asg1);
+        Map<String, AutoScalingGroup> autoScalingGroupMap = Map.of("masterASG", asg1, "workerASG", asg2);
 
         when(amazonAutoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
                 .thenReturn(describeAutoScalingGroupsResult);
@@ -551,7 +551,10 @@ class AwsUpscaleServiceTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<Group> groups = new ArrayList<>();
 
-        groups.add(getMasterGroup(instanceAuthentication));
+        Group masterGroup = getMasterGroup(instanceAuthentication);
+        masterGroup.setRootVolumeType(null);
+        masterGroup.setRootVolumeSize(20);
+        groups.add(masterGroup);
 
         Group worker = getWorkerGroup(instanceAuthentication);
         groups.add(worker);
@@ -569,6 +572,8 @@ class AwsUpscaleServiceTest {
         when(autoScalingGroupHandler.autoScalingGroupByName(any(), any(), any())).thenReturn(autoScalingGroupMap);
         LaunchTemplateBlockDeviceMapping masterBlockDeviceMapping = LaunchTemplateBlockDeviceMapping.builder().ebs(LaunchTemplateEbsBlockDevice.builder()
                 .volumeSize(20).volumeType(VolumeType.GP2).build()).build();
+        when(awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(authenticatedContext, asg2))
+                .thenReturn(List.of(masterBlockDeviceMapping));
         when(awsLaunchTemplateUpdateService.getBlockDeviceMappingFromAutoScalingGroup(authenticatedContext, asg1))
                 .thenReturn(List.of(masterBlockDeviceMapping));
         Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, "50",
@@ -599,6 +604,6 @@ class AwsUpscaleServiceTest {
         verify(syncUserDataService).syncUserData(any(), any(), any());
         verify(resourceNotifier).notifyDeletions(rootVolumeResources, cloudContext);
         verify(resourceNotifier).notifyAllocations(rootVolumeResources, cloudContext);
-        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(updatableFields, false, amazonAutoScalingClient, ec2Client, asg1, cloudStack);
+        verify(awsLaunchTemplateUpdateService).updateLaunchTemplate(updatableFields, false, amazonAutoScalingClient, ec2Client, asg2, cloudStack);
     }
 }
