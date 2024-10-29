@@ -163,7 +163,7 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
+    public Map<String, String> listAvailabilityZonesForVms(String clusterName, Map<String, String> instanceZoneMap) {
         return gcpUtil.listAvailabilityZonesForVms(instanceZoneMap);
     }
 }

@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
@@ -187,8 +190,10 @@ public interface CloudFunctionality {
         return Map.of();
     }
 
-    default Map<String, String> listAvailabilityZonesForVms(Map<String, String> instanceZoneMap) {
-        return Map.of();
+    default Map<String, String> listAvailabilityZonesForVms(String clusterName, Map<String, String> instanceZoneMap) {
+        return listAvailabilityZonesForVms(clusterName, new ArrayList<>(instanceZoneMap.keySet())).entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getKey(),
+                        entry -> CollectionUtils.isNotEmpty(entry.getValue()) ?  entry.getValue().iterator().next() : null));
     }
 
     @Retryable(

@@ -192,7 +192,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
                 .filter(Objects::nonNull)
                 .flatMap(ins -> ins.stream())
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getAvailabilityZone));
-        Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(instanceZoneMap);
+        Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(clusterName, instanceZoneMap);
         List<String> instancesWithNoAz = availabilityZoneForVms.entrySet().stream()
                 .filter(entry -> StringUtils.isEmpty(entry.getValue()))
                 .map(Map.Entry::getKey)

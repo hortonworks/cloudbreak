@@ -97,7 +97,7 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
                     .filter(Objects::nonNull)
                     .flatMap(ins -> ins.stream())
                     .collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId, InstanceMetaDataResponse::getAvailabilityZone));
-            Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(instanceZoneMap);
+            Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(freeIpaResponse.getName(), instanceZoneMap);
             List<String> instancesWithNoAz = availabilityZoneForVms.entrySet().stream()
                     .filter(entry -> StringUtils.isEmpty(entry.getValue()))
                     .map(Map.Entry::getKey)
