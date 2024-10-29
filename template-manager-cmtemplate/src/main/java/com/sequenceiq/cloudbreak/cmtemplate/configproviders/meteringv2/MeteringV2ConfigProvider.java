@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.Me
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVICE_REFNAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVICE_ROLE_SERVER_REF_NAME;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,12 +57,31 @@ public class MeteringV2ConfigProvider extends AbstractRoleConfigProvider {
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_KEY_ID, databusCredentialView.getAccessKey()),
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY, databusCredentialView.getPrivateKey()),
                 config(MeteringV2ServiceRoles.METERINGV2_DATABUS_ACCESS_SECRET_KEY_ALGO, databusCredentialView.getAccessKeyType()),
-                config(MeteringV2ServiceRoles.METERINGV2_DBUS_HOST, altusDatabusConfiguration.getAltusDatabusEndpoint()),
+                config(MeteringV2ServiceRoles.METERINGV2_DBUS_HOST, extractHost(altusDatabusConfiguration.getAltusDatabusEndpoint())),
                 config(MeteringV2ServiceRoles.METERINGV2_DBUS_STREAM, dbusStreamName),
                 config(MeteringV2ServiceRoles.METERINGV2_DBUS_APPNAME, dbusAppName),
                 config(MeteringV2ServiceRoles.METERINGV2_DBUS_PARTITION_KEY, source.getGeneralClusterConfigs().getEnvironmentCrn()),
                 config(MeteringV2ServiceRoles.METERINGV2_DBUS_REGION, region)
         );
+    }
+
+    /**
+     * The host value that is passed to the metering v2 service needs to match how Liftie operates, which does
+     * not have the http/https prefix. DBUS communication is also always https.
+     *
+     * @param url The input URL containing the DBUS host. May or may not start with http(s)
+     *
+     * @return The host part of the URL
+     */
+    protected String extractHost(String url) {
+        try {
+            URL dbusURL = new URI(url).toURL();
+            return dbusURL.getHost();
+        } catch (Exception genex) {
+            // This should never happen. But if it does, just pass the value through so that it can at least be fixed manually.
+            LOGGER.error("Error parsing URL {}", url, genex);
+            return url;
+        }
     }
 
     @Override

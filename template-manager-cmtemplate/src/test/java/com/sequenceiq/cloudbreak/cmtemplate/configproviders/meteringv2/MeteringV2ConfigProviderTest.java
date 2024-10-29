@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.dlm.DLMServiceRoles.DLM_SERVICE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.meteringv2.MeteringV2ServiceRoles.METERINGV2_SERVICE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -58,6 +59,23 @@ class MeteringV2ConfigProviderTest {
         Map<String, ApiClusterTemplateService> additionalServices = underTest.getAdditionalServices(mockTemplateProcessor, templatePreparationObject);
 
         assertFalse(additionalServices.isEmpty());
+    }
+
+    @Test
+    void testDbusHostName() {
+        String expectedHost = "dbusapi.sigma-dev.cloudera.com";
+
+        String inputHost = "https://dbusapi.sigma-dev.cloudera.com";
+        String newHost = underTest.extractHost(inputHost);
+        assertEquals(expectedHost, newHost);
+
+        inputHost = "http://dbusapi.sigma-dev.cloudera.com";
+        newHost = underTest.extractHost(inputHost);
+        assertEquals(expectedHost, newHost);
+
+        inputHost = "dbusapi.sigma-dev.cloudera.com";
+        newHost = underTest.extractHost(inputHost);
+        assertEquals(expectedHost, newHost);
     }
 
     @Test
