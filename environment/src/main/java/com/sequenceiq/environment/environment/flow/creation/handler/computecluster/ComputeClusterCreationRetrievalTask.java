@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.computecluster;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_FINISHED;
 import static com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus.LIFTIE_CLUSTER_CREATION_IN_PROGRESS;
 
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -60,6 +62,7 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
                 sendNotificationIfNeeded(pollerObject, status, environmentCrn);
                 return false;
             } else if (status.isAvailable()) {
+                sendNotification(environmentCrn, ENVIRONMENT_COMPUTE_CLUSTER_CREATION_FINISHED);
                 return true;
             } else if (status.isDeletionInProgress() || status.isDeleted()) {
                 LOGGER.warn("Compute cluster {} is getting terminated (status:'{}'), polling is cancelled.", name, status);
@@ -80,11 +83,14 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
         }
     }
 
+    private void sendNotification(String environmentCrn, ResourceEvent resourceEvent) {
+        EnvironmentDto environmentDto = environmentService.internalGetByCrn(environmentCrn);
+        eventService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(), resourceEvent);
+    }
+
     private void sendNotificationIfNeeded(ComputeClusterPollerObject pollerObject, ExternalizedComputeClusterApiStatus status, String environmentCrn) {
         if (!pollerObject.isCreationInProgressNotificationSent() && LIFTIE_CLUSTER_CREATION_IN_PROGRESS.equals(status)) {
-            EnvironmentDto environmentDto = environmentService.internalGetByCrn(environmentCrn);
-            eventService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(),
-                    ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED);
+            sendNotification(environmentCrn, ENVIRONMENT_COMPUTE_CLUSTER_CONTAINER_ORCHESTRATION_ENGINE_CREATION_STARTED);
             pollerObject.creationInProgressNotificationSent();
         }
     }
