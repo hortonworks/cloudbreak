@@ -70,11 +70,9 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
 
         when(subject.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(subject.getRegion()).thenReturn("region");
-        when(subject.getResourceCrn()).thenReturn(ENV_CRN);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCrn(ENV_CRN);
-        when(entitlementService.awsNativeEnabled(anyString())).thenReturn(false);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
     }

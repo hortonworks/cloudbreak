@@ -6,8 +6,6 @@ import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.ERROR;
 import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
@@ -89,7 +87,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stackRequest = stackWithRootVolumeSize(0, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stackRequest, false);
+        entitlementMock(stackRequest);
 
         underTest.validate(stackRequest, builder);
         assertEquals(ERROR, builder.build().getState());
@@ -100,7 +98,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(-1, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, false);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(ERROR, builder.build().getState());
@@ -111,7 +109,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(null, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, false);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
@@ -122,7 +120,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, false);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
@@ -133,8 +131,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, true);
-        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(true);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
@@ -145,8 +142,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, true);
-        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(false);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
@@ -157,23 +153,10 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_NATIVE_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, true);
-        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(true);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
-    }
-
-    @Test
-    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementDisabledAndNative() {
-        Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_NATIVE_VARIANT.variant());
-        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
-
-        entitlementMock(stack, true);
-        when(entitlementService.awsNativeDataLakeEnabled(anyString())).thenReturn(false);
-
-        underTest.validate(stack, builder);
-        assertEquals(ERROR, builder.build().getState());
     }
 
     @Test
@@ -182,25 +165,13 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
-        entitlementMock(stack, true);
+        entitlementMock(stack);
 
         underTest.validate(stack, builder);
         assertEquals(VALID, builder.build().getState());
     }
 
-    @Test
-    public void testWithNativeVariantWhenEntitlementNOTEnabledShouldNOTBeValid() {
-        Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
-        stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
-        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
-
-        entitlementMock(stack, false);
-
-        underTest.validate(stack, builder);
-        assertEquals(ERROR, builder.build().getState());
-    }
-
-    private void entitlementMock(Stack stack, boolean enabled) {
+    private void entitlementMock(Stack stack) {
         Tenant tenant = new Tenant();
         tenant.setName("tenant1");
 
@@ -208,8 +179,6 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
         user.setTenant(tenant);
 
         stack.setCreator(user);
-
-        when(entitlementService.awsNativeEnabled(anyString())).thenReturn(enabled);
     }
 
     private Stack stackWithRootVolumeSize(Integer rootVolumeSize, StackType stackType, Variant variant) {

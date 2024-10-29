@@ -172,7 +172,6 @@ public class StackRequestManifesterTest {
 
         when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
         doNothing().when(cloudStorageValidator).validate(any(), any(), any());
-        when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(true);
         when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
@@ -191,7 +190,6 @@ public class StackRequestManifesterTest {
 
         when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
         doNothing().when(cloudStorageValidator).validate(any(), any(), any());
-        when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(true);
         when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
@@ -218,6 +216,49 @@ public class StackRequestManifesterTest {
 
         String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
         assertThat(variant).isEqualTo("AWS_NATIVE");
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
+    }
+
+    @Test
+    public void testAwsNativeEnforcementDuringSetupStackRequestWithNoEntitlementAndRuntimeVersionThatMakesAwsNativeVariantDefault() throws IOException {
+        SdxCluster sdxCluster = getSdxCluster(false);
+        sdxCluster.setRuntime("7.3.1");
+        StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+
+        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        when(entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(any())).thenReturn(false);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
+        assertThat(variant).isEqualTo("AWS_NATIVE");
+        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
+        verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
+    }
+
+    @Test
+    public void testAwsNativeEnforcementDuringSetupStackRequestWithNoEntitlementAndRuntimeVersionLowerThanRequiredForMakingAwsNativeVariantDefault()
+            throws IOException {
+        SdxCluster sdxCluster = getSdxCluster(false);
+        sdxCluster.setRuntime("7.3.0");
+        StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
+
+        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+
+        when(entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(any())).thenReturn(false);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
+
+        String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
+        assertThat(variant).isNull();
         verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
         verify(multiAzDecorator, never()).decorateStackRequestWithMultiAz(any(), any(), any());
     }
@@ -262,23 +303,6 @@ public class StackRequestManifesterTest {
     }
 
     @Test
-    public void configureStackForSdxClusterTestWhenMultiAzAndAwsAndNotEntitled() {
-        SdxCluster sdxCluster = getSdxCluster(true);
-        StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse(false);
-
-        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
-        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
-        when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(false);
-        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
-
-        verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
-        verify(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
-    }
-
-    @Test
     public void configureStackForSdxClusterTestWhenMultiAzAndAzure() {
         SdxCluster sdxCluster = getSdxCluster(true);
         StackV4Request stackV4Request = getStackV4Request(sdxCluster, false);
@@ -291,7 +315,6 @@ public class StackRequestManifesterTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse));
 
-        verify(entitlementService, never()).awsNativeDataLakeEnabled(any());
         verify(multiAzDecorator, never()).decorateStackRequestWithAwsNative(any());
         verify(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
     }

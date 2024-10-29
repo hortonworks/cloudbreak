@@ -42,12 +42,6 @@ class EntitlementServiceTest {
 
                 // entitlementName, function, enabled
 
-                {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, false},
-                {"CDP_CB_AWS_NATIVE", (EntitlementCheckFunction) EntitlementService::awsNativeEnabled, true},
-
-                {"CDP_CB_AWS_NATIVE_DATALAKE", (EntitlementCheckFunction) EntitlementService::awsNativeDataLakeEnabled, false},
-                {"CDP_CB_AWS_NATIVE_DATALAKE", (EntitlementCheckFunction) EntitlementService::awsNativeDataLakeEnabled, true},
-
                 {"CDP_CB_AWS_NATIVE_FREEIPA", (EntitlementCheckFunction) EntitlementService::awsNativeFreeIpaEnabled, false},
                 {"CDP_CB_AWS_NATIVE_FREEIPA", (EntitlementCheckFunction) EntitlementService::awsNativeFreeIpaEnabled, true},
 

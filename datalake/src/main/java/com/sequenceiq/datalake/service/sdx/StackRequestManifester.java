@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.datalake.service.sdx.SdxService.DATABASE_SSL_ENABLED;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -85,6 +88,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 public class StackRequestManifester {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRequestManifester.class);
+
+    private static final String MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE = "7.3.1";
 
     @Inject
     private GatewayManifester gatewayManifester;
@@ -179,8 +184,8 @@ public class StackRequestManifester {
             setupMultiAz(sdxCluster, environment, stackRequest);
             setupGovCloud(environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
-            if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
-                    entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (isAwsNativePlatformVariantEnforced(environment.getCloudPlatform()) ||
+                    isAwsNativePlatformVariantDefaultForRuntimeVersion(environment.getCloudPlatform(), sdxCluster.getRuntime())) {
                 stackRequest.setVariant("AWS_NATIVE");
             }
             setupDisableDbSslEnforcement(sdxCluster, stackRequest);
@@ -189,6 +194,21 @@ public class StackRequestManifester {
             LOGGER.error("Can not parse JSON to stack request");
             throw new IllegalStateException("Can not parse JSON to stack request", e);
         }
+    }
+
+    private boolean isAwsNativePlatformVariantEnforced(String cloudPlatform) {
+        return CloudPlatform.AWS.name().equals(cloudPlatform) &&
+                entitlementService.enforceAwsNativeForSingleAzDatalakeEnabled(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    private boolean isAwsNativePlatformVariantDefaultForRuntimeVersion(String cloudPlatform, String runtimeVersion) {
+        if (runtimeVersion != null) {
+            Comparator<Versioned> versionComparator = new VersionComparator();
+            return CloudPlatform.AWS.name().equals(cloudPlatform) &&
+                    versionComparator.compare(() -> runtimeVersion, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0;
+        }
+
+        return false;
     }
 
     private void setupDisableDbSslEnforcement(SdxCluster sdxCluster, StackV4Request stackRequest) {
@@ -494,7 +514,7 @@ public class StackRequestManifester {
 
     private void setupMultiAz(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (sdxCluster.isEnableMultiAz()) {
-            if (environment.getCloudPlatform().equals(CloudPlatform.AWS.name()) && entitlementService.awsNativeDataLakeEnabled(environment.getAccountId())) {
+            if (environment.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
                 multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest);
             }
             multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment, sdxCluster.getClusterShape());

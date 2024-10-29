@@ -10,8 +10,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ADD_DISK;
@@ -159,16 +157,8 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE);
     }
 
-    public boolean awsNativeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_AWS_NATIVE);
-    }
-
     public boolean awsVariantMigrationEnable(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AWS_VARIANT_MIGRATION);
-    }
-
-    public boolean awsNativeDataLakeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_CB_AWS_NATIVE_DATALAKE);
     }
 
     public boolean awsNativeFreeIpaEnabled(String accountId) {

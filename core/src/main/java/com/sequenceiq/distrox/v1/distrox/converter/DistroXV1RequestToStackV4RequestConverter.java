@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -29,9 +30,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -50,6 +53,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 public class DistroXV1RequestToStackV4RequestConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXV1RequestToStackV4RequestConverter.class);
+
+    private static final String MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE = "7.3.1";
 
     @Inject
     private DistroXAuthenticationToStaAuthenticationConverter authenticationConverter;
@@ -92,6 +97,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
         StackV4Request request = new StackV4Request();
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
+        String runtime = sdxClusterResponse != null ? sdxClusterResponse.getRuntime() : null;
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
         request.setCloudPlatform(getCloudPlatform(environment));
@@ -121,14 +127,19 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setEnableMultiAz(source.isEnableMultiAz());
         request.setArchitecture(source.getArchitecture());
         request.setDisableDbSslEnforcement(source.isDisableDbSslEnforcement());
-        calculateVariant(environment, source, request);
+        calculateVariant(environment, source, request, runtime);
         checkMultipleGatewayNodes(source);
         return request;
     }
 
-    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request) {
+    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request, String runtime) {
+        Comparator<Versioned> versionComparator = new VersionComparator();
         if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
                 entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        } else if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
+                runtime != null &&
+                versionComparator.compare(() -> runtime, () -> MIN_RUNTIME_VERSION_FOR_DEFAULT_AWS_NATIVE) >= 0) {
             request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         } else {
             request.setVariant(source.getVariant());

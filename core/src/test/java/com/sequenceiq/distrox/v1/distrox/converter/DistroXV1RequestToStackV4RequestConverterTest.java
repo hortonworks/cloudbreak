@@ -55,6 +55,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegio
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXV1RequestToStackV4RequestConverterTest {
@@ -119,6 +120,32 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         assertThat(convert.getExternalDatabase().getDatabaseEngineVersion()).isEqualTo("13");
 
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.TRUE);
+        convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE");
+    }
+
+    @Test
+    void testConvertWithDisabledAwsNativeEntitlementAndRuntimeVersionThatMakesAwsNativeVariantDefault() {
+        when(environmentClientService.getByName(anyString())).thenReturn(createAwsEnvironment());
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
+        when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+        sdxClusterResponse.setRuntime("7.3.1");
+        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+
+        DistroXV1Request source = new DistroXV1Request();
+        source.setEnvironmentName("envname");
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
+        databaseRequest.setDatabaseEngineVersion("13");
+        source.setExternalDatabase(databaseRequest);
+        StackV4Request convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        assertThat(convert.getExternalDatabase()).isNotNull();
+        assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
+        assertThat(convert.getExternalDatabase().getDatabaseEngineVersion()).isEqualTo("13");
+
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
         convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
         assertThat(convert.getVariant()).isEqualTo("AWS_NATIVE");
     }
@@ -523,6 +550,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
         env.setCloudPlatform("AWS");
+        env.setCrn("environmentCrn");
         env.setNetwork(createAwsNetwork());
         env.setName("SomeAwesomeEnv");
         env.setRegions(createCompactRegionResponse());

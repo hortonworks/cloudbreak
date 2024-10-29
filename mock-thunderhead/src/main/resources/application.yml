@@ -42,7 +42,6 @@ auth:
       backup.on.resize.enable: true
       light.to.medium.migration.enable: true
       recovery.resize.enable: true
-      multiaz.enable: true
       select.instance.type.enable: true
       backup.restore.permission.checks.enabled: true
       backup.compression.enable: false
