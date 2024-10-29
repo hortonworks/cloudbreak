@@ -162,6 +162,25 @@ class RdsUpgradeServiceTest {
     }
 
     @Test
+    void testUpgradeRdsOnAzureSkipServicesAndCmStopEnabledThenFailure() {
+        Stack stack = createStack(Status.AVAILABLE);
+        StackDto stackDto = createStackDto(stack, DatabaseAvailabilityType.HA);
+        stack.setCloudPlatform("AZURE");
+        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN), any())).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
+        when(stackDtoService.getByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stackDto);
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> doAsAndThrow(USER_CRN,
+                () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION, false)));
+
+        verifyNoInteractions(reactorFlowManager);
+        assertThat(exception.getMessage())
+                .isEqualTo("Azure external database cannot be upgraded if 'CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP' entitlement is enabled");
+    }
+
+    @Test
     void testUpgradeRdsRejectedOnDataHubWithEmbeddedDB() {
         Stack stack = createStack(Status.AVAILABLE);
         stack.setType(StackType.WORKLOAD);
