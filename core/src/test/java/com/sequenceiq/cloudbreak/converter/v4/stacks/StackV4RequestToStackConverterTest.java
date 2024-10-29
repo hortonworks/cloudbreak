@@ -81,7 +81,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -259,11 +258,10 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
-                        "ccmV2AgentCrn", "stackVersion", "originalName", "javaVersion", "creatorClient", "supportedImdsVersion"));
+                        "ccmV2AgentCrn", "stackVersion", "originalName", "javaVersion", "creatorClient", "supportedImdsVersion", "architecture"));
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
         assertTrue(stack.getCluster().isAutoTlsEnabled());
-        assertEquals(Architecture.X86_64, stack.getArchitecture());
     }
 
     private Mappable getMappable() {

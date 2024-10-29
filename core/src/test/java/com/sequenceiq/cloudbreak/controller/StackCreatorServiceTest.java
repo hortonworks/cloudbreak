@@ -265,7 +265,7 @@ public class StackCreatorServiceTest {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setArchitecture(Architecture.ARM64.getName());
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
 
@@ -285,7 +285,7 @@ public class StackCreatorServiceTest {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setArchitecture(Architecture.ARM64.getName());
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
 
@@ -305,7 +305,7 @@ public class StackCreatorServiceTest {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setArchitecture(Architecture.ARM64.getName());
         stackRequest.setTags(isCodClusterTag(true));
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
@@ -326,7 +326,7 @@ public class StackCreatorServiceTest {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setArchitecture(Architecture.ARM64.getName());
         stackRequest.setTags(isCodClusterTag(true));
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
@@ -347,7 +347,7 @@ public class StackCreatorServiceTest {
         User user = new User();
         Workspace workspace = getWorkspace();
         StackV4Request stackRequest = getStackV4Request();
-        stackRequest.setArchitecture(Architecture.ARM64);
+        stackRequest.setArchitecture(Architecture.ARM64.getName());
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.empty());
 
