@@ -461,11 +461,11 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         DistroXV1Request source = new DistroXV1Request();
         source.setEnvironmentName("env");
-        source.setArchitecture(Architecture.ARM64);
+        source.setArchitecture(Architecture.ARM64.getName());
 
         StackV4Request result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
 
-        assertThat(result.getArchitecture()).isEqualTo(Architecture.ARM64);
+        assertThat(result.getArchitecture()).isEqualTo(Architecture.ARM64.getName());
     }
 
     private void checkTagsV4WithV1(TagsV4Request input, TagsV1Request result) {

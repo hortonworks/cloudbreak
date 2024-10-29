@@ -330,7 +330,7 @@ public class StackCreatorService {
     }
 
     private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest) {
-        if (stackRequest.getArchitecture() == Architecture.ARM64) {
+        if (stackRequest.getArchitectureEnum() == Architecture.ARM64) {
             if (!distroxRequest) {
                 throw new BadRequestException(String.format("Data Lake clusters are not supported on (%s) architecture.",
                         Architecture.ARM64.getName()));
@@ -474,7 +474,7 @@ public class StackCreatorService {
                     return imageService.determineImageFromCatalog(
                             workspace.getId(),
                             stackRequest.getImage(),
-                            stackRequest.getArchitecture(),
+                            stackRequest.getArchitectureEnum(),
                             platformString,
                             stackRequest.getVariant(),
                             blueprint,
