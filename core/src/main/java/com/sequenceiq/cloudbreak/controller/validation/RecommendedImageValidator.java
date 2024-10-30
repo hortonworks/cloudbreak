@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplaceTermsClientService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.model.Architecture;
 
 @Component
 public class RecommendedImageValidator {
@@ -56,8 +57,9 @@ public class RecommendedImageValidator {
         CloudPlatformVariant cloudPlatform = new CloudPlatformVariant(
                 Platform.platform(platform.toUpperCase()),
                 Variant.variant(platform.toUpperCase()));
+        Architecture architecture = Architecture.fromStringWithValidation(request.getArchitecture());
         Image image = recommendImageService.recommendImage(
-                workspaceId, cloudbreakUser, request.getImage(), request.getRegion(), request.getBlueprintName(), cloudPlatform, request.getArchitecture());
+                workspaceId, cloudbreakUser, request.getImage(), request.getRegion(), request.getBlueprintName(), cloudPlatform, architecture);
         LOGGER.debug("Recommended image to validate: {}", image);
 
         Boolean accepted = azureMarketplaceTermsClientService.getAccepted(request.getEnvironmentCrn());

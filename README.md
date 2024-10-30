@@ -885,6 +885,8 @@ https://github.infra.cloudera.com/cloudbreak/cloudbreak/commit/f50f5c8f38941db95
 
 - If you introduce a new Cloud SDK or API for a feature, please ensure that the newly introduced API calls **are supported in every region** and if not then search for an alternative solution. It is often the case that the cloud providers gradually introduce their new services.
 
+- Use strings instead of enums on APIs for better backward compatibility - enums are useful for the service layer but on the API layer each new value can break compatibility.
+
 ## Catching Up
 
 When you're working on your precious change on your beloved branch and all of a sudden you face the issue of getting your branch drop behind from the desired/initial branch where you would like to open your future pull request, our way of catching up is [rebasing](https://git-scm.com/docs/git-rebase).
