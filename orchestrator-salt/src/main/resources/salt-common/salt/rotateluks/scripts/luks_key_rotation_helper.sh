@@ -12,6 +12,8 @@ export PASSPHRASE_CIPHERTEXT="$LUKS_DIR/passphrase_ciphertext"
 export ENCRYPTION_KEY_FILE="$LUKS_DIR/passphrase_encryption_key"
 export LUKS_LOG_DIR="/var/log/$LUKS_VOLUME_NAME"
 export AWS_USE_FIPS_ENDPOINT=true
+export AWS_RETRY_MODE=standard
+export AWS_MAX_ATTEMPTS=15
 
 find_loop_device() {
   local loop_device_count
