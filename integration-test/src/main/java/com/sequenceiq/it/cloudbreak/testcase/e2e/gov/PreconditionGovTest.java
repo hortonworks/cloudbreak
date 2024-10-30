@@ -64,6 +64,7 @@ public class PreconditionGovTest extends AbstractE2ETest {
         initiateEnvironmentCreation(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
+        setFreeIpaResponse(testContext);
     }
 
     @Override
@@ -75,6 +76,7 @@ public class PreconditionGovTest extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                     .withNetwork()
                     .withTelemetry("telemetry")
+                    .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withOneFreeIpaNode()
@@ -90,6 +92,7 @@ public class PreconditionGovTest extends AbstractE2ETest {
         initiateDatalakeCreation(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
+        setFreeIpaResponse(testContext);
         waitForDatalakeCreation(testContext);
     }
 

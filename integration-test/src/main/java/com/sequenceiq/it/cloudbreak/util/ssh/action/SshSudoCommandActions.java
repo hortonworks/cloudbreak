@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -25,20 +27,29 @@ public class SshSudoCommandActions {
     @Inject
     private SshJClient sshJClient;
 
-    public void executeCommand(Set<String> ipAddresses, String user, String password, String... sudoCommands) {
-        ipAddresses.stream().forEach(ipAddress -> {
-            String commandsAsSingleCommand = Arrays.stream(sudoCommands).map(command -> getSudoCommand(password, command))
-                    .collect(Collectors.joining(" && "));
+    public void executeCommand(Collection<String> ipAddresses, String user, String password, String... sudoCommands) {
+        String commandsAsSingleCommand = Arrays.stream(sudoCommands)
+                .map(command -> getSudoCommand(password, command))
+                .collect(Collectors.joining(" && "));
+        ipAddresses.forEach(ipAddress -> {
             Pair<Integer, String> result = executeCommand(ipAddress, user, password, commandsAsSingleCommand);
-            if (result.getKey().intValue() != 0) {
-                LOGGER.error("Unexpected exit code [" + result.getKey().intValue() + "] for command '" +
+            if (result.getKey() != 0) {
+                LOGGER.error("Unexpected exit code [" + result.getKey() + "] for command '" +
                         commandsAsSingleCommand + "'. Output: " + result.getValue());
                 throw new TestFailException("sudo command failed on '" + ipAddress + "' for user '" + user + "'. ");
             } else {
-                LOGGER.info("Expected exit code [" + result.getKey().intValue() + "] for command '" +
+                LOGGER.info("Expected exit code [" + result.getKey() + "] for command '" +
                         commandsAsSingleCommand + "'. Output: " + result.getValue());
             }
         });
+    }
+
+    public Map<String, Pair<Integer, String>> executeCommandWithoutThrowing(Collection<String> ipAddresses, Collection<String> sudoCommands) {
+        String commandsAsSingleCommand = sudoCommands.stream()
+                .map(command -> getSudoCommand(null, command))
+                .collect(Collectors.joining(" && "));
+        return ipAddresses.parallelStream()
+                .collect(Collectors.toMap(Function.identity(), ipAddress -> executeCommand(ipAddress, null, null, commandsAsSingleCommand)));
     }
 
     private String getSudoCommand(String password, String sudoCommand) {

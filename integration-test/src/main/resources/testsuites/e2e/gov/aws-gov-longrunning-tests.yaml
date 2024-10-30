@@ -12,3 +12,6 @@ tests:
         excludedMethods:
           - testSDXMediumDutyRepair
           - testSDXEnterpriseRepair
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.SecretEncryptionTests
+        excludedMethods:
+          - testCreateStopStartUpscaleDownscaleFreeIpaWithSecretEncryption

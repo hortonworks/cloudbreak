@@ -306,6 +306,11 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public boolean isResourceEncryptionEnabled() {
+        return wrappedTestContext.isResourceEncryptionEnabled();
+    }
+
+    @Override
     public void skipSafeLogicValidation() {
         wrappedTestContext.skipSafeLogicValidation();
     }

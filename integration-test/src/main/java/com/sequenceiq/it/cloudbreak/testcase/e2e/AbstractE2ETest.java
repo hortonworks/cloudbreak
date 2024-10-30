@@ -19,6 +19,7 @@ import org.testng.annotations.Listeners;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.assertion.encryption.SecretEncryptionAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
 import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -57,6 +58,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     private SafeLogicAssertions safeLogicAssertions;
 
     @Inject
+    private SecretEncryptionAssertions secretEncryptionAssertions;
+
+    @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
 
     @Override
@@ -89,6 +93,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 LOGGER.info("Validating SafeLogic installation of created resources...");
                 safeLogicAssertions.validate(testContext);
             }
+            LOGGER.info("Validating secret encryption on the created resources...");
+            secretEncryptionAssertions.validateAllExisting(testContext);
         }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }
@@ -107,6 +113,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                     .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                     .withTelemetry("telemetry")
+                    .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)

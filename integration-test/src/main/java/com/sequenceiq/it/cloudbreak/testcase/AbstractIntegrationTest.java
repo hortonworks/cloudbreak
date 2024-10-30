@@ -365,7 +365,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    private void setFreeIpaResponse(TestContext testContext) {
+    protected void setFreeIpaResponse(TestContext testContext) {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
@@ -401,6 +401,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         initiateDatalakeCreation(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
+        setFreeIpaResponse(testContext);
         waitForDatalakeCreation(testContext);
     }
 
@@ -420,6 +421,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         initiateDatalakeCreationWithAutoTlsAndExternalDb(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);
+        setFreeIpaResponse(testContext);
         waitForDatalakeCreation(testContext);
     }
 

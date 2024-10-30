@@ -40,7 +40,10 @@ public class Log<T extends CloudbreakTestDto> {
     }
 
     public static void log(Logger logger, String message, Object... args) {
-        String format = format(message, args);
+        String format = message;
+        if (args.length > 0) {
+            format = format(message, args);
+        }
         log(format);
         if (logger != null) {
             logger.info(format);
@@ -48,7 +51,10 @@ public class Log<T extends CloudbreakTestDto> {
     }
 
     public static void error(Logger logger, String message, Object... args) {
-        String format = format(message, args);
+        String format = message;
+        if (args.length > 0) {
+            format = format(message, args);
+        }
         log(format);
         if (logger != null) {
             logger.error(format);
@@ -56,7 +62,10 @@ public class Log<T extends CloudbreakTestDto> {
     }
 
     public static void warn(Logger logger, String message, Object... args) {
-        String format = format(message, args);
+        String format = message;
+        if (args.length > 0) {
+            format = format(message, args);
+        }
         log(format);
         if (logger != null) {
             logger.warn(format);

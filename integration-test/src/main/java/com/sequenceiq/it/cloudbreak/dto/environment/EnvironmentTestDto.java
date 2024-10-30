@@ -365,8 +365,11 @@ public class EnvironmentTestDto
         return getCloudProvider().withResourceGroup(this, resourceGroupUsage, resourceGroupName);
     }
 
-    public EnvironmentTestDto withResourceEncryption() {
-        return getCloudProvider().withResourceEncryption(this);
+    public EnvironmentTestDto withResourceEncryption(Boolean resourceEncryptionEnabled) {
+        if (resourceEncryptionEnabled) {
+            return getCloudProvider().withResourceEncryption(this);
+        }
+        return this;
     }
 
     public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {

@@ -105,7 +105,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
                 .withNetwork()
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
-                .withResourceEncryption()
+                .withResourceEncryption(Boolean.TRUE)
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),

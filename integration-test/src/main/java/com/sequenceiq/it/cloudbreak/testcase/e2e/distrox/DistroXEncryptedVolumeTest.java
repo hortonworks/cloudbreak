@@ -185,7 +185,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE, resourceGroupForTest)
-                .withResourceEncryption()
+                .withResourceEncryption(Boolean.TRUE)
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.FALSE)

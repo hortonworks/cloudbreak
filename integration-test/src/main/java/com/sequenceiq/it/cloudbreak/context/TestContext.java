@@ -1120,6 +1120,14 @@ public abstract class TestContext implements ApplicationContextAware {
         }
     }
 
+    public boolean isResourceEncryptionEnabled() {
+        if (getCloudProvider().getGovCloud()) {
+            LOGGER.info("Resource encryption is enabled, because the tested is environment is a GOV environment.");
+            return true;
+        }
+        return false;
+    }
+
     /**
      * The SafeLogic CryptoComply for Java should be installed on Cloudbreak images.
      * This is validated on VM instances by default, it has been invoked in the E2E tearDown

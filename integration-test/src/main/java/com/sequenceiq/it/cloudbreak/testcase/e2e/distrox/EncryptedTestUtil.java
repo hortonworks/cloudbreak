@@ -81,7 +81,7 @@ public class EncryptedTestUtil {
                 .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
-                .withResourceEncryption()
+                .withResourceEncryption(Boolean.TRUE)
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.FALSE)

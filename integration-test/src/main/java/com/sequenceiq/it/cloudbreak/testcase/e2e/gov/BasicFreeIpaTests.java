@@ -31,6 +31,7 @@ public class BasicFreeIpaTests extends PreconditionGovTest {
                     .withNetwork()
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
+                    .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .withFreeIpa(attachedFreeIpaHARequestForTest())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
