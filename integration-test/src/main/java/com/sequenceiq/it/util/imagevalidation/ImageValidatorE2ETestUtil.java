@@ -34,9 +34,9 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.listener.PassedTestsReporter;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid.BasicHybridCloudE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.BaseImageValidatorE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest;
-import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.YarnImageValidatorE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.java.ForceJavaVersionE2ETest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.BasicEnvironmentVirtualGroupTest;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DatalakeCcmUpgradeAndRotationTest;
@@ -214,7 +214,7 @@ public class ImageValidatorE2ETestUtil {
         switch (imageValidationType) {
             case BASE -> {
                 if (commonCloudProperties.isYcloudTest()) {
-                    testNGUtil.addTestCase(basicTests, YarnImageValidatorE2ETest.class, "testHybridSDXWithBaseImage");
+                    testNGUtil.addTestCase(basicTests, BasicHybridCloudE2ETest.class, "testHybridSdx");
                 } else {
                     testNGUtil.addTestCase(basicTests, BaseImageValidatorE2ETest.class, "testProvisioningWithBaseImage");
                 }
