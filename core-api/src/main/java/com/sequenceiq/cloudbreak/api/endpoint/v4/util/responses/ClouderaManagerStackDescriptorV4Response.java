@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
-import com.sequenceiq.common.model.Architecture;
 
 public class ClouderaManagerStackDescriptorV4Response {
 
@@ -13,7 +12,7 @@ public class ClouderaManagerStackDescriptorV4Response {
 
     private String os;
 
-    private Architecture architecture;
+    private String architecture;
 
     private ClouderaManagerStackRepoDetailsV4Response repository;
 
@@ -39,11 +38,11 @@ public class ClouderaManagerStackDescriptorV4Response {
         this.os = os;
     }
 
-    public Architecture getArchitecture() {
+    public String getArchitecture() {
         return architecture;
     }
 
-    public void setArchitecture(Architecture architecture) {
+    public void setArchitecture(String architecture) {
         this.architecture = architecture;
     }
 

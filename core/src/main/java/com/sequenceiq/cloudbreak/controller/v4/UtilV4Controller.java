@@ -98,10 +98,11 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     @DisableCheckPermissions
-    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud, String os, Architecture architecture)
+    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud, String os, String architecture)
             throws Exception {
+        Architecture architectureEnum = Architecture.fromStringWithValidation(architecture);
         return stackMatrixService.getStackMatrix(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), os, architecture, imageCatalogName);
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), os, architectureEnum, imageCatalogName);
     }
 
     @Override
