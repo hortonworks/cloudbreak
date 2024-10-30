@@ -139,6 +139,14 @@ public class RdsUpgradeService {
         validateStackStatus(stack);
         validateAttachedDatahubsAreNotRunning(stack, accountId);
         validateRdsIsAvailableForUpgrade(databaseServer);
+        validatePostgresServiceStopDisabledForAzure(stack, accountId);
+    }
+
+    private void validatePostgresServiceStopDisabledForAzure(StackView stack, String accountId) {
+        if (CloudPlatform.AZURE.name().equalsIgnoreCase(stack.getCloudPlatform())
+                && entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(accountId)) {
+            throw new BadRequestException("Azure external database cannot be upgraded if 'CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP' entitlement is enabled");
+        }
     }
 
     private void validateRdsIsNotUpgraded(StackDatabaseServerResponse databaseServer, TargetMajorVersion targetMajorVersion, boolean forced) {

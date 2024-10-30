@@ -132,7 +132,7 @@ public class DistroXImagesTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then((tc, dto, client) -> {
-                    Architecture stackArchitecture = dto.getResponse().getArchitecture();
+                    Architecture stackArchitecture = Architecture.fromStringWithFallback(dto.getResponse().getArchitecture());
                     if (stackArchitecture != Architecture.ARM64) {
                         throw new TestFailException(String.format("The stack architecture %s does not match, expected arm64", stackArchitecture));
                     }
