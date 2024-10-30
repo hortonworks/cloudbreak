@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -154,7 +153,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     private String supportedImdsVersion;
 
     @Schema(description = ModelDescriptions.ARCHITECTURE)
-    private Architecture architecture;
+    private String architecture;
 
     private boolean enableMultiAz;
 
@@ -472,11 +471,11 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
-    public Architecture getArchitecture() {
+    public String getArchitecture() {
         return architecture;
     }
 
-    public void setArchitecture(Architecture architecture) {
+    public void setArchitecture(String architecture) {
         this.architecture = architecture;
     }
 

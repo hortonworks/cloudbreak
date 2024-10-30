@@ -41,7 +41,6 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
-import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
@@ -345,8 +344,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     public DistroXTestDto withArchitecture(Architecture architecture) {
-        DistroXImageV1Request image = getRequest().getImage();
-        getRequest().setArchitecture(architecture);
+        getRequest().setArchitecture(architecture.getName());
         getCloudProvider().template(getTestContext().given(DistroXInstanceTemplateTestDto.class), architecture);
         return this;
     }
