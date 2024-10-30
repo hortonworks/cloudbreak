@@ -29,6 +29,8 @@ public class CommonCloudProperties {
 
     private String imageCatalogUrl;
 
+    private String freeipaImageCatalogUrl;
+
     private Integer gatewayPort;
 
     private String defaultPrivateKeyFile;
@@ -181,6 +183,14 @@ public class CommonCloudProperties {
 
     public void setBaseImageTest(BaseImageTest baseImageTest) {
         this.baseImageTest = baseImageTest;
+    }
+
+    public String getFreeipaImageCatalogUrl() {
+        return freeipaImageCatalogUrl;
+    }
+
+    public void setFreeipaImageCatalogUrl(String freeipaImageCatalogUrl) {
+        this.freeipaImageCatalogUrl = freeipaImageCatalogUrl;
     }
 
     public static class BaseImageTest {

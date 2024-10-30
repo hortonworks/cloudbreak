@@ -310,7 +310,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public String getFreeIpaImageCatalogUrl() {
-        return null;
+        return commonCloudProperties.getFreeipaImageCatalogUrl();
     }
 
     @Override
