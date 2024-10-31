@@ -144,6 +144,8 @@ public class GcpPlatformParameters implements PlatformParameters {
     private Map<DiskType, DisplayName> diskDisplayNames() {
         Map<DiskType, DisplayName> map = new HashMap<>();
         map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
+        map.put(diskType(GcpDiskType.BALANCED.value()), displayName(GcpDiskType.BALANCED.displayName()));
+        map.put(diskType(GcpDiskType.EXTREME.value()), displayName(GcpDiskType.EXTREME.displayName()));
         map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
         map.put(diskType(GcpDiskType.LOCAL_SSD.value()), displayName(GcpDiskType.LOCAL_SSD.displayName()));
         return map;
@@ -151,8 +153,9 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private Map<String, VolumeParameterType> diskMappings() {
         Map<String, VolumeParameterType> map = new HashMap<>();
-        map.put(GcpDiskType.HDD.name(), VolumeParameterType.MAGNETIC);
         map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
+        map.put(GcpDiskType.BALANCED.value(), VolumeParameterType.MAGNETIC);
+        map.put(GcpDiskType.EXTREME.value(), VolumeParameterType.SSD);
         map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
         map.put(GcpDiskType.LOCAL_SSD.value(), VolumeParameterType.LOCAL_SSD);
 
@@ -181,6 +184,8 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     public enum GcpDiskType {
         SSD("pd-ssd", "Solid-state persistent disks (SSD)"),
+        BALANCED("pd-balanced", "Balanced persistent disks (BALANCED)"),
+        EXTREME("pd-extreme", "Extreme persistent disks (EXTREME)"),
         HDD("pd-standard", "Standard persistent disks (HDD)"),
         LOCAL_SSD("local-ssd", "Local scratch disk (SSD)");
 

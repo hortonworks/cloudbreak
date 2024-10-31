@@ -49,6 +49,9 @@ public class GcpPlatformResourcesTest {
     private ExtendedCloudCredential extendedCloudCredential;
 
     @Mock
+    private ExtremeDiskCalculator extremeDiskCalculator;
+
+    @Mock
     private GcpComputeFactory gcpComputeFactory;
 
     @Mock
@@ -176,6 +179,7 @@ public class GcpPlatformResourcesTest {
             assertEquals(expectedVms.size(), vmTypes.size());
             expectedVms.entrySet().stream().forEach(entry -> {
                 assertTrue(vmTypes.stream().anyMatch(vmType -> vmType.getValue().equals(entry.getKey())));
+                assertTrue(vmTypes.stream().anyMatch(vmType -> vmType.getMetaData().getBalancedHddConfig() != null));
                 assertEquals(entry.getValue(), new HashSet<>(vmTypes.stream().filter(vmType ->
                         vmType.getValue().equals(entry.getKey())).findFirst().orElse(null).getMetaData().getAvailabilityZones()));
             });

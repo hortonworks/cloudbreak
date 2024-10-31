@@ -40,6 +40,10 @@ public class VmTypeMeta {
 
     private VolumeParameterConfig localSsdConfig;
 
+    private VolumeParameterConfig balancedHddConfig;
+
+    private VolumeParameterConfig extremeSsdConfig;
+
     private List<String> availabilityZones = new ArrayList<>();
 
     private Map<String, Object> properties = new HashMap<>();
@@ -92,6 +96,22 @@ public class VmTypeMeta {
         return localSsdConfig;
     }
 
+    public VolumeParameterConfig getExtremeSsdConfig() {
+        return extremeSsdConfig;
+    }
+
+    public VolumeParameterConfig getBalancedHddConfig() {
+        return balancedHddConfig;
+    }
+
+    public void setBalancedHddConfig(VolumeParameterConfig balancedHddConfig) {
+        this.balancedHddConfig = balancedHddConfig;
+    }
+
+    public void setExtremeSsdConfig(VolumeParameterConfig extremeSsdConfig) {
+        this.extremeSsdConfig = extremeSsdConfig;
+    }
+
     public List<String> getAvailabilityZones() {
         return availabilityZones;
     }
@@ -140,6 +160,8 @@ public class VmTypeMeta {
                 + ", ssdConfig=" + ssdConfig
                 + ", ephemeralConfig=" + ephemeralConfig
                 + ", st1Config=" + st1Config
+                + ", extremeSsdConfig=" + extremeSsdConfig
+                + ", balancedHddConfig=" + balancedHddConfig
                 + ", availabilityZones=" + availabilityZones
                 + ", properties=" + properties
                 + '}';
@@ -158,6 +180,10 @@ public class VmTypeMeta {
         private VolumeParameterConfig st1Config;
 
         private VolumeParameterConfig localSsdConfig;
+
+        private VolumeParameterConfig balancedHddConfig;
+
+        private VolumeParameterConfig extremeSsdConfig;
 
         private List<String> availabilityZones;
 
@@ -197,6 +223,26 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withLocalSsdConfig(Set<Integer> possibleSizeValues, Set<Integer> possibleNumberValues) {
             localSsdConfig = new VolumeParameterConfig(VolumeParameterType.LOCAL_SSD, possibleSizeValues, possibleNumberValues);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withBalancedHddConfig(VolumeParameterConfig volumeParameterConfig) {
+            balancedHddConfig = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withBalancedHddConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
+            balancedHddConfig = new VolumeParameterConfig(VolumeParameterType.BALANCED_HDD, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withExtremeSsdConfig(VolumeParameterConfig volumeParameterConfig) {
+            extremeSsdConfig = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withExtremeSsdConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
+            ephemeralConfig = new VolumeParameterConfig(VolumeParameterType.EXTREME_SSD, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
@@ -300,6 +346,8 @@ public class VmTypeMeta {
             vmTypeMeta.setSsdConfig(ssdConfig);
             vmTypeMeta.setSt1Config(st1Config);
             vmTypeMeta.setLocalSsdConfig(localSsdConfig);
+            vmTypeMeta.setBalancedHddConfig(balancedHddConfig);
+            vmTypeMeta.setExtremeSsdConfig(extremeSsdConfig);
             vmTypeMeta.setAvailabilityZones(availabilityZones);
             vmTypeMeta.setProperties(properties);
             return vmTypeMeta;

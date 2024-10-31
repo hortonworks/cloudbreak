@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -101,6 +102,8 @@ public class GcpPlatformResources implements PlatformResources {
 
     private static final float THOUSAND = 1000.0f;
 
+    private static final int THOUSAND_FIVE_HUNDRED = 1500;
+
     private static final int TEN = 10;
 
     private static final int DEFAULT_PAGE_SIZE = 50;
@@ -140,6 +143,9 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Inject
     private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private ExtremeDiskCalculator extremeDiskCalculator;
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
@@ -512,9 +518,12 @@ public class GcpPlatformResources implements PlatformResources {
                                         machineType.getMemoryMb().floatValue() / THOUSAND)
 
                                 .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
-                                        1, machineType.getMaximumPersistentDisksSizeGb().intValue())
+                                        1, machineType.getMaximumPersistentDisks())
 
                                 .withSsdConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
+                                        1, machineType.getMaximumPersistentDisks())
+
+                                .withBalancedHddConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
                                         1, machineType.getMaximumPersistentDisks())
 
                                 .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
@@ -525,6 +534,14 @@ public class GcpPlatformResources implements PlatformResources {
                                     Set.of(GCP_LOCAL_SSD_ALLOWED_VALUES),
                                     GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES
                             );
+                        }
+                        if (isExtremeSsdSupportedForInstanceType(machineType)) {
+                            LOGGER.trace("Adding the extreme disk configurations to the instance {}.", machineType);
+                            vmTypeMetaBuilder.withExtremeSsdConfig(
+                                    TEN,
+                                    THOUSAND_FIVE_HUNDRED,
+                                    1,
+                                    machineType.getMaximumPersistentDisks());
                         }
                         vmTypeMetaBuilder.withAvailabilityZones(new ArrayList<>(availabilityZonesForVm));
                         VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMetaBuilder.create(), true);
@@ -546,8 +563,16 @@ public class GcpPlatformResources implements PlatformResources {
         }
     }
 
-    private static boolean isLocalSsdSupportedForInstanceType(MachineType machineType) {
-        return MACHINE_TYPES_WITH_LOCAL_SSD.contains(machineType.getName().split("-")[0]);
+    private boolean isLocalSsdSupportedForInstanceType(MachineType machineType) {
+        return MACHINE_TYPES_WITH_LOCAL_SSD.contains(getMachineTypeFamily(machineType));
+    }
+
+    private boolean isExtremeSsdSupportedForInstanceType(MachineType machineType) {
+        return extremeDiskCalculator.extremeDiskSupported(machineType);
+    }
+
+    private String getMachineTypeFamily(MachineType machineType) {
+        return machineType.getName().toLowerCase(Locale.ROOT).split("-")[0];
     }
 
     @Override

@@ -8,7 +8,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 public enum VolumeParameterType {
 
     MAGNETIC() {
-        @Override public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
             return metaData.getMagneticConfig();
         }
 
@@ -29,7 +30,8 @@ public enum VolumeParameterType {
     },
 
     SSD() {
-        @Override public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
             return metaData.getSsdConfig();
         }
 
@@ -50,7 +52,8 @@ public enum VolumeParameterType {
     },
 
     LOCAL_SSD() {
-        @Override public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
             return metaData.getLocalSsdConfig();
         }
 
@@ -75,8 +78,53 @@ public enum VolumeParameterType {
         }
     },
 
+    BALANCED_HDD() {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+            return metaData.getBalancedHddConfig();
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount, int maxdiskSize) {
+            builder.withBalancedHddConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount, maxdiskSize));
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount) {
+            builder.withBalancedHddConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount));
+        }
+
+        @Override
+        public boolean in(VolumeParameterType... types) {
+            return VolumeParameterType.in(this, types);
+        }
+    },
+
+    EXTREME_SSD() {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+            return metaData.getExtremeSsdConfig();
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount, int maxdiskSize) {
+            builder.withExtremeSsdConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount, maxdiskSize));
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount) {
+            builder.withExtremeSsdConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount));
+        }
+
+        @Override
+        public boolean in(VolumeParameterType... types) {
+            return VolumeParameterType.in(this, types);
+        }
+    },
+
     EPHEMERAL() {
-        @Override public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
             return metaData.getEphemeralConfig();
         }
 
@@ -118,7 +166,8 @@ public enum VolumeParameterType {
     },
 
     AUTO_ATTACHED() {
-        @Override public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
             return metaData.getAutoAttachedConfig();
         }
 

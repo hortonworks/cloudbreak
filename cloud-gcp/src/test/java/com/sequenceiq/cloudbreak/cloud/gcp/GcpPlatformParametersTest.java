@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
@@ -33,6 +34,12 @@ public class GcpPlatformParametersTest {
 
     @InjectMocks
     private GcpPlatformParameters underTest;
+
+    @Test
+    public void testDiskTypes() {
+        DiskTypes diskTypes = underTest.diskTypes();
+        Assert.assertEquals(5, diskTypes.diskMapping().keySet().size());
+    }
 
     @Test
     public void testTagValidator() {
