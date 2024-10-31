@@ -11,7 +11,7 @@ ext {
   quartzVersion = '2.5.0-rc2'
   springBootVersion = '3.3.4'
   springDataJpaFrameworkVersion = '3.2.3'
-  springFrameworkVersion = '6.1.13'
+  springFrameworkVersion = '6.1.14'
   springRetryVersion = '2.0.9'
   springSecurityJwtVersion = '1.1.1.RELEASE'
   springSecurityVersion = '6.3.4'
@@ -55,7 +55,7 @@ ext {
   azureStorageSdkVersion = '8.4.0'
 
   // Apache Commons, Utils
-  apacheCommonsIoVersion = '2.11.0'
+  apacheCommonsIoVersion = '2.14.0'
   apacheCommonsLangVersion = '3.8.1'
   apacheCommonsTextVersion = '1.10.0'
   apacheCommonsValidatorVersion = '1.6'
@@ -85,7 +85,7 @@ ext {
   jinjavaVersion = '2.5.2'
 
   // Protobuf
-  protobufVersion = '3.25.3'
+  protobufVersion = '3.25.5'
   grpcVersion = '1.64.0'
 
   // Database
