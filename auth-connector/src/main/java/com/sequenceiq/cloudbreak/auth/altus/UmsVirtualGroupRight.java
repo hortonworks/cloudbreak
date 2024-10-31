@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
-
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
@@ -16,7 +14,7 @@ public enum UmsVirtualGroupRight {
     NIFI_REGISTRY_ADMIN("datahub/adminNiFiRegistry"),
     EFM_ADMIN("datahub/adminEfm"),
     HBASE_ADMIN("datahub/adminHBase"),
-    ALLOW_PRIVILEGED_OS_OPERATIONS("environments/allowPrivilegedOSOperations", CDP_ENVIRONMENT_PRIVILEGED_USER);
+    ALLOW_PRIVILEGED_OS_OPERATIONS("environments/allowPrivilegedOSOperations");
 
     private final String right;
 

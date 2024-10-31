@@ -137,9 +137,6 @@ class EntitlementServiceTest {
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, false},
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true},
 
-                {"CDP_ENVIRONMENT_PRIVILEGED_USER", (EntitlementCheckFunction) EntitlementService::isEnvironmentPrivilegedUserEnabled, false},
-                {"CDP_ENVIRONMENT_PRIVILEGED_USER", (EntitlementCheckFunction) EntitlementService::isEnvironmentPrivilegedUserEnabled, true},
-
                 {"WORKLOAD_IAM_SYNC", (EntitlementCheckFunction) EntitlementService::isWorkloadIamSyncEnabled, false},
                 {"WORKLOAD_IAM_SYNC", (EntitlementCheckFunction) EntitlementService::isWorkloadIamSyncEnabled, true},
 

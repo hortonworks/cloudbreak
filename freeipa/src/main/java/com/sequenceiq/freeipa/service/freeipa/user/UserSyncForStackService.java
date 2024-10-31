@@ -80,22 +80,8 @@ public class UserSyncForStackService {
 
             if (options.isFullSync()) {
                 // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
-                if (entitlementService.cloudIdentityMappingEnabled(stack.accountId())) {
-                    LOGGER.debug("Starting {} ...", SYNC_CLOUD_IDENTITIES);
-                    cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
-                    LOGGER.debug("Finished {}.", SYNC_CLOUD_IDENTITIES);
-                }
-
-                if (entitlementService.isEnvironmentPrivilegedUserEnabled(stack.accountId())) {
-                    LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
-                    try {
-                        sudoRuleService.setupSudoRule(stack, freeIpaClient);
-                    } catch (Exception e) {
-                        warnings.put(stack.environmentCrn(), e.getMessage());
-                        LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.environmentCrn(), e);
-                    }
-                    LOGGER.debug("Finished {}.", ADD_SUDO_RULES);
-                }
+                syncCloudEntities(stack, umsUsersState, warnings);
+                addSudoRules(stack, freeIpaClient, warnings);
             }
 
             SyncStatusDetail syncStatusDetail = toSyncStatusDetail(environmentCrn, warnings);
@@ -111,6 +97,25 @@ public class UserSyncForStackService {
             LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage(), warnings);
         }
+    }
+
+    private void syncCloudEntities(StackUserSyncView stack, UmsUsersState umsUsersState, Multimap<String, String> warnings) {
+        if (entitlementService.cloudIdentityMappingEnabled(stack.accountId())) {
+            LOGGER.debug("Starting {} ...", SYNC_CLOUD_IDENTITIES);
+            cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
+            LOGGER.debug("Finished {}.", SYNC_CLOUD_IDENTITIES);
+        }
+    }
+
+    private void addSudoRules(StackUserSyncView stack, FreeIpaClient freeIpaClient, Multimap<String, String> warnings) {
+        LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
+        try {
+            sudoRuleService.setupSudoRule(stack, freeIpaClient);
+        } catch (Exception e) {
+            warnings.put(stack.environmentCrn(), e.getMessage());
+            LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.environmentCrn(), e);
+        }
+        LOGGER.debug("Finished {}.", ADD_SUDO_RULES);
     }
 
     private void logLargeGroupMembershipSizes(String envCrn, UmsUsersState umsUsersState, UserSyncOptions options) {

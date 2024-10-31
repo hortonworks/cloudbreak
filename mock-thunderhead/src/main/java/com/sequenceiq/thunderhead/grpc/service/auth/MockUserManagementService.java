@@ -47,7 +47,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
@@ -427,9 +426,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.upgrade.skip.rolling.upgrade.validation}")
     private boolean skipRollingUpgradeValidationEnabled;
-
-    @Value("${auth.mock.freeipa.privileged.user.enable}")
-    private boolean enablePrivilegedUser;
 
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
@@ -934,9 +930,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (skipRollingUpgradeValidationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_SKIP_ROLLING_UPGRADE_VALIDATION));
-        }
-        if (enablePrivilegedUser) {
-            builder.addEntitlements(createEntitlement(CDP_ENVIRONMENT_PRIVILEGED_USER));
         }
         if (enableWorkloadIamSync) {
             builder.addEntitlements(createEntitlement(WORKLOAD_IAM_SYNC));

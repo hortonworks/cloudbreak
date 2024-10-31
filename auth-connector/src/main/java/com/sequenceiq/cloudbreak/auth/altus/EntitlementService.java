@@ -48,7 +48,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
@@ -390,10 +389,6 @@ public class EntitlementService {
 
     public boolean isSkipRollingUpgradeValidationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_SKIP_ROLLING_UPGRADE_VALIDATION);
-    }
-
-    public boolean isEnvironmentPrivilegedUserEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_ENVIRONMENT_PRIVILEGED_USER);
     }
 
     public boolean isComputeMonitoringEnabled(String accountId) {

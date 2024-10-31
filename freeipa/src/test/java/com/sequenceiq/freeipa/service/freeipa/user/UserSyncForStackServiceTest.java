@@ -114,7 +114,6 @@ class UserSyncForStackServiceTest {
         when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
                 .thenReturn(usersStateDifference);
         when(entitlementService.cloudIdentityMappingEnabled(ACCOUNT)).thenReturn(TRUE);
-        when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT)).thenReturn(TRUE);
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
@@ -145,7 +144,6 @@ class UserSyncForStackServiceTest {
         when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
                 .thenReturn(usersStateDifference);
         when(entitlementService.cloudIdentityMappingEnabled(ACCOUNT)).thenReturn(TRUE);
-        when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT)).thenReturn(TRUE);
         doThrow(new Exception(ERROR_MESSAGE)).when(sudoRuleService).setupSudoRule(STACK, FREE_IPA_CLIENT);
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
@@ -177,7 +175,6 @@ class UserSyncForStackServiceTest {
                 .thenReturn(usersStateDifference);
         when(userStateDifferenceCalculator.usersStateDifferenceChanged(any(), any())).thenReturn(TRUE);
         when(entitlementService.cloudIdentityMappingEnabled(ACCOUNT)).thenReturn(TRUE);
-        when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT)).thenReturn(TRUE);
         doAnswer(invocation -> {
             Multimap<String, String> warnings = invocation.getArgument(2, Multimap.class);
             warnings.put(ENV_CRN, "failed");

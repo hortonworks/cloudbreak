@@ -51,22 +51,16 @@ public class PostUserSyncService extends AbstractUserSyncTaskRunner {
 
     protected void asyncRunTask(String operationId, String accountId, Stack stack) {
         Future<?> task = usersyncExternalTaskExecutor.submit(() -> {
-            if (entitlementService.isEnvironmentPrivilegedUserEnabled(stack.getAccountId())) {
-                LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
-                try {
-                    FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-                    sudoRuleService.setupSudoRule(syncViewConverter.convert(stack), freeIpaClient);
-                    operationService.completeOperation(accountId, operationId, List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
-                } catch (Exception e) {
-                    LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.getEnvironmentCrn(), e);
-                    operationService.failOperation(accountId, operationId, ADD_SUDO_RULES + " failed for environment with " + e.getMessage());
-                }
-                LOGGER.debug("Finished {}.", ADD_SUDO_RULES);
-            } else {
-                LOGGER.debug("Nothing to do for environment {}", stack.getEnvironmentCrn());
+            LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
+            try {
+                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+                sudoRuleService.setupSudoRule(syncViewConverter.convert(stack), freeIpaClient);
                 operationService.completeOperation(accountId, operationId, List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
+            } catch (Exception e) {
+                LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.getEnvironmentCrn(), e);
+                operationService.failOperation(accountId, operationId, ADD_SUDO_RULES + " failed for environment with " + e.getMessage());
             }
-
+            LOGGER.debug("Finished {}.", ADD_SUDO_RULES);
         });
         timeoutTaskScheduler.scheduleTimeoutTask(operationId, accountId, task, getOperationTimeout());
     }

@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -79,14 +78,13 @@ class PostUserSyncServiceTest {
     }
 
     @Test
-    public void testSchedulingEntitlementPresent() throws Exception {
+    public void testSchedulingSuccess() throws Exception {
         Future<Void> task = mock(Future.class);
         doAnswer(inv -> {
             Runnable runnable = inv.getArgument(0, Runnable.class);
             runnable.run();
             return task;
         }).when(usersyncExternalTaskExecutor).submit(any(Runnable.class));
-        when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT_ID)).thenReturn(true);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
@@ -99,14 +97,13 @@ class PostUserSyncServiceTest {
     }
 
     @Test
-    public void testSchedulingEntitlementPresentSudoFails() throws Exception {
+    public void testSchedulingFailure() throws Exception {
         Future<Void> task = mock(Future.class);
         doAnswer(inv -> {
             Runnable runnable = inv.getArgument(0, Runnable.class);
             runnable.run();
             return task;
         }).when(usersyncExternalTaskExecutor).submit(any(Runnable.class));
-        when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT_ID)).thenReturn(true);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
         doThrow(FreeIpaClientException.class).when(sudoRuleService).setupSudoRule(syncView, freeIpaClient);
@@ -116,24 +113,6 @@ class PostUserSyncServiceTest {
 
         verify(operationService).failOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), anyString());
         verify(timeoutTaskScheduler).scheduleTimeoutTask(OPERATION_ID, ACCOUNT_ID, task, TIMEOUT);
-    }
-
-    @Test
-    public void testSchedulingEntitlementMissing() {
-        Future<Void> task = mock(Future.class);
-        doAnswer(inv -> {
-            Runnable runnable = inv.getArgument(0, Runnable.class);
-            runnable.run();
-            return task;
-        }).when(usersyncExternalTaskExecutor).submit(any(Runnable.class));
-        when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT_ID)).thenReturn(false);
-        ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
-
-        underTest.asyncRunTask(OPERATION_ID, ACCOUNT_ID, stack);
-
-        verify(operationService).completeOperation(ACCOUNT_ID, OPERATION_ID, List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
-        verify(timeoutTaskScheduler).scheduleTimeoutTask(OPERATION_ID, ACCOUNT_ID, task, TIMEOUT);
-        verifyNoInteractions(sudoRuleService);
     }
 
 }
