@@ -420,6 +420,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         initiateEnvironmentCreation(testContext);
         initiateDatalakeCreationWithAutoTlsAndExternalDb(testContext);
         waitForEnvironmentCreation(testContext);
+        setFreeIpaResponse(testContext);
         waitForUserSync(testContext);
         setFreeIpaResponse(testContext);
         waitForDatalakeCreation(testContext);

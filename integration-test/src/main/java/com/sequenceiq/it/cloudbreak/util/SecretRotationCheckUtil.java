@@ -1,8 +1,12 @@
 package com.sequenceiq.it.cloudbreak.util;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -12,15 +16,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSaltPasswordActions;
 
 @Component
 public class SecretRotationCheckUtil {
@@ -34,11 +44,18 @@ public class SecretRotationCheckUtil {
             "export LDAP_URL=$(sudo grep \"LDAP_URL\" /etc/cloudera-scm-server/cm.settings | awk '{print $3;}') && " +
             "ldapsearch -LLL -H $LDAP_URL -D $LDAP_BIND_DN -w $LDAP_BIND_PW -b $LDAP_USER_SEARCH_BASE -z1";
 
+    private static final LocalDate PAST_DATE = LocalDate.now().minusMonths(1);
+
+    private static final AtomicReference<String> SHADOW_LINE_REFERENCE = new AtomicReference<>();
+
     @Inject
     private SshJClientActions sshJClientActions;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private SshSaltPasswordActions sshSaltPasswordActions;
 
     public void checkLdapLogin(String datalakeCrn, SdxClient client) {
         checkLdapLogin(getInstanceGroupResponses(datalakeCrn, client));
@@ -102,5 +119,75 @@ public class SecretRotationCheckUtil {
                 .stackV4Endpoint()
                 .get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(), testContext.getActingUserCrn().getAccountId())
                 .getInstanceGroups();
+    }
+
+    public FreeIpaTestDto preSaltPasswordRotation(FreeIpaTestDto testDto) {
+        Set<String> ipAddresses = getFreeipaIpAddresses(testDto);
+        return preSaltPasswordRotation(testDto, ipAddresses);
+    }
+
+    public SdxInternalTestDto preSaltPasswordRotation(SdxInternalTestDto testDto) {
+        Set<String> ipAddresses = getSdxIpAddresses(testDto);
+        return preSaltPasswordRotation(testDto, ipAddresses);
+    }
+
+    public DistroXTestDto preSaltPasswordRotation(DistroXTestDto testDto) {
+        Set<String> ipAddresses = getDistroXIpAddresses(testDto);
+        return preSaltPasswordRotation(testDto, ipAddresses);
+    }
+
+    private <T> T preSaltPasswordRotation(T testDto, Set<String> ipAddresses) {
+        sshSaltPasswordActions.setPasswordChangeDate(ipAddresses, PAST_DATE);
+        SHADOW_LINE_REFERENCE.set(sshSaltPasswordActions.getShadowLine(ipAddresses));
+        return testDto;
+    }
+
+    public FreeIpaTestDto validateSaltPasswordRotation(FreeIpaTestDto testDto) {
+        Set<String> ipAddresses = getFreeipaIpAddresses(testDto);
+        return validateSaltPasswordRotation(testDto, ipAddresses);
+    }
+
+    public SdxInternalTestDto validateSaltPasswordRotation(SdxInternalTestDto testDto) {
+        Set<String> ipAddresses = getSdxIpAddresses(testDto);
+        return validateSaltPasswordRotation(testDto, ipAddresses);
+    }
+
+    public DistroXTestDto validateSaltPasswordRotation(DistroXTestDto testDto) {
+        Set<String> ipAddresses = getDistroXIpAddresses(testDto);
+        return validateSaltPasswordRotation(testDto, ipAddresses);
+    }
+
+    private <T> T validateSaltPasswordRotation(T testDto, Set<String> ipAddresses) {
+        String shadowLine = sshSaltPasswordActions.getShadowLine(ipAddresses);
+        if (shadowLine.equals(SHADOW_LINE_REFERENCE.get())) {
+            throw new TestFailException("Saltuser shadow line was not changed after password rotation");
+        }
+        SHADOW_LINE_REFERENCE.set("");
+
+        LocalDate passwordChange = sshSaltPasswordActions.getPasswordChangeDate(ipAddresses);
+        if (!passwordChange.isEqual(LocalDate.now())) {
+            throw new TestFailException("Saltuser password change date was not modified to today after password rotation");
+        }
+        return testDto;
+    }
+
+    private Set<String> getFreeipaIpAddresses(FreeIpaTestDto testDto) {
+        return testDto.getResponse().getFreeIpa().getServerIp();
+    }
+
+    private Set<String> getSdxIpAddresses(SdxInternalTestDto testDto) {
+        return getStackIpAddresses(testDto.getResponse().getStackV4Response());
+    }
+
+    private Set<String> getDistroXIpAddresses(DistroXTestDto testDto) {
+        return getStackIpAddresses(testDto.getResponse());
+    }
+
+    private Set<String> getStackIpAddresses(StackV4Response stack) {
+        return stack.getInstanceGroups().stream()
+                .filter(ig -> ig.getType().equals(InstanceGroupType.GATEWAY))
+                .flatMap(ig -> ig.getMetadata().stream())
+                .map(InstanceMetaDataV4Response::getPrivateIp)
+                .collect(Collectors.toSet());
     }
 }

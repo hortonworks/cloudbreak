@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRotationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -87,22 +88,30 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     .withPublicKey(commonCloudProperties().getRotationSshPublicKey())
                     .given(EnvironmentTestDto.class)
                     .when(environmentTestClient.changeAuthentication())
+                    .given(FreeIpaTestDto.class)
+                    .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
                     .given(FreeIpaRotationTestDto.class)
-                    .withSecrets(List.of(FreeIpaSecretType.USER_KEYPAIR))
+                        .withSecrets(List.of(FreeIpaSecretType.USER_KEYPAIR, FreeIpaSecretType.SALT_PASSWORD))
                     .when(freeIpaTestClient.rotateSecret())
                     .awaitForFlow()
+                    .given(FreeIpaTestDto.class)
+                    .then((tc, testDto, client) -> secretRotationCheckUtil.validateSaltPasswordRotation(testDto))
                     .given(SdxInternalTestDto.class)
-                    .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.USER_KEYPAIR)))
+                    .then((testContext1, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
+                    .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.USER_KEYPAIR, DatalakeSecretType.SALT_PASSWORD)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
+                        secretRotationCheckUtil.validateSaltPasswordRotation(testDto);
                         return testDto;
                     })
                     .given(DistroXTestDto.class)
-                    .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.USER_KEYPAIR)))
+                    .then((tc, testDto, client) -> secretRotationCheckUtil.preSaltPasswordRotation(testDto))
+                    .when(distroXTestClient.rotateSecret(Set.of(CloudbreakSecretType.USER_KEYPAIR, CloudbreakSecretType.SALT_PASSWORD)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
                         secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);
+                        secretRotationCheckUtil.validateSaltPasswordRotation(testDto);
                         return testDto;
                     })
                     .validate();
