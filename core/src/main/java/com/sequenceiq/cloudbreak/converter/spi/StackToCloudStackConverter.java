@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -185,8 +186,11 @@ public class StackToCloudStackConverter {
         if (diskUpdateRequest != null && diskUpdateRequest.getDiskType().equals(DiskType.ROOT_DISK)) {
             for (Group group : instanceGroups) {
                 if (group.getName().equals(diskUpdateRequest.getGroup())) {
-                    group.setRootVolumeSize(diskUpdateRequest.getSize());
-                    group.setRootVolumeType(diskUpdateRequest.getVolumeType());
+                    int rootVolumeSize = diskUpdateRequest.getSize() > defaultRootVolumeSizeProvider.getForPlatform(stack.getCloudPlatform()) ?
+                            diskUpdateRequest.getSize() : group.getRootVolumeSize();
+                    group.setRootVolumeSize(rootVolumeSize);
+                    String volumeType = StringUtils.defaultIfEmpty(diskUpdateRequest.getVolumeType(), null);
+                    group.setRootVolumeType(volumeType);
                 }
             }
         }
