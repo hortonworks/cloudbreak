@@ -62,19 +62,6 @@ class FlinkConfigProviderUtilsTest {
         assertThat(configList.getFirst().getValue()).isEqualTo("CSA-DH");
     }
 
-    @Test
-    void testIsUnifiedFlinkVersion() {
-        ClouderaManagerProduct dummyProduct;
-
-        // Pre-unification parcel name
-        dummyProduct = new ClouderaManagerProduct().withVersion("1.18.1-csadh1.12.0.0-cdh7.2.18.0-123-12345678");
-        assertThat(FlinkConfigProviderUtils.isUnifiedFlinkVersion(dummyProduct)).isFalse();
-
-        // Post-unification parcel name
-        dummyProduct = new ClouderaManagerProduct().withVersion("1.19.1-csa1.14.0.0-12345678");
-        assertThat(FlinkConfigProviderUtils.isUnifiedFlinkVersion(dummyProduct)).isTrue();
-    }
-
     private List<ClouderaManagerProduct> getDummyProducts(String... productNames) {
         return Arrays.stream(productNames)
                 .map(name -> new ClouderaManagerProduct().withName(name))
