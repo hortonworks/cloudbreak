@@ -113,4 +113,9 @@ public class FreeIpaModelDescriptions {
         public static final String FREEIPA_HOST = "A DNS load balanced FQDN to the FreeIPA servers";
         public static final String FREEIPA_PORT = "The port for the load balanced FQDN to the FreeIPA servers";
     }
+
+    public static class FreeIpaImageSecurityModelDescriptions {
+        public static final String IMAGE_SECURITY = "FreeIpa image security settings.";
+        public static final String SELINUX_POLICY = "SELinux policy enabled on the image.";
+    }
 }

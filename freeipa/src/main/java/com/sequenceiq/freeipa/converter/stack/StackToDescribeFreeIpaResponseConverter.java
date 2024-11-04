@@ -15,11 +15,13 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.common.model.SeLinuxPolicy;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.SecurityResponse;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationToStackAuthenticationResponseConverter;
 import com.sequenceiq.freeipa.converter.freeipa.FreeIpaToFreeIpaServerResponseConverter;
 import com.sequenceiq.freeipa.converter.image.ImageToImageSettingsResponseConverter;
@@ -95,7 +97,18 @@ public class StackToDescribeFreeIpaResponseConverter {
         decorateWithCloudStorageAndTelemetry(stack, describeFreeIpaResponse);
         userSyncStatus.ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u, stack.getEnvironmentCrn())));
         describeFreeIpaResponse.setSupportedImdsVersion(stack.getSupportedImdsVersion());
+        describeFreeIpaResponse.setSecurity(getSecurity(stack));
         return describeFreeIpaResponse;
+    }
+
+    private SecurityResponse getSecurity(Stack stack) {
+        SecurityResponse securityResponse = new SecurityResponse();
+        if (stack.getSecurityConfig() != null) {
+            securityResponse.setSeLinuxPolicy(stack.getSecurityConfig().getSeLinuxPolicy().name());
+        } else {
+            securityResponse.setSeLinuxPolicy(SeLinuxPolicy.PERMISSIVE.name());
+        }
+        return securityResponse;
     }
 
     private void decorateFreeIpaServerResponseWithIps(FreeIpaServerResponse freeIpa, List<InstanceGroupResponse> instanceGroups) {

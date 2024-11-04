@@ -35,9 +35,7 @@ public class TlsSecurityService {
     @Inject
     private ClusterProxyService clusterProxyService;
 
-    public SecurityConfig generateSecurityKeys(String accountId) {
-        SecurityConfig securityConfig = new SecurityConfig();
-        securityConfig.setAccountId(accountId);
+    public SecurityConfig generateSecurityKeys(String accountId, SecurityConfig securityConfig) {
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setAccountId(accountId);
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);

@@ -119,7 +119,7 @@ class CreateUserDataHandlerTest {
 
         underTest.accept(new Event<>(new CreateUserDataRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
 
-        verify(securityConfigService).createIfDoesntExists(STACK_ID);
+        verify(securityConfigService).initSaltSecurityConfigs(STACK_ID);
         verify(userDataService).createUserData(STACK_ID);
         verify(userdataSecretsService).createUserdataSecrets(stack, List.of(2L), CLOUD_CONTEXT, CLOUD_CREDENTIAL);
         verify(userdataSecretsService).assignSecretsToInstances(stack, List.of(r), List.of(imd2));
@@ -147,7 +147,7 @@ class CreateUserDataHandlerTest {
     @Test
     void testAcceptFailure() throws TransactionService.TransactionExecutionException {
         Exception exception = new RuntimeException("asdf");
-        doThrow(exception).when(securityConfigService).createIfDoesntExists(STACK_ID);
+        doThrow(exception).when(securityConfigService).initSaltSecurityConfigs(STACK_ID);
 
         underTest.accept(new Event<>(new CreateUserDataRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL)));
 

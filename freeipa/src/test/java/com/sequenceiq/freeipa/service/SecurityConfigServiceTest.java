@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,33 +81,30 @@ class SecurityConfigServiceTest {
         stack.setAccountId("accountId");
         when(stackService.getStackById(2L)).thenReturn(stack);
         SecurityConfig securityConfig = new SecurityConfig();
-        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
-        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
-        when(tlsSecurityService.generateSecurityKeys(stack.getAccountId())).thenReturn(securityConfig);
+        stack.setSecurityConfig(securityConfig);
+        when(tlsSecurityService.generateSecurityKeys(stack.getAccountId(), securityConfig)).thenReturn(securityConfig);
         when(securityConfigRepository.save(securityConfig)).thenAnswer(invocation -> invocation.getArgument(0, SecurityConfig.class));
         doAnswer(invocation -> {
             invocation.getArgument(0, Runnable.class).run();
             return null;
         }).when(transactionService).required(any(Runnable.class));
 
-        underTest.createIfDoesntExists(2L);
+        underTest.initSaltSecurityConfigs(2L);
 
-        ArgumentCaptor<Stack> stackArgumentCaptor = ArgumentCaptor.forClass(Stack.class);
-        verify(stackService).save(stackArgumentCaptor.capture());
-        Stack savedStack = stackArgumentCaptor.getValue();
-        assertEquals(stack, savedStack);
-        assertEquals(securityConfig, savedStack.getSecurityConfig());
-        verify(saltSecurityConfigRepository).save(saltSecurityConfig);
+        verify(saltSecurityConfigRepository).save(securityConfig.getSaltSecurityConfig());
+        verify(securityConfigRepository).save(securityConfig);
     }
 
     @Test
     void testCreateConfigAlreadyExists() throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setAccountId("accountId");
-        stack.setSecurityConfig(new SecurityConfig());
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSaltSecurityConfig(new SaltSecurityConfig());
+        stack.setSecurityConfig(securityConfig);
         when(stackService.getStackById(2L)).thenReturn(stack);
 
-        underTest.createIfDoesntExists(2L);
+        underTest.initSaltSecurityConfigs(2L);
 
         verifyNoInteractions(tlsSecurityService, securityConfigRepository);
     }

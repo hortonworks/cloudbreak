@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.common.model.SeLinuxPolicy;
+import com.sequenceiq.freeipa.entity.util.SeLinuxPolicyConverter;
 
 @Entity
 public class SecurityConfig implements AccountIdAwareResource {
@@ -38,6 +40,10 @@ public class SecurityConfig implements AccountIdAwareResource {
     private boolean usePrivateIpToTls;
 
     private String accountId;
+
+    @Convert(converter = SeLinuxPolicyConverter.class)
+    @Column(name = "selinux_policy")
+    private SeLinuxPolicy seLinuxPolicy;
 
     public Long getId() {
         return id;
@@ -105,6 +111,14 @@ public class SecurityConfig implements AccountIdAwareResource {
         this.accountId = accountId;
     }
 
+    public SeLinuxPolicy getSeLinuxPolicy() {
+        return seLinuxPolicy;
+    }
+
+    public void setSeLinuxPolicy(SeLinuxPolicy seLinuxPolicy) {
+        this.seLinuxPolicy = seLinuxPolicy;
+    }
+
     @Override
     public String toString() {
         return "SecurityConfig{" +
@@ -113,6 +127,7 @@ public class SecurityConfig implements AccountIdAwareResource {
                 ", clientCertVault=" + clientCertVault +
                 ", saltSecurityConfig=" + saltSecurityConfig +
                 ", usePrivateIpToTls=" + usePrivateIpToTls +
+                ", seLinuxPolicy=" + seLinuxPolicy +
                 ", accountId='" + accountId + '\'' +
                 '}';
     }

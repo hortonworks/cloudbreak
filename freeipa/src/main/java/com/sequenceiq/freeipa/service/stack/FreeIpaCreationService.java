@@ -50,6 +50,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.BackupClusterType;
@@ -130,6 +131,9 @@ public class FreeIpaCreationService {
     @Inject
     private ImageConverter imageConverter;
 
+    @Inject
+    private SecurityConfigService securityConfigService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -168,6 +172,7 @@ public class FreeIpaCreationService {
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 Stack savedStack = stackService.save(stack);
+                securityConfigService.createIfDoesntExists(stack, request.getSecurity());
                 freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
                 freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
                 ImageSettingsRequest imageSettingsRequest = request.getImage();

@@ -102,6 +102,9 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     @Schema(description = FreeIpaModelDescriptions.MULTIAZ)
     private Boolean enableMultiAz;
 
+    @Schema(description = FreeIpaModelDescriptions.FreeIpaImageSecurityModelDescriptions.IMAGE_SECURITY)
+    private SecurityRequest security;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -243,6 +246,14 @@ public class CreateFreeIpaRequest implements TaggableRequest {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public SecurityRequest getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(SecurityRequest security) {
+        this.security = security;
+    }
+
     @Override
     public String toString() {
         return "CreateFreeIpaRequest{" +
@@ -263,6 +274,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
                 ", tunnel=" + tunnel +
                 ", enableMultiAz=" + enableMultiAz +
                 ", variant='" + variant + '\'' +
+                ", security='" + security + '\'' +
                 '}';
     }
 

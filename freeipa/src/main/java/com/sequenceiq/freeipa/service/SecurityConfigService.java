@@ -12,12 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.common.model.SeLinuxPolicy;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.SecurityRequest;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.SaltSecurityConfigRepository;
 import com.sequenceiq.freeipa.repository.SecurityConfigRepository;
 import com.sequenceiq.freeipa.service.stack.StackService;
+
+import io.micrometer.common.util.StringUtils;
 
 @Service
 public class SecurityConfigService {
@@ -47,17 +51,34 @@ public class SecurityConfigService {
         return securityConfigRepository.findOneByStackId(stack.getId());
     }
 
-    public void createIfDoesntExists(Long stackId) throws TransactionExecutionException {
+    public SecurityConfig createIfDoesntExists(Stack stack, SecurityRequest securityRequest) {
+        String seLinuxPolicyAsString = (securityRequest != null && StringUtils.isNotBlank(securityRequest.getSeLinuxPolicy())) ?
+                securityRequest.getSeLinuxPolicy() : SeLinuxPolicy.PERMISSIVE.name();
+        SeLinuxPolicy seLinuxPolicy = SeLinuxPolicy.fromString(seLinuxPolicyAsString);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setAccountId(stack.getAccountId());
+        securityConfig.setSeLinuxPolicy(seLinuxPolicy);
+        SecurityConfig savedSecurityConfig = securityConfigRepository.save(securityConfig);
+        stack.setSecurityConfig(savedSecurityConfig);
+        stackService.save(stack);
+
+        return securityConfig;
+    }
+
+    public void initSaltSecurityConfigs(Long stackId) throws TransactionExecutionException {
         Stack stack = stackService.getStackById(stackId);
-        if (stack.getSecurityConfig() == null) {
+        if (stack.getSecurityConfig() == null || stack.getSecurityConfig().getSaltSecurityConfig() == null) {
             LOGGER.debug("Create SecurityConfig for stack {}", stack.getResourceCrn());
-            SecurityConfig securityConfig = measure(() -> tlsSecurityService.generateSecurityKeys(stack.getAccountId()), LOGGER,
+            SecurityConfig securityConfig = measure(() ->
+                            tlsSecurityService.generateSecurityKeys(stack.getAccountId(), stack.getSecurityConfig()), LOGGER,
                     "Generating security keys took {} ms for {}", stack.getName());
             transactionService.required(() -> {
                 saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
                 SecurityConfig savedSecurityConfig = securityConfigRepository.save(securityConfig);
-                stack.setSecurityConfig(savedSecurityConfig);
-                stackService.save(stack);
+                if (stack.getSecurityConfig() == null) {
+                    stack.setSecurityConfig(savedSecurityConfig);
+                    stackService.save(stack);
+                }
             });
         } else {
             LOGGER.debug("SecurityConfig for stack {} already exists", stack.getResourceCrn());

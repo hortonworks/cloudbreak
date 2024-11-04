@@ -101,6 +101,9 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.SUPPORTED_IMDS_VERSION)
     private String supportedImdsVersion;
 
+    @Schema(description = FreeIpaModelDescriptions.FreeIpaImageSecurityModelDescriptions.IMAGE_SECURITY)
+    private SecurityResponse security;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -285,6 +288,14 @@ public class DescribeFreeIpaResponse {
         this.supportedImdsVersion = supportedImdsVersion;
     }
 
+    public SecurityResponse getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(SecurityResponse security) {
+        this.security = security;
+    }
+
     @Override
     public String toString() {
         return "DescribeFreeIpaResponse{" +
@@ -310,6 +321,7 @@ public class DescribeFreeIpaResponse {
                 ", recipes=" + recipes +
                 ", enableMultiAz=" + enableMultiAz +
                 ", supportedImdsVersion=" + enableMultiAz +
+                ", security=" + security +
                 '}';
     }
 }

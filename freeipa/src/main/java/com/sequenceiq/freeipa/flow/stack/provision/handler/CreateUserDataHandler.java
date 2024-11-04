@@ -70,7 +70,7 @@ public class CreateUserDataHandler extends ExceptionCatcherEventHandler<CreateUs
         CloudContext cloudContext = event.getData().getCloudContext();
         CloudCredential cloudCredential = event.getData().getCloudCredential();
         try {
-            securityConfigService.createIfDoesntExists(stackId);
+            securityConfigService.initSaltSecurityConfigs(stackId);
             userDataService.createUserData(stackId);
 
             String environmentCrn = stackService.getEnvironmentCrnByStackId(stackId);
