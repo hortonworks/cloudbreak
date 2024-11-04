@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
@@ -150,12 +152,9 @@ public class ClusterUpgradeActions {
         };
     }
 
-    @Bean(name = "CLUSTER_UPGRADE_FINISHED_STATE")
-    public Action<?, ?> clusterUpgradeFinished() {
+    @Bean(name = "CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_STATE")
+    public Action<?, ?> configureManagementServicesAction() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeSuccess.class) {
-
-            @Inject
-            private StackImageService stackImageService;
 
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
@@ -164,7 +163,37 @@ public class ClusterUpgradeActions {
             }
 
             @Override
+            protected Object getFailurePayload(ClusterUpgradeSuccess payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
+                return ClusterUpgradeFailedEvent.from(payload, ex, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
+            }
+
+            @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterUpgradeContext context) {
+                return new ConfigureClusterManagerManagementServicesRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_FINISHED_STATE")
+    public Action<?, ?> clusterUpgradeFinished() {
+        return new AbstractClusterUpgradeAction<>(ConfigureClusterManagerManagementServicesSuccess.class) {
+
+            @Inject
+            private StackImageService stackImageService;
+
+            @Override
+            protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    ConfigureClusterManagerManagementServicesSuccess payload) {
+                return ClusterUpgradeContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(ClusterUpgradeContext context, ConfigureClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
                 com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetImage = getTargetImage(variables);
                 clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage.getPackageVersions(), targetImage,
@@ -181,7 +210,8 @@ public class ClusterUpgradeActions {
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeSuccess payload, Optional<ClusterUpgradeContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ConfigureClusterManagerManagementServicesSuccess payload,
+                    Optional<ClusterUpgradeContext> flowContext, Exception ex) {
                 return null;
             }
         };

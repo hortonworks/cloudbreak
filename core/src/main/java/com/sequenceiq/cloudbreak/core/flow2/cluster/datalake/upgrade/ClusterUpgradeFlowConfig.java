@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FINALIZED_EVENT;
@@ -8,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.Clus
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_MANAGER_UPGRADE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_INIT_STATE;
@@ -25,7 +28,7 @@ import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class ClusterUpgradeFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterUpgradeState, ClusterUpgradeEvent>
-    implements RetryableFlowConfiguration<ClusterUpgradeEvent> {
+        implements RetryableFlowConfiguration<ClusterUpgradeEvent> {
 
     private static final List<Transition<ClusterUpgradeState, ClusterUpgradeEvent>> TRANSITIONS =
             new Builder<ClusterUpgradeState, ClusterUpgradeEvent>()
@@ -40,8 +43,12 @@ public class ClusterUpgradeFlowConfig extends StackStatusFinalizerAbstractFlowCo
                     .from(CLUSTER_MANAGER_UPGRADE_STATE).to(CLUSTER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CLUSTER_UPGRADE_STATE).to(CLUSTER_UPGRADE_FINISHED_STATE).event(CLUSTER_UPGRADE_FINISHED_EVENT)
+                    .from(CLUSTER_UPGRADE_STATE).to(CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_STATE).event(CLUSTER_UPGRADE_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_STATE).to(CLUSTER_UPGRADE_FINISHED_STATE)
+                    .event(CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT)
+                    .failureEvent(CLUSTER_UPGRADE_CONFIGURE_MANAGEMENT_SERVICES_FAILED_EVENT)
 
                     .from(CLUSTER_UPGRADE_FINISHED_STATE).to(FINAL_STATE).event(CLUSTER_UPGRADE_FINALIZED_EVENT)
                     .defaultFailureEvent()
