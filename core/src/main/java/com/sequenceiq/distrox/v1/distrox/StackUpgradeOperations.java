@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -21,12 +20,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -38,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterSe
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -92,16 +88,6 @@ public class StackUpgradeOperations {
     public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {
         LOGGER.debug("Starting to prepare upgrade for cluster: " + nameOrCrn);
         return upgradeService.prepareClusterUpgrade(accountId, nameOrCrn, imageId);
-    }
-
-    public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, CloudbreakUser cloudbreakUser, String accountId) {
-        User user = userService.getOrCreate(cloudbreakUser);
-        if (nameOrCrn.hasName()) {
-            return upgradeService.getOsUpgradeOptionByStackNameOrCrn(accountId, nameOrCrn, user);
-        } else {
-            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
-            throw new BadRequestException("Please provide a stack name for upgrade");
-        }
     }
 
     public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {

@@ -400,6 +400,7 @@ public interface StackV4Endpoint {
     FlowIdentifier upgradeOsInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("keepVariant") Boolean keepVariant);
 
+    @Deprecated
     @GET
     @Path("{name}/check_for_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
@@ -882,9 +883,9 @@ public interface StackV4Endpoint {
     @Operation(summary = "Migrate RDS of the stack by CRN", operationId = "migrateDatabaseByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     MigrateDatabaseV1Response migrateDatabaseByCrnInternal(@PathParam("workspaceId") Long workspaceId,
-        @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-        @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
-        @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("internal/crn/{crn}/validate_rotate_rds_certificate")

@@ -322,8 +322,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public UpgradeOptionV4Response checkForOsUpgrade(Long workspaceId, String name, @AccountId String accountId) {
-        return stackUpgradeOperations.checkForOsUpgrade(NameOrCrn.ofName(name), restRequestThreadLocalService.getCloudbreakUser(),
-                ThreadBasedUserCrnProvider.getAccountId());
+        throw new UnsupportedOperationException("Please use the new upgrade endpoint with dry-run option.");
     }
 
     @Override

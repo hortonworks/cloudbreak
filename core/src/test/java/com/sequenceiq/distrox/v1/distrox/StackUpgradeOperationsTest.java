@@ -3,7 +3,6 @@ package com.sequenceiq.distrox.v1.distrox;
 import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -13,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-
-import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -114,27 +110,6 @@ class StackUpgradeOperationsTest {
     void testUpgradeClusterShouldCallUpgradeService() {
         underTest.upgradeCluster(nameOrCrn, ACCOUNT_ID, IMAGE_ID, ROLLING_UPGRADE_ENABLED);
         verify(upgradeService).upgradeCluster(ACCOUNT_ID, nameOrCrn, IMAGE_ID, ROLLING_UPGRADE_ENABLED);
-    }
-
-    @Test
-    void testCheckForOsUpgradeShouldShouldCallUpgradeServiceWhenTheClusterNameIsAvailable() {
-        User user = new User();
-        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
-
-        underTest.checkForOsUpgrade(nameOrCrn, cloudbreakUser, ACCOUNT_ID);
-
-        verify(userService).getOrCreate(cloudbreakUser);
-        verify(upgradeService).getOsUpgradeOptionByStackNameOrCrn(ACCOUNT_ID, nameOrCrn, user);
-    }
-
-    @Test
-    void testCheckForOsUpgradeShouldThrowExceptionWhenTheClusterNameIsNotAvailable() {
-        when(userService.getOrCreate(cloudbreakUser)).thenReturn(new User());
-
-        assertThrows(BadRequestException.class, () -> underTest.checkForOsUpgrade(NameOrCrn.ofCrn("crn"), cloudbreakUser, ACCOUNT_ID));
-
-        verify(userService).getOrCreate(cloudbreakUser);
-        verifyNoInteractions(upgradeService);
     }
 
     @Test
