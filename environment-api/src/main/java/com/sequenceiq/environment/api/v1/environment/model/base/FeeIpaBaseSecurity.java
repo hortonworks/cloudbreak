@@ -1,17 +1,17 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create;
+package com.sequenceiq.environment.api.v1.environment.model.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
+import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "BaseSecurity")
+@Schema(name = "FeeIpaBaseSecurity")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public abstract class BaseSecurity {
+public abstract class FeeIpaBaseSecurity {
 
-    @Schema(description = FreeIpaModelDescriptions.FreeIpaImageSecurityModelDescriptions.SELINUX)
+    @Schema(description = EnvironmentModelDescription.SELINUX)
     private String seLinux;
 
     public String getSeLinux() {
@@ -24,7 +24,7 @@ public abstract class BaseSecurity {
 
     @Override
     public String toString() {
-        return "CreateFreeIpaRequest.BaseSecurity{" +
+        return "FeeIpaBaseSecurity{" +
                 "seLinux='" + seLinux.toString() + '\'' +
                 '}';
     }

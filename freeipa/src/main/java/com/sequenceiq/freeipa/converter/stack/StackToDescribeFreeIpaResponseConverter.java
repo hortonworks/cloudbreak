@@ -15,7 +15,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
-import com.sequenceiq.common.model.SeLinuxPolicy;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -31,6 +31,7 @@ import com.sequenceiq.freeipa.converter.telemetry.TelemetryConverter;
 import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
+import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
@@ -103,10 +104,11 @@ public class StackToDescribeFreeIpaResponseConverter {
 
     private SecurityResponse getSecurity(Stack stack) {
         SecurityResponse securityResponse = new SecurityResponse();
-        if (stack.getSecurityConfig() != null) {
-            securityResponse.setSeLinuxPolicy(stack.getSecurityConfig().getSeLinuxPolicy().name());
+        SecurityConfig securityConfig = stack.getSecurityConfig();
+        if (securityConfig != null && securityConfig.getSeLinux() != null) {
+            securityResponse.setSeLinux(securityConfig.getSeLinux().name());
         } else {
-            securityResponse.setSeLinuxPolicy(SeLinuxPolicy.PERMISSIVE.name());
+            securityResponse.setSeLinux(SeLinux.PERMISSIVE.name());
         }
         return securityResponse;
     }

@@ -53,6 +53,7 @@ import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
@@ -923,6 +924,7 @@ public class StackRequestManifesterTest {
         sdxCluster.setClusterName("sdxName");
         sdxCluster.setEnvCrn("envcrn");
         sdxCluster.setEnableMultiAz(multiAz);
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         return sdxCluster;
     }
 

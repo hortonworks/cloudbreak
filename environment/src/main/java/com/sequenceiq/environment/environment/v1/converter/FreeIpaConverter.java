@@ -16,12 +16,14 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaImageResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaSecurityResponse;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -52,9 +54,17 @@ public class FreeIpaConverter {
                     .ifPresent(response::setAws);
             response.setImage(convertImage(freeIpaCreation.getImageCatalog(), freeIpaCreation.getImageId(), freeIpaCreation.getImageOs()));
             response.setEnableMultiAz(freeIpaCreation.isEnableMultiAz());
+            response.setSecurity(convertSecurity(freeIpaCreation));
             response.setRecipes(freeIpaCreation.getRecipes());
             return response;
         }
+    }
+
+    private FreeIpaSecurityResponse convertSecurity(FreeIpaCreationDto freeIpaCreation) {
+        FreeIpaSecurityResponse freeIpaSecurityResponse = new FreeIpaSecurityResponse();
+        SeLinux seLinux = freeIpaCreation.getSeLinux();
+        freeIpaSecurityResponse.setSeLinux(seLinux == null ? SeLinux.PERMISSIVE.name() : freeIpaCreation.getSeLinux().name());
+        return freeIpaSecurityResponse;
     }
 
     private AwsFreeIpaParameters convertAws(FreeIpaCreationAwsParametersDto aws) {

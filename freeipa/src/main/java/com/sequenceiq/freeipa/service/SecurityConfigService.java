@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.common.model.SeLinuxPolicy;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.SecurityRequest;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -51,13 +51,13 @@ public class SecurityConfigService {
         return securityConfigRepository.findOneByStackId(stack.getId());
     }
 
-    public SecurityConfig createIfDoesntExists(Stack stack, SecurityRequest securityRequest) {
-        String seLinuxPolicyAsString = (securityRequest != null && StringUtils.isNotBlank(securityRequest.getSeLinuxPolicy())) ?
-                securityRequest.getSeLinuxPolicy() : SeLinuxPolicy.PERMISSIVE.name();
-        SeLinuxPolicy seLinuxPolicy = SeLinuxPolicy.fromString(seLinuxPolicyAsString);
+    public SecurityConfig create(Stack stack, SecurityRequest securityRequest) {
+        String seLinuxAsString = (securityRequest != null && StringUtils.isNotBlank(securityRequest.getSeLinux())) ?
+                securityRequest.getSeLinux() : SeLinux.PERMISSIVE.name();
+        SeLinux seLinux = SeLinux.fromStringWithFallback(seLinuxAsString);
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setAccountId(stack.getAccountId());
-        securityConfig.setSeLinuxPolicy(seLinuxPolicy);
+        securityConfig.setSeLinux(seLinux);
         SecurityConfig savedSecurityConfig = securityConfigRepository.save(securityConfig);
         stack.setSecurityConfig(savedSecurityConfig);
         stackService.save(stack);

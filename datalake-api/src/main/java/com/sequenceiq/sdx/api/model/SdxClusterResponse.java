@@ -85,6 +85,9 @@ public class SdxClusterResponse {
     @Schema(description = ModelDescriptions.DATABASE)
     private SdxDatabaseResponse sdxDatabaseResponse;
 
+    @Schema(description = ModelDescriptions.SECURITY)
+    private String seLinuxPolicy;
+
     public String getCrn() {
         return crn;
     }
@@ -273,6 +276,14 @@ public class SdxClusterResponse {
         this.rangerRmsEnabled = rangerRmsEnabled;
     }
 
+    public String getSeLinuxPolicy() {
+        return seLinuxPolicy;
+    }
+
+    public void setSeLinuxPolicy(String seLinuxPolicy) {
+        this.seLinuxPolicy = seLinuxPolicy;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -294,6 +305,7 @@ public class SdxClusterResponse {
                 ", rangerRmsEnabled=" + rangerRmsEnabled +
                 ", enableMultiAz=" + enableMultiAz +
                 ", tags=" + tags +
+                ", seLinuxPolicy=" + seLinuxPolicy +
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
                 ", detached=" + detached +

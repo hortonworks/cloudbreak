@@ -277,6 +277,7 @@ public class EnvironmentDtoConverter {
                 .withImageOs(environment.getFreeIpaImageOs())
                 .withEnableMultiAz(environment.isFreeIpaEnableMultiAz())
                 .withRecipes(environmentRecipeService.getRecipes(environment.getId()))
+                .withSeLinux(environment.getSeLinux())
                 .withAws(getFreeIpaAwsParameters(environment.getCloudPlatform(), environment.getParameters()))
                 .build();
     }

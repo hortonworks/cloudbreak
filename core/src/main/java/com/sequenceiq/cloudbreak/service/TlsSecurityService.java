@@ -74,9 +74,7 @@ public class TlsSecurityService {
     }
 
     @Measure(TlsSecurityService.class)
-    public SecurityConfig generateSecurityKeys(Workspace workspace) {
-        SecurityConfig securityConfig = new SecurityConfig();
-        securityConfig.setWorkspace(workspace);
+    public SecurityConfig generateSecurityKeys(Workspace workspace, SecurityConfig securityConfig) {
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setWorkspace(workspace);
         saltSecurityConfig.setSaltBootPassword(PasswordUtil.generatePassword());

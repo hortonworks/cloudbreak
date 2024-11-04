@@ -157,8 +157,11 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private boolean enableMultiAz;
 
-    @Schema(description = "List of resources attached to the stack")
+    @Schema(description = StackModelDescription.ATTACHED_RESOURCES)
     private List<ResourceV4Response> resources;
+
+    @Schema(description = StackModelDescription.SECURITY)
+    private SecurityV4Response security;
 
     public Long getId() {
         return id;
@@ -487,6 +490,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.region = region;
     }
 
+    public SecurityV4Response getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(SecurityV4Response security) {
+        this.security = security;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -529,6 +540,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", resources=" + resources +
                 ", supportedImdsVersion=" + supportedImdsVersion +
                 ", architecture=" + architecture +
+                ", security=" + security +
                 '}';
     }
 }

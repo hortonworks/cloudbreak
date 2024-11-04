@@ -45,6 +45,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setDatabaseServerCrn(sdxCluster.getDatabaseCrn());
         sdxClusterResponse.setRangerRazEnabled(sdxCluster.isRangerRazEnabled());
         sdxClusterResponse.setRangerRmsEnabled(sdxCluster.isRangerRmsEnabled());
+        sdxClusterResponse.setSeLinuxPolicy(sdxCluster.getSeLinux().name());
         sdxClusterResponse.setTags(getTags(sdxCluster.getTags()));
         sdxClusterResponse.setCertExpirationState(sdxCluster.getCertExpirationState());
         sdxClusterResponse.setSdxClusterServiceVersion(sdxCluster.getSdxClusterServiceVersion());

@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -65,6 +66,7 @@ class SdxClusterConverterTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         sdxCluster.setRuntime("CDH6.3");
         sdxCluster.setRangerRazEnabled(true);
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         sdxCluster.setEnableMultiAz(true);
         sdxCluster.getSdxDatabase().setDatabaseEngineVersion("9.6.20");
         sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);

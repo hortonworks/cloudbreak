@@ -172,7 +172,7 @@ public class FreeIpaCreationService {
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 Stack savedStack = stackService.save(stack);
-                securityConfigService.createIfDoesntExists(stack, request.getSecurity());
+                securityConfigService.create(stack, request.getSecurity());
                 freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
                 freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
                 ImageSettingsRequest imageSettingsRequest = request.getImage();

@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 
@@ -65,6 +66,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
 
     @Schema(description = ModelDescriptions.IMAGE_SETTINGS)
     private ImageSettingsV4Request image;
+
+    @Schema(description = ModelDescriptions.SECURITY)
+    private SecurityV4Request security;
 
     @Schema(description = ModelDescriptions.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
@@ -205,6 +209,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.disableDbSslEnforcement = disableDbSslEnforcement;
     }
 
+    public SecurityV4Request getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(SecurityV4Request security) {
+        this.security = security;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -219,6 +231,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setRecipes(recipes);
         toInstance.setImage(image);
         toInstance.setDisableDbSslEnforcement(disableDbSslEnforcement);
+        toInstance.setSecurity(security);
     }
 
     @Override
@@ -234,6 +247,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", javaVersion=" + javaVersion +
                 ", recipes=" + recipes +
                 ", image=" + image +
+                ", security=" + security +
                 ", disableDbSslEnforcement=" + disableDbSslEnforcement +
                 '}';
     }

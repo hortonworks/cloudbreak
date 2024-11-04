@@ -50,6 +50,9 @@ public class AttachedFreeIpaRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE)
     private FreeIpaImageRequest image;
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_SECURITY)
+    private FreeIpaSecurityRequest security;
+
     public Boolean getCreate() {
         return create;
     }
@@ -93,7 +96,16 @@ public class AttachedFreeIpaRequest implements Serializable {
                 ", azure=" + azure +
                 ", gcp=" + gcp +
                 ", image=" + image +
+                ", security=" + security +
                 '}';
+    }
+
+    public FreeIpaSecurityRequest getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(FreeIpaSecurityRequest security) {
+        this.security = security;
     }
 
     public AzureFreeIpaParameters getAzure() {

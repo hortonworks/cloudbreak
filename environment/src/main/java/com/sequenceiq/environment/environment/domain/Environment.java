@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -181,6 +183,10 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     @Column(name = "creator_client")
     private String creatorClient;
+
+    @Convert(converter = SeLinuxConverter.class)
+    @Column(name = "selinux")
+    private SeLinux seLinux;
 
     @Embedded
     private DefaultComputeCluster defaultComputeCluster;
@@ -626,6 +632,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.defaultComputeCluster = defaultComputeCluster;
     }
 
+    public SeLinux getSeLinux() {
+        return seLinux;
+    }
+
+    public void setSeLinux(SeLinux seLinux) {
+        this.seLinux = seLinux;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
@@ -639,6 +653,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", statusReason='" + statusReason + '\'' +
                 ", domain='" + domain + '\'' +
                 ", enableSecretEncryption=" + enableSecretEncryption +
+                ", seLinux=" + seLinux +
                 '}';
     }
 

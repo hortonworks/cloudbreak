@@ -180,7 +180,7 @@ public class UserDataServiceTest {
         Map<InstanceGroupType, String> userdataMap = Map.of(InstanceGroupType.GATEWAY, "gwUserdata", InstanceGroupType.CORE, "coreUserdata");
         when(intermediateBuilderExecutor.submit(any(Callable.class))).thenReturn(platformParametersFuture);
         when(platformParametersFuture.get()).thenReturn(platformParameters);
-        when(securityConfigService.generateAndSaveSecurityConfig(stack)).thenReturn(securityConfig);
+        when(securityConfigService.initSaltSecurityConfigs(stack)).thenReturn(securityConfig);
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         when(stack.getCloudPlatform()).thenReturn("AWS");
         when(stack.getPlatformVariant()).thenReturn("AWS");

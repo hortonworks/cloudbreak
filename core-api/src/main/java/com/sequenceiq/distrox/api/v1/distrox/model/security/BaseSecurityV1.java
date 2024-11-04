@@ -1,17 +1,17 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create;
+package com.sequenceiq.distrox.api.v1.distrox.model.security;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "BaseSecurity")
+@Schema(name = "BaseSecurityV1")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public abstract class BaseSecurity {
+public abstract class BaseSecurityV1 {
 
-    @Schema(description = FreeIpaModelDescriptions.FreeIpaImageSecurityModelDescriptions.SELINUX)
+    @Schema(description = "SELinux enabled on the image.")
     private String seLinux;
 
     public String getSeLinux() {
@@ -24,8 +24,8 @@ public abstract class BaseSecurity {
 
     @Override
     public String toString() {
-        return "CreateFreeIpaRequest.BaseSecurity{" +
-                "seLinux='" + seLinux.toString() + '\'' +
+        return "DistroXV1Request.BaseSecurityV1{" +
+                "seLinux='" + seLinux + '\'' +
                 '}';
     }
 }

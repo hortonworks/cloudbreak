@@ -120,6 +120,7 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -350,9 +351,11 @@ class SdxServiceTest {
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");
         sdxCluser.setClusterName(CLUSTER_NAME);
+        sdxCluser.setSeLinux(SeLinux.PERMISSIVE);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq("hortonworks"), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
         SdxCluster returnedSdxCluster = underTest.getByCrn(USER_CRN, ENVIRONMENT_CRN);
         assertEquals(sdxCluser, returnedSdxCluster);
+        assertEquals(SeLinux.PERMISSIVE, returnedSdxCluster.getSeLinux());
     }
 
     @Test
@@ -360,9 +363,11 @@ class SdxServiceTest {
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");
         sdxCluser.setCrn(CLUSTER_NAME);
+        sdxCluser.setSeLinux(SeLinux.ENFORCING);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
         SdxCluster returnedSdxCluster = underTest.getByCrn(ENVIRONMENT_CRN);
         assertEquals(sdxCluser, returnedSdxCluster);
+        assertEquals(SeLinux.ENFORCING, returnedSdxCluster.getSeLinux());
     }
 
     @Test
@@ -601,6 +606,7 @@ class SdxServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.17");
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
@@ -686,6 +692,7 @@ class SdxServiceTest {
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         sdxCluster.setCloudStorageBaseLocation("gcs://some/dir/");
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
@@ -808,6 +815,7 @@ class SdxServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -1017,6 +1025,7 @@ class SdxServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -1071,6 +1080,7 @@ class SdxServiceTest {
         sdxCluster.setRuntime(runtime);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
         sdxCluster.setEnableMultiAz(false);
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -1209,6 +1219,7 @@ class SdxServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
         sdxCluster.setRuntime("7.2.17");
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
@@ -1433,6 +1444,7 @@ class SdxServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.17");
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
@@ -1478,6 +1490,7 @@ class SdxServiceTest {
         resizeRequest.setCustomSdxDatabaseComputeStorage(sdxDatabaseComputeStorageRequest);
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setId(1L);
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.17");
@@ -1624,6 +1637,7 @@ class SdxServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setClusterName("dl-name");
         sdxCluster.setEnvName("env-name");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         sdxCluster.setCloudStorageBaseLocation("s3a://bucket/path");
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq("hortonworks"), eq("dl-name")))
                 .thenReturn(Optional.of(sdxCluster));
@@ -1710,6 +1724,7 @@ class SdxServiceTest {
         sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.18");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -1766,6 +1781,7 @@ class SdxServiceTest {
         sdxCluster.setClusterShape(LIGHT_DUTY);
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.18");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -1828,6 +1844,7 @@ class SdxServiceTest {
         sdxCluster.getSdxDatabase().setDatabaseCrn(null);
         sdxCluster.setRuntime("7.2.17");
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
@@ -1869,6 +1886,110 @@ class SdxServiceTest {
         sdxDatabase.setDatabaseEngineVersion("11");
         sdxDatabase.setId(1L);
         SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setRuntime("7.2.17");
+        sdxCluster.setRangerRazEnabled(true);
+        sdxCluster.setRangerRmsEnabled(false);
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
+        sdxCluster.setCloudStorageBaseLocation("s3a://cloudStorageBase/location");
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setAccountId(accountId);
+        RecipeV4Response recipeV4Response1 = new RecipeV4Response();
+        recipeV4Response1.setName("recipe1");
+        recipeV4Response1.setType(RecipeV4Type.POST_SERVICE_DEPLOYMENT);
+        RecipeV4Response recipeV4Response2 = new RecipeV4Response();
+        recipeV4Response2.setName("recipe2");
+        RecipeV4Response recipeV4Response3 = new RecipeV4Response();
+        recipeV4Response3.setName("recipe3");
+        InstanceGroupV4Response masterIg = new InstanceGroupV4Response();
+        masterIg.setName("master");
+        masterIg.setRecipes(List.of(recipeV4Response1, recipeV4Response2));
+        InstanceGroupV4Response coreIg = new InstanceGroupV4Response();
+        coreIg.setName("core");
+        coreIg.setRecipes(List.of(recipeV4Response1, recipeV4Response2, recipeV4Response3));
+        StackV4Response stackV4Response = getStackV4ResponseForEnterpriseDatalake(Map.of("tag1", "value1"),
+                List.of(masterIg, coreIg), getClusterV4Response());
+
+        String enterpriseDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.17/aws/enterprise.json");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(eq(accountId)))
+                .thenReturn(true);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam())
+                .thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq(accountId), eq(CLUSTER_NAME)))
+                .thenReturn(Optional.of(sdxCluster));
+        when(environmentClientService.getByName(eq(ENVIRONMENT_NAME)))
+                .thenReturn(detailedEnvironmentResponse);
+        when(stackV4Endpoint.get(eq(0L), eq(CLUSTER_NAME), anySet(), eq(accountId)))
+                .thenReturn(stackV4Response);
+        when(cdpConfigService.getConfigForKey(any()))
+                .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
+
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+
+        verify(sdxReactorFlowManager, times(1)).triggerSdxResize(eq(SDX_ID), sdxClusterArgumentCaptor.capture(),
+                any(DatalakeDrSkipOptions.class), eq(false));
+
+        SdxCluster createdSdxCluster = sdxClusterArgumentCaptor.getValue();
+
+        // Validate new SdxCluster
+        assertEquals(ENTERPRISE, createdSdxCluster.getClusterShape());
+        assertEquals(SeLinux.PERMISSIVE, createdSdxCluster.getSeLinux());
+        assertEquals("7.2.17", createdSdxCluster.getRuntime());
+        assertEquals(sdxCluster.getCloudStorageBaseLocation(), createdSdxCluster.getCloudStorageBaseLocation());
+        assertEquals(sdxCluster.getCloudStorageFileSystemType(), createdSdxCluster.getCloudStorageFileSystemType());
+        assertEquals(sdxCluster.getTags(), createdSdxCluster.getTags());
+
+        // Validate new StackRequest
+        String stackRequestRawString = createdSdxCluster.getStackRequest();
+        ObjectMapper mapper = new ObjectMapper();
+        StackV4Request stackV4Request = mapper.readValue(stackRequestRawString, StackV4Request.class);
+
+        assertEquals(11, stackV4Request.getJavaVersion());
+        assertEquals(CLUSTER_NAME + ENTERPRISE.getResizeSuffix(), stackV4Request.getCustomDomain().getHostname());
+        assertEquals("RHEL8", stackV4Request.getImage().getOs());
+        assertEquals("cb-default", stackV4Request.getImage().getCatalog());
+        assertEquals("random-uuid-id", stackV4Request.getImage().getId());
+        ClusterV4Request cluster = stackV4Request.getCluster();
+        assertTrue(cluster.isRangerRazEnabled());
+        assertFalse(cluster.isRangerRmsEnabled());
+        // validate recipes
+        assertAll(() -> {
+            assertEquals(11, stackV4Request.getInstanceGroups().size());
+            Map<String, List<RecipeV4Response>> hostGroupRecipesMap = stackV4Response.getInstanceGroups()
+                    .stream()
+                    .collect(toMap(InstanceGroupV4Response::getName, InstanceGroupV4Response::getRecipes));
+            assertEquals(3, hostGroupRecipesMap.get("core").size());
+            assertEquals(2, hostGroupRecipesMap.get("master").size());
+            List<String> coreRecipes = hostGroupRecipesMap.get("core").stream().map(RecipeV4Base::getName).toList();
+            List<String> masterRecipes = hostGroupRecipesMap.get("master").stream().map(RecipeV4Base::getName).toList();
+            assertTrue(coreRecipes.contains("recipe1"));
+            assertTrue(coreRecipes.contains("recipe2"));
+            assertTrue(coreRecipes.contains("recipe3"));
+            assertTrue(masterRecipes.contains("recipe1"));
+            assertTrue(masterRecipes.contains("recipe2"));
+            assertFalse(masterRecipes.contains("recipe3"));
+        });
+    }
+
+    @Test
+    void resizeMoveRecipesToNewClusterWhenSeLinuxEnforcing() throws IOException {
+        String accountId = Crn.safeFromString(USER_CRN).getAccountId();
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment(ENVIRONMENT_NAME);
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setCreateDatabase(true);
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabase.setDatabaseEngineVersion("11");
+        sdxDatabase.setId(1L);
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setSeLinux(SeLinux.ENFORCING);
         sdxCluster.setRuntime("7.2.17");
         sdxCluster.setRangerRazEnabled(true);
         sdxCluster.setRangerRmsEnabled(false);
@@ -1921,6 +2042,7 @@ class SdxServiceTest {
 
         // Validate new SdxCluster
         assertEquals(ENTERPRISE, createdSdxCluster.getClusterShape());
+        assertEquals(SeLinux.ENFORCING, createdSdxCluster.getSeLinux());
         assertEquals("7.2.17", createdSdxCluster.getRuntime());
         assertEquals(sdxCluster.getCloudStorageBaseLocation(), createdSdxCluster.getCloudStorageBaseLocation());
         assertEquals(sdxCluster.getCloudStorageFileSystemType(), createdSdxCluster.getCloudStorageFileSystemType());

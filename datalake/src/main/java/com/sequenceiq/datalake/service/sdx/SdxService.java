@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -127,6 +128,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -509,6 +511,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
         setTagsSafe(sdxClusterRequest, sdxCluster);
+        setSecurity(sdxClusterRequest, sdxCluster);
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
@@ -563,6 +566,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    private void setSecurity(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
+        if (sdxClusterRequest.getSecurity() != null && StringUtils.isNotBlank(sdxClusterRequest.getSecurity().getSeLinux())) {
+            sdxCluster.setSeLinux(SeLinux.fromStringWithFallback(sdxClusterRequest.getSecurity().getSeLinux()));
+        } else {
+            sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
+        }
     }
 
     private void overrideDbSslEnabledAttribute(SdxCluster sdxCluster, SdxClusterRequest sdxClusterRequest) {
@@ -696,7 +707,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 sdxCluster.getDatabaseEngineVersion(), Optional.ofNullable(sdxCluster.getSdxDatabase()).map(SdxDatabase::getAttributes).orElse(null)));
         StackV4Request stackRequest = getStackRequest(shape, null, cloudPlatform, sdxCluster.getRuntime(), null);
         setStackRequestParams(stackRequest, stackV4Response.getJavaVersion(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled());
-
+        setSecurityRequest(sdxCluster, stackRequest);
         setRecipesFromStackV4ResponseToStackV4Request(stackV4Response, stackRequest);
         CustomDomainSettingsV4Request customDomainSettingsV4Request = new CustomDomainSettingsV4Request();
         String azSuffix = (shape == sdxCluster.getClusterShape()) ? "-az" : "";
@@ -723,6 +734,13 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
                 sdxClusterResizeRequest.isValidationOnly());
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    private void setSecurityRequest(SdxCluster sdxCluster, StackV4Request stackRequest) {
+        SecurityV4Request securityV4Request = new SecurityV4Request();
+        SeLinux seLinux = sdxCluster.getSeLinux();
+        securityV4Request.setSeLinux(seLinux == null ? SeLinux.PERMISSIVE.name() : sdxCluster.getSeLinux().name());
+        stackRequest.setSecurity(securityV4Request);
     }
 
     private void setRecipesFromStackV4ResponseToStackV4Request(StackV4Response stackV4Response, StackV4Request stackRequest) {
@@ -870,6 +888,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setClusterName(clusterName);
         newSdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         newSdxCluster.setClusterShape(shape);
+        newSdxCluster.setSeLinux(sdxCluster.getSeLinux());
         newSdxCluster.setCreated(clock.getCurrentTimeMillis());
         newSdxCluster.setEnvName(environmentResponse.getName());
         newSdxCluster.setEnvCrn(environmentResponse.getCrn());

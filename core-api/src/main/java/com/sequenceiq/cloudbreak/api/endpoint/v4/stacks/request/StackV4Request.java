@@ -119,6 +119,9 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     @Schema(description = ModelDescriptions.Database.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
 
+    @Schema(description = StackModelDescription.SECURITY)
+    private SecurityV4Request security;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -310,5 +313,13 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setDisableDbSslEnforcement(boolean disableDbSslEnforcement) {
         this.disableDbSslEnforcement = disableDbSslEnforcement;
+    }
+
+    public SecurityV4Request getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(SecurityV4Request security) {
+        this.security = security;
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SecurityV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
@@ -182,10 +183,17 @@ public class StackToStackV4ResponseConverter {
         if (!CollectionUtils.isEmpty(response.getLoadBalancers())) {
             response.setEnableLoadBalancer(true);
         }
+        response.setSecurity(convertSecurity(stack));
         response.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         response.setArchitecture(stack.getStack().getArchitecture().getName());
         response.setRegion(stack.getRegion());
         return response;
+    }
+
+    private SecurityV4Response convertSecurity(StackDtoDelegate stack) {
+        SecurityV4Response securityV4Response = new SecurityV4Response();
+        securityV4Response.setSeLinux(stack.getSecurityConfig().getSeLinux().name());
+        return securityV4Response;
     }
 
     private List<ResourceV4Response> convertResources(Set<Resource> resourceList) {

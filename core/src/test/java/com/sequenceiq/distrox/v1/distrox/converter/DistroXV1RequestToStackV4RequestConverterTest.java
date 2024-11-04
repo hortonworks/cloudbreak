@@ -90,6 +90,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
     private TelemetryConverter telemetryConverter;
 
     @Mock
+    private SecurityV1RequestToSecurityV4RequestConverter securityV1RequestToSecurityV4RequestConverter;
+
+    @Mock
     private SdxClientService sdxClientService;
 
     @Mock

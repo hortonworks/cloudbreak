@@ -31,6 +31,9 @@ public class FreeIpaResponse implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_RECIPES)
     private Set<String> recipes = new HashSet<>();
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_SECURITY)
+    private FreeIpaSecurityResponse security;
+
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
     }
@@ -79,6 +82,14 @@ public class FreeIpaResponse implements Serializable {
         this.recipes = recipes;
     }
 
+    public FreeIpaSecurityResponse getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(FreeIpaSecurityResponse security) {
+        this.security = security;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaResponse{" +
@@ -88,6 +99,7 @@ public class FreeIpaResponse implements Serializable {
                 ", image=" + image +
                 ", enableMultiAz=" + enableMultiAz +
                 ", recipes=" + recipes +
+                ", security=" + security +
                 '}';
     }
 }

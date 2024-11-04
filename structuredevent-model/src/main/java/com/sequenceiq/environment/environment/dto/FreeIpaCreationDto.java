@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.sequenceiq.common.model.SeLinux;
 
 @JsonDeserialize(builder = FreeIpaCreationDto.Builder.class)
 public class FreeIpaCreationDto {
@@ -27,6 +28,8 @@ public class FreeIpaCreationDto {
 
     private String instanceType;
 
+    private SeLinux seLinux;
+
     private FreeIpaCreationDto(Builder builder) {
         create = builder.create;
         instanceCountByGroup = builder.instanceCountByGroup;
@@ -37,6 +40,7 @@ public class FreeIpaCreationDto {
         imageOs = builder.imageOs;
         instanceType = builder.instanceType;
         recipes = builder.recipes;
+        seLinux = builder.seLinux;
     }
 
     public void setCreate(boolean create) {
@@ -111,6 +115,14 @@ public class FreeIpaCreationDto {
         this.recipes = recipes;
     }
 
+    public SeLinux getSeLinux() {
+        return seLinux;
+    }
+
+    public void setSeLinux(SeLinux seLinux) {
+        this.seLinux = seLinux;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
@@ -118,6 +130,7 @@ public class FreeIpaCreationDto {
                 ", instanceCountByGroup=" + instanceCountByGroup +
                 ", aws=" + aws +
                 ", recipes=" + recipes +
+                ", seLinux=" + seLinux +
                 ", enableMultiAz=" + enableMultiAz +
                 ", imageCatalog='" + imageCatalog + '\'' +
                 ", imageId='" + imageId + '\'' +
@@ -148,6 +161,8 @@ public class FreeIpaCreationDto {
         private boolean enableMultiAz;
 
         private String instanceType;
+
+        private SeLinux seLinux = SeLinux.PERMISSIVE;
 
         private Set<String> recipes = Collections.emptySet();
 
@@ -200,6 +215,11 @@ public class FreeIpaCreationDto {
 
         public Builder withRecipes(Set<String> recipes) {
             this.recipes = recipes;
+            return this;
+        }
+
+        public Builder withSeLinux(SeLinux seLinux) {
+            this.seLinux = seLinux;
             return this;
         }
 

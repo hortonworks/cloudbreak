@@ -55,7 +55,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
-import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
@@ -236,15 +235,5 @@ public class CreateFreeIpaRequestToStackConverterTest {
         source.setFreeIpa(freeIpaServerRequest);
 
         return source;
-    }
-
-    EnumMap<CloudArgsForIgConverter, String> createAndGetCloudArgsForIgMap(String diskEncryptionSetId, String encryptionKey) {
-        EnumMap<CloudArgsForIgConverter, String> cloudArgsForIgConverterMap =
-                new EnumMap<>(CloudArgsForIgConverter.class);
-
-        cloudArgsForIgConverterMap.put(DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
-        cloudArgsForIgConverterMap.put(GCP_KMS_ENCRYPTION_KEY, encryptionKey);
-
-        return cloudArgsForIgConverterMap;
     }
 }

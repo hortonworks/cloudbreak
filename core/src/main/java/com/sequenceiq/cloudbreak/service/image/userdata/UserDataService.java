@@ -186,7 +186,7 @@ public class UserDataService {
         Future<PlatformParameters> platformParametersFuture =
                 intermediateBuilderExecutor.submit(() -> connector.getPlatformParameters(stack, userCrn));
 
-        SecurityConfig securityConfig = securityConfigService.generateAndSaveSecurityConfig(stack);
+        SecurityConfig securityConfig = securityConfigService.initSaltSecurityConfigs(stack);
         stack.setSecurityConfig(securityConfig);
         stackService.save(stack);
 

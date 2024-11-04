@@ -100,6 +100,8 @@ public class EnvironmentModelDescription {
     public static final String SECURITY_CIDR = "CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.";
     public static final String LOADBALANCER_CREATION = "Flag that marks the request to create without loadbalancers";
 
+    public static final String SELINUX = "SELinux enabled on the image.";
+
     public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with CCM and cluster proxy.";
     public static final String OVERRIDE_TUNNEL = "Flag that marks that the request was intended to set the tunnel version by hand and it will not be " +
             "overwritten by Cloudbreak";
@@ -158,6 +160,7 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";
     public static final String FREEIPA_AWS_SPOT_MAX_PRICE = "Max price per hour of spot instances launched in FreeIpa instance group";
     public static final String FREEIPA_IMAGE = "Image parameters for FreeIpa instance creation.";
+    public static final String FREEIPA_SECURITY = "Security parameters for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_CATALOG = "Image catalog for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";

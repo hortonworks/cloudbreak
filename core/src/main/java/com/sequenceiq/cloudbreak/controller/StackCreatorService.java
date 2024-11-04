@@ -84,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorServic
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -189,6 +190,9 @@ public class StackCreatorService {
     private EntitlementService entitlementService;
 
     @Inject
+    private SecurityConfigService securityConfigService;
+
+    @Inject
     private ImageUtil imageUtil;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
@@ -224,7 +228,6 @@ public class StackCreatorService {
         stackStub.setType(stackType);
         stackStub.setMultiAz(stackRequest.isEnableMultiAz());
         String platformString = stackStub.getCloudPlatform().toLowerCase(Locale.ROOT);
-
         measure(() -> assignOwnerRoleOnDataHub(stackType, crn),
                 LOGGER,
                 "assignOwnerRoleOnDataHub to stack took {} ms with name {}.", stackName);
@@ -276,13 +279,12 @@ public class StackCreatorService {
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
-
-
                 Stack newStack = measure(
                         () -> stackService.create(stack, imgFromCatalog, user, workspace),
                         LOGGER,
                         "Save the remaining stack data took {} ms"
                 );
+                securityConfigService.create(stack, stackRequest.getSecurity());
 
                 try {
                     LOGGER.info("Create cluster entity in the database with name {}.", stackName);

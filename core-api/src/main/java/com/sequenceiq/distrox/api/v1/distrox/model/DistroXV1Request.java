@@ -20,6 +20,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.security.SecurityV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 
@@ -66,6 +67,9 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     @Schema(description = ModelDescriptions.Database.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
+
+    @Schema(description = ModelDescriptions.StackModelDescription.SECURITY)
+    private SecurityV1Request security;
 
     public String getEnvironmentName() {
         return environmentName;
@@ -205,6 +209,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setDisableDbSslEnforcement(boolean disableDbSslEnforcement) {
         this.disableDbSslEnforcement = disableDbSslEnforcement;
+    }
+
+    public SecurityV1Request getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(SecurityV1Request security) {
+        this.security = security;
     }
 
     @JsonIgnore

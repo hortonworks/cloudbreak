@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
@@ -70,6 +71,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.Securit
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.SecurityRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
@@ -252,6 +254,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setBackup(environment, createFreeIpaRequest);
         setTags(environment, createFreeIpaRequest);
         setImage(environment, createFreeIpaRequest);
+        setSecurity(environment, createFreeIpaRequest);
 
         SecurityGroupRequest securityGroupRequest = null;
         if (environment.getSecurityAccess() != null) {
@@ -262,6 +265,13 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setVariant(environment, createFreeIpaRequest, multiAzRequired);
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;
+    }
+
+    private void setSecurity(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
+        SeLinux seLinux = environment.getFreeIpaCreation().getSeLinux();
+        SecurityRequest securityRequest = new SecurityRequest();
+        securityRequest.setSeLinux(seLinux == null ? SeLinux.PERMISSIVE.name() : seLinux.name());
+        createFreeIpaRequest.setSecurity(securityRequest);
     }
 
     private void setVariant(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest, boolean multiAzRequired) {

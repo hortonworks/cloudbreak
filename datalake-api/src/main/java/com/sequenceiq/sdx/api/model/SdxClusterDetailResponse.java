@@ -38,6 +38,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withRuntime(sdxClusterResponse.getRuntime())
                     .withRangerRazEnabled(sdxClusterResponse.getRangerRazEnabled())
                     .withRangerRmsEnabled(sdxClusterResponse.isRangerRmsEnabled())
+                    .withSeLinux(sdxClusterResponse.getSeLinuxPolicy())
                     .withTags(sdxClusterResponse.getTags())
                     .withCertExpirationState(sdxClusterResponse.getCertExpirationState())
                     .withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion())
@@ -119,6 +120,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         private String databaseEngineVersion;
 
         private SdxDatabaseAvailabilityType databaseAvailabilityType;
+
+        private String seLinux;
 
         private Builder() {
         }
@@ -207,6 +210,11 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             return this;
         }
 
+        public Builder withSeLinux(String seLinux) {
+            this.seLinux = seLinux;
+            return this;
+        }
+
         public Builder withRangerRmsEnabled(boolean rangerRmsEnabled) {
             this.rangerRmsEnabled = rangerRmsEnabled;
             return this;
@@ -270,6 +278,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             sdxClusterDetailResponse.setCertExpirationState(certExpirationState);
             sdxClusterDetailResponse.setSdxClusterServiceVersion(sdxClusterServiceVersion);
             sdxClusterDetailResponse.setDetached(detached);
+            sdxClusterDetailResponse.setSeLinuxPolicy(seLinux);
             sdxClusterDetailResponse.setDatabaseEngineVersion(databaseEngineVersion);
             SdxDatabaseResponse sdxDatabaseResponse = new SdxDatabaseResponse();
             sdxDatabaseResponse.setAvailabilityType(databaseAvailabilityType);

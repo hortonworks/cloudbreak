@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -143,6 +144,8 @@ public interface StackView extends MdcContextInfoProvider {
     String getSupportedImdsVersion();
 
     Architecture getArchitecture();
+
+    SecurityConfig getSecurityConfig();
 
     default boolean isDatalake() {
         return getType() == StackType.DATALAKE;

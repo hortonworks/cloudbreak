@@ -168,6 +168,9 @@ class EntitlementServiceTest {
 
                 {"CDP_EXPRESS_ONBOARDING", (EntitlementCheckFunction) EntitlementService::isExpressOnboardingEnabled, false},
                 {"CDP_EXPRESS_ONBOARDING", (EntitlementCheckFunction) EntitlementService::isExpressOnboardingEnabled, true},
+
+                {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, false},
+                {"CDP_SECURITY_ENFORCING_SELINUX", (EntitlementCheckFunction) EntitlementService::isCdpSecurityEnforcingSELinux, true},
         };
     }
 

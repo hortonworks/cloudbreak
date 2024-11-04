@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.common.model.SeLinux;
 
 @Service
 public class SecurityConfigService {
@@ -33,6 +35,9 @@ public class SecurityConfigService {
 
     @Inject
     private SaltSecurityConfigService saltSecurityConfigService;
+
+    @Inject
+    private StackService stackService;
 
     public SecurityConfig save(SecurityConfig securityConfig) {
         return securityConfigRepository.save(securityConfig);
@@ -52,24 +57,33 @@ public class SecurityConfigService {
         }
     }
 
-    public SecurityConfig getOneByStackId(Long stackId) {
-        return findOneByStackId(stackId)
-                .orElseThrow(() -> new NotFoundException("Stack does not have a security config"));
+    public SecurityConfig create(Stack stack, SecurityV4Request securityRequest) {
+        String seLinuxAsString = securityRequest != null ? securityRequest.getSeLinux() : SeLinux.PERMISSIVE.name();
+        SeLinux seLinux = SeLinux.fromStringWithFallback(seLinuxAsString);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setWorkspace(stack.getWorkspace());
+        securityConfig.setStack(stack);
+        securityConfig.setSeLinux(seLinux);
+        SecurityConfig savedSecurityConfig = securityConfigRepository.save(securityConfig);
+        stack.setSecurityConfig(savedSecurityConfig);
+        stackService.save(stack);
+        return savedSecurityConfig;
     }
 
-    public SecurityConfig generateAndSaveSecurityConfig(Stack stack) {
+    public SecurityConfig initSaltSecurityConfigs(Stack stack) {
         try {
             return transactionService.required(() -> {
-                Optional<SecurityConfig> securityConfig = findOneByStackId(stack.getId());
-                if (securityConfig.isEmpty()) {
+                Optional<SecurityConfig> securityConfigOptional = findOneByStackId(stack.getId());
+                if (securityConfigOptional.isEmpty() || securityConfigOptional.get().getSaltSecurityConfig() == null) {
                     LOGGER.info("Security config does not exist for stack, it is going to be generated");
-                    SecurityConfig config = tlsSecurityService.generateSecurityKeys(stack.getWorkspace());
-                    config.setStack(stack);
+                    SecurityConfig securityConfig = securityConfigOptional.isEmpty() ? new SecurityConfig() : securityConfigOptional.get();
+                    securityConfig.setWorkspace(stack.getWorkspace());
+                    SecurityConfig config = tlsSecurityService.generateSecurityKeys(stack.getWorkspace(), securityConfig);
                     saltSecurityConfigService.save(config.getSaltSecurityConfig());
                     return save(config);
                 }
                 LOGGER.info("Security already exsist for stack, probably the flow was restarted!");
-                return securityConfig.get();
+                return securityConfigOptional.get();
             });
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Error while saving SecurityConfig", e);

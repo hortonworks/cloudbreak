@@ -12,12 +12,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.common.model.SeLinux;
 
 @Entity
 public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
@@ -53,6 +55,10 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret userFacingKey = Secret.EMPTY;
+
+    @Convert(converter = SeLinuxConverter.class)
+    @Column(name = "selinux")
+    private SeLinux seLinux = SeLinux.PERMISSIVE;
 
     public Long getId() {
         return id;
@@ -143,5 +149,13 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setUserFacingKey(String userFacingKey) {
         this.userFacingKey = new Secret(userFacingKey);
+    }
+
+    public SeLinux getSeLinux() {
+        return seLinux;
+    }
+
+    public void setSeLinux(SeLinux seLinux) {
+        this.seLinux = seLinux;
     }
 }

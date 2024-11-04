@@ -70,6 +70,9 @@ public class StackViewV4Response implements JsonEntity {
     @Schema(description = StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseResponse externalDatabase;
 
+    @Schema(description = StackModelDescription.SECURITY)
+    private SecurityV4Response security;
+
     public String getCrn() {
         return crn;
     }
@@ -222,6 +225,14 @@ public class StackViewV4Response implements JsonEntity {
         this.externalDatabase = externalDatabase;
     }
 
+    public SecurityV4Response getSecurityV4Response() {
+        return security;
+    }
+
+    public void setSecurityV4Response(SecurityV4Response security) {
+        this.security = security;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
@@ -244,6 +255,7 @@ public class StackViewV4Response implements JsonEntity {
                 ", stackVersion='" + stackVersion + '\'' +
                 ", upgradeable=" + upgradeable +
                 ", externalDatabase=" + externalDatabase +
+                ", security=" + security +
                 '}';
     }
 }

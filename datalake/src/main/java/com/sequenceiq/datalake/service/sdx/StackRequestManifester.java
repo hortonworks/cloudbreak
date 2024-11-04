@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -169,11 +170,10 @@ public class StackRequestManifester {
                 stackRequest.setTags(tags);
             }
             stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
-
             if (CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
                 setupYarnDetails(environment, stackRequest);
             }
-
+            setupSecurityRequest(sdxCluster, stackRequest);
             setupAuthentication(environment, stackRequest);
             setupSecurityAccess(environment, stackRequest);
             setupClusterRequest(stackRequest);
@@ -209,6 +209,12 @@ public class StackRequestManifester {
         }
 
         return false;
+    }
+
+    private void setupSecurityRequest(SdxCluster sdxCluster, StackV4Request stackRequest) {
+        SecurityV4Request securityV4Request = new SecurityV4Request();
+        securityV4Request.setSeLinux(sdxCluster.getSeLinux().name());
+        stackRequest.setSecurity(securityV4Request);
     }
 
     private void setupDisableDbSslEnforcement(SdxCluster sdxCluster, StackV4Request stackRequest) {

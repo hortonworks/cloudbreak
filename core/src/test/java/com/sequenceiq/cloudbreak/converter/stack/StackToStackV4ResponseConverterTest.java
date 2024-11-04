@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -84,6 +86,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -202,7 +205,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
                 "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
-
+        assertEquals(SeLinux.PERMISSIVE.name(), result.getSecurity().getSeLinux());
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
 
@@ -229,6 +232,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
                 "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         assertNull(result.getCluster());
+        assertEquals(SeLinux.PERMISSIVE.name(), result.getSecurity().getSeLinux());
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
 
@@ -256,7 +260,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // THEN
         assertNotNull(result.getLoadBalancers());
         assertTrue(result.isEnableLoadBalancer());
-
+        assertEquals(SeLinux.PERMISSIVE.name(), result.getSecurity().getSeLinux());
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
 
@@ -290,6 +294,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setParameters(Map.of(PlatformParametersConsts.TTL_MILLIS, String.valueOf(System.currentTimeMillis())));
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack, "az1");
         stack.setResources(Collections.singleton(s3ArnResource));
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        stack.setSecurityConfig(securityConfig);
         stack.setEnvironmentCrn("");
         stack.setTerminated(100L);
         stack.setDatalakeCrn("");

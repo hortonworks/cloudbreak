@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -104,6 +105,7 @@ import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.TargetGroupType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -248,6 +250,9 @@ public class StackToCloudStackConverterTest {
         when(cluster.getFileSystem()).thenReturn(null);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertFalse(result.getFileSystem().isPresent());
@@ -260,6 +265,9 @@ public class StackToCloudStackConverterTest {
         when(cluster.getFileSystem()).thenReturn(fileSystem);
         when(fileSystemConverter.fileSystemToSpi(fileSystem)).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
 
         CloudStack result = underTest.convert(stack);
 
@@ -283,6 +291,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getGroups().isEmpty());
@@ -309,6 +320,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -340,6 +354,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -368,6 +385,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -397,6 +417,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -415,6 +438,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -434,6 +460,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -447,6 +476,8 @@ public class StackToCloudStackConverterTest {
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         instanceGroups.add(new InstanceGroupDto(instanceGroup, emptyList()));
         Template template = mock(Template.class);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
         Map<String, Object> expected = createMap("", Object.class);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getAttributes()).thenReturn(attributes);
@@ -454,6 +485,7 @@ public class StackToCloudStackConverterTest {
         when(template.getCloudPlatform()).thenReturn("AWS");
         when(template.getVolumeTemplates()).thenReturn(Sets.newHashSet());
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         when(stack.getStack()).thenReturn(stack);
 
         CloudStack result = underTest.convert(stack);
@@ -475,6 +507,9 @@ public class StackToCloudStackConverterTest {
         when(template.getRootVolumeSize()).thenReturn(null);
         when(defaultRootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
 
         CloudStack result = underTest.convert(stack);
 
@@ -502,6 +537,9 @@ public class StackToCloudStackConverterTest {
         when(resource.getAttributes()).thenReturn(new Json(volumeSetAttributes));
         when(resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(any(), any(), any())).thenReturn(List.of(resource));
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -516,8 +554,11 @@ public class StackToCloudStackConverterTest {
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
         instanceGroups.add(new InstanceGroupDto(instanceGroup, emptyList()));
         Template template = mock(Template.class);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
         when(template.getCloudPlatform()).thenReturn("AWS");
         when(instanceGroup.getTemplate()).thenReturn(template);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         when(stack.getStack()).thenReturn(stack);
         when(instanceGroup.getSecurityGroup()).thenReturn(null);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
@@ -545,6 +586,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(emptyList());
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -569,6 +613,9 @@ public class StackToCloudStackConverterTest {
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
         when(template.getCloudPlatform()).thenReturn("AWS");
         when(stack.getStack()).thenReturn(stack);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
         CloudStack result = underTest.convert(stack);
@@ -599,6 +646,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -630,6 +680,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -644,6 +697,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getNetwork()).thenReturn(null);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertNull(result.getNetwork());
@@ -657,6 +713,9 @@ public class StackToCloudStackConverterTest {
         when(stackNetwork.getSubnetCIDR()).thenReturn(subnetCIDR);
         when(stackNetwork.getAttributes()).thenReturn(null);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertNotNull(result.getNetwork());
@@ -668,9 +727,12 @@ public class StackToCloudStackConverterTest {
     public void testConvertWhenStackNetworkNotNullAndStackNetworkAttributesAreNotNullThenExpectedMapShouldBeSavedInNetworkParams() {
         String subnetCIDR = "testSubnetCIDR";
         Json attributes = mock(Json.class);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
         Map<String, Object> params = new LinkedHashMap<>();
         when(stack.getNetwork()).thenReturn(stackNetwork);
         when(stack.getStack()).thenReturn(stack);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         when(stackNetwork.getSubnetCIDR()).thenReturn(subnetCIDR);
         when(stackNetwork.getAttributes()).thenReturn(attributes);
         when(attributes.getMap()).thenReturn(params);
@@ -689,6 +751,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getId()).thenReturn(stackId);
         when(imageService.getImage(stackId)).thenReturn(expected);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
 
         CloudStack result = underTest.convert(stack);
 
@@ -703,6 +768,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getId()).thenReturn(stackId);
         when(imageService.getImage(stackId)).thenThrow(new CloudbreakImageNotFoundException("not found"));
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertNull(result.getImage());
@@ -714,6 +782,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getParameters()).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(expected, result.getParameters());
@@ -724,6 +795,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getTags()).thenReturn(null);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getTags().isEmpty());
@@ -739,6 +813,9 @@ public class StackToCloudStackConverterTest {
         when(stackTags.getDefaultTags()).thenReturn(Collections.emptyMap());
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getTags().isEmpty());
@@ -754,6 +831,9 @@ public class StackToCloudStackConverterTest {
         when(stackTags.getUserDefinedTags()).thenReturn(null);
         when(stackTags.getDefaultTags()).thenReturn(null);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getTags().isEmpty());
@@ -770,6 +850,9 @@ public class StackToCloudStackConverterTest {
         when(stackTags.getUserDefinedTags()).thenReturn(userDefinedTags);
         when(stackTags.getDefaultTags()).thenReturn(null);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(userDefinedTags.size(), result.getTags().size());
@@ -790,6 +873,9 @@ public class StackToCloudStackConverterTest {
         when(stackTags.getUserDefinedTags()).thenReturn(null);
         when(stackTags.getDefaultTags()).thenReturn(defaultTags);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(defaultTags.size(), result.getTags().size());
@@ -811,6 +897,9 @@ public class StackToCloudStackConverterTest {
         when(stackTags.getUserDefinedTags()).thenReturn(userDefined);
         when(stackTags.getDefaultTags()).thenReturn(defaultTags);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(defaultTags.size() + userDefined.size(), result.getTags().size());
@@ -831,6 +920,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(tags.get(StackTags.class)).thenThrow(new IOException("failed to parse json to StackTags"));
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertTrue(result.getTags().isEmpty());
@@ -842,6 +934,9 @@ public class StackToCloudStackConverterTest {
         when(componentConfigProviderService.getStackTemplate(TEST_STACK_ID)).thenReturn(null);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertNull(result.getTemplate());
@@ -856,6 +951,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getId()).thenReturn(TEST_STACK_ID);
         when(componentConfigProviderService.getStackTemplate(TEST_STACK_ID)).thenReturn(stackTemplate);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(expected, result.getTemplate());
@@ -867,6 +965,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(stackAuthentication.getLoginUserName(), result.getInstanceAuthentication().getLoginUserName());
@@ -880,6 +981,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStackAuthentication()).thenReturn(authentication);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(authentication.getLoginUserName(), result.getLoginUserName());
@@ -1047,6 +1151,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(azureMarketplaceTermsClientService.getAccepted(stack.getResourceCrn())).thenReturn(input);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
         Map<String, String> parameters = result.getParameters();
 
@@ -1073,6 +1180,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getParameters()).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
         Map<String, String> parameters = result.getParameters();
 
@@ -1157,6 +1267,9 @@ public class StackToCloudStackConverterTest {
         TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(443, 8443);
         when(targetGroupPortProvider.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1, result.getLoadBalancers().size());
@@ -1179,9 +1292,12 @@ public class StackToCloudStackConverterTest {
         InstanceGroupView instanceGroup2 = mock(InstanceGroupView.class);
         instanceGroups.add(new InstanceGroupDto(instanceGroup1, emptyList()));
         instanceGroups.add(new InstanceGroupDto(instanceGroup2, emptyList()));
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
         when(instanceGroup1.getGroupName()).thenReturn("group1");
         when(instanceGroup2.getGroupName()).thenReturn("group2");
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         Template template = mock(Template.class);
         when(template.getCloudPlatform()).thenReturn("AWS");
         when(template.getVolumeTemplates()).thenReturn(Set.of());
@@ -1241,6 +1357,9 @@ public class StackToCloudStackConverterTest {
         when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(List.of(instanceGroup1));
         when(targetGroupPortProvider.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1, result.getLoadBalancers().size());
@@ -1282,6 +1401,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
 
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1L, result.getGroups().size());
@@ -1433,6 +1555,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getId()).thenReturn(TEST_STACK_ID);
         when(componentConfigProviderService.getStackTemplate(TEST_STACK_ID)).thenReturn(null);
         when(stack.getStack()).thenReturn(stack);
+        SecurityConfig securityConfig = mock(SecurityConfig.class);
+        when(securityConfig.getSeLinux()).thenReturn(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest("gp2", 200, TEST_NAME, DiskType.ROOT_DISK);
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
@@ -1463,6 +1588,9 @@ public class StackToCloudStackConverterTest {
         when(stack.getId()).thenReturn(TEST_STACK_ID);
         when(componentConfigProviderService.getStackTemplate(TEST_STACK_ID)).thenReturn(null);
         when(stack.getStack()).thenReturn(stack);
+        SecurityConfig securityConfig = mock(SecurityConfig.class);
+        when(securityConfig.getSeLinux()).thenReturn(SeLinux.PERMISSIVE);
+        when(stack.getSecurityConfig()).thenReturn(securityConfig);
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest(null, 0, TEST_NAME, DiskType.ROOT_DISK);
         List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         InstanceGroupView instanceGroup = mock(InstanceGroupView.class);

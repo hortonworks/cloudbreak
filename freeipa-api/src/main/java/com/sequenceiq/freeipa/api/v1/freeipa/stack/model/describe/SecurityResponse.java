@@ -14,6 +14,5 @@ public class SecurityResponse extends BaseSecurity {
     @Override
     public String toString() {
         return "DescribeFreeIpaRequest.DescribeFreeIpaSecurityV1Response{" + super.toString() + '}';
-
     }
 }

@@ -234,6 +234,8 @@ public class ModelDescriptions {
 
     public static final String DATABASE_INSTANCE_STORAGE = "Database instance storage";
 
+    public static final String SECURITY = "Security related objects";
+
     private ModelDescriptions() {
     }
 

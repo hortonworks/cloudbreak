@@ -292,6 +292,8 @@ public class ModelDescriptions {
 
         public static final String SUPPORTED_IMDS_VERSION = "IMDS version supported by the given stack.";
         public static final String MULTIPLE_AVAILABILITY_ZONES = "Indicates the enablement of the multiple availability zones functionality on the stack level";
+        public static final String ATTACHED_RESOURCES = "List of resources attached to the stack";
+        public static final String SECURITY = "Security related objects";
     }
 
     public static class ClusterModelDescription {

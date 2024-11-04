@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -436,6 +437,7 @@ class SdxControllerTest {
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
         sdxCluster.setSdxDatabase(new SdxDatabase());
+        sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         return sdxCluster;
     }
 

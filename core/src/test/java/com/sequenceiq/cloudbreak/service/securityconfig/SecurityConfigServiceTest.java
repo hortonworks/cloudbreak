@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.SeLinux;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecurityConfigServiceTest {
@@ -56,23 +57,40 @@ public class SecurityConfigServiceTest {
     }
 
     @Test
-    public void testSecurityConfigExists() {
+    public void testSecurityConfigExistsAndPermissiveSelinux() {
         // This can happen when the flow is restarted
         SecurityConfig existingSecurityConfig = new SecurityConfig();
+        existingSecurityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        existingSecurityConfig.setSaltSecurityConfig(new SaltSecurityConfig());
         when(securityConfigRepository.findOneByStackId(anyLong())).thenReturn(Optional.of(existingSecurityConfig));
 
-        SecurityConfig securityConfig = underTest.generateAndSaveSecurityConfig(stack);
+        SecurityConfig securityConfig = underTest.initSaltSecurityConfigs(stack);
 
-        Assert.assertEquals("It should return the exsiting SecurityConfig", existingSecurityConfig, securityConfig);
+        Assert.assertEquals("It should return the exisiting SecurityConfig", existingSecurityConfig, securityConfig);
+        Assert.assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
+    }
+
+    @Test
+    public void testSecurityConfigExistsAndNoSelinux() {
+        // This can happen when the flow is restarted
+        SecurityConfig existingSecurityConfig = new SecurityConfig();
+        existingSecurityConfig.setSeLinux(SeLinux.PERMISSIVE);
+        existingSecurityConfig.setSaltSecurityConfig(new SaltSecurityConfig());
+        when(securityConfigRepository.findOneByStackId(anyLong())).thenReturn(Optional.of(existingSecurityConfig));
+
+        SecurityConfig securityConfig = underTest.initSaltSecurityConfigs(stack);
+
+        Assert.assertEquals("It should return the exisiting SecurityConfig", existingSecurityConfig, securityConfig);
+        Assert.assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
     }
 
     @Test
     public void testSecurityConfigDoesNotExists() {
         SecurityConfig createdSecurityConfig = new SecurityConfig();
-        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class))).thenReturn(createdSecurityConfig);
+        when(tlsSecurityService.generateSecurityKeys(any(Workspace.class), any(SecurityConfig.class))).thenReturn(createdSecurityConfig);
         when(securityConfigRepository.save(any(SecurityConfig.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        SecurityConfig securityConfig = underTest.generateAndSaveSecurityConfig(stack);
+        SecurityConfig securityConfig = underTest.initSaltSecurityConfigs(stack);
 
         Assert.assertEquals("It should create a new SecurityConfig", createdSecurityConfig, securityConfig);
     }

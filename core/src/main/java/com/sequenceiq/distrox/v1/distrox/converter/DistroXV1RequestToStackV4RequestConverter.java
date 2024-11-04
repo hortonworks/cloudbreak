@@ -90,6 +90,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private DistroXDatabaseRequestToStackDatabaseRequestConverter databaseRequestConverter;
 
     @Inject
+    private SecurityV1RequestToSecurityV4RequestConverter securityRequestConverter;
+
+    @Inject
     private EntitlementService entitlementService;
 
     public StackV4Request convert(DistroXV1Request source) {
@@ -127,6 +130,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setEnableMultiAz(source.isEnableMultiAz());
         request.setArchitecture(source.getArchitecture());
         request.setDisableDbSslEnforcement(source.isDisableDbSslEnforcement());
+        request.setSecurity(securityRequestConverter.convert(source.getSecurity()));
         calculateVariant(environment, source, request, runtime);
         checkMultipleGatewayNodes(source);
         return request;

@@ -29,12 +29,14 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
+import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -143,6 +145,10 @@ public class SdxCluster implements AccountAwareResource {
 
     @Column(name = "creator_client")
     private String creatorClient;
+
+    @Convert(converter = SeLinuxConverter.class)
+    @Column(name = "selinux")
+    private SeLinux seLinux;
 
     public Long getId() {
         return id;
@@ -431,6 +437,14 @@ public class SdxCluster implements AccountAwareResource {
         this.rangerRmsEnabled = rangerRmsEnabled;
     }
 
+    public SeLinux getSeLinux() {
+        return seLinux;
+    }
+
+    public void setSeLinux(SeLinux seLinux) {
+        this.seLinux = seLinux;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -459,13 +473,14 @@ public class SdxCluster implements AccountAwareResource {
                 rangerRmsEnabled == that.rangerRmsEnabled &&
                 certExpirationState == that.certExpirationState &&
                 Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
+                seLinux == that.seLinux &&
                 Objects.equals(sdxDatabase, that.sdxDatabase);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
-                stackRequestToCloudbreak, deleted, created, cloudStorageBaseLocation, cloudStorageFileSystemType,
+                stackRequestToCloudbreak, deleted, created, cloudStorageBaseLocation, cloudStorageFileSystemType, seLinux,
                 rangerRazEnabled, rangerRmsEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
     }
 
@@ -499,6 +514,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", rangerRmsEnabled+" + rangerRmsEnabled +
                 ", enableMultiAz=" + enableMultiAz +
                 ", certExpirationState=" + certExpirationState +
+                ", seLinux=" + seLinux +
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
                 ", detached=" + detached +
                 ", sdxDatabase=" + sdxDatabase +
