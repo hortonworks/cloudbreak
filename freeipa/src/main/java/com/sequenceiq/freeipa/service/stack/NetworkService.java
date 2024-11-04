@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.stack;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -59,40 +58,52 @@ public class NetworkService {
 
     public Multimap<String, String> getFilteredSubnetWithCidr(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {
         LOGGER.debug("NetworkId: [{}] SubnetIds: {}", networkId, subnetIds);
-        CloudNetworks cloudNetworks = fetchCloudNetworks(environmentCrn, stack, networkId, subnetIds);
-        ArrayListMultimap<String, String> filteredSubnetsWithCidr = filterNetworkResponse(stack, networkId, subnetIds, cloudNetworks);
-        LOGGER.debug("Filtering result: {}", filteredSubnetsWithCidr);
+        Set<CloudNetwork> cloudNetworks = fetchCloudNetworks(environmentCrn, stack, networkId, subnetIds);
+        StringBuilder filterLogger = new StringBuilder();
+        ArrayListMultimap<String, String> filteredSubnetsWithCidr = filterNetworkResponse(networkId, subnetIds, cloudNetworks, filterLogger);
+        LOGGER.debug("Filtering result: {} Filtering debug info: {}", filteredSubnetsWithCidr, filterLogger);
         return filteredSubnetsWithCidr;
     }
 
-    private ArrayListMultimap<String, String> filterNetworkResponse(Stack stack, String networkId, Collection<String> subnetIds, CloudNetworks cloudNetworks) {
-        return cloudNetworks.getCloudNetworkResponses()
-                .getOrDefault(stack.getRegion(), Collections.emptySet()).stream()
-                .filter(cloudNetwork -> filterNetwork(networkId, cloudNetwork))
-                .peek(cloudNetwork -> LOGGER.debug("CloudNetwork passed filtering name: [{}] id: [{}]", cloudNetwork.getName(), cloudNetwork.getId()))
+    private ArrayListMultimap<String, String> filterNetworkResponse(String networkId, Collection<String> subnetIds, Set<CloudNetwork> cloudNetworks,
+            StringBuilder filterLogger) {
+        return cloudNetworks.stream()
+                .filter(cloudNetwork -> filterNetwork(networkId, cloudNetwork, filterLogger))
+                .peek(cloudNetwork -> filterLogger.append(System.lineSeparator()).append(String.format("CloudNetwork passed filtering name: [%s] id: [%s].",
+                        cloudNetwork.getName(), cloudNetwork.getId())))
                 .flatMap(cloudNetwork -> cloudNetwork.getSubnetsMeta().stream())
                 .filter(cloudSubnet -> StringUtils.isNoneBlank(cloudSubnet.getId(), cloudSubnet.getCidr()))
                 .filter(cloudSubnet -> subnetIds.contains(cloudSubnet.getId()) || subnetIds.contains(cloudSubnet.getName()))
                 .collect(Multimaps.toMultimap(CloudSubnet::getId, CloudSubnet::getCidr, ArrayListMultimap::create));
     }
 
-    private CloudNetworks fetchCloudNetworks(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {
+    private Set<CloudNetwork> fetchCloudNetworks(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         Map<String, String> filter = getCloudNetworkFilter(stack, networkId, subnetIds);
-        CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(cloudCredential, stack.getRegion(), stack.getPlatformvariant(), filter);
-        LOGGER.debug("Received Cloud networks for region [{}]: {}", stack.getRegion(), cloudNetworks.getCloudNetworkResponses().get(stack.getRegion()));
+        Set<CloudNetwork> cloudNetworks = cloudParameterService.getCloudNetworks(cloudCredential, stack.getRegion(), stack.getPlatformvariant(), filter)
+                .getCloudNetworkResponses().getOrDefault(stack.getRegion(), Set.of());
+        LOGGER.debug("Received Cloud networks for region [{}]: {}", stack.getRegion(), cloudNetworks);
         return cloudNetworks;
     }
 
-    private boolean filterNetwork(String networkId, com.sequenceiq.cloudbreak.cloud.model.CloudNetwork cloudNetwork) {
-        String cloudNetworkId = transformAzureNetworkId(cloudNetwork);
-        return networkId.equals(cloudNetworkId) || networkId.equals(cloudNetwork.getName());
+    private boolean filterNetwork(String networkId, com.sequenceiq.cloudbreak.cloud.model.CloudNetwork cloudNetwork, StringBuilder filterLogger) {
+        String cloudNetworkId = transformAzureNetworkId(cloudNetwork, filterLogger);
+        boolean equalsResult = networkId.equals(cloudNetworkId) || networkId.equals(cloudNetwork.getName());
+        filterLogger.append(System.lineSeparator())
+                .append(String.format("Result is [%s] for comparing network ID [%s] with cloud network ID [%s] and cloud network name [%s].",
+                equalsResult, networkId, cloudNetworkId, cloudNetwork.getName()));
+        return equalsResult;
     }
 
-    private String transformAzureNetworkId(com.sequenceiq.cloudbreak.cloud.model.CloudNetwork cloudNetwork) {
+    private String transformAzureNetworkId(com.sequenceiq.cloudbreak.cloud.model.CloudNetwork cloudNetwork, StringBuilder filterLogger) {
         String[] splittedNetworkId = cloudNetwork.getId().split("/");
-        return splittedNetworkId[splittedNetworkId.length - 1];
+        String transformedNetworkId = splittedNetworkId[splittedNetworkId.length - 1];
+        if (splittedNetworkId.length > 1) {
+            filterLogger.append(System.lineSeparator())
+                    .append(String.format("Transformed [%s] network ID to [%s].", cloudNetwork.getId(), transformedNetworkId));
+        }
+        return transformedNetworkId;
     }
 
     private Map<String, String> getCloudNetworkFilter(Stack stack, String networkId, Collection<String> subnetIds) {
