@@ -57,6 +57,9 @@ class ValidateRdsUpgradeServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Mock
+    private RdsUpgradeValidationErrorHandler rdsUpgradeValidationErrorHandler;
+
     @InjectMocks
     private ValidateRdsUpgradeService underTest;
 
@@ -77,6 +80,7 @@ class ValidateRdsUpgradeServiceTest {
 
         underTest.validateRdsUpgradeFailed(STACK_ID, CLUSTER_ID, exception);
 
+        verify(rdsUpgradeValidationErrorHandler).handleUpgradeValidationError(STACK_ID, exception.getMessage());
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED),
                 eq("Validate RDS upgrade failed with exception: " + exception.getMessage()));
         verify(flowMessageService).fireEventAndLog(

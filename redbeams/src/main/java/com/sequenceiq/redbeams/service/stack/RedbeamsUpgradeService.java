@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.RdsAutoMigrationException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -43,6 +44,7 @@ import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeR
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.operation.OperationService;
+import com.sequenceiq.redbeams.service.upgrade.DatabaseAutoMigrationUpdater;
 import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
 
 @Service
@@ -79,6 +81,9 @@ public class RedbeamsUpgradeService {
     @Inject
     private DBStackToDatabaseStackConverter databaseStackConverter;
 
+    @Inject
+    private DatabaseAutoMigrationUpdater databaseAutoMigrationUpdater;
+
     public UpgradeDatabaseResponse validateUpgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.buildMdcContext(dbStack);
@@ -110,6 +115,9 @@ public class RedbeamsUpgradeService {
         try {
             resourceConnector.validateUpgradeDatabaseServer(ac, databaseStack, targetVersion);
             return new UpgradeDatabaseResponse(dbStack.getMajorVersion());
+        } catch (RdsAutoMigrationException autoMigrationException) {
+            databaseAutoMigrationUpdater.updateDatabaseIfAutoMigrationHappened(dbStack, autoMigrationException);
+            return new UpgradeDatabaseResponse(autoMigrationException.getMessage(), dbStack.getMajorVersion());
         } catch (Exception ex) {
             LOGGER.warn("RDS upgrade validation failed on provider side", ex);
             return new UpgradeDatabaseResponse(ex.getMessage(), dbStack.getMajorVersion());
@@ -171,5 +179,4 @@ public class RedbeamsUpgradeService {
                 targetMajorVersion, upgradeNeeded);
         return upgradeNeeded;
     }
-
 }

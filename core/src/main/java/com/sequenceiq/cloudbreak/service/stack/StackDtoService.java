@@ -155,6 +155,10 @@ public class StackDtoService implements LocalPaasSdxService {
         return stackDto;
     }
 
+    public Optional<Database> getDatabaseByStackId(Long stackId) {
+        return stackDtoRepository.getDatabaseByStackById(stackId);
+    }
+
     private StackDto getStackProxy(StackView stackView, boolean fetchResources) {
         Map<String, InstanceGroupDto> groupListMap = new HashMap<>();
         Map<Long, Map<InstanceGroupView, List<InstanceMetadataView>>> group = new HashMap<>();
