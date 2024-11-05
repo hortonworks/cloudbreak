@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -259,6 +260,20 @@ class EnvironmentServiceTest {
         when(environmentRepository.findById(123L)).thenReturn(env);
         assertThatThrownBy(() -> environmentServiceUnderTest.updateTunnelByEnvironmentId(123L, Tunnel.CCMV2_JUMPGATE))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void updateEnvironmentStatusTest() {
+        Environment environment = mock(Environment.class);
+        long id = 1L;
+        when(environment.getId()).thenReturn(id);
+        EnvironmentStatus deleteFailedStatus = EnvironmentStatus.DELETE_FAILED;
+        String reason = "reason";
+        when(environmentRepository.updateEnvironmentStatusAndStatusReason(id, deleteFailedStatus, reason)).thenReturn(1);
+        environmentServiceUnderTest.updateEnvironmentStatus(environment, deleteFailedStatus, reason);
+        verify(environmentRepository, times(1)).updateEnvironmentStatusAndStatusReason(id, deleteFailedStatus, reason);
+        verify(environment).setStatus(deleteFailedStatus);
+        verify(environment).setStatusReason(reason);
     }
 
     @Configuration

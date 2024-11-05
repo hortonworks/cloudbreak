@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +26,7 @@ import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentStatusUpdateServiceTest {
@@ -39,14 +44,16 @@ public class EnvironmentStatusUpdateServiceTest {
 
     private EnvironmentDto environmentDto;
 
+    private Environment environment;
+
     @BeforeEach
     void setUp() {
         commonContext = new CommonContext(new FlowParameters("flowId", "userCrn"));
         environmentDto = EnvironmentDto.builder().withId(1L).withEnvironmentStatus(EnvironmentStatus.STOP_DATAHUB_FAILED).build();
-        Environment environment = new Environment();
 
+        environment = new Environment();
+        when(environmentService.updateEnvironmentStatus(eq(environment), any(), nullable(String.class))).thenReturn(environment);
         when(environmentService.findEnvironmentById(environmentDto.getResourceId())).thenReturn(Optional.of(environment));
-        when(environmentService.save(environment)).thenReturn(environment);
         when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
     }
 
@@ -57,6 +64,7 @@ public class EnvironmentStatusUpdateServiceTest {
 
         Assertions.assertEquals(EnvironmentStatus.STOP_DATAHUB_FAILED, actual.getStatus());
         verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of());
+        verify(environmentService).updateEnvironmentStatus(eq(environment), eq(EnvironmentStatus.STOP_DATAHUB_FAILED), nullable(String.class));
     }
 
     @Test
@@ -66,5 +74,20 @@ public class EnvironmentStatusUpdateServiceTest {
 
         Assertions.assertEquals(EnvironmentStatus.STOP_DATAHUB_FAILED, actual.getStatus());
         verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"));
+        verify(environmentService).updateEnvironmentStatus(eq(environment), eq(EnvironmentStatus.STOP_DATAHUB_FAILED), nullable(String.class));
+    }
+
+    @Test
+    public void updateFailedEnvironmentStatusAndNotify() {
+        BaseFailedFlowEvent failedFlowEvent = mock(BaseFailedFlowEvent.class);
+        String errorHappened = "error happened";
+        when(failedFlowEvent.getException()).thenReturn(new RuntimeException(errorHappened));
+        when(failedFlowEvent.getResourceId()).thenReturn(environmentDto.getResourceId());
+        EnvironmentDto actual = underTest.updateFailedEnvironmentStatusAndNotify(commonContext, failedFlowEvent,
+                EnvironmentStatus.STOP_DATAHUB_FAILED, ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"), EnvStartState.ENV_START_FINISHED_STATE);
+
+        Assertions.assertEquals(EnvironmentStatus.STOP_DATAHUB_FAILED, actual.getStatus());
+        verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"));
+        verify(environmentService).updateEnvironmentStatus(eq(environment), eq(EnvironmentStatus.STOP_DATAHUB_FAILED), eq(errorHappened));
     }
 }

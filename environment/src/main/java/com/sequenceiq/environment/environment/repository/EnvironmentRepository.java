@@ -181,4 +181,8 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             "WHERE e.name in (:names) " +
             "AND e.accountId = :accountId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
+    @Modifying
+    @Query("UPDATE Environment e SET e.status = :status, e.statusReason = :statusReason WHERE e.id = :id AND e.archived = false")
+    int updateEnvironmentStatusAndStatusReason(Long id, EnvironmentStatus status, String statusReason);
 }

@@ -144,7 +144,11 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private boolean isInSameNetwork(Environment environment, Environment sibling) {
-        return Objects.equals(sibling.getNetwork().getNetworkCidr(), environment.getNetwork().getNetworkCidr());
+        if (environment.getNetwork() != null && sibling.getNetwork() != null) {
+            return Objects.equals(sibling.getNetwork().getNetworkCidr(), environment.getNetwork().getNetworkCidr());
+        } else {
+            return false;
+        }
     }
 
     private void deleteFreeIpa(Environment environment, boolean forced) {

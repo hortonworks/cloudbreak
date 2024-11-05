@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
@@ -87,8 +86,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final GrpcUmsClient grpcUmsClient;
 
-    private final TransactionService transactionService;
-
     private final RoleCrnGenerator roleCrnGenerator;
 
     private final ExperienceConnectorService experienceConnectorService;
@@ -100,7 +97,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             EnvironmentDtoConverter environmentDtoConverter,
             OwnerAssignmentService ownerAssignmentService,
             GrpcUmsClient grpcUmsClient,
-            TransactionService transactionService,
             RoleCrnGenerator roleCrnGenerator,
             ExperienceConnectorService experienceConnectorService) {
         this.validatorService = validatorService;
@@ -108,7 +104,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.grpcUmsClient = grpcUmsClient;
-        this.transactionService = transactionService;
         this.roleCrnGenerator = roleCrnGenerator;
         this.experienceConnectorService = experienceConnectorService;
     }
@@ -116,6 +111,19 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public Environment save(Environment environment) {
         LOGGER.debug("Saving environment '{}'.", environment);
         return environmentRepository.save(environment);
+    }
+
+    public Environment updateEnvironmentStatus(Environment environment, EnvironmentStatus status, String statusReason) {
+        LOGGER.debug("Updating environment with id '{}' status to '{}' with reason: '{}'.", environment.getId(), status, statusReason);
+        int updatedRows = environmentRepository.updateEnvironmentStatusAndStatusReason(environment.getId(), status, statusReason);
+        if (updatedRows == 0) {
+            LOGGER.warn("Environment with id '{}' was not found and status was not updated. Expected to update status to '{}' with reason: '{}'.",
+                    environment.getId(), status, statusReason);
+        } else {
+            environment.setStatus(status);
+            environment.setStatusReason(statusReason);
+        }
+        return environment;
     }
 
     public EnvironmentDto getEnvironmentDto(Environment environment) {

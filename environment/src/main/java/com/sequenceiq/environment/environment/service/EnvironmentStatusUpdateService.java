@@ -43,9 +43,7 @@ public class EnvironmentStatusUpdateService {
         return environmentService
                 .findEnvironmentById(payload.getResourceId())
                 .map(environment -> {
-                    environment.setStatus(environmentStatus);
-                    environment.setStatusReason(null);
-                    Environment env = environmentService.save(environment);
+                    Environment env = environmentService.updateEnvironmentStatus(environment, environmentStatus, null);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent, messageArgs);
                     return environmentDto;
@@ -66,9 +64,8 @@ public class EnvironmentStatusUpdateService {
         return environmentService
                 .findEnvironmentById(failedFlowEvent.getResourceId())
                 .map(environment -> {
-                    environment.setStatus(environmentStatus);
-                    environment.setStatusReason(failedFlowEvent.getException().getMessage());
-                    Environment env = environmentService.save(environment);
+                    Environment env = environmentService.updateEnvironmentStatus(environment, environmentStatus,
+                            failedFlowEvent.getException().getMessage());
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent, messageArgs);
                     return environmentDto;
@@ -79,8 +76,7 @@ public class EnvironmentStatusUpdateService {
 
     public void updateEnvironmentStatusAndNotify(Environment environment, EnvironmentStatus environmentStatus, ResourceEvent resourceEvent) {
         LOGGER.info("Update environment status from {} to {} and notify", environment.getStatus().name(), environmentStatus.name());
-        environment.setStatus(environmentStatus);
-        Environment env = environmentService.save(environment);
+        Environment env = environmentService.updateEnvironmentStatus(environment, environmentStatus, null);
         EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
         eventService.sendEventAndNotification(environmentDto, env.getCreator(), resourceEvent, Set.of(environmentStatus));
     }
