@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -21,7 +23,7 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
-import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceException;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRDSAutoMigrationException;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
@@ -74,9 +76,16 @@ public class AzureRDSAutoMigrationValidatorTest {
     @Test
     void testValidateWhenSingleAndFlexibleServerFound() {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn("rg");
-        when(azureFlexibleServerClient.getFlexibleServer("rg", "serverId")).thenReturn(mock(Server.class));
+        Server server = mock(Server.class);
+        when(server.id()).thenReturn("serverId");
+        when(azureFlexibleServerClient.getFlexibleServer("rg", "serverId")).thenReturn(server);
 
-        assertThrows(AzureResourceException.class, () -> underTest.validate(authenticatedContext, databaseStack));
+        AzureRDSAutoMigrationException azureRDSAutoMigrationException = assertThrows(AzureRDSAutoMigrationException.class,
+                () -> underTest.validate(authenticatedContext, databaseStack));
+
+        assertTrue(azureRDSAutoMigrationException.getAzureRDSAutoMigrationParams().isPresent());
+        assertEquals("serverId", azureRDSAutoMigrationException.getAzureRDSAutoMigrationParams().get().serverId());
+        assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, azureRDSAutoMigrationException.getAzureRDSAutoMigrationParams().get().azureDatabaseType());
     }
 
     @Test
@@ -93,8 +102,10 @@ public class AzureRDSAutoMigrationValidatorTest {
     void testValidateWhenFlexibleServer() {
         when(databaseServer.getStringParameter(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY)).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER.name());
 
-        underTest.validate(authenticatedContext, databaseStack);
+        AzureRDSAutoMigrationException azureRDSAutoMigrationException = assertThrows(AzureRDSAutoMigrationException.class,
+                () -> underTest.validate(authenticatedContext, databaseStack));
 
+        assertTrue(azureRDSAutoMigrationException.getAzureRDSAutoMigrationParams().isEmpty());
         verify(azureResourceGroupMetadataProvider, never()).getResourceGroupName(any(), any(DatabaseStack.class));
         verify(azureFlexibleServerClient, never()).getFlexibleServer(anyString(), anyString());
     }

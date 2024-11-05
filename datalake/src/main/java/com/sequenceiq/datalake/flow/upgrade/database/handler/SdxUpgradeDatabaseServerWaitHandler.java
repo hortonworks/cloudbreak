@@ -25,7 +25,6 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class SdxUpgradeDatabaseServerWaitHandler extends ExceptionCatcherEventHandler<UpgradeDatabaseServerWaitRequest> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeDatabaseServerWaitHandler.class);
 
     @Inject
@@ -74,5 +73,4 @@ public class SdxUpgradeDatabaseServerWaitHandler extends ExceptionCatcherEventHa
         sdxDatabaseServerUpgradeService.waitDatabaseUpgradeInCb(sdxCluster, config);
         sdxDatabaseServerUpgradeService.updateDatabaseServerEngineVersion(sdxCluster);
     }
-
 }

@@ -10,6 +10,8 @@ public enum AzureDatabaseType implements DatabaseType {
 
     public static final String AZURE_DATABASE_TYPE_KEY = "AZURE_DATABASE_TYPE";
 
+    public static final String AZURE_AUTOMIGRATION_ERROR_PREFIX = "Automigration happened from Single to Flexible Server";
+
     private final String shortName;
 
     private final boolean databasePauseSupported;

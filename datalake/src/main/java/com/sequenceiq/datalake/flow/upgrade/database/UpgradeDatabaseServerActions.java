@@ -29,6 +29,7 @@ import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServer
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.upgrade.database.SdxRdsUpgradeValidationErrorHandler;
 
 @Configuration
 public class UpgradeDatabaseServerActions {
@@ -40,6 +41,9 @@ public class UpgradeDatabaseServerActions {
 
     @Inject
     private SdxMetricService metricService;
+
+    @Inject
+    private SdxRdsUpgradeValidationErrorHandler sdxRdsUpgradeValidationErrorHandler;
 
     @Bean(name = "SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE")
     public Action<?, ?> callUpgradeDatabaseInCore() {
@@ -109,6 +113,7 @@ public class UpgradeDatabaseServerActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
                         failedStatus, Collections.singleton(statusReason), statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.UPGRADE_DATABASE_SERVER_FAILED, sdxCluster);
+                sdxRdsUpgradeValidationErrorHandler.handleUpgradeValidationError(sdxCluster, exception);
                 sendEvent(context, SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT.event(), payload);
             }
 

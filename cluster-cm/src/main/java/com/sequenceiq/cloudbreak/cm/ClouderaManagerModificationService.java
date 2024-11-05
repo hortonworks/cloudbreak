@@ -85,6 +85,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.CmConfig;
 import com.sequenceiq.cloudbreak.cm.config.modification.CmServiceType;
@@ -186,6 +187,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
+
+    @Inject
+    private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
 
     private final StackDtoDelegate stack;
 
@@ -330,6 +334,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
             restartMgmtServices();
+            clouderaManagerFlinkConfigurationService.addServiceConfigurationIfNecessary(v31Client, stack, products);
             LOGGER.debug("Starting the upgrade for the new components: {}", products);
             if (patchUpgrade) {
                 downloadAndActivateParcels(products, parcelResourceApi, true);
@@ -353,7 +358,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void enableKnoxAutoRestart() {
-        configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+        configService.modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), true);
     }
 
     private void tagHostsWithHostTemplateName() throws ApiException, CloudbreakException {
@@ -909,7 +914,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void disableKnoxAutorestart(boolean disableKnoxAutorestart) {
         if (disableKnoxAutorestart) {
-            configService.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+            configService.modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), false);
         }
     }
 
