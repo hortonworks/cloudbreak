@@ -1,6 +1,9 @@
 package com.sequenceiq.datalake.entity;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -84,6 +87,10 @@ public class SdxDatabase {
 
     public Json getAttributes() {
         return attributes;
+    }
+
+    public Map<String, Object> getAttributesMap() {
+        return Optional.ofNullable(attributes).map(Json::getMap).orElse(new HashMap<>());
     }
 
     public void setAttributes(Json attributes) {
