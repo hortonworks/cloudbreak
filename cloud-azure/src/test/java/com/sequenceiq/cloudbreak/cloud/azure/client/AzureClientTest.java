@@ -548,18 +548,6 @@ class AzureClientTest {
     }
 
     @Test
-    void runWhatIfAnalysisShouldReturnEmptyOptionalOnInvalidJson() {
-        String deploymentName = "yourDeploymentName";
-        String invalidJsonTemplate = "invalidJsonTemplate";
-
-        // When
-        Optional<ManagementError> result = underTest.runWhatIfAnalysis(RESOURCE_GROUP_NAME, deploymentName, invalidJsonTemplate);
-
-        // Then
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void runWhatIfAnalysisShouldReturnEmptyOptionalOnSuccess() {
         String deploymentName = "yourDeploymentName";
         String validJsonTemplate = "{\"key\":\"value\"}";

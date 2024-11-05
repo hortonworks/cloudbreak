@@ -35,6 +35,7 @@ import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
+import com.azure.core.util.BinaryData;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner;
 import com.azure.resourcemanager.authorization.models.RoleAssignment;
@@ -114,8 +115,6 @@ import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.options.BlobBeginCopyOptions;
 import com.azure.storage.common.StorageSharedKeyCredential;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
@@ -130,7 +129,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -1131,9 +1129,8 @@ public class AzureClient {
     }
 
     public Optional<ManagementError> runWhatIfAnalysis(String resourceGroupName, String deploymentName, String template) {
-        try {
+        return handleException(() -> {
             LOGGER.debug("Calling what-if analysis for deployment {} in resource group {}", deploymentName, resourceGroupName);
-            JsonNode jsonNode = JsonUtil.readTree(template);
             WhatIfOperationResultInner operation = azure.genericResources()
                     .manager()
                     .serviceClient()
@@ -1144,7 +1141,7 @@ public class AzureClient {
                             new DeploymentWhatIf()
                                     .withProperties(
                                             new DeploymentWhatIfProperties()
-                                                    .withTemplate(jsonNode)
+                                                    .withTemplate(BinaryData.fromString(template).toObject(Map.class))
                                                     .withParameters(Map.of())
                                                     .withMode(DeploymentMode.COMPLETE)),
                             com.azure.core.util.Context.NONE);
@@ -1157,10 +1154,7 @@ public class AzureClient {
                 LOGGER.debug("What-if analysis has been completed with the following status: {}", operation.status());
                 return Optional.empty();
             }
-        } catch (JsonProcessingException e) {
-            LOGGER.info("Template is not a valid json, this should not happen, omitting what if analysis");
-            return Optional.empty();
-        }
+        });
     }
 
     public void modifyDisk(String volumeName, String resourceGroupName, int size, String diskType) {
