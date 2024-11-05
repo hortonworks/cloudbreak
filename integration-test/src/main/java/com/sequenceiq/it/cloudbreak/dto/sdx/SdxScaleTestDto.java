@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.Map;
 
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
@@ -24,6 +25,10 @@ public class SdxScaleTestDto extends AbstractSdxTestDto<DatalakeHorizontalScaleR
 
     public SdxScaleTestDto await(SdxClusterStatusResponse status) {
         return getTestContext().await(this, Map.of("status", status), emptyRunningParameter());
+    }
+
+    public SdxScaleTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     @Override
