@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -229,6 +230,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Spy
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Mock
+    private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
 
     private Cluster cluster;
 
@@ -1225,7 +1229,7 @@ class ClouderaManagerModificationServiceTest {
         // WHEN
         underTest.deployConfigAndStartClusterServices();
         // THEN
-        verify(configService, times(1)).enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+        verify(configService, times(1)).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), true);
     }
 
     @Test
@@ -1388,9 +1392,9 @@ class ClouderaManagerModificationServiceTest {
         underTest.stopCluster(disableKnoxAutorestart);
 
         if (disableKnoxAutorestart) {
-            verify(configService, times(1)).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+            verify(configService, times(1)).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), false);
         } else {
-            verify(configService, never()).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+            verify(configService, never()).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), false);
         }
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmShutdown(stack, v31Client, apiCommand.getId());
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
@@ -1415,9 +1419,9 @@ class ClouderaManagerModificationServiceTest {
         underTest.stopCluster(disableKnoxAutorestart);
 
         if (disableKnoxAutorestart) {
-            verify(configService, times(1)).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+            verify(configService, times(1)).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), false);
         } else {
-            verify(configService, never()).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName());
+            verify(configService, never()).modifyKnoxAutoRestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, v31Client, stack.getName(), false);
         }
         verify(clouderaManagerPollingServiceProvider, never()).startPollingCmShutdown(stack, v31Client, apiCommand.getId());
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);

@@ -19,9 +19,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 @Component
 public class FlinkConfigProviderUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(FlinkConfigProviderUtils.class);
+    public static final String RELEASE_NAME_CONF_NAME = "release.name";
 
-    private static final String RELEASE_NAME_CONF_NAME = "release.name";
+    public static final String RELEASE_NAME_CONF_VALUE = "CSA-DH";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlinkConfigProviderUtils.class);
 
     public Optional<ClouderaManagerProduct> getFlinkProduct(List<ClouderaManagerProduct> products) {
         Optional<ClouderaManagerProduct> flinkProductOptional = products
@@ -29,23 +31,20 @@ public class FlinkConfigProviderUtils {
                 .filter(e -> e.getName().equalsIgnoreCase(FLINK))
                 .findFirst();
         if (flinkProductOptional.isEmpty()) {
-            LOG.warn("FLINK product not found!");
+            LOGGER.warn("FLINK product not found!");
         }
         return flinkProductOptional;
     }
 
-    public void addReleaseNameIfNeeded(
-            String cdhVersion,
-            List<ApiClusterTemplateConfig> configList,
-            Optional<ClouderaManagerProduct> flinkProduct) {
+    public void addReleaseNameIfNeeded(String cdhVersion, List<ApiClusterTemplateConfig> configList, Optional<ClouderaManagerProduct> flinkProduct) {
         flinkProduct.ifPresent(fp -> {
             if (isUnifiedFlinkVersion(fp) && isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_3_1)) {
-                configList.add(config(RELEASE_NAME_CONF_NAME, "CSA-DH"));
+                configList.add(config(RELEASE_NAME_CONF_NAME, RELEASE_NAME_CONF_VALUE));
             }
         });
     }
 
-    static boolean isUnifiedFlinkVersion(ClouderaManagerProduct flinkProduct) {
+    private boolean isUnifiedFlinkVersion(ClouderaManagerProduct flinkProduct) {
         // Unified version scheme: 1.19.1-csa1.14.0.0-12345678
         return !StringUtils.containsIgnoreCase(flinkProduct.getVersion(), "csadh");
     }

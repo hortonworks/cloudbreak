@@ -33,7 +33,7 @@ public class ClusterUpgradePrerequisitesService {
         });
     }
 
-    public void removeServiceIfNecessary(StackDto stackDto, ClusterApi connector, String targetRuntimeVersion, String versionLimit, String serviceType)
+    private void removeServiceIfNecessary(StackDto stackDto, ClusterApi connector, String targetRuntimeVersion, String versionLimit, String serviceType)
             throws Exception {
         if (StringUtils.hasText(targetRuntimeVersion) && isVersionNewerOrEqualThanLimited(targetRuntimeVersion, () -> versionLimit)) {
             LOGGER.debug("Trying to remove {} service from the cluster because this is a prerequisite of the target runtime version {}",
