@@ -85,7 +85,7 @@ ext {
   jinjavaVersion = '2.5.2'
 
   // Protobuf
-  protobufVersion = '3.25.3'
+  protobufVersion = '4.27.3'
   grpcVersion = '1.64.0'
 
   // Database
