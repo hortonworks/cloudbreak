@@ -28,6 +28,10 @@
     "label": "syslog"
   },
   {
+    "path": "/var/log/user-data.log",
+    "label": "userdata"
+  },
+  {
     "path": "/var/log/cloud-init.log",
     "label": "cloud_init"
   },
