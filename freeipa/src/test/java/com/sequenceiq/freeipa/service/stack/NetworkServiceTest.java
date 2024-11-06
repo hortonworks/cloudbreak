@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,6 +125,70 @@ class NetworkServiceTest {
         assertTrue(filteredSubnetWithCidr.get(subnet1.getId()).contains("10.2.0.0/24"));
         assertEquals(1, filteredSubnetWithCidr.get(subnet2.getId()).size());
         assertEquals(subnet2.getCidr(), filteredSubnetWithCidr.get(subnet2.getId()).stream().findFirst().get());
+    }
+
+    @Test
+    public void testAzureMultipleNetworkWithSameIds() {
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AZURE");
+        stack.setRegion("East US");
+        stack.setPlatformvariant("AZURE");
+        Credential credential = new Credential("AZURE", "", "", "", "acc");
+        ExtendedCloudCredential extendedCred = new ExtendedCloudCredential(new CloudCredential(), "AZURE", "", "", new ArrayList<>());
+        Set<CloudSubnet> subnets = Set.of(
+                new CloudSubnet(
+                        "CDPPROD-DataLake-GW", "CDPPROD-DataLake-GW", null, "10.278.245.32/28",
+                        false, false, false, null, Set.of()
+                ),
+                new CloudSubnet(
+                        "CDPPROD-DataFlow", "CDPPROD-DataFlow", null, "10.278.245.64/28",
+                        false, false, false, null, Set.of()
+                ),
+                new CloudSubnet(
+                        "CDPPROD-DataLake", "CDPPROD-DataLake", null, "10.278.245.0/27",
+                        false, false, false, null, Set.of()
+                ),
+                new CloudSubnet(
+                        "CDPPROD-AirFlow", "CDPPROD-AirFlow", null, "10.278.245.48/28",
+                        false, false, false, null, Set.of()
+                ),
+                new CloudSubnet(
+                        "CDPPROD-DataLake-NAT", "CDPPROD-DataLake-NAT", null, "10.278.245.248/29",
+                        false, false, false, null, Set.of()
+                ),
+                new CloudSubnet(
+                        "CDPPROD-DataEngineering", "CDPPROD-DataEngineering", null, "10.278.245.128/27",
+                        false, false, false, null, Set.of()
+                ),
+                new CloudSubnet(
+                        "CDPPROD-Postgre", "CDPPROD-Postgre", null, "10.278.245.160/27",
+                        true, false, false, null, Set.of()
+                )
+        );
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("addressSpaces", List.of("10.278.245.0/24"));
+        properties.put("resourceGroupName", "RSG_CDP_Prod");
+        properties.put("dnsServerIPs", List.of());
+
+        CloudNetwork cloudNetwork = new CloudNetwork(
+                "VNET_CDP_Prod",
+                "/subscriptions/40aa3b-bbb8-4ccb-ddfe-2ehhf839e52e/resourceGroups/RSG_CDP_Prod/providers/Microsoft.Network/virtualNetworks/VNET_CDP_Prod",
+                subnets,
+                properties
+        );
+        Map<String, Set<CloudNetwork>> cloudNets = Map.of("East US", Set.of(cloudNetwork));
+        CloudNetworks cloudNetworks = new CloudNetworks(cloudNets);
+
+        when(credentialService.getCredentialByEnvCrn(ENV_CRN)).thenReturn(credential);
+        when(extendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCred);
+        when(cloudParameterService.getCloudNetworks(eq(extendedCred), eq("East US"), eq("AZURE"), any())).thenReturn(cloudNetworks);
+        when(networkFilterProviderMap.get(any())).thenReturn(null);
+
+        Multimap<String, String> filteredSubnetWithCidr = underTest.getFilteredSubnetWithCidr(ENV_CRN, stack, "VNET_CDP_Prod", List.of("CDPPROD-DataLake"));
+
+        assertEquals(1, filteredSubnetWithCidr.size());
+        Collection<String> subnetsResult = filteredSubnetWithCidr.get("CDPPROD-DataLake");
+        assertEquals("10.278.245.0/27", subnetsResult.stream().findFirst().get());
     }
 
 }

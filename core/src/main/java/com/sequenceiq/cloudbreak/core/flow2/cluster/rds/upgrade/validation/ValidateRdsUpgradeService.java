@@ -45,6 +45,9 @@ public class ValidateRdsUpgradeService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private RdsUpgradeValidationErrorHandler rdsUpgradeValidationErrorHandler;
+
     void pushSaltStates(Long stackId) {
         setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS,
                 getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_PUSH_SALT_STATES), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_PUSH_SALT_STATES);
@@ -82,6 +85,7 @@ public class ValidateRdsUpgradeService {
         if (Objects.nonNull(clusterId)) {
             InMemoryStateStore.deleteCluster(clusterId);
         }
+        rdsUpgradeValidationErrorHandler.handleUpgradeValidationError(stackId, exception.getMessage());
         updateStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED, errorMsg);
     }

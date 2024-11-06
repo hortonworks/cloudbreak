@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,33 +50,13 @@ public class ClouderaManagerConfigService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    private boolean isVersionAtLeast(Versioned requiredVersion, ClouderaManagerResourceApi resourceApiInstance) throws ApiException {
-        ApiVersionInfo versionInfo = resourceApiInstance.getVersion();
-        LOGGER.debug("CM version is {}, used version string {}", versionInfo, versionInfo.getVersion());
-
-        if (isVersionNewerOrEqualThanLimited(versionInfo.getVersion(), requiredVersion)) {
-            return true;
-        }
-        LOGGER.debug("Version is smaller than {}, not setting cdp_environment", requiredVersion.getVersion());
-        return false;
-    }
-
-    public void disableKnoxAutorestartIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient client, String clusterName) {
+    public void modifyKnoxAutoRestartIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient client, String clusterName, boolean enabled) {
         try {
             ClouderaManagerResourceApi resourceApiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
-            if (isVersionAtLeast(versionAtLeast, resourceApiInstance)) {
-                modifyKnoxAutorestart(client, clusterName, false);
-            }
-        } catch (ApiException e) {
-            LOGGER.debug("Failed to initialize CM client.", e);
-        }
-    }
-
-    public void enableKnoxAutorestartIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient client, String clusterName) {
-        try {
-            ClouderaManagerResourceApi resourceApiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
-            if (isVersionAtLeast(versionAtLeast, resourceApiInstance)) {
-                modifyKnoxAutorestart(client, clusterName, true);
+            ApiVersionInfo versionInfo = resourceApiInstance.getVersion();
+            LOGGER.debug("CM version is {}, used version string {}", versionInfo, versionInfo.getVersion());
+            if (isVersionNewerOrEqualThanLimited(versionInfo.getVersion(), versionAtLeast)) {
+                modifyKnoxAutorestart(client, clusterName, enabled);
             }
         } catch (ApiException e) {
             LOGGER.debug("Failed to initialize CM client.", e);
@@ -87,7 +66,7 @@ public class ClouderaManagerConfigService {
     private void modifyKnoxAutorestart(ApiClient client, String clusterName, boolean autorestart) {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         LOGGER.info("Try to modify Knox auto restart to {}", autorestart);
-        getKnoxServiceName(clusterName, servicesResourceApi)
+        getServiceName(clusterName, KNOX_SERVICE, servicesResourceApi)
                 .ifPresentOrElse(
                         modifyKnoxAutorestart(clusterName, servicesResourceApi, autorestart),
                         () -> LOGGER.info("KNOX service name is missing, skip modifying the autorestart property."));
@@ -105,22 +84,9 @@ public class ClouderaManagerConfigService {
         };
     }
 
-    private Optional<String> getKnoxServiceName(String clusterName, ServicesResourceApi servicesResourceApi) {
-        try {
-            ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
-            return serviceList.getItems().stream()
-                    .filter(service -> KNOX_SERVICE.equals(service.getType()))
-                    .map(ApiService::getName)
-                    .findFirst();
-        } catch (ApiException e) {
-            LOGGER.debug("Failed to get KNOX service name from Cloudera Manager.", e);
-            return Optional.empty();
-        }
-    }
-
     public void modifyServiceConfig(ApiClient client, String clusterName, String serviceType, Map<String, String> config) throws CloudbreakException {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        LOGGER.info("Trying to modify config: {} for service {}", Arrays.asList(config), serviceType);
+        LOGGER.info("Trying to modify config: {} for service {}", config, serviceType);
         getServiceName(clusterName, serviceType, servicesResourceApi)
                 .ifPresentOrElse(
                         modifyServiceConfig(clusterName, servicesResourceApi, config),
@@ -139,7 +105,7 @@ public class ClouderaManagerConfigService {
             try {
                 servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", apiServiceConfig);
             } catch (ApiException e) {
-                LOGGER.error("Failed to set configs {} for service {}", Arrays.asList(config), serviceName, e);
+                LOGGER.error("Failed to set configs {} for service {}", config, serviceName, e);
                 throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
             }
         };
