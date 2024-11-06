@@ -906,7 +906,8 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier setDefaultJavaVersionByCrnInternal(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
-            @NotNull @Valid SetDefaultJavaVersionRequest request);
+            @NotNull @Valid SetDefaultJavaVersionRequest request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("internal/crn/{crn}/set_default_java_version/validate")
