@@ -282,16 +282,8 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     private KeyPair getKeyPairForStack(SecurityConfig securityConfig) {
-        KeyPair keyPair;
-        if (StringUtils.isEmpty(securityConfig.getUserFacingKey())) {
-            keyPair = PkiUtil.generateKeypair();
-            securityConfig.setUserFacingKey(PkiUtil.convert(keyPair.getPrivate()));
-        } else {
-            keyPair = PkiUtil.fromPrivateKeyPem(securityConfig.getUserFacingKey());
-            if (keyPair == null) {
-                keyPair = PkiUtil.generateKeypair();
-            }
-        }
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        securityConfig.setUserFacingKey(PkiUtil.convert(keyPair.getPrivate()));
         return keyPair;
     }
 

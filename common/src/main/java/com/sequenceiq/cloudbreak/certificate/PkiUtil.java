@@ -34,10 +34,12 @@ import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
@@ -82,6 +84,8 @@ public class PkiUtil {
     private static final Integer SALT_LENGTH = 20;
 
     private static final Integer MAX_CACHE_SIZE = 200;
+
+    private static final int CSR_PRINT_INDEX = 64;
 
     private static final Map<String, RSAKeyParameters> CACHE =
             Collections.synchronizedMap(new LinkedHashMap<>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
@@ -152,6 +156,14 @@ public class PkiUtil {
             return keyGen.generateKeyPair();
         } catch (Exception e) {
             throw new PkiException("Failed to generate PK for the cluster!", e);
+        }
+    }
+
+    public static X509Certificate certByCsr(PKCS10CertificationRequest csr, String publicAddress, KeyPair signKey, int validity) {
+        try {
+            return selfsign(csr, publicAddress, signKey, validity);
+        } catch (Exception e) {
+            throw new PkiException("Failed to create signed cert for the cluster!", e);
         }
     }
 
@@ -293,6 +305,15 @@ public class PkiUtil {
                 new X500Name(String.format("cn=%s", publicAddress)), new BigInteger("1"), currentTime, expiryTime, inputCSR.getSubject(),
                 inputCSR.getSubjectPublicKeyInfo());
 
+        // Extract SANs from CSR and add to the certificate if present
+        for (Attribute attribute : inputCSR.getAttributes(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
+            Extensions extensions = Extensions.getInstance(attribute.getAttrValues().getObjectAt(0));
+            Extension sanExtension = extensions.getExtension(Extension.subjectAlternativeName);
+            if (sanExtension != null) {
+                myCertificateGenerator.addExtension(Extension.subjectAlternativeName, false, sanExtension.getParsedValue());
+            }
+        }
+
         ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
                 .build(akp);
 
@@ -345,6 +366,21 @@ public class PkiUtil {
 
     private static String clarifyPemKey(String rawPem) {
         return "-----BEGIN RSA PRIVATE KEY-----\n" + rawPem.replaceAll("-----(.*)-----|\n", "") + "\n-----END RSA PRIVATE KEY-----";
+    }
+
+    public static String getPEMEncodedCSR(PKCS10CertificationRequest csr) throws Exception {
+        byte[] csrBytes = csr.getEncoded();
+        String encodedCSR = java.util.Base64.getEncoder().encodeToString(csrBytes);
+        StringBuilder pemCSR = new StringBuilder();
+        pemCSR.append("-----BEGIN CERTIFICATE REQUEST-----\n");
+        int index = 0;
+        while (index < encodedCSR.length()) {
+            pemCSR.append(encodedCSR, index, Math.min(index + CSR_PRINT_INDEX, encodedCSR.length()));
+            pemCSR.append("\n");
+            index += CSR_PRINT_INDEX;
+        }
+        pemCSR.append("-----END CERTIFICATE REQUEST-----\n");
+        return pemCSR.toString();
     }
 
 }
