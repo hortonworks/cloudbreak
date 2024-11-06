@@ -178,18 +178,22 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
         flowLogService.close(resourceId, flowId, false, contextParams, null);
         Flow flow = runningFlows.remove(flowId);
-        Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
-        flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
-        if (flowChainId != null) {
-            if (flow.isFlowFailed()) {
-                flowChains.removeFullFlowChain(flowChainId, false);
-                finalizerCallback.ifPresent(callback -> callback.onFinalize(resourceId));
+        if (flow != null) {
+            Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
+            flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
+            if (flowChainId != null) {
+                if (flow.isFlowFailed()) {
+                    flowChains.removeFullFlowChain(flowChainId, false);
+                    finalizerCallback.ifPresent(callback -> callback.onFinalize(resourceId));
+                } else {
+                    flowChains.triggerNextFlow(flowChainId, flowParameters.getFlowTriggerUserCrn(), contextParams, flowParameters.getFlowOperationType(),
+                            finalizerCallback.map(callback -> () -> callback.onFinalize(resourceId)));
+                }
             } else {
-                flowChains.triggerNextFlow(flowChainId, flowParameters.getFlowTriggerUserCrn(), contextParams, flowParameters.getFlowOperationType(),
-                        finalizerCallback.map(callback -> () -> callback.onFinalize(resourceId)));
+                finalizerCallback.ifPresent(callback -> callback.onFinalize(resourceId));
             }
         } else {
-            finalizerCallback.ifPresent(callback -> callback.onFinalize(resourceId));
+            LOGGER.warn("The flow is missing from the running flows, it has already been cancelled.");
         }
     }
 
