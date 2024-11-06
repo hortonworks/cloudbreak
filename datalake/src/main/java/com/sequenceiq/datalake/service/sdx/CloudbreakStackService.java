@@ -121,9 +121,11 @@ public class CloudbreakStackService {
             SetDefaultJavaVersionRequest setDefaultJavaVersionRequest = new SetDefaultJavaVersionRequest();
             setDefaultJavaVersionRequest.setDefaultJavaVersion(javaVersion);
             setDefaultJavaVersionRequest.setRestartServices(restartServices);
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> stackV4Endpoint.setDefaultJavaVersionByCrnInternal(WORKSPACE_ID, sdxCluster.getCrn(), setDefaultJavaVersionRequest));
+                    () -> stackV4Endpoint.setDefaultJavaVersionByCrnInternal(WORKSPACE_ID, sdxCluster.getCrn(),
+                            setDefaultJavaVersionRequest, initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String message = String.format("Could not set default java version in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
