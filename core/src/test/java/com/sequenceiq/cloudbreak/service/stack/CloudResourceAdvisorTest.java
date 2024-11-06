@@ -5,31 +5,45 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.CdpResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CloudResourceAdvisorTest {
 
     private static final String VERSION_7_2_1 = "7.2.1";
@@ -43,6 +57,18 @@ public class CloudResourceAdvisorTest {
 
     @Mock
     private BlueprintTextProcessor blueprintTextProcessor;
+
+    @Mock
+    private CredentialClientService credentialClientService;
+
+    @Mock
+    private CloudParameterService cloudParameterService;
+
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Mock
+    private TransactionService transactionService;
 
     @InjectMocks
     private CloudResourceAdvisor underTest;
@@ -61,6 +87,12 @@ public class CloudResourceAdvisorTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private Credential credential;
+
+    @Mock
+    private ExtendedCloudCredential extendedCloudCredential;
 
     @Test
     public void testRecommendAutoscaleWhenCloudManagerVersionLessThanEqualTo720() {
@@ -120,6 +152,24 @@ public class CloudResourceAdvisorTest {
         ScaleRecommendation scaleRecommendation = underTest.createForBlueprint(this.workspace.getId(), blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), scaleRecommendation.getAutoscaleRecommendation());
         assertEquals(new ResizeRecommendation(Set.of("compute"), Set.of("compute")), scaleRecommendation.getResizeRecommendation());
+    }
+
+    @Test
+    public void testGetPlatformRecommendationForBluePrint() throws TransactionService.TransactionExecutionException {
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        Blueprint blueprint = createBlueprint();
+        when(blueprintService.getByNameForWorkspaceId(any(), any())).thenReturn(blueprint);
+        when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
+        when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        when(extendedCloudCredentialConverter.convert(any())).thenReturn(extendedCloudCredential);
+        when(transactionService.required(any(Supplier.class))).thenReturn(Map.of("gatewayGroup", "master", "architecture", "arm64"));
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(new CloudVmTypes(new HashMap<>(), new HashMap<>()));
+        when(blueprintTextProcessor.recommendResize(any(), any())).thenReturn(new ResizeRecommendation(Set.of(), Set.of()));
+
+        underTest.createForBlueprint(workspace.getId(), "definitionName", TEST_BLUEPRINT_NAME, "credName",
+                "region", "platformVariant", "az1", CdpResourceType.DATAHUB);
+
+        verify(cloudParameterService).getVmTypesV2(any(), any(), any(), any(), eq(Map.of("architecture", "arm64")));
     }
 
     private Blueprint createBlueprint() {

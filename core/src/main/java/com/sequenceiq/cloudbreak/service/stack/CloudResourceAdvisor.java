@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredenti
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
@@ -64,10 +65,17 @@ import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Base;
 
 @Service
 public class CloudResourceAdvisor {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudResourceAdvisor.class);
+
+    private static final String GATEWAY_GROUP = "gatewayGroup";
+
+    private static final String ARCHITECTURE = "architecture";
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -145,12 +153,14 @@ public class CloudResourceAdvisor {
                 platformDisks.getDiskMappings().get(platform),
                 platformDisks.getDiskDisplayNames().get(platform));
 
+        Map<String, String> templateInfo = getInfoFromClusterTemplate(definitionName, workspaceId);
+        Architecture architecture = Architecture.fromStringWithFallback(templateInfo.get(ARCHITECTURE));
         CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 region,
                 platformVariant,
                 cdpResourceType,
-                Maps.newHashMap());
+                Maps.newHashMap(Map.of(ARCHITECTURE, architecture.getName())));
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         if (defaultVmType != null) {
             componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
@@ -190,7 +200,7 @@ public class CloudResourceAdvisor {
         }
 
         Map<String, InstanceCount> instanceCounts = recommendInstanceCounts(blueprintTextProcessor);
-        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor, definitionName, workspaceId);
+        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor, templateInfo);
 
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor, entitlements);
 
@@ -222,52 +232,62 @@ public class CloudResourceAdvisor {
         return recommendAutoscale(blueprintTextProcessor, entitlements);
     }
 
-    private Optional<String> getGroupNameFromClusterTemplate(String definitionName, Long workspaceId) {
-        Optional<String> groupResponse = Optional.empty();
+    private Map<String, String> getInfoFromClusterTemplate(String definitionName, Long workspaceId) {
+        Map<String, String> templateInfo = new HashMap<>();
         if (!Strings.isNullOrEmpty(definitionName)) {
             try {
-                groupResponse = transactionService.required(() -> {
+                templateInfo = transactionService.required(() -> {
                     Optional<ClusterTemplate> templateByName = clusterTemplateService.getTemplateByName(definitionName, workspaceId);
-                    Optional<String> group = Optional.empty();
                     if (templateByName.isPresent()) {
                         if (templateByName.get().getStackTemplate() != null) {
-                            group = getGroupNameFromCustomTemplate(templateByName);
+                            return getInfoFromCustomTemplate(templateByName.get().getStackTemplate());
                         } else {
-                            group = getGroupNameFromDefaultTemplate(definitionName, templateByName, group);
+                            return getInfoFromDefaultTemplate(definitionName, templateByName.get());
                         }
                     }
-                    return group;
+                    return new HashMap<>();
                 });
             } catch (Exception e) {
                 LOGGER.error("Could not parse Default Cluster with name {}. Error: {}", definitionName, e);
             }
         }
-        return groupResponse;
+        return templateInfo;
     }
 
-    private Optional<String> getGroupNameFromDefaultTemplate(String definitionName, Optional<ClusterTemplate> templateByName, Optional<String> group) {
+    private Map<String, String> getInfoFromDefaultTemplate(String definitionName, ClusterTemplate clusterTemplate) {
+        Map<String, String> clusterTemplateInfo = new HashMap<>();
         try {
-            DefaultClusterTemplateV4Request clusterTemplateV4Request = new Json(getTemplateString(templateByName.get()))
+            DefaultClusterTemplateV4Request clusterTemplateV4Request = new Json(getTemplateString(clusterTemplate))
                     .get(DefaultClusterTemplateV4Request.class);
-            group = clusterTemplateV4Request.getDistroXTemplate().getInstanceGroups()
+            clusterTemplateV4Request.getDistroXTemplate().getInstanceGroups()
                     .stream()
                     .filter(e -> InstanceGroupType.GATEWAY.equals(e.getType()))
-                    .map(e -> e.getName())
-                    .findFirst();
+                    .map(InstanceGroupV1Base::getName)
+                    .findFirst()
+                    .ifPresent(groupName -> clusterTemplateInfo.put(GATEWAY_GROUP, groupName));
+            if (clusterTemplateV4Request.getDistroXTemplate().getArchitecture() != null) {
+                clusterTemplateInfo.put(ARCHITECTURE, clusterTemplateV4Request.getDistroXTemplate().getArchitecture());
+            }
         } catch (IOException e) {
             LOGGER.error("Could not parse Default Cluster with name {}. Error: {}", definitionName, e);
         }
-        return group;
+        return clusterTemplateInfo;
     }
 
-    private Optional<String> getGroupNameFromCustomTemplate(Optional<ClusterTemplate> templateByName) {
-        return stackTemplateService.getByIdWithLists(templateByName.get().getStackTemplate().getId())
-                    .map(Stack::getInstanceGroups)
-                    .map(Set::stream)
-                    .flatMap(igs -> igs
-                            .filter(e -> InstanceGroupType.GATEWAY.equals(e.getInstanceGroupType()))
-                            .map(e -> e.getGroupName())
-                            .findFirst());
+    private Map<String, String> getInfoFromCustomTemplate(Stack stackTemplate) {
+        Map<String, String> clusterTemplateInfo = new HashMap<>();
+        stackTemplateService.getByIdWithLists(stackTemplate.getId())
+                .map(Stack::getInstanceGroups)
+                .map(Set::stream)
+                .flatMap(igs -> igs
+                        .filter(e -> InstanceGroupType.GATEWAY.equals(e.getInstanceGroupType()))
+                        .map(InstanceGroup::getGroupName)
+                        .findFirst())
+                .ifPresent(groupName -> clusterTemplateInfo.put(GATEWAY_GROUP, groupName));
+        if (stackTemplate.getArchitecture() != null) {
+            clusterTemplateInfo.put(ARCHITECTURE, stackTemplate.getArchitectureName());
+        }
+        return clusterTemplateInfo;
     }
 
     private String getTemplateString(ClusterTemplate clusterTemplate) {
@@ -284,11 +304,10 @@ public class CloudResourceAdvisor {
         return getBlueprintTextProcessor(blueprint);
     }
 
-    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor, String definitionName, Long workspaceId) {
+    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor, Map<String, String> templateInfo) {
         GatewayRecommendation recommendation;
-        Optional<String> group = getGroupNameFromClusterTemplate(definitionName, workspaceId);
-        if (group.isPresent()) {
-            recommendation = new GatewayRecommendation(Set.of(group.get()));
+        if (templateInfo.containsKey(GATEWAY_GROUP)) {
+            recommendation = new GatewayRecommendation(Set.of(templateInfo.get(GATEWAY_GROUP)));
         } else {
             recommendation = blueprintTextProcessor.recommendGateway();
             if (recommendation.getHostGroups().isEmpty()) {
