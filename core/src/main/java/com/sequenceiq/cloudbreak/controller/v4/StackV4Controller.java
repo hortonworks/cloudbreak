@@ -731,7 +731,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier setDefaultJavaVersionByCrnInternal(Long workspaceId, String crn, SetDefaultJavaVersionRequest request) {
+    public FlowIdentifier setDefaultJavaVersionByCrnInternal(Long workspaceId, String crn, SetDefaultJavaVersionRequest request,
+            @InitiatorUserCrn String initiatorUserCrn) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
         return stackOperationService.triggerSetDefaultJavaVersion(nameOrCrn, ThreadBasedUserCrnProvider.getAccountId(), request);
     }
