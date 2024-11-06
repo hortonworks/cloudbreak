@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
@@ -880,7 +879,7 @@ public class ClusterHostServiceRunner {
                 gateway.put("protocol", autoTlsEnabled ? "https" : "http");
             }
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
-                String accountId = ThreadBasedUserCrnProvider.getAccountId();
+                String accountId = stackDto.getAccountId();
                 try {
                     String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId);
                     gateway.put("saml", metadataXml);
