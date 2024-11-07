@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -53,6 +55,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @ExtendWith(MockitoExtension.class)
 class SdxRotationServiceTest {
@@ -111,6 +114,11 @@ class SdxRotationServiceTest {
 
     @InjectMocks
     private SdxRotationService underTest;
+
+    @BeforeEach
+    void setup() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "enabledSecretTypes", List.of(DatalakeSecretType.values()), true);
+    }
 
     @Test
     void rotateCloudbreakSecretShouldSucceed() {

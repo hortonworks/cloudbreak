@@ -45,6 +45,9 @@ cdp:
     rest:
       contentlogging: true
 
+secretrotation:
+    secretTypeEnumClass: FreeIpaSecretType
+
 freeipa:
   verticalScalingSupported: AWS,GCP,MOCK,AZURE
   cert.dir: /certs/

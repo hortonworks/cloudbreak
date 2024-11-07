@@ -4,12 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.internal.guava.Sets;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +14,6 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 public class SecretTypeConverter {
-
-    public static final Set<Class<? extends SecretType>> AVAILABLE_SECRET_TYPES =
-            new Reflections("com.sequenceiq", Scanners.SubTypes)
-                    .getSubTypesOf(SecretType.class)
-                    .stream()
-                    .filter(Class::isEnum)
-                    .collect(Collectors.toSet());
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretTypeConverter.class);
 
@@ -42,10 +32,6 @@ public class SecretTypeConverter {
             LOGGER.warn(message);
             throw new CloudbreakServiceException(message, e);
         }
-    }
-
-    public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypesSkipUnknown(List<String> secrets) {
-        return mapSecretTypesSkipUnknown(secrets, AVAILABLE_SECRET_TYPES);
     }
 
     public static <T extends Enum<T> & SecretType> List<SecretType> mapSecretTypesSkipUnknown(List<String> secrets,
