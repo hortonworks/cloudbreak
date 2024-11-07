@@ -38,6 +38,9 @@ management:
     env:
       enabled: true
 
+secretrotation:
+    secretTypeEnumClass: RedbeamsSecretType
+
 redbeams:
   schema.migration.auto: true
   cloudbreak.url: http://localhost:9091

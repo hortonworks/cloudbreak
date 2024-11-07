@@ -6,16 +6,13 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -25,7 +22,6 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
@@ -75,9 +71,7 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
     public List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(
             @ValidCrn(resource = DATAHUB) @ResourceCrn @NotEmpty @TenantAwareParam String datahubCrn) {
         // further improvement needed to query secret types for resource
-        return Arrays.stream(CloudbreakSecretType.values())
-                .filter(Predicate.not(CloudbreakSecretType::internal))
-                .filter(secretType -> CollectionUtils.isEmpty(enabledSecretTypes) || enabledSecretTypes.contains(secretType))
+        return enabledSecretTypes.stream()
                 .map(type -> new DistroXSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }

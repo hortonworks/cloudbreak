@@ -53,7 +53,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
-import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
 public class SdxRotationService {
@@ -118,6 +117,9 @@ public class SdxRotationService {
     @Inject
     private SdxStatusService sdxStatusService;
 
+    @Inject
+    private List<SecretType> enabledSecretTypes;
+
     public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
         MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
         Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
@@ -179,7 +181,8 @@ public class SdxRotationService {
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
         secretRotationValidationService.validateSecretRotationEntitlement(datalakeCrn);
-        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets, Set.of(DatalakeSecretType.class));
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
+                enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
         SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdxCluster.getId());

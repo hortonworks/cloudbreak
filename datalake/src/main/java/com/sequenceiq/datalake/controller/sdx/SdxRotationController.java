@@ -5,15 +5,12 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -35,7 +32,6 @@ import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
 import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretTypeResponse;
-import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Controller
 @AccountEntityType(SdxCluster.class)
@@ -76,9 +72,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
     public List<SdxSecretTypeResponse> listRotatableSdxSecretType(
             @ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty @TenantAwareParam String datalakeCrn) {
         // further improvement needed to query secret types for resource
-        return Arrays.stream(DatalakeSecretType.values())
-                .filter(Predicate.not(DatalakeSecretType::internal))
-                .filter(secretType -> CollectionUtils.isEmpty(enabledSecretTypes) || enabledSecretTypes.contains(secretType))
+        return enabledSecretTypes.stream()
                 .map(type -> new SdxSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }

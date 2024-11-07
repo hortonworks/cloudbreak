@@ -14,6 +14,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +34,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -58,6 +61,11 @@ class FreeIpaSecretRotationServiceTest {
 
     @Captor
     private ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+
+    @BeforeEach
+    void setup() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "enabledSecretTypes", List.of(FreeIpaSecretType.values()), true);
+    }
 
     @Test
     public void testSecretRotationIsTriggered() {

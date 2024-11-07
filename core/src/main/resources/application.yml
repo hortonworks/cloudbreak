@@ -78,6 +78,9 @@ secret:
   application: cb/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
+secretrotation:
+    secretTypeEnumClass: CloudbreakSecretType
+
 vault:
   addr: localhost
   port: 8200
