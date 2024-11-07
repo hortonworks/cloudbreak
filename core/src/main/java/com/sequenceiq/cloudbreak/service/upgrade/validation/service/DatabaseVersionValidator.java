@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 
 @Component
 public class DatabaseVersionValidator implements ServiceUpgradeValidator {
@@ -19,13 +20,18 @@ public class DatabaseVersionValidator implements ServiceUpgradeValidator {
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
         String targetRuntime = validationRequest.upgradeImageInfo().getTargetStatedImage().getImage().getVersion();
-        String databaseVersion = validationRequest.stack().getDatabase().getExternalDatabaseEngineVersion();
-        if (isVersionNewerOrEqualThan731(targetRuntime) && isPostgresVersionOlderThanRequired(databaseVersion)) {
+        Database database = validationRequest.stack().getDatabase();
+        String databaseVersion = database.getExternalDatabaseEngineVersion();
+        if (isExternalDatabase(database) && isVersionNewerOrEqualThan731(targetRuntime) && isPostgresVersionOlderThanRequired(databaseVersion)) {
             String message = "To upgrade your cluster to version 7.3.1 or higher, your PostgreSQL version must be at least 14. "
                     + "Please update your database to version 14 or above and attempt the upgrade again.";
             LOGGER.error("Cluster upgrade validation failed. {} Target runtime {}, current database version {}", message, targetRuntime, databaseVersion);
             throw new UpgradeValidationFailedException(message);
         }
+    }
+
+    private boolean isExternalDatabase(Database database) {
+        return !database.getExternalDatabaseAvailabilityType().isEmbedded();
     }
 
     private boolean isPostgresVersionOlderThanRequired(String databaseVersion) {
