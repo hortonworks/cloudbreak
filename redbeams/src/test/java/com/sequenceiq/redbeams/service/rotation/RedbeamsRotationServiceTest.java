@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +50,11 @@ class RedbeamsRotationServiceTest {
 
     @Mock
     private DBStack dbStack;
+
+    @BeforeEach
+    void setup() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "enabledSecretTypes", List.of(RedbeamsSecretType.values()), true);
+    }
 
     @Test
     void rotateSecretsShouldSucceed() {

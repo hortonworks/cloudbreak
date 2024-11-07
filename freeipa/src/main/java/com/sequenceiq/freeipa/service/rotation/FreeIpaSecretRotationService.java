@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.service.rotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -25,7 +25,6 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -49,10 +48,14 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     @Inject
     private SecretRotationStepProgressService stepProgressService;
 
+    @Inject
+    private List<SecretType> enabledSecretTypes;
+
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         secretRotationValidationService.validateSecretRotationEntitlement(environmentCrn);
-        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets(), Set.of(FreeIpaSecretType.class));
+        List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets(),
+                enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, null);
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         Optional<RotationFlowExecutionType> usedExecutionType =

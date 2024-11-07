@@ -3,16 +3,13 @@ package com.sequenceiq.freeipa.controller;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_FREEIPA_SECRETS;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -31,7 +28,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaSecretRotationService;
 
 @Controller
@@ -66,9 +62,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     public List<FreeipaSecretTypeResponse> listRotatableFreeipaSecretType(
             @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn) {
         // further improvement needed to query secret types for resource
-        return Arrays.stream(FreeIpaSecretType.values())
-                .filter(Predicate.not(FreeIpaSecretType::internal))
-                .filter(secretType -> CollectionUtils.isEmpty(enabledSecretTypes) || enabledSecretTypes.contains(secretType))
+        return enabledSecretTypes.stream()
                 .map(type -> new FreeipaSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }
