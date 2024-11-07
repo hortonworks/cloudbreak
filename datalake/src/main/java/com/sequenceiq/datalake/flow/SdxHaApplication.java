@@ -45,13 +45,13 @@ public class SdxHaApplication implements HaApplication {
 
     @Override
     public Set<Long> getDeletingResources(Set<Long> resourceIds) {
-        return sdxService.findByResourceIdsAndStatuses(resourceIds, DELETE_STATUSES);
+        return filterResizingSdx(sdxService.findByResourceIdsAndStatuses(resourceIds, DELETE_STATUSES));
     }
 
     @Override
     public Set<Long> getAllDeletingResources() {
         Set<Long> sdxIds = DatalakeInMemoryStateStore.getAll();
-        return sdxService.findByResourceIdsAndStatuses(sdxIds, DELETE_STATUSES);
+        return filterResizingSdx(sdxService.findByResourceIdsAndStatuses(sdxIds, DELETE_STATUSES));
     }
 
     @Override
@@ -68,5 +68,9 @@ public class SdxHaApplication implements HaApplication {
     @Override
     public boolean isRunningOnThisNode(Set<String> runningFlowIds) {
         return runningFlowIds.stream().anyMatch(id -> runningFlows.get(id) != null);
+    }
+
+    private Set<Long> filterResizingSdx(Set<Long> sdxIds) {
+        return Set.copyOf(sdxService.findAllNotDetachedIdsByIds(sdxIds));
     }
 }

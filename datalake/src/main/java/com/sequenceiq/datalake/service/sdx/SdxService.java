@@ -340,6 +340,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return sdxClusterRepository.findAllById(ids);
     }
 
+    public List<Long> findAllNotDetachedIdsByIds(Collection<Long> ids) {
+        return sdxClusterRepository.findAllIdsNotDetachedByIds(ids);
+    }
+
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);

@@ -132,4 +132,8 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
 
     @Query("SELECT sdxc.sdxDatabase.id FROM SdxCluster sdxc WHERE sdxc.crn = :crn")
     Optional<Long> findDatabaseIdByCrn(@Param("crn") String crn);
+
+    @Query("SELECT s.id FROM SdxCluster s " +
+            "WHERE s.id in (:ids) AND NOT s.detached")
+    List<Long> findAllIdsNotDetachedByIds(@Param("ids") Collection<Long> ids);
 }
