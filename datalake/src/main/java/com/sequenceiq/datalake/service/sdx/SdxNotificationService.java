@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.controller.sdx.SdxClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -27,16 +29,30 @@ public class SdxNotificationService {
     private SdxClusterConverter sdxClusterConverter;
 
     public void send(ResourceEvent resourceEvent, SdxCluster sdx) {
-        send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdx);
+        send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdx, getUserCrn(sdx));
+    }
+
+    public void send(ResourceEvent resourceEvent, SdxCluster sdx, String userCrn) {
+        send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdx, userCrn);
     }
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx) {
-        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx),
-                getAccountIdFromSdx(sdx));
+        send(resourceEvent, messageArgs, sdx, getUserCrn(sdx));
+    }
+
+    public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx, String userCrn) {
+        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), userCrn);
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
     }
 
-    private String getAccountIdFromSdx(SdxCluster sdx) {
-        return (sdx.getAccountId() != null) ? sdx.getAccountId() : ThreadBasedUserCrnProvider.getUserCrn();
+    private String getUserCrn(SdxCluster sdxCluster) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        boolean internalCrn = RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn);
+        if (!internalCrn) {
+            return userCrn;
+        } else {
+            return Crn.copyWithDifferentAccountId(Crn.safeFromString(userCrn), sdxCluster.getAccountId()).toString();
+        }
     }
+
 }

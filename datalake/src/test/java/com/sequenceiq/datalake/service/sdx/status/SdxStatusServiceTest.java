@@ -119,7 +119,7 @@ class SdxStatusServiceTest {
         oldStatus.setStatus(DatalakeStatusEnum.RUNNING);
         DatalakeStatusEnum status = DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FAILED;
         Set<String> messageArgs = Collections.singleton("exception-message");
-        doNothing().when(sdxNotificationService).send(any(), any(), any());
+        doNothing().when(sdxNotificationService).send(any(), any(), any(SdxCluster.class));
         doNothing().when(eventSenderService).sendEventAndNotification(any(), any(), any());
 
         sdxStatusService.setStatusForDatalakeAndNotify(status, messageArgs, "Rotating SaltStack user password failed", sdxCluster.getId());
