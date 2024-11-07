@@ -14,4 +14,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxResizeRecoveryTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildv2Tests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzScalingTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaMultiAzUpgradeTests
 
