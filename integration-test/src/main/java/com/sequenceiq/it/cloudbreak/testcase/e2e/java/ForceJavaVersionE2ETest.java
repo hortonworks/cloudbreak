@@ -117,7 +117,7 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
     private void validateJavaVersions(Integer expectedVersion, Map<String, Integer> javaVersionByInstanceIps) {
         String errorMessage = javaVersionByInstanceIps.entrySet().stream()
                 .filter(entry -> !entry.getValue().equals(expectedVersion))
-                .map(entry -> String.format("Java version on '%s' is '%d' instead of %d", entry.getKey(), entry.getValue(), expectedVersion))
+                .map(entry -> String.format("Java version on machine '%s' is JDK%d instead of JDK%d", entry.getKey(), entry.getValue(), expectedVersion))
                 .collect(Collectors.joining(", "));
 
         if (!Strings.isNullOrEmpty(errorMessage)) {
