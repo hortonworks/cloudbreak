@@ -13,9 +13,12 @@ public class SdxSetDefaultJavaVersionAction implements Action<SdxInternalTestDto
 
     private final boolean restartServices;
 
-    public SdxSetDefaultJavaVersionAction(String defaultJavaVersion, boolean restartServices) {
+    private final boolean restartCM;
+
+    public SdxSetDefaultJavaVersionAction(String defaultJavaVersion, boolean restartServices, boolean restartCM) {
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
+        this.restartCM = restartCM;
     }
 
     @Override
@@ -23,6 +26,7 @@ public class SdxSetDefaultJavaVersionAction implements Action<SdxInternalTestDto
         SetDefaultJavaVersionRequest setDefaultJavaVersionAction = new SetDefaultJavaVersionRequest();
         setDefaultJavaVersionAction.setDefaultJavaVersion(defaultJavaVersion);
         setDefaultJavaVersionAction.setRestartServices(restartServices);
+        setDefaultJavaVersionAction.setRestartCM(restartCM);
         FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().setDefaultJavaVersionByName(testDto.getName(), setDefaultJavaVersionAction);
         testDto.setFlow("SDX set default Java version to " + defaultJavaVersion, flowIdentifier);
         return testDto;

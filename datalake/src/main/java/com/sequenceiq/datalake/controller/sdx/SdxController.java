@@ -600,7 +600,8 @@ public class SdxController implements SdxEndpoint {
     public FlowIdentifier setDefaultJavaVersionByName(@ResourceName String name, SetDefaultJavaVersionRequest request) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         sdxService.validateDefaultJavaVersionUpdate(sdxCluster.getCrn(), request);
-        return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices());
+        return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices(),
+                request.isRestartCM());
     }
 
     @Override
@@ -608,7 +609,8 @@ public class SdxController implements SdxEndpoint {
     public FlowIdentifier setDefaultJavaVersionByCrn(@TenantAwareParam @ResourceCrn String crn, SetDefaultJavaVersionRequest request) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         sdxService.validateDefaultJavaVersionUpdate(crn, request);
-        return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices());
+        return sdxReactorFlowManager.triggerSetDefaultJavaVersion(sdxCluster, request.getDefaultJavaVersion(), request.isRestartServices(),
+                request.isRestartCM());
     }
 
     @Override

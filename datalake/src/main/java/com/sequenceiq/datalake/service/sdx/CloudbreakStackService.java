@@ -116,11 +116,12 @@ public class CloudbreakStackService {
         }
     }
 
-    public void setDefaultJavaVersion(SdxCluster sdxCluster, String javaVersion, boolean restartServices) {
+    public void setDefaultJavaVersion(SdxCluster sdxCluster, String javaVersion, boolean restartServices, boolean restartCM) {
         try {
             SetDefaultJavaVersionRequest setDefaultJavaVersionRequest = new SetDefaultJavaVersionRequest();
             setDefaultJavaVersionRequest.setDefaultJavaVersion(javaVersion);
             setDefaultJavaVersionRequest.setRestartServices(restartServices);
+            setDefaultJavaVersionRequest.setRestartCM(restartCM);
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
