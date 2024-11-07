@@ -138,12 +138,15 @@ class SdxStatusServiceTest {
         doNothing().when(sdxNotificationService).send(any(), any());
         doNothing().when(eventSenderService).sendEventAndNotificationWithMessage(any(), any(), any());
         String statusReason = "statusReason";
+        String eventMessage = "eventMessage";
 
-        sdxStatusService.setStatusForDatalakeAndNotify(status, statusReason, sdxCluster.getCrn());
+        sdxStatusService.setStatusForDatalakeAndNotify(status, statusReason, eventMessage, sdxCluster.getCrn());
 
-        verify(sdxStatusRepository).save(any(SdxStatusEntity.class));
+        ArgumentCaptor<SdxStatusEntity> sdxStatusCaptor = ArgumentCaptor.forClass(SdxStatusEntity.class);
+        verify(sdxStatusRepository).save(sdxStatusCaptor.capture());
+        assertEquals(statusReason, sdxStatusCaptor.getValue().getStatusReason());
         assertEquals(status, statusEntityCaptor.getValue().getStatus());
         verify(transactionService).required(any(Runnable.class));
-        verify(eventSenderService).sendEventAndNotificationWithMessage(sdxCluster, status.getDefaultResourceEvent(), statusReason);
+        verify(eventSenderService).sendEventAndNotificationWithMessage(sdxCluster, status.getDefaultResourceEvent(), eventMessage);
     }
 }
