@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation.UPSCALE;
-import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage.REDHAT;
-import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage.RHEL_BYOS;
+import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.SupportedSourceMarketplaceImage.CLOUDERA;
+import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.SupportedSourceMarketplaceImage.REDHAT;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -115,7 +115,7 @@ public class AzureTemplateBuilder {
                     && !azureMarketplaceImage.isUsedAsSourceImage());
             model.put("marketplaceImageDetails", azureMarketplaceImage);
             model.put("useSourceImagePlan", Objects.nonNull(azureMarketplaceImage)
-                    && isRedHatByos(azureMarketplaceImage)
+                    && (isRedHatByos(azureMarketplaceImage) || isClouderaByos(azureMarketplaceImage))
                     && azureMarketplaceImage.isUsedAsSourceImage());
             model.put("customImageId", customImageId);
             model.put("storage_account_name", rootDiskStorage);
@@ -152,8 +152,13 @@ public class AzureTemplateBuilder {
     }
 
     private boolean isRedHatByos(AzureMarketplaceImage azureMarketplaceImage) {
-        return Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getPublisherId).orElse("").equalsIgnoreCase(REDHAT)
-                && Optional.ofNullable(azureMarketplaceImage.getOfferId()).orElse("").equalsIgnoreCase(RHEL_BYOS);
+        return Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getPublisherId).orElse("").equalsIgnoreCase(REDHAT.getPublisher())
+                && Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getOfferId).orElse("").matches(REDHAT.getOffer());
+    }
+
+    private boolean isClouderaByos(AzureMarketplaceImage azureMarketplaceImage) {
+        return Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getPublisherId).orElse("").equalsIgnoreCase(CLOUDERA.getPublisher())
+                && Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getOfferId).orElse("").matches(CLOUDERA.getOffer());
     }
 
     public String buildParameters(CloudCredential credential, Network network, Image image) {
