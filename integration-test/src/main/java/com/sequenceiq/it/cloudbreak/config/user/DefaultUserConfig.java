@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.config.server.CliProfileReaderService;
+import com.sequenceiq.it.cloudbreak.util.UmsUtil;
 
 @Component(DEFAULT_USERS)
 class DefaultUserConfig implements TestUserConfig {
@@ -89,7 +90,7 @@ class DefaultUserConfig implements TestUserConfig {
         user.setWorkloadUserName(workloadName);
         user.setWorkloadPassword(MOCK_UMS_PASSWORD);
         user.setDescription("");
-        mockedUms = mockedUms(user.getAccessKey());
+        mockedUms = UmsUtil.isMockUms(user.getAccessKey());
     }
 
     private String mockCrnOrConfiguredCrn(String accessKey, String userCrn) {
@@ -123,16 +124,5 @@ class DefaultUserConfig implements TestUserConfig {
         }
 
         return workloadName;
-    }
-
-    private boolean mockedUms(String accessKey) {
-        try {
-            Crn.fromString(new String(Base64.getDecoder().decode(accessKey)));
-            LOGGER.info("Test user is for a mocked ums");
-            return true;
-        } catch (Exception e) {
-            LOGGER.info("Test user is ready to use against ums");
-            return false;
-        }
     }
 }

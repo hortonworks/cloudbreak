@@ -63,6 +63,7 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.microservice.TestClients;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.util.UmsUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
@@ -475,6 +476,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public String getActingUserAccessKey() {
         return getTestUsers().getActingUser().getAccessKey();
+    }
+
+    public boolean isMockUms() {
+        return UmsUtil.isMockUms(getActingUserAccessKey());
     }
 
     public Crn getActingUserCrn() {

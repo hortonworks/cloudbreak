@@ -354,15 +354,17 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(freeIpaTestClient.describe())
                 .validate();
         waitForUserSync(testContext);
-        testContext
-                .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.syncAll())
-                .await(OperationState.COMPLETED)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .validate();
+        if (!testContext.isMockUms()) {
+            testContext
+                    .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
+                    .given(FreeIpaUserSyncTestDto.class)
+                    .when(freeIpaTestClient.syncAll())
+                    .await(OperationState.COMPLETED)
+                    .given(FreeIpaTestDto.class)
+                    .when(freeIpaTestClient.describe())
+                    .validate();
+        }
     }
 
     protected void setFreeIpaResponse(TestContext testContext) {
