@@ -383,6 +383,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withNetwork()
                 .withTelemetry("telemetry")
                 .withTunnel(testContext.getTunnel())
+                .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),

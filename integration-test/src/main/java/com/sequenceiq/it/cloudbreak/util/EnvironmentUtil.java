@@ -67,6 +67,7 @@ public class EnvironmentUtil {
                     .withTelemetry("telemetry")
                     .withTunnel(ccmTunnel)
                     .withOverrideTunnel()
+                    .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext));
     }
