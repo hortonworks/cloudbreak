@@ -22,12 +22,6 @@ remove_cluster_conf_from_unbound:
         server_address: {{ metadata.server_address }}
 {% endif %}
 
-/etc/dhcp/dhclient.d/google_hostname.sh:
-  file.managed:
-    - makedirs: True
-    - source: salt://unbound/dhcp/google_hostname.sh
-    - mode: 744
-
 /etc/unbound/conf.d/60-domain-dns.conf:
   file.managed:
     - makedirs: True

@@ -21,6 +21,7 @@ base:
     {% if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True %}
     - cdpluksvolumebackup
     {% endif %}
+    - hostname
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound
