@@ -7,7 +7,9 @@
     "Microsoft.DBforPostgreSQL/flexibleServers/write",
     "Microsoft.DBforPostgreSQL/flexibleServers/delete",
     "Microsoft.DBforPostgreSQL/flexibleServers/start/action",
-    "Microsoft.DBforPostgreSQL/flexibleServers/stop/action"
+    "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",
+    "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
+    "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write"
   ],
   "NotActions": [],
   "DataActions": [],
