@@ -125,10 +125,6 @@ public class AzureTemplateBuilderPart1Test {
 
     private static final String LATEST_TEMPLATE_PATH = "templates/arm-v2.ftl";
 
-    private static final String ZONE_REDUNDANT = "\"zones\":[\"1\",\"2\",\"3\"]";
-
-    private static final int ROOT_VOLUME_SIZE = 50;
-
     private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
 
     private static final String SUBNET_CIDR = "10.0.0.0/24";
@@ -904,6 +900,93 @@ public class AzureTemplateBuilderPart1Test {
                                         "name": "rhel-lvm88",
                                         "product": "rhel-byos",
                                         "publisher": "redhat"
+                                   },
+                """);
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceClouderaSourceImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    public void buildTestWithMarketplaceClouderaCdpSourceImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+        azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "cdp-7_2_17", "runtime-7_2_17", "700.56405233.1725954227", true);
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("""
+                                           "imageReference": {
+                                                    "publisher": "cloudera",
+                """);
+        assertThat(templateString).contains("""
+                                           "imageReference": {
+                                                   "id": "cloudbreak-image.vhd"
+                                           }
+                """);
+        assertThat(templateString).contains("""
+                                   "plan": {
+                                        "name": "runtime-7_2_17",
+                                        "product": "cdp-7_2_17",
+                                        "publisher": "cloudera"
+                                   },
+                """);
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceClouderaFreeipaSourceImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    public void buildTestWithMarketplaceClouderaFreeipaSourceImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+        azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "freeipa-1_0", "runtime-7_2_17", "700.56405233.1725954227", true);
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("""
+                                           "imageReference": {
+                                                    "publisher": "cloudera",
+                """);
+        assertThat(templateString).contains("""
+                                           "imageReference": {
+                                                   "id": "cloudbreak-image.vhd"
+                                           }
+                """);
+        assertThat(templateString).contains("""
+                                   "plan": {
+                                        "name": "runtime-7_2_17",
+                                        "product": "freeipa-1_0",
+                                        "publisher": "cloudera"
+                                   },
+                """);
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "buildTestWithMarketplaceClouderaUnknownSourceImage {0}")
+    @MethodSource("templatesPathDataProvider")
+    @SuppressWarnings("checkstyle:RegexpSingleline")
+    public void buildTestWithMarketplaceClouderaUnknownSourceImage(String templatePath) {
+        setupMarketplaceTests(templatePath);
+        azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "unknown-1_0", "runtime-7_2_17", "700.56405233.1725954227", true);
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("""
+                                           "imageReference": {
+                                                    "publisher": "cloudera",
+                """);
+        assertThat(templateString).contains("""
+                                           "imageReference": {
+                                                   "id": "cloudbreak-image.vhd"
+                                           }
+                """);
+        assertThat(templateString).doesNotContain("""
+                                   "plan": {
+                                        "name": "runtime-7_2_17",
+                                        "product": "unknown-1_0",
+                                        "publisher": "cloudera"
                                    },
                 """);
         validateJson(templateString);
