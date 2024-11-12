@@ -4,6 +4,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -63,6 +64,7 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
             @ValidCrn(resource = ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn) {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
+                .filter(Predicate.not(SecretType::internal))
                 .map(type -> new FreeipaSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }
