@@ -102,7 +102,7 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesCdh() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean(), eq(null))).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(""));
@@ -112,7 +112,7 @@ public class StackImageFilterServiceTest {
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
         assertEquals(IMAGE_CDH_ID, images.getCdhImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(false));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(false), eq(null));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -123,7 +123,7 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean(), eq(null))).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(IMAGE_HDP_ID));
@@ -132,7 +132,7 @@ public class StackImageFilterServiceTest {
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(false));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(false), eq(null));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -143,7 +143,7 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean(), eq(null))).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(false);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(""));
@@ -152,7 +152,7 @@ public class StackImageFilterServiceTest {
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, true);
 
         assertThat(images.getBaseImages(), empty());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(true));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(true), eq(null));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
     }

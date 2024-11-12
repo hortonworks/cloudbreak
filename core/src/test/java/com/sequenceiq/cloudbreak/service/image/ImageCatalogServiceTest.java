@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatf
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -724,7 +725,7 @@ public class ImageCatalogServiceTest {
         ret.setName(CUSTOM_CATALOG_NAME);
         when(imageCatalogRepository.findByNameAndWorkspaceId("name", WORKSPACE_ID)).thenReturn(Optional.of(ret));
 
-        StatedImages actual = underTest.getImages(WORKSPACE_ID, "name", null, IMAGE_CATALOG_PLATFORM, false);
+        StatedImages actual = underTest.getImages(WORKSPACE_ID, "name", null, IMAGE_CATALOG_PLATFORM, false, null);
         assertEquals(CUSTOM_CATALOG_NAME, actual.getImageCatalogName());
         assertNull(actual.getImageCatalogUrl());
     }
@@ -733,7 +734,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenThrow(new NotFoundException("no no"));
 
-        assertThatThrownBy(() -> underTest.getImages(WORKSPACE_ID, "verycool", null, IMAGE_CATALOG_PLATFORM, false))
+        assertThatThrownBy(() -> underTest.getImages(WORKSPACE_ID, "verycool", null, IMAGE_CATALOG_PLATFORM, false, null))
                 .isInstanceOf(CloudbreakImageCatalogException.class)
                 .hasMessage("The verycool catalog does not exist or does not belongs to your account.");
 
@@ -796,7 +797,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesFromDefaultWithEmptyInput() throws CloudbreakImageCatalogException {
         setupUserProfileService();
 
-        assertThatThrownBy(() -> underTest.getImagesFromDefault(WORKSPACE_ID, null, null, emptySet(), null, false, false))
+        assertThatThrownBy(() -> underTest.getImagesFromDefault(WORKSPACE_ID, null, null, emptySet(), null, false, false, null))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Either platform or stackName should be filled in request.");
 
@@ -805,7 +806,8 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesFromDefaultGivenBothInput() throws CloudbreakImageCatalogException {
-        assertThatThrownBy(() -> underTest.getImagesFromDefault(WORKSPACE_ID, "stack", imageCatalogPlatform("AWS"), emptySet(), null, false, false))
+        assertThatThrownBy(() -> underTest.getImagesFromDefault(WORKSPACE_ID, "stack", imageCatalogPlatform("AWS"), emptySet(), null, false, false,
+                null))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Platform or stackName cannot be filled in the same request.");
 
@@ -817,7 +819,7 @@ public class ImageCatalogServiceTest {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyBoolean())).thenReturn(new Images(Lists.newArrayList(),
                 Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
-        underTest.getImagesFromDefault(WORKSPACE_ID, "stack", null, emptySet(), null, false, false);
+        underTest.getImagesFromDefault(WORKSPACE_ID, "stack", null, emptySet(), null, false, false, null);
 
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString(), anyBoolean());
         verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString(), anyBoolean());
@@ -829,7 +831,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(ImageCatalogPlatform.class), anyBoolean())).thenReturn(imageCatalogPlatform);
-        underTest.getImagesFromDefault(WORKSPACE_ID, null, imageCatalogPlatform, emptySet(), null, false, false);
+        underTest.getImagesFromDefault(WORKSPACE_ID, null, imageCatalogPlatform, emptySet(), null, false, false, null);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -840,7 +842,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWithEmptyInput() throws CloudbreakImageCatalogException {
-        assertThatThrownBy(() -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, null, null, false, false))
+        assertThatThrownBy(() -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, null, null, false, false, null))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Either platform or stack name must be present in the request.");
 
@@ -849,7 +851,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesGivenBothInput() throws CloudbreakImageCatalogException {
-        assertThatThrownBy(() -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", imageCatalogPlatform("AWS"), null,  false, false))
+        assertThatThrownBy(() -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", imageCatalogPlatform("AWS"), null, false, false, null))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Both platform and existing stack name could not be present in the request.");
 
@@ -861,7 +863,7 @@ public class ImageCatalogServiceTest {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString(), anyBoolean())).thenReturn(new Images(Lists.newArrayList(),
                 Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
-        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", null, null, false, false);
+        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", null, null, false, false, null);
 
         verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString(), anyString(), anyBoolean());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyBoolean());
@@ -877,13 +879,62 @@ public class ImageCatalogServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
-        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false);
+        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, null);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
         verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString(), anyBoolean());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void testGetImagesWithArchitectureThrowsExceptionWhenArmIsNotSupported() throws CloudbreakImageCatalogException, IOException {
+        setupUserProfileService();
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
+        when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "arm64"));
+
+        assertEquals("Not entitled to use arm64 architecture.", exception.getMessage());
+    }
+
+    @Test
+    public void testGetImagesWithArchitectureWhenArmIsSupported() throws CloudbreakImageCatalogException, IOException {
+        setupUserProfileService();
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
+        when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
+        when(entitlementService.isArmInstanceEnabled(anyString())).thenReturn(true);
+
+        Images images = underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "arm64");
+
+        assertThat(images.getCdhImages(), hasSize(1));
+        assertEquals("996aa8bf-bc1a-4cc6-43f1-427b4432c8c2", images.getCdhImages().getFirst().getUuid());
+    }
+
+    @Test
+    public void testGetImagesWithArchitectureWhenX86IsRequested() throws CloudbreakImageCatalogException, IOException {
+        setupUserProfileService();
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
+        when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
+
+        Images images = underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, null, false, false, "x86_64");
+
+        assertThat(images.getCdhImages(), hasSize(1));
+        assertEquals("886aa8bf-bc1a-4cc6-43f1-427b4432c8c2", images.getCdhImages().getFirst().getUuid());
     }
 
     @Test
@@ -1010,7 +1061,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImages actual = underTest.getImages(ACCOUNT_ID, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of(imageCatalogPlatform("AWS")), null, true, false);
+        StatedImages actual = underTest.getImages(ACCOUNT_ID, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of(imageCatalogPlatform("AWS")), null, true, false, null);
         assertEquals(statedImage.getImage(), actual.getImages().getCdhImages().stream().findFirst().get());
 
     }
@@ -1025,7 +1076,7 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImages actual = underTest.getImages(ACCOUNT_ID, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of(imageCatalogPlatform("AWS")), null, true, false);
+        StatedImages actual = underTest.getImages(ACCOUNT_ID, WORKSPACE_ID, CUSTOM_CATALOG_NAME, Set.of(imageCatalogPlatform("AWS")), null, true, false, null);
 
         assertEquals(statedImage.getImage(), actual.getImages().getFreeIpaImages().stream().findFirst().get());
     }

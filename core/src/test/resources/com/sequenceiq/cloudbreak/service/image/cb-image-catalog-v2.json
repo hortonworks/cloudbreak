@@ -90,6 +90,90 @@
     ],
     "cdh-images": [
       {
+        "date": "2018-09-20",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc30161",
+            "ap-northeast-2": "ami-4d6aa021",
+            "ap-southeast-1": "ami-ced60fa1",
+            "ap-southeast-2": "ami-9f9eaaf1",
+            "eu-central-1": "ami-cd4cbaa1",
+            "eu-west-1": "ami-0b067371",
+            "sa-east-1": "ami-70a53311",
+            "us-east-1": "ami-70a73c61",
+            "us-west-1": "ami-3fe8ab51",
+            "us-west-2": "ami-6bf93301"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+        "architecture": "arm64",
+        "package-versions": {
+          "cm": "6.1.1",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "6.1.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://archive.cloudera.com/cdh6/6.1.1/parcels/",
+              "repoid": "CDH",
+              "repository-version": "6.1.1-1.cdh6.1.1.p0.875250"
+            }
+          },
+          "version": "6.1.1"
+        },
+        "repo": {
+          "redhat7": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/"
+        },
+        "version": "6.1.1"
+      },
+      {
+        "date": "2018-09-20",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0fc30162",
+            "ap-northeast-2": "ami-4d6aa022",
+            "ap-southeast-1": "ami-ced60fa2",
+            "ap-southeast-2": "ami-9f9eaaf2",
+            "eu-central-1": "ami-cd4cbaa2",
+            "eu-west-1": "ami-0b067372",
+            "sa-east-1": "ami-70a53312",
+            "us-east-1": "ami-70a73c62",
+            "us-west-1": "ami-3fe8ab52",
+            "us-west-2": "ami-6bf93302"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+        "architecture": "x86_64",
+        "package-versions": {
+          "cm": "6.1.1",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "6.1.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://archive.cloudera.com/cdh6/6.1.1/parcels/",
+              "repoid": "CDH",
+              "repository-version": "6.1.1-1.cdh6.1.1.p0.875250"
+            }
+          },
+          "version": "6.1.1"
+        },
+        "repo": {
+          "redhat7": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/"
+        },
+        "version": "6.1.1"
+      },
+      {
         "date": "2018-09-21",
         "description": "Official Cloudbreak image",
         "images": {
@@ -156,7 +240,9 @@
           "1.16.5"
         ],
         "images": [
-          "f6e778fc-7f17-4535-9021-515351df3691"
+          "f6e778fc-7f17-4535-9021-515351df3691",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]
       },
       {
@@ -165,11 +251,15 @@
         ],
         "defaults": [
           "f6e778fc-7f17-4535-9021-515351df3691",
-          "7aca1fa6-980c-44e2-a75e-3144b18a5993"
+          "7aca1fa6-980c-44e2-a75e-3144b18a5993",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ],
         "images": [
           "f6e778fc-7f17-4535-9021-515351df3691",
-          "7aca1fa6-980c-44e2-a75e-3144b18a5993"
+          "7aca1fa6-980c-44e2-a75e-3144b18a5993",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]
       },
       {
@@ -177,11 +267,15 @@
           "2.1.0-dev.2"
         ],
         "defaults": [
-          "f6e778fc-7f17-4535-9021-515351df3691"
+          "f6e778fc-7f17-4535-9021-515351df3691",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ],
         "images": [
           "f6e778fc-7f17-4535-9021-515351df3691",
-          "7aca1fa6-980c-44e2-a75e-3144b18a5993"
+          "7aca1fa6-980c-44e2-a75e-3144b18a5993",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]
       },
       {
@@ -191,7 +285,9 @@
         ],
         "images": [
           "f6e778fc-7f17-4535-9021-515351df3691",
-          "7aca1fa6-980c-44e2-a75e-3144b18a5993"
+          "7aca1fa6-980c-44e2-a75e-3144b18a5993",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]
       },
       {
@@ -201,7 +297,9 @@
           "2.0.0-rc.2"
         ],
         "images": [
-          "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
+          "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "996aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+          "886aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]
       }
     ]

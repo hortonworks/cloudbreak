@@ -56,7 +56,7 @@ public class StackImageFilterService {
                 imageCatalogName,
                 null,
                 platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(), stack.getPlatformVariant()),
-                defaultOnly);
+                defaultOnly, null);
         return getApplicableImages(imageCatalogName, statedImages, stack);
     }
 

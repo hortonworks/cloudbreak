@@ -72,7 +72,7 @@ public class CoreImageProvider implements ImageProvider {
     private List<Image> getImagesInCatalogForPlatform(String catalog, String platform) throws Exception {
         ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, catalog, null,
                 platform, null,
-                null, false, false);
+                null, false, false, null);
         LOGGER.debug("Images received: {}", imagesV4Response);
         return Optional.ofNullable(imagesV4Response.getFreeipaImages()).
                 orElseGet(List::of).stream()

@@ -187,7 +187,7 @@ public class CachedImageCatalogWrapperProviderTest {
 
         assertEquals(mapToUuid(expectedCatalog.getImages().getBaseImages()), mapToUuid(actualCatalog.getImages().getBaseImages()));
         assertEquals(mapToUuid(Collections.emptyList()), mapToUuid(actualCatalog.getImages().getCdhImages()));
-        assertEquals(1, expectedCatalog.getImages().getCdhImages().size());
+        assertEquals(3, expectedCatalog.getImages().getCdhImages().size());
     }
 
     @Test

@@ -340,7 +340,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform, runtimeVersion, null, govCloud, true)
+                            platform, runtimeVersion, null, govCloud, true, null)
                     .getCdhImages().stream()
                     .max(Comparator.comparing(ImageV4Response::getPublished))
                     .orElseThrow(() -> new TestFailException(
@@ -373,7 +373,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform, null, null, govCloud, true).getBaseImages();
+                            platform, null, null, govCloud, true, null).getBaseImages();
 
             if (images.isEmpty()) {
                 throw new TestFailException("Images are empty, there is not any base image on provider " + platform);

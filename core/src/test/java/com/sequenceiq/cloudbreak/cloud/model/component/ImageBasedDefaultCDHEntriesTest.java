@@ -127,7 +127,7 @@ public class ImageBasedDefaultCDHEntriesTest {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
 
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true)).thenReturn(statedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(statedImages);
 
         Map<String, ImageBasedDefaultCDHInfo> x86Actual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.X86_64, IMAGE_CATALOG_NAME);
         Image x86Image = x86Images.stream().filter(Image::isDefaultImage).findFirst().get();
@@ -148,8 +148,8 @@ public class ImageBasedDefaultCDHEntriesTest {
         StatedImages statedImages = StatedImages.statedImages(images, null, null);
         StatedImages emptyStatedImages = StatedImages.statedImages(emptyImages, null, null);
 
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true)).thenReturn(emptyStatedImages);
-        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true)).thenReturn(statedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(emptyStatedImages);
+        when(imageCatalogService.getImages(0L, IMAGE_CATALOG_NAME, null, imageCatalogPlatform, true, null)).thenReturn(statedImages);
 
         Map<String, ImageBasedDefaultCDHInfo> actual = victim.getEntries(0L, imageCatalogPlatform, null, Architecture.X86_64, IMAGE_CATALOG_NAME);
 
