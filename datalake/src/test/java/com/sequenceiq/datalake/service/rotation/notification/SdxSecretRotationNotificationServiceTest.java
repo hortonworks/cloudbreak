@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
@@ -55,11 +56,11 @@ class SdxSecretRotationNotificationServiceTest {
         SdxCluster cluster = new SdxCluster();
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(anyString())).thenReturn(Optional.of(cluster));
 
-        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING, SecretListField.DESCRIPTION);
 
         verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
                 List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DESCRIPTION.SALT_BOOT_SECRETS");
     }
 
     @Test
@@ -67,11 +68,11 @@ class SdxSecretRotationNotificationServiceTest {
         SdxCluster cluster = new SdxCluster();
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(anyString())).thenReturn(Optional.of(cluster));
 
-        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING, SecretListField.DESCRIPTION);
 
         verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
                 List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DESCRIPTION.SALT_BOOT_SECRETS");
     }
 
     @Test
@@ -79,10 +80,10 @@ class SdxSecretRotationNotificationServiceTest {
         SdxCluster cluster = new SdxCluster();
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(anyString())).thenReturn(Optional.of(cluster));
 
-        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING, SecretListField.DESCRIPTION);
 
         verify(sdxNotificationService).send(ResourceEvent.SECRET_ROTATION_STEP,
                 List.of("Execute secret [random secret]: small step for a secret, big step for the customer"), cluster);
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DESCRIPTION.SALT_BOOT_SECRETS");
     }
 }

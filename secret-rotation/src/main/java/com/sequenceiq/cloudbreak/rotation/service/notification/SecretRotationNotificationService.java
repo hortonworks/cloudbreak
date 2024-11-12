@@ -27,12 +27,13 @@ public class SecretRotationNotificationService {
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
-    public void sendNotification(RotationMetadata metadata, SecretRotationStep step) {
-        createNotificationMessage(metadata.secretType(), step, metadata.currentExecution()).ifPresent(message -> send(metadata.resourceCrn(), message));
+    public void sendNotification(RotationMetadata metadata, SecretRotationStep step, SecretListField secretListField) {
+        createNotificationMessage(metadata.secretType(), step, metadata.currentExecution(), secretListField)
+                .ifPresent(message -> send(metadata.resourceCrn(), message));
     }
 
-    public String getMessage(SerializableRotationEnum rotationEnum) {
-        String code = rotationEnum.getClazz().getSimpleName() + "." + rotationEnum.value();
+    public String getMessage(SerializableRotationEnum rotationEnum, SecretListField secretListField) {
+        String code = rotationEnum.getClazz().getSimpleName() + "." + secretListField.name() + "." + rotationEnum.value();
         try {
             return cloudbreakMessagesService.getMessage(code);
         } catch (Exception e) {
@@ -41,11 +42,13 @@ public class SecretRotationNotificationService {
         }
     }
 
-    private Optional<String> createNotificationMessage(SecretType secretType, SecretRotationStep step, RotationFlowExecutionType executionType) {
+    private Optional<String> createNotificationMessage(SecretType secretType, SecretRotationStep step,
+            RotationFlowExecutionType executionType, SecretListField secretListField) {
         if (step.skipNotification() || !NOTIFIABLE_EXECUTION_TYPES.contains(executionType)) {
             return Optional.empty();
         }
-        return Optional.of(getMessage(executionType) + " secret [" + getMessage(secretType) + "]: " + getMessage(step));
+        return Optional.of(getMessage(executionType, SecretListField.DESCRIPTION) + " secret [" +
+                getMessage(secretType, secretListField) + "]: " + getMessage(step, SecretListField.DESCRIPTION));
     }
 
     protected void send(String resourceCrn, String message) {

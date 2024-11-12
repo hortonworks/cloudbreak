@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -75,7 +76,9 @@ public class SdxRotationController implements SdxRotationEndpoint {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
                 .filter(Predicate.not(SecretType::internal))
-                .map(type -> new SdxSecretTypeResponse(type.value(), notificationService.getMessage(type)))
+                .map(type -> new SdxSecretTypeResponse(type.value(),
+                        notificationService.getMessage(type, SecretListField.DISPLAY_NAME),
+                        notificationService.getMessage(type, SecretListField.DESCRIPTION)))
                 .toList();
     }
 }

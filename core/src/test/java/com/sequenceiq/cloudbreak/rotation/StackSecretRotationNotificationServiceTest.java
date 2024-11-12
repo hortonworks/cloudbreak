@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -61,30 +62,30 @@ class StackSecretRotationNotificationServiceTest {
     public void testRotationNotification() {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stackView);
 
-        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING, SecretListField.DESCRIPTION);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DESCRIPTION.SALT_BOOT_SECRETS");
     }
 
     @Test
     public void testRollbackNotification() {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stackView);
 
-        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING, SecretListField.DESCRIPTION);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DESCRIPTION.SALT_BOOT_SECRETS");
     }
 
     @Test
     public void testFinalizeNotification() {
         when(stackDtoService.getStackViewByCrn(anyString())).thenReturn(stackView);
 
-        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING);
+        underTest.sendNotification(METADATA, CLOUDBREAK_ROTATE_POLLING, SecretListField.DESCRIPTION);
 
         verifyEventIsSent("Execute secret [random secret]: small step for a secret, big step for the customer");
-        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.SALT_BOOT_SECRETS");
+        verify(cloudbreakMessagesService).getMessage("DatalakeSecretType.DESCRIPTION.SALT_BOOT_SECRETS");
     }
 
     private void verifyEventIsSent(String message) {

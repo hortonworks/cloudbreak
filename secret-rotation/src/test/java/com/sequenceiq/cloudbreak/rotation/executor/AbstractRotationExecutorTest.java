@@ -38,70 +38,70 @@ public class AbstractRotationExecutorTest {
     public void testRotate() {
         underTest.executeRotate(new RotationContext(""), METADATA);
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testRotateFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executeRotate(new RotationContext(null), METADATA));
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testRollback() {
         underTest.executeRollback(new RotationContext(""), METADATA);
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testRollbackFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executeRollback(new RotationContext(null), METADATA));
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testFinalize() {
         underTest.executeFinalize(new RotationContext(""), METADATA);
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testFinalizeFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executeFinalize(new RotationContext(null), METADATA));
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testPreValidate() {
         underTest.executePreValidation(new RotationContext(""), METADATA);
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testPreValidateFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(new RotationContext(null), METADATA));
 
-        verify(secretRotationNotificationService).sendNotification(any(), any());
+        verify(secretRotationNotificationService).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testPostValidate() {
         underTest.executePostValidation(new RotationContext(""), METADATA);
 
-        verify(secretRotationNotificationService, times(0)).sendNotification(any(), any());
+        verify(secretRotationNotificationService, times(0)).sendNotification(any(), any(), any());
     }
 
     @Test
     public void testPostValidateFailure() {
         assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(new RotationContext(null), METADATA));
 
-        verify(secretRotationNotificationService, times(0)).sendNotification(any(), any());
+        verify(secretRotationNotificationService, times(0)).sendNotification(any(), any(), any());
     }
 
     private static class TestExecutor extends AbstractRotationExecutor<RotationContext> {

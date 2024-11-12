@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -74,7 +75,9 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
                 .filter(Predicate.not(SecretType::internal))
-                .map(type -> new DistroXSecretTypeResponse(type.value(), notificationService.getMessage(type)))
+                .map(type -> new DistroXSecretTypeResponse(type.value(),
+                        notificationService.getMessage(type, SecretListField.DISPLAY_NAME),
+                        notificationService.getMessage(type, SecretListField.DESCRIPTION)))
                 .toList();
     }
 }

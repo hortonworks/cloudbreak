@@ -15,13 +15,16 @@ public class DistroXSecretTypeResponse {
     @NotNull
     private String secretType;
 
+    private String displayName;
+
     private String description;
 
     public DistroXSecretTypeResponse() {
     }
 
-    public DistroXSecretTypeResponse(String secretType, String description) {
+    public DistroXSecretTypeResponse(String secretType, String displayName, String description) {
         this.secretType = secretType;
+        this.displayName = displayName;
         this.description = description;
     }
 
@@ -41,10 +44,19 @@ public class DistroXSecretTypeResponse {
         this.description = description;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public String toString() {
         return "DistroXSecretTypeResponse{" +
                 "secretType='" + secretType + '\'' +
+                ", displayName='" + displayName + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

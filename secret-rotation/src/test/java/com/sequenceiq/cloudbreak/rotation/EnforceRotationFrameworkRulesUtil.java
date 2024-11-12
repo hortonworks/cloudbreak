@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +23,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 
 public class EnforceRotationFrameworkRulesUtil {
 
@@ -54,7 +56,15 @@ public class EnforceRotationFrameworkRulesUtil {
     public static void enforceMessagesForTypesAndSteps(MessageSource messageSource) {
         Stream.concat(getSecretTypeStream(), getRotationStepStream())
                 .forEach(rotationEnum -> {
-                    String code = rotationEnum.getClazz().getSimpleName() + "." + rotationEnum.value();
+                    String code = rotationEnum.getClazz().getSimpleName() + "." + SecretListField.DESCRIPTION +  "." + rotationEnum.value();
+                    assertDoesNotThrow(() -> messageSource.getMessage(code, null, Locale.getDefault()),
+                            String.format("Rotation enum %s does not have corresponding entry in messages property file.", rotationEnum));
+                });
+        getSecretTypeStream()
+                .map(rotationEnum -> (SecretType) rotationEnum)
+                .filter(Predicate.not(SecretType::internal))
+                .forEach(rotationEnum -> {
+                    String code = rotationEnum.getClazz().getSimpleName() + "." + SecretListField.DISPLAY_NAME +  "." + rotationEnum.value();
                     assertDoesNotThrow(() -> messageSource.getMessage(code, null, Locale.getDefault()),
                             String.format("Rotation enum %s does not have corresponding entry in messages property file.", rotationEnum));
                 });

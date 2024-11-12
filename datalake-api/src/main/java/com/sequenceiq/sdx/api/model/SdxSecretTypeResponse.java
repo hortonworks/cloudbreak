@@ -19,11 +19,15 @@ public class SdxSecretTypeResponse {
     @Schema(description = "Description")
     private String description;
 
+    @Schema(description = "Display name")
+    private String displayName;
+
     public SdxSecretTypeResponse() {
     }
 
-    public SdxSecretTypeResponse(String secretType, String description) {
+    public SdxSecretTypeResponse(String secretType, String displayName, String description) {
         this.secretType = secretType;
+        this.displayName = displayName;
         this.description = description;
     }
 
@@ -43,10 +47,19 @@ public class SdxSecretTypeResponse {
         this.description = description;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public String toString() {
         return "SdxSecretTypeResponse{" +
                 "secretType='" + secretType + '\'' +
+                ", displayName='" + displayName + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

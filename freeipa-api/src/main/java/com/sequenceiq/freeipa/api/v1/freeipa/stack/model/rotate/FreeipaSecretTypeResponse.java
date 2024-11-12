@@ -15,13 +15,16 @@ public class FreeipaSecretTypeResponse {
     @NotNull
     private String secretType;
 
+    private String displayName;
+
     private String description;
 
     public FreeipaSecretTypeResponse() {
     }
 
-    public FreeipaSecretTypeResponse(String secretType, String description) {
+    public FreeipaSecretTypeResponse(String secretType, String displayName, String description) {
         this.secretType = secretType;
+        this.displayName = displayName;
         this.description = description;
     }
 
@@ -41,10 +44,19 @@ public class FreeipaSecretTypeResponse {
         this.description = description;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public String toString() {
         return "FreeipaSecretTypeResponse{" +
                 "secretType='" + secretType + '\'' +
+                ", displayName='" + displayName + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }
