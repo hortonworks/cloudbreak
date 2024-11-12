@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONME
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
@@ -72,6 +73,7 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
             @ValidCrn(resource = DATAHUB) @ResourceCrn @NotEmpty @TenantAwareParam String datahubCrn) {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
+                .filter(Predicate.not(SecretType::internal))
                 .map(type -> new DistroXSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }

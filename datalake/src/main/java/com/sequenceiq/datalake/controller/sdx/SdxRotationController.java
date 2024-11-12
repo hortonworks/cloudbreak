@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONME
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -73,6 +74,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
             @ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty @TenantAwareParam String datalakeCrn) {
         // further improvement needed to query secret types for resource
         return enabledSecretTypes.stream()
+                .filter(Predicate.not(SecretType::internal))
                 .map(type -> new SdxSecretTypeResponse(type.value(), notificationService.getMessage(type)))
                 .toList();
     }
