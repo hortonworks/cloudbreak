@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.environment.environment.domain.CompactView;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
@@ -105,13 +106,29 @@ public class EnvironmentDeletionService {
     }
 
     private List<EnvironmentViewDto> deleteMultiple(String actualUserCrn, boolean cascading, boolean forced, Collection<EnvironmentView> environments) {
-        return new ArrayList<>(environments).stream()
+        Collection<EnvironmentView> environmentsToDelete = environments;
+        if (cascading) {
+            environmentsToDelete = removeChildEnvironmentsToAvoidDeletionConflicts(environments);
+        }
+        return new ArrayList<>(environmentsToDelete).stream()
                 .map(environment -> {
                     LOGGER.debug("Starting to delete environment [name: {}, CRN: {}]", environment.getName(), environment.getResourceCrn());
                     delete(environment, actualUserCrn, cascading, forced);
                     return environmentDtoConverter.environmentViewToViewDto(environment);
                 })
                 .collect(Collectors.toList());
+    }
+
+    private Collection<EnvironmentView> removeChildEnvironmentsToAvoidDeletionConflicts(Collection<EnvironmentView> environments) {
+        Set<String> environmentNamesToDelete = environments.stream().map(CompactView::getName).collect(Collectors.toSet());
+        Set<EnvironmentView> childrenEnvironmentsToRemove = environments.stream().filter(environmentView -> environmentView.getParentEnvironment() != null)
+                .filter(environmentView -> environmentNamesToDelete.contains(environmentView.getParentEnvironment().getName()))
+                .collect(Collectors.toSet());
+        LOGGER.info("Removing child environments [names: {}] to avoid deletion conflicts as their parents are in the deletion list and parent deletion " +
+                "deletes children environment.", childrenEnvironmentsToRemove.stream().map(CompactView::getName).collect(Collectors.joining(", ")));
+        return environments.stream()
+                .filter(env -> !childrenEnvironmentsToRemove.contains(env))
+                .collect(Collectors.toSet());
     }
 
     @VisibleForTesting

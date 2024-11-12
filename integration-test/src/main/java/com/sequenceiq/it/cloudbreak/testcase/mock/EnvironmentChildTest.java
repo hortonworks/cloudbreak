@@ -161,7 +161,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT))
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
-                .when(environmentTestClient.deleteMultipleByNames(parentEnvName))
+                .when(environmentTestClient.deleteMultipleByNames(parentEnvName, testContext.get(CHILD_ENVIRONMENT).getName()))
                 .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT))
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.ARCHIVED)

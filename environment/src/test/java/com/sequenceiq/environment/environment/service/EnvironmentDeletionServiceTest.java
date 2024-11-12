@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.domain.ParentEnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -256,6 +257,32 @@ public class EnvironmentDeletionServiceTest {
                 .deleteMultipleByNames(names, ACCOUNT_ID, USER, NON_CASCADE, false).size());
 
         verify(environmentDeletionServiceWired, times(expected)).delete(any(), eq(USER), eq(NON_CASCADE), eq(false));
+    }
+
+    @Test
+    public void deleteMultipleByNamesIfParentAndChildEnvironmentAreInTheSet() {
+        Set<String> names = Set.of("name1", "name2");
+        EnvironmentView e1 = new EnvironmentView();
+        e1.setId(0L);
+        e1.setName("name1");
+        EnvironmentView e2 = new EnvironmentView();
+        e2.setId(1L);
+        e2.setName("name2");
+        ParentEnvironmentView parentEnvironment = new ParentEnvironmentView();
+        parentEnvironment.setName("name1");
+        parentEnvironment.setId(0L);
+        e2.setParentEnvironment(parentEnvironment);
+        Set<EnvironmentView> envs = Set.of(e1, e2);
+        EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
+
+        when(environmentService
+                .findByNamesInAccount(eq(names), eq(ACCOUNT_ID))).thenReturn(envs);
+
+        assertEquals(1, environmentDeletionServiceWired
+                .deleteMultipleByNames(names, ACCOUNT_ID, USER, CASCADE, false).size());
+
+        verify(environmentDeletionServiceWired, times(1)).delete(any(), eq(USER), eq(CASCADE), eq(false));
+        verify(reactorFlowManager).triggerCascadingDeleteFlow(eq(e1), eq(USER), eq(false));
     }
 
     @Test
