@@ -4,10 +4,6 @@ public class AzureMarketplaceImage {
 
     public static final String MARKETPLACE_REGION = "default";
 
-    public static final String REDHAT = "redhat";
-
-    public static final String RHEL_BYOS = "rhel-byos";
-
     private final String publisherId;
 
     private final String offerId;
