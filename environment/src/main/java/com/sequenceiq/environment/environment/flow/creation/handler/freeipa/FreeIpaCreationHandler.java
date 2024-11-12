@@ -179,13 +179,13 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
             freeIpaService.create(createFreeIpaRequest);
             awaitFreeIpaCreation(environmentDto);
-            AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(environmentDto);
-            if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
-                dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
-            }
         } else {
             LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environmentDto.getResourceCrn());
             awaitFreeIpaCreation(environmentDto);
+        }
+        AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = createAddDnsZoneForSubnetIdsRequest(environmentDto);
+        if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+            dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
         }
     }
 
@@ -227,13 +227,14 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return StringUtils.isNotBlank(addDnsZoneNetwork.getNetworkId()) && !addDnsZoneNetwork.getSubnetIds().isEmpty();
     }
 
-    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(EnvironmentDto environmentDto) {
+    private AddDnsZoneForSubnetIdsRequest createAddDnsZoneForSubnetIdsRequest(EnvironmentDto environmentDto) {
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = new AddDnsZoneForSubnetIdsRequest();
         addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environmentDto.getResourceCrn());
         AddDnsZoneNetwork addDnsZoneNetwork = new AddDnsZoneNetwork();
         addDnsZoneNetwork.setNetworkId(environmentDto.getNetwork().getNetworkId());
         addDnsZoneNetwork.setSubnetIds(environmentDto.getNetwork().getSubnetIds());
         addDnsZoneForSubnetIdsRequest.setAddDnsZoneNetwork(addDnsZoneNetwork);
+        LOGGER.debug("Request for additional DNS zones: {}", addDnsZoneForSubnetIdsRequest);
         return addDnsZoneForSubnetIdsRequest;
     }
 

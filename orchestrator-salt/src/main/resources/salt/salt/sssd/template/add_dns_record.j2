@@ -8,8 +8,13 @@ function cleanup() {
 
 trap cleanup EXIT
 
+function errcho(){ >&2 echo "$@"; }
+
 echo "$PW" | kinit {{ pillar['sssd-ipa']['principal'] }}
 
+exec 3>/var/log/dnsrecord-add-debug.log
+# Redirect `set -x` output to `stdout`, which is now captured in the log file.
+BASH_XTRACEFD=3
 set -x
 
 HOSTNAME=$(hostname)
@@ -26,20 +31,22 @@ do
   retVal=0
   alreadyExists=0
   ipa dnsrecord-mod {{ pillar['sssd-ipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}" --ttl {{ pillar['sssd-ipa']['dns_ttl'] }} 2>"${IPA_STDERR}" || retVal=$?
-  cat "${IPA_STDERR}" >&2
   if grep "ERROR: no modifications to be performed" ${IPA_STDERR} &>/dev/null; then
     alreadyExists=1
     echo "DNS a-record already exists for ${HOSTNAME}"
+  else
+    cat "${IPA_STDERR}" >&2
   fi
-  rm "${IPA_STDERR}"
+  rm -f "${IPA_STDERR}"
   if [[ "$retVal" -eq 0 || ( "$retVal" -eq 1 && "$alreadyExists" -eq 1 ) ]]; then
     break
   elif [[ "$attempt" -eq 3 ]]; then
-    echo "Failed to set DNS A-record for ${HOSTNAME}"
+    errcho "Failed to set DNS A-record for ${HOSTNAME}"
     false
   fi
 done
 
+REVERSE_RECORD_CREATED=0
 for zone in $(ipa dnszone-find --raw | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
 do
     ZONE_NET=${zone//.in-addr.arpa./}
@@ -50,13 +57,22 @@ do
           ipa dnsrecord-add "$zone" "$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}
         fi
         if ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
+          REVERSE_RECORD_CREATED=1
           break
         else
-          echo "Failed to set Reverse DNS PTR-record for ${FQDN}"
+          errcho "Failed to set Reverse DNS PTR-record for ${FQDN} with IP $IPADDR"
           false
         fi
     fi
 done
 
+if [[ "$REVERSE_RECORD_CREATED" -eq 0 ]]; then
+  errcho "Reverse record creation failed for $HOSTNAME with IP $IPADDR"
+  false
+fi
+
 set +x
 set +e
+
+# Close file descriptor 3 explicitly
+exec 3>&-

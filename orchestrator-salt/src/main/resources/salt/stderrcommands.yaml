@@ -2,3 +2,4 @@
 - /opt/salt/scripts/restore_db.sh
 - /opt/salt/scripts/backup_dry_run_validation.sh
 - /opt/salt/scripts/restore_dry_run_validation.sh
+- /opt/salt/scripts/add_dns_record.sh

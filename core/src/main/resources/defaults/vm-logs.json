@@ -446,5 +446,9 @@
   {
     "label": "luks_volume_backup_daily_bypass",
     "path": "/tmp/cdp_luks_volume_backup_daily_bypass"
+  },
+  {
+    "label": "add_dns_record_log",
+    "path": "/var/log/dnsrecord-add*.log"
   }
 ]
