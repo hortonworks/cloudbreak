@@ -14,6 +14,7 @@ base:
              - ccm
              - monitoring
              - rhelrepo
+             - hostname
 
            'recipes:pre-cloudera-manager-start':
              - match: grain
