@@ -56,7 +56,7 @@ addService() {
   EXISTS=$?
   set -e
   if [ $EXISTS -ne 0 ]; then
-    ipa service-add "$SERVICE_PRINCIPAL"
+    ipa service-add "$SERVICE_PRINCIPAL" --force
   fi
 }
 

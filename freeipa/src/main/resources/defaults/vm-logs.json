@@ -166,5 +166,17 @@
   {
     "label": "luks_volume_backup_daily_bypass",
     "path": "/tmp/cdp_luks_volume_backup_daily_bypass"
+  },
+  {
+    "label": "ipa-restore-full-log",
+    "path": "/var/log/ipa-restore-full.log"
+  },
+  {
+    "label": "ipa-restore-data-log",
+    "path": "/var/log/ipa-restore-data.log"
+  },
+  {
+    "label": "ipa-restore-update-dns-log",
+    "path": "/var/log/ipa-restore-update-dns.log"
   }
 ]
