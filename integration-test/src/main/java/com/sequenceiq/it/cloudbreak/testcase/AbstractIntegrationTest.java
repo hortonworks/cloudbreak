@@ -412,7 +412,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         initiateEnvironmentCreation(testContext);
         testContext
                 .given(SdxInternalTestDto.class)
-                    .withRuntimeVersion(runtimeVersion);
+                .withRuntimeVersion(runtimeVersion);
         initiateDatalakeCreation(testContext);
         waitForEnvironmentCreation(testContext);
         waitForUserSync(testContext);

@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_ARM_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
@@ -112,7 +113,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -120,6 +120,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -546,9 +547,12 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.ranger.ldap.usersync}")
     private boolean rangerLdapUsersyncEnabled;
 
-    private Set<String> grantedEntitlements = new HashSet<>();
+    @Value("${auth.mock.aws.arm.datahub}")
+    private boolean awsArmDataHubEnabled;
 
-    private Set<String> revokedEntitlements = new HashSet<>();
+    private final Set<String> grantedEntitlements = new ConcurrentSkipListSet<>();
+
+    private final Set<String> revokedEntitlements = new ConcurrentSkipListSet<>();
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -1014,6 +1018,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (rangerLdapUsersyncEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RANGER_LDAP_USERSYNC));
+        }
+        if (awsArmDataHubEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_AWS_ARM_DATAHUB));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
