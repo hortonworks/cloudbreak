@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.start;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,11 +29,17 @@ public class OneFreeIpaReachableAttempt implements AttemptMaker<Void> {
 
     private final Set<InstanceMetaData> instanceMetaDataSet;
 
+    private final int consecutiveSuccess;
+
+    private final Map<String, Integer> consecutiveSuccessCounter;
+
     public OneFreeIpaReachableAttempt(FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService, Stack stack,
-            Set<InstanceMetaData> instanceMetaDataSet) {
+            Set<InstanceMetaData> instanceMetaDataSet, int consecutiveSuccess) {
         this.freeIpaInstanceHealthDetailsService = freeIpaInstanceHealthDetailsService;
         this.stack = stack;
         this.instanceMetaDataSet = instanceMetaDataSet;
+        this.consecutiveSuccess = consecutiveSuccess;
+        consecutiveSuccessCounter = new HashMap<>(instanceMetaDataSet.size());
     }
 
     @Override
@@ -46,13 +54,20 @@ public class OneFreeIpaReachableAttempt implements AttemptMaker<Void> {
                 RPCResponse<Boolean> result = checkedMeasure(() -> freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
                         ":::Freeipa start::: FreeIPA health check ran in {}ms");
                 if (result.getResult()) {
-                    LOGGER.debug("Freeipa services are available and freeipa is working (on instance: {})", instanceMetaData.getInstanceId());
-                    return AttemptResults.finishWith(null);
+                    Integer currentSuccessCount = consecutiveSuccessCounter.compute(instanceMetaData.getInstanceId(),
+                            (key, value) -> Optional.ofNullable(value).orElse(0) + 1);
+                    LOGGER.debug("Freeipa services are available and freeipa is working (on instance: {}). Consecutive success [{}/{}]",
+                            instanceMetaData.getInstanceId(), currentSuccessCount, consecutiveSuccess);
+                    if (currentSuccessCount >= consecutiveSuccess) {
+                        return AttemptResults.finishWith(null);
+                    }
                 } else {
                     LOGGER.debug("Freeipa services are available, but freeipa is not working (on instance: {})", instanceMetaData.getInstanceId());
+                    consecutiveSuccessCounter.computeIfPresent(instanceMetaData.getInstanceId(), (key, value) -> 0);
                 }
             } catch (Exception e) {
                 LOGGER.debug("Freeipa services have not been available yet (on instance: {})", instanceMetaData.getInstanceId());
+                consecutiveSuccessCounter.computeIfPresent(instanceMetaData.getInstanceId(), (key, value) -> 0);
             }
         }
         return AttemptResults.justContinue();

@@ -46,10 +46,12 @@ class OneFreeIpaReachableAttemptTest {
         InMemoryStateStore.putStack(ID, PollGroup.POLLABLE);
 
         InstanceMetaData instance1 = new InstanceMetaData();
+        instance1.setInstanceId("ipaserver1");
         InstanceMetaData instance2 = new InstanceMetaData();
+        instance2.setInstanceId("ipaserver2");
         instanceSet = Set.of(instance1, instance2);
 
-        oneFreeIpaReachableAttemptUnderTest = new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceSet);
+        oneFreeIpaReachableAttemptUnderTest = new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceSet, 1);
         response = new RPCResponse<>();
     }
 
@@ -57,8 +59,32 @@ class OneFreeIpaReachableAttemptTest {
     public void testAttemptSucceed() throws Exception {
         response.setResult(Boolean.TRUE);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
-        Assertions.assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.FINISH);
+        Assertions.assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
         verify(freeIpaInstanceHealthDetailsService, times(1)).checkFreeIpaHealth(any(), any());
+    }
+
+    @Test
+    public void testAttemptSecondTimeSucceed() throws Exception {
+        response.setResult(Boolean.TRUE);
+        oneFreeIpaReachableAttemptUnderTest = new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceSet, 2);
+        when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
+        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        Assertions.assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        verify(freeIpaInstanceHealthDetailsService, times(3)).checkFreeIpaHealth(any(), any());
+    }
+
+    @Test
+    public void testAttemptSecondTimeSucceedWithAFailure() throws Exception {
+        response.setResult(Boolean.TRUE);
+        oneFreeIpaReachableAttemptUnderTest = new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceSet, 2);
+        when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
+        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        response.setResult(Boolean.FALSE);
+        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        response.setResult(Boolean.TRUE);
+        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        Assertions.assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        verify(freeIpaInstanceHealthDetailsService, times(7)).checkFreeIpaHealth(any(), any());
     }
 
     @Test

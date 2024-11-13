@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,11 +27,11 @@ public class FreeIpaServiceStartService {
     @Value("${freeipa.start.polling.sleeping.time:5}")
     private Integer sleepingTime;
 
-    private AttemptMakerFactory attemptMakerFactory;
+    @Value("${freeipa.start.polling.consecutive.success:5}")
+    private Integer consecutiveSuccess;
 
-    public FreeIpaServiceStartService(AttemptMakerFactory attemptMakerFactory) {
-        this.attemptMakerFactory = attemptMakerFactory;
-    }
+    @Inject
+    private AttemptMakerFactory attemptMakerFactory;
 
     public void pollFreeIpaHealth(Stack stack) {
         Set<InstanceMetaData> notTerminatedStackInstances = stack.getAllInstanceMetaDataList().stream()
@@ -43,7 +45,7 @@ public class FreeIpaServiceStartService {
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
                     .waitPeriodly(sleepingTime, TimeUnit.SECONDS)
-                    .run(attemptMakerFactory.create(stack, instanceMetaDataSet));
+                    .run(attemptMakerFactory.create(stack, instanceMetaDataSet, consecutiveSuccess));
         } catch (Exception e) {
             LOGGER.info("freeipa health check poller failed, cause: {}", e.getMessage());
             throw new OperationException("Failed to start freeipa services");

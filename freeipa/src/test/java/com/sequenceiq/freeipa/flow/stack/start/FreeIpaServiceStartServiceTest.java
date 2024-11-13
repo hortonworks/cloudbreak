@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.stack.start;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,9 +38,10 @@ public class FreeIpaServiceStartServiceTest {
     @BeforeEach
     void setup() {
         this.stack = new Stack();
-        when(attemptMakerFactory.create(any(), any())).thenReturn(oneFreeIpaReachableAttempt);
+        when(attemptMakerFactory.create(any(), any(), anyInt())).thenReturn(oneFreeIpaReachableAttempt);
         ReflectionTestUtils.setField(freeIpaServiceStartServiceUnderTest, "attempt", 2);
         ReflectionTestUtils.setField(freeIpaServiceStartServiceUnderTest, "sleepingTime", 1);
+        ReflectionTestUtils.setField(freeIpaServiceStartServiceUnderTest, "consecutiveSuccess", 1);
     }
 
     @Test
