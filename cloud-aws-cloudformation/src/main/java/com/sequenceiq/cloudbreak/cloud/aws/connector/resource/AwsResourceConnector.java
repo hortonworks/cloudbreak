@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -186,6 +187,12 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         return awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
+    }
+
+    @Override
+    public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        ExternalDatabaseStatus databaseStatus = awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
+        return new ExternalDatabaseParameters(databaseStatus, null, null);
     }
 
     @Override

@@ -24,7 +24,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -51,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.service.CloudResourceValidationService;
@@ -89,6 +92,8 @@ public class AzureDatabaseResourceService {
             DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS,
             INACCESSIBLE, ExternalDatabaseStatus.UNKNOWN,
             AzureSingleServerClient.UNKNOWN, ExternalDatabaseStatus.UNKNOWN);
+
+    private static final long GB_TO_MB = 1024L;
 
     @Inject
     private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
@@ -382,28 +387,67 @@ public class AzureDatabaseResourceService {
     }
 
     private ExternalDatabaseStatus getExternalDatabaseStatus(DatabaseStack stack, AzureClient client, String resourceGroupName) {
-        AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
-        if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
-            LOGGER.debug("Getting flexible server status from Azure for {} database", databaseServerView.getDbServerName());
-            return convertFlexibleStatus(
-                    client.getFlexibleServerClient().getFlexibleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
-        } else {
-            LOGGER.debug("Getting single server status from Azure for {} database", databaseServerView.getDbServerName());
-            return convertSingleStatus(
-                    client.getSingleServerClient().getSingleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
-        }
+        return getExternalDatabaseParameters(stack, client, resourceGroupName).externalDatabaseStatus();
     }
 
-    private ExternalDatabaseStatus convertFlexibleStatus(ServerState serverState) {
-        return Optional.ofNullable(serverState)
+    public ExternalDatabaseParameters getExternalDatabaseParameters(AuthenticatedContext ac, DatabaseStack stack) {
+        CloudContext cloudContext = ac.getCloudContext();
+        AzureClient client = ac.getParameter(AzureClient.class);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        return getExternalDatabaseParameters(stack, client, resourceGroupName);
+    }
+
+    private ExternalDatabaseParameters getExternalDatabaseParameters(DatabaseStack stack, AzureClient client, String resourceGroupName) {
+        AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
+        ExternalDatabaseParameters externalDatabaseParameters;
+        if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+            LOGGER.debug("Getting flexible server parameters from Azure for {} database", databaseServerView.getDbServerName());
+            Server server = client.getFlexibleServerClient().getFlexibleServer(resourceGroupName, stack.getDatabaseServer().getServerId());
+            externalDatabaseParameters = new ExternalDatabaseParameters(
+                    convertFlexibleStatus(server),
+                    AzureDatabaseType.FLEXIBLE_SERVER,
+                    getFlexibleServerStorageSizeInMB(server));
+        } else {
+            LOGGER.debug("Getting single server parameters from Azure for {} database", databaseServerView.getDbServerName());
+            com.azure.resourcemanager.postgresql.models.Server server =
+                    client.getSingleServerClient().getSingleServer(resourceGroupName, stack.getDatabaseServer().getServerId());
+            externalDatabaseParameters = new ExternalDatabaseParameters(
+                    convertSingleStatus(server),
+                    AzureDatabaseType.SINGLE_SERVER,
+                    getSingleServerStorageSizeInMB(server));
+        }
+        LOGGER.debug("External database parameters: {}", externalDatabaseParameters);
+        return externalDatabaseParameters;
+    }
+
+    private ExternalDatabaseStatus convertFlexibleStatus(Server server) {
+        return Optional.ofNullable(server)
+                .map(Server::state)
                 .map(state -> FLEXIBLESERVER_STATE_MAP.getOrDefault(state, ExternalDatabaseStatus.UNKNOWN))
                 .orElse(ExternalDatabaseStatus.DELETED);
     }
 
-    private ExternalDatabaseStatus convertSingleStatus(com.azure.resourcemanager.postgresql.models.ServerState serverState) {
-        return Optional.ofNullable(serverState)
+    private ExternalDatabaseStatus convertSingleStatus(com.azure.resourcemanager.postgresql.models.Server server) {
+        return Optional.ofNullable(server)
+                .map(com.azure.resourcemanager.postgresql.models.Server::userVisibleState)
                 .map(state -> SINGLESERVER_STATE_MAP.getOrDefault(state, ExternalDatabaseStatus.UNKNOWN))
                 .orElse(ExternalDatabaseStatus.DELETED);
+    }
+
+    private Long getSingleServerStorageSizeInMB(com.azure.resourcemanager.postgresql.models.Server server) {
+        return Optional.ofNullable(server)
+                .map(com.azure.resourcemanager.postgresql.models.Server::storageProfile)
+                .map(com.azure.resourcemanager.postgresql.models.StorageProfile::storageMB)
+                .map(Integer::longValue)
+                .orElse(null);
+    }
+
+    private Long getFlexibleServerStorageSizeInMB(Server server) {
+        return Optional.ofNullable(server)
+                .map(Server::storage)
+                .map(Storage::storageSizeGB)
+                .map(size -> size * GB_TO_MB)
+                .orElse(null);
     }
 
     public String getDBStackTemplate(DatabaseStack databaseStack) {

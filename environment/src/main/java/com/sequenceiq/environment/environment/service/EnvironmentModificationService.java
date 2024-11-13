@@ -223,6 +223,7 @@ public class EnvironmentModificationService {
             }
             azureParameters.setUserManagedIdentity(dto.getUserManagedIdentity());
             azureParameters = azureParametersRepository.save(azureParameters);
+            environment.setParameters(azureParameters);
         }
         if (dto.getEncryptionKeyUrl() != null) {
             if (azureParameters.getEncryptionKeyUrl() == null) {

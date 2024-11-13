@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -90,8 +91,10 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         try {
             if (databaseMigrationRequired) {
                 LOGGER.debug("Migration is required, new database server attributes: {}", migrationParams.getAttributes());
+                AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+                ExternalDatabaseParameters databaseParameters = connector.resources().getDatabaseServerParameters(ac, databaseStack);
                 databaseStack = upgradeMigrationService.mergeDatabaseStacks(dbStack, migrationParams, connector, cloudCredential,
-                        cloudContext.getPlatformVariant());
+                        cloudContext.getPlatformVariant(), databaseParameters);
             } else {
                 LOGGER.debug("Migration was not needed, progressing with original databaseStack..");
             }

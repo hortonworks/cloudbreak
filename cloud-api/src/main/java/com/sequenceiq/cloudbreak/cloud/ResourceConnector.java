@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -201,6 +202,18 @@ public interface ResourceConnector {
      * @throws Exception in case of any error
      */
     ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
+
+    /**
+     * Collect database related parameters of a database server.
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @return The database parameters of the given database server instance; never {@code null}
+     * @throws NullPointerException if either argument is {@code null}
+     * @throws Exception in case of any error
+     */
+    default ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 
     /**
      * Queries the SSL root certificate currently active for a database server.
