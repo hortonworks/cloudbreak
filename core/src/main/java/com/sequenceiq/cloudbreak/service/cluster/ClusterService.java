@@ -276,7 +276,7 @@ public class ClusterService {
             StackView stack = stackDto.getStack();
             try {
                 Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-                clusterApiConnectors.getConnector(stackDto).clusterModificationService().cleanupCluster(telemetry);
+                clusterApiConnectors.getConnector(stackDto).cleanupCluster(telemetry);
                 altusMachineUserService.clearFluentMachineUser(stack, stackDto.getCluster(), telemetry);
                 altusMachineUserService.clearMonitoringMachineUser(stack, stackDto.getCluster(), telemetry);
             } catch (CloudbreakServiceException se) {
