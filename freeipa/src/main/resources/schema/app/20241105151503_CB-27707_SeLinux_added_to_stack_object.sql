@@ -3,7 +3,7 @@
 
 ALTER TABLE securityconfig ADD COLUMN IF NOT EXISTS selinux varchar(255) DEFAULT 'PERMISSIVE';
 
-ALTER TABLE securityconfig DROP COLUMN selinux_policy;
+ALTER TABLE securityconfig DROP COLUMN IF EXISTS selinux_policy;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
