@@ -130,7 +130,7 @@ public interface ClusterApi {
     }
 
     default void cleanupCluster(Telemetry telemetry) throws CloudbreakException {
-        clusterModificationService().cleanupCluster(telemetry);
+        clusterDecomissionService().cleanupCluster(telemetry);
     }
 
     default void restartAll(boolean withMgmtServices) {

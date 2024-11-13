@@ -11,5 +11,25 @@ public enum ParcelStatus {
     ACTIVATING,
     ACTIVATED,
     UNAVAILABLE,
-    UNKNOWN
+    UNKNOWN;
+
+    public boolean isDownloaded() {
+        return DOWNLOADED.equals(this)
+                || DISTRIBUTING.equals(this)
+                || DISTRIBUTED.equals(this)
+                || UNDISTRIBUTING.equals(this)
+                || ACTIVATING.equals(this)
+                || ACTIVATED.equals(this);
+    }
+
+    public boolean isDistributed() {
+        return DISTRIBUTED.equals(this)
+                || UNDISTRIBUTING.equals(this)
+                || ACTIVATING.equals(this)
+                || ACTIVATED.equals(this);
+    }
+
+    public boolean isActivated() {
+        return ACTIVATED.equals(this);
+    }
 }

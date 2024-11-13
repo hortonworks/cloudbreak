@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterDecomissionService {
     void verifyNodesAreRemovable(StackDtoDelegate stack, Collection<InstanceMetadataView> removableInstances);
@@ -39,4 +40,6 @@ public interface ClusterDecomissionService {
     void stopRolesOnHosts(Set<String> hosts, boolean stopServicesGracefully) throws CloudbreakException;
 
     Map<String, Map<String, String>> getStatusOfComponentsForHost(String host);
+
+    void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 }
