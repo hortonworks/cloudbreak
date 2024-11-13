@@ -46,6 +46,7 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractE2ETest {
 
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
+                .withTelemetry("telemetry")
                 .withFreeIpaHa(1, 3)
                 .withUpgradeCatalogAndImage()
                 .withEnableMultiAz(true)

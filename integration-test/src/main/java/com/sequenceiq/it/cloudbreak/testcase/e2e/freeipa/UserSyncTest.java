@@ -35,6 +35,7 @@ public class UserSyncTest extends AbstractE2ETest {
     public void testUserSyncDuration(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
         testContext.given(freeIpa, FreeIpaTestDto.class)
+                .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(Status.AVAILABLE)
                 .given(FreeIpaUserSyncTestDto.class)
