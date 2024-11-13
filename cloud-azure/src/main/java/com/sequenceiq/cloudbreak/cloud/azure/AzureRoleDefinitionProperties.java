@@ -18,6 +18,9 @@ public class AzureRoleDefinitionProperties {
     @JsonProperty("Actions")
     private List<String> actions;
 
+    @JsonProperty("NotActions")
+    private List<String> notActions;
+
     @JsonProperty("DataActions")
     private List<String> dataActions;
 
@@ -48,6 +51,14 @@ public class AzureRoleDefinitionProperties {
         this.actions = actions;
     }
 
+    public List<String> getNotActions() {
+        return notActions;
+    }
+
+    public void setNotActions(List<String> notActions) {
+        this.notActions = notActions;
+    }
+
     public List<String> getDataActions() {
         return dataActions;
     }
@@ -70,6 +81,7 @@ public class AzureRoleDefinitionProperties {
                 .add("roleName='" + roleName + "'")
                 .add("description='" + description + "'")
                 .add("actions=" + actions)
+                .add("notActions=" + notActions)
                 .add("dataActions=" + dataActions)
                 .add("assignableScopes=" + assignableScopes)
                 .toString();

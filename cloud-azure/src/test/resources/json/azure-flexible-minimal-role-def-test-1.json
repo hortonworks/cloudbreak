@@ -11,7 +11,10 @@
     "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
     "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write"
   ],
-  "NotActions": [],
+  "NotActions": [
+    "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
+    "Microsoft.DBforPostgreSQL/flexibleServers/configurations/write"
+  ],
   "DataActions": [],
   "NotDataActions": [],
   "AssignableScopes": []
