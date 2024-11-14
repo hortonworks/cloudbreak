@@ -1,11 +1,8 @@
 package com.sequenceiq.periscope.utils;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.periscope.utils.MockStackResponseGenerator.getMockStackResponseWithDependentHostGroup;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -131,28 +128,6 @@ public class StackResponseUtilsTest {
         StackV4Response mockStackResponse = getMockStackResponseWithDependentHostGroup(AVAILABLE, Set.of("master"), SERVICES_UNHEALTHY);
 
         assertFalse(underTest.primaryGatewayHealthy(mockStackResponse));
-    }
-
-    @Test
-    public void testGetUnhealthyDependentHostsMasterUnhealthy() {
-        String policyHostGroup = "compute";
-        StackV4Response mockStackResponse = getMockStackResponseWithDependentHostGroup(AVAILABLE, Set.of("master"), SERVICES_RUNNING);
-        DependentHostGroupsV4Response mockDependentHostGroupsResponse = getDependentHostGroupsResponse(policyHostGroup,
-                "master", "gateway");
-
-        Set<String> result = underTest.getUnhealthyDependentHosts(mockStackResponse, mockDependentHostGroupsResponse, policyHostGroup);
-        assertThat(result).hasSameElementsAs(Set.of("fqdn-master"));
-    }
-
-    @Test
-    public void testGetUnhealthyDependentHostsNoneUnhealthy() {
-        String policyHostGroup = "compute";
-        StackV4Response mockStackResponse = getMockStackResponseWithDependentHostGroup(AVAILABLE, Set.of("master", "gateway"), SERVICES_HEALTHY);
-        DependentHostGroupsV4Response mockDependentHostGroupsResponse = getDependentHostGroupsResponse(policyHostGroup,
-                "master", "gateway");
-
-        Set<String> result = underTest.getUnhealthyDependentHosts(mockStackResponse, mockDependentHostGroupsResponse, policyHostGroup);
-        assertThat(result).isEmpty();
     }
 
     private void validateGetRoleConfigNameForHostGroup(String testService, String testRole,

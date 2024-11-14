@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -221,8 +222,6 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE,
                 Set.of("gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -239,8 +238,6 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE,
                 Set.of("master", "gateway1"), InstanceStatus.SERVICES_UNHEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -257,10 +254,8 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
                 InstanceStatus.SERVICES_HEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
+                .thenReturn(getNoUnhealthyDependentComponentsResponse("compute"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
         when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
@@ -277,10 +272,8 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.NODE_FAILURE,
                 Set.of("master", "gateway1"), InstanceStatus.SERVICES_HEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
+                .thenReturn(getNoUnhealthyDependentComponentsResponse("compute"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(true);
         when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
@@ -297,10 +290,8 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
                 InstanceStatus.SERVICES_HEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
+                .thenReturn(getNoUnhealthyDependentComponentsResponse("compute"));
         when(cmCommunicator.isClusterManagerRunning(any(Cluster.class))).thenReturn(false);
         when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(true);
 
@@ -317,10 +308,8 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.AVAILABLE, Set.of("master", "gateway1"),
                 InstanceStatus.SERVICES_HEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
-                .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
+                .thenReturn(getNoUnhealthyDependentComponentsResponse("compute"));
         when(stackResponseUtils.primaryGatewayHealthy(any(StackV4Response.class))).thenReturn(false);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
@@ -336,8 +325,6 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.STOP_IN_PROGRESS, Set.of("master",
                 "gateway1"), InstanceStatus.SERVICES_HEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -354,8 +341,6 @@ class ClusterStatusSyncHandlerTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(getMockStackResponseWithDependentHostGroup(Status.UPDATE_IN_PROGRESS, Set.of("master",
                 "gateway1"), InstanceStatus.SERVICES_HEALTHY));
-        when(stackResponseUtils.getUnhealthyDependentHosts(any(StackV4Response.class), any(DependentHostGroupsV4Response.class),
-                anyString())).thenCallRealMethod();
         when(dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroups(anyString(), anySet()))
                 .thenReturn(getDependentHostGroupsResponse("compute", "master", "gateway1"));
 
@@ -368,6 +353,13 @@ class ClusterStatusSyncHandlerTest {
     private DependentHostGroupsV4Response getDependentHostGroupsResponse(String policyHostGroup, String... dependentHostGroups) {
         DependentHostGroupsV4Response response = new DependentHostGroupsV4Response();
         Map<String, Set<String>> dependentHostGroupsMap = Map.of(policyHostGroup, Set.of(dependentHostGroups));
+        response.setDependentHostGroups(dependentHostGroupsMap);
+        return response;
+    }
+
+    private DependentHostGroupsV4Response getNoUnhealthyDependentComponentsResponse(String policyHostGroup) {
+        DependentHostGroupsV4Response response = new DependentHostGroupsV4Response();
+        Map<String, Set<String>> dependentHostGroupsMap = Map.of(policyHostGroup, Collections.emptySet());
         response.setDependentHostGroups(dependentHostGroupsMap);
         return response;
     }

@@ -111,24 +111,24 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
                 return Optional.ofNullable(stackResponse.getStatus()).map(Status::isAvailable).orElse(false);
             }
 
-            boolean dependentHostsUnhealthy = policyHostGroups.stream().anyMatch(hg -> dependentHostsUnhealthy(dependentHostGroupsResponse, stackResponse, hg));
+            boolean dependentComponentsUnhealthy = policyHostGroups.stream().anyMatch(hg -> dependentComponentsUnhealthy(dependentHostGroupsResponse, hg));
 
             return !(stackDeletionInProgress(stackResponse) || stackStatusInProgress(stackResponse) || stackStopped(stackResponse)
-                    || dependentHostsUnhealthy);
+                    || dependentComponentsUnhealthy);
         }
     }
 
-    private boolean dependentHostsUnhealthy(DependentHostGroupsV4Response dependentHostGroupsResponse, StackV4Response stackResponse, String policyHostGroup) {
-        Set<String> unhealthyDependentHosts = stackResponseUtils.getUnhealthyDependentHosts(stackResponse, dependentHostGroupsResponse, policyHostGroup);
-        logUnhealthyHostNamesIfPresent(unhealthyDependentHosts, policyHostGroup);
-        return !unhealthyDependentHosts.isEmpty();
+    private boolean dependentComponentsUnhealthy(DependentHostGroupsV4Response dependentHostGroupsResponse, String policyHostGroup) {
+        Set<String> unhealthyDependentComponents = dependentHostGroupsResponse.getDependentHostGroups().get(policyHostGroup);
+        logUnhealthyComponentNamesIfPresent(unhealthyDependentComponents, policyHostGroup);
+        return !unhealthyDependentComponents.isEmpty();
     }
 
-    private void logUnhealthyHostNamesIfPresent(Set<String> unhealthyDependentHosts, String hostGroup) {
-        if (unhealthyDependentHosts.isEmpty()) {
-            LOGGER.info("No unhealthy dependent hosts for hostGroup: {}", hostGroup);
+    private void logUnhealthyComponentNamesIfPresent(Set<String> unhealthyDependentComponents, String hostGroup) {
+        if (unhealthyDependentComponents.isEmpty()) {
+            LOGGER.info("No unhealthy dependent components for hostGroup: {}", hostGroup);
         } else {
-            LOGGER.info("Detected unhealthy dependent hosts: {} for hostGroup: {}", unhealthyDependentHosts, hostGroup);
+            LOGGER.info("Detected unhealthy dependent components: {} for hostGroup: {}", unhealthyDependentComponents, hostGroup);
         }
     }
 
