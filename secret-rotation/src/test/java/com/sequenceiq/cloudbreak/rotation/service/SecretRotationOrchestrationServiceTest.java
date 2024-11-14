@@ -25,7 +25,6 @@ import org.mockito.stubbing.Answer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationPreValidateService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationRollbackService;
@@ -67,9 +66,6 @@ public class SecretRotationOrchestrationServiceTest {
 
     @Mock
     private SecretRotationFinalizeService finalizeService;
-
-    @Mock
-    private MultiClusterRotationService multiClusterRotationService;
 
     @Mock
     private TransactionService transactionService;
@@ -118,11 +114,9 @@ public class SecretRotationOrchestrationServiceTest {
     public void testRotate() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(rotationService).rotate(any());
-        doNothing().when(multiClusterRotationService).updateMultiRotationEntriesAfterRotate(any());
         underTest.rotateIfNeeded(TEST, RESOURCE, null, null);
 
         verify(rotationService).rotate(any());
-        verify(multiClusterRotationService).updateMultiRotationEntriesAfterRotate(any());
         verify(secretRotationStatusService, times(1)).rotationStarted(eq(RESOURCE), eq(TEST));
         verify(secretRotationUsageService, times(1)).rotationStarted(eq(TEST), eq(RESOURCE), isNull());
         verify(secretRotationStatusService, times(1)).rotationFinished(eq(RESOURCE), eq(TEST));
@@ -148,12 +142,10 @@ public class SecretRotationOrchestrationServiceTest {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(finalizeService).finalize(any());
         doNothing().when(secretRotationStepProgressService).deleteCurrentRotation(any());
-        doNothing().when(multiClusterRotationService).updateMultiRotationEntriesAfterFinalize(any());
 
         underTest.finalizeIfNeeded(TEST, RESOURCE, null, null);
 
         verify(finalizeService).finalize(any());
-        verify(multiClusterRotationService).updateMultiRotationEntriesAfterFinalize(any());
         verify(secretRotationStatusService, times(1)).finalizeStarted(eq(RESOURCE), eq(TEST));
         verify(secretRotationStatusService, times(1)).finalizeFinished(eq(RESOURCE), eq(TEST));
         verify(secretRotationUsageService, times(1)).rotationFinished(eq(TEST), eq(RESOURCE), isNull());

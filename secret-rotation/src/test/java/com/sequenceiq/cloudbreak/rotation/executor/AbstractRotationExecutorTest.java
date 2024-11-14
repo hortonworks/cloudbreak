@@ -7,8 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +24,7 @@ import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNot
 @ExtendWith(MockitoExtension.class)
 public class AbstractRotationExecutorTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", Optional.empty(), null);
+    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "", null);
 
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;

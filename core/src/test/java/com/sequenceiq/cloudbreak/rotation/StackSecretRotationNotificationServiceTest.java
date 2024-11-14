@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ class StackSecretRotationNotificationServiceTest {
     private static final Long STACK_ID = 1L;
 
     private static final RotationMetadata METADATA = new RotationMetadata(SALT_BOOT_SECRETS, ROTATE, null,
-            "", Optional.empty(), null);
+            "", null);
 
     @Mock
     private StackDtoService stackDtoService;

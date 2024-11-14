@@ -20,7 +20,6 @@ import org.springframework.validation.annotation.Validated;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxChildResourceMarkingRequest;
@@ -45,15 +44,16 @@ public interface SdxRotationEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rotateSecrets(@Valid @NotNull SdxSecretRotationRequest request);
 
+    @Deprecated
     @GET
     @Path("multi_secret/check_children")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Check ongoing child SDX multi secret rotations by parent", operationId = "checkSDXMultiSecretsByParent",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     boolean checkOngoingMultiSecretChildrenRotationsByParent(@ValidCrn(resource = ENVIRONMENT) @QueryParam("parentCrn") String parentCrn,
-            @ValidMultiSecretType @QueryParam("secret") String multiSecret,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("secret") String multiSecret, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
+    @Deprecated
     @PUT
     @Path("multi_secret/mark_children")
     @Produces(MediaType.APPLICATION_JSON)

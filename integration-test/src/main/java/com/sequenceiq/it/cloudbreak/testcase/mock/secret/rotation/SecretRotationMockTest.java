@@ -22,7 +22,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
-public class MultiSecretRotationMockTest extends AbstractMockTest {
+public class SecretRotationMockTest extends AbstractMockTest {
 
     public static final String ROTATION_FAILURE_KEY = "rotation_failure";
 
@@ -52,9 +52,9 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running default Distrox cluster",
-            when = "multi secrets are getting rotated",
+            when = "secrets are getting rotated",
             then = "rotation should be successful and cluster should be available")
-    public void testMultiSecretRotation(TestContext testContext, ITestContext iTestContext) {
+    public void testSecretRotation(TestContext testContext, ITestContext iTestContext) {
         createDefaultDatahub(testContext);
         testContext
                 .given(FreeIpaRotationTestDto.class)
@@ -65,14 +65,7 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
                 .when(sdxTestClient.rotateSecretInternal(List.of(DatalakeSecretType.DEMO_SECRET)))
                 .awaitForFlow()
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.stop())
-                .awaitForFlow()
-                .given(DistroXTestDto.class)
-                .when(distroXTestClient.start())
-                .awaitForFlow()
-                .given(FreeIpaRotationTestDto.class)
-                .withSecrets(List.of(FreeIpaSecretType.DEMO_SECRET))
-                .when(freeIpaTestClient.rotateSecretInternal())
+                .when(distroXTestClient.rotateSecretInternal(List.of(CloudbreakSecretType.DEMO_SECRET)))
                 .awaitForFlow()
                 .validate();
     }
@@ -84,9 +77,6 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
             then = "retrying rollback succeeds")
     public void testFailedDataLakeSecretRotationRollbackCanBeRestarted(TestContext testContext, ITestContext iTestContext) {
         createDefaultDatalake(testContext);
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
         executeDataLakeDemoRotation(testContext, Map.of(ROTATION_FAILURE_KEY, "", ROLLBACK_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
@@ -94,9 +84,6 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
                 .awaitForFlow()
                 .validate();
         executeDataLakeDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeFreeIpaDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
     }
@@ -108,16 +95,10 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
             then = "retrying rollback succeeds")
     public void testFailedDataLakeSecretRotationPreValidateCanBeRestarted(TestContext testContext, ITestContext iTestContext) {
         createDefaultDatalake(testContext);
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
         executeDataLakeDemoRotation(testContext, Map.of(PREVALIDATE_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
         executeDataLakeDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeFreeIpaDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
     }
@@ -129,67 +110,10 @@ public class MultiSecretRotationMockTest extends AbstractMockTest {
             then = "retrying finalize succeeds")
     public void testFailedDataLakeSecretRotationFinalizationCanBeRestarted(TestContext testContext, ITestContext iTestContext) {
         createDefaultDatalake(testContext);
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
         executeDataLakeDemoRotation(testContext, Map.of(FINALIZE_FAILURE_KEY, ""))
                 .awaitForFlowFail()
                 .validate();
         executeDataLakeDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running default Distrox cluster",
-            when = "multi secrets are getting rotated and rollback fails in datahub",
-            then = "rollback is retried than new datahub rotation can be started and datalake rotation finished")
-    public void testFailedDataHubRotationRollbackCanBeRetriedAndRotationCompleted(TestContext testContext, ITestContext iTestContext) {
-        createDefaultDatahub(testContext);
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeDataLakeDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeDataHubDemoRotation(testContext, Map.of(ROTATION_FAILURE_KEY, "", ROLLBACK_FAILURE_KEY, ""))
-                .awaitForFlowFail()
-                .validate();
-        executeDataHubDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeDataHubDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running default Distrox cluster",
-            when = "multi secrets are getting rotated and finalize fails in datahub",
-            then = "finalize is retried and completed and datalake rotation finished")
-    public void testFailedDataHubRotationFinalizeCanBeRetriedAndRotationCompleted(TestContext testContext, ITestContext iTestContext) {
-        createDefaultDatahub(testContext);
-        executeFreeIpaDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeDataLakeDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeDataHubDemoRotation(testContext, Map.of(FINALIZE_FAILURE_KEY, ""))
-                .awaitForFlowFail()
-                .validate();
-        executeDataHubDemoRotation(testContext)
-                .awaitForFlow()
-                .validate();
-        executeFreeIpaDemoRotation(testContext)
                 .awaitForFlow()
                 .validate();
     }

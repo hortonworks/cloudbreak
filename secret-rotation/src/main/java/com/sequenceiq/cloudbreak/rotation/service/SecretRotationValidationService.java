@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @Service
@@ -42,9 +41,6 @@ public class SecretRotationValidationService {
 
     @Inject
     private SecretRotationStepProgressService secretRotationStepProgressService;
-
-    @Inject
-    private MultiClusterRotationValidationService multiClusterRotationValidationService;
 
     public void validateSecretRotationEntitlement(String resourceCrn) {
         if (!entitlementService.isSecretRotationEnabled(Crn.safeFromString(resourceCrn).getAccountId())) {
@@ -64,7 +60,6 @@ public class SecretRotationValidationService {
 
     public Optional<RotationFlowExecutionType> validate(String resourceCrn, Collection<SecretType> secretTypes,
             RotationFlowExecutionType rotationFlowExecutionType, Supplier<Boolean> isInAvailableStatePredicate) {
-        validateMultiSecretRotation(resourceCrn, secretTypes);
         List<SecretRotationStepProgress> stepProgressList = secretRotationStepProgressService.getProgressList(resourceCrn);
         if (stepProgressList.isEmpty()) {
             validateIfAvailableStatusIsNeeded(secretTypes, isInAvailableStatePredicate);
@@ -110,14 +105,8 @@ public class SecretRotationValidationService {
                 failedStep.getSecretType(), failedStep.getCurrentExecutionType()));
     }
 
-    private void validateMultiSecretRotation(String resourceCrn, Collection<SecretType> secretTypes) {
-        secretTypes.stream()
-                .filter(SecretType::multiSecret)
-                .forEach(secretType -> multiClusterRotationValidationService.validateMultiRotationRequest(resourceCrn, secretType));
-    }
-
     private void validateIfAvailableStatusIsNeeded(Collection<SecretType> secretTypes, Supplier<Boolean> isInAvailableStatePredicate) {
-        if (secretTypes.stream().anyMatch(Predicate.not(SecretType::multiSecret)) && !isInAvailableStatePredicate.get()) {
+        if (!isInAvailableStatePredicate.get()) {
             throwBadRequest("The cluster must be in available state to start secret rotation.");
         }
     }
@@ -131,22 +120,17 @@ public class SecretRotationValidationService {
     private void validateExecutionType(
             Collection<SecretType> secretTypes, RotationFlowExecutionType requestedExecutionType, List<SecretRotationStepProgress> stepProgressList) {
         for (SecretType secretType : secretTypes) {
-            if (!secretType.multiSecret()) {
-                Optional<SecretRotationStepProgress> progress = stepProgressList.stream().filter(step -> secretType.equals(step.getSecretType())).findFirst();
-                if (progress.isEmpty()) {
-                    expectPreValidateOrFullExecution(secretType, requestedExecutionType);
-                } else if (requestedExecutionType == null) {
-                    throwBadRequest("There is already a running rotation for %s secret type.", secretType);
-                } else {
-                    switch (requestedExecutionType) {
-                        case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE, ROTATE);
-                        case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, ROTATE);
-                        default -> throwBadRequest("There is already a running rotation for %s secret type.", secretType);
-                    }
-                }
+            Optional<SecretRotationStepProgress> progress = stepProgressList.stream().filter(step -> secretType.equals(step.getSecretType())).findFirst();
+            if (progress.isEmpty()) {
+                expectPreValidateOrFullExecution(secretType, requestedExecutionType);
+            } else if (requestedExecutionType == null) {
+                throwBadRequest("There is already a running rotation for %s secret type.", secretType);
             } else {
-                LOGGER.info("Execution type validation skipped in case of secret type {}, since it is related to a multi-cluster rotation, " +
-                        "multi-cluster rotation has it's own rules for validation and execution", secretType);
+                switch (requestedExecutionType) {
+                    case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE, ROTATE);
+                    case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, ROTATE);
+                    default -> throwBadRequest("There is already a running rotation for %s secret type.", secretType);
+                }
             }
         }
     }

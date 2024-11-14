@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepPro
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationServiceTest extends AbstractSecretRotationTest {
 
-    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "resource", Optional.empty(), null);
+    private static final RotationMetadata METADATA = new RotationMetadata(TEST, ROTATE, null, "resource", null);
 
     @Mock
     private SecretRotationStepProgressService stepProgressService;

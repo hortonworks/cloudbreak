@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -19,13 +18,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -48,12 +44,6 @@ public class StackRotationService {
     private StackService stackService;
 
     @Inject
-    private MultiClusterRotationValidationService multiClusterRotationValidationService;
-
-    @Inject
-    private MultiClusterRotationService multiClusterRotationService;
-
-    @Inject
     private SecretRotationStepProgressService stepProgressService;
 
     @Inject
@@ -74,19 +64,7 @@ public class StackRotationService {
         return flowManager.triggerSecretRotation(stack.getId(), crn, secretTypes, usedExecutionType.orElse(null), additionalProperties);
     }
 
-    public boolean checkOngoingChildrenMultiSecretRotations(String parentCrn, String secret) {
-        Set<String> crns = getCrnsByParentCrn(parentCrn);
-        MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
-        return CollectionUtils.isNotEmpty(multiClusterRotationService.getMultiRotationEntriesForSecretAndResources(multiSecretType, crns));
-    }
-
-    public void markMultiClusterChildrenResources(String parentCrn, String secret) {
-        Set<String> crns = getCrnsByParentCrn(parentCrn);
-        multiClusterRotationService.markChildrenMultiRotationEntriesLocally(crns, secret);
-    }
-
     public void cleanupSecretRotationEntries(String crn) {
-        multiClusterRotationService.deleteAllByCrn(crn);
         stepProgressService.deleteAllForResource(crn);
     }
 

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +24,11 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -103,12 +99,6 @@ public class SdxRotationService {
     private FreeipaFlowService freeipaFlowService;
 
     @Inject
-    private MultiClusterRotationValidationService multiClusterRotationValidationService;
-
-    @Inject
-    private MultiClusterRotationService multiClusterRotationService;
-
-    @Inject
     private SecretRotationValidationService secretRotationValidationService;
 
     @Inject
@@ -119,17 +109,6 @@ public class SdxRotationService {
 
     @Inject
     private List<SecretType> enabledSecretTypes;
-
-    public boolean checkOngoingMultiSecretChildrenRotations(String parentCrn, String secret) {
-        MultiSecretType multiSecretType = MultiSecretType.valueOf(secret);
-        Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
-        return CollectionUtils.isNotEmpty(multiClusterRotationService.getMultiRotationEntriesForSecretAndResources(multiSecretType, crnsByEnvironmentCrn));
-    }
-
-    public void markMultiClusterChildrenResources(String parentCrn, String secret) {
-        Set<String> crnsByEnvironmentCrn = getSdxCrnsByEnvironmentCrn(parentCrn);
-        multiClusterRotationService.markChildrenMultiRotationEntriesLocally(crnsByEnvironmentCrn, secret);
-    }
 
     public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
@@ -214,7 +193,6 @@ public class SdxRotationService {
     }
 
     public void cleanupSecretRotationEntries(String datalakeCrn) {
-        multiClusterRotationService.deleteAllByCrn(datalakeCrn);
         stepProgressService.deleteAllForResource(datalakeCrn);
     }
 

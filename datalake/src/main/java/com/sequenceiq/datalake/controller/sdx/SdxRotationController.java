@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -22,7 +23,6 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.annotation.ValidMultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
@@ -54,19 +54,20 @@ public class SdxRotationController implements SdxRotationEndpoint {
         return sdxRotationService.triggerSecretRotation(request.getCrn(), request.getSecrets(), request.getExecutionType(), request.getAdditionalProperties());
     }
 
+    @Deprecated
     @Override
     @InternalOnly
     public boolean checkOngoingMultiSecretChildrenRotationsByParent(@ValidCrn(resource = ENVIRONMENT) String parentCrn,
-            @ValidMultiSecretType String multiSecret,
-            @InitiatorUserCrn String initiatorUserCrn) {
-        return sdxRotationService.checkOngoingMultiSecretChildrenRotations(parentCrn, multiSecret);
+            String multiSecret, @InitiatorUserCrn String initiatorUserCrn) {
+        throw new NotImplementedException("This is a deprecated API.");
     }
 
+    @Deprecated
     @Override
     @InternalOnly
     public void markMultiClusterChildrenResourcesByParent(@Valid SdxChildResourceMarkingRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
-        sdxRotationService.markMultiClusterChildrenResources(request.getParentCrn(), request.getSecret());
+        throw new NotImplementedException("This is a deprecated API.");
     }
 
     @Override

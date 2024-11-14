@@ -20,7 +20,6 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
@@ -40,9 +39,6 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
 
     @Inject
     private FreeIpaSecretRotationService freeIpaSecretRotationService;
-
-    @Inject
-    private MultiClusterRotationService multiClusterRotationService;
 
     @Inject
     private SecretRotationNotificationService notificationService;

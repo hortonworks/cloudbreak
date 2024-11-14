@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.USER_DATA;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
-import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.CCMV2_JUMPGATE;
@@ -17,10 +16,8 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STA
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STATE_RUN;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeFlag;
@@ -41,30 +38,20 @@ public enum FreeIpaSecretType implements SecretType {
     NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY(List.of(SALT_STATE_APPLY, CUSTOM_JOB)),
     // cluster related internal freeipa secrets
     FREEIPA_LDAP_BIND_PASSWORD(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
-    DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL)),
+    DEMO_SECRET(List.of(CUSTOM_JOB), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     FREEIPA_KERBEROS_BIND_USER(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL));
 
     private final List<SecretRotationStep> steps;
-
-    private final Optional<MultiSecretType> multiSecretType;
 
     private final Set<SecretTypeFlag> flags;
 
     FreeIpaSecretType(List<SecretRotationStep> steps) {
         this.steps = steps;
-        this.multiSecretType = Optional.empty();
         this.flags = Set.of();
     }
 
     FreeIpaSecretType(List<SecretRotationStep> steps, Set<SecretTypeFlag> flags) {
         this.steps = steps;
-        this.multiSecretType = Optional.empty();
-        this.flags = flags;
-    }
-
-    FreeIpaSecretType(List<SecretRotationStep> steps, MultiSecretType multiSecretType, Set<SecretTypeFlag> flags) {
-        this.steps = steps;
-        this.multiSecretType = Optional.ofNullable(multiSecretType);
         this.flags = flags;
     }
 
@@ -76,11 +63,6 @@ public enum FreeIpaSecretType implements SecretType {
     @Override
     public Set<SecretTypeFlag> getFlags() {
         return flags;
-    }
-
-    @Override
-    public Optional<MultiSecretType> getMultiSecretType() {
-        return multiSecretType;
     }
 
     @Override

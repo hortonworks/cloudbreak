@@ -18,11 +18,6 @@ public class EnforceRotationFrameworkRulesTest {
     private MessageSource messageSource;
 
     @Test
-    void enforceSecretTypeBelongsOnlyOneMultiSecretType() {
-        EnforceRotationFrameworkRulesUtil.enforceSecretTypeBelongsOnlyOneMultiSecretType();
-    }
-
-    @Test
     void enforceThereAreNoDuplicatesBetweenSecretTypeEnums() {
         EnforceRotationFrameworkRulesUtil.enforceThereAreNoDuplicatesBetweenSecretTypeEnums();
     }

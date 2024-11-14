@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationFinalizeService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationPreValidateService;
 import com.sequenceiq.cloudbreak.rotation.service.phase.SecretRotationRollbackService;
@@ -60,9 +59,6 @@ public class SecretRotationOrchestrationService {
     private SecretRotationFinalizeService finalizeService;
 
     @Inject
-    private MultiClusterRotationService multiClusterRotationService;
-
-    @Inject
     private TransactionService transactionService;
 
     public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
@@ -79,7 +75,6 @@ public class SecretRotationOrchestrationService {
             secretRotationStatusService.rotationStarted(resourceCrn, secretType);
             secretRotationUsageService.rotationStarted(secretType, resourceCrn, executionType);
             rotationService.rotate(rotationMetadata);
-            multiClusterRotationService.updateMultiRotationEntriesAfterRotate(rotationMetadata);
             secretRotationStatusService.rotationFinished(resourceCrn, secretType);
         }
     }
@@ -110,10 +105,7 @@ public class SecretRotationOrchestrationService {
             try {
                 secretRotationStatusService.finalizeStarted(resourceCrn, secretType);
                 finalizeService.finalize(rotationMetadata);
-                transactionService.required(() -> {
-                    secretRotationProgressService.deleteCurrentRotation(rotationMetadata);
-                    multiClusterRotationService.updateMultiRotationEntriesAfterFinalize(rotationMetadata);
-                });
+                transactionService.required(() -> secretRotationProgressService.deleteCurrentRotation(rotationMetadata));
                 secretRotationStatusService.finalizeFinished(resourceCrn, secretType);
                 secretRotationUsageService.rotationFinished(secretType, resourceCrn, executionType);
             } catch (TransactionService.TransactionExecutionException te) {
@@ -134,7 +126,6 @@ public class SecretRotationOrchestrationService {
                 .requestedExecutionType(requestedExecutionType)
                 .resourceCrn(resourceCrn)
                 .additionalProperties(additionalProperties);
-        secretType.getMultiSecretType().ifPresent(builder::multiSecretType);
         return builder.build();
     }
 }

@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.rotation.MultiSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 
@@ -13,7 +11,6 @@ public record RotationMetadata(
         RotationFlowExecutionType currentExecution,
         RotationFlowExecutionType requestedExecutionType,
         String resourceCrn,
-        Optional<MultiSecretType> multiSecretType,
         Map<String, String> additionalProperties
 ) {
 
@@ -30,8 +27,6 @@ public record RotationMetadata(
         private RotationFlowExecutionType requestedExecutionType;
 
         private String resourceCrn;
-
-        private Optional<MultiSecretType> multiSecretType = Optional.empty();
 
         private Map<String, String> additionalProperties = Maps.newHashMap();
 
@@ -55,18 +50,13 @@ public record RotationMetadata(
             return this;
         }
 
-        public Builder multiSecretType(MultiSecretType multiSecretType) {
-            this.multiSecretType = Optional.of(multiSecretType);
-            return this;
-        }
-
         public Builder additionalProperties(Map<String, String> additionalProperties) {
             this.additionalProperties = additionalProperties;
             return this;
         }
 
         public RotationMetadata build() {
-            return new RotationMetadata(secretType, currentExecution, requestedExecutionType, resourceCrn, multiSecretType, additionalProperties);
+            return new RotationMetadata(secretType, currentExecution, requestedExecutionType, resourceCrn, additionalProperties);
         }
     }
 }

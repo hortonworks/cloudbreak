@@ -40,7 +40,7 @@ public class RedbeamsRotationService {
             DBStack dbStack = dbStackService.getByCrn(resourceCrn);
             List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
                     enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
-            if (secretTypes.stream().noneMatch(SecretType::multiSecret) && !dbStack.getStatus().isAvailable()) {
+            if (!dbStack.getStatus().isAvailable()) {
                 throw new CloudbreakServiceException(
                         String.format("Secret rotation is not allowed because database status is not available. Current status: %s", dbStack.getStatus()));
             }

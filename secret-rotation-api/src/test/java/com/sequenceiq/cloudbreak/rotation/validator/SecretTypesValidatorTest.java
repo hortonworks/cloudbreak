@@ -59,12 +59,6 @@ public class SecretTypesValidatorTest {
     }
 
     @Test
-    void testValidateIfMultiSecretProvided() {
-        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid(List.of("TEST_2", "TEST_4"), context)));
-        assertEquals("Request should contain maximum 1 secret type which affects multiple resources!", errorMessageCaptor.getValue());
-    }
-
-    @Test
     void testValidateIfDuplicated() {
         assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> validator().isValid(List.of("TEST_2", "TEST_2"), context)));
         assertEquals("There is at least one duplication in the request!", errorMessageCaptor.getValue());

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,22 +28,6 @@ public class EnforceRotationFrameworkRulesUtil {
 
     private EnforceRotationFrameworkRulesUtil() {
 
-    }
-
-    public static void enforceSecretTypeBelongsOnlyOneMultiSecretType() {
-        Map<MultiSecretType, Long> multiSecretTypeReferenceCount = getSecretTypeStream()
-                .map(serializableRotationEnum -> (SecretType) serializableRotationEnum)
-                .filter(SecretType::multiSecret)
-                .map(SecretType::getMultiSecretType)
-                .map(Optional::get)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        Set<MultiSecretType> multiSecretTypesReferencedTooManyTimes = Arrays.stream(MultiSecretType.values())
-                .filter(multiSecretType ->
-                        multiSecretType.getChildrenCrnDescriptors().size() + 1 < multiSecretTypeReferenceCount.get(multiSecretType))
-                .collect(Collectors.toSet());
-        assertTrue(multiSecretTypesReferencedTooManyTimes.isEmpty(), "These multi-cluster secret types are referenced too many times in SecretType enums, " +
-                "which caused by a possible duplication: "
-                + Joiner.on(",").join(multiSecretTypesReferencedTooManyTimes));
     }
 
     public static void enforceThereAreNoDuplicatesBetweenSecretTypeEnums() {

@@ -29,7 +29,7 @@ import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 class SdxSecretRotationNotificationServiceTest {
 
     private static final RotationMetadata METADATA = new RotationMetadata(SALT_BOOT_SECRETS, ROTATE, null,
-            "", Optional.empty(), null);
+            "", null);
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;

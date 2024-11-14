@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXChildResourceMarkingRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,28 +35,5 @@ class DistroXV1RotationControllerTest {
         underTest.rotateSecrets(request);
 
         verify(stackRotationService).rotateSecrets(crn, secretTypes, RotationFlowExecutionType.ROTATE, null);
-    }
-
-    @Test
-    public void testCheckOngoingChildrenMultiSecretRotationsByParent() {
-        String crn = "crn";
-        String secretType = "SECRET_TYPE";
-
-        underTest.checkOngoingChildrenMultiSecretRotationsByParent(crn, secretType, "userCrn");
-
-        verify(stackRotationService).checkOngoingChildrenMultiSecretRotations(crn, secretType);
-    }
-
-    @Test
-    public void testMarkMultiClusterChildrenResourcesByParent() {
-        DistroXChildResourceMarkingRequest request = new DistroXChildResourceMarkingRequest();
-        String crn = "crn";
-        request.setParentCrn(crn);
-        String secretType = "SECRET_TYPE";
-        request.setSecret(secretType);
-
-        underTest.markMultiClusterChildrenResourcesByParent(request, "userCrn");
-
-        verify(stackRotationService).markMultiClusterChildrenResources(crn, secretType);
     }
 }

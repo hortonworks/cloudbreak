@@ -36,10 +36,6 @@ public class SecretTypesValidator implements ConstraintValidator<ValidSecretType
                 ValidatorUtil.addConstraintViolation(context, "Internal secret types can be rotated only by using internal actor!");
                 return false;
             }
-            if (secretTypes.stream().filter(SecretType::multiSecret).count() > 1) {
-                ValidatorUtil.addConstraintViolation(context, "Request should contain maximum 1 secret type which affects multiple resources!");
-                return false;
-            }
         } catch (Exception e) {
             ValidatorUtil.addConstraintViolation(context, e.getMessage());
             return false;

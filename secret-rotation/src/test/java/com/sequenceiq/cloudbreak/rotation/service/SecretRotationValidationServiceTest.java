@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.TestSecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,9 +51,6 @@ class SecretRotationValidationServiceTest {
 
     @Mock
     private SecretRotationStepProgressService secretRotationStepProgressService;
-
-    @Mock
-    private MultiClusterRotationValidationService multiClusterRotationValidationService;
 
     @InjectMocks
     private SecretRotationValidationService underTest;

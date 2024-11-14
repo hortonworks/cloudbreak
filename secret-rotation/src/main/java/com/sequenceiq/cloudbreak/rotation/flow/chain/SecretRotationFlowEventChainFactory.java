@@ -31,11 +31,10 @@ public class SecretRotationFlowEventChainFactory implements FlowEventChainFactor
     public FlowTriggerEventQueue createFlowTriggerEventQueue(SecretRotationFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         secretRotationFlowEventProviderOptional.stream()
-                .filter(secretRotationFlowEventProvider -> secretRotationFlowEventProvider.saltUpdateNeeded(event))
-                .forEach(secretRotationFlowEventProvider -> flowEventChain.add(secretRotationFlowEventProvider.getSaltUpdateTriggerEvent(event)));
+                .filter(flowEventProvider -> flowEventProvider.saltUpdateNeeded(event))
+                .forEach(flowEventProvider -> flowEventChain.add(flowEventProvider.getSaltUpdateTriggerEvent(event)));
         event.getSecretTypes().forEach(secretType -> flowEventChain.add(getSecretRotationFlowTriggerEvent(event, secretType)));
-        secretRotationFlowEventProviderOptional.ifPresent(secretRotationFlowEventProvider ->
-                flowEventChain.addAll(secretRotationFlowEventProvider.getPostFlowEvent(event)));
+        secretRotationFlowEventProviderOptional.ifPresent(flowEventProvider -> flowEventChain.addAll(flowEventProvider.getPostFlowEvent(event)));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 

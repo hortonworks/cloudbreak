@@ -7,15 +7,12 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -56,9 +52,6 @@ public class StackRotationServiceTest {
 
     @Mock
     private StackService stackService;
-
-    @Mock
-    private MultiClusterRotationService multiClusterRotationService;
 
     @Mock
     private SecretRotationValidationService secretRotationValidationService;
@@ -102,27 +95,5 @@ public class StackRotationServiceTest {
         verify(secretRotationValidationService).validate(eq(CRN), eq(List.of(CM_ADMIN_PASSWORD)), eq(null), any());
         verify(secretRotationValidationService).validateEnabledSecretTypes(eq(List.of(CM_ADMIN_PASSWORD)), isNull());
         verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any(), anyMap());
-    }
-
-    @Test
-    public void testMarkMultiClusterChildrenResourceByEnv() {
-        when(stackService.getByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(getStackIdView()));
-        doNothing().when(multiClusterRotationService).markChildrenMultiRotationEntriesLocally(any(), any());
-
-        underTest.markMultiClusterChildrenResources(ENV_CRN, "DEMO_MULTI_SECRET");
-
-        verify(stackService).getByEnvironmentCrnAndStackType(eq(ENV_CRN), any());
-        verify(stackService, times(0)).findNotTerminatedByDatalakeCrn(any());
-    }
-
-    @Test
-    public void testMarkMultiClusterChildrenResourceByDL() {
-        when(stackService.findNotTerminatedByDatalakeCrn(any())).thenReturn(Set.of(getStackIdView()));
-        doNothing().when(multiClusterRotationService).markChildrenMultiRotationEntriesLocally(any(), any());
-
-        underTest.markMultiClusterChildrenResources(DATALAKE_CRN, "DEMO_MULTI_SECRET");
-
-        verify(stackService, times(0)).getByEnvironmentCrnAndStackType(any(), any());
-        verify(stackService).findNotTerminatedByDatalakeCrn(eq(DATALAKE_CRN));
     }
 }

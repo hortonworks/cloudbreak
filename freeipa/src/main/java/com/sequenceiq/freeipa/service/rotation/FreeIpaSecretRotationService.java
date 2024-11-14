@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
-import com.sequenceiq.cloudbreak.rotation.service.multicluster.MultiClusterRotationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -41,9 +40,6 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
 
     @Inject
     private SecretRotationValidationService secretRotationValidationService;
-
-    @Inject
-    private MultiClusterRotationService multiClusterRotationService;
 
     @Inject
     private SecretRotationStepProgressService stepProgressService;
@@ -77,7 +73,6 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     }
 
     public void cleanupSecretRotationEntries(String environmentCrn) {
-        multiClusterRotationService.deleteAllByCrn(environmentCrn);
         stepProgressService.deleteAllForResource(environmentCrn);
     }
 
