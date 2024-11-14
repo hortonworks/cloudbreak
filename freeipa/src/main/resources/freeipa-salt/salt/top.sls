@@ -1,5 +1,6 @@
 base:
            '*':
+             - prevalidation
              - freeipa.grow-disk
              - nginx
              - tags

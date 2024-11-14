@@ -2,6 +2,7 @@
 
 base:
   '*':
+    - prevalidation
     - pkg-mgr-proxy
     - unbound
     - java
