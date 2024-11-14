@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -15,6 +14,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -102,35 +102,32 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
         }
         for (InstanceGroupV4Response instanceGroup : sdxClusterDetailResponse.getStackV4Response().getInstanceGroups()) {
             if (!CollectionUtils.isEmpty(instanceGroup.getMetadata())) {
-                List<String> instanceIds = instanceGroup.getMetadata().stream()
-                        .map(InstanceMetaDataV4Response::getInstanceId)
-                        .collect(Collectors.toList());
-                validateMultiAzDistribution(sdxClusterDetailResponse.getName(), tc, operation, instanceIds, instanceGroup.getName());
+                Map<String, String> instanceZoneMap = instanceGroup.getMetadata().stream()
+                        .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getAvailabilityZone));
+                validateMultiAzDistribution(sdxClusterDetailResponse.getName(), tc, operation, instanceZoneMap, instanceGroup.getName());
             }
         }
     }
 
-    private void validateMultiAzDistribution(String dataLakeName, TestContext tc, String operation, List<String> instanceIds, String hostGroup) {
-        Map<String, Set<String>> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(dataLakeName, instanceIds);
+    private void validateMultiAzDistribution(String dataLakeName, TestContext tc, String operation, Map<String, String> instanceZoneMap,
+            String hostGroup) {
+        Map<String, String> availabilityZoneForVms = getCloudFunctionality(tc).listAvailabilityZonesForVms(dataLakeName, instanceZoneMap);
         LOGGER.info("Availability Zone for Vms {}", availabilityZoneForVms);
-        List<String> instancesWithNoAz = instanceIds.stream().filter(instance -> CollectionUtils.isEmpty(availabilityZoneForVms.get(instance)))
+        List<String> instancesWithNoAz = instanceZoneMap.keySet().stream().filter(instance -> StringUtils.isEmpty(availabilityZoneForVms.get(instance)))
                 .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(instancesWithNoAz)) {
             throw new TestFailException(String.format("Availability Zones is missing for instances %s in %s",
                     String.join(",", instancesWithNoAz), dataLakeName));
         }
         Map<String, Integer> zoneToNodeCountMap = new HashMap<>();
-        for (Map.Entry<String, Set<String>> entry : availabilityZoneForVms.entrySet()) {
-            if (!CollectionUtils.isEmpty(entry.getValue())) {
-                String availabilityZone = entry.getValue().iterator().next();
-                zoneToNodeCountMap.put(availabilityZone, zoneToNodeCountMap.getOrDefault(availabilityZone, 0) + 1);
-            }
+        for (Map.Entry<String, String> entry : availabilityZoneForVms.entrySet()) {
+            zoneToNodeCountMap.put(entry.getValue(), zoneToNodeCountMap.getOrDefault(entry.getValue(), 0) + 1);
         }
         LOGGER.info("Zone to Node count {} after  {}", zoneToNodeCountMap, operation);
-        int numInstances = instanceIds.size();
+        int numInstances = instanceZoneMap.size();
         int numZones = zoneToNodeCountMap.size();
         int numZonesWithDesiredNumInstances;
-        if (instanceIds.size() >= zoneToNodeCountMap.size()) {
+        if (instanceZoneMap.size() >= zoneToNodeCountMap.size()) {
             numZonesWithDesiredNumInstances = countZonesWithDesiredNumberOfInstances(zoneToNodeCountMap, numInstances / numZones);
             if (numZones - numInstances % numZones != numZonesWithDesiredNumInstances) {
                 throw new TestFailException(String.format("Distribution of nodes in AZs is not correct in host group: %s after %s for %s." +
