@@ -83,7 +83,7 @@ public class PreWarmParcelLocationFilter implements PackageLocationFilter {
     private boolean allAvailableRequiredPreWarmParcelUrlLocationIsValid(Map<String, Set<String>> preWarmParcelsByParcelName) {
         return preWarmParcelsByParcelName.entrySet().stream()
                 .allMatch(parcels -> parcels.getValue().stream()
-                        .allMatch(parcelUrl -> URL_PATTERN.matcher(parcelUrl).find()));
+                        .allMatch(this::isArchiveUrl));
     }
 
     private boolean isParcelExistsOnImage(Image image, String requiredParcel) {
