@@ -198,6 +198,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 : getByCrnAndWorkspaceIdAndAddToMdc(nameOrCrn.getCrn(), workspaceId);
     }
 
+    public String getCdhVersion(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        Blueprint blueprint = getByWorkspace(nameOrCrn, workspaceId);
+        return new CmTemplateProcessor(blueprint.getBlueprintJsonText()).getStackVersion();
+    }
+
     public void decorateWithCrn(Blueprint bp, String accountId) {
         bp.setResourceCrn(createCRN(accountId));
     }

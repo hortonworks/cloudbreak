@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 public class CloudResourceAdvisorTest {
@@ -69,6 +70,9 @@ public class CloudResourceAdvisorTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private VmAdvisor vmAdvisor;
 
     @InjectMocks
     private CloudResourceAdvisor underTest;
@@ -161,15 +165,14 @@ public class CloudResourceAdvisorTest {
         when(blueprintService.getByNameForWorkspaceId(any(), any())).thenReturn(blueprint);
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
         when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>()));
-        when(extendedCloudCredentialConverter.convert(any())).thenReturn(extendedCloudCredential);
         when(transactionService.required(any(Supplier.class))).thenReturn(Map.of("gatewayGroup", "master", "architecture", "arm64"));
-        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any())).thenReturn(new CloudVmTypes(new HashMap<>(), new HashMap<>()));
+        when(vmAdvisor.recommendVmTypes(any(), any(), any(), any(), any(), any())).thenReturn(new CloudVmTypes(new HashMap<>(), new HashMap<>()));
         when(blueprintTextProcessor.recommendResize(any(), any())).thenReturn(new ResizeRecommendation(Set.of(), Set.of()));
 
         underTest.createForBlueprint(workspace.getId(), "definitionName", TEST_BLUEPRINT_NAME, "credName",
                 "region", "platformVariant", "az1", CdpResourceType.DATAHUB);
 
-        verify(cloudParameterService).getVmTypesV2(any(), any(), any(), any(), eq(Map.of("architecture", "arm64")));
+        verify(vmAdvisor).recommendVmTypes(any(), any(), any(), any(), any(), eq(Architecture.ARM64));
     }
 
     private Blueprint createBlueprint() {

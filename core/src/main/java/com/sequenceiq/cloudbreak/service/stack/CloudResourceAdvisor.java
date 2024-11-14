@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -71,11 +70,11 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1
 @Service
 public class CloudResourceAdvisor {
 
+    static final String ARCHITECTURE = "architecture";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudResourceAdvisor.class);
 
     private static final String GATEWAY_GROUP = "gatewayGroup";
-
-    private static final String ARCHITECTURE = "architecture";
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -109,6 +108,9 @@ public class CloudResourceAdvisor {
 
     @Inject
     private StackTemplateService stackTemplateService;
+
+    @Inject
+    private VmAdvisor vmAdvisor;
 
     public PlatformRecommendation createForBlueprint(Long workspaceId, String definitionName, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
@@ -155,12 +157,7 @@ public class CloudResourceAdvisor {
 
         Map<String, String> templateInfo = getInfoFromClusterTemplate(definitionName, workspaceId);
         Architecture architecture = Architecture.fromStringWithFallback(templateInfo.get(ARCHITECTURE));
-        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
-                extendedCloudCredentialConverter.convert(credential),
-                region,
-                platformVariant,
-                cdpResourceType,
-                Maps.newHashMap(Map.of(ARCHITECTURE, architecture.getName())));
+        CloudVmTypes vmTypes = vmAdvisor.recommendVmTypes(blueprintTextProcessor, region, platformVariant, cdpResourceType, credential, architecture);
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         if (defaultVmType != null) {
             componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -219,7 +221,7 @@ public class StackCreatorService {
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
-        validateArchitecture(stackRequest, distroxRequest);
+        validateArchitecture(stackRequest, distroxRequest, workspace.getId());
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
@@ -364,7 +366,7 @@ public class StackCreatorService {
         stack.setJavaVersion(javaVersion);
     }
 
-    private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest) {
+    private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest, Long workspaceId) {
         if (stackRequest.getArchitectureEnum() == Architecture.ARM64) {
             if (!distroxRequest) {
                 throw new BadRequestException(String.format("Data Lake clusters are not supported on (%s) architecture.",
@@ -376,10 +378,17 @@ public class StackCreatorService {
                     throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                             Architecture.ARM64.getName()));
                 }
-            } else if (!entitlementService.isDataHubArmEnabled(accountId)) {
+            }
+            if (!entitlementService.isDataHubArmEnabled(accountId)) {
                 throw new BadRequestException(String.format("The selected architecture (%s) is not enabled in your account",
                         Architecture.ARM64.getName()));
 
+            } else if (stackRequest.getCluster() != null) {
+                String version = blueprintService.getCdhVersion(NameOrCrn.ofName(stackRequest.getCluster().getBlueprintName()), workspaceId);
+                if (!isVersionNewerOrEqualThanLimited(version, CLOUDERA_STACK_VERSION_7_3_1)) {
+                    throw new BadRequestException(String.format("The selected architecture (%s) is not supported in this cdh version (%s).",
+                            Architecture.ARM64.getName(), version));
+                }
             }
         }
     }
