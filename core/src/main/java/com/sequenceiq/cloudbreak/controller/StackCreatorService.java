@@ -196,6 +196,7 @@ public class StackCreatorService {
     private ImageUtil imageUtil;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
         String crn = getCrnForCreation(Optional.ofNullable(stackRequest.getResourceCrn()));
@@ -284,6 +285,7 @@ public class StackCreatorService {
                         LOGGER,
                         "Save the remaining stack data took {} ms"
                 );
+                securityConfigService.validateRequest(stackRequest.getSecurity(), accountId);
                 securityConfigService.create(stack, stackRequest.getSecurity());
 
                 try {

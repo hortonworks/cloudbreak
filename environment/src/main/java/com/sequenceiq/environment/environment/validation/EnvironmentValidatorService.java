@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -258,7 +259,7 @@ public class EnvironmentValidatorService {
         return cloudPlatforms.stream().anyMatch(p -> p.equalsIgnoreCase(cloudPlatform));
     }
 
-    public ValidationResult validateFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
+    public ValidationResult validateFreeIpaCreation(FreeIpaCreationDto freeIpaCreation, String accountId) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         int ipaInstanceCountByGroup = freeIpaCreation.getInstanceCountByGroup();
         if (ipaInstanceCountByGroup < ipaMinimumInstanceCountByGroup) {
@@ -272,6 +273,11 @@ public class EnvironmentValidatorService {
         }
         if (StringUtils.isNoneBlank(freeIpaCreation.getImageId(), freeIpaCreation.getImageOs())) {
             validationResultBuilder.error("FreeIpa deployment requests can not have both image id and image os parameters set.");
+        }
+        if (freeIpaCreation.getSeLinux() != null
+                && SeLinux.ENFORCING.equals(freeIpaCreation.getSeLinux())
+                && !entitlementService.isCdpSecurityEnforcingSELinux(accountId)) {
+            validationResultBuilder.error("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
         }
         return validationResultBuilder.build();
     }

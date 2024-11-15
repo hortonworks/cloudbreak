@@ -515,7 +515,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
         setTagsSafe(sdxClusterRequest, sdxCluster);
-        setSecurity(sdxClusterRequest, sdxCluster);
+        setSecurity(sdxClusterRequest, sdxCluster, userCrn);
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (isCloudStorageConfigured(sdxClusterRequest)) {
@@ -572,9 +572,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return Pair.of(savedSdxCluster, flowIdentifier);
     }
 
-    private void setSecurity(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
+    private void setSecurity(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, String userCrn) {
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         if (sdxClusterRequest.getSecurity() != null && StringUtils.isNotBlank(sdxClusterRequest.getSecurity().getSeLinux())) {
             sdxCluster.setSeLinux(SeLinux.fromStringWithFallback(sdxClusterRequest.getSecurity().getSeLinux()));
+            if (SeLinux.ENFORCING.equals(sdxCluster.getSeLinux())
+                    && !entitlementService.isCdpSecurityEnforcingSELinux(accountIdFromCrn)) {
+                throw new BadRequestException("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
+            }
         } else {
             sdxCluster.setSeLinux(SeLinux.PERMISSIVE);
         }

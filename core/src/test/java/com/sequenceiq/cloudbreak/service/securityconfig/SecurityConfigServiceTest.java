@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.securityconfig;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -45,6 +51,9 @@ public class SecurityConfigServiceTest {
     @Mock
     private SaltSecurityConfigService saltSecurityConfigService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     private Stack stack;
 
     @Before
@@ -68,6 +77,39 @@ public class SecurityConfigServiceTest {
 
         Assert.assertEquals("It should return the exisiting SecurityConfig", existingSecurityConfig, securityConfig);
         Assert.assertEquals(SeLinux.PERMISSIVE, securityConfig.getSeLinux());
+    }
+
+    @Test
+    public void validateRequestShouldThrowBadRequestExceptionWhenSeLinuxIsEnforcingEntitlementNotGranted() {
+        SecurityV4Request mockRequest = mock(SecurityV4Request.class);
+        when(mockRequest.getSeLinux()).thenReturn(SeLinux.ENFORCING.name());
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(false);
+
+        BadRequestException exception = Assert.assertThrows(BadRequestException.class,
+                () -> underTest.validateRequest(mockRequest, "accountId"));
+        assertEquals("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.", exception.getMessage());
+    }
+
+    @Test
+    public void validateRequestShouldNOTThrowBadRequestExceptionWhenSeLinuxIsEnforcingEntitlementGranted() {
+        SecurityV4Request mockRequest = mock(SecurityV4Request.class);
+        when(mockRequest.getSeLinux()).thenReturn(SeLinux.ENFORCING.name());
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.validateRequest(mockRequest, "accountId"));
+    }
+
+    @Test
+    public void validateRequestShouldNotThrowExceptionWhenSeLinuxIsPermissive() {
+        SecurityV4Request mockRequest = mock(SecurityV4Request.class);
+        when(mockRequest.getSeLinux()).thenReturn(SeLinux.PERMISSIVE.name());
+
+        assertDoesNotThrow(() -> underTest.validateRequest(mockRequest, "accountId"));
+    }
+
+    @Test
+    public void validateRequestShouldNotThrowExceptionWhenSecurityRequestIsNull() {
+        assertDoesNotThrow(() -> underTest.validateRequest(null, "accountId"));
     }
 
     @Test

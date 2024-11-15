@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -450,18 +451,33 @@ class EnvironmentValidatorServiceTest {
         FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(0)
                 .build();
 
-        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
         assertTrue(validationResult.hasError());
         assertEquals("FreeIpa deployment requests are only allowed with at least '1' instance(s) by group. The requested value was '0'",
                 validationResult.getErrors().get(0));
     }
 
     @Test
-    void testValidateWhenRequestedInstanceCountEqualsOrMoreThanTheMinimumThreshold() {
+    void testValidateWhenRequestedInstanceCountEqualsOrMoreThanTheMinimumThresholdWithOutEnforcedSeLinuxNoEntitlementGranted() {
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(false);
         FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(1)
+                .withSeLinux(SeLinux.ENFORCING)
                 .build();
 
-        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
+        assertTrue(validationResult.hasError());
+        assertEquals("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.",
+                validationResult.getErrors().get(0));
+    }
+
+    @Test
+    void testValidateWhenRequestedInstanceCountEqualsOrMoreThanTheMinimumThresholdWithEnforcedSeLinuxNoEntitlementGranted() {
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
+        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(1)
+                .withSeLinux(SeLinux.ENFORCING)
+                .build();
+
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
         assertFalse(validationResult.hasError());
     }
 
@@ -472,7 +488,7 @@ class EnvironmentValidatorServiceTest {
                 .withImageOs("os")
                 .build();
 
-        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
         assertTrue(validationResult.hasError());
         assertEquals("FreeIpa deployment requests can not have both image id and image os parameters set.",
                 validationResult.getErrors().get(0));
@@ -597,7 +613,7 @@ class EnvironmentValidatorServiceTest {
                         .build())
                 .build();
 
-        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto, "accountId");
         assertEquals(!valid, validationResult.hasError());
     }
 

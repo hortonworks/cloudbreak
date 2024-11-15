@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -39,6 +41,9 @@ public class SecurityConfigService {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public SecurityConfig save(SecurityConfig securityConfig) {
         return securityConfigRepository.save(securityConfig);
     }
@@ -57,9 +62,20 @@ public class SecurityConfigService {
         }
     }
 
-    public SecurityConfig create(Stack stack, SecurityV4Request securityRequest) {
+    public void validateRequest(SecurityV4Request securityRequest, String accountId) {
+        if (SeLinux.ENFORCING.equals(getSeLinuxFromRequest(securityRequest))
+                && !entitlementService.isCdpSecurityEnforcingSELinux(accountId)) {
+            throw new BadRequestException("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
+        }
+    }
+
+    private SeLinux getSeLinuxFromRequest(SecurityV4Request securityRequest) {
         String seLinuxAsString = securityRequest != null ? securityRequest.getSeLinux() : SeLinux.PERMISSIVE.name();
-        SeLinux seLinux = SeLinux.fromStringWithFallback(seLinuxAsString);
+        return SeLinux.fromStringWithFallback(seLinuxAsString);
+    }
+
+    public SecurityConfig create(Stack stack, SecurityV4Request securityRequest) {
+        SeLinux seLinux = getSeLinuxFromRequest(securityRequest);
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setWorkspace(stack.getWorkspace());
         securityConfig.setStack(stack);

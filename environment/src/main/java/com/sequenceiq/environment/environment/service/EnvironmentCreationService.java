@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -127,6 +128,7 @@ public class EnvironmentCreationService {
         initializeSecretEncryption(environment);
         validateCreation(creationDto, environment);
         validateRecipes(creationDto);
+        validateSecurity(creationDto);
         try {
             environment = environmentService.save(environment);
             saveFreeIpaRecipes(creationDto, environment);
@@ -143,6 +145,15 @@ public class EnvironmentCreationService {
             throw e;
         }
         return environmentDtoConverter.environmentToDto(environment);
+    }
+
+    private void validateSecurity(EnvironmentCreationDto creationDto) {
+        if (creationDto.getFreeIpaCreation() != null
+                && creationDto.getFreeIpaCreation().getSeLinux() != null
+                && SeLinux.ENFORCING.equals(creationDto.getFreeIpaCreation().getSeLinux())
+                && !entitlementService.isCdpSecurityEnforcingSELinux(creationDto.getAccountId())) {
+            throw new BadRequestException("SELinux enforcing requires CDP_SECURITY_ENFORCING_SELINUX entitlement for your account.");
+        }
     }
 
     private void validateRecipes(EnvironmentCreationDto creationDto) {
@@ -210,7 +221,7 @@ public class EnvironmentCreationService {
         if (environmentTelemetry != null && environmentTelemetry.getLogging() != null && environmentTelemetry.getLogging().getStorageLocation() != null) {
             validationBuilder.merge(validatorService.validateStorageLocation(environmentTelemetry.getLogging().getStorageLocation(), "logging"));
         }
-        ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
+        ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation(), creationDto.getAccountId());
         validationBuilder.merge(freeIpaCreationValidation);
         if (creationDto.getExternalizedComputeCluster() != null) {
             Set<String> environmentSubnets = Collections.emptySet();

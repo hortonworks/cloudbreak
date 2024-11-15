@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
@@ -190,6 +191,7 @@ class EnvironmentCreationServiceTest {
         environment.setName(ENVIRONMENT_NAME);
         environment.setId(1L);
         environment.setAccountId(ACCOUNT_ID);
+        environment.setSeLinux(SeLinux.ENFORCING);
         environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(tunnel).withOverrideTunnel(override).build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
@@ -197,10 +199,11 @@ class EnvironmentCreationServiceTest {
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
         when(environmentService.save(any(Environment.class))).thenReturn(environment);
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
 
         if (valid) {
             environmentCreationServiceUnderTest.create(environmentCreationDto);
@@ -208,12 +211,14 @@ class EnvironmentCreationServiceTest {
             ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
             verify(environmentService, times(2)).save(captor.capture());
             Environment capturedEnvironment = captor.getValue();
+            assertEquals(SeLinux.ENFORCING, capturedEnvironment.getSeLinux());
             assertEquals(expectedTunnel, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be " + expectedTunnel);
         } else {
             assertThatThrownBy(() -> environmentCreationServiceUnderTest.create(environmentCreationDto))
                     .isInstanceOf(expectedThrowable)
                     .hasMessage(errorMessage);
 
+            verify(validatorService, never()).validateFreeIpaCreation(any(), any());
             verify(environmentService, never()).save(any());
             verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
             verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -252,7 +257,7 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
@@ -265,6 +270,7 @@ class EnvironmentCreationServiceTest {
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
         verify(entitlementService, never()).isSecretEncryptionEnabled(any());
+        verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
 
         List<Environment> allValues = environmentCaptor.getAllValues();
         assertThat(allValues).hasSize(2);
@@ -283,6 +289,7 @@ class EnvironmentCreationServiceTest {
                 .withCrn(environmentCrn)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
+                .withFreeIpaCreation(FreeIpaCreationDto.builder(1).build())
                 .withLocation(LocationDto.builder()
                         .withName("test")
                         .withDisplayName("test")
@@ -303,7 +310,7 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
@@ -316,6 +323,7 @@ class EnvironmentCreationServiceTest {
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
         verify(entitlementService, never()).isSecretEncryptionEnabled(any());
+        verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
 
         List<Environment> allValues = environmentCaptor.getAllValues();
         assertThat(allValues).hasSize(2);
@@ -362,11 +370,12 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
         when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEnabled);
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
@@ -415,7 +424,7 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
@@ -428,6 +437,7 @@ class EnvironmentCreationServiceTest {
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
         verify(validatorService, times(1)).validateFreeipaRecipesExistsByName(recipes);
+        verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
     }
 
     @Test
@@ -471,10 +481,11 @@ class EnvironmentCreationServiceTest {
                 .thenReturn(credential);
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(environmentArgumentCaptor.capture())).thenReturn(environment);
+        when(entitlementService.isCdpSecurityEnforcingSELinux(any())).thenReturn(true);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
@@ -520,7 +531,7 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
 
@@ -528,6 +539,7 @@ class EnvironmentCreationServiceTest {
 
         verify(validatorService, times(1)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
+        verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
@@ -568,7 +580,7 @@ class EnvironmentCreationServiceTest {
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentDtoConverter.environmentToLocationDto(any(Environment.class))).thenReturn(LocationDto.builder().withName("loc").build());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));
         when(environmentService.save(any())).thenReturn(environment);
 
@@ -576,6 +588,7 @@ class EnvironmentCreationServiceTest {
 
         verify(validatorService, times(1)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
+        verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
@@ -611,9 +624,10 @@ class EnvironmentCreationServiceTest {
         when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.save(any())).thenReturn(environment);
+        verify(validatorService, never()).validateFreeIpaCreation(any(), any());
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
     }
@@ -650,7 +664,7 @@ class EnvironmentCreationServiceTest {
         when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.save(any())).thenReturn(environment);
 
@@ -689,7 +703,7 @@ class EnvironmentCreationServiceTest {
         when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.save(any())).thenReturn(environment);
 
