@@ -37,7 +37,7 @@ if [[ "$rotationphase" == "rotation" ]];then
         -c "GRANT $newusername TO $admin_username;" \
         -c "select pg_backend_pid();"
     # Check if the user is the owner of the schema
-    IS_OWNER=$(PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname "SELECT CASE WHEN nspowner = (SELECT oid FROM pg_roles WHERE rolname = '$oldusername') THEN 'yes' ELSE 'no' END FROM pg_namespace WHERE nspname = 'public';")
+    IS_OWNER=$(PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXAc "SELECT CASE WHEN nspowner = (SELECT oid FROM pg_roles WHERE rolname = '$oldusername') THEN 'yes' ELSE 'no' END FROM pg_namespace WHERE nspname = 'public';")
     if [ "$IS_OWNER" == "yes" ]; then
         PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
               -c "ALTER SCHEMA public OWNER TO $newusername;"  \
