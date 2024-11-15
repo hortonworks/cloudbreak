@@ -66,7 +66,7 @@ public class DatabaseCertificateRotationOutdatedDatahubsCollector {
                 int currentVersion = databaseServerByCrn.getSslConfig().getSslCertificateActiveVersion();
                 int expectedVersion = latestCertificate.getVersion();
                 if (currentVersion != latestCertificate.getVersion()) {
-                    LOGGER.info("Data Hub with external DB and name {} ssl active verison {} the expected {}.",
+                    LOGGER.info("Data Hub with external DB and name {} ssl active version {} does not match the expected version {}.",
                             response.getName(),
                             currentVersion,
                             expectedVersion);

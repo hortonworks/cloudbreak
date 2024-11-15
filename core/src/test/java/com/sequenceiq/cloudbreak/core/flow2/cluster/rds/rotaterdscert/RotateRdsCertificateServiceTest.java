@@ -164,7 +164,6 @@ class RotateRdsCertificateServiceTest {
         StackView stackView = mock(StackView.class);
         Cluster cluster = mock(Cluster.class);
 
-        when(stackView.getCloudPlatform()).thenReturn("AWS");
         when(stackView.getClusterId()).thenReturn(1L);
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
         when(clusterService.getCluster(1L)).thenReturn(cluster);
@@ -178,26 +177,10 @@ class RotateRdsCertificateServiceTest {
     }
 
     @Test
-    public void testCheckPrerequisitesThrowsExceptionIfNotAWS() {
-        Long stackId = 1L;
-        StackView stackView = mock(StackView.class);
-
-        when(stackView.getCloudPlatform()).thenReturn("GCP");
-        when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
-
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.checkPrerequisites(stackId, ROTATE);
-        });
-
-        assertEquals("Data Hub is not deployed on AWS. Rotation of certificate does not supported", exception.getMessage());
-    }
-
-    @Test
     public void testCheckPrerequisitesThrowsExceptionIfClusterNull() {
         Long stackId = 1L;
         StackView stackView = mock(StackView.class);
 
-        when(stackView.getCloudPlatform()).thenReturn("AWS");
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
         when(clusterService.getCluster(any())).thenReturn(null);
 
@@ -214,7 +197,6 @@ class RotateRdsCertificateServiceTest {
         StackView stackView = mock(StackView.class);
         Cluster cluster = mock(Cluster.class);
 
-        when(stackView.getCloudPlatform()).thenReturn("AWS");
         when(cluster.getDbSslRootCertBundle()).thenReturn(null);
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
         when(clusterService.getCluster(any())).thenReturn(cluster);
@@ -232,7 +214,6 @@ class RotateRdsCertificateServiceTest {
         StackView stackView = mock(StackView.class);
         Cluster cluster = mock(Cluster.class);
 
-        when(stackView.getCloudPlatform()).thenReturn("AWS");
         when(cluster.getDbSslRootCertBundle()).thenReturn("bundle");
         when(cluster.getDbSslEnabled()).thenReturn(false);
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
@@ -251,7 +232,6 @@ class RotateRdsCertificateServiceTest {
         StackView stackView = mock(StackView.class);
         Cluster cluster = mock(Cluster.class);
 
-        when(stackView.getCloudPlatform()).thenReturn("AWS");
         when(cluster.getDbSslRootCertBundle()).thenReturn("bundle");
         when(cluster.getDbSslEnabled()).thenReturn(true);
         when(stackDtoService.getStackViewById(stackId)).thenReturn(stackView);
