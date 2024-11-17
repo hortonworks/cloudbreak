@@ -402,7 +402,7 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType,
             boolean restartServices, String triggeredVariant, boolean upgrade) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, repairType, restartServices, triggeredVariant, upgrade));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, repairType, restartServices, triggeredVariant, upgrade, false));
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap,
@@ -571,7 +571,7 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerRootVolumeUpdateFlow(Long stackId, Map<String, List<String>> updatedNodesMap, DiskUpdateRequest updateRequest) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, updatedNodesMap, RepairType.ONE_BY_ONE, true, null, false, updateRequest));
+                new ClusterRepairTriggerEvent(stackId, updatedNodesMap, RepairType.ONE_BY_ONE, true, null, false, updateRequest, false));
     }
 
     public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices, boolean restartCM) {
