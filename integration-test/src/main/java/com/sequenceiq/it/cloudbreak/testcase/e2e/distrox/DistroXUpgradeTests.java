@@ -8,10 +8,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
-import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
-import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -23,10 +20,6 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
-import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
-import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
-import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -41,39 +34,13 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     private DistroXTestClient distroXTestClient;
 
     @Inject
-    private ImageCatalogTestClient imageCatalogTest;
-
-    @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
 
     @Inject
-    private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private EnvironmentTestClient environmentTestClient;
-
-    @Inject
-    private RecipeTestClient recipeTestClient;
-
-    @Inject
-    private RecipeUtil recipeUtil;
-
-    @Inject
-    private FreeIpaInstanceUtil freeIpaInstanceUtil;
-
-    @Inject
-    private SdxUtil sdxUtil;
-
-    @Inject
-    private DistroxUtil distroxUtil;
-
-    @Inject
     private EncryptedTestUtil encryptedTestUtil;
-
-    private String resourceGroupForTest;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -93,7 +60,6 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
             then = "Both DistroX upgrade should be successful," + " the clusters should be up and running" +
                     "disks are encrypted too")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
-
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
         String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade()
                 .getDistroXUpgradeCurrentVersion(govCloud);

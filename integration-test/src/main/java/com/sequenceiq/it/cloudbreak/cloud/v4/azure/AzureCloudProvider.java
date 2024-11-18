@@ -504,7 +504,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         }
         AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
 
-
         AzureResourceEncryptionParameters.Builder builder = AzureResourceEncryptionParameters.builder()
                 .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
                 .withEncryptionKeyUrl(getEncryptionKeyUrl());

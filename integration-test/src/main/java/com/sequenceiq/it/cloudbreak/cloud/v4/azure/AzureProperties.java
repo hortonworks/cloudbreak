@@ -29,7 +29,7 @@ public class AzureProperties {
 
     private final Network network = new Network();
 
-    private final DiskEncription diskEncryption = new DiskEncription();
+    private final DiskEncryption diskEncryption = new DiskEncryption();
 
     private final Resourcegroup resourcegroup = new Resourcegroup();
 
@@ -103,7 +103,7 @@ public class AzureProperties {
         return network;
     }
 
-    public DiskEncription getDiskEncryption() {
+    public DiskEncryption getDiskEncryption() {
         return diskEncryption;
     }
 
@@ -383,7 +383,7 @@ public class AzureProperties {
         }
     }
 
-    public static class DiskEncription {
+    public static class DiskEncryption {
         private String encryptionKeyUrl;
 
         private String resourceGroupName;
