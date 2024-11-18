@@ -1789,6 +1789,8 @@ message CDPLiftieRequested {
   string customer = 17;
   // the cluster crn
   string clusterCrn = 18;
+  // the Compute Cluster shape (Embedded or Externalized).
+  string clusterShape = 19;
 }
 
 // Generated when a CDP Liftie cluster's status changed.
@@ -1836,6 +1838,8 @@ message CDPLiftieClusterStatusChanged {
   string workloadCrn = 20;
   // the Liftie app version.
   string liftieVersion = 21;
+  // the Compute Cluster shape (Embedded or Externalized).
+  string clusterShape = 22;
 }
 
 // States of the nodes in a Liftie Cluster
@@ -2497,6 +2501,8 @@ message CDPFreeIPADetails {
   bool spot = 2;
   // multi az for freeipa
   bool multiAz = 3;
+  // seLinux status
+  string seLinux = 4;
 }
 
 // Azure specific environment details
@@ -2712,6 +2718,8 @@ message CDPDatalakeShapeType {
     CUSTOM = 4;
     // CONTAINERIZED
     CONTAINERIZED = 5;
+    // ENTERPRISE
+    ENTERPRISE = 6;
   }
 }
 
@@ -2785,6 +2793,8 @@ message CDPClusterDetails {
   bool sslEnabled = 11;
   // Database details related to cluster
   CDPDatabaseDetails databaseDetails = 12;
+  // seLinux status
+  string seLinux = 13;
 }
 
 message CDPStatusDetails {
@@ -3046,6 +3056,8 @@ message CDPDFSharedParameterGroupLifecycle {
   string environmentCrn = 9;
   // Username of the actor that triggered the action.
   string username = 10;
+  // The source of the shared parameter group.
+  CDPDFSharedParameterGroupSource.Value parameterGroupSource = 11;
 }
 
 // The various lifecycle actions that can be taken on shared parameter groups.
@@ -3061,6 +3073,19 @@ message CDPDFSharedParameterGroupAction {
     UPDATED = 3;
     // A value indicating the shared parameter group association was updated.
     FLOW_DRAFT_ASSOCIATION_UPDATED = 4;
+  }
+}
+
+message CDPDFSharedParameterGroupSource {
+  enum Value {
+    // Local parameter group associated as a default parameter context to a flow draft. Created along with flow draft.
+    LOCAL = 0;
+    // Shared parameter group created by exporting parameters from flow draft.
+    SHARED_FLOW_DRAFT = 1;
+    // Shared parameter group.
+    SHARED = 2;
+    // Shared parameter group created from parameter providers.
+    SHARED_PARAMETER_PROVIDER = 3;
   }
 }
 

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.SeLinux;
 
 @Component
 public class StackToStackDetailsConverter {
@@ -95,7 +96,14 @@ public class StackToStackDetailsConverter {
         stackDetails.setDatabaseType(convertDatabaseType(cluster, getGatewayGroup(instanceGroupDtos)));
         stackDetails.setDatabaseDetails(convertDatabaseDetails(source, cluster));
         stackDetails.setCreatorClient(source.getCreatorClient());
+        stackDetails.setSeLinux(getSeLinux(source));
         return stackDetails;
+    }
+
+    private String getSeLinux(StackView source) {
+        return source.getSecurityConfig() == null || source.getSecurityConfig().getSeLinux() == null ?
+                SeLinux.PERMISSIVE.name() :
+                source.getSecurityConfig().getSeLinux().name();
     }
 
     private DatabaseDetails convertDatabaseDetails(StackView source, ClusterView cluster) {

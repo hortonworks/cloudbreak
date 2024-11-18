@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.datalake.DatalakeDetails;
+import com.sequenceiq.common.model.SeLinux;
 
 @Component
 public class DatalakeDetailsToCDPClusterDetailsConverter {
@@ -17,6 +18,8 @@ public class DatalakeDetailsToCDPClusterDetailsConverter {
         CDPClusterDetails.Builder cdpClusterDetails = CDPClusterDetails.newBuilder();
         if (datalakeDetails != null) {
             cdpClusterDetails.setMultiAz(datalakeDetails.isMultiAzEnabled());
+            cdpClusterDetails.setSeLinux(datalakeDetails.getSeLinux() == null ?
+                    SeLinux.PERMISSIVE.name() : datalakeDetails.getSeLinux().name());
             DatabaseDetails databaseDetails = datalakeDetails.getDatabaseDetails();
             if (databaseDetails != null) {
                 cdpClusterDetails.setDatabaseDetails(convert(databaseDetails));

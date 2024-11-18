@@ -92,6 +92,7 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
         datalakeDetails.setMultiAzEnabled(sdxCluster.isEnableMultiAz());
         datalakeDetails.setStatus(sdxStatus.getStatus().name());
         datalakeDetails.setStatusReason(sdxStatus.getStatusReason());
+        datalakeDetails.setSeLinux(sdxCluster.getSeLinux());
         Optional<StackV4Request> stackV4Request = getStackV4Request(sdxCluster);
         stackV4Request.ifPresent(request -> {
             datalakeDetails.setCloudPlatform(getCloudPlatform(request));

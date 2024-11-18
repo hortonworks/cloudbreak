@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -28,6 +29,8 @@ public class EnvironmentDetailsToCDPFreeIPADetailsConverter {
             if (freeIpaCreationDto != null) {
                 cdpFreeIPADetails.setNodes(freeIpaCreationDto.getInstanceCountByGroup());
                 cdpFreeIPADetails.setMultiAz(freeIpaCreationDto.isEnableMultiAz());
+                cdpFreeIPADetails.setSeLinux(freeIpaCreationDto.getSeLinux() == null ?
+                        SeLinux.PERMISSIVE.name() : freeIpaCreationDto.getSeLinux().name());
 
                 FreeIpaCreationAwsParametersDto aws = freeIpaCreationDto.getAws();
 

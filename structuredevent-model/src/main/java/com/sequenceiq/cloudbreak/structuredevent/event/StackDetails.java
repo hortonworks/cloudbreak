@@ -67,6 +67,8 @@ public class StackDetails implements Serializable {
 
     private boolean multiAz;
 
+    private String seLinux;
+
     private CustomConfigurationsDetails customConfigurations;
 
     private Integer javaVersion;
@@ -273,5 +275,13 @@ public class StackDetails implements Serializable {
 
     public void setCreatorClient(String creatorClient) {
         this.creatorClient = creatorClient;
+    }
+
+    public String getSeLinux() {
+        return seLinux;
+    }
+
+    public void setSeLinux(String seLinux) {
+        this.seLinux = seLinux;
     }
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
+import com.sequenceiq.common.model.SeLinux;
 
 @Component
 public class StructuredEventToCDPClusterDetailsConverter {
@@ -48,6 +49,7 @@ public class StructuredEventToCDPClusterDetailsConverter {
                     cdpClusterDetails.setCloudProviderVariant(CDPCloudProviderVariantType.Value.valueOf(platformVariant));
                 }
                 cdpClusterDetails.setMultiAz(stackDetails.isMultiAz());
+                cdpClusterDetails.setSeLinux(stackDetails.getSeLinux() == null ? SeLinux.PERMISSIVE.name() : stackDetails.getSeLinux());
                 createDatabaseDetails(stackDetails.getDatabaseDetails()).ifPresent(cdpClusterDetails::setDatabaseDetails);
             }
             if (structuredFlowEvent.getCluster() != null) {
@@ -76,6 +78,7 @@ public class StructuredEventToCDPClusterDetailsConverter {
                     cdpClusterDetails.setCloudProviderVariant(CDPCloudProviderVariantType.Value.valueOf(platformVariant));
                 }
                 cdpClusterDetails.setMultiAz(structuredSyncEvent.getStack().isMultiAz());
+                cdpClusterDetails.setSeLinux(getSeLinux(structuredSyncEvent));
                 createDatabaseDetails(structuredSyncEvent.getStack().getDatabaseDetails()).ifPresent(cdpClusterDetails::setDatabaseDetails);
             }
             if (structuredSyncEvent.getCluster() != null) {
@@ -85,6 +88,11 @@ public class StructuredEventToCDPClusterDetailsConverter {
         }
 
         return cdpClusterDetails.build();
+    }
+
+    private String getSeLinux(StructuredSyncEvent structuredSyncEvent) {
+        return structuredSyncEvent.getStack() == null || structuredSyncEvent.getStack().getSeLinux() == null ?
+                SeLinux.PERMISSIVE.name() : structuredSyncEvent.getStack().getSeLinux();
     }
 
     private void setTags(final Consumer<String> setter, Map<String, String> tags) {
