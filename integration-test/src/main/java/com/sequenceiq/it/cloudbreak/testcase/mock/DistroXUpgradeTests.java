@@ -200,7 +200,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
 
     private String getNextRuntimeVersion(String runtime) {
         if ("7.2.18".equals(runtime)) {
-            return "7.3.0";
+            return "7.3.1";
         }
         String[] split = runtime.split("\\.");
         int last = Integer.parseInt(split[split.length - 1]);

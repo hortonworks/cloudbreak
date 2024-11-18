@@ -43,13 +43,11 @@ class DatabaseVersionValidatorTest {
     private static Object[][] testScenariosProvider() {
         return new Object[][] {
                 { "7.2.18", "11", HA, false},
-                { "7.3.0", "11", HA, false},
                 { "7.3.1", "11", HA, true},
                 { "7.3.1", "11", NONE, false},
                 { "7.3.2", "11", HA, true},
                 { "7.2.18", "14", HA, false},
                 { "7.2.18", "14", NONE, false},
-                { "7.3.0", "14", HA, false},
                 { "7.3.1", "14", HA, false},
                 { "7.3.2", "14", HA, false},
                 { "7.3.2", "16", HA, false},

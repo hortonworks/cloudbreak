@@ -74,7 +74,7 @@ class ClusterUpgradePrerequisitesServiceTest {
     void testRemoveIncompatibleServicesShouldOnlyRemoveTheDasServicesIfTheRuntimeVersionIsLowerThanTheLimited() throws Exception {
         when(clusterApi.isServicePresent(STACK_NAME, DAS_SERVICE_TYPE)).thenReturn(true);
 
-        underTest.removeIncompatibleServices(stackDto, clusterApi, "7.3.0");
+        underTest.removeIncompatibleServices(stackDto, clusterApi, "7.2.18");
 
         verify(clusterApi).isServicePresent(STACK_NAME, DAS_SERVICE_TYPE);
         verify(clusterApi, times(0)).isServicePresent(STACK_NAME, ZEPPELIN_SERVICE_TYPE);

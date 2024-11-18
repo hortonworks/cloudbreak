@@ -31,11 +31,11 @@ public class ComponentVersionComparatorTest {
 
     private static Stream<Arguments> provideTestParameters() {
         return Stream.of(
-                Arguments.of("7.2.0", 100, 1, "7.3.0", 200, 2, true),
-                Arguments.of("7.2.9", 100, 1, "7.3.0", 200, 2, true),
+                Arguments.of("7.2.0", 100, 1, "7.3.1", 200, 2, true),
+                Arguments.of("7.2.9", 100, 1, "7.3.1", 200, 2, true),
                 Arguments.of("7.2.9", 100, 1, "7.9.0", 200, 2, true),
                 Arguments.of("7.2.0", 100, 1, "7.2.0", 100, 1, true),
-                Arguments.of("7.3.0", 200, 2, "7.2.0", 100, 1, false),
+                Arguments.of("7.3.1", 200, 2, "7.2.0", 100, 1, false),
                 Arguments.of("7.9.0", 200, 2, "7.2.9", 100, 1, false),
                 Arguments.of("7.2.2", 100, 1, "7.2.0", 100, 1, false),
                 Arguments.of("7.2.0", 100, 1, "7.2.0", 101, 1, true),
@@ -46,7 +46,7 @@ public class ComponentVersionComparatorTest {
                 Arguments.of("7.2.0", 100, 1, "7.2.1", 99, 1, true),
                 Arguments.of("7.2.0", 100, 1, "7.2.1", 100, 0, true),
                 Arguments.of("7.2.0", 100, 1, "7.2.0", 99, 2, false),
-                Arguments.of("7.2.0", null, 1, "7.3.0", null, 2, true),
+                Arguments.of("7.2.0", null, 1, "7.3.1", null, 2, true),
                 Arguments.of("7.2.0", null, 1, "7.2.0", null, 1, true),
                 Arguments.of("7.2.0", null, 1, "7.2.0", null, 2, true),
                 Arguments.of("7.2.0", null, 1, "7.2.1", null, 1, true),

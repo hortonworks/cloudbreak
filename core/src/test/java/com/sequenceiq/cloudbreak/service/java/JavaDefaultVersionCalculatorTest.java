@@ -38,7 +38,6 @@ class JavaDefaultVersionCalculatorTest {
                 { "7.2.16",    null,         8  },
                 { "7.2.17",    null,         8  },
                 { "7.2.18",    null,         8  },
-                { "7.3.0",     null,         8  },
                 { "7.3.1",     null,         17 },
                 { "7.2.7",     8,            8  },
                 { "7.2.8",     8,            8  },
@@ -51,7 +50,6 @@ class JavaDefaultVersionCalculatorTest {
                 { "7.2.16",    17,           17 },
                 { "7.2.17",    8,            8  },
                 { "7.2.18",    8,            8  },
-                { "7.3.0",     11,           11 },
                 { "7.3.1",     11,           11 },
         };
     }
@@ -63,7 +61,7 @@ class JavaDefaultVersionCalculatorTest {
             DefaultJavaConfiguration java8 = new DefaultJavaConfiguration();
             java8.setVersion(8);
             java8.setMinRuntimeVersion("7.1.0");
-            java8.setMaxRuntimeVersion("7.3.0");
+            java8.setMaxRuntimeVersion("7.2.18");
 
             DefaultJavaConfiguration java17 = new DefaultJavaConfiguration();
             java17.setVersion(17);
