@@ -20,7 +20,7 @@ public class CdhPackageLocationFilter implements PackageLocationFilter {
         } else {
             String repoUrl = image.getStackDetails().getRepo().getStack().getOrDefault(image.getOsType(), "");
             LOGGER.debug("Matching URL: [{}]", repoUrl);
-            return URL_PATTERN.matcher(repoUrl).find();
+            return isArchiveUrl(repoUrl);
         }
     }
 

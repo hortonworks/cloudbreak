@@ -56,7 +56,7 @@ public class SetDatalakeDefaultJavaVersionActions {
                         List.of(payload.getDefaultJavaVersion()), "Initiating the process to set the default Java version for the Data Lake",
                         context.getSdxId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                cloudbreakStackService.setDefaultJavaVersion(sdxCluster, payload.getDefaultJavaVersion(), payload.isRestartServices());
+                cloudbreakStackService.setDefaultJavaVersion(sdxCluster, payload.getDefaultJavaVersion(), payload.isRestartServices(), payload.isRestartCM());
                 LOGGER.info("Successfully initiated the process to set the default Java version for the Data Lake with payload: {}", payload);
                 sendEvent(context, setDefaultJavaVersionRequest);
             }

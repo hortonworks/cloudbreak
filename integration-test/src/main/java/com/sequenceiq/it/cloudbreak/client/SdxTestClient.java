@@ -299,8 +299,8 @@ public class SdxTestClient {
         return new SdxAddDisksAction(size, numOfDisks, volumeType, instanceGroup, cloudVolumeUsageType);
     }
 
-    public Action<SdxInternalTestDto, SdxClient> setDefaultJavaVersion(String defaultJavaVersion, boolean restartServices) {
-        return new SdxSetDefaultJavaVersionAction(defaultJavaVersion, restartServices);
+    public Action<SdxInternalTestDto, SdxClient> setDefaultJavaVersion(String defaultJavaVersion, boolean restartServices, boolean restartCM) {
+        return new SdxSetDefaultJavaVersionAction(defaultJavaVersion, restartServices, restartCM);
     }
 
     public Action<SdxInternalTestDto, SdxClient> describeInternalWithResources() {

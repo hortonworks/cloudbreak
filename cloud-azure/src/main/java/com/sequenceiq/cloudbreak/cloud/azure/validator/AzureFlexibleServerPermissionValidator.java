@@ -4,9 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceException;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
 @Component
@@ -40,11 +44,21 @@ public class AzureFlexibleServerPermissionValidator {
 
     public void validatePermission(AzureClient client) {
         Set<RoleDefinition> roleDefinitions = getRoleDefinitions(client);
+        Set<String> notAllowedActions = getNotAllowedActions(roleDefinitions);
         Set<String> allowedActions = getAllowedActions(roleDefinitions);
-        Set<String> missingPermissions = findMissingPermissions(allowedActions);
-        if (!missingPermissions.isEmpty()) {
-            throw new AzureResourceException(
-                    String.format("Permission validation failed because the following actions are missing from your role definition: %s", missingPermissions));
+        Pair<Set<String>, Set<String>> incorrectPermissions = findMissingPermissions(allowedActions, notAllowedActions);
+        ValidationResult.ValidationResultBuilder errors = ValidationResult.builder();
+        if (!incorrectPermissions.getRight().isEmpty()) {
+            errors.error("The following required action(s) are explicitly denied in your role definition (in 'notActions' section): " +
+                    incorrectPermissions.getRight());
+        }
+        if (!incorrectPermissions.getLeft().isEmpty()) {
+            errors.error("The following required action(s) are missing from your role definition: " + incorrectPermissions.getLeft());
+        }
+        ValidationResult result = errors.build();
+        if (result.hasError()) {
+            LOGGER.info("Flexible Server validation result: {}", result.getErrors());
+            throw new AzureResourceException(result.getFormattedErrors());
         }
     }
 
@@ -66,12 +80,23 @@ public class AzureFlexibleServerPermissionValidator {
     }
 
     private Set<String> getAllowedActions(Set<RoleDefinition> roleDefinitions) {
-        return roleDefinitions.stream()
-                .map(RoleDefinition::permissions)
-                .flatMap(Set::stream)
+        return getPermissions(roleDefinitions)
                 .map(Permission::actions)
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
+    }
+
+    private Set<String> getNotAllowedActions(Set<RoleDefinition> roleDefinitions) {
+        return getPermissions(roleDefinitions)
+                .map(Permission::notActions)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+    }
+
+    private Stream<Permission> getPermissions(Set<RoleDefinition> roleDefinitions) {
+        return roleDefinitions.stream()
+                .map(RoleDefinition::permissions)
+                .flatMap(Set::stream);
     }
 
     private Set<String> getAssignedRoleDefinitionIds(AzureClient client, String servicePrincipalId) {
@@ -80,16 +105,22 @@ public class AzureFlexibleServerPermissionValidator {
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> findMissingPermissions(Set<String> allowedActions) {
-        if (allowedActions.contains("*")) {
+    private Pair<Set<String>, Set<String>> findMissingPermissions(Set<String> allowedActions, Set<String> notAllowedActions) {
+        if (allowedActions.contains("*") && CollectionUtils.isEmpty(notAllowedActions)) {
             LOGGER.debug("All action is allowed because a \"*\" is present in the role definition");
-            return Collections.emptySet();
+            return Pair.of(Collections.emptySet(), Collections.emptySet());
         } else {
             Set<String> allowedActionsRegex = convertAllowedActionsToRegex(allowedActions);
             List<String> requiredActions = azureFlexibleServerRoleDefinitionProvider.loadAzureFlexibleMinimalRoleDefinition().getActions();
-            return requiredActions.stream()
+
+            Set<String> deniedPermissions = notAllowedActions.stream()
+                    .filter(requiredActions::contains)
+                    .collect(Collectors.toSet());
+
+            Set<String> missingPermissions = requiredActions.stream()
                     .filter(requiredAction -> isMissing(allowedActionsRegex, requiredAction))
                     .collect(Collectors.toSet());
+            return Pair.of(missingPermissions, deniedPermissions);
         }
     }
 

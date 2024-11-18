@@ -104,7 +104,6 @@ public class ValidationResult {
 
     public boolean hasErrorOrWarning() {
         return hasError() || hasWarning();
-
     }
 
     @Override
