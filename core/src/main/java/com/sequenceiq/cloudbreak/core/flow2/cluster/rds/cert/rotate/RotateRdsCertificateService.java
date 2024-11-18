@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAK
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.PAAS;
 
 import java.util.Collections;
@@ -162,27 +161,22 @@ public class RotateRdsCertificateService {
 
     public void checkPrerequisites(Long stackId, RotateRdsCertificateType rotateRdsCertificateType) {
         StackView stack = stackDtoService.getStackViewById(stackId);
-        if (AWS.name().equalsIgnoreCase(stack.getCloudPlatform())) {
-            List<String> datahubsWhichMustBeUpdated = datahubCertificateChecker.collectDatahubsWhichMustBeUpdated(stack);
-            if (!datahubsWhichMustBeUpdated.isEmpty()) {
-                String errorMessage = String.format("Data Hub with name: '%s' is not on the latest certificate version. " +
-                                "Please update certificate on the Data Hub side before update the Data Lake",
-                        String.join(", ", datahubsWhichMustBeUpdated.stream().sorted().collect(Collectors.toList())));
-                LOGGER.info(errorMessage);
-                throw new CloudbreakServiceException(errorMessage);
+        List<String> datahubsWhichMustBeUpdated = datahubCertificateChecker.collectDatahubsWhichMustBeUpdated(stack);
+        if (!datahubsWhichMustBeUpdated.isEmpty()) {
+            String errorMessage = String.format("Data Hub with name: '%s' is not on the latest certificate version. " +
+                            "Please update certificate on the Data Hub side before update the Data Lake",
+                    String.join(", ", datahubsWhichMustBeUpdated.stream().sorted().collect(Collectors.toList())));
+            LOGGER.info(errorMessage);
+            throw new CloudbreakServiceException(errorMessage);
+        }
+        Cluster cluster = clusterService.getCluster(stack.getClusterId());
+        if (rotateRdsCertificateType.equals(RotateRdsCertificateType.ROTATE)) {
+            if (cluster != null && cluster.getDbSslRootCertBundle() != null && cluster.getDbSslEnabled()) {
+                LOGGER.info("{} with name {} is applicable for rotation", getType(stack), stack.getName());
+            } else {
+                throw new CloudbreakServiceException(String.format("%s Database not ssl enabled. " +
+                        "Rotation of certificate does not supported", getType(stack)));
             }
-            Cluster cluster = clusterService.getCluster(stack.getClusterId());
-            if (rotateRdsCertificateType.equals(RotateRdsCertificateType.ROTATE)) {
-                if (cluster != null && cluster.getDbSslRootCertBundle() != null && cluster.getDbSslEnabled()) {
-                    LOGGER.info("{} with name {} is applicable for rotation", getType(stack), stack.getName());
-                } else {
-                    throw new CloudbreakServiceException(String.format("%s Database not ssl enabled. " +
-                            "Rotation of certificate does not supported", getType(stack)));
-                }
-            }
-        } else {
-            throw new CloudbreakServiceException(String.format("%s is not deployed on AWS. " +
-                    "Rotation of certificate does not supported", getType(stack)));
         }
     }
 

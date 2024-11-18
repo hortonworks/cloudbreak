@@ -402,8 +402,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         return new AwsVariantMigrationTriggerEvent(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), resourceId, groupName);
     }
 
-    private StackEvent downscaleEvent(boolean singlePrimaryGW, ClusterRepairTriggerEvent event,
-            Map<String, Set<String>> groupsWithHostNames) {
+    private StackEvent downscaleEvent(boolean primaryGatewaySelected, ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames) {
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
         Map<String, Set<Long>> groupsWithPrivateIds = new HashMap<>();
         Map<String, Integer> groupsWithAdjustment = new HashMap<>();
@@ -417,7 +416,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
         LOGGER.info("Downscale groups with adjustments: {}", groupsWithAdjustment);
         LOGGER.info("Downscale groups with privateIds: {}", groupsWithPrivateIds);
-        if (!singlePrimaryGW) {
+        if (!primaryGatewaySelected || (event.isUpgrade() && !event.isRollingRestartEnabled())) {
             LOGGER.info("Full downscale for the following: {}", groupsWithHostNames);
             return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(), groupsWithAdjustment,
                     groupsWithPrivateIds, groupsWithHostNames, ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
