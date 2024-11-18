@@ -44,13 +44,13 @@ public class ClusterRepairTriggerEvent extends StackEvent {
     }
 
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
-            String triggeredStackVariant, boolean upgrade, DiskUpdateRequest diskUpdateRequest) {
-        this(stackId, failedNodesMap, repairType, restartServices, triggeredStackVariant, upgrade);
+            String triggeredStackVariant, boolean upgrade, DiskUpdateRequest diskUpdateRequest, boolean rollingRestartEnabled) {
+        this(stackId, failedNodesMap, repairType, restartServices, triggeredStackVariant, upgrade, rollingRestartEnabled);
         this.diskUpdateRequest = diskUpdateRequest;
     }
 
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
-            String triggeredStackVariant, boolean upgrade) {
+            String triggeredStackVariant, boolean upgrade, boolean rollingRestartEnabled) {
         super(stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
         this.stackId = stackId;
@@ -58,7 +58,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.restartServices = restartServices;
         this.upgrade = upgrade;
         this.triggeredStackVariant = triggeredStackVariant;
-        this.rollingRestartEnabled = false;
+        this.rollingRestartEnabled = rollingRestartEnabled;
         this.diskUpdateRequest = null;
     }
 

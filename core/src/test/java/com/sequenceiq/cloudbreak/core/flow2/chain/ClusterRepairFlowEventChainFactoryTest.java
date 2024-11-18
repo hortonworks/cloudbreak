@@ -32,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
@@ -78,7 +77,7 @@ import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePaylo
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterRepairFlowEventChainFactoryTest {
+class ClusterRepairFlowEventChainFactoryTest {
 
     private static final long INSTANCE_GROUP_ID = 1L;
 
@@ -144,13 +143,13 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         setupStackDto();
         setupViews();
     }
 
     @Test
-    public void testRepairSingleGatewayWithNoAttached() {
+    void testRepairSingleGatewayWithNoAttached() {
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.GATEWAY);
 
@@ -165,7 +164,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairSingleGatewayWithNoAttachedWithEmbeddedDBUpgrade() {
+    void testRepairSingleGatewayWithNoAttachedWithEmbeddedDBUpgrade() {
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.GATEWAY);
         when(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(stackDto, true))
@@ -179,14 +178,14 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "UPGRADE_EMBEDDEDDB_PREPARATION_TRIGGER_EVENT",
                 "UPGRADE_RDS_TRIGGER_EVENT",
-                "STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
-    public void testRepairSingleGatewayWithAttached() {
+    void testRepairSingleGatewayWithAttached() {
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.GATEWAY);
 
@@ -201,7 +200,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairSingleGatewayMultipleNodes() {
+    void testRepairSingleGatewayMultipleNodes() {
         Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
@@ -219,7 +218,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairMultipleGatewayWithNoAttached() {
+    void testRepairMultipleGatewayWithNoAttached() {
         Stack stack = getStack();
         setupInstanceGroup(InstanceGroupType.GATEWAY, 5);
         setupHostGroup(InstanceGroupType.GATEWAY);
@@ -235,7 +234,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairMultipleGatewayWithAttached() {
+    void testRepairMultipleGatewayWithAttached() {
         Stack stack = getStack();
         setupInstanceGroup(InstanceGroupType.GATEWAY, 5);
         setupHostGroup(InstanceGroupType.GATEWAY);
@@ -251,7 +250,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairCoreNodes() {
+    void testRepairCoreNodes() {
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
 
@@ -266,7 +265,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairCoreNodesWithStoppedNodes() {
+    void testRepairCoreNodesWithStoppedNodes() {
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
 
@@ -299,7 +298,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairNotGatewayInstanceGroup() {
+    void testRepairNotGatewayInstanceGroup() {
         Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
 
@@ -314,7 +313,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairAllAtOnce() {
+    void testRepairAllAtOnce() {
         Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
@@ -344,16 +343,16 @@ public class ClusterRepairFlowEventChainFactoryTest {
         FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
         assertNotNull(flowChainInitPayload);
 
-        StackDownscaleTriggerEvent downscale1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHosts(downscale1, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN));
-        assertGroupWithHosts(downscale1, HG_CORE, Set.of("core1", "core2", "core3"));
-        assertGroupWithHosts(downscale1, HG_AUXILIARY, Set.of("aux1"));
+        StackDownscaleTriggerEvent downscale = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHosts(downscale, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN));
+        assertGroupWithHosts(downscale, HG_CORE, Set.of("core1", "core2", "core3"));
+        assertGroupWithHosts(downscale, HG_AUXILIARY, Set.of("aux1"));
 
-        StackAndClusterUpscaleTriggerEvent upscale1 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        assertGroupWithHosts(upscale1, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN));
-        assertGroupWithHosts(upscale1, HG_CORE, Set.of("core1", "core2", "core3"));
-        assertGroupWithHosts(upscale1, HG_AUXILIARY, Set.of("aux1"));
-        assertEquals(diskUpdateRequest, upscale1.getDiskUpdateRequest());
+        StackAndClusterUpscaleTriggerEvent upscale = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHosts(upscale, HG_MASTER, Set.of(FAILED_PRIMARY_GATEWAY_FQDN, FAILED_SECONDARY_GATEWAY_FQDN));
+        assertGroupWithHosts(upscale, HG_CORE, Set.of("core1", "core2", "core3"));
+        assertGroupWithHosts(upscale, HG_AUXILIARY, Set.of("aux1"));
+        assertEquals(diskUpdateRequest, upscale.getDiskUpdateRequest());
 
         RescheduleStatusCheckTriggerEvent statusCheckTriggerEvent = (RescheduleStatusCheckTriggerEvent) eventQueues.getQueue().poll();
         assertNotNull(statusCheckTriggerEvent);
@@ -363,7 +362,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRepairNodesOneByOne() {
+    void testRepairNodesOneByOne() {
         Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
@@ -436,7 +435,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testBatchRepair() {
+    void testBatchRepair() {
         Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
@@ -497,7 +496,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenNotUpgrade() {
+    void testAddAwsNativeMigrationIfNeedWhenNotUpgrade() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackView.getId(), Map.of(), RepairType.ALL_AT_ONCE, false, "variant");
@@ -508,7 +507,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenUpgradeButNotAwsNativeVariantIsTheTriggered() {
+    void testAddAwsNativeMigrationIfNeedWhenUpgradeButNotAwsNativeVariantIsTheTriggered() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "triggeredVariant";
@@ -522,7 +521,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredButStackIsAlreadyOnAwsNativeVariant() {
+    void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredButStackIsAlreadyOnAwsNativeVariant() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
@@ -536,7 +535,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredOnTheLegacyAwsVariantAndEntitledForMigrationButNotEntitledFor() {
+    void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredOnTheLegacyAwsVariantAndEntitledForMigrationButNotEntitledFor() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
@@ -550,7 +549,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigration() {
+    void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigration() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "AWS_NATIVE";
@@ -566,7 +565,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testRootDiskMigration() {
+    void testRootDiskMigration() {
         ReflectionTestUtils.setField(underTest, "rootDiskRepairMigrationEnabled", true);
         when(rootVolumeSizeProvider.getForPlatform(any())).thenReturn(200);
         Stack stack = getStack();
@@ -593,6 +592,60 @@ public class ClusterRepairFlowEventChainFactoryTest {
         eventQueues.getQueue().remove();
         CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent = (CoreVerticalScalingTriggerEvent) eventQueues.getQueue().poll();
         assertEquals(200, coreVerticalScalingTriggerEvent.getRequest().getTemplate().getRootVolume().getSize().intValue());
+    }
+
+    @Test
+    void testRepairSingleGatewayWhenNonRollingUpgrade() {
+        Stack stack = getStack();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupPrimaryGateway();
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
+                new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().withUpgrade().build());
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+    }
+
+    @Test
+    void testRepairSingleGatewayWhenRollingUpgrade() {
+        Stack stack = getStack();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupPrimaryGateway();
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
+                new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().withUpgrade().withRollingRestartEnabled().build());
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+    }
+
+    @Test
+    void testRepairSingleGatewayWhenNotUpgrade() {
+        Stack stack = getStack();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupPrimaryGateway();
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
+                new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().build());
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     private void assertGroupWithHost(StackScaleTriggerEvent scaleTriggerEvent, String group, String expectedInstanceFqdn) {
@@ -662,7 +715,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setInstanceId(hostName);
-        instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
 
         return instanceMetaData;
     }
@@ -706,6 +759,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
         private RepairType repairType = RepairType.ALL_AT_ONCE;
 
         private boolean upgrade;
+
+        private boolean rollingRestartEnabled;
 
         private DiskUpdateRequest diskUpdateRequest;
 
@@ -762,6 +817,11 @@ public class ClusterRepairFlowEventChainFactoryTest {
             return this;
         }
 
+        private TriggerEventBuilder withRollingRestartEnabled() {
+            rollingRestartEnabled = true;
+            return this;
+        }
+
         private ClusterRepairTriggerEvent build() {
             Map<String, List<String>> failedNodes = new LinkedHashMap<>();
             if (!failedGatewayNodes.isEmpty()) {
@@ -774,7 +834,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 failedNodes.put(HG_AUXILIARY, failedAuxiliaryNodes);
             }
 
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade, diskUpdateRequest);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade, diskUpdateRequest, rollingRestartEnabled);
         }
     }
 }

@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -82,8 +83,10 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -96,7 +99,7 @@ import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterRepairServiceTest {
+class ClusterRepairServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -109,6 +112,8 @@ public class ClusterRepairServiceTest {
     private static final long CLUSTER_ID = 1;
 
     private static final Long WORKSPACE_ID = 2L;
+
+    private static final String PLATFORM_VARIANT = "platformVariant";
 
     @Mock
     private TransactionService transactionService;
@@ -164,6 +169,9 @@ public class ClusterRepairServiceTest {
     @Mock
     private StackStopRestrictionService stackStopRestrictionService;
 
+    @Mock
+    private StackUpgradeService stackUpgradeService;
+
     private Stack stack;
 
     private StackDto stackDto;
@@ -171,7 +179,7 @@ public class ClusterRepairServiceTest {
     private Cluster cluster;
 
     @BeforeEach
-    public void setUp() throws TransactionExecutionException {
+    void setUp() throws TransactionExecutionException {
         cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         cluster.setRdsConfigs(Set.of());
@@ -196,10 +204,11 @@ public class ClusterRepairServiceTest {
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
         lenient().when(stackDto.getStack()).thenReturn(stack);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
+        lenient().when(stackDto.getPlatformVariant()).thenReturn(PLATFORM_VARIANT);
     }
 
     @Test
-    public void testRepairByHostGroups() {
+    void testRepairByHostGroups() {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -220,7 +229,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testCMNodeRepairSelectedAndAllStoppedNodesNotSelected() {
+    void testCMNodeRepairSelectedAndAllStoppedNodesNotSelected() {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -251,7 +260,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void repairValidationShouldFailWhenStackUsesCCMAndHasMultipleGatewayInstances() {
+    void repairValidationShouldFailWhenStackUsesCCMAndHasMultipleGatewayInstances() {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -276,7 +285,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testCanRepairCoreTypeNode() {
+    void testCanRepairCoreTypeNode() {
         cluster.setDatabaseServerCrn("dbCrn");
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
@@ -301,7 +310,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testCanRepairPrewarmedGatewayWithRepairPossibleBasedOnDBSetup() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    void testCanRepairPrewarmedGatewayWithRepairPossibleBasedOnDBSetup() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -327,7 +336,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testCannotRepairBaseImageGateway() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    void testCannotRepairBaseImageGateway() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -352,7 +361,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testCannotRepairGatewayWithoutExternalDatabase() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    void testCannotRepairGatewayWithoutExternalDatabase() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -377,7 +386,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testRepairByNodeIds() {
+    void testRepairByNodeIds() {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
 
@@ -421,7 +430,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void shouldNotUpdateStackStateWhenThereAreNoNodesToRepair() {
+    void shouldNotUpdateStackStateWhenThereAreNoNodesToRepair() {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -444,7 +453,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void repairShouldFailIfNotAvailableDatabaseExistsForCluster() {
+    void repairShouldFailIfNotAvailableDatabaseExistsForCluster() {
         cluster.setDatabaseServerCrn("dbCrn");
 
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
@@ -465,7 +474,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenFreeIpaNotAvailable() {
+    void testValidateRepairWhenFreeIpaNotAvailable() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(false);
@@ -479,7 +488,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenEnvNotAvailable() {
+    void testValidateRepairWhenEnvNotAvailable() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -494,7 +503,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
+    void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -526,7 +535,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
+    void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -558,7 +567,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
+    void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -595,7 +604,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenReattachSupported() {
+    void testValidateRepairWhenReattachSupported() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -621,7 +630,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testValidateRepairWhenReattachNotSupported() {
+    void testValidateRepairWhenReattachNotSupported() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -645,7 +654,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void markVolumesToNonDeletableBasedOnInstanceIdTest() {
+    void markVolumesToNonDeletableBasedOnInstanceIdTest() {
         InstanceMetaData instanceMetaData1 = createInstanceMetaData("i-1", InstanceStatus.CREATED, "worker-1");
         InstanceMetaData instanceMetaData2 = createInstanceMetaData("i-2", InstanceStatus.CREATED, "worker-2");
 
@@ -668,7 +677,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void markVolumesToNonDeletableBasedOnFqdnTest() {
+    void markVolumesToNonDeletableBasedOnFqdnTest() {
         InstanceMetaData instanceMetaData1 = createInstanceMetaData("i-1", InstanceStatus.CREATED, "worker-1");
         InstanceMetaData instanceMetaData2 = createInstanceMetaData("i-2", InstanceStatus.CREATED, "worker-2");
 
@@ -692,7 +701,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void doNotNarkVolumesToNonDeletableTest() {
+    void doNotNarkVolumesToNonDeletableTest() {
         InstanceMetaData instanceMetaData1 = createInstanceMetaData("i-1", InstanceStatus.CREATED, "worker-1");
         InstanceMetaData instanceMetaData2 = createInstanceMetaData("i-2", InstanceStatus.CREATED, "worker-2");
 
@@ -713,6 +722,35 @@ public class ClusterRepairServiceTest {
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertTrue(saveCaptor.getValue().isEmpty());
+    }
+
+    @Test
+    void testRepairAllDuringOsUpgrade() {
+        StackView stackView = mock(StackView.class);
+        when(stackView.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
+
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        HostGroup hostGroup2 = new HostGroup();
+        hostGroup2.setName("hostGroup2");
+        hostGroup2.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
+        hostGroup2.setInstanceGroup(host2.getInstanceGroup());
+
+        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
+        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1, hostGroup2));
+        when(stackUpgradeService.calculateUpgradeVariant(eq(stackView), eq(USER_CRN), eq(true))).thenReturn(PLATFORM_VARIANT);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairAll(stackView, true, true));
+        verify(flowManager, times(1)).triggerClusterRepairFlow(eq(STACK_ID), eq(Map.of("hostGroup1", List.of("host1"), "hostGroup2", List.of("host2"))),
+                eq(RepairType.ALL_AT_ONCE), eq(false), eq(PLATFORM_VARIANT), eq(true));
     }
 
     private InstanceGroup createUnhealthyInstanceGroup(String groupName, Set<VolumeTemplate> volumeTemplates) {
