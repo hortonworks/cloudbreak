@@ -72,6 +72,12 @@ public class SecretRotationSaltService {
         executeSaltState(gatewayConfig, targets, states, exitCriteriaModel, Optional.of(MAX_RETRY), Optional.of(MAX_RETRY_ON_ERROR));
     }
 
+    public void executeSaltStateOnPrimaryGateway(StackDto stackDto, List<String> states) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        ExitCriteriaModel exitCriteriaModel = exitCriteriaProvider.get(stackDto);
+        executeSaltState(gatewayConfig, Set.of(gatewayConfig.getHostname()), states, exitCriteriaModel, Optional.of(MAX_RETRY), Optional.of(MAX_RETRY_ON_ERROR));
+    }
+
     public void executeSaltRun(OrchestratorStateParams stateParams) throws CloudbreakOrchestratorFailedException {
         hostOrchestrator.runOrchestratorState(stateParams);
     }

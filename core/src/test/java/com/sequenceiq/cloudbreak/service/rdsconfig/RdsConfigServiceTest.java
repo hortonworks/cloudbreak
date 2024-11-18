@@ -130,25 +130,6 @@ public class RdsConfigServiceTest {
         underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME + "X", defaultWorkspace);
     }
 
-    @Test
-    public void testGetRdsConfigById() {
-        when(rdsConfigRepository.findById(eq(1L))).thenReturn(Optional.of(testRdsConfig));
-
-        RDSConfig rdsConfig = underTest.get(1L);
-
-        verify(rdsConfigRepository).findById(eq(1L));
-        assertEquals(TEST_RDS_CONFIG_NAME, rdsConfig.getName());
-    }
-
-    @Test
-    public void testGetNonExistingRdsConfigById() {
-        when(rdsConfigRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        thrown.expect(NotFoundException.class);
-
-        underTest.get(1L);
-    }
-
     private void mockClusterServiceWithEmptyList() {
         when(clusterService.findByRdsConfig(anyLong())).thenReturn(Collections.emptySet());
     }

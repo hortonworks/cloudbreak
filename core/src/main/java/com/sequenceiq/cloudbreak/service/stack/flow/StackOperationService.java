@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
@@ -582,5 +584,14 @@ public class StackOperationService {
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         defaultJavaVersionUpdateValidator.validate(stack, request);
+    }
+
+    public FlowIdentifier manageDatabaseUser(String crn, String dbUser, String dbType, String operation) {
+        StackDto stack = stackDtoService.getByCrn(crn);
+        if (!stack.isAvailable()) {
+            throw new BadRequestException("Database user operation should be executed on available cluster!");
+        }
+        return flowManager.triggerExternalDatabaseUserOperation(stack.getId(), stack.getResourceName(), stack.getResourceCrn(),
+                ExternalDatabaseUserOperation.valueOf(operation), DatabaseType.valueOf(dbType), dbUser);
     }
 }

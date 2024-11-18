@@ -28,9 +28,6 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.workspace = :org AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByWorkspace(@Param("org") Workspace org);
 
-    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.name= :name AND r.status = 'USER_MANAGED'")
-    RDSConfig findUserManagedByName(@Param("name") String name);
-
     @Override
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.name= :name AND r.status = 'USER_MANAGED'"
             + "AND r.workspace.id = :workspaceId")
@@ -46,15 +43,8 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
             + "AND r.workspace = :org")
     Optional<RDSConfig> findByNameAndWorkspace(@Param("name") String name, @Param("org") Workspace org);
 
-    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.id= :id AND r.status <> 'DEFAULT_DELETED'")
-    Optional<RDSConfig> findById(@Param("id") Long id);
-
     @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster LEFT JOIN FETCH r.clusters WHERE cluster.id= :clusterId")
     Set<RDSConfig> findByClusterId(@Param("clusterId") Long clusterId);
-
-    @Query("SELECT r FROM RDSConfig r INNER JOIN r.clusters cluster WHERE cluster.id= :clusterId "
-            + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
-    RDSConfig findByClusterIdAndType(@Param("clusterId") Long clusterId, @Param("type") String type);
 
     @Query("SELECT count(r) > 0 FROM RDSConfig r INNER JOIN r.clusters cluster WHERE cluster.id= :clusterId "
             + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
@@ -67,6 +57,9 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     @Query("SELECT rc FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.rdsConfigs rc " +
             "WHERE s.resourceCrn = :stackCrn AND rc.type = :databaseType AND rc.status = 'DEFAULT'")
     Optional<RDSConfig> findByStackIdAndType(@Param("stackCrn") String stackCrn, @Param("databaseType") String databaseType);
+
+    @Query("SELECT r FROM RDSConfig r WHERE r.connectionURL = :connectionUrl")
+    Set<RDSConfig> findAllByConnectionUrlAndType(@Param("connectionUrl") String connectionUrl);
 
     @Modifying
     @Query("UPDATE RDSConfig r SET r.sslMode = 'ENABLED' WHERE r.id = :id")

@@ -57,4 +57,8 @@ public class RdsConfigWithoutClusterService {
     public Optional<RdsConfigWithoutCluster> findByConnectionUrlAndType(String connectionUrl, String type) {
         return rdsConfigWithoutClusterRepository.findByConnectionUrlAndType(connectionUrl, type);
     }
+
+    public Set<RdsConfigWithoutCluster> findAllByConnectionUrlAndType(String connectionUrl, String type) {
+        return rdsConfigWithoutClusterRepository.findAllByConnectionUrlAndType(connectionUrl, type);
+    }
 }

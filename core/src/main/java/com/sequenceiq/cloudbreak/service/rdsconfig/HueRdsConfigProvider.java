@@ -40,7 +40,7 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return hueDb;
     }
 

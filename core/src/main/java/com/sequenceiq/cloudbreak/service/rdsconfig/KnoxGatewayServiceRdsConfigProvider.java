@@ -26,7 +26,7 @@ public class KnoxGatewayServiceRdsConfigProvider extends AbstractRdsConfigProvid
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return db;
     }
 

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -59,6 +60,9 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private SecretService secretService;
+
+    @Inject
+    private DatabaseCommon dbCommon;
 
     public Cluster configureCluster(Cluster requestedCluster) {
         Objects.requireNonNull(requestedCluster);
@@ -112,7 +116,7 @@ public class SharedServiceConfigProvider {
             String host = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_HOST);
             String port = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_PORT);
             String dbName = getHmsServiceConfigValue(configuration, HIVE_METASTORE_DATABASE_NAME);
-            String connectionUrl = String.format("jdbc:postgresql://%s:%s/%s", host, port, dbName);
+            String connectionUrl = dbCommon.getJdbcConnectionUrl("postgresql", host, Integer.parseInt(port), Optional.of(dbName));
             Optional<RdsConfigWithoutCluster> rdsConfigWithoutCluster = rdsConfigWithoutClusterService.findByConnectionUrlAndType(connectionUrl, databaseType);
             if (rdsConfigWithoutCluster.isPresent()) {
                 setRdsConfigsForCluster(requestedCluster, List.of(rdsConfigWithoutCluster.get()));

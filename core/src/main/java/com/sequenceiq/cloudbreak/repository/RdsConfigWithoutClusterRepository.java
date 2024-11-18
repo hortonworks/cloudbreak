@@ -90,4 +90,10 @@ public interface RdsConfigWithoutClusterRepository extends CrudRepository<RDSCon
             "ORDER BY id DESC " +
             "LIMIT 1")
     Optional<RdsConfigWithoutCluster> findByConnectionUrlAndType(@Param("connectionUrl") String connectionUrl, @Param("type") String type);
+
+    @Query("SELECT DISTINCT " + PROJECTION +
+            "FROM RDSConfig r " +
+            "WHERE r.connectionURL = :connectionUrl " +
+            "AND r.type = :type ")
+    Set<RdsConfigWithoutCluster> findAllByConnectionUrlAndType(@Param("connectionUrl") String connectionUrl, @Param("type") String type);
 }

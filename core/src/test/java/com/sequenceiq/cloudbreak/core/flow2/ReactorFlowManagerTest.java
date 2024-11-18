@@ -36,6 +36,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
@@ -60,6 +61,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
@@ -210,6 +212,7 @@ class ReactorFlowManagerTest {
         doReturn(CloudVolumeUsageType.GENERAL.toString()).when(stackAddVolumesRequest).getCloudVolumeUsageType();
         underTest.triggerAddVolumes(STACK_ID, stackAddVolumesRequest);
         underTest.triggerRotateRdsCertificate(STACK_ID);
+        underTest.triggerExternalDatabaseUserOperation(STACK_ID, "name", "crn", ExternalDatabaseUserOperation.CREATION, DatabaseType.HIVE, "user");
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

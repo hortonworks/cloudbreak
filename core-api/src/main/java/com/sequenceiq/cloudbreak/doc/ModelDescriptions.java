@@ -497,6 +497,7 @@ public class ModelDescriptions {
         public static final String AZURE_DATABASE_TYPE = "The type of the azure database: single server / flexible server";
         public static final String FLEXIBLE_SERVER_DELEGATED_SUBNET = "flexible server delegated subnet id";
         public static final String DISABLE_DB_SSL_ENFORCEMENT = "Option to enforce disabling database SSL encryption for clusters.";
+        public static final String USER_OPERATION = "Operation regarding user (creation or deletion).";
     }
 
     public static class DatabaseServerModelDescription {

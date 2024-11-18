@@ -33,7 +33,7 @@ public class SchemaRegistryServerRdsConfigProvider extends AbstractRdsConfigProv
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return db;
     }
 

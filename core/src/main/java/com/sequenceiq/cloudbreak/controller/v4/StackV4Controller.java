@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ExternalDatabaseManageDatabaseUserV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
@@ -747,5 +748,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier updateRootVolumeByStackCrnInternal(Long workspaceId, @ResourceCrn String crn,
             DiskUpdateRequest rootDiskVolumesRequest, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.rootVolumeDiskUpdate(NameOrCrn.ofCrn(crn), rootDiskVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @InternalOnly
+    @Override
+    public FlowIdentifier manageDatabaseUser(Long workspaceId, ExternalDatabaseManageDatabaseUserV4Request rq, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.manageDatabaseUser(rq.getCrn(), rq.getDbUser(), rq.getDbType(), rq.getOperation());
     }
 }

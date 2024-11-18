@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -50,6 +52,10 @@ public class PostgresConfigService {
     public static final String POSTGRESQL_SERVER = "postgresql-server";
 
     public static final String POSTGRES_ROTATION = "postgres-rotation";
+
+    public static final String POSTGRES_USER = "postgres-user";
+
+    public static final String POSTGRESQL_USER_SLS = "/postgresql/user.sls";
 
     private static final String POSTGRES_COMMON = "postgres-common";
 
@@ -119,6 +125,28 @@ public class PostgresConfigService {
         rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
                 postgresConfig.putAll(provider.createServicePillarConfigMapForRotation(stackDto)));
         return new SaltPillarProperties(POSTGRESQL_ROTATION_SLS, singletonMap(POSTGRES_ROTATION, postgresConfig));
+    }
+
+    public String getDatabaseNameByType(DatabaseType databaseType) {
+        return getAbstractRdsConfigProviderStreamByDatabaseType(databaseType).map(AbstractRdsConfigProvider::getDb).findFirst().orElseThrow();
+    }
+
+    public SaltPillarProperties getPillarPropertiesForUserCreation(StackDto stackDto, RDSConfig rdsConfig, DatabaseType databaseType) {
+        Map<String, Object> postgresConfig = new HashMap<>();
+        getAbstractRdsConfigProviderStreamByDatabaseType(databaseType)
+                .forEach(provider -> postgresConfig.putAll(provider.createServicePillarConfigMapForUserCreation(stackDto, rdsConfig)));
+        return new SaltPillarProperties(POSTGRESQL_USER_SLS, singletonMap(POSTGRES_USER, postgresConfig));
+    }
+
+    public SaltPillarProperties getPillarPropertiesForUserDeletion(StackDto stackDto, String dbUser, DatabaseType databaseType) {
+        Map<String, Object> postgresConfig = new HashMap<>();
+        getAbstractRdsConfigProviderStreamByDatabaseType(databaseType)
+                .forEach(provider -> postgresConfig.putAll(provider.createServicePillarConfigMapForUserDeletion(stackDto, dbUser)));
+        return new SaltPillarProperties(POSTGRESQL_USER_SLS, singletonMap(POSTGRES_USER, postgresConfig));
+    }
+
+    private Stream<AbstractRdsConfigProvider> getAbstractRdsConfigProviderStreamByDatabaseType(DatabaseType databaseType) {
+        return rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().stream().filter(provider -> provider.getRdsType().equals(databaseType));
     }
 
     public SaltPillarProperties getPostgreSQLServerPropertiesForRotation(StackDto stackDto) {

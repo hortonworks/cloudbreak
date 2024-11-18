@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
@@ -42,19 +43,20 @@ public class RedbeamsDbServerConfigurer {
     @Inject
     private DbUsernameConverterService dbUsernameConverterService;
 
-    /**
-     * Creates an RDSConfig object for a specific database.
-     *
-     * @param stack   stack for naming purposes
-     * @param cluster cluster to associate database with
-     * @param dbName  database name
-     * @param dbUser  database user
-     * @param type    database type
-     * @return RDSConfig object for database
-     */
     public RDSConfig createNewRdsConfig(String stackName, Long stackId, String dbServerCrn, Long clusterId, String dbName, String dbUser, DatabaseType type) {
+        String rdsConfigName = type.name() + '_' + stackName + stackId;
+        return createNewRdsConfig(dbServerCrn, clusterId, dbName, dbUser, type, rdsConfigName);
+    }
+
+    public RDSConfig createNewRdsConfigForNewUser(String stackName, Long stackId, String dbServerCrn, Long clusterId, String dbName,
+            String dbUser, DatabaseType type) {
+        String datePostfix = new SimpleDateFormat("ddMMyyHHmmss").format(new Date());
+        String rdsConfigName = type.name() + '_' + stackName + stackId + '_' + datePostfix;
+        return createNewRdsConfig(dbServerCrn, clusterId, dbName, dbUser, type, rdsConfigName);
+    }
+
+    public RDSConfig createNewRdsConfig(String dbServerCrn, Long clusterId, String dbName, String dbUser, DatabaseType type, String rdsConfigName) {
         DatabaseServerV4Response resp = getDatabaseServer(dbServerCrn);
-        LOGGER.info("Using redbeams for remote database configuration: {}", resp.toString());
         if (Objects.nonNull(resp.getStatus()) && !resp.getStatus().isAvailable()) {
             String message = String.format("Redbeams database server is not available (%s) with message: %s", resp.getStatus(), resp.getStatusReason());
             LOGGER.warn(message);
@@ -69,7 +71,7 @@ public class RedbeamsDbServerConfigurer {
         rdsConfig.setConnectionDriver(resp.getConnectionDriver());
         rdsConfig.setDatabaseEngine(DatabaseVendor.fromValue(resp.getDatabaseVendor()));
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
-        rdsConfig.setName(type.name() + '_' + stackName + stackId);
+        rdsConfig.setName(rdsConfigName);
         rdsConfig.setType(type.name());
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
         rdsConfig.setCreationDate(new Date().getTime());
@@ -79,6 +81,17 @@ public class RedbeamsDbServerConfigurer {
         LOGGER.info("Created RDS config {} for database type {} with connection URL {}, connection username {}",
                 rdsConfig.getName(), type, rdsConfig.getConnectionURL(), rdsConfig.getConnectionUserName());
         return rdsConfig;
+    }
+
+    private DatabaseServerV4Response getDatabaseServerV4Response(String dbServerCrn) {
+        DatabaseServerV4Response resp = getDatabaseServer(dbServerCrn);
+        LOGGER.info("Using redbeams for remote database configuration: {}", resp.toString());
+        if (Objects.nonNull(resp.getStatus()) && !resp.getStatus().isAvailable()) {
+            String message = String.format("Redbeams database server is not available (%s) with message: %s", resp.getStatus(), resp.getStatusReason());
+            LOGGER.warn(message);
+            throw new CloudbreakServiceException(message);
+        }
+        return resp;
     }
 
     private RdsSslMode getSslMode(DatabaseServerV4Response response) {

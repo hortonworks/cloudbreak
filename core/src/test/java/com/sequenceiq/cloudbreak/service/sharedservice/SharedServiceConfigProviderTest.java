@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.CDL;
 import static com.sequenceiq.cloudbreak.sdx.TargetPlatform.PAAS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -63,6 +65,9 @@ public class SharedServiceConfigProviderTest {
     @Mock
     private SecretService secretService;
 
+    @Mock
+    private DatabaseCommon dbCommon;
+
     @InjectMocks
     private SharedServiceConfigProvider underTest;
 
@@ -93,7 +98,7 @@ public class SharedServiceConfigProviderTest {
         Cluster cluster = cluster();
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withPlatform(CDL).build()));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
-                HIVE_METASTORE_DATABASE_PORT, "port",
+                HIVE_METASTORE_DATABASE_PORT, "5432",
                 HIVE_METASTORE_DATABASE_HOST, "host",
                 HIVE_METASTORE_DATABASE_NAME, "hive",
                 HIVE_METASTORE_DATABASE_PASSWORD, "pass",
@@ -114,7 +119,7 @@ public class SharedServiceConfigProviderTest {
         Cluster cluster = cluster();
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(SdxBasicView.builder().withPlatform(CDL).build()));
         when(platformAwareSdxConnector.getHmsServiceConfig(any())).thenReturn(Map.of(
-                HIVE_METASTORE_DATABASE_PORT, "port",
+                HIVE_METASTORE_DATABASE_PORT, "5432",
                 HIVE_METASTORE_DATABASE_HOST, "host",
                 HIVE_METASTORE_DATABASE_NAME, "hive",
                 HIVE_METASTORE_DATABASE_PASSWORD, "pass",
@@ -122,6 +127,7 @@ public class SharedServiceConfigProviderTest {
         ));
         when(rdsConfigWithoutClusterService.findByConnectionUrlAndType(any(), any())).thenReturn(Optional.empty());
         doNothing().when(clusterService).saveRdsConfig(any());
+        when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn("jdbc:postgresql://host:5432/hive");
 
         underTest.configureCluster(cluster);
 
@@ -129,7 +135,7 @@ public class SharedServiceConfigProviderTest {
         assertEquals(cluster.getRdsConfigs().size(), 1);
         RDSConfig rdsConfig = cluster.getRdsConfigs().iterator().next();
         assertEquals(rdsConfig.getType(), "HIVE");
-        assertEquals(rdsConfig.getConnectionURL(), "jdbc:postgresql://host:port/hive");
+        assertEquals(rdsConfig.getConnectionURL(), "jdbc:postgresql://host:5432/hive");
         verifyNoInteractions(stackService, remoteDataContextWorkaroundService);
     }
 

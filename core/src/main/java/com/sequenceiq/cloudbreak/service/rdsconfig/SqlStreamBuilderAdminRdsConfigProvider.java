@@ -34,7 +34,7 @@ public class SqlStreamBuilderAdminRdsConfigProvider extends AbstractRdsConfigPro
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return db;
     }
 

@@ -99,6 +99,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ExternalDatabaseManageDatabaseUserV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
@@ -944,6 +945,17 @@ public interface StackV4Endpoint {
     FlowIdentifier updateRootVolumeByStackCrnInternal(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @Valid DiskUpdateRequest rootDiskVolumesRequest,
+            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/manage_db_user")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Create or delete a database user", operationId = "manageDatabaseUser",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier manageDatabaseUser(@PathParam("workspaceId") Long workspaceId,
+            @NotNull @Valid ExternalDatabaseManageDatabaseUserV4Request request,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

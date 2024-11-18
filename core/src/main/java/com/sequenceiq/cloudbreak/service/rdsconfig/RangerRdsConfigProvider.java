@@ -39,7 +39,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return rangerDb;
     }
 

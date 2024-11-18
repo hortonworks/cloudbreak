@@ -28,7 +28,7 @@ public class ClouderaManagementServiceReportsManagerRdsConfigProvider extends Ab
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return db;
     }
 

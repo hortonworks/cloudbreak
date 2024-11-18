@@ -113,6 +113,23 @@ public abstract class AbstractRdsConfigProvider {
         return Collections.emptyMap();
     }
 
+    public Map<String, Object> createServicePillarConfigMapForUserCreation(StackDto stackDto, RDSConfig rdsConfig) {
+        Map<String, Object> postgres = new HashMap<>();
+        addRemoteDbToConfigIfNeeded(stackDto, postgres);
+        postgres.put("database", getDb());
+        postgres.put("user", rdsConfig.getConnectionUserName());
+        postgres.put("password", rdsConfig.getConnectionPassword());
+        return Collections.singletonMap(getPillarKey(), postgres);
+    }
+
+    public Map<String, Object> createServicePillarConfigMapForUserDeletion(StackDto stackDto, String dbUser) {
+        Map<String, Object> postgres = new HashMap<>();
+        addRemoteDbToConfigIfNeeded(stackDto, postgres);
+        postgres.put("database", getDb());
+        postgres.put("user", dbUser);
+        return Collections.singletonMap(getPillarKey(), postgres);
+    }
+
     private RdsConfigWithoutCluster getRdsConfig(StackDto stackDto) {
         Set<RdsConfigWithoutCluster> rdsConfigs = createPostgresRdsConfigIfNeeded(stackDto);
         return rdsConfigs.stream().filter(c -> c.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
@@ -236,7 +253,7 @@ public abstract class AbstractRdsConfigProvider {
 
     public abstract String getDbUser();
 
-    protected abstract String getDb();
+    public abstract String getDb();
 
     protected abstract String getDbPort();
 

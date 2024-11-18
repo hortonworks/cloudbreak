@@ -91,7 +91,8 @@ public class RestUrlParserTest {
             "/v4/progress",
             "/v4/operation",
             "/v4/custom_configurations",
-            "internal/get_database_certificate_status"
+            "internal/get_database_certificate_status",
+            "internal/manage_db_user"
     };
 
     private static final String[] EXCLUDEPATHS = {
@@ -101,7 +102,8 @@ public class RestUrlParserTest {
             "stacks/internal/rotate_secret",
             "/singleimage/internal",
             "/imd_update",
-            "internal/get_database_certificate_status"
+            "internal/get_database_certificate_status",
+            "internal/manage_db_user"
     };
 
     @Mock

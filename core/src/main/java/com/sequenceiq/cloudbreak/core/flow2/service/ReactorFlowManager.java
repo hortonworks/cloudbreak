@@ -43,6 +43,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
@@ -88,6 +89,9 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserFlowStartEvent;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.config.ExternalDatabaseUserEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateTriggerEvent;
@@ -568,5 +572,11 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices, boolean restartCM) {
         String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices, restartCM));
+    }
+
+    public FlowIdentifier triggerExternalDatabaseUserOperation(Long stackId, String name, String crn, ExternalDatabaseUserOperation operation,
+            DatabaseType dbType, String dbUser) {
+        String selector = ExternalDatabaseUserEvent.START_EXTERNAL_DATABASE_USER_OPERATION_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new ExternalDatabaseUserFlowStartEvent(stackId, selector, name, crn, operation, dbType, dbUser));
     }
 }

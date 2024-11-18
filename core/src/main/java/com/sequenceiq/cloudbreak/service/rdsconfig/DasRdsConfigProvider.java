@@ -33,7 +33,7 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected String getDb() {
+    public String getDb() {
         return dasDb;
     }
 

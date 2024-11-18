@@ -7,6 +7,7 @@
 base:
   '*':
 {{ include_if_exists('postgresql', 'rotation') }}
+{{ include_if_exists('postgresql', 'user') }}
 {{ include_if_exists('nodes', 'hosts') }}
 {{ include_if_exists('nodes', 'hostattrs') }}
 {{ include_if_exists('discovery') }}

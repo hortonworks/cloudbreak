@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -52,10 +50,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         return getByNameForWorkspaceId(name, workspace.getId());
     }
 
-    public RDSConfig get(Long id) {
-        return rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
-    }
-
     public RDSConfig getByStackCrnAndType(String stackCrn, DatabaseType databaseType) {
         return rdsConfigRepository.findByStackIdAndType(stackCrn, databaseType.name())
                 .orElseThrow(() -> new NotFoundException("Not found " + databaseType + " type rds configuration for stack " + stackCrn));
@@ -93,16 +87,8 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         return rdsConfigRepository.findByClusterId(clusterId);
     }
 
-    public RDSConfig findByClusterIdAndType(Long clusterId, DatabaseType databaseType) {
-        return rdsConfigRepository.findByClusterIdAndType(clusterId, databaseType.name());
-    }
-
     public Boolean existsByClusterIdAndType(Long clusterId, DatabaseType databaseType) {
         return rdsConfigRepository.existsByClusterIdAndType(clusterId, databaseType.name());
-    }
-
-    public Boolean existsByClusterIdAndType(Long clusterId, String databaseType) {
-        return rdsConfigRepository.existsByClusterIdAndType(clusterId, databaseType);
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
@@ -153,5 +139,9 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     public int countOfClustersUsingResource(RDSConfig rdsConfig) {
         return clusterService.countByRdsConfig(rdsConfig.getId());
+    }
+
+    public Set<RDSConfig> findAllByConnectionUrlAndType(String connectionUrl) {
+        return rdsConfigRepository.findAllByConnectionUrlAndType(connectionUrl);
     }
 }
