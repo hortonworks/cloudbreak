@@ -43,7 +43,7 @@ public class EntitlementDrivenPackageLocationFilter implements UpgradeImageFilte
     public String getMessage(ImageFilterParams imageFilterParams) {
         if (hasTargetImage(imageFilterParams)) {
             return getCantUpgradeToImageMessage(imageFilterParams,
-                    String.format("The selected image contains packages where the url doesn't match the pattern '%s',", PackageLocationFilter.URL_PATTERN));
+                    "The selected image contains packages with URLs that do not belong to the archive.cloudera.com domain.");
         } else {
             return "There are no eligible images to upgrade because the location of the packages is not appropriate.";
         }

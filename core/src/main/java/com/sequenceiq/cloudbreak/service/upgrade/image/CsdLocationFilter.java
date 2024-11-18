@@ -68,7 +68,7 @@ public class CsdLocationFilter implements PackageLocationFilter {
     private boolean allAvailableRequiredCsdUrlLocationIsValid(Map<String, Set<String>> csdList) {
         return csdList.entrySet().stream()
                 .allMatch(csdListByParcel -> csdListByParcel.getValue().stream()
-                        .allMatch(csdUrl -> URL_PATTERN.matcher(csdUrl).find()));
+                        .allMatch(this::isArchiveUrl));
     }
 
     private Map<String, Set<String>> getCsdUrlsByParcelNames(Image image, Set<String> requiredParcels) {

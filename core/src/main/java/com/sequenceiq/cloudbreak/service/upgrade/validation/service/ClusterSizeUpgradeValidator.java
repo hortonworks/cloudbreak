@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @Component
 public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
@@ -22,9 +21,6 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
 
     @Value("${cb.upgrade.validation.distrox.maxNumberOfInstancesForRollingUpgrade}")
     private int maxNumberOfInstancesForRollingUpgrade;
-
-    @Inject
-    private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
     private EntitlementService entitlementService;
@@ -37,7 +33,7 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
         long numberOfInstances = validationRequest.stack().getFullNodeCount();
         if (validationRequest.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled()) {
             validateClusterSizeForRollingUpgrade(numberOfInstances);
-        } else if (validationRequest.replaceVms()) {
+        } else if (validationRequest.replaceVms() && rollingUpgradeValidationEnabled()) {
             validateForOsUpgrade(numberOfInstances);
         }
     }

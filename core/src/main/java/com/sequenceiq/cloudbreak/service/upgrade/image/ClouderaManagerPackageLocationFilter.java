@@ -20,7 +20,7 @@ public class ClouderaManagerPackageLocationFilter implements PackageLocationFilt
         } else {
             String repoUrl = image.getRepo().getOrDefault(image.getOsType(), "");
             LOGGER.debug("Matching URL: [{}]", repoUrl);
-            return URL_PATTERN.matcher(repoUrl).find();
+            return isArchiveUrl(repoUrl);
         }
     }
 }

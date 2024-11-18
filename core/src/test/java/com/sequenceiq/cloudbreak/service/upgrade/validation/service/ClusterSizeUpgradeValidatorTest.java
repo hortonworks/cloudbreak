@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,6 +86,13 @@ class ClusterSizeUpgradeValidatorTest {
 
         assertEquals("There are 21 nodes in the cluster. Upgrade is supported up to 20 nodes. "
                         + "Please downscale the cluster below the limit and retry the upgrade.", exception.getMessage());
+    }
+
+    @Test
+    void testValidateShouldNotThrowExceptionWhenVmReplacementIsEnabledAndSkipValidationIsEnabled() {
+        when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(true);
+        mockAvailableInstances(5000);
+        assertDoesNotThrow(() -> doAs(ACTOR, () -> underTest.validate(createRequest(false, true))));
     }
 
     @Test
