@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.AVAILABLE_REMOTELY;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
@@ -20,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -48,11 +46,9 @@ import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerParcelManagementServiceTest {
@@ -83,9 +79,6 @@ class ClouderaManagerParcelManagementServiceTest {
 
     @Mock
     private ApiClient apiClient;
-
-    @Mock
-    private CloudbreakEventService eventService;
 
     @BeforeAll
     static void before() {
@@ -193,9 +186,8 @@ class ClouderaManagerParcelManagementServiceTest {
 
     @Test
     void testDownloadParcelsShouldCallCmApiToDownloadParcels() throws CloudbreakException, ApiException {
-        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15").withParcelFileUrl("http://parcel");
-        ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3")
-                .withParcelFileUrl("http://archive.cloudera.com/");
+        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15");
+        ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3");
         ApiCommand cdhDownloadCommand = new ApiCommand().id(BigDecimal.ONE);
         ApiCommand flinkDownloadCommand = new ApiCommand().id(BigDecimal.TEN);
         ExtendedPollingResult pollingResult = createPollingResult();
@@ -205,29 +197,17 @@ class ClouderaManagerParcelManagementServiceTest {
                 any(ParcelResource.class))).thenReturn(pollingResult);
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDownload(eq(stack), eq(apiClient), eq(flinkDownloadCommand.getId()),
                 any(ParcelResource.class))).thenReturn(pollingResult);
-        when(parcelsResourceApi.readParcels(stack.getName(), "summary")).thenReturn(
-                new ApiParcelList().items(List.of(createApiParcel(CDH, "7.2.15", AVAILABLE_REMOTELY), createApiParcel(FLINK, "1.2.3", AVAILABLE_REMOTELY))));
 
-        underTest.downloadParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, parcelsResourceApi, stack, apiClient);
+        underTest.downloadParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, stack, apiClient);
 
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_PARCEL, List.of(CDH));
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_PARCEL, List.of(FLINK));
         verify(parcelResourceApi).startDownloadCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion());
         verify(parcelResourceApi).startDownloadCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion());
         verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeParcelDownload(eq(stack), eq(apiClient), eq(cdhDownloadCommand.getId()),
                 any(ParcelResource.class));
         verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeParcelDownload(eq(stack), eq(apiClient), eq(flinkDownloadCommand.getId()),
                 any(ParcelResource.class));
-        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult.getPollingResult(),
-                "Cluster was terminated while waiting for CDP Runtime Parcel to be downloaded",
-                "The upgrade process encountered issues due to the degradation of build-cache.vpc.cloudera.com or the build cache, "
-                        + "resulting in the inability to download the parcels within 60 minutes. "
-                        + "If this issue persists, please contact our Release Engineering team for assistance.");
-        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult.getPollingResult(),
-                "Cluster was terminated while waiting for CDP Runtime Parcel to be downloaded",
-                "The upgrade process encountered issues due to the degradation of archive.cloudera.com or the build cache, "
-                        + "resulting in the inability to download the parcels within 60 minutes. "
-                        + "If this issue persists, please contact our Support team for assistance.");
+        verify(pollingResultErrorHandler, times(2)).handlePollingResult(pollingResult.getPollingResult(),
+                "Cluster was terminated while waiting for CDP Runtime Parcel to be downloaded", "Timeout during the updated CDP Runtime Parcel download.");
     }
 
     @Test
@@ -243,13 +223,9 @@ class ClouderaManagerParcelManagementServiceTest {
                 any(ParcelResource.class))).thenReturn(pollingResult);
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(flinkDistributeCommand.getId()),
                 any(ParcelResource.class))).thenReturn(pollingResult);
-        when(parcelsResourceApi.readParcels(stack.getName(), "summary")).thenReturn(
-                new ApiParcelList().items(List.of(createApiParcel(CDH, "7.2.15", DOWNLOADED), createApiParcel(FLINK, "1.2.3", DOWNLOADED))));
 
-        underTest.distributeParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, parcelsResourceApi, stack, apiClient);
+        underTest.distributeParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, stack, apiClient);
 
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL, List.of(CDH));
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL, List.of(FLINK));
         verify(parcelResourceApi).startDistributionCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion());
         verify(parcelResourceApi).startDistributionCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion());
         verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(cdhDistributeCommand.getId()),
@@ -257,34 +233,6 @@ class ClouderaManagerParcelManagementServiceTest {
         verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(flinkDistributeCommand.getId()),
                 any(ParcelResource.class));
         verify(pollingResultErrorHandler, times(2)).handlePollingResult(pollingResult.getPollingResult(),
-                "Cluster was terminated while waiting for CDP Runtime Parcel to be distributed", "Timeout during the updated CDP Runtime Parcel distribution.");
-    }
-
-    @Test
-    void testDistributeParcelsShouldDistributeOnlyCdhParcelWhenTheFlinkIsAlreadyActivated() throws CloudbreakException, ApiException {
-        ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15");
-        ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3");
-        ApiCommand cdhDistributeCommand = new ApiCommand().id(BigDecimal.ONE);
-        ApiCommand flinkDistributeCommand = new ApiCommand().id(BigDecimal.TEN);
-        ExtendedPollingResult pollingResult = createPollingResult();
-        when(parcelResourceApi.startDistributionCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion())).thenReturn(cdhDistributeCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(cdhDistributeCommand.getId()),
-                any(ParcelResource.class))).thenReturn(pollingResult);
-        when(parcelsResourceApi.readParcels(stack.getName(), "summary"))
-                .thenReturn(new ApiParcelList().items(List.of(createApiParcel(CDH, "7.2.15", DOWNLOADED), createApiParcel(FLINK, "1.2.3", ACTIVATED))));
-
-        underTest.distributeParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, parcelsResourceApi, stack, apiClient);
-
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL, List.of(CDH));
-        verify(eventService, times(0))
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL, List.of(FLINK));
-        verify(parcelResourceApi).startDistributionCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion());
-        verify(parcelResourceApi, times(0)).startDistributionCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(cdhDistributeCommand.getId()),
-                any(ParcelResource.class));
-        verify(clouderaManagerPollingServiceProvider, times(0))
-                .startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(flinkDistributeCommand.getId()), any(ParcelResource.class));
-        verify(pollingResultErrorHandler, times(1)).handlePollingResult(pollingResult.getPollingResult(),
                 "Cluster was terminated while waiting for CDP Runtime Parcel to be distributed", "Timeout during the updated CDP Runtime Parcel distribution.");
     }
 
@@ -301,23 +249,15 @@ class ClouderaManagerParcelManagementServiceTest {
                 .thenReturn(pollingResult);
         when(clouderaManagerPollingServiceProvider.startPollingCmSingleParcelActivation(stack, apiClient, flinkActivationCommand.getId(), flinkProduct))
                 .thenReturn(pollingResult);
-        when(parcelsResourceApi.readParcels(stack.getName(), "summary")).thenReturn(
-                new ApiParcelList().items(List.of(createApiParcel(CDH, "7.2.15", DISTRIBUTED), createApiParcel(FLINK, "1.2.3", DISTRIBUTED))));
 
-        underTest.activateParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, parcelsResourceApi, stack, apiClient);
+        underTest.activateParcels(Set.of(cdhProduct, flinkProduct), parcelResourceApi, stack, apiClient);
 
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_ACTIVATE_PARCEL, List.of(CDH));
-        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_ACTIVATE_PARCEL, List.of(FLINK));
         verify(parcelResourceApi).activateCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion());
         verify(parcelResourceApi).activateCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion());
         verify(clouderaManagerPollingServiceProvider).startPollingCmSingleParcelActivation(stack, apiClient, cdhActivationCommand.getId(), cdhProduct);
         verify(clouderaManagerPollingServiceProvider).startPollingCmSingleParcelActivation(stack, apiClient, flinkActivationCommand.getId(), flinkProduct);
         verify(pollingResultErrorHandler, times(2)).handlePollingResult(pollingResult.getPollingResult(),
                 "Cluster was terminated while waiting for CDP Runtime Parcel to be activated", "Timeout during the updated CDP Runtime Parcel activation.");
-    }
-
-    private ApiParcel createApiParcel(String name, String version, ParcelStatus parcelStatus) {
-        return new ApiParcel().product(name).version(version).stage(parcelStatus.name());
     }
 
     @Test
