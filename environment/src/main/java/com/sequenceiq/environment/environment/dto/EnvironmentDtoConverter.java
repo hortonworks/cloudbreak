@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -190,6 +191,11 @@ public class EnvironmentDtoConverter {
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         environment.setDataServices(creationDto.getDataServices());
         environment.setCreatorClient(creationDto.getCreatorClient());
+        if (null != creationDto.getFreeIpaCreation().getSeLinux()) {
+            environment.setSeLinux(creationDto.getFreeIpaCreation().getSeLinux());
+        } else {
+            environment.setSeLinux(SeLinux.PERMISSIVE);
+        }
         setDefaultComputeCluster(creationDto, environment);
         setRegions(creationDto, environment);
         return environment;

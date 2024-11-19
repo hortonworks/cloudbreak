@@ -112,6 +112,9 @@ public class FreeIpaConverter {
                             StringUtils.join(missingEntitlements, ",")));
                 }
             }
+            if (null != request.getSecurity() && null != request.getSecurity().getSeLinux()) {
+                builder.withSeLinux(SeLinux.fromStringWithFallback(request.getSecurity().getSeLinux()));
+            }
             Optional.ofNullable(request.getInstanceType())
                     .ifPresent(builder::withInstanceType);
             Optional.ofNullable(request.getAws())

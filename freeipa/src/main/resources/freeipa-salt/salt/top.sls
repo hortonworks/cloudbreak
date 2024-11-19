@@ -36,6 +36,7 @@ base:
              - freeipa.healthagent
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
+             - freeipa.selinux-mode
              - faillock
 
            'roles:freeipa_replica':
@@ -49,6 +50,7 @@ base:
              - freeipa.healthagent
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
+             - freeipa.selinux-mode
              - faillock
 
            'roles:freeipa_primary_replacement':
@@ -63,6 +65,7 @@ base:
              - freeipa.healthagent
              - freeipa.patch-pki-tomcat
              - freeipa.ldapagent
+             - freeipa.selinux-mode
              - faillock
 
            'recipes:post-cluster-install':

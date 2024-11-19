@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -69,7 +70,8 @@ public class FreeIpaConfigService {
         LOGGER.debug("Subnets for reverse zone calculation : {}", subnetWithCidr);
         String reverseZones = reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
         LOGGER.debug("Reverse zones : {}", reverseZones);
-
+        String seLinux = null != stack.getSecurityConfig() && null != stack.getSecurityConfig().getSeLinux() ?
+                stack.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
         return builder
                 .withRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT))
                 .withDomain(freeIpa.getDomain())
@@ -85,6 +87,7 @@ public class FreeIpaConfigService {
                 .withCcmv2JumpgateEnabled(stack.getTunnel().useCcmV2Jumpgate())
                 .withSecretEncryptionEnabled(environmentService.isSecretEncryptionEnabled(stack.getEnvironmentCrn()))
                 .withKerberosSecretLocation(kerberosSecretLocation)
+                .withSeLinux(seLinux)
                 .build();
     }
 

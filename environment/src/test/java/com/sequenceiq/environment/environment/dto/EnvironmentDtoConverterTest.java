@@ -27,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
@@ -708,6 +709,7 @@ class EnvironmentDtoConverterTest {
                 .withImageCatalog(FREE_IPA_IMAGE_CATALOG)
                 .withEnableMultiAz(FREE_IPA_ENABLE_MULTI_AZ)
                 .withImageId(FREE_IPA_IMAGE_ID)
+                .withSeLinux(SeLinux.ENFORCING)
                 .build();
         ExperimentalFeatures experimentalFeatures = ExperimentalFeatures.builder()
                 .withTunnel(Tunnel.CCMV2_JUMPGATE)
@@ -771,6 +773,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getDeletionType()).isEqualTo(EnvironmentDeletionType.NONE);
         assertThat(result.getFreeIpaImageId()).isEqualTo(FREE_IPA_IMAGE_ID);
         assertThat(result.getAdminGroupName()).isEqualTo(ADMIN_GROUP_NAME);
+        assertThat(result.getSeLinux()).isEqualTo(SeLinux.ENFORCING);
         assertThat(result.getCreated()).isPositive();
         DefaultComputeCluster defaultComputeCluster = result.getDefaultComputeCluster();
         assertNotNull(defaultComputeCluster);
@@ -816,7 +819,8 @@ class EnvironmentDtoConverterTest {
                 .withName(LOCATION)
                 .withDisplayName(LOCATION_DISPLAY_NAME)
                 .build();
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
+        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withCreate(CREATE_FREE_IPA)
+                .withSeLinux(null)
                 .build();
         Map<String, String> defaultTags = Map.ofEntries(entry("defaultKey1", "defaultValue1"), entry("defaultKey2", "defaultValue2"));
         EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
@@ -848,6 +852,7 @@ class EnvironmentDtoConverterTest {
         assertThat(environmentTags.getUserDefinedTags()).isNotNull();
         assertThat(environmentTags.getUserDefinedTags()).isEmpty();
         assertThat(environmentTags.getDefaultTags()).isEqualTo(defaultTags);
+        assertThat(result.getSeLinux()).isEqualTo(SeLinux.PERMISSIVE);
         DefaultComputeCluster defaultComputeCluster = result.getDefaultComputeCluster();
         assertThat(defaultComputeCluster.isCreate()).isFalse();
         assertThat(defaultComputeCluster.isPrivateCluster()).isFalse();

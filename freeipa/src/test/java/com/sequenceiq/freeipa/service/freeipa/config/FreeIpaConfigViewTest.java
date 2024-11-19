@@ -10,6 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.common.model.SeLinux;
+
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaConfigViewTest {
 
@@ -22,9 +24,11 @@ public class FreeIpaConfigViewTest {
         FreeIpaConfigView freeIpaConfigView = new FreeIpaConfigView.Builder()
                 .withKerberosSecretLocation(KERBEROS_SECRET_LOCATION)
                 .withBackupConfig(backupConfigView)
+                .withSeLinux(SeLinux.PERMISSIVE.name())
                 .withSecretEncryptionEnabled(secretEncryptionEnabled).build();
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
         assertEquals(secretEncryptionEnabled, freeIpaConfigMap.get("secretEncryptionEnabled"));
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigMap.get("kerberosSecretLocation"));
+        assertEquals(SeLinux.PERMISSIVE.name(), freeIpaConfigMap.get("selinux_mode"));
     }
 }

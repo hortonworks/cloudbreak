@@ -47,6 +47,8 @@ public class FreeIpaConfigView {
 
     private final String kerberosSecretLocation;
 
+    private final String seLinux;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -64,6 +66,7 @@ public class FreeIpaConfigView {
         this.ccmv2JumpgateEnabled = builder.ccmv2JumpgateEnabled;
         this.secretEncryptionEnabled = builder.secretEncryptionEnabled;
         this.kerberosSecretLocation = builder.kerberosSecretLocation;
+        this.seLinux = builder.seLinux;
     }
 
     public String getRealm() {
@@ -126,6 +129,10 @@ public class FreeIpaConfigView {
         return kerberosSecretLocation;
     }
 
+    public String getSeLinux() {
+        return seLinux;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -148,6 +155,7 @@ public class FreeIpaConfigView {
         map.put("cidrBlocks", cidrBlocks);
         map.put("secretEncryptionEnabled", secretEncryptionEnabled);
         map.put("kerberosSecretLocation", kerberosSecretLocation);
+        map.put("selinux_mode", seLinux);
         return map;
     }
 
@@ -182,6 +190,8 @@ public class FreeIpaConfigView {
         private boolean secretEncryptionEnabled;
 
         private String kerberosSecretLocation;
+
+        private String seLinux;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -259,6 +269,11 @@ public class FreeIpaConfigView {
 
         public Builder withKerberosSecretLocation(String kerberosSecretLocation) {
             this.kerberosSecretLocation = kerberosSecretLocation;
+            return this;
+        }
+
+        public Builder withSeLinux(String seLinux) {
+            this.seLinux = seLinux;
             return this;
         }
     }

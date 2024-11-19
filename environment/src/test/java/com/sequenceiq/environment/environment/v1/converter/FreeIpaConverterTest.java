@@ -26,8 +26,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaSecurityRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -147,12 +149,16 @@ public class FreeIpaConverterTest {
         AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
         request.setCreate(true);
         request.setImage(aFreeIpaImage(IMAGE_CATALOG, IMAGE_ID));
+        FreeIpaSecurityRequest securityRequest = new FreeIpaSecurityRequest();
+        securityRequest.setSeLinux(SeLinux.ENFORCING.name());
+        request.setSecurity(securityRequest);
         // WHEN
         FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
         // THEN
         verify(ipaInstanceCountByGroupProvider).getInstanceCount(any());
         assertEquals(IMAGE_CATALOG, result.getImageCatalog());
         assertEquals(IMAGE_ID, result.getImageId());
+        assertEquals(SeLinux.ENFORCING, result.getSeLinux());
     }
 
     @Test

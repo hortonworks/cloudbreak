@@ -34,9 +34,11 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Network;
+import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
@@ -122,6 +124,9 @@ class FreeIpaConfigServiceTest {
         stack.setCloudPlatform(CloudPlatform.AWS.name());
         stack.setBackup(backup);
         stack.setRegion("region");
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setSeLinux(SeLinux.ENFORCING);
+        stack.setSecurityConfig(securityConfig);
         stack.setEnvironmentCrn(ENV_CRN);
         Network network = new Network();
         network.setNetworkCidrs(List.of(CIDR));
@@ -157,6 +162,7 @@ class FreeIpaConfigServiceTest {
         assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
         assertEquals(true, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
+        assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -187,6 +193,7 @@ class FreeIpaConfigServiceTest {
         assertEquals(expectedCcmV2JumpgateEnabled, freeIpaConfigView.isCcmv2JumpgateEnabled());
         assertEquals(false, freeIpaConfigView.isSecretEncryptionEnabled());
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigView.getKerberosSecretLocation());
+        assertEquals(SeLinux.PERMISSIVE.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
     }
 
     // @formatter:off

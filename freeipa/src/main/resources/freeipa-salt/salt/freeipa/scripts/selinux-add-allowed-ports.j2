@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -ex
+restorecon -v /etc/httpd/conf/httpd-log-filter.sh
+restorecon -v /cdp/ipahealthagent/httpd-crt-tracking.sh
+semodule -B

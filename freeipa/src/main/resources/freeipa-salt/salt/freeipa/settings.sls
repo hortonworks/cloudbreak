@@ -7,6 +7,7 @@
      {% set aws_region = salt['pillar.get']('freeipa:backup:aws_region') %}
      {% set aws_endpoint = salt['pillar.get']('freeipa:backup:aws_endpoint') %}
      {% set gcp_service_account = salt['pillar.get']('freeipa:backup:gcp_service_account') %}
+     {% set selinux_mode = salt['pillar.get']('freeipa:selinux_mode') %}
 
      {% do freeipa.update({
          "backup_platform" : backup_platform,
@@ -16,5 +17,6 @@
          "gcp_service_account": gcp_service_account,
          "http_proxy": http_proxy,
          "aws_region": aws_region,
-         "aws_endpoint": aws_endpoint
+         "aws_endpoint": aws_endpoint,
+         "selinux_mode": selinux_mode
      }) %}
