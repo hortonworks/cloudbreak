@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.ExternalizedComputeCreateRequest;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -25,8 +26,9 @@ public class EnvironmentReInitializeDefaultExternalizedComputeClusterAction impl
         ExternalizedComputeCreateRequest request = new ExternalizedComputeCreateRequest();
         request.setCreate(true);
         request.setPrivateCluster(privateCluster);
-        client.getDefaultClient()
+        FlowIdentifier flowId = client.getDefaultClient()
                 .defaultComputeClusterEndpoint().createDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request, true);
+        testDto.setLastKnownFlow(flowId);
         return testDto;
     }
 }
