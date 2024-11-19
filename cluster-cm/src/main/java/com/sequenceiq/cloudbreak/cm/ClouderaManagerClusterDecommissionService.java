@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
 @Scope("prototype")
@@ -47,9 +45,6 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     @Inject
     private ApplicationContext applicationContext;
-
-    @Inject
-    private ClouderaManagerDatabusService databusService;
 
     private final StackDtoDelegate stack;
 
@@ -171,16 +166,5 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     @Override
     public Map<String, Map<String, String>> getStatusOfComponentsForHost(String host) {
         return Map.of();
-    }
-
-    @Override
-    public void cleanupCluster(Telemetry telemetry) {
-        if (telemetry != null && telemetry.getWorkloadAnalytics() != null) {
-            if (StackType.DATALAKE.equals(stack.getType())) {
-                LOGGER.info("Stack type is datalake, no need for WA cleanup");
-            } else {
-                databusService.cleanUpMachineUser(stack);
-            }
-        }
     }
 }

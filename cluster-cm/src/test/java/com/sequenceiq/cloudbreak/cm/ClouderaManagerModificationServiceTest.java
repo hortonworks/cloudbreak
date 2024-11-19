@@ -783,7 +783,6 @@ class ClouderaManagerModificationServiceTest {
     @Test
     void testUpgradeClusterWhenPatchUpgradeAndNoPostUpgradeCommandIsAvailable() throws CloudbreakException, ApiException {
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
@@ -820,21 +819,20 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, v31Client)).thenReturn(success);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
-        Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
 
-        underTest.upgradeClusterRuntime(products, true, Optional.empty(), false);
+        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(products, clouderaManagerResourceApi);
+        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         verify(mgmtServiceResourceApi, times(1)).listActiveCommands("SUMMARY");
         verify(mgmtServiceResourceApi, times(1)).restartCommand();
         verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, Optional.empty());
-        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verifyNoInteractions(clouderaManagerUpgradeService);
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
@@ -842,11 +840,11 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(products, clouderaManagerResourceApi);
+        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         inOrder.verify(clouderaManagerRestartService).doRestartServicesIfNeeded(v31Client, stack, false, Optional.empty());
     }
 
@@ -854,7 +852,6 @@ class ClouderaManagerModificationServiceTest {
     void testUpgradeClusterWhenPatchUpgradeAndPostUpgradeCommandIsAvailable()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
@@ -905,21 +902,20 @@ class ClouderaManagerModificationServiceTest {
         when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), eq(ClusterCommandType.START_CLUSTER))).thenReturn(Optional.empty());
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
-        Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
 
-        underTest.upgradeClusterRuntime(products, true, Optional.empty(), false);
+        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(products, clouderaManagerResourceApi);
+        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         verify(mgmtServiceResourceApi, times(1)).listActiveCommands("SUMMARY");
         verify(mgmtServiceResourceApi, times(1)).restartCommand();
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmServicesRestart(stack, v31Client, apiCommandId);
-        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
         verify(clustersResourceApi, times(1)).startCommand(STACK_NAME);
         verify(clouderaManagerUpgradeService, times(1)).callPostRuntimeUpgradeCommand(clustersResourceApi, stack, v31Client);
@@ -935,11 +931,11 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(products, clouderaManagerResourceApi);
+        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         inOrder.verify(clustersResourceApi).startCommand(STACK_NAME);
         inOrder.verify(clouderaManagerApiClientProvider).getV45Client(any(), any(), any(), any());
         inOrder.verify(clouderaManagerUpgradeService).callPostRuntimeUpgradeCommand(eq(clustersResourceApi), eq(stack), eq(v31Client));
@@ -950,7 +946,6 @@ class ClouderaManagerModificationServiceTest {
     void testUpgradeClusterWhenPatchUpgradeAndPostUpgradeCommandIsAvailableAndRestartIsRunning()
             throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
@@ -985,22 +980,22 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
-        when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
-        Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
 
-        underTest.upgradeClusterRuntime(products, true, Optional.empty(), false);
+        when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(v31Client);
+
+        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(products, clouderaManagerResourceApi);
+        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         verify(mgmtServiceResourceApi, times(1)).listActiveCommands("SUMMARY");
         verify(mgmtServiceResourceApi, times(1)).restartCommand();
         verify(clouderaManagerRestartService, times(2)).waitForRestartExecutionIfPresent(v31Client, stack, false);
-        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
         verify(clouderaManagerUpgradeService, times(1)).callPostRuntimeUpgradeCommand(clustersResourceApi, stack, v31Client);
         verify(clustersResourceApi, times(0)).restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class));
@@ -1011,11 +1006,11 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(products, clouderaManagerResourceApi);
+        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         inOrder.verify(clouderaManagerApiClientProvider).getV45Client(any(), any(), any(), any());
         inOrder.verify(clouderaManagerUpgradeService).callPostRuntimeUpgradeCommand(eq(clustersResourceApi), eq(stack), eq(v31Client));
     }
@@ -1024,7 +1019,6 @@ class ClouderaManagerModificationServiceTest {
     void testUpgradeClusterWhenNotPatchUpgrade() throws CloudbreakException, ApiException {
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
-        when(clouderaManagerApiFactory.getParcelsResourceApi(any())).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
@@ -1062,19 +1056,18 @@ class ClouderaManagerModificationServiceTest {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
-        Set<ClouderaManagerProduct> products = TestUtil.clouderaManagerProducts();
 
-        underTest.upgradeClusterRuntime(products, false, Optional.empty(), true);
+        underTest.upgradeClusterRuntime(TestUtil.clouderaManagerProducts(), false, Optional.empty(), true);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, v31Client);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).checkParcelApiAvailability(stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(products, clouderaManagerResourceApi);
+        verify(clouderaManagerParcelManagementService, times(1)).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        verify(clouderaManagerParcelManagementService, times(2)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(2)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verify(clouderaManagerUpgradeService, times(1)).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, v31Client, true);
-        verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(parcelsResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verify(clouderaManagerCommonCommandService, times(1)).getDeployClientConfigCommandId(any(), any(), any());
         verify(clouderaManagerCommonCommandService, times(1)).getApiCommand(any(), any(), any(), any());
 
@@ -1083,11 +1076,11 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(products, clouderaManagerResourceApi);
+        inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(any(), eq(clouderaManagerResourceApi));
         inOrder.verify(clouderaManagerParcelManagementService).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(parcelsResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
+        inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         inOrder.verify(clouderaManagerUpgradeService).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, v31Client, true);
         inOrder.verify(servicesResourceApi).readServices(stack.getName(), "SUMMARY");
         inOrder.verify(clouderaManagerCommonCommandService).getDeployClientConfigCommandId(stack, clustersResourceApi, apiCommandList.getItems());

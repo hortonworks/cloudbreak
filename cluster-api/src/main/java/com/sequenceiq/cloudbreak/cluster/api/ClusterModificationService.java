@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterModificationService {
 
@@ -36,6 +37,8 @@ public interface ClusterModificationService {
     Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
 
     String getStackRepositoryJson(StackRepoDetails repoDetails, String stackRepoId);
+
+    void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
     void upgradeClusterRuntime(Set<ClouderaManagerProduct> products, boolean patchUpgrade, Optional<String> remoteDataContext, boolean rollingUpgradeEnabled)
             throws CloudbreakException;
