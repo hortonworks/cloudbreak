@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -251,6 +252,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         return azureDatabaseResourceService.getDatabaseServerStatus(authenticatedContext, stack);
+    }
+
+    @Override
+    public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return azureDatabaseResourceService.getExternalDatabaseParameters(authenticatedContext, stack);
     }
 
     @Override

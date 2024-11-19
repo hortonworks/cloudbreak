@@ -96,9 +96,6 @@ public class DistroXUpgradeService {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    @Value("${cb.cm.gracefulservicestopnodecountthreshold}")
-    private int gracefulServiceStopNodeCountThreshold;
-
     public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         ImageChangeDto imageChangeDto = determineImageChangeDto(nameOrCrn, imageId, stack);
@@ -139,24 +136,11 @@ public class DistroXUpgradeService {
         ImageChangeDto imageChangeDto = upgradeDto.getImageChangeDto();
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, rollingUpgradeEnabled: {}",
                 imageChangeDto.getImageId(), upgradeDto.isLockComponents(), replaceVms, rollingUpgradeEnabled);
-        if (replaceVms && rollingUpgradeEnabled) {
-            validateRollingUpgradeNodeCountAndRuntime(upgradeDto.getStackDto());
-        }
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(upgradeDto.getStackDto().getStack(), userCrn, keepVariant);
         String runtime = upgradeDto.getTargetImage().getComponentVersions().getCdp();
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(upgradeDto.getStackDto().getStack().getId(), imageChangeDto,
                 replaceVms, upgradeDto.isLockComponents(), upgradeVariant, rollingUpgradeEnabled, runtime);
         return new UpgradeV4Response("Upgrade started with Image: " + imageChangeDto.getImageId(), flowIdentifier, replaceVms);
-    }
-
-    private void validateRollingUpgradeNodeCountAndRuntime(StackDto stackDto) {
-        if (isGracefulStopServicesNeeded(stackDto)) {
-            if (stackDto.getFullNodeCount() > gracefulServiceStopNodeCountThreshold) {
-                throw new BadRequestException(String.format(
-                        "Rolling upgrade with VM replacement (zero downtime upgrade) is only supported if the cluster doesn't contain more nodes than %s.",
-                        gracefulServiceStopNodeCountThreshold));
-            }
-        }
     }
 
     public boolean isGracefulStopServicesNeeded(StackDto stackDto) {

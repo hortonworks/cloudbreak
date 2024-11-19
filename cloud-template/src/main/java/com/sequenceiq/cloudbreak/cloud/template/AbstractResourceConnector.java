@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
@@ -193,6 +194,12 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         return databaseServerCheckerService.check(authenticatedContext, stack);
+    }
+
+    @Override
+    public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        ExternalDatabaseStatus databaseStatus = databaseServerCheckerService.check(authenticatedContext, stack);
+        return new ExternalDatabaseParameters(databaseStatus, null, null);
     }
 
     @Override

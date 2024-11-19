@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import jakarta.inject.Inject;
 
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Component;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageEditionCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -33,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
@@ -45,6 +50,9 @@ public class AzureDatabaseCapabilityService {
 
     @Value("${cb.azure.database.flexible.serverEdition:MemoryOptimized}")
     private String serverEdition;
+
+    @Value("${cb.azure.database.flexible.storageEdition:ManagedDisk}")
+    private String storageEdition;
 
     @Value("${cb.azure.database.flexible.defaultInstanceType:Standard_E4ds_v4}")
     private String defaultFlexibleInstanceType;
@@ -67,6 +75,29 @@ public class AzureDatabaseCapabilityService {
         Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), getZoneRedundantSupportedRegions(regions, capabilityMap));
         return new PlatformDatabaseCapabilities(enabledRegions, getRegionInstanceTypeMap(regions, capabilityMap, filters));
+    }
+
+    public Optional<PlatformDBStorageCapabilities> databaseStorageCapabilities(CloudCredential cloudCredential, Region region) {
+        AzureClient client = azureClientService.getClient(cloudCredential);
+        Optional<AzureCoordinate> azureCoordinate = azureRegionProvider.getAzureCoordinate(region);
+        if (azureCoordinate.isPresent()) {
+            Optional<FlexibleServerCapability> serverCapability = client.getFlexibleServerClient().getFlexibleServerCapability(azureCoordinate.get());
+            List<Long> supportedStorageSizes = serverCapability.stream()
+                    .map(FlexibleServerCapability::supportedServerEditions)
+                    .flatMap(Collection::stream)
+                    .filter(this::matchesServerEdition)
+                    .flatMap(serverEdition -> serverEdition.supportedStorageEditions().stream())
+                    .filter(this::matchesStorageEdition)
+                    .flatMap(storageEdition -> storageEdition.supportedStorageMb().stream())
+                    .map(StorageMbCapability::storageSizeMb)
+                    .toList();
+            PlatformDBStorageCapabilities platformDBStorageCapabilities = new PlatformDBStorageCapabilities(new TreeSet<>(supportedStorageSizes));
+            LOGGER.debug("Flexible server database storage capabilities for {} region is {}", region, platformDBStorageCapabilities);
+            return Optional.of(platformDBStorageCapabilities);
+        } else {
+            LOGGER.debug("No azure coordinate found for {} region, returns empty database storage capabilities", region);
+            return Optional.empty();
+        }
     }
 
     private Collection<Region> getZoneRedundantSupportedRegions(Map<Region, AzureCoordinate> regions, Map<Region,
@@ -120,6 +151,10 @@ public class AzureDatabaseCapabilityService {
 
     private boolean matchesServerEdition(FlexibleServerEditionCapability serverEditionCapability) {
         return StringUtils.isEmpty(serverEdition) || serverEdition.equals(serverEditionCapability.name());
+    }
+
+    private boolean matchesStorageEdition(StorageEditionCapability storageEditionCapability) {
+        return StringUtils.isEmpty(storageEdition) || storageEdition.equals(storageEditionCapability.name());
     }
 
     private boolean matchesInstanceType(String instanceType) {
