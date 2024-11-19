@@ -127,6 +127,13 @@ public class AzureRegionProvider {
         return result;
     }
 
+    public Optional<AzureCoordinate> getAzureCoordinate(Region region) {
+        return enabledRegions.values()
+                .stream()
+                .filter(azureCoordinate -> azureCoordinate.isMatchedRegion(region))
+                .findFirst();
+    }
+
     private String resourceDefinition() {
         return cloudbreakResourceReaderService.resourceDefinition("azure", ENABLED_REGIONS_FILE);
     }

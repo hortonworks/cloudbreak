@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
@@ -176,4 +178,7 @@ public interface PlatformResources {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    default Optional<PlatformDBStorageCapabilities> databaseStorageCapabilities(CloudCredential cloudCredential, Region region) {
+        return Optional.empty();
+    }
 }

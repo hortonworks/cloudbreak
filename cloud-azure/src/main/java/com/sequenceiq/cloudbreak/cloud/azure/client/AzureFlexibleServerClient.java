@@ -57,6 +57,10 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
                 .collect(Collectors.toMap(Map.Entry::getKey, regionEntry -> getFlexibleServerCapability(regionEntry.getValue().getKey())));
     }
 
+    public Optional<FlexibleServerCapability> getFlexibleServerCapability(AzureCoordinate azureCoordinate) {
+        return getFlexibleServerCapability(azureCoordinate.getKey());
+    }
+
     public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
         Server server = getFlexibleServer(resourceGroupName, serverName);
         if (server == null) {

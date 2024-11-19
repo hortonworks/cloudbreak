@@ -52,7 +52,10 @@ import com.azure.core.exception.AzureException;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.postgresql.models.StorageProfile;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Server;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.Storage;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -77,6 +80,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.service.CloudResourceValidationService;
@@ -159,26 +163,26 @@ class AzureDatabaseResourceServiceTest {
 
     private static Stream<Arguments> flexibleServerStates() {
         return Stream.of(
-                Arguments.of(ServerState.DISABLED, ExternalDatabaseStatus.DELETED),
-                Arguments.of(ServerState.READY, ExternalDatabaseStatus.STARTED),
-                Arguments.of(ServerState.DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
-                Arguments.of(ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS),
-                Arguments.of(ServerState.STOPPED, ExternalDatabaseStatus.STOPPED),
-                Arguments.of(ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS),
-                Arguments.of(ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS),
-                Arguments.of(ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN),
-                Arguments.of(null, ExternalDatabaseStatus.DELETED)
+                Arguments.of(ServerState.DISABLED, ExternalDatabaseStatus.DELETED, 128),
+                Arguments.of(ServerState.READY, ExternalDatabaseStatus.STARTED, 256),
+                Arguments.of(ServerState.DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS, 1024),
+                Arguments.of(ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS, 2048),
+                Arguments.of(ServerState.STOPPED, ExternalDatabaseStatus.STOPPED, 4096),
+                Arguments.of(ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS, 8192),
+                Arguments.of(ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS, 16384),
+                Arguments.of(ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN, 32768),
+                Arguments.of(null, ExternalDatabaseStatus.DELETED, 65536)
         );
     }
 
     private static Stream<Arguments> singleServerStates() {
         return Stream.of(
-                Arguments.of(DISABLED, ExternalDatabaseStatus.DELETED),
-                Arguments.of(READY, ExternalDatabaseStatus.STARTED),
-                Arguments.of(DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS),
-                Arguments.of(INACCESSIBLE, ExternalDatabaseStatus.UNKNOWN),
-                Arguments.of(com.azure.resourcemanager.postgresql.models.ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN),
-                Arguments.of(null, ExternalDatabaseStatus.DELETED)
+                Arguments.of(DISABLED, ExternalDatabaseStatus.DELETED, 100),
+                Arguments.of(READY, ExternalDatabaseStatus.STARTED, 200),
+                Arguments.of(DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS, 300),
+                Arguments.of(INACCESSIBLE, ExternalDatabaseStatus.UNKNOWN, 400),
+                Arguments.of(com.azure.resourcemanager.postgresql.models.ServerState.fromString("CUSTOM"), ExternalDatabaseStatus.UNKNOWN, 500),
+                Arguments.of(null, ExternalDatabaseStatus.DELETED, 600)
         );
     }
 
@@ -190,28 +194,42 @@ class AzureDatabaseResourceServiceTest {
 
     @ParameterizedTest
     @MethodSource("singleServerStates")
-    void testGetDatabaseServerStatusWhenSingleServer(com.azure.resourcemanager.postgresql.models.ServerState serverState,
-            ExternalDatabaseStatus externalDatabaseStatus) {
+    void testGetDatabaseServerParametersWhenSingleServer(com.azure.resourcemanager.postgresql.models.ServerState serverState,
+            ExternalDatabaseStatus externalDatabaseStatus, int storageSizeGB) {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).build());
         AzureSingleServerClient singleServerClientMock = mock(AzureSingleServerClient.class);
         when(client.getSingleServerClient()).thenReturn(singleServerClientMock);
-        when(singleServerClientMock.getSingleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(serverState);
-        ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
-        assertEquals(externalDatabaseStatus, actual);
+        com.azure.resourcemanager.postgresql.models.Server server = mock(com.azure.resourcemanager.postgresql.models.Server.class);
+        when(server.userVisibleState()).thenReturn(serverState);
+        StorageProfile storageProfile = mock(StorageProfile.class);
+        when(storageProfile.storageMB()).thenReturn(storageSizeGB * 1024);
+        when(server.storageProfile()).thenReturn(storageProfile);
+        when(singleServerClientMock.getSingleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(server);
+        ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
+        assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
+        assertEquals(storageSizeGB * 1024L, actual.storageSizeInMB());
+        assertEquals(AzureDatabaseType.SINGLE_SERVER, actual.databaseType());
     }
 
     @ParameterizedTest
     @MethodSource("flexibleServerStates")
-    void testGetDatabaseServerStatusWhenFlexibleServer(ServerState serverState, ExternalDatabaseStatus externalDatabaseStatus) {
+    void testGetDatabaseServerParametersWhenFlexibleServer(ServerState serverState, ExternalDatabaseStatus externalDatabaseStatus, int storageSizeGB) {
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         Map<String, Object> params = Map.of(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
         when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withServerId(SERVER_NAME).withParams(params).build());
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
-        when(flexibleServerClientMock.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(serverState);
-        ExternalDatabaseStatus actual = underTest.getDatabaseServerStatus(ac, databaseStack);
-        assertEquals(externalDatabaseStatus, actual);
+        Server server = mock(Server.class);
+        when(server.state()).thenReturn(serverState);
+        Storage storage = mock(Storage.class);
+        when(storage.storageSizeGB()).thenReturn(storageSizeGB);
+        when(server.storage()).thenReturn(storage);
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenReturn(server);
+        ExternalDatabaseParameters actual = underTest.getExternalDatabaseParameters(ac, databaseStack);
+        assertEquals(externalDatabaseStatus, actual.externalDatabaseStatus());
+        assertEquals(storageSizeGB * 1024L, actual.storageSizeInMB());
+        assertEquals(AzureDatabaseType.FLEXIBLE_SERVER, actual.databaseType());
     }
 
     @Test
@@ -222,7 +240,7 @@ class AzureDatabaseResourceServiceTest {
         AzureFlexibleServerClient flexibleServerClientMock = mock(AzureFlexibleServerClient.class);
         when(client.getFlexibleServerClient()).thenReturn(flexibleServerClientMock);
         RuntimeException exception = new RuntimeException("ex");
-        when(flexibleServerClientMock.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME)).thenThrow(exception);
+        when(flexibleServerClientMock.getFlexibleServer(RESOURCE_GROUP_NAME, SERVER_NAME)).thenThrow(exception);
         CloudConnectorException actualException = assertThrows(CloudConnectorException.class, () -> underTest.getDatabaseServerStatus(ac, databaseStack));
         assertEquals(exception, actualException.getCause());
     }

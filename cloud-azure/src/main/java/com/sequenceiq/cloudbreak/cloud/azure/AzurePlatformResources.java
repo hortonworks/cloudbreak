@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -387,6 +389,12 @@ public class AzurePlatformResources implements PlatformResources {
             "#cloudCredential?.id + #region.getRegionName() + #filters[T(com.sequenceiq.cloudbreak.cloud.CloudParameterConst).DATABASE_TYPE] + 'databases'")
     public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, region, filters);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "dbStorageCapabilities", key = "#cloudCredential?.id + #region.getRegionName() + 'databases'")
+    public Optional<PlatformDBStorageCapabilities> databaseStorageCapabilities(CloudCredential cloudCredential, Region region) {
+        return azureDatabaseCapabilityService.databaseStorageCapabilities(cloudCredential, region);
     }
 
     @Override

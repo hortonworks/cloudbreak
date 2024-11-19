@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageEditionCapability;
+import com.azure.resourcemanager.postgresqlflexibleserver.models.StorageMbCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -34,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
@@ -65,6 +69,7 @@ class AzureDatabaseCapabilityServiceTest {
     public void setup() {
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "instanceTypeRegex", "^Standard_E4d?s.*$");
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "serverEdition", "MemoryOptimized");
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "storageEdition", "ManagedDisk");
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultFlexibleInstanceType", "Standard_E4ds_v4");
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultSingleServerInstanceType", "MO_Gen5_4");
     }
@@ -110,7 +115,7 @@ class AzureDatabaseCapabilityServiceTest {
     }
 
     @Test
-    void testDatabaseCapabilitiesWhenSingleServcerNoRegion() {
+    void testDatabaseCapabilitiesWhenSingleServerNoRegion() {
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
         Map<Region, AzureCoordinate> regions = Map.of(
@@ -298,6 +303,64 @@ class AzureDatabaseCapabilityServiceTest {
         Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
     }
 
+    @Test
+    void testDatabaseStorageCapabilities() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        AzureCoordinate azureCoordinate = azureCoordinate("westus");
+        when(azureRegionProvider.getAzureCoordinate(Region.region("westus"))).thenReturn(Optional.of(azureCoordinate));
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(Map.of("MemoryOptimized",
+                        Map.of("serverEdition1", List.of(128L, 256L),
+                                "ManagedDisk", List.of(128L, 256L, 512L))));
+        when(azureFlexibleServerClient.getFlexibleServerCapability(azureCoordinate)).thenReturn(Optional.of(flexibleServerCapability));
+
+        Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
+                cloudCredential, Region.region("westus"));
+
+        Assertions.assertEquals(new TreeSet<>(List.of(128L, 256L, 512L)), capabilities.get().supportedStorageSizeInMb());
+    }
+
+    @Test
+    void testDatabaseStorageCapabilitiesNoManagedDisk() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        AzureCoordinate azureCoordinate = azureCoordinate("westus");
+        when(azureRegionProvider.getAzureCoordinate(Region.region("westus"))).thenReturn(Optional.of(azureCoordinate));
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(Map.of("MemoryOptimized",
+                Map.of("serverEdition1", List.of(128L, 256L))));
+        when(azureFlexibleServerClient.getFlexibleServerCapability(azureCoordinate)).thenReturn(Optional.of(flexibleServerCapability));
+
+        Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
+                cloudCredential, Region.region("westus"));
+
+        Assertions.assertTrue(capabilities.get().supportedStorageSizeInMb().isEmpty());
+    }
+
+    @Test
+    void testDatabaseStorageCapabilitiesNoCapability() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        AzureCoordinate azureCoordinate = azureCoordinate("westus");
+        when(azureRegionProvider.getAzureCoordinate(Region.region("westus"))).thenReturn(Optional.of(azureCoordinate));
+        when(azureFlexibleServerClient.getFlexibleServerCapability(azureCoordinate)).thenReturn(Optional.empty());
+
+        Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
+                cloudCredential, Region.region("westus"));
+
+        Assertions.assertTrue(capabilities.get().supportedStorageSizeInMb().isEmpty());
+    }
+
+    @Test
+    void testDatabaseStorageCapabilitiesNoRegion() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureRegionProvider.getAzureCoordinate(Region.region("westus"))).thenReturn(Optional.empty());
+
+        Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
+                cloudCredential, Region.region("westus"));
+
+        Assertions.assertTrue(capabilities.isEmpty());
+    }
+
     private AzureCoordinate azureCoordinate(String name) {
         return AzureCoordinate.AzureCoordinateBuilder.builder()
                 .longitude("1")
@@ -332,5 +395,39 @@ class AzureDatabaseCapabilityServiceTest {
                 .toList();
         lenient().when(flexibleServerEditionCapability.supportedServerSkus()).thenReturn(serverSkus);
         return flexibleServerEditionCapability;
+    }
+
+    private FlexibleServerCapability createFlexibleServerCapability(Map<String, Map<String, List<Long>>> storageSizes) {
+        FlexibleServerCapability flexibleServerCapability = mock(FlexibleServerCapability.class);
+        List<FlexibleServerEditionCapability> flexibleServerEditionCapabilities = storageSizes.entrySet().stream()
+                .map(entry -> createFlexibleServerEditionCapabilityWithStorage(entry.getKey(), entry.getValue()))
+                .toList();
+        lenient().when(flexibleServerCapability.supportedServerEditions()).thenReturn(flexibleServerEditionCapabilities);
+        return flexibleServerCapability;
+    }
+
+    private FlexibleServerEditionCapability createFlexibleServerEditionCapabilityWithStorage(
+            String serverEdition, Map<String, List<Long>> storageSizes) {
+        FlexibleServerEditionCapability flexibleServerEditionCapability = mock(FlexibleServerEditionCapability.class);
+        lenient().when(flexibleServerEditionCapability.name()).thenReturn(serverEdition);
+        List<StorageEditionCapability> storageEditionCapabilities = storageSizes.entrySet().stream()
+                .map(entry -> createStorageEditionCapability(entry.getKey(), entry.getValue()))
+                .toList();
+        lenient().when(flexibleServerEditionCapability.supportedStorageEditions()).thenReturn(storageEditionCapabilities);
+        return flexibleServerEditionCapability;
+    }
+
+    private StorageEditionCapability createStorageEditionCapability(String storageEdition, List<Long> sizes) {
+        StorageEditionCapability storageEditionCapability = mock(StorageEditionCapability.class);
+        lenient().when(storageEditionCapability.name()).thenReturn(storageEdition);
+        List<StorageMbCapability> storageMbCapabilities = sizes.stream()
+                .map(size -> {
+                    StorageMbCapability storageMbCapability = mock(StorageMbCapability.class);
+                    lenient().when(storageMbCapability.storageSizeMb()).thenReturn(size);
+                    return storageMbCapability;
+                })
+                .toList();
+        lenient().when(storageEditionCapability.supportedStorageMb()).thenReturn(storageMbCapabilities);
+        return storageEditionCapability;
     }
 }

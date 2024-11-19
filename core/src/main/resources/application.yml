@@ -686,7 +686,6 @@ cb:
       write.timeout.seconds: 125
       syncCommandPoller:
         interrupt.timeout.seconds: 120
-    gracefulservicestopnodecountthreshold: 20
 
   kerberos:
     secret:
