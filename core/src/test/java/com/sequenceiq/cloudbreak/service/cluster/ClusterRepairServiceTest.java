@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -81,10 +82,12 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionValidatorService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -172,6 +175,9 @@ class ClusterRepairServiceTest {
     @Mock
     private StackUpgradeService stackUpgradeService;
 
+    @Mock
+    private SaltVersionValidatorService saltVersionValidatorService;
+
     private Stack stack;
 
     private StackDto stackDto;
@@ -184,12 +190,13 @@ class ClusterRepairServiceTest {
         cluster.setId(CLUSTER_ID);
         cluster.setRdsConfigs(Set.of());
         stackDto = spy(new StackDto());
-        stack = spy(new Stack());
+        stack = new Stack();
         stack.setId(STACK_ID);
         stack.setResourceCrn(STACK_CRN);
         stack.setCluster(cluster);
         stack.setPlatformVariant("AWS");
         stack.setEnvironmentCrn(ENV_CRN);
+        stack.setTunnel(Tunnel.CLUSTER_PROXY);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
@@ -245,8 +252,7 @@ class ClusterRepairServiceTest {
 
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -272,9 +278,7 @@ class ClusterRepairServiceTest {
 
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(host1.getInstanceGroup(), List.of(host1, host2))));
-        when(stack.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
@@ -295,8 +299,7 @@ class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(AVAILABLE);
@@ -324,8 +327,7 @@ class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
@@ -350,8 +352,7 @@ class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(false);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
@@ -375,8 +376,7 @@ class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(false);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
@@ -396,8 +396,7 @@ class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(instanceGroup);
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         InstanceMetaData instance1md = new InstanceMetaData();
@@ -439,8 +438,7 @@ class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -460,8 +458,7 @@ class ClusterRepairServiceTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(STOPPED);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -476,8 +473,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenFreeIpaNotAvailable() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(false);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
                 underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false);
@@ -505,8 +501,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         InstanceMetaData primaryGW = new InstanceMetaData();
@@ -537,8 +532,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         InstanceMetaData primaryGW = new InstanceMetaData();
@@ -569,8 +563,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
         HostGroup hostGroup1 = new HostGroup();
@@ -606,8 +599,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenReattachSupported() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
@@ -632,8 +624,7 @@ class ClusterRepairServiceTest {
     @Test
     void testValidateRepairWhenReattachNotSupported() {
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
 
@@ -650,6 +641,62 @@ class ClusterRepairServiceTest {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
                     underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false);
             assertEquals("Reattach not supported for this disk type.", actual.getError().getValidationErrors().get(0));
+        });
+    }
+
+    @Test
+    void testValidateRepairWhenSaltVersionOutdatedRepairModeAll() {
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
+        when(saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
+
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.CORE);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+        when(hostGroupService.getByCluster(CLUSTER_ID)).thenReturn(Set.of(hostGroup1));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Set.of(), false);
+            assertEquals(1, actual.getSuccess().size());
+            assertNotNull(actual.getSuccess().get(hostGroupName(hostGroup1.getName())));
+        });
+    }
+
+    @Test
+    void testValidateRepairWhenSaltVersionOutdatedRepairModeNodeId() {
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.NODE_ID, STACK_ID, Set.of("hostGroup1"), false);
+            assertEquals("Gateway node(s) has outdated Salt version. Please include gateway node(s) in the repair selection!",
+                    actual.getError().getValidationErrors().get(0));
+        });
+    }
+
+    @Test
+    void testValidateRepairWhenSaltVersionOutdatedRepairModeHostGroup() {
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())).thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(eq(stackDto))).thenReturn(Set.of("instance1"));
+        InstanceGroupView gatewayGroup = mock(InstanceGroupView.class);
+        when(gatewayGroup.getGroupName()).thenReturn("gateway");
+        doReturn(gatewayGroup).when(stackDto).getPrimaryGatewayGroup();
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("core"), false);
+            assertEquals("Gateway node(s) has outdated Salt version. Please include gateway node(s) in the repair selection!",
+                    actual.getError().getValidationErrors().get(0));
         });
     }
 

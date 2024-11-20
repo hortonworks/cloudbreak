@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.salt.SaltVersionValidatorService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
@@ -127,6 +128,9 @@ public class ClusterRepairService {
 
     @Inject
     private StackUpgradeService stackUpgradeService;
+
+    @Inject
+    private SaltVersionValidatorService saltVersionValidatorService;
 
     public FlowIdentifier repairAll(StackView stackView, boolean upgrade, boolean keepVariant) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -225,9 +229,23 @@ public class ClusterRepairService {
             return Optional.of(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
         } else if (isCMRepairAndAllStoppedNodesNotSelected(stack.getNotTerminatedInstanceMetaData(), selectedParts)) {
             return Optional.of(RepairValidation.of("Need to select all stopped nodes as CM node is selected for repair."));
+        } else if (!isAllGatewaySelectedWhenSaltVersionIsOutdated(repairMode, selectedParts, stack)) {
+            return Optional.of(RepairValidation.of("Gateway node(s) has outdated Salt version. Please include gateway node(s) in the repair selection!"));
         } else {
             return Optional.empty();
         }
+    }
+
+    private boolean isAllGatewaySelectedWhenSaltVersionIsOutdated(ManualClusterRepairMode repairMode, Set<String> selectedParts, StackDto stack) {
+        Set<String> gatewayInstancesWithOutdatedSaltVersion = saltVersionValidatorService.getGatewayInstancesWithOutdatedSaltVersion(stack);
+        if (!selectedParts.isEmpty() && !gatewayInstancesWithOutdatedSaltVersion.isEmpty()) {
+            if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
+                return selectedParts.contains(stack.getPrimaryGatewayGroup().getGroupName());
+            } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
+                return selectedParts.containsAll(gatewayInstancesWithOutdatedSaltVersion);
+            }
+        }
+        return true;
     }
 
     private boolean isCMRepairAndAllStoppedNodesNotSelected(List<InstanceMetadataView> nonTerminatedInstanceMetadata, Set<String> selectedInstances) {
