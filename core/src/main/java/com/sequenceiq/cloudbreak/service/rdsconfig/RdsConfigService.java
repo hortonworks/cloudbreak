@@ -144,4 +144,8 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     public Set<RDSConfig> findAllByConnectionUrlAndType(String connectionUrl) {
         return rdsConfigRepository.findAllByConnectionUrlAndType(connectionUrl);
     }
+
+    public Set<RDSConfig> findAllByConnectionUrlAndTypeWithClusters(String connectionUrl) {
+        return rdsConfigRepository.findAllByConnectionUrlAndTypeWithClusters(connectionUrl);
+    }
 }

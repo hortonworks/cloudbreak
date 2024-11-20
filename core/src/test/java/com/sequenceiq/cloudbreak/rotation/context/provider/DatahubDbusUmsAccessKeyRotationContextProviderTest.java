@@ -109,14 +109,14 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
-        doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).updateSaltPillar(any(), any(), any());
+        doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).updateSaltPillar(any(), any());
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) underTest.getContexts("").get(CUSTOM_JOB);
         assertTrue(customJobRotationContext.getRotationJob().isPresent());
         assertThrows(SecretRotationException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> customJobRotationContext.getRotationJob().get().run()),
                 "Failed to refresh Databus relevant salt pillars.");
 
-        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(1)).updateSaltPillar(any(), any());
         verify(saltService, never()).executeSaltState(any(), any(), any());
         verify(clusterApiConnectors, never()).getConnector(any(StackDtoDelegate.class));
     }
@@ -128,7 +128,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
-        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
         doThrow(new CloudbreakOrchestratorFailedException("failed")).when(saltService).executeSaltState(any(), any(), any());
         CustomJobRotationContext customJobRotationContext = (CustomJobRotationContext) underTest.getContexts("").get(CUSTOM_JOB);
@@ -137,7 +137,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> customJobRotationContext.getRotationJob().get().run()),
                 "Failed to execute Databus relevant salt states.");
 
-        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(1)).updateSaltPillar(any(), any());
         verify(saltService, times(1)).executeSaltState(any(), any(), any());
         verify(clusterApiConnectors, never()).getConnector(any(StackDtoDelegate.class));
     }
@@ -149,7 +149,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
-        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
         doNothing().when(saltService).executeSaltState(any(), any(), any());
         ClusterApi clusterApi = mock(ClusterApi.class);
@@ -163,7 +163,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> customJobRotationContext.getRotationJob().get().run()),
                 "Failed to restart MGMT services to update them with Dbus credential.");
 
-        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(1)).updateSaltPillar(any(), any());
         verify(saltService, times(1)).executeSaltState(any(), any(), any());
         verify(clusterModificationService, times(1)).restartMgmtServices();
     }
@@ -175,7 +175,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getDatabusCredential()).thenReturn("{\"privateKey\":\"anything\"}");
         when(stackService.getByCrn(any())).thenReturn(stackDto);
-        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(saltService).updateSaltPillar(any(), any());
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
         doNothing().when(saltService).executeSaltState(any(), any(), any());
         ClusterApi clusterApi = mock(ClusterApi.class);
@@ -189,7 +189,7 @@ public class DatahubDbusUmsAccessKeyRotationContextProviderTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> customJobRotationContext.getRotationJob().get().run());
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> customJobRotationContext.getRollbackJob().get().run());
 
-        verify(saltService, times(2)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(2)).updateSaltPillar(any(), any());
         verify(saltService, times(2)).executeSaltState(any(), any(), any());
         verify(clusterModificationService, times(2)).restartMgmtServices();
     }

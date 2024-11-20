@@ -10,6 +10,7 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_MGMT_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICES_DB_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.LDAP_BIND_PASSWORD;
@@ -184,7 +185,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                     CM_DB_PASSWORD,
                     CM_SERVICES_DB_PASSWORD,
                     CM_INTERMEDIATE_CA_CERT,
-                    NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY);
+                    NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY,
+                    CM_SERVICE_SHARED_DB);
         } else {
             return Set.of(
                     EXTERNAL_DATABASE_ROOT_PASSWORD,

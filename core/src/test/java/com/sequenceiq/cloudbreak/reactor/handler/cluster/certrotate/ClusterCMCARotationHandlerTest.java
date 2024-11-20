@@ -71,7 +71,7 @@ public class ClusterCMCARotationHandlerTest {
 
         assertEquals(selectable.getClass(), ClusterCMCARotationSuccess.class);
         verify(uncachedSecretServiceForRotation, times(2)).update(any(), any());
-        verify(saltService).updateSaltPillar(any(), any(), any());
+        verify(saltService).updateSaltPillar(any(), any());
         verify(saltService).executeSaltState(any(), any(), any());
     }
 
@@ -84,13 +84,13 @@ public class ClusterCMCARotationHandlerTest {
 
         assertEquals(selectable.getClass(), ClusterCertificatesRotationFailed.class);
         verify(uncachedSecretServiceForRotation, times(2)).update(any(), any());
-        verify(saltService).updateSaltPillar(any(), any(), any());
+        verify(saltService).updateSaltPillar(any(), any());
         verify(saltService).executeSaltState(any(), any(), eq(List.of("cloudera.manager.rotate.cmca-renewal")));
     }
 
     private void mockCmcaRotation() throws Exception {
         when(uncachedSecretServiceForRotation.update(any(), any())).thenReturn("secret");
-        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(saltService).updateSaltPillar(any(), any());
         when(clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(any())).thenReturn(new SaltPillarProperties(null, null));
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);

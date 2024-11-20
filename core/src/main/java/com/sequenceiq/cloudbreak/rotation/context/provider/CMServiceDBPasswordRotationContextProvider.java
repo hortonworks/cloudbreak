@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
@@ -57,7 +58,7 @@ public class CMServiceDBPasswordRotationContextProvider extends AbstractCMRelate
 
     @Override
     protected Predicate<RDSConfig> getRDSConfigTypePredicate() {
-        return rdsConfig -> !DatabaseType.CLOUDERA_MANAGER.name().equals(rdsConfig.getType());
+        return rdsConfig -> !Set.of(DatabaseType.CLOUDERA_MANAGER.name(), DatabaseType.HIVE.name()).contains(rdsConfig.getType());
     }
 
     @Override

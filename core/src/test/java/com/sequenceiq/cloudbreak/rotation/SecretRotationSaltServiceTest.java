@@ -71,7 +71,7 @@ public class SecretRotationSaltServiceTest {
         when(exitCriteriaProvider.get(any())).thenReturn(new ClusterDeletionBasedExitCriteriaModel(null, null));
         doNothing().when(hostOrchestrator).saveCustomPillars(any(), any(), any());
 
-        underTest.updateSaltPillar(new StackDto(), Map.of(), "");
+        underTest.updateSaltPillar(new StackDto(), Map.of());
 
         verify(hostOrchestrator).saveCustomPillars(any(), any(), any());
     }

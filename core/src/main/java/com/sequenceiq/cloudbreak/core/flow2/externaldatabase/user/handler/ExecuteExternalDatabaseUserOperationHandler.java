@@ -123,7 +123,7 @@ public class ExecuteExternalDatabaseUserOperationHandler extends ExceptionCatche
     private void executeSaltState(StackDto stackDto, Optional<RDSConfig> rdsConfig, UserOperationExternalDatabaseRequest data) {
         try {
             SaltPillarProperties pillarProperties = getPillarPropertiesForUserOperation(stackDto, rdsConfig, data);
-            secretRotationSaltService.updateSaltPillar(stackDto, Map.of(PostgresConfigService.POSTGRES_USER, pillarProperties), "update");
+            secretRotationSaltService.updateSaltPillar(stackDto, Map.of(PostgresConfigService.POSTGRES_USER, pillarProperties));
             secretRotationSaltService.executeSaltStateOnPrimaryGateway(stackDto, getUserOperationState(data.getOperation()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new RuntimeException(e);

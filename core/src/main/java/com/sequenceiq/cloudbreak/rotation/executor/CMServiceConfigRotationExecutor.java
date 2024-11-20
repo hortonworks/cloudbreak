@@ -13,16 +13,12 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
 public class CMServiceConfigRotationExecutor extends AbstractRotationExecutor<CMServiceConfigRotationContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMServiceConfigRotationExecutor.class);
-
-    @Inject
-    private SecretService secretService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;

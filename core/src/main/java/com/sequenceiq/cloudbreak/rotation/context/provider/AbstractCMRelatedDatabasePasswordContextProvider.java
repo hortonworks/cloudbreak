@@ -63,10 +63,6 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
 
     protected abstract Predicate<RDSConfig> getRDSConfigTypePredicate();
 
-    protected Predicate<RDSConfig> getRDSConfigCountPredicate() {
-        return rdsConfig -> rdsConfigService.getClustersUsingResource(rdsConfig).size() == 1;
-    }
-
     protected Map<String, SaltPillarProperties> getPillarProperties(StackDto stack) {
         try {
             Map<String, SaltPillarProperties> pillarPropertiesSet = Maps.newHashMap();
@@ -124,7 +120,7 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
         return rdsConfigService.findByClusterId(cluster.getId())
                 .stream()
                 .filter(getRDSConfigTypePredicate())
-                .filter(getRDSConfigCountPredicate())
+                .filter(rdsConfig -> rdsConfigService.getClustersUsingResource(rdsConfig).size() == 1)
                 .filter(rdsConfig -> rdsConfigProviders.stream().anyMatch(configProvider -> matchRdsTypeWithString(configProvider.getRdsType(), rdsConfig)))
                 .collect(Collectors.toMap(rdsConfig -> rdsConfig, this::getUserPassPairs));
     }

@@ -86,35 +86,35 @@ class SaltPillarRotationExecutorTest {
     @Test
     void rotateShouldThrowSecretRotationExceptionIfSaltFails() throws CloudbreakOrchestratorFailedException {
         mockStackDto();
-        doThrow(new RuntimeException("error")).when(saltService).updateSaltPillar(any(), any(), any());
+        doThrow(new RuntimeException("error")).when(saltService).updateSaltPillar(any(), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
         assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null, reason: error",
                 secretRotationException.getMessage());
-        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(1)).updateSaltPillar(any(), any());
     }
 
     @Test
     void rotateShouldSucceed() throws Exception {
-        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(saltService).updateSaltPillar(any(), any());
         mockStackDto();
         underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
-        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(1)).updateSaltPillar(any(), any());
     }
 
     @Test
     void rollbackShouldSucceed() throws Exception {
-        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(saltService).updateSaltPillar(any(), any());
         mockStackDto();
         underTest.executeRollback(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
-        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
+        verify(saltService, times(1)).updateSaltPillar(any(), any());
     }
 
     @Test
     void finalizeShouldDoNothing() throws CloudbreakOrchestratorFailedException {
         underTest.executeFinalize(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
-        verify(saltService, never()).updateSaltPillar(any(), any(), any());
+        verify(saltService, never()).updateSaltPillar(any(), any());
     }
 
     private StackDto mockStackDto() {

@@ -72,15 +72,15 @@ public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationC
         StackDto stackDto = stackService.getByCrn(resourceCrn);
         RotationContext customJobRotationContext = CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withRotationJob(() -> updateClusterWithDatabusCredentials(stackDto, "rotation"))
-                .withRollbackJob(() -> updateClusterWithDatabusCredentials(stackDto, "rollback"))
+                .withRotationJob(() -> updateClusterWithDatabusCredentials(stackDto))
+                .withRollbackJob(() -> updateClusterWithDatabusCredentials(stackDto))
                 .build();
         return Map.of(UMS_DATABUS_CREDENTIAL, new RotationContext(resourceCrn),
                 CUSTOM_JOB, customJobRotationContext);
     }
 
-    private void updateClusterWithDatabusCredentials(StackDto stackDto, String state) {
-        refreshDatabusPillars(stackDto, state);
+    private void updateClusterWithDatabusCredentials(StackDto stackDto) {
+        refreshDatabusPillars(stackDto);
         executeDbusRelatedSaltStates(stackDto);
         restartMgmtServicesInCM(stackDto);
     }
@@ -102,12 +102,12 @@ public class DatahubDbusUmsAccessKeyRotationContextProvider implements RotationC
         }
     }
 
-    private void refreshDatabusPillars(StackDto stackDto, String state) {
+    private void refreshDatabusPillars(StackDto stackDto) {
         try {
             DatabusConfigView databusConfigView = getDatabusConfigView(stackDto);
             SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/" + DATABUS_KEY + "/init.sls",
                     Map.of(DATABUS_KEY, databusConfigView.toMap()));
-            saltService.updateSaltPillar(stackDto, Map.of(DATABUS_KEY, saltPillarProperties), state);
+            saltService.updateSaltPillar(stackDto, Map.of(DATABUS_KEY, saltPillarProperties));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new SecretRotationException("Failed to refresh Databus relevant salt pillars.", e);
         }

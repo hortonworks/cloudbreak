@@ -61,6 +61,9 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     @Query("SELECT r FROM RDSConfig r WHERE r.connectionURL = :connectionUrl")
     Set<RDSConfig> findAllByConnectionUrlAndType(@Param("connectionUrl") String connectionUrl);
 
+    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.connectionURL = :connectionUrl")
+    Set<RDSConfig> findAllByConnectionUrlAndTypeWithClusters(@Param("connectionUrl") String connectionUrl);
+
     @Modifying
     @Query("UPDATE RDSConfig r SET r.sslMode = 'ENABLED' WHERE r.id = :id")
     void enableSsl(@Param("id") Long id);

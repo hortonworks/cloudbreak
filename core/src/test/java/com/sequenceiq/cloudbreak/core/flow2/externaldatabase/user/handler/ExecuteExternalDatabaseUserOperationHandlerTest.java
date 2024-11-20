@@ -87,7 +87,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         RDSConfig rdsConfig = mock(RDSConfig.class);
         when(redbeamsDbServerConfigurer.createNewRdsConfigForNewUser(any(), any(), any(), any(), any(), any(), any())).thenReturn(rdsConfig);
         when(postgresConfigService.getPillarPropertiesForUserCreation(any(), any(), any())).thenReturn(new SaltPillarProperties("path", Map.of()));
-        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any());
         doNothing().when(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), any());
         doNothing().when(eventBus).notify(any(), any());
 
@@ -98,7 +98,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         ArgumentCaptor<List<String>> saltStatesArgumentCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
-        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture(), any());
+        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture());
         assertEquals("path", saltPillarPropertiesArgumentCaptor.getValue().get(PostgresConfigService.POSTGRES_USER).getPath());
         verify(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), saltStatesArgumentCaptor.capture());
         assertEquals("postgresql.newuser.init", saltStatesArgumentCaptor.getValue().getFirst());
@@ -121,7 +121,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         when(rdsConfig.getConnectionUserName()).thenReturn("dbUser");
         when(rdsConfigService.findAllByConnectionUrlAndType(any())).thenReturn(Set.of(rdsConfig));
         when(postgresConfigService.getPillarPropertiesForUserCreation(any(), any(), any())).thenReturn(new SaltPillarProperties("path", Map.of()));
-        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any());
         doNothing().when(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), any());
         doNothing().when(eventBus).notify(any(), any());
 
@@ -132,7 +132,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         ArgumentCaptor<List<String>> saltStatesArgumentCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
-        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture(), any());
+        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture());
         assertEquals("path", saltPillarPropertiesArgumentCaptor.getValue().get(PostgresConfigService.POSTGRES_USER).getPath());
         verify(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), saltStatesArgumentCaptor.capture());
         assertEquals("postgresql.newuser.init", saltStatesArgumentCaptor.getValue().getFirst());
@@ -156,7 +156,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         when(rdsConfig.getConnectionUserName()).thenReturn("dbUser");
         when(rdsConfigService.findAllByConnectionUrlAndType(any())).thenReturn(Set.of(rdsConfig));
         when(postgresConfigService.getPillarPropertiesForUserDeletion(any(), any(), any())).thenReturn(new SaltPillarProperties("path", Map.of()));
-        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any());
         doNothing().when(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), any());
         doNothing().when(eventBus).notify(any(), any());
 
@@ -167,7 +167,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         ArgumentCaptor<List<String>> saltStatesArgumentCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
-        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture(), any());
+        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture());
         assertEquals("path", saltPillarPropertiesArgumentCaptor.getValue().get(PostgresConfigService.POSTGRES_USER).getPath());
         verify(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), saltStatesArgumentCaptor.capture());
         assertEquals("postgresql.deleteuser.init", saltStatesArgumentCaptor.getValue().getFirst());
@@ -189,7 +189,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         when(redbeamsDbServerConfigurer.getDatabaseServer(any())).thenReturn(dbServer);
         when(rdsConfigService.findAllByConnectionUrlAndType(any())).thenReturn(Set.of());
         when(postgresConfigService.getPillarPropertiesForUserDeletion(any(), any(), any())).thenReturn(new SaltPillarProperties("path", Map.of()));
-        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any(), any());
+        doNothing().when(secretRotationSaltService).updateSaltPillar(any(), any());
         doNothing().when(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), any());
         doNothing().when(eventBus).notify(any(), any());
 
@@ -200,7 +200,7 @@ public class ExecuteExternalDatabaseUserOperationHandlerTest {
         ArgumentCaptor<List<String>> saltStatesArgumentCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
 
-        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture(), any());
+        verify(secretRotationSaltService).updateSaltPillar(any(), saltPillarPropertiesArgumentCaptor.capture());
         assertEquals("path", saltPillarPropertiesArgumentCaptor.getValue().get(PostgresConfigService.POSTGRES_USER).getPath());
         verify(secretRotationSaltService).executeSaltStateOnPrimaryGateway(any(), saltStatesArgumentCaptor.capture());
         assertEquals("postgresql.deleteuser.init", saltStatesArgumentCaptor.getValue().getFirst());

@@ -30,18 +30,18 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
 
     @Override
     protected void rotate(SaltPillarRotationContext rotationContext) throws Exception {
-        updateSaltPillar(rotationContext, "rotation");
+        updateSaltPillar(rotationContext);
     }
 
     @Override
     protected void rollback(SaltPillarRotationContext rotationContext) throws Exception {
-        updateSaltPillar(rotationContext, "rollback");
+        updateSaltPillar(rotationContext);
     }
 
-    private void updateSaltPillar(SaltPillarRotationContext rotationContext, String rotationState) throws CloudbreakOrchestratorFailedException {
+    private void updateSaltPillar(SaltPillarRotationContext rotationContext) throws CloudbreakOrchestratorFailedException {
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         Map<String, SaltPillarProperties> servicePillar = rotationContext.getServicePillarGenerator().apply(stackDto);
-        saltService.updateSaltPillar(stackDto, servicePillar, rotationState);
+        saltService.updateSaltPillar(stackDto, servicePillar);
     }
 
     @Override

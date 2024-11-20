@@ -43,9 +43,9 @@ public class SecretRotationSaltService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
-    public void updateSaltPillar(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar, String rotationState)
+    public void updateSaltPillar(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Salt pillar {}, keys: {}", rotationState, servicePillar.keySet());
+        LOGGER.info("Salt pillar update, keys: {}", servicePillar.keySet());
         OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
         ExitCriteriaModel exitCriteriaModel = exitCriteriaProvider.get(stackDto);
         hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitCriteriaModel, stateParams);

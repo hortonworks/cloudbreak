@@ -1,21 +1,25 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.HIVE;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICE_SHARED_DB;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 
 import java.util.Map;
 import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.service.DataHubCMServiceSharedDBRotationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -25,16 +29,21 @@ public class DatahubCMServiceSharedDBRotationContextProvider extends AbstractCMR
     private StackDtoService stackService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private DataHubCMServiceSharedDBRotationService rotationService;
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
-        throw new SecretRotationException("This rotation will be reimplemented to use different HMS DB user/password per cluster!");
+        StackDto stack = stackService.getByCrn(resourceCrn);
+        CustomJobRotationContext customJobRotationContext = CustomJobRotationContext.builder()
+                .withRotationJob(() -> rotationService.rotateSharedServiceDbSecretOnDataHub(stack))
+                .withResourceCrn(resourceCrn)
+                .build();
+        return Map.of(CUSTOM_JOB, customJobRotationContext);
     }
 
     @Override
     protected Predicate<RDSConfig> getRDSConfigTypePredicate() {
-        return rdsConfig -> false;
+        return rdsConfig -> StringUtils.equals(rdsConfig.getType(), HIVE.name());
     }
 
     @Override
