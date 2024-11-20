@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
@@ -118,6 +119,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CloudPlatformBasedUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CmAndStackVersionUpgradeImageFilter;
+import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CpuArchUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CurrentImageUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.EntitlementDrivenPackageLocationFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.IgnoredCmVersionUpgradeImageFilter;
@@ -322,7 +324,7 @@ public class DistroXUpgradeRetrievalComponentTest {
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(2, actual);
         assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat runtime upgrade");
-        assertUpgradeCandidate(actual, "918aeb9c-75cb-4bce-b637-facfdda414af", "7.3.1 RedHat runtime upgrade");
+        assertUpgradeCandidate(actual, "f51d0f62-24a2-450c-91f3-78dadf9e5952", "7.3.1 RedHat runtime upgrade");
     }
 
     @Test
@@ -338,7 +340,7 @@ public class DistroXUpgradeRetrievalComponentTest {
         assertUpgradeCandidateNumber(3, actual);
         assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat patch upgrade");
         assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat runtime upgrade");
-        assertUpgradeCandidate(actual, "918aeb9c-75cb-4bce-b637-facfdda414af", "7.3.1 RedHat runtime upgrade");
+        assertUpgradeCandidate(actual, "f51d0f62-24a2-450c-91f3-78dadf9e5952", "7.3.1 RedHat runtime upgrade");
     }
 
     @Test
@@ -380,6 +382,30 @@ public class DistroXUpgradeRetrievalComponentTest {
         assertUpgradeCandidate(actual, "21ef3ca1-51e5-4d97-880e-06998c51c707", "7.2.15 runtime upgrade");
         assertUpgradeCandidate(actual, "ef21e621-b3e6-422b-9ab3-bfc01bbd86b8", "7.2.16 runtime upgrade");
         assertUpgradeCandidate(actual, "d45e1ab0-0de6-4c8b-8417-18e3ec30a325", "7.2.17 runtime upgrade");
+    }
+
+    @Test
+    void testUpgradeClusterByNameWhenTheCurrentImageIsArmImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image currentCatalogImage = imageCatalogMock.getImage("d5d3e04f-3484-4909-b5d3-c109b84526b2");
+        setupImageCatalogMocks(currentCatalogImage);
+
+        DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
+
+        assertTrue(actual.reason().isEmpty());
+        assertUpgradeCandidateNumber(1, actual);
+        assertUpgradeCandidate(actual, "d82010cc-271d-4095-a6d1-91d08c0d06fb", "");
+    }
+
+    @Test
+    void testUpgradeClusterByNameWhenTheCurrentImageIsArmImageAndOnlyX86HasNewerImage()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image currentCatalogImage = imageCatalogMock.getImage("d82010cc-271d-4095-a6d1-91d08c0d06fb");
+        setupImageCatalogMocks(currentCatalogImage);
+
+        DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
+
+        //assertEquals("There is no proper Cloudera Manager or CDP version to upgrade.", actual.reason());
+        assertUpgradeCandidateNumber(0, actual);
     }
 
     private void assertUpgradeCandidateNumber(int expected, DistroXUpgradeV1Response actual) {
@@ -492,6 +518,8 @@ public class DistroXUpgradeRetrievalComponentTest {
             BlueprintUpgradeOptionCondition.class,
             ImageFilterUpgradeService.class,
             CentosToRedHatUpgradeImageFilter.class,
+            CpuArchUpgradeImageFilter.class,
+            ImageUtil.class,
             CloudPlatformBasedUpgradeImageFilter.class,
             CmAndStackVersionUpgradeImageFilter.class,
             CurrentImageUpgradeImageFilter.class,
