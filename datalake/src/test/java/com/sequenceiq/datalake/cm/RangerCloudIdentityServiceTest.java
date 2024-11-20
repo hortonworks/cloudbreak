@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +59,7 @@ class RangerCloudIdentityServiceTest {
         when(apiCommand.getSuccess()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
-        testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.SUCCESS);
+        testSetAzureCloudIdentityMapping(List.of(apiCommand), RangerCloudIdentitySyncState.SUCCESS);
     }
 
     @Test
@@ -70,7 +69,7 @@ class RangerCloudIdentityServiceTest {
         when(apiCommand.getActive()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
-        testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.ACTIVE);
+        testSetAzureCloudIdentityMapping(List.of(apiCommand), RangerCloudIdentitySyncState.ACTIVE);
     }
 
     @Test
@@ -80,14 +79,14 @@ class RangerCloudIdentityServiceTest {
         when(apiCommand.getSuccess()).thenReturn(false);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
-        testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.FAILED);
+        testSetAzureCloudIdentityMapping(List.of(apiCommand), RangerCloudIdentitySyncState.FAILED);
     }
 
     @Test
     public void testSetAzureCloudIdentityMappingNoApiCommand() throws ApiException {
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
-        testSetAzureCloudIdentityMapping(Optional.empty(), RangerCloudIdentitySyncState.SUCCESS);
+        testSetAzureCloudIdentityMapping(List.of(), RangerCloudIdentitySyncState.SUCCESS);
     }
 
     @Test
@@ -114,7 +113,7 @@ class RangerCloudIdentityServiceTest {
         verify(clouderaManagerRangerUtil, never()).setAzureCloudIdentityMapping(eq("stack-crn"), eq(userMapping));
     }
 
-    private void testSetAzureCloudIdentityMapping(Optional<ApiCommand> apiCommand, RangerCloudIdentitySyncState expectedStatus) throws ApiException {
+    private void testSetAzureCloudIdentityMapping(List<ApiCommand> apiCommand, RangerCloudIdentitySyncState expectedStatus) throws ApiException {
         SdxCluster cluster = mock(SdxCluster.class);
         when(cluster.getStackCrn()).thenReturn("stack-crn");
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(cluster));
