@@ -98,6 +98,9 @@ public class ClouderaManagerPollingServiceProvider {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
+    @Inject
+    private ClouderaManagerUpgradePollingTimeoutProvider clouderaManagerUpgradePollingTimeoutProvider;
+
     public ExtendedPollingResult startPollingCmStartup(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
         return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
@@ -290,7 +293,7 @@ public class ClouderaManagerPollingServiceProvider {
         String commandName = "Upgrade CDP Runtime services";
         LOGGER.debug("Waiting for Cloudera Manager for [{}].", commandName);
         return pollCommandWithTimeListener(stack, apiClient, commandId,
-                ClouderaManagerPollingTimeoutProvider.getCdhUpgradeTimeout(stack.getCloudPlatform(), rollingUpgrade),
+                clouderaManagerUpgradePollingTimeoutProvider.getCdhUpgradeTimeout(stack, rollingUpgrade),
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, commandName));
     }
 
@@ -298,7 +301,7 @@ public class ClouderaManagerPollingServiceProvider {
             ParcelResource parcelResource) {
         LOGGER.debug("Waiting for Cloudera Manager to download CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId,
-                ClouderaManagerPollingTimeoutProvider.getParcelDownloadTimeout(stack.getCloudPlatform()),
+                clouderaManagerUpgradePollingTimeoutProvider.getParcelDownloadTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerUpgradeParcelDownloadListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelResource));
     }
 
@@ -306,7 +309,7 @@ public class ClouderaManagerPollingServiceProvider {
             ParcelResource parcelResource) {
         LOGGER.debug("Waiting for Cloudera Manager to distribute CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId,
-                ClouderaManagerPollingTimeoutProvider.getParcelDownloadTimeout(stack.getCloudPlatform()),
+                clouderaManagerUpgradePollingTimeoutProvider.getParcelDistributeTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerUpgradeParcelDistributeListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelResource));
     }
 
