@@ -570,6 +570,7 @@ public enum ResourceEvent {
     CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER("cluster.externaldatabase.upgrade.validation.on.cloudprovider"),
     CLUSTER_RDS_UPGRADE_VALIDATION_FINISHED("cluster.externaldatabase.upgrade.validation.finished"),
     CLUSTER_RDS_UPGRADE_VALIDATION_FAILED("cluster.externaldatabase.upgrade.validation.failed"),
+    CLUSTER_RDS_UPGRADE_VALIDATION_WARNING("cluster.externaldatabase.upgrade.validation.warning"),
 
     CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_IN_PROGRESS("cluster.prepare.embeddeddatabase.upgrade.inprogress"),
     CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_FINISHED("cluster.prepare.embeddeddatabase.upgrade.finished"),

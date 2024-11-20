@@ -496,22 +496,25 @@ public class ExternalDatabaseService {
     public boolean isMigrationNeededDuringUpgrade(UpgradeRdsContext context) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(context.getStack().getCloudPlatform());
         boolean externalDb = context.getCluster().hasExternalDatabase();
-        Versioned currentVersion = context.getDatabase()::getExternalDatabaseEngineVersion;
+        Database database = context.getDatabase();
+        Versioned currentVersion = database::getExternalDatabaseEngineVersion;
         Versioned targetVersion = context.getVersion()::getMajorVersion;
-        return isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb);
+        DatabaseType databaseType = parameterDecoratorMap.get(cloudPlatform).getDatabaseType(database.getAttributesMap()).orElse(null);
+        return isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb, databaseType);
     }
 
-    private boolean isMigrationNeededDuringUpgrade(Versioned currentVersion, Versioned targetVersion, CloudPlatform cloudPlatform, boolean externalDb) {
+    private boolean isMigrationNeededDuringUpgrade(Versioned currentVersion, Versioned targetVersion, CloudPlatform cloudPlatform, boolean externalDb,
+            DatabaseType databaseType) {
         boolean upgradeTargetVersionImpliesFlexibleServerMigration =
                 CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
         boolean currentVersionImpliesFlexibleServerMigration =
                 CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
-        boolean migrationNeeded = externalDb && cloudPlatform == AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
-                currentVersionImpliesFlexibleServerMigration;
+        boolean migrationNeeded = externalDb && cloudPlatform == AZURE && databaseType == AzureDatabaseType.SINGLE_SERVER &&
+                upgradeTargetVersionImpliesFlexibleServerMigration && currentVersionImpliesFlexibleServerMigration;
         String migrationNeededMsg = migrationNeeded ? "Database settings migration is needed during upgrade." :
                 "Database settings migration is not needed during upgrade.";
-        LOGGER.debug("{} Current version: {}, target version: {}, cloudPlatform: {}, externalDb: {}",
-                migrationNeededMsg, currentVersion.getVersion(), targetVersion.getVersion(), cloudPlatform, externalDb);
+        LOGGER.debug("{} Current version: {}, target version: {}, cloudPlatform: {}, externalDb: {}, databaseType: {}",
+                migrationNeededMsg, currentVersion.getVersion(), targetVersion.getVersion(), cloudPlatform, externalDb, databaseType);
         return migrationNeeded;
     }
 
@@ -521,8 +524,9 @@ public class ExternalDatabaseService {
         Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;
         boolean externalDb = stack.getCluster().hasExternalDatabase();
+        DatabaseType databaseType = parameterDecoratorMap.get(cloudPlatform).getDatabaseType(stack.getDatabase().getAttributesMap()).orElse(null);
 
-        if (isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb)) {
+        if (isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb, databaseType)) {
             DatabaseAvailabilityType databaseAvailabilityType = fetchDatabaseAvailabilityType(stack);
 
             Map<String, Object> attributes = getAttributes(stack.getDatabase());

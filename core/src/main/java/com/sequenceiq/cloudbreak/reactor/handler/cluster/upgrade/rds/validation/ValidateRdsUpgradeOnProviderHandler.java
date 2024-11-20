@@ -77,9 +77,14 @@ public class ValidateRdsUpgradeOnProviderHandler extends ExceptionCatcherEventHa
         String validationReason = redbeamsResponse.getReason();
         Selectable response;
         if (StringUtils.isNotBlank(validationReason)) {
-            LOGGER.warn("Validating RDS upgrade on cloudprovider side has failed: {}", redbeamsResponse.getReason());
-            response = new ValidateRdsUpgradeFailedEvent(stackId,
-                    new Exception(validationReason), DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED);
+            if (redbeamsResponse.isWarning()) {
+                LOGGER.info("Validating RDS upgrade on cloudprovider side has a warning: {}", redbeamsResponse.getReason());
+                response = new ValidateRdsUpgradeOnCloudProviderResult(stackId, version, validationReason);
+            } else {
+                LOGGER.warn("Validating RDS upgrade on cloudprovider side has failed: {}", redbeamsResponse.getReason());
+                response = new ValidateRdsUpgradeFailedEvent(stackId,
+                        new Exception(validationReason), DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED);
+            }
         } else {
             response = new ValidateRdsUpgradeOnCloudProviderResult(stackId, version, null);
         }

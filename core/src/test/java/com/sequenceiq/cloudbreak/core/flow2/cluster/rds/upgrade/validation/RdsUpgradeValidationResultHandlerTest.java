@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.model.AzureDatabaseType;
 
 @ExtendWith(MockitoExtension.class)
-class RdsUpgradeValidationErrorHandlerTest {
+class RdsUpgradeValidationResultHandlerTest {
     @Mock
     private StackDtoService stackDtoService;
 
@@ -31,21 +31,21 @@ class RdsUpgradeValidationErrorHandlerTest {
     private DatabaseService databaseService;
 
     @InjectMocks
-    private RdsUpgradeValidationErrorHandler underTest;
+    private RdsUpgradeValidationResultHandler underTest;
 
     @Test
-    void testHandleUpgradeValidationErrorNoMigration() {
-        underTest.handleUpgradeValidationError(1L, "reason");
+    void testHandleUpgradeValidationWarningNoMigration() {
+        underTest.handleUpgradeValidationWarning(1L, "reason");
         verify(stackDtoService, never()).getDatabaseByStackId(1L);
         verify(databaseService, never()).save(ArgumentMatchers.any());
     }
 
     @Test
-    void testHandleUpgradeValidationErrorMigration() {
+    void testHandleUpgradeValidationWarningMigration() {
         Database database = new Database();
         Mockito.when(stackDtoService.getDatabaseByStackId(1L)).thenReturn(Optional.of(database));
 
-        underTest.handleUpgradeValidationError(1L, AzureDatabaseType.AZURE_AUTOMIGRATION_ERROR_PREFIX);
+        underTest.handleUpgradeValidationWarning(1L, AzureDatabaseType.AZURE_AUTOMIGRATION_ERROR_PREFIX);
 
         ArgumentCaptor<Database> databaseArgumentCaptor = ArgumentCaptor.forClass(Database.class);
         verify(databaseService).save(databaseArgumentCaptor.capture());
