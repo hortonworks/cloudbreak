@@ -8,24 +8,16 @@ public class WaitSetDatalakeDefaultJavaVersionRequest extends SdxEvent {
 
     private final String defaultJavaVersion;
 
-    private final boolean restartServices;
-
     @JsonCreator
     public WaitSetDatalakeDefaultJavaVersionRequest(
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonProperty("defaultJavaVersion") String defaultJavaVersion,
-            @JsonProperty("restartServices")boolean restartServices) {
+            @JsonProperty("defaultJavaVersion") String defaultJavaVersion) {
         super(sdxId, userId);
         this.defaultJavaVersion = defaultJavaVersion;
-        this.restartServices = restartServices;
     }
 
     public String getDefaultJavaVersion() {
         return defaultJavaVersion;
-    }
-
-    public boolean isRestartServices() {
-        return restartServices;
     }
 }

@@ -21,10 +21,13 @@ public class DistroXSetDefaultJavaVersionAction implements Action<DistroXTestDto
 
     private final boolean restartCM;
 
-    public DistroXSetDefaultJavaVersionAction(String javaVersion, boolean restartServices, boolean restartCM) {
+    private final boolean rollingRestart;
+
+    public DistroXSetDefaultJavaVersionAction(String javaVersion, boolean restartServices, boolean restartCM, boolean rollingRestart) {
         this.javaVersion = javaVersion;
         this.restartServices = restartServices;
         this.restartCM = restartCM;
+        this.rollingRestart = rollingRestart;
     }
 
     @Override
@@ -34,6 +37,7 @@ public class DistroXSetDefaultJavaVersionAction implements Action<DistroXTestDto
         setDefaultJavaVersionRequest.setDefaultJavaVersion(javaVersion);
         setDefaultJavaVersionRequest.setRestartServices(restartServices);
         setDefaultJavaVersionRequest.setRestartCM(restartCM);
+        setDefaultJavaVersionRequest.setRollingRestart(rollingRestart);
         FlowIdentifier flowIdentifier = client.getDefaultClient().distroXV1Endpoint()
                 .setDefaultJavaVersionByName(testDto.getName(), setDefaultJavaVersionRequest);
         testDto.setFlow("Set default Java version on DistroX cluster", flowIdentifier);

@@ -15,12 +15,15 @@ public class SetDatalakeDefaultJavaVersionTriggerEvent extends SdxEvent {
 
     private final boolean restartCM;
 
+    private final boolean rollingRestart;
+
     public SetDatalakeDefaultJavaVersionTriggerEvent(String selector, Long sdxId, String userId, String defaultJavaVersion, boolean restartServices,
-            boolean restartCM) {
+            boolean restartCM, boolean rollingRestart) {
         super(selector, sdxId, userId);
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
         this.restartCM = restartCM;
+        this.rollingRestart = rollingRestart;
     }
 
     @JsonCreator
@@ -30,11 +33,13 @@ public class SetDatalakeDefaultJavaVersionTriggerEvent extends SdxEvent {
             @JsonProperty("defaultJavaVersion") String defaultJavaVersion,
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("restartCM") boolean restartCM,
+            @JsonProperty("rollingRestart") boolean rollingRestart,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
         this.restartCM = restartCM;
+        this.rollingRestart = rollingRestart;
     }
 
     public String getDefaultJavaVersion() {
@@ -49,11 +54,17 @@ public class SetDatalakeDefaultJavaVersionTriggerEvent extends SdxEvent {
         return restartCM;
     }
 
+    public boolean isRollingRestart() {
+        return rollingRestart;
+    }
+
     @Override
     public String toString() {
         return "SetDefaultJavaVersionTriggerEvent{" +
                 "defaultJavaVersion='" + defaultJavaVersion + '\'' +
                 ", restartServices=" + restartServices +
+                ", restartCM=" + restartCM +
+                ", rollingRestart=" + rollingRestart +
                 "} " + super.toString();
     }
 

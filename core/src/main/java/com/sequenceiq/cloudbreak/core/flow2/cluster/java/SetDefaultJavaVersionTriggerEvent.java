@@ -15,11 +15,15 @@ public class SetDefaultJavaVersionTriggerEvent extends StackEvent {
 
     private final boolean restartCM;
 
-    public SetDefaultJavaVersionTriggerEvent(String selector, Long stackId, String defaultJavaVersion, boolean restartServices, boolean restartCM) {
+    private final boolean rollingRestart;
+
+    public SetDefaultJavaVersionTriggerEvent(String selector, Long stackId, String defaultJavaVersion, boolean restartServices, boolean restartCM,
+            boolean rollingRestart) {
         super(selector, stackId);
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
         this.restartCM = restartCM;
+        this.rollingRestart = rollingRestart;
     }
 
     @JsonCreator
@@ -28,11 +32,13 @@ public class SetDefaultJavaVersionTriggerEvent extends StackEvent {
             @JsonProperty("defaultJavaVersion") String defaultJavaVersion,
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("restartCM") boolean restartCM,
+            @JsonProperty("rollingRestart") boolean rollingRestart,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.defaultJavaVersion = defaultJavaVersion;
         this.restartServices = restartServices;
         this.restartCM = restartCM;
+        this.rollingRestart = rollingRestart;
     }
 
     public String getDefaultJavaVersion() {
@@ -47,11 +53,17 @@ public class SetDefaultJavaVersionTriggerEvent extends StackEvent {
         return restartCM;
     }
 
+    public boolean isRollingRestart() {
+        return rollingRestart;
+    }
+
     @Override
     public String toString() {
         return "SetDefaultJavaVersionTriggerEvent{" +
                 "defaultJavaVersion='" + defaultJavaVersion + '\'' +
                 ", restartServices=" + restartServices +
+                ", restartCM=" + restartCM +
+                ", rollingRestart=" + rollingRestart +
                 "} " + super.toString();
     }
 }

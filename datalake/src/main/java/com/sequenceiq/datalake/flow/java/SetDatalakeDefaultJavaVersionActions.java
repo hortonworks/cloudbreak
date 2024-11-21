@@ -47,16 +47,18 @@ public class SetDatalakeDefaultJavaVersionActions {
 
         return new AbstractSdxAction<>(SetDatalakeDefaultJavaVersionTriggerEvent.class) {
             @Override
-            protected void doExecute(SdxContext context, SetDatalakeDefaultJavaVersionTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Initiating the process to set the default Java version to {} for the Data Lake. Restart services: {}",
-                        payload.getDefaultJavaVersion(), payload.isRestartServices());
+            protected void doExecute(SdxContext context, SetDatalakeDefaultJavaVersionTriggerEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Initiating the process to set the default Java version to {} for the Data Lake. Restart services: {}. Restart CM: {}. " +
+                                "Rolling restart: {}",
+                        payload.getDefaultJavaVersion(), payload.isRestartServices(), payload.isRestartCM(), payload.isRollingRestart());
                 WaitSetDatalakeDefaultJavaVersionRequest setDefaultJavaVersionRequest = new WaitSetDatalakeDefaultJavaVersionRequest(payload.getResourceId(),
-                        context.getUserId(), payload.getDefaultJavaVersion(), payload.isRestartServices());
+                        context.getUserId(), payload.getDefaultJavaVersion());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_DEFAULT_JAVA_VERSION_CHANGE_IN_PROGRESS,
                         List.of(payload.getDefaultJavaVersion()), "Initiating the process to set the default Java version for the Data Lake",
                         context.getSdxId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                cloudbreakStackService.setDefaultJavaVersion(sdxCluster, payload.getDefaultJavaVersion(), payload.isRestartServices(), payload.isRestartCM());
+                cloudbreakStackService.setDefaultJavaVersion(sdxCluster, payload.getDefaultJavaVersion(), payload.isRestartServices(), payload.isRestartCM(),
+                        payload.isRollingRestart());
                 LOGGER.info("Successfully initiated the process to set the default Java version for the Data Lake with payload: {}", payload);
                 sendEvent(context, setDefaultJavaVersionRequest);
             }

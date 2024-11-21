@@ -54,7 +54,7 @@ public class WaitSetDatalakeDefaultJavaVersionHandler extends ExceptionCatcherEv
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                     .withStopPollingIfExceptionOccurred(true);
             sdxWaitService.waitForCloudbreakFlow(sdxCluster, pollingConfig, "Setting default java version");
-            LOGGER.info("Setting default java version finished for SDX stack {}", sdxId);
+            LOGGER.info("Setting default java version finished for SDX stack {}. Java version: {}", sdxId, request.getDefaultJavaVersion());
             return new WaitSetDatalakeDefaultJavaVersionResult(sdxId, userId);
         } catch (SdxWaitException e) {
             LOGGER.warn("Setting default java version failed for SDX stack {}", sdxId, e);

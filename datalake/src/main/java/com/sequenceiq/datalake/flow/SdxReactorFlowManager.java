@@ -319,13 +319,14 @@ public class SdxReactorFlowManager {
         return notify(event.selector(), event, cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSetDefaultJavaVersion(SdxCluster cluster, String defaultJavaVersion, boolean restartServices, boolean restartCM) {
-        LOGGER.info("Trigger Set Default Java Version to {} on Datalake for: {}, restart services: {}, restart CM: {}", defaultJavaVersion, cluster,
-                restartServices, restartCM);
+    public FlowIdentifier triggerSetDefaultJavaVersion(SdxCluster cluster, String defaultJavaVersion, boolean restartServices, boolean restartCM,
+            boolean rollingRestart) {
+        LOGGER.info("Trigger Set Default Java Version to {} on Datalake for: {}, restart services: {}, restart CM: {}, rolling restart: {}",
+                defaultJavaVersion, cluster, restartServices, restartCM, rollingRestart);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SetDatalakeDefaultJavaVersionTriggerEvent datalakeDefaultJavaVersionTriggerEvent =
                 new SetDatalakeDefaultJavaVersionTriggerEvent(SET_DATALAKE_DEFAULT_JAVA_VERSION_EVENT.event(), cluster.getId(), initiatorUserCrn,
-                        defaultJavaVersion, restartServices, restartCM);
+                        defaultJavaVersion, restartServices, restartCM, rollingRestart);
         return notify(datalakeDefaultJavaVersionTriggerEvent.selector(), datalakeDefaultJavaVersionTriggerEvent, cluster.getClusterName());
     }
 

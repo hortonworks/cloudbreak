@@ -578,7 +578,8 @@ public class StackOperationService {
         LOGGER.info("Triggering default Java update on stack ('{}')", nameOrCrn);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         defaultJavaVersionUpdateValidator.validate(stack, request);
-        return flowManager.triggerSetDefaultJavaVersion(stack.getId(), request.getDefaultJavaVersion(), request.isRestartServices(), request.isRestartCM());
+        return flowManager.triggerSetDefaultJavaVersion(stack.getId(), request.getDefaultJavaVersion(), request.isRestartServices(),
+                request.isRestartCM(), request.isRollingRestart());
     }
 
     public void validateDefaultJavaVersionUpdate(NameOrCrn nameOrCrn, String accountId, SetDefaultJavaVersionRequest request) {

@@ -569,9 +569,10 @@ public class ReactorFlowManager {
                 new ClusterRepairTriggerEvent(stackId, updatedNodesMap, RepairType.ONE_BY_ONE, true, null, false, updateRequest, false));
     }
 
-    public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices, boolean restartCM) {
+    public FlowIdentifier triggerSetDefaultJavaVersion(Long stackId, String javaVersion, boolean restartServices, boolean restartCM, boolean rollingRestart) {
         String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices, restartCM));
+        return reactorNotifier.notify(stackId, selector,
+                new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices, restartCM, rollingRestart));
     }
 
     public FlowIdentifier triggerExternalDatabaseUserOperation(Long stackId, String name, String crn, ExternalDatabaseUserOperation operation,

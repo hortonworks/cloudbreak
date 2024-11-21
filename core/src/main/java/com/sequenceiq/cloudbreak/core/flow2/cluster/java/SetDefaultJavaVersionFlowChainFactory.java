@@ -28,7 +28,7 @@ public class SetDefaultJavaVersionFlowChainFactory implements FlowEventChainFact
     public FlowTriggerEventQueue createFlowTriggerEventQueue(SetDefaultJavaVersionTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), event.getResourceId(),
-                event.getDefaultJavaVersion(), event.isRestartServices(), event.isRestartCM(), event.accepted()));
+                event.getDefaultJavaVersion(), event.isRestartServices(), event.isRestartCM(), event.isRollingRestart(), event.accepted()));
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         if (event.isRestartCM()) {
             flowEventChain.add(new StackEvent(RestartClusterManagerFlowEvent.RESTART_CLUSTER_MANAGER_TRIGGER_EVENT.event(), event.getResourceId(),
@@ -36,7 +36,7 @@ public class SetDefaultJavaVersionFlowChainFactory implements FlowEventChainFact
         }
         if (event.isRestartServices()) {
             flowEventChain.add(new ClusterServicesRestartTriggerEvent(CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event(), event.getResourceId(), false,
-                    true, event.accepted()));
+                    event.isRollingRestart(), event.accepted()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

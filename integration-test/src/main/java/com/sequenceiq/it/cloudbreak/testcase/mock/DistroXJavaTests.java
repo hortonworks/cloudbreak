@@ -49,7 +49,7 @@ public class DistroXJavaTests extends AbstractMockTest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .resetCalls()
-                .when(distroXTestClient.setDefaultJavaVersion("17", true, true), key(distroXName))
+                .when(distroXTestClient.setDefaultJavaVersion("17", true, true, true), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
                 .mockSalt().run().post().bodyContains(Set.of("fun=cmd.run",
                         URLEncoder.encode("rm /var/log/set-default-java-version-executed", StandardCharsets.UTF_8)), 1).times(1).verify()
