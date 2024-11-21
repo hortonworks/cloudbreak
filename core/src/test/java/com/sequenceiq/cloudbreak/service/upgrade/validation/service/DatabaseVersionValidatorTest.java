@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType.HA;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType.NONE;
 
@@ -12,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
@@ -29,10 +32,11 @@ class DatabaseVersionValidatorTest {
     @Mock
     private StackDto stackDto;
 
-    @ParameterizedTest(name = "Target runtime {0}, database engine version {1}, database availability type {2} should throw validation failure {3}")
+    @ParameterizedTest(name = "Target runtime {0}, database engine version {1}, database availability type {2} should throw validation failure {4}")
     @MethodSource("testScenariosProvider")
-    void testValidate(String targetRuntime, String databaseEngineVersion, DatabaseAvailabilityType databaseAvailabilityType, boolean expectValidationFailure) {
-        ServiceUpgradeValidationRequest request = createRequest(targetRuntime, databaseEngineVersion, databaseAvailabilityType);
+    void testValidate(String targetRuntime, String databaseEngineVersion, DatabaseAvailabilityType databaseAvailabilityType, StackType stackType,
+            boolean expectValidationFailure) {
+        ServiceUpgradeValidationRequest request = createRequest(targetRuntime, databaseEngineVersion, databaseAvailabilityType, stackType);
         if (expectValidationFailure) {
             Assertions.assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
         } else {
@@ -42,25 +46,31 @@ class DatabaseVersionValidatorTest {
 
     private static Object[][] testScenariosProvider() {
         return new Object[][] {
-                { "7.2.18", "11", HA, false},
-                { "7.3.0", "11", HA, false},
-                { "7.3.1", "11", HA, true},
-                { "7.3.1", "11", NONE, false},
-                { "7.3.2", "11", HA, true},
-                { "7.2.18", "14", HA, false},
-                { "7.2.18", "14", NONE, false},
-                { "7.3.0", "14", HA, false},
-                { "7.3.1", "14", HA, false},
-                { "7.3.2", "14", HA, false},
-                { "7.3.2", "16", HA, false},
+                { "7.2.18", "11", HA, DATALAKE, false},
+                { "7.3.1", "11", HA, DATALAKE, true},
+                { "7.3.1", "11", HA, WORKLOAD, true},
+                { "7.3.1", "11", NONE, DATALAKE, false},
+                { "7.3.1", "11", NONE, WORKLOAD, false},
+                { "7.3.2", "11", HA, DATALAKE, true},
+                { "7.2.18", "14", HA, DATALAKE, false},
+                { "7.2.18", "14", NONE, DATALAKE, false},
+                { "7.3.1", "14", HA, DATALAKE, false},
+                { "7.3.2", "14", HA, DATALAKE, false},
+                { "7.3.2", "16", HA, DATALAKE, false},
         };
     }
 
-    private ServiceUpgradeValidationRequest createRequest(String targetRuntime, String databaseEngineVersion, DatabaseAvailabilityType availabilityType) {
+    private ServiceUpgradeValidationRequest createRequest(String targetRuntime, String databaseEngineVersion, DatabaseAvailabilityType availabilityType,
+            StackType stackType) {
         Database database = new Database();
+        if (DATALAKE.equals(stackType)) {
+            database.setDatalakeDatabaseAvailabilityType(availabilityType);
+        } else {
+            database.setExternalDatabaseAvailabilityType(availabilityType);
+        }
         database.setExternalDatabaseEngineVersion(databaseEngineVersion);
-        database.setExternalDatabaseAvailabilityType(availabilityType);
         Mockito.when(stackDto.getDatabase()).thenReturn(database);
+        Mockito.when(stackDto.getType()).thenReturn(stackType);
         UpgradeImageInfo upgradeImageInfo = new UpgradeImageInfo(null, StatedImage.statedImage(Image.builder().withVersion(targetRuntime).build(), null, null));
         return new ServiceUpgradeValidationRequest(stackDto, false, false, upgradeImageInfo, false);
     }
