@@ -19,11 +19,16 @@ public class EncryptionRoleValidator {
     public ValidationResult validateEncryptionRole(String encryptionRole) {
         ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
 
-        if (StringUtils.isNotBlank(encryptionRole)) {
-            if (!encryptionRole.matches(USER_MANAGED_IDENTITY)) {
-                String error = "Must be a full valid managed identity resource ID in the format of /subscriptions/[your-subscription-id]/resourceGroups/" +
-                        "[your-resource-group]/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[name-of-your-identity]. " +
+        if (encryptionRole != null) {
+            String error = null;
+            if (StringUtils.isBlank(encryptionRole)) {
+                error = "If specified, the managed identity resource ID may not be empty or whitespace only." + getDocLink();
+            } else if (!encryptionRole.matches(USER_MANAGED_IDENTITY)) {
+                error = "Must be a full valid managed identity resource ID in the format of /subscriptions/[your-subscription-id]/resourceGroups/" +
+                        "[your-resource-group]/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[name-of-your-identity]." +
                         getDocLink();
+            }
+            if (error != null) {
                 LOGGER.debug(error);
                 validationResultBuilder.error(error);
             }
@@ -35,4 +40,5 @@ public class EncryptionRoleValidator {
         String docReferenceLink = " Refer to Cloudera documentation at %s for the required setup.";
         return String.format(docReferenceLink, DocumentationLinkProvider.azureCloudStorageSetupLink());
     }
+
 }

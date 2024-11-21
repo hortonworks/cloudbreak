@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static java.util.stream.Collectors.groupingBy;
 
 import java.util.Comparator;
@@ -25,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -92,7 +90,7 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
                     instanceMetadataView -> groupsWithHostNames.get(instanceMetadataView.getInstanceGroupName()).size(), (key1, key2) -> key2));
             boolean repairingPrimaryGW = isRepairingPrimaryGW(event.getResourceId(), instanceIdsToUpgradeAtOnce);
             clusterRepairService.markVolumesToNonDeletable(stackView, instancesToUpgradeAtOnce);
-            addDownscaleFlowTrigger(event, flowTriggers, repairingPrimaryGW, groupsWithHostNames, groupsWithPrivateIds, groupsWithAdjustment);
+            addDownscaleFlowTrigger(event, flowTriggers, groupsWithHostNames, groupsWithPrivateIds, groupsWithAdjustment);
             // maybe AWS migration should be implemented here later
             addUpscaleFlowTrigger(event, flowTriggers, upgradeSets, repairingPrimaryGW, groupsWithHostNames, groupsWithAdjustment);
         });
@@ -111,18 +109,12 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
         return repairingPrimaryGW;
     }
 
-    private void addDownscaleFlowTrigger(OSUpgradeByUpgradeSetsTriggerEvent event, Queue<Selectable> flowTriggers, boolean repairingPrimaryGW,
+    private void addDownscaleFlowTrigger(OSUpgradeByUpgradeSetsTriggerEvent event, Queue<Selectable> flowTriggers,
             Map<String, Set<String>> groupsWithHostNames, Map<String, Set<Long>> groupsWithPrivateIds, Map<String, Integer> groupsWithAdjustment) {
         LOGGER.info("Add downscale flow trigger for: {}", groupsWithHostNames);
-        if (repairingPrimaryGW) {
-            LOGGER.info("Primary GW is in repaired host list, cluster downscale should be skipped");
-            flowTriggers.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupsWithAdjustment, groupsWithPrivateIds,
-                    groupsWithHostNames, event.getPlatformVariant(), event.accepted()).setRepair());
-        } else {
-            flowTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
+        flowTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
                 groupsWithAdjustment, groupsWithPrivateIds, groupsWithHostNames, ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
-                    new ClusterDownscaleDetails(true, true, false)));
-        }
+                new ClusterDownscaleDetails(true, true, false)));
     }
 
     private void addUpscaleFlowTrigger(OSUpgradeByUpgradeSetsTriggerEvent event, Queue<Selectable> flowTriggers, List<OrderedOSUpgradeSet> upgradeSets,
