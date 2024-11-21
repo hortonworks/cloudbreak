@@ -32,6 +32,8 @@ public class DistroXImagesTests extends AbstractE2ETest {
 
     private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.1";
 
+    private static final String AWS_ARM_INSTANCE_TYPE = "r6gd.2xlarge";
+
     @Inject
     private DistroXTestClient distroXTestClient;
 
@@ -89,10 +91,10 @@ public class DistroXImagesTests extends AbstractE2ETest {
                     return dto;
                 })
                 .given(imageSettings, DistroXImageTestDto.class)
-                    .withImageCatalog(cloudProvider.getImageCatalogName())
-                    .withImageId(selectedImageID.get())
+                .withImageCatalog(cloudProvider.getImageCatalogName())
+                .withImageId(selectedImageID.get())
                 .given(distrox, DistroXTestDto.class)
-                    .withImageSettings(imageSettings)
+                .withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
@@ -126,8 +128,9 @@ public class DistroXImagesTests extends AbstractE2ETest {
 
         testContext
                 .given(distrox, DistroXTestDto.class)
-                    .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(runtimeVersion))
-                    .withArchitecture(Architecture.ARM64)
+                .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(runtimeVersion))
+                .withInstanceType(AWS_ARM_INSTANCE_TYPE)
+                .withArchitecture(Architecture.ARM64)
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()

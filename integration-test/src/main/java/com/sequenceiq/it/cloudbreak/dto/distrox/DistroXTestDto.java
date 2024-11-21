@@ -301,6 +301,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public DistroXTestDto withTemplate(String template) {
         getRequest().getCluster().setBlueprintName(template);
         return this;
+
+    }
+
+    public DistroXTestDto withInstanceType(String instanceType) {
+        getRequest().getInstanceGroups().forEach(i -> i.getTemplate().setInstanceType(instanceType));
+        return this;
     }
 
     public DistroXTestDto withSpotPercentage(int spotPercentage) {
