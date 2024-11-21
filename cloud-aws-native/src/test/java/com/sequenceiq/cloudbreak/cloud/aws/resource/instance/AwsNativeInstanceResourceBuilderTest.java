@@ -13,6 +13,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -29,7 +30,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -79,6 +82,7 @@ import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsRe
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AwsNativeInstanceResourceBuilderTest {
@@ -632,14 +636,96 @@ class AwsNativeInstanceResourceBuilderTest {
         verify(amazonEc2Client, times(0)).modifyInstanceMetadataOptions(any());
     }
 
-    private CloudResource setupImdsTest(Instance instance) {
-        CloudResource cloudResource = CloudResource.builder()
-                .withName("name")
-                .withType(ResourceType.AWS_INSTANCE)
-                .withStatus(CommonStatus.CREATED)
-                .withParameters(emptyMap())
-                .withInstanceId(INSTANCE_ID)
+    @ParameterizedTest
+    @NullAndEmptySource
+    void testDeleteWhenTheInstanceIdIsNullOrEmptyString(String instanceId) throws Exception {
+        CloudResource cloudResource = createInstanceResource(instanceId);
+
+        CloudResource actual = underTest.delete(awsContext, ac, cloudResource);
+
+        Assertions.assertEquals(cloudResource, actual);
+        verifyNoInteractions(awsMethodExecutor);
+    }
+
+    @Test
+    void testDeleteWhenTheInstanceIsNotReturnedByDescribeInstances() throws Exception {
+        CloudResource cloudResource = createInstanceResource();
+        DescribeInstancesResponse emptyDescribeResp = DescribeInstancesResponse.builder().build();
+        when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenReturn(emptyDescribeResp);
+
+        CloudResource actual = underTest.delete(awsContext, ac, cloudResource);
+
+        assertNull(actual);
+        verify(awsMethodExecutor, times(1)).execute(any(), any());
+    }
+
+    @Test
+    void testDeleteWhenTheDescribeInstancesCallFails() {
+        CloudResource cloudResource = createInstanceResource();
+        DescribeInstancesResponse emptyDescribeResp = DescribeInstancesResponse.builder().build();
+        when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenThrow(new RuntimeException());
+
+        Assertions.assertThrows(RuntimeException.class, () -> underTest.delete(awsContext, ac, cloudResource));
+
+        verify(awsMethodExecutor, times(1)).execute(any(), any());
+    }
+
+    @Test
+    void testDeleteWhenTheTerminateSdkCallIsNeeded() throws Exception {
+        CloudResource cloudResource = createInstanceResource(INSTANCE_ID);
+        DescribeInstancesResponse emptyDescribeResp = DescribeInstancesResponse.builder().build();
+        DescribeInstancesResponse describeResp = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder().instanceId(INSTANCE_ID).build())
+                        .build())
                 .build();
+        when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenReturn(describeResp);
+        when(awsMethodExecutor.execute(ArgumentMatchers.<Supplier<TerminateInstancesResponse>>any(), eq(null)))
+                .thenReturn(TerminateInstancesResponse.builder().build());
+
+        CloudResource actual = underTest.delete(awsContext, ac, cloudResource);
+
+        Assertions.assertEquals(cloudResource, actual);
+        verify(awsMethodExecutor, times(2)).execute(any(), any());
+    }
+
+    @Test
+    void testDeleteWhenTheTerminateSdkCallIsNeededAndReturnsWithNull() throws Exception {
+        CloudResource cloudResource = createInstanceResource(INSTANCE_ID);
+        DescribeInstancesResponse emptyDescribeResp = DescribeInstancesResponse.builder().build();
+        DescribeInstancesResponse describeResp = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder().instanceId(INSTANCE_ID).build())
+                        .build())
+                .build();
+        when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenReturn(describeResp);
+        when(awsMethodExecutor.execute(ArgumentMatchers.<Supplier<TerminateInstancesResponse>>any(), eq(null))).thenReturn(null);
+
+        CloudResource actual = underTest.delete(awsContext, ac, cloudResource);
+
+        assertNull(actual);
+        verify(awsMethodExecutor, times(2)).execute(any(), any());
+    }
+
+    @Test
+    void testDeleteWhenTheTerminateSdkCallIsNeededButFails() {
+        CloudResource cloudResource = createInstanceResource(INSTANCE_ID);
+        DescribeInstancesResponse emptyDescribeResp = DescribeInstancesResponse.builder().build();
+        DescribeInstancesResponse describeResp = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder().instanceId(INSTANCE_ID).build())
+                        .build())
+                .build();
+        when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenReturn(describeResp);
+        when(awsMethodExecutor.execute(ArgumentMatchers.<Supplier<TerminateInstancesResponse>>any(), eq(null))).thenThrow(new RuntimeException());
+
+        Assertions.assertThrows(RuntimeException.class, () -> underTest.delete(awsContext, ac, cloudResource));
+
+        verify(awsMethodExecutor, times(2)).execute(any(), any());
+    }
+
+    private CloudResource setupImdsTest(Instance instance) {
+        CloudResource cloudResource = createInstanceResource(INSTANCE_ID);
         when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(instance));
         when(cloudInstance.getTemplate()).thenReturn(new InstanceTemplate(InstanceType.A1_MEDIUM.toString(), null, null, List.of(),
                 null, null, null, null, null, null));
@@ -649,12 +735,16 @@ class AwsNativeInstanceResourceBuilderTest {
     }
 
     private CloudResource createInstanceResource() {
+        return createInstanceResource(INSTANCE_ID);
+    }
+
+    private CloudResource createInstanceResource(String instanceId) {
         return CloudResource.builder()
                 .withName("name")
                 .withType(ResourceType.AWS_INSTANCE)
                 .withStatus(CommonStatus.CREATED)
                 .withParameters(emptyMap())
-                .withInstanceId(INSTANCE_ID)
+                .withInstanceId(instanceId)
                 .build();
     }
 }

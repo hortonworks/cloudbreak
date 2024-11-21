@@ -344,14 +344,30 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        LOGGER.info("Terminate instance with instance id: {}", resource.getInstanceId());
-        if (resource.getInstanceId() != null) {
-            TerminateInstancesRequest request = TerminateInstancesRequest.builder().instanceIds(resource.getInstanceId()).build();
-            TerminateInstancesResponse terminateInstancesResponse = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
+        String instanceId = resource.getInstanceId();
+        LOGGER.info("Terminate instance with instance id: {}", instanceId);
+        if (StringUtils.isNotEmpty(instanceId)) {
+            TerminateInstancesResponse terminateInstancesResponse = null;
+            if (isInstanceExistsOnEc2(context, instanceId)) {
+                TerminateInstancesRequest request = TerminateInstancesRequest.builder().instanceIds(instanceId).build();
+                terminateInstancesResponse = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
+            } else {
+                LOGGER.info("The instance could not be found with id:'{}' on EC2, no need for triggering termination", instanceId);
+            }
             return terminateInstancesResponse == null ? null : resource;
         } else {
             return resource;
         }
+    }
+
+    private boolean isInstanceExistsOnEc2(AwsContext context, String instanceId) {
+        DescribeInstancesRequest describeInstancesRequest = DescribeInstancesRequest.builder().instanceIds(instanceId).build();
+        DescribeInstancesResponse describeInstancesResponse = awsMethodExecutor.execute(() ->
+                context.getAmazonEc2Client().describeInstances(describeInstancesRequest), DescribeInstancesResponse.builder().build());
+
+        return describeInstancesResponse.reservations().stream()
+                .flatMap(reservation -> reservation.instances().stream())
+                .anyMatch(instance -> instanceId.equals(instance.instanceId()));
     }
 
     @Override
