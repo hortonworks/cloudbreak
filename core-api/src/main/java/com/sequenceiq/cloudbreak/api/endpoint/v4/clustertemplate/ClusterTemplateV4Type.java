@@ -7,6 +7,7 @@ public enum ClusterTemplateV4Type {
     ETL,
     DATASCIENCE,
     DATAMART,
+    ICEBERG,
     DATALAKE,
     DATAENGINEERING,
     DATAENGINEERING_HA,
