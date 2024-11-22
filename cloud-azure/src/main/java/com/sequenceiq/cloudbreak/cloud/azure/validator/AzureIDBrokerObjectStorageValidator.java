@@ -126,7 +126,9 @@ public class AzureIDBrokerObjectStorageValidator {
             Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId, storageAccountName, Kind.STORAGE_V2);
             boolean hierarchical = storageAccount.map(StorageAccount::isHnsEnabled).orElse(false);
             if (storageAccount.isPresent() && !hierarchical) {
-                addError(resultBuilder, String.format("Hierarchical namespace is not allowed for Storage Account '%s'.", storageAccountName));
+                addError(resultBuilder, String.format("Hierarchical namespace is mandatory for Storage Account '%s'. " +
+                        "Please create an ADLS Gen2 storage account with hierarchical namespace enabled. " +
+                        "The storage account must be in the same region as the environment.", storageAccountName));
             }
         }
     }

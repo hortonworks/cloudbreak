@@ -198,6 +198,29 @@ class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
+    void testValidateObjectStorageHnsNotEnabled() {
+        when(storageAccount.isHnsEnabled()).thenReturn(Boolean.FALSE);
+        SpiFileSystem fileSystem = setupSpiFileSystem(false);
+        new RoleAssignmentBuilder(client)
+                .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, ABFS_STORAGE_ACCOUNT_NAME);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        ObjectStorageValidateRequest objectStorageValidateRequest =
+                ObjectStorageValidateRequest
+                        .builder()
+                        .withLogsLocationBase(LOG_LOCATION)
+                        .build();
+        underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, objectStorageValidateRequest, null, resultBuilder);
+
+        ValidationResult validationResult = resultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertEquals("Hierarchical namespace is mandatory for Storage Account 'storageaccount'. " +
+                "Please create an ADLS Gen2 storage account with hierarchical namespace enabled. " +
+                "The storage account must be in the same region as the environment.", validationResult.getErrors().get(0));
+
+    }
+
+    @Test
     void testValidateObjectStorageWithoutFileSystems() {
         SpiFileSystem fileSystem = new SpiFileSystem("test", FileSystemType.ADLS_GEN_2, null);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
