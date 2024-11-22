@@ -16,12 +16,16 @@ public class DatalakeBackupStatusResponse implements DatalakeOperationStatus {
 
     private final Optional<String> failureReason;
 
-    public DatalakeBackupStatusResponse(String backupId, State state, List<String> includedData, String timestamp, String failureReason) {
+    private final String endTimeStamp;
+
+    public DatalakeBackupStatusResponse(String backupId, State state, List<String> includedData, String timestamp, String failureReason,
+                                        String endTimeStamp) {
         this.backupId = backupId;
         this.state = state;
         this.includedData = includedData;
         this.timestamp = timestamp;
         this.failureReason = Optional.ofNullable(failureReason).filter(Predicate.not("null"::equals));
+        this.endTimeStamp = endTimeStamp;
     }
 
     @Override
@@ -45,5 +49,9 @@ public class DatalakeBackupStatusResponse implements DatalakeOperationStatus {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public String getEndTimeStamp() {
+        return endTimeStamp;
     }
 }

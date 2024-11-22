@@ -28,15 +28,19 @@ public class SdxBackupStatusResponse {
     @Schema(description = ModelDescriptions.BACKUP_TIMESTAMP)
     private String timestamp;
 
+    @Schema(description = ModelDescriptions.BACKUP_END_TIMESTAMP)
+    private String endTimestamp;
+
     public SdxBackupStatusResponse() {
     }
 
-    public SdxBackupStatusResponse(String operationId, String status, String reason, List<String> includedData, String timestamp) {
+    public SdxBackupStatusResponse(String operationId, String status, String reason, List<String> includedData, String timestamp, String endTimestamp) {
         this.operationId = operationId;
         this.status = status;
         this.reason = reason;
         this.includedData = includedData;
         this.timestamp = timestamp;
+        this.endTimestamp = endTimestamp;
     }
 
     public String getOperationId() {
@@ -61,6 +65,10 @@ public class SdxBackupStatusResponse {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public String getEndTimestamp() {
+        return endTimestamp;
     }
 
     @Override

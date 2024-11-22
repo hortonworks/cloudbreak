@@ -11,6 +11,8 @@ import static java.util.Objects.isNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -558,7 +560,8 @@ public class SdxBackupRestoreService {
                 datalakeBackupStatusResponse.getState().name(),
                 datalakeBackupStatusResponse.getFailureReason(),
                 datalakeBackupStatusResponse.getIncludedData(),
-                datalakeBackupStatusResponse.getTimestamp());
+                datalakeBackupStatusResponse.getTimestamp(),
+                datalakeBackupStatusResponse.getEndTimeStamp());
     }
 
     public String getDatalakeBackupId(String datalakeName, String backupName, String userCrn) {
@@ -567,7 +570,7 @@ public class SdxBackupRestoreService {
     }
 
     public DatalakeRestoreStatusResponse triggerDatalakeRestore(Long id, String backupId, String backupLocationOverride, String userCrn,
-            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin, boolean validationOnly) {
+            DatalakeDrSkipOptions skipOptions, boolean validationOnly) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         LOGGER.info("Triggering datalake restore for datalake: '{}' in '{}' env from backupId '{}",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName(), backupId);
@@ -856,5 +859,23 @@ public class SdxBackupRestoreService {
             LOGGER.warn("Cannot parse backup location {}", backupLocation, e);
         }
         return backupLocation;
+    }
+
+    public long getTotalDurationInMin(String startTimeStamp, String endTimeStamp) {
+        try {
+            if (startTimeStamp == null || startTimeStamp.isEmpty() ||
+                    endTimeStamp == null || endTimeStamp.isEmpty()) {
+                return 0;
+            }
+
+            OffsetDateTime startTime = OffsetDateTime.parse(startTimeStamp);
+            OffsetDateTime endTime = OffsetDateTime.parse(endTimeStamp);
+
+            Duration duration = Duration.between(startTime, endTime);
+            return duration.toMinutes();
+        } catch (Exception e) {
+            LOGGER.error("Failed to parse backup startTimeStamp {} or endTimeStamp {}", startTimeStamp, endTimeStamp);
+            return 0;
+        }
     }
 }

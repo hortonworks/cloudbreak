@@ -56,6 +56,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
+import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 
 @Configuration
@@ -77,6 +78,8 @@ public class DatalakeRestoreActions {
     private static final String VALIDATION_ONLY = "VALIDATION_ONLY";
 
     private static final String FAILURE_REASON = "FAILURE_REASON";
+
+    private static final double RESTORE_TIMOUET_MULTIPLIER = 1.5;
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
@@ -127,13 +130,19 @@ public class DatalakeRestoreActions {
                                 payload.getBackupLocationOverride(),
                                 payload.getUserId(),
                                 payload.getSkipOptions(),
-                                payload.getFullDrMaxDurationInMin(),
                                 payload.isValidationOnly());
                 variables.put(REASON, payload.getReason().name());
                 variables.put(RESTORE_ID, restoreStatusResponse.getRestoreId());
                 variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());
-                variables.put(FULLDR_MAX_DURATION_IN_MIN, payload.getFullDrMaxDurationInMin());
+
+                // Update full restore polling duration
+                SdxBackupStatusResponse sdxBackupStatusResponse = sdxBackupRestoreService
+                        .getDatalakeBackupStatus(payload.getSdxName(), restoreStatusResponse.getBackupId(),
+                                null, payload.getUserId());
+                int restoreFullMaxDuration = (int) (sdxBackupRestoreService.getTotalDurationInMin(sdxBackupStatusResponse.getTimestamp(),
+                                        sdxBackupStatusResponse.getEndTimestamp()) * RESTORE_TIMOUET_MULTIPLIER);
+                variables.put(FULLDR_MAX_DURATION_IN_MIN, restoreFullMaxDuration);
                 variables.put(VALIDATION_ONLY, payload.isValidationOnly());
                 payload.getDrStatus().setOperationId(restoreStatusResponse.getRestoreId());
                 if (restoreStatusResponse.getState().isFailed()) {

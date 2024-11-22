@@ -48,6 +48,6 @@ public class DatalakeRestoreStatusResponse implements DatalakeOperationStatus {
     }
 
     public DatalakeBackupStatusResponse toBackupStatusResponse() {
-        return new DatalakeBackupStatusResponse(backupId, state, List.of(), "", failureReason.orElse(null));
+        return new DatalakeBackupStatusResponse(backupId, state, List.of(), "", failureReason.orElse(null), "");
     }
 }

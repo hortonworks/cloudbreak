@@ -74,6 +74,14 @@ public class MockDatalakeDrService extends datalakeDRGrpc.datalakeDRImplBase {
         DatalakeOperationStatus.State state = mockStatusDatabase.get(request.getBackupId());
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder = datalakeDRProto.BackupDatalakeStatusResponse.newBuilder();
         builder.setBackupId(request.getBackupId());
+
+        if (state == null) {
+            mockStatusDatabase.put(request.getBackupId(), DatalakeOperationStatus.State.SUCCESSFUL);
+            builder.setOverallState(DatalakeOperationStatus.State.SUCCESSFUL.name());
+            responseObserver.onNext(builder.build());
+            responseObserver.onCompleted();
+            return;
+        }
         switch (state) {
             case STARTED:
                 mockStatusDatabase.put(request.getBackupId(), DatalakeOperationStatus.State.IN_PROGRESS);

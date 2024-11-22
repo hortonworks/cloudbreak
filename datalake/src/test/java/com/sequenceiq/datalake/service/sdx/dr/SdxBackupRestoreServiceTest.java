@@ -139,7 +139,7 @@ public class SdxBackupRestoreServiceTest {
     public void triggerDatabaseBackupInternalSuccess() {
         String drOperationId = UUID.randomUUID().toString();
         when(datalakeDrClient.triggerBackup(any(), any(), any(), any(), any()))
-                .thenReturn(new DatalakeBackupStatusResponse(drOperationId, DatalakeOperationStatus.State.IN_PROGRESS, List.of(), "", null));
+                .thenReturn(new DatalakeBackupStatusResponse(drOperationId, DatalakeOperationStatus.State.IN_PROGRESS, List.of(), "", null, ""));
         when(sdxClusterRepository.findById(sdxCluster.getId())).thenReturn(Optional.of(sdxCluster));
         DatalakeBackupStatusResponse backupResponse = sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster.getId(), BACKUP_LOCATION, BACKUP_NAME, USER_CRN,
                 new DatalakeDrSkipOptions(false, false, false, false));
@@ -389,9 +389,9 @@ public class SdxBackupRestoreServiceTest {
     @Test
     public void testIsDatalakeInBackupOrRestoreWithoutExceptions() {
         DatalakeBackupStatusResponse backupStatusInProgress = new DatalakeBackupStatusResponse("",
-                DatalakeOperationStatus.State.IN_PROGRESS, Collections.emptyList(), "", "");
+                DatalakeOperationStatus.State.IN_PROGRESS, Collections.emptyList(), "", "", "");
         DatalakeBackupStatusResponse backupStatusCompleted = new DatalakeBackupStatusResponse("",
-                DatalakeOperationStatus.State.SUCCESSFUL, Collections.emptyList(), "", "");
+                DatalakeOperationStatus.State.SUCCESSFUL, Collections.emptyList(), "", "", "");
         DatalakeRestoreStatusResponse restoreStatusInProgress = new DatalakeRestoreStatusResponse("", "",
                 DatalakeOperationStatus.State.STARTED, Collections.emptyList(), "");
         DatalakeRestoreStatusResponse restoreStatusCompleted = new DatalakeRestoreStatusResponse("", "",
@@ -513,6 +513,29 @@ public class SdxBackupRestoreServiceTest {
         assertEquals("gs://bucket/", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket/"));
         assertEquals("gs://bucket/test", sdxBackupRestoreService.modifyBackupLocation(sdxCluster, "gs://bucket/test"));
 
+    }
+
+    @Test
+    public void testGetTotalDurationWithValidTimestamps() {
+        String startTimeStamp = "2024-10-02T19:09:31.000653+00:00";
+        String endTimeStamp = "2024-10-02T19:15:12.000060+00:00";
+        assertEquals(5, sdxBackupRestoreService.getTotalDurationInMin(startTimeStamp, endTimeStamp));
+    }
+
+    @Test
+    public void testGetTotalDurationWithEmptyTimestamps() {
+        String startTimeStamp = "2024-10-02T19:09:31.000653+00:00";
+        String endTimeStamp = null;
+        assertEquals(0, sdxBackupRestoreService.getTotalDurationInMin(startTimeStamp, endTimeStamp));
+        endTimeStamp = "";
+        assertEquals(0, sdxBackupRestoreService.getTotalDurationInMin(startTimeStamp, endTimeStamp));
+    }
+
+    @Test
+    public void testGetTotalDurationWithInvalidTimestamps() {
+        String startTimeStamp = "some tests";
+        String endTimeStamp = "2024-10-02T19:09:31.000653+00:00";
+        assertEquals(0, sdxBackupRestoreService.getTotalDurationInMin(startTimeStamp, endTimeStamp));
     }
 
     private SdxCluster getValidSdxCluster() {

@@ -387,7 +387,7 @@ public class DatalakeDrClient {
     private DatalakeBackupStatusResponse missingConnectorResponseOnBackup() {
         return new DatalakeBackupStatusResponse(UUID.randomUUID().toString(),
                 DatalakeOperationStatus.State.FAILED,
-                List.of(), "", NO_CONNECTOR_ERROR
+                List.of(), "", NO_CONNECTOR_ERROR, ""
         );
     }
 

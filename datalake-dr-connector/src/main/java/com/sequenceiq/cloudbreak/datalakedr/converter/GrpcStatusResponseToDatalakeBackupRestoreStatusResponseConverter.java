@@ -40,7 +40,8 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
     public DatalakeBackupStatusResponse convert(BackupDatalakeResponse response) {
         return new DatalakeBackupStatusResponse(response.getBackupId(),
                 DatalakeOperationStatus.State.valueOf(response.getOverallState()),
-                List.of(), "", parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()));
+                List.of(), "", parseFailuresFromOperationsStates(response.getOperationStates(), response.getFailureReason()),
+                "");
     }
 
     public DatalakeRestoreStatusResponse convert(RestoreDatalakeResponse response) {
@@ -79,7 +80,8 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter {
                 DatalakeOperationStatus.State.valueOf(response.getOverallState()),
                 contents,
                 response.getStartTimestamp(),
-                parseFailuresFromOperationsStates(operationStates, response.getFailureReason()));
+                parseFailuresFromOperationsStates(operationStates, response.getFailureReason()),
+                response.getEndTimestamp());
     }
 
     public DatalakeRestoreStatusResponse convert(datalakeDRProto.RestoreDatalakeStatusResponse response) {

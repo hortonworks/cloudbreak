@@ -238,6 +238,8 @@ public class ModelDescriptions {
 
     public static final String SECURITY = "Security related objects";
 
+    public static final String BACKUP_END_TIMESTAMP = "When backup was completed (end of the backup procedure)";
+
     private ModelDescriptions() {
     }
 
