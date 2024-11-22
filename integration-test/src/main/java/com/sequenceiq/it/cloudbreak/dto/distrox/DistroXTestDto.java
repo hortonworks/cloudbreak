@@ -304,11 +304,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     }
 
-    public DistroXTestDto withInstanceType(String instanceType) {
-        getRequest().getInstanceGroups().forEach(i -> i.getTemplate().setInstanceType(instanceType));
-        return this;
-    }
-
     public DistroXTestDto withSpotPercentage(int spotPercentage) {
         getRequest().getInstanceGroups().stream()
                 .map(InstanceGroupV1Request::getTemplate)

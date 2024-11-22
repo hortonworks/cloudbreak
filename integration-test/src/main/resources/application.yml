@@ -180,7 +180,7 @@ integrationtest:
       volumeCount: 1
       volumeType: gp3
     arm64Instance:
-      type: r7gd.2xlarge
+      type: r6gd.2xlarge
       rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
