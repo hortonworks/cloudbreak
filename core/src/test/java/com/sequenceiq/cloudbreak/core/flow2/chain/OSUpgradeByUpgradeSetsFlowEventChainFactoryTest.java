@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -113,9 +112,9 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactoryTest {
         assertEquals("imageId", firstFlow.getNewImageId());
         assertEquals(1L, firstFlow.getResourceId());
 
-        StackDownscaleTriggerEvent secondFlow = (StackDownscaleTriggerEvent) eventQueue.getQueue().poll();
-        assertEquals("STACK_DOWNSCALE_TRIGGER_EVENT", secondFlow.getSelector());
-        assertTrue(secondFlow.isRepair());
+        ClusterAndStackDownscaleTriggerEvent secondFlow = (ClusterAndStackDownscaleTriggerEvent) eventQueue.getQueue().poll();
+        assertEquals("FULL_DOWNSCALE_TRIGGER_EVENT", secondFlow.getSelector());
+        assertTrue(secondFlow.getDetails().isRepair());
         Map<String, Set<String>> hostGroupsWithHostNames = secondFlow.getHostGroupsWithHostNames();
         assertThat(hostGroupsWithHostNames).containsOnlyKeys("master", "worker");
         assertThat(hostGroupsWithHostNames.get("master")).containsExactlyInAnyOrder("host1");
