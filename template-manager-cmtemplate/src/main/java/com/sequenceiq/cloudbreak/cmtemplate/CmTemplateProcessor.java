@@ -782,8 +782,17 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 if (config.getName().endsWith("_safety_valve")) {
                     String currentValue = configIfExists.get().getValue();
                     String valueToBeAppended = config.getValue();
-                    currentValue = currentValue + '\n' + String.join("\n", Arrays.asList(valueToBeAppended.split("\\\\n")));
-                    config.setValue(currentValue);
+                    if (INI_FILE_SAFETY_VALVE_CONFIGS.contains(config.getName())) {
+                        LOGGER.info("Merging INI file safety valve config values: '{}'", config.getName());
+                        IniFile safetyValve = iniFileFactory.create();
+                        valueToBeAppended = String.join("\n", Arrays.asList(valueToBeAppended.split("\\\\n")));
+                        safetyValve.addContent(currentValue);
+                        safetyValve.addContent(valueToBeAppended);
+                        config.setValue(safetyValve.print());
+                    } else {
+                        currentValue = currentValue + '\n' + String.join("\n", Arrays.asList(valueToBeAppended.split("\\\\n")));
+                        config.setValue(currentValue);
+                    }
                 }
                 currentConfigs.set(currentConfigs.indexOf(configIfExists.get()), config);
             } else {
