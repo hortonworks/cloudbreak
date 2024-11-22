@@ -13,7 +13,6 @@ public class ResourceToResourceV4ResponseConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceToResourceV4ResponseConverter.class);
 
     public ResourceV4Response convertResourceToResourceV4Response(Resource resource) {
-        LOGGER.debug("Converting resource to ResourceV4Response : {}", resource);
         ResourceV4Response resourceV4Response = new ResourceV4Response();
         resourceV4Response.setAttributes(null != resource.getAttributes() ? resource.getAttributes().getValue() : null);
         resourceV4Response.setId(resource.getId());

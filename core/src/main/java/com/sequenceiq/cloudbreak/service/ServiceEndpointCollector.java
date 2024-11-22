@@ -128,7 +128,7 @@ public class ServiceEndpointCollector {
             BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
             Map<String, List<String>> privateIps = componentLocatorService.getComponentLocationEvenIfStopped(stackDto, processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
-            LOGGER.debug("The private IPs in the cluster {}", privateIps);
+            LOGGER.trace("The private IPs in the cluster {}", privateIps);
             if (privateIps.containsKey(exposedServiceCollector.getImpalaService().getServiceName())) {
                 setImpalaDebugUIToCoordinator(stackDto, privateIps);
             }
@@ -152,7 +152,7 @@ public class ServiceEndpointCollector {
             Optional<String> version) {
         GatewayView gateway = stackDto.getGateway();
         ClusterView cluster = stackDto.getCluster();
-        LOGGER.debug("Generating the topology for '{}' topologies", gatewayTopology.getTopologyName());
+        LOGGER.trace("Generating the topology for '{}' topologies", gatewayTopology.getTopologyName());
         Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
                 .flatMap(e -> getExposedServiceStream(e, version))
                 .filter(Objects::nonNull)
@@ -160,7 +160,7 @@ public class ServiceEndpointCollector {
         List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
         List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
         boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
-        LOGGER.debug("AutoTls enabled '{}' for the cluster", autoTlsEnabled);
+        LOGGER.trace("AutoTls enabled '{}' for the cluster", autoTlsEnabled);
         SecurityConfig securityConfig = stackDto.getSecurityConfig();
         String managerServerUrl = getManagerServerUrl(stackDto, managerIp);
         for (ExposedService exposedService : filterKnoxServices(knownExposedServices, stackDto.getType())) {
@@ -442,9 +442,9 @@ public class ServiceEndpointCollector {
             Optional<String> version) {
         String serviceName = exposedServiceCollector.getNameNodeService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
-            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+            LOGGER.trace("Cannot find private ip for the {} exposed service", serviceName);
         } else {
-            LOGGER.debug("Select {} service from {}", serviceName, privateIps);
+            LOGGER.trace("Select {} service from {}", serviceName, privateIps);
             List<String> hdfsUrls = privateIps.get(serviceName)
                     .stream()
                     .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled, version))
@@ -462,7 +462,7 @@ public class ServiceEndpointCollector {
             Optional<String> version) {
         String serviceName = exposedServiceCollector.getHBaseUIService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
-            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+            LOGGER.trace("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             List<String> hbaseUrls = privateIps.get(serviceName)
                     .stream()
@@ -481,7 +481,7 @@ public class ServiceEndpointCollector {
             Optional<String> version) {
         String serviceName = exposedServiceCollector.getHBaseJarsService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
-            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+            LOGGER.trace("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             // Grab the first HBase master. Any will do, so we'll take the first
             privateIps.get(serviceName)
@@ -514,7 +514,7 @@ public class ServiceEndpointCollector {
             Optional<String> version) {
         String serviceName = exposedServiceCollector.getImpalaDebugUIService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
-            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+            LOGGER.trace("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             String impalaDebugUIServiceName = exposedServiceCollector.getImpalaDebugUIService().getServiceName();
             String impalaServiceName = exposedServiceCollector.getImpalaService().getServiceName();
@@ -551,7 +551,7 @@ public class ServiceEndpointCollector {
             Optional<String> version) {
         String serviceName = exposedServiceCollector.getKuduService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
-            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+            LOGGER.trace("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             Optional<String> coordinatorUrl = privateIps.get(serviceName)
                     .stream()
@@ -567,7 +567,7 @@ public class ServiceEndpointCollector {
     private void addKafkaBrokerEndpointUrl(ExposedService exposedService, Map<String, List<String>> fqdnsByComponent, List<String> urls) {
         String serviceName = exposedServiceCollector.getKafkaBrokerService().getServiceName();
         if (!fqdnsByComponent.containsKey(serviceName) || fqdnsByComponent.get(serviceName).isEmpty()) {
-            LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
+            LOGGER.trace("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             String brokerUrls = fqdnsByComponent.get(serviceName)
                     .stream()

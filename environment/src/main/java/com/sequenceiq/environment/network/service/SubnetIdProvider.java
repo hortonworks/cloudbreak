@@ -53,7 +53,7 @@ public class SubnetIdProvider {
         CloudSubnet selectedSubnet = subnetSelectionResult.hasResult()
                 ? subnetSelectionResult.getResult().get(0)
                 : fallback(network);
-        LOGGER.info("Selected subnet as preferred: {}", selectedSubnet);
+        LOGGER.info("Selected subnet as preferred: {}", selectedSubnet.getId());
         Set<CloudSubnet> selectedSubnets = subnetSelectionResult.hasResult()
                 ? new HashSet<>(subnetSelectionResult.getResult())
                 : fallbacks(network);

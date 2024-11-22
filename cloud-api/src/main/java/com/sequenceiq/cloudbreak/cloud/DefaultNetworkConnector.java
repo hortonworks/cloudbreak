@@ -46,7 +46,9 @@ public interface DefaultNetworkConnector extends NetworkConnector {
                     subnetSelectionResult = selectForNonHAScenario(subnetSelectionResult.getResult());
                 }
             }
-            LOGGER.info("The subnet selection is: {}.", subnetSelectionResult);
+            LOGGER.info("The subnet selection is: {}.", subnetSelectionResult.getResult().stream()
+                    .map(e -> String.format("%s: %s", e.getName(), e.getId()))
+                    .collect(Collectors.toSet()));
         }
         return subnetSelectionResult;
     }

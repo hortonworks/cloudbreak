@@ -55,7 +55,7 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
         try {
             if (cloudbreakUser != null) {
                 if (ThreadBasedUserCrnProvider.getUserCrn() != null && !ThreadBasedUserCrnProvider.getUserCrn().equals(cloudbreakUser.getUserCrn())) {
-                    LOGGER.debug("Before:There is a difference between:: Spring security context: {} and header-based-actor: '{}'",
+                    LOGGER.trace("Before:There is a difference between:: Spring security context: {} and header-based-actor: '{}'",
                             cloudbreakUser.getUserCrn(), ThreadBasedUserCrnProvider.getUserCrn());
                     logHeadersSafely(request);
                 }
@@ -67,15 +67,15 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
                     throw new IllegalStateException("Tenant default workspace does not exist!");
                 }
                 if (ThreadBasedUserCrnProvider.getUserCrn() != null && !ThreadBasedUserCrnProvider.getUserCrn().equals(user.getUserCrn())) {
-                    LOGGER.debug("Before:There is a difference between:: CB user context: {} and header-based-actor: '{}'",
+                    LOGGER.trace("Before:There is a difference between:: CB user context: {} and header-based-actor: '{}'",
                             user.getUserCrn(), ThreadBasedUserCrnProvider.getUserCrn());
                 }
                 Long workspaceId = tenantDefaultWorkspace.get().getId();
                 restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
                 WorkspaceIdModifiedRequest modifiedRequest = new WorkspaceIdModifiedRequest(request, workspaceId);
-                LOGGER.debug("Before:CloudbreakRestRequestThreadLocalContext: {}", restRequestThreadLocalService.getRestThreadLocalContextAsString());
+                LOGGER.trace("Before:CloudbreakRestRequestThreadLocalContext: {}", restRequestThreadLocalService.getRestThreadLocalContextAsString());
                 filterChain.doFilter(modifiedRequest, response);
-                LOGGER.debug("After:CloudbreakRestRequestThreadLocalContext: {}", restRequestThreadLocalService.getRestThreadLocalContextAsString());
+                LOGGER.trace("After:CloudbreakRestRequestThreadLocalContext: {}", restRequestThreadLocalService.getRestThreadLocalContextAsString());
             } else {
                 filterChain.doFilter(request, response);
             }
@@ -89,7 +89,7 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
             Map<String, String> headers = StreamSupport.stream(
                             Spliterators.spliteratorUnknownSize(request.getHeaderNames().asIterator(), Spliterator.ORDERED), false)
                     .collect(Collectors.toMap(headerName -> headerName, headerName -> getHeaderValues(request, headerName)));
-            LOGGER.debug("HTTP headers: \n{}", Joiner.on("\n").withKeyValueSeparator(" | ").join(headers));
+            LOGGER.trace("HTTP headers: \n{}", Joiner.on("\n").withKeyValueSeparator(" | ").join(headers));
         } catch (Exception e) {
             LOGGER.debug("Failed to log HTTP headers, because: {}", e.getMessage());
         }
