@@ -66,10 +66,21 @@ class ClouderaManagerFlinkConfigurationServiceTest {
     }
 
     @Test
-    void testAddServiceConfigurationIfNecessaryShouldNotSetTheConfigurationWhenTheRuntimeVersionIsNotProper() {
+    void testAddServiceConfigurationIfNecessaryShouldNotSetTheConfigurationWhenTheRuntimeVersionIsLower() {
         Stack stack = createStack();
 
         when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.0")));
+
+        underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
+
+        verifyNoInteractions(cmTemplateService, clouderaManagerConfigService);
+    }
+
+    @Test
+    void testAddServiceConfigurationIfNecessaryShouldNotSetTheConfigurationWhenTheRuntimeVersionIsHigher() {
+        Stack stack = createStack();
+
+        when(clouderaManagerProductsProvider.getCdhProduct(products)).thenReturn(Optional.of(createCdhProduct("7.3.2")));
 
         underTest.addServiceConfigurationIfNecessary(apiClient, stack, products);
 

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.config;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionEqualToLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.flink.FlinkConfigProviderUtils.RELEASE_NAME_CONF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.flink.FlinkConfigProviderUtils.RELEASE_NAME_CONF_VALUE;
 
@@ -58,7 +58,7 @@ public class ClouderaManagerFlinkConfigurationService {
     private boolean isConfigNecessaryByRuntime(Set<ClouderaManagerProduct> products) {
         Optional<ClouderaManagerProduct> cdhProduct = clouderaManagerProductsProvider.getCdhProduct(products);
         return cdhProduct
-                .map(cdh -> isVersionNewerOrEqualThanLimited(VersionNormalizer.normalizeCdhVersion(cdh.getVersion()), CLOUDERA_STACK_VERSION_7_3_1))
+                .map(cdh -> isVersionEqualToLimited(VersionNormalizer.normalizeCdhVersion(cdh.getVersion()), CLOUDERA_STACK_VERSION_7_3_1))
                 .orElse(false);
     }
 
