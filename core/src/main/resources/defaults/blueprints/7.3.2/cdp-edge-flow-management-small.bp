@@ -1,0 +1,44 @@
+{
+  "description": "7.3.2 - Edge Flow Management Light Duty",
+  "blueprint": {
+    "cdhVersion": "7.3.2",
+    "displayName": "edge-flow-management",
+    "blueprintUpgradeOption": "GA",
+    "services": [
+      {
+        "refName": "stub_dfs",
+        "serviceType": "STUB_DFS",
+        "roleConfigGroups": [
+          {
+            "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
+            "roleType": "STORAGEOPERATIONS",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "efm-EFM-BASE",
+        "serviceType": "EFM",
+        "roleConfigGroups": [
+          {
+            "refName": "efm-EFM_SERVER-BASE",
+            "roleType": "EFM_SERVER",
+            "base": true,
+            "configs": [
+            ]
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "management",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "efm-EFM_SERVER-BASE",
+          "stub_dfs-STORAGEOPERATIONS-BASE"
+        ]
+      }
+    ]
+  }
+}
