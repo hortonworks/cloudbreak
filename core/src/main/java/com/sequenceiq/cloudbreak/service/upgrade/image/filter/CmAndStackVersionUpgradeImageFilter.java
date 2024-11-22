@@ -52,7 +52,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
         return imageFilterParams.isLockComponents()
                 ? "There is at least one activated parcel for which we cannot find image with matching version. Activated parcel(s): "
                 + imageFilterParams.getStackRelatedParcels()
-                : "There is no proper Cloudera Manager or CDP version to upgrade.";
+                : "This service is using the latest available version.";
     }
 
     @Override

@@ -151,7 +151,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
     }
 
     private void assertNotLockedReason(String reason) {
-        assertEquals("There is no proper Cloudera Manager or CDP version to upgrade.", reason);
+        assertEquals("This service is using the latest available version.", reason);
     }
 
     private void assertLockedComponentCheckerNotInvoked() {
