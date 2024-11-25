@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.IdBrokerSyncStatus;
 import com.cloudera.thunderhead.service.environments2api.model.SyncStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,11 +22,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for getting ID Broker mappings sync status.
@@ -51,10 +46,11 @@ public class GetIdBrokerMappingsSyncStatusResponse {
   public static final String JSON_PROPERTY_STATUSES = "statuses";
   private Map<String, IdBrokerSyncStatus> statuses = new HashMap<>();
 
-  public GetIdBrokerMappingsSyncStatusResponse() { 
+  public GetIdBrokerMappingsSyncStatusResponse() {
   }
 
   public GetIdBrokerMappingsSyncStatusResponse syncNeeded(Boolean syncNeeded) {
+    
     this.syncNeeded = syncNeeded;
     return this;
   }
@@ -80,6 +76,7 @@ public class GetIdBrokerMappingsSyncStatusResponse {
 
 
   public GetIdBrokerMappingsSyncStatusResponse globalStatus(SyncStatus globalStatus) {
+    
     this.globalStatus = globalStatus;
     return this;
   }
@@ -105,14 +102,12 @@ public class GetIdBrokerMappingsSyncStatusResponse {
 
 
   public GetIdBrokerMappingsSyncStatusResponse statuses(Map<String, IdBrokerSyncStatus> statuses) {
+    
     this.statuses = statuses;
     return this;
   }
 
   public GetIdBrokerMappingsSyncStatusResponse putStatusesItem(String key, IdBrokerSyncStatus statusesItem) {
-    if (this.statuses == null) {
-      this.statuses = new HashMap<>();
-    }
     this.statuses.put(key, statusesItem);
     return this;
   }
@@ -136,10 +131,6 @@ public class GetIdBrokerMappingsSyncStatusResponse {
     this.statuses = statuses;
   }
 
-
-  /**
-   * Return true if this GetIdBrokerMappingsSyncStatusResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -181,59 +172,5 @@ public class GetIdBrokerMappingsSyncStatusResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `syncNeeded` to the URL query string
-    if (getSyncNeeded() != null) {
-      joiner.add(String.format("%ssyncNeeded%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSyncNeeded()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `globalStatus` to the URL query string
-    if (getGlobalStatus() != null) {
-      joiner.add(String.format("%sglobalStatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getGlobalStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `statuses` to the URL query string
-    if (getStatuses() != null) {
-      for (String _key : getStatuses().keySet()) {
-        if (getStatuses().get(_key) != null) {
-          joiner.add(getStatuses().get(_key).toUrlQueryString(String.format("%sstatuses%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object to check connectivity to private cloud environment.
@@ -90,10 +86,11 @@ public class CheckEnvironmentConnectivityRequest {
   public static final String JSON_PROPERTY_CLUSTER_NAMES = "clusterNames";
   private List<String> clusterNames = new ArrayList<>();
 
-  public CheckEnvironmentConnectivityRequest() { 
+  public CheckEnvironmentConnectivityRequest() {
   }
 
   public CheckEnvironmentConnectivityRequest address(String address) {
+    
     this.address = address;
     return this;
   }
@@ -119,6 +116,7 @@ public class CheckEnvironmentConnectivityRequest {
 
 
   public CheckEnvironmentConnectivityRequest user(String user) {
+    
     this.user = user;
     return this;
   }
@@ -144,6 +142,7 @@ public class CheckEnvironmentConnectivityRequest {
 
 
   public CheckEnvironmentConnectivityRequest authenticationToken(String authenticationToken) {
+    
     this.authenticationToken = authenticationToken;
     return this;
   }
@@ -169,6 +168,7 @@ public class CheckEnvironmentConnectivityRequest {
 
 
   public CheckEnvironmentConnectivityRequest authenticationTokenType(AuthenticationTokenTypeEnum authenticationTokenType) {
+    
     this.authenticationTokenType = authenticationTokenType;
     return this;
   }
@@ -194,6 +194,7 @@ public class CheckEnvironmentConnectivityRequest {
 
 
   public CheckEnvironmentConnectivityRequest clusterNames(List<String> clusterNames) {
+    
     this.clusterNames = clusterNames;
     return this;
   }
@@ -225,10 +226,6 @@ public class CheckEnvironmentConnectivityRequest {
     this.clusterNames = clusterNames;
   }
 
-
-  /**
-   * Return true if this CheckEnvironmentConnectivityRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -274,68 +271,5 @@ public class CheckEnvironmentConnectivityRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `address` to the URL query string
-    if (getAddress() != null) {
-      joiner.add(String.format("%saddress%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAddress()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `user` to the URL query string
-    if (getUser() != null) {
-      joiner.add(String.format("%suser%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUser()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `authenticationToken` to the URL query string
-    if (getAuthenticationToken() != null) {
-      joiner.add(String.format("%sauthenticationToken%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAuthenticationToken()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `authenticationTokenType` to the URL query string
-    if (getAuthenticationTokenType() != null) {
-      joiner.add(String.format("%sauthenticationTokenType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAuthenticationTokenType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `clusterNames` to the URL query string
-    if (getClusterNames() != null) {
-      for (int i = 0; i < getClusterNames().size(); i++) {
-        joiner.add(String.format("%sclusterNames%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getClusterNames().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

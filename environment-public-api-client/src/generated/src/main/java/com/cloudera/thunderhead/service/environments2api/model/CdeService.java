@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CdeVc;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The CDE service.
@@ -56,12 +52,13 @@ public class CdeService {
   private String status;
 
   public static final String JSON_PROPERTY_CDE_VCS = "cdeVcs";
-  private List<CdeVc> cdeVcs = new ArrayList<>();
+  private List<CdeVc> cdeVcs;
 
-  public CdeService() { 
+  public CdeService() {
   }
 
   public CdeService name(String name) {
+    
     this.name = name;
     return this;
   }
@@ -87,6 +84,7 @@ public class CdeService {
 
 
   public CdeService clusterId(String clusterId) {
+    
     this.clusterId = clusterId;
     return this;
   }
@@ -112,6 +110,7 @@ public class CdeService {
 
 
   public CdeService environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -137,6 +136,7 @@ public class CdeService {
 
 
   public CdeService status(String status) {
+    
     this.status = status;
     return this;
   }
@@ -162,6 +162,7 @@ public class CdeService {
 
 
   public CdeService cdeVcs(List<CdeVc> cdeVcs) {
+    
     this.cdeVcs = cdeVcs;
     return this;
   }
@@ -193,10 +194,6 @@ public class CdeService {
     this.cdeVcs = cdeVcs;
   }
 
-
-  /**
-   * Return true if this CdeService object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -242,69 +239,5 @@ public class CdeService {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `name` to the URL query string
-    if (getName() != null) {
-      joiner.add(String.format("%sname%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `clusterId` to the URL query string
-    if (getClusterId() != null) {
-      joiner.add(String.format("%sclusterId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getClusterId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cdeVcs` to the URL query string
-    if (getCdeVcs() != null) {
-      for (int i = 0; i < getCdeVcs().size(); i++) {
-        if (getCdeVcs().get(i) != null) {
-          joiner.add(getCdeVcs().get(i).toUrlQueryString(String.format("%scdeVcs%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,23 +13,18 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIPANodeStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The overall status of the FreeIPA cluster.
@@ -133,10 +128,11 @@ public class GetFreeipaStatusResponse {
   public static final String JSON_PROPERTY_INSTANCES = "instances";
   private Map<String, FreeIPANodeStatus> instances = new HashMap<>();
 
-  public GetFreeipaStatusResponse() { 
+  public GetFreeipaStatusResponse() {
   }
 
   public GetFreeipaStatusResponse environmentCrn(String environmentCrn) {
+    
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -162,6 +158,7 @@ public class GetFreeipaStatusResponse {
 
 
   public GetFreeipaStatusResponse environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -187,6 +184,7 @@ public class GetFreeipaStatusResponse {
 
 
   public GetFreeipaStatusResponse status(StatusEnum status) {
+    
     this.status = status;
     return this;
   }
@@ -212,14 +210,12 @@ public class GetFreeipaStatusResponse {
 
 
   public GetFreeipaStatusResponse instances(Map<String, FreeIPANodeStatus> instances) {
+    
     this.instances = instances;
     return this;
   }
 
   public GetFreeipaStatusResponse putInstancesItem(String key, FreeIPANodeStatus instancesItem) {
-    if (this.instances == null) {
-      this.instances = new HashMap<>();
-    }
     this.instances.put(key, instancesItem);
     return this;
   }
@@ -243,10 +239,6 @@ public class GetFreeipaStatusResponse {
     this.instances = instances;
   }
 
-
-  /**
-   * Return true if this GetFreeipaStatusResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -290,64 +282,5 @@ public class GetFreeipaStatusResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentCrn` to the URL query string
-    if (getEnvironmentCrn() != null) {
-      joiner.add(String.format("%senvironmentCrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instances` to the URL query string
-    if (getInstances() != null) {
-      for (String _key : getInstances().keySet()) {
-        if (getInstances().get(_key) != null) {
-          joiner.add(getInstances().get(_key).toUrlQueryString(String.format("%sinstances%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

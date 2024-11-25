@@ -80,6 +80,37 @@ public final class RemoteClusterInternalGrpc {
     return getGeneratePvcControlPlaneAuthTokenMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse> getGeneratePvcWorkloadAuthTokenMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GeneratePvcWorkloadAuthToken",
+      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse> getGeneratePvcWorkloadAuthTokenMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse> getGeneratePvcWorkloadAuthTokenMethod;
+    if ((getGeneratePvcWorkloadAuthTokenMethod = RemoteClusterInternalGrpc.getGeneratePvcWorkloadAuthTokenMethod) == null) {
+      synchronized (RemoteClusterInternalGrpc.class) {
+        if ((getGeneratePvcWorkloadAuthTokenMethod = RemoteClusterInternalGrpc.getGeneratePvcWorkloadAuthTokenMethod) == null) {
+          RemoteClusterInternalGrpc.getGeneratePvcWorkloadAuthTokenMethod = getGeneratePvcWorkloadAuthTokenMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GeneratePvcWorkloadAuthToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new RemoteClusterInternalMethodDescriptorSupplier("GeneratePvcWorkloadAuthToken"))
+              .build();
+        }
+      }
+    }
+    return getGeneratePvcWorkloadAuthTokenMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest,
       com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterResponse> getRegisterPvcBaseClusterMethod;
 
@@ -184,6 +215,16 @@ public final class RemoteClusterInternalGrpc {
 
     /**
      * <pre>
+     * GeneratePvcWorkloadAuthToken method :: Generates a workload auth token for the requests sent to Private Cloud workload.
+     * </pre>
+     */
+    default void generatePvcWorkloadAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGeneratePvcWorkloadAuthTokenMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * RegisterPvcBaseCluster method :: Partially registers a base cluster from an already registered PvC Control Plane.
      * </pre>
      */
@@ -250,6 +291,17 @@ public final class RemoteClusterInternalGrpc {
 
     /**
      * <pre>
+     * GeneratePvcWorkloadAuthToken method :: Generates a workload auth token for the requests sent to Private Cloud workload.
+     * </pre>
+     */
+    public void generatePvcWorkloadAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGeneratePvcWorkloadAuthTokenMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * RegisterPvcBaseCluster method :: Partially registers a base cluster from an already registered PvC Control Plane.
      * </pre>
      */
@@ -297,6 +349,16 @@ public final class RemoteClusterInternalGrpc {
     public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse generatePvcControlPlaneAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGeneratePvcControlPlaneAuthTokenMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * GeneratePvcWorkloadAuthToken method :: Generates a workload auth token for the requests sent to Private Cloud workload.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse generatePvcWorkloadAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGeneratePvcWorkloadAuthTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -353,6 +415,17 @@ public final class RemoteClusterInternalGrpc {
 
     /**
      * <pre>
+     * GeneratePvcWorkloadAuthToken method :: Generates a workload auth token for the requests sent to Private Cloud workload.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse> generatePvcWorkloadAuthToken(
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGeneratePvcWorkloadAuthTokenMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * RegisterPvcBaseCluster method :: Partially registers a base cluster from an already registered PvC Control Plane.
      * </pre>
      */
@@ -365,7 +438,8 @@ public final class RemoteClusterInternalGrpc {
 
   private static final int METHODID_LIST_ALL_PVC_CONTROL_PLANES = 0;
   private static final int METHODID_GENERATE_PVC_CONTROL_PLANE_AUTH_TOKEN = 1;
-  private static final int METHODID_REGISTER_PVC_BASE_CLUSTER = 2;
+  private static final int METHODID_GENERATE_PVC_WORKLOAD_AUTH_TOKEN = 2;
+  private static final int METHODID_REGISTER_PVC_BASE_CLUSTER = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -391,6 +465,10 @@ public final class RemoteClusterInternalGrpc {
         case METHODID_GENERATE_PVC_CONTROL_PLANE_AUTH_TOKEN:
           serviceImpl.generatePvcControlPlaneAuthToken((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse>) responseObserver);
+          break;
+        case METHODID_GENERATE_PVC_WORKLOAD_AUTH_TOKEN:
+          serviceImpl.generatePvcWorkloadAuthToken((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse>) responseObserver);
           break;
         case METHODID_REGISTER_PVC_BASE_CLUSTER:
           serviceImpl.registerPvcBaseCluster((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.RegisterPvcBaseClusterRequest) request,
@@ -428,6 +506,13 @@ public final class RemoteClusterInternalGrpc {
               com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest,
               com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse>(
                 service, METHODID_GENERATE_PVC_CONTROL_PLANE_AUTH_TOKEN)))
+        .addMethod(
+          getGeneratePvcWorkloadAuthTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse>(
+                service, METHODID_GENERATE_PVC_WORKLOAD_AUTH_TOKEN)))
         .addMethod(
           getRegisterPvcBaseClusterMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -485,6 +570,7 @@ public final class RemoteClusterInternalGrpc {
               .setSchemaDescriptor(new RemoteClusterInternalFileDescriptorSupplier())
               .addMethod(getListAllPvcControlPlanesMethod())
               .addMethod(getGeneratePvcControlPlaneAuthTokenMethod())
+              .addMethod(getGeneratePvcWorkloadAuthTokenMethod())
               .addMethod(getRegisterPvcBaseClusterMethod())
               .build();
         }

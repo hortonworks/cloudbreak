@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * GCP specific environment configuration information.
@@ -34,15 +29,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
   EnvironmentGcpDetails.JSON_PROPERTY_SHARED_PROJECT_ID
 })
+@JsonTypeName("Environment_gcpDetails")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class EnvironmentGcpDetails {
   public static final String JSON_PROPERTY_SHARED_PROJECT_ID = "sharedProjectId";
   private String sharedProjectId;
 
-  public EnvironmentGcpDetails() { 
+  public EnvironmentGcpDetails() {
   }
 
   public EnvironmentGcpDetails sharedProjectId(String sharedProjectId) {
+    
     this.sharedProjectId = sharedProjectId;
     return this;
   }
@@ -66,10 +63,6 @@ public class EnvironmentGcpDetails {
     this.sharedProjectId = sharedProjectId;
   }
 
-
-  /**
-   * Return true if this Environment_gcpDetails object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -107,44 +100,5 @@ public class EnvironmentGcpDetails {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `sharedProjectId` to the URL query string
-    if (getSharedProjectId() != null) {
-      joiner.add(String.format("%ssharedProjectId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSharedProjectId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

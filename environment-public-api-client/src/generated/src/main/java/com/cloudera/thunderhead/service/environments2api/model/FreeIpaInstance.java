@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AttachedVolumeDetail;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Object for a FreeIPA instance providing specific information about the instance.
@@ -94,10 +90,11 @@ public class FreeIpaInstance {
   public static final String JSON_PROPERTY_ATTACHED_VOLUMES = "attachedVolumes";
   private List<AttachedVolumeDetail> attachedVolumes = new ArrayList<>();
 
-  public FreeIpaInstance() { 
+  public FreeIpaInstance() {
   }
 
   public FreeIpaInstance availabilityZone(String availabilityZone) {
+    
     this.availabilityZone = availabilityZone;
     return this;
   }
@@ -123,6 +120,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance discoveryFQDN(String discoveryFQDN) {
+    
     this.discoveryFQDN = discoveryFQDN;
     return this;
   }
@@ -148,6 +146,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance instanceId(String instanceId) {
+    
     this.instanceId = instanceId;
     return this;
   }
@@ -173,6 +172,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance instanceGroup(String instanceGroup) {
+    
     this.instanceGroup = instanceGroup;
     return this;
   }
@@ -198,6 +198,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance instanceStatus(String instanceStatus) {
+    
     this.instanceStatus = instanceStatus;
     return this;
   }
@@ -223,6 +224,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance instanceStatusReason(String instanceStatusReason) {
+    
     this.instanceStatusReason = instanceStatusReason;
     return this;
   }
@@ -248,6 +250,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance instanceType(String instanceType) {
+    
     this.instanceType = instanceType;
     return this;
   }
@@ -273,6 +276,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance instanceVmType(String instanceVmType) {
+    
     this.instanceVmType = instanceVmType;
     return this;
   }
@@ -298,6 +302,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance lifeCycle(String lifeCycle) {
+    
     this.lifeCycle = lifeCycle;
     return this;
   }
@@ -323,6 +328,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance privateIP(String privateIP) {
+    
     this.privateIP = privateIP;
     return this;
   }
@@ -348,6 +354,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance publicIP(String publicIP) {
+    
     this.publicIP = publicIP;
     return this;
   }
@@ -373,6 +380,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance sshPort(Integer sshPort) {
+    
     this.sshPort = sshPort;
     return this;
   }
@@ -398,6 +406,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance subnetId(String subnetId) {
+    
     this.subnetId = subnetId;
     return this;
   }
@@ -423,6 +432,7 @@ public class FreeIpaInstance {
 
 
   public FreeIpaInstance attachedVolumes(List<AttachedVolumeDetail> attachedVolumes) {
+    
     this.attachedVolumes = attachedVolumes;
     return this;
   }
@@ -454,10 +464,6 @@ public class FreeIpaInstance {
     this.attachedVolumes = attachedVolumes;
   }
 
-
-  /**
-   * Return true if this FreeIpaInstance object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -521,114 +527,5 @@ public class FreeIpaInstance {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `availabilityZone` to the URL query string
-    if (getAvailabilityZone() != null) {
-      joiner.add(String.format("%savailabilityZone%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAvailabilityZone()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `discoveryFQDN` to the URL query string
-    if (getDiscoveryFQDN() != null) {
-      joiner.add(String.format("%sdiscoveryFQDN%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDiscoveryFQDN()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceId` to the URL query string
-    if (getInstanceId() != null) {
-      joiner.add(String.format("%sinstanceId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceGroup` to the URL query string
-    if (getInstanceGroup() != null) {
-      joiner.add(String.format("%sinstanceGroup%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceGroup()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceStatus` to the URL query string
-    if (getInstanceStatus() != null) {
-      joiner.add(String.format("%sinstanceStatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceStatusReason` to the URL query string
-    if (getInstanceStatusReason() != null) {
-      joiner.add(String.format("%sinstanceStatusReason%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceStatusReason()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceType` to the URL query string
-    if (getInstanceType() != null) {
-      joiner.add(String.format("%sinstanceType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceVmType` to the URL query string
-    if (getInstanceVmType() != null) {
-      joiner.add(String.format("%sinstanceVmType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceVmType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `lifeCycle` to the URL query string
-    if (getLifeCycle() != null) {
-      joiner.add(String.format("%slifeCycle%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getLifeCycle()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `privateIP` to the URL query string
-    if (getPrivateIP() != null) {
-      joiner.add(String.format("%sprivateIP%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPrivateIP()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `publicIP` to the URL query string
-    if (getPublicIP() != null) {
-      joiner.add(String.format("%spublicIP%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPublicIP()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `sshPort` to the URL query string
-    if (getSshPort() != null) {
-      joiner.add(String.format("%ssshPort%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSshPort()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `subnetId` to the URL query string
-    if (getSubnetId() != null) {
-      joiner.add(String.format("%ssubnetId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSubnetId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `attachedVolumes` to the URL query string
-    if (getAttachedVolumes() != null) {
-      for (int i = 0; i < getAttachedVolumes().size(); i++) {
-        if (getAttachedVolumes().get(i) != null) {
-          joiner.add(getAttachedVolumes().get(i).toUrlQueryString(String.format("%sattachedVolumes%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

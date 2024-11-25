@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CdwCluster;
 import com.cloudera.thunderhead.service.environments2api.model.CdwDbc;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The CDW summary.
@@ -45,10 +40,11 @@ public class CdwSummary {
   public static final String JSON_PROPERTY_CDW_DBC = "cdwDbc";
   private CdwDbc cdwDbc;
 
-  public CdwSummary() { 
+  public CdwSummary() {
   }
 
   public CdwSummary cdwCluster(CdwCluster cdwCluster) {
+    
     this.cdwCluster = cdwCluster;
     return this;
   }
@@ -74,6 +70,7 @@ public class CdwSummary {
 
 
   public CdwSummary cdwDbc(CdwDbc cdwDbc) {
+    
     this.cdwDbc = cdwDbc;
     return this;
   }
@@ -97,10 +94,6 @@ public class CdwSummary {
     this.cdwDbc = cdwDbc;
   }
 
-
-  /**
-   * Return true if this CdwSummary object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -140,49 +133,5 @@ public class CdwSummary {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `cdwCluster` to the URL query string
-    if (getCdwCluster() != null) {
-      joiner.add(getCdwCluster().toUrlQueryString(prefix + "cdwCluster" + suffix));
-    }
-
-    // add `cdwDbc` to the URL query string
-    if (getCdwDbc() != null) {
-      joiner.add(getCdwDbc().toUrlQueryString(prefix + "cdwDbc" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

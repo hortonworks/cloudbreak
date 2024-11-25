@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CcmV2TlsType;
 import com.cloudera.thunderhead.service.environments2api.model.CustomDockerRegistryRequest;
 import com.cloudera.thunderhead.service.environments2api.model.ExistingGCPNetworkRequest;
@@ -27,6 +23,7 @@ import com.cloudera.thunderhead.service.environments2api.model.GCPFreeIpaCreatio
 import com.cloudera.thunderhead.service.environments2api.model.GcpLogStorageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.GcpSecurityAccessRequest;
 import com.cloudera.thunderhead.service.environments2api.model.GcpTagRequest;
+import com.cloudera.thunderhead.service.environments2api.model.SecurityRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TunnelType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a create GCP environment request.
@@ -67,7 +64,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateGCPEnvironmentRequest.JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE,
   CreateGCPEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_KEY,
   CreateGCPEnvironmentRequest.JSON_PROPERTY_AVAILABILITY_ZONES,
-  CreateGCPEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY
+  CreateGCPEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
+  CreateGCPEnvironmentRequest.JSON_PROPERTY_SECURITY
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class CreateGCPEnvironmentRequest {
@@ -181,10 +179,14 @@ public class CreateGCPEnvironmentRequest {
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
   private CustomDockerRegistryRequest customDockerRegistry;
 
-  public CreateGCPEnvironmentRequest() { 
+  public static final String JSON_PROPERTY_SECURITY = "security";
+  private SecurityRequest security;
+
+  public CreateGCPEnvironmentRequest() {
   }
 
   public CreateGCPEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -210,6 +212,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -235,6 +238,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest region(String region) {
+    
     this.region = region;
     return this;
   }
@@ -260,6 +264,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest publicKey(String publicKey) {
+    
     this.publicKey = publicKey;
     return this;
   }
@@ -285,6 +290,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest usePublicIp(Boolean usePublicIp) {
+    
     this.usePublicIp = usePublicIp;
     return this;
   }
@@ -310,6 +316,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest existingNetworkParams(ExistingGCPNetworkRequest existingNetworkParams) {
+    
     this.existingNetworkParams = existingNetworkParams;
     return this;
   }
@@ -335,6 +342,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest securityAccess(GcpSecurityAccessRequest securityAccess) {
+    
     this.securityAccess = securityAccess;
     return this;
   }
@@ -360,6 +368,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest logStorage(GcpLogStorageRequest logStorage) {
+    
     this.logStorage = logStorage;
     return this;
   }
@@ -385,6 +394,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -410,6 +420,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest enableTunnel(Boolean enableTunnel) {
+    
     this.enableTunnel = enableTunnel;
     return this;
   }
@@ -435,6 +446,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest workloadAnalytics(Boolean workloadAnalytics) {
+    
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -460,6 +472,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+    
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -485,6 +498,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest tunnelType(TunnelType tunnelType) {
+    
     this.tunnelType = tunnelType;
     return this;
   }
@@ -510,6 +524,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest ccmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+    
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
@@ -535,6 +550,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+    
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -560,6 +576,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest freeIpa(GCPFreeIpaCreationRequest freeIpa) {
+    
     this.freeIpa = freeIpa;
     return this;
   }
@@ -585,6 +602,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+    
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -610,6 +628,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+    
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -643,6 +662,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest image(FreeIpaImageRequest image) {
+    
     this.image = image;
     return this;
   }
@@ -668,6 +688,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest tags(List<GcpTagRequest> tags) {
+    
     this.tags = tags;
     return this;
   }
@@ -701,6 +722,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest proxyConfigName(String proxyConfigName) {
+    
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -726,6 +748,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest idBrokerMappingSource(String idBrokerMappingSource) {
+    
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
@@ -751,6 +774,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest encryptionKey(String encryptionKey) {
+    
     this.encryptionKey = encryptionKey;
     return this;
   }
@@ -776,6 +800,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest availabilityZones(List<String> availabilityZones) {
+    
     this.availabilityZones = availabilityZones;
     return this;
   }
@@ -809,6 +834,7 @@ public class CreateGCPEnvironmentRequest {
 
 
   public CreateGCPEnvironmentRequest customDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+    
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
@@ -833,9 +859,31 @@ public class CreateGCPEnvironmentRequest {
   }
 
 
-  /**
-   * Return true if this CreateGCPEnvironmentRequest object is equal to o.
-   */
+  public CreateGCPEnvironmentRequest security(SecurityRequest security) {
+    
+    this.security = security;
+    return this;
+  }
+
+   /**
+   * Get security
+   * @return security
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public SecurityRequest getSecurity() {
+    return security;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSecurity(SecurityRequest security) {
+    this.security = security;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -869,12 +917,13 @@ public class CreateGCPEnvironmentRequest {
         Objects.equals(this.idBrokerMappingSource, createGCPEnvironmentRequest.idBrokerMappingSource) &&
         Objects.equals(this.encryptionKey, createGCPEnvironmentRequest.encryptionKey) &&
         Objects.equals(this.availabilityZones, createGCPEnvironmentRequest.availabilityZones) &&
-        Objects.equals(this.customDockerRegistry, createGCPEnvironmentRequest.customDockerRegistry);
+        Objects.equals(this.customDockerRegistry, createGCPEnvironmentRequest.customDockerRegistry) &&
+        Objects.equals(this.security, createGCPEnvironmentRequest.security);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, publicKey, usePublicIp, existingNetworkParams, securityAccess, logStorage, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, image, tags, proxyConfigName, idBrokerMappingSource, encryptionKey, availabilityZones, customDockerRegistry);
+    return Objects.hash(environmentName, credentialName, region, publicKey, usePublicIp, existingNetworkParams, securityAccess, logStorage, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, image, tags, proxyConfigName, idBrokerMappingSource, encryptionKey, availabilityZones, customDockerRegistry, security);
   }
 
   @Override
@@ -906,6 +955,7 @@ public class CreateGCPEnvironmentRequest {
     sb.append("    encryptionKey: ").append(toIndentedString(encryptionKey)).append("\n");
     sb.append("    availabilityZones: ").append(toIndentedString(availabilityZones)).append("\n");
     sb.append("    customDockerRegistry: ").append(toIndentedString(customDockerRegistry)).append("\n");
+    sb.append("    security: ").append(toIndentedString(security)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -921,177 +971,5 @@ public class CreateGCPEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `region` to the URL query string
-    if (getRegion() != null) {
-      joiner.add(String.format("%sregion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRegion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `publicKey` to the URL query string
-    if (getPublicKey() != null) {
-      joiner.add(String.format("%spublicKey%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPublicKey()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `usePublicIp` to the URL query string
-    if (getUsePublicIp() != null) {
-      joiner.add(String.format("%susePublicIp%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUsePublicIp()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `existingNetworkParams` to the URL query string
-    if (getExistingNetworkParams() != null) {
-      joiner.add(getExistingNetworkParams().toUrlQueryString(prefix + "existingNetworkParams" + suffix));
-    }
-
-    // add `securityAccess` to the URL query string
-    if (getSecurityAccess() != null) {
-      joiner.add(getSecurityAccess().toUrlQueryString(prefix + "securityAccess" + suffix));
-    }
-
-    // add `logStorage` to the URL query string
-    if (getLogStorage() != null) {
-      joiner.add(getLogStorage().toUrlQueryString(prefix + "logStorage" + suffix));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableTunnel` to the URL query string
-    if (getEnableTunnel() != null) {
-      joiner.add(String.format("%senableTunnel%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableTunnel()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `workloadAnalytics` to the URL query string
-    if (getWorkloadAnalytics() != null) {
-      joiner.add(String.format("%sworkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `reportDeploymentLogs` to the URL query string
-    if (getReportDeploymentLogs() != null) {
-      joiner.add(String.format("%sreportDeploymentLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getReportDeploymentLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tunnelType` to the URL query string
-    if (getTunnelType() != null) {
-      joiner.add(String.format("%stunnelType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTunnelType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `ccmV2TlsType` to the URL query string
-    if (getCcmV2TlsType() != null) {
-      joiner.add(String.format("%sccmV2TlsType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCcmV2TlsType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudStorageLogging` to the URL query string
-    if (getCloudStorageLogging() != null) {
-      joiner.add(String.format("%scloudStorageLogging%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudStorageLogging()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `freeIpa` to the URL query string
-    if (getFreeIpa() != null) {
-      joiner.add(getFreeIpa().toUrlQueryString(prefix + "freeIpa" + suffix));
-    }
-
-    // add `endpointAccessGatewayScheme` to the URL query string
-    if (getEndpointAccessGatewayScheme() != null) {
-      joiner.add(String.format("%sendpointAccessGatewayScheme%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndpointAccessGatewayScheme()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewaySubnetIds` to the URL query string
-    if (getEndpointAccessGatewaySubnetIds() != null) {
-      for (int i = 0; i < getEndpointAccessGatewaySubnetIds().size(); i++) {
-        joiner.add(String.format("%sendpointAccessGatewaySubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getEndpointAccessGatewaySubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `image` to the URL query string
-    if (getImage() != null) {
-      joiner.add(getImage().toUrlQueryString(prefix + "image" + suffix));
-    }
-
-    // add `tags` to the URL query string
-    if (getTags() != null) {
-      for (int i = 0; i < getTags().size(); i++) {
-        if (getTags().get(i) != null) {
-          joiner.add(getTags().get(i).toUrlQueryString(String.format("%stags%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `proxyConfigName` to the URL query string
-    if (getProxyConfigName() != null) {
-      joiner.add(String.format("%sproxyConfigName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProxyConfigName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `idBrokerMappingSource` to the URL query string
-    if (getIdBrokerMappingSource() != null) {
-      joiner.add(String.format("%sidBrokerMappingSource%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIdBrokerMappingSource()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionKey` to the URL query string
-    if (getEncryptionKey() != null) {
-      joiner.add(String.format("%sencryptionKey%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionKey()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `availabilityZones` to the URL query string
-    if (getAvailabilityZones() != null) {
-      for (int i = 0; i < getAvailabilityZones().size(); i++) {
-        joiner.add(String.format("%savailabilityZones%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getAvailabilityZones().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `customDockerRegistry` to the URL query string
-    if (getCustomDockerRegistry() != null) {
-      joiner.add(getCustomDockerRegistry().toUrlQueryString(prefix + "customDockerRegistry" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

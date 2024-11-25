@@ -15,7 +15,6 @@
             "instanceStatus": "installation:failed",
             "instanceUrl": "http://ml-29c86d80-133.apps.zhe-rhl9-3.vpc.cloudera.com",
             "environmentCrn": "crn:altus:environments:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
-            "namespace": "",
             "crn": "crn:cdp:ml:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:workspace:cb596fc0-7a5c-422a-8576-c05ec72b33e5"
           }
         ]
@@ -214,7 +213,8 @@
             "zookeeper_tls_enabled": "true"
           }
         }
-      }
+      },
+      "knoxGatewayUrl": "https://knox-testcloud-1.test-hybrid.root.comops.site:7183"
     },
     "cdpRuntimeVersion": "7.1.9-1.cdh7.1.9.p1.53348907",
     "clouderaManagerVersion": "7.13.0",

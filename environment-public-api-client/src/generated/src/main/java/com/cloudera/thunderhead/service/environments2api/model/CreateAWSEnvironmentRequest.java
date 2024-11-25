@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AWSComputeClusterConfigurationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AWSFreeIpaCreationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AuthenticationRequest;
@@ -27,6 +23,7 @@ import com.cloudera.thunderhead.service.environments2api.model.CcmV2TlsType;
 import com.cloudera.thunderhead.service.environments2api.model.CustomDockerRegistryRequest;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaImageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.SecurityAccessRequest;
+import com.cloudera.thunderhead.service.environments2api.model.SecurityRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TagRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TunnelType;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -41,7 +38,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a create AWS environment request.
@@ -69,14 +66,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateAWSEnvironmentRequest.JSON_PROPERTY_CCM_V2_TLS_TYPE,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_CLOUD_STORAGE_LOGGING,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_FREE_IPA,
-  CreateAWSEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_VERSION,
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_IMAGE,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_TAGS,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_PROXY_CONFIG_NAME,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_KEY_ARN,
   CreateAWSEnvironmentRequest.JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE,
-  CreateAWSEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
+  CreateAWSEnvironmentRequest.JSON_PROPERTY_SECURITY
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class CreateAWSEnvironmentRequest {
@@ -181,8 +179,8 @@ public class CreateAWSEnvironmentRequest {
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
   private AWSFreeIpaCreationRequest freeIpa;
 
-  public static final String JSON_PROPERTY_ENVIRONMENT_VERSION = "environmentVersion";
-  private String environmentVersion;
+  public static final String JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER = "enableComputeCluster";
+  private Boolean enableComputeCluster;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
   private AWSComputeClusterConfigurationRequest computeClusterConfiguration;
@@ -205,10 +203,14 @@ public class CreateAWSEnvironmentRequest {
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
   private CustomDockerRegistryRequest customDockerRegistry;
 
-  public CreateAWSEnvironmentRequest() { 
+  public static final String JSON_PROPERTY_SECURITY = "security";
+  private SecurityRequest security;
+
+  public CreateAWSEnvironmentRequest() {
   }
 
   public CreateAWSEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -234,6 +236,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -259,6 +262,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest region(String region) {
+    
     this.region = region;
     return this;
   }
@@ -284,6 +288,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest securityAccess(SecurityAccessRequest securityAccess) {
+    
     this.securityAccess = securityAccess;
     return this;
   }
@@ -309,6 +314,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest authentication(AuthenticationRequest authentication) {
+    
     this.authentication = authentication;
     return this;
   }
@@ -334,6 +340,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest logStorage(AwsLogStorageRequest logStorage) {
+    
     this.logStorage = logStorage;
     return this;
   }
@@ -359,6 +366,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest networkCidr(String networkCidr) {
+    
     this.networkCidr = networkCidr;
     return this;
   }
@@ -384,6 +392,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest vpcId(String vpcId) {
+    
     this.vpcId = vpcId;
     return this;
   }
@@ -409,6 +418,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest subnetIds(Set<String> subnetIds) {
+    
     this.subnetIds = subnetIds;
     return this;
   }
@@ -443,6 +453,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest createPrivateSubnets(Boolean createPrivateSubnets) {
+    
     this.createPrivateSubnets = createPrivateSubnets;
     return this;
   }
@@ -468,6 +479,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest createServiceEndpoints(Boolean createServiceEndpoints) {
+    
     this.createServiceEndpoints = createServiceEndpoints;
     return this;
   }
@@ -493,6 +505,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+    
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -518,6 +531,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+    
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -551,12 +565,13 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest s3GuardTableName(String s3GuardTableName) {
+    
     this.s3GuardTableName = s3GuardTableName;
     return this;
   }
 
    /**
-   * The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+   * Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
    * @return s3GuardTableName
   **/
   @javax.annotation.Nullable
@@ -576,6 +591,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -601,6 +617,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest enableTunnel(Boolean enableTunnel) {
+    
     this.enableTunnel = enableTunnel;
     return this;
   }
@@ -626,6 +643,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest workloadAnalytics(Boolean workloadAnalytics) {
+    
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -651,6 +669,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+    
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -676,6 +695,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest tunnelType(TunnelType tunnelType) {
+    
     this.tunnelType = tunnelType;
     return this;
   }
@@ -701,6 +721,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest ccmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+    
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
@@ -726,6 +747,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+    
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -751,6 +773,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest freeIpa(AWSFreeIpaCreationRequest freeIpa) {
+    
     this.freeIpa = freeIpa;
     return this;
   }
@@ -775,32 +798,34 @@ public class CreateAWSEnvironmentRequest {
   }
 
 
-  public CreateAWSEnvironmentRequest environmentVersion(String environmentVersion) {
-    this.environmentVersion = environmentVersion;
+  public CreateAWSEnvironmentRequest enableComputeCluster(Boolean enableComputeCluster) {
+    
+    this.enableComputeCluster = enableComputeCluster;
     return this;
   }
 
    /**
-   * The environment version can be defined in this parameter. Valid values are v1,v2. Default is v1 at the moment
-   * @return environmentVersion
+   * Enable compute clusters for environment
+   * @return enableComputeCluster
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_VERSION)
+  @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getEnvironmentVersion() {
-    return environmentVersion;
+  public Boolean getEnableComputeCluster() {
+    return enableComputeCluster;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_VERSION)
+  @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentVersion(String environmentVersion) {
-    this.environmentVersion = environmentVersion;
+  public void setEnableComputeCluster(Boolean enableComputeCluster) {
+    this.enableComputeCluster = enableComputeCluster;
   }
 
 
   public CreateAWSEnvironmentRequest computeClusterConfiguration(AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
+    
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
@@ -826,6 +851,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest image(FreeIpaImageRequest image) {
+    
     this.image = image;
     return this;
   }
@@ -851,6 +877,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest tags(List<TagRequest> tags) {
+    
     this.tags = tags;
     return this;
   }
@@ -884,6 +911,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest proxyConfigName(String proxyConfigName) {
+    
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -909,6 +937,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest encryptionKeyArn(String encryptionKeyArn) {
+    
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
@@ -934,6 +963,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest idBrokerMappingSource(String idBrokerMappingSource) {
+    
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
@@ -959,6 +989,7 @@ public class CreateAWSEnvironmentRequest {
 
 
   public CreateAWSEnvironmentRequest customDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+    
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
@@ -983,9 +1014,31 @@ public class CreateAWSEnvironmentRequest {
   }
 
 
-  /**
-   * Return true if this CreateAWSEnvironmentRequest object is equal to o.
-   */
+  public CreateAWSEnvironmentRequest security(SecurityRequest security) {
+    
+    this.security = security;
+    return this;
+  }
+
+   /**
+   * Get security
+   * @return security
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public SecurityRequest getSecurity() {
+    return security;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSecurity(SecurityRequest security) {
+    this.security = security;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -1017,19 +1070,20 @@ public class CreateAWSEnvironmentRequest {
         Objects.equals(this.ccmV2TlsType, createAWSEnvironmentRequest.ccmV2TlsType) &&
         Objects.equals(this.cloudStorageLogging, createAWSEnvironmentRequest.cloudStorageLogging) &&
         Objects.equals(this.freeIpa, createAWSEnvironmentRequest.freeIpa) &&
-        Objects.equals(this.environmentVersion, createAWSEnvironmentRequest.environmentVersion) &&
+        Objects.equals(this.enableComputeCluster, createAWSEnvironmentRequest.enableComputeCluster) &&
         Objects.equals(this.computeClusterConfiguration, createAWSEnvironmentRequest.computeClusterConfiguration) &&
         Objects.equals(this.image, createAWSEnvironmentRequest.image) &&
         Objects.equals(this.tags, createAWSEnvironmentRequest.tags) &&
         Objects.equals(this.proxyConfigName, createAWSEnvironmentRequest.proxyConfigName) &&
         Objects.equals(this.encryptionKeyArn, createAWSEnvironmentRequest.encryptionKeyArn) &&
         Objects.equals(this.idBrokerMappingSource, createAWSEnvironmentRequest.idBrokerMappingSource) &&
-        Objects.equals(this.customDockerRegistry, createAWSEnvironmentRequest.customDockerRegistry);
+        Objects.equals(this.customDockerRegistry, createAWSEnvironmentRequest.customDockerRegistry) &&
+        Objects.equals(this.security, createAWSEnvironmentRequest.security);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, networkCidr, vpcId, subnetIds, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, environmentVersion, computeClusterConfiguration, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry);
+    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, networkCidr, vpcId, subnetIds, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, enableComputeCluster, computeClusterConfiguration, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry, security);
   }
 
   @Override
@@ -1058,7 +1112,7 @@ public class CreateAWSEnvironmentRequest {
     sb.append("    ccmV2TlsType: ").append(toIndentedString(ccmV2TlsType)).append("\n");
     sb.append("    cloudStorageLogging: ").append(toIndentedString(cloudStorageLogging)).append("\n");
     sb.append("    freeIpa: ").append(toIndentedString(freeIpa)).append("\n");
-    sb.append("    environmentVersion: ").append(toIndentedString(environmentVersion)).append("\n");
+    sb.append("    enableComputeCluster: ").append(toIndentedString(enableComputeCluster)).append("\n");
     sb.append("    computeClusterConfiguration: ").append(toIndentedString(computeClusterConfiguration)).append("\n");
     sb.append("    image: ").append(toIndentedString(image)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
@@ -1066,6 +1120,7 @@ public class CreateAWSEnvironmentRequest {
     sb.append("    encryptionKeyArn: ").append(toIndentedString(encryptionKeyArn)).append("\n");
     sb.append("    idBrokerMappingSource: ").append(toIndentedString(idBrokerMappingSource)).append("\n");
     sb.append("    customDockerRegistry: ").append(toIndentedString(customDockerRegistry)).append("\n");
+    sb.append("    security: ").append(toIndentedString(security)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -1081,204 +1136,5 @@ public class CreateAWSEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `region` to the URL query string
-    if (getRegion() != null) {
-      joiner.add(String.format("%sregion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRegion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `securityAccess` to the URL query string
-    if (getSecurityAccess() != null) {
-      joiner.add(getSecurityAccess().toUrlQueryString(prefix + "securityAccess" + suffix));
-    }
-
-    // add `authentication` to the URL query string
-    if (getAuthentication() != null) {
-      joiner.add(getAuthentication().toUrlQueryString(prefix + "authentication" + suffix));
-    }
-
-    // add `logStorage` to the URL query string
-    if (getLogStorage() != null) {
-      joiner.add(getLogStorage().toUrlQueryString(prefix + "logStorage" + suffix));
-    }
-
-    // add `networkCidr` to the URL query string
-    if (getNetworkCidr() != null) {
-      joiner.add(String.format("%snetworkCidr%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNetworkCidr()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `vpcId` to the URL query string
-    if (getVpcId() != null) {
-      joiner.add(String.format("%svpcId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getVpcId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `subnetIds` to the URL query string
-    if (getSubnetIds() != null) {
-      int i = 0;
-      for (String _item : getSubnetIds()) {
-        joiner.add(String.format("%ssubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `createPrivateSubnets` to the URL query string
-    if (getCreatePrivateSubnets() != null) {
-      joiner.add(String.format("%screatePrivateSubnets%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreatePrivateSubnets()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `createServiceEndpoints` to the URL query string
-    if (getCreateServiceEndpoints() != null) {
-      joiner.add(String.format("%screateServiceEndpoints%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreateServiceEndpoints()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewayScheme` to the URL query string
-    if (getEndpointAccessGatewayScheme() != null) {
-      joiner.add(String.format("%sendpointAccessGatewayScheme%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndpointAccessGatewayScheme()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewaySubnetIds` to the URL query string
-    if (getEndpointAccessGatewaySubnetIds() != null) {
-      for (int i = 0; i < getEndpointAccessGatewaySubnetIds().size(); i++) {
-        joiner.add(String.format("%sendpointAccessGatewaySubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getEndpointAccessGatewaySubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `s3GuardTableName` to the URL query string
-    if (getS3GuardTableName() != null) {
-      joiner.add(String.format("%ss3GuardTableName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getS3GuardTableName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableTunnel` to the URL query string
-    if (getEnableTunnel() != null) {
-      joiner.add(String.format("%senableTunnel%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableTunnel()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `workloadAnalytics` to the URL query string
-    if (getWorkloadAnalytics() != null) {
-      joiner.add(String.format("%sworkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `reportDeploymentLogs` to the URL query string
-    if (getReportDeploymentLogs() != null) {
-      joiner.add(String.format("%sreportDeploymentLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getReportDeploymentLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tunnelType` to the URL query string
-    if (getTunnelType() != null) {
-      joiner.add(String.format("%stunnelType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTunnelType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `ccmV2TlsType` to the URL query string
-    if (getCcmV2TlsType() != null) {
-      joiner.add(String.format("%sccmV2TlsType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCcmV2TlsType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudStorageLogging` to the URL query string
-    if (getCloudStorageLogging() != null) {
-      joiner.add(String.format("%scloudStorageLogging%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudStorageLogging()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `freeIpa` to the URL query string
-    if (getFreeIpa() != null) {
-      joiner.add(getFreeIpa().toUrlQueryString(prefix + "freeIpa" + suffix));
-    }
-
-    // add `environmentVersion` to the URL query string
-    if (getEnvironmentVersion() != null) {
-      joiner.add(String.format("%senvironmentVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `computeClusterConfiguration` to the URL query string
-    if (getComputeClusterConfiguration() != null) {
-      joiner.add(getComputeClusterConfiguration().toUrlQueryString(prefix + "computeClusterConfiguration" + suffix));
-    }
-
-    // add `image` to the URL query string
-    if (getImage() != null) {
-      joiner.add(getImage().toUrlQueryString(prefix + "image" + suffix));
-    }
-
-    // add `tags` to the URL query string
-    if (getTags() != null) {
-      for (int i = 0; i < getTags().size(); i++) {
-        if (getTags().get(i) != null) {
-          joiner.add(getTags().get(i).toUrlQueryString(String.format("%stags%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `proxyConfigName` to the URL query string
-    if (getProxyConfigName() != null) {
-      joiner.add(String.format("%sproxyConfigName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProxyConfigName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionKeyArn` to the URL query string
-    if (getEncryptionKeyArn() != null) {
-      joiner.add(String.format("%sencryptionKeyArn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionKeyArn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `idBrokerMappingSource` to the URL query string
-    if (getIdBrokerMappingSource() != null) {
-      joiner.add(String.format("%sidBrokerMappingSource%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIdBrokerMappingSource()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `customDockerRegistry` to the URL query string
-    if (getCustomDockerRegistry() != null) {
-      joiner.add(getCustomDockerRegistry().toUrlQueryString(prefix + "customDockerRegistry" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

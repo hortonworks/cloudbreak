@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.SecretTypeResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response for listing possible secret values for Freeipa.
@@ -42,10 +38,11 @@ public class ListFreeipaSecretTypesResponse {
   public static final String JSON_PROPERTY_FREEIPA_SECRET_TYPES = "freeipaSecretTypes";
   private List<SecretTypeResponse> freeipaSecretTypes = new ArrayList<>();
 
-  public ListFreeipaSecretTypesResponse() { 
+  public ListFreeipaSecretTypesResponse() {
   }
 
   public ListFreeipaSecretTypesResponse freeipaSecretTypes(List<SecretTypeResponse> freeipaSecretTypes) {
+    
     this.freeipaSecretTypes = freeipaSecretTypes;
     return this;
   }
@@ -77,10 +74,6 @@ public class ListFreeipaSecretTypesResponse {
     this.freeipaSecretTypes = freeipaSecretTypes;
   }
 
-
-  /**
-   * Return true if this ListFreeipaSecretTypesResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -118,49 +111,5 @@ public class ListFreeipaSecretTypesResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `freeipaSecretTypes` to the URL query string
-    if (getFreeipaSecretTypes() != null) {
-      for (int i = 0; i < getFreeipaSecretTypes().size(); i++) {
-        if (getFreeipaSecretTypes().get(i) != null) {
-          joiner.add(getFreeipaSecretTypes().get(i).toUrlQueryString(String.format("%sfreeipaSecretTypes%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

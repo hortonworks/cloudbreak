@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AttachedVolume;
 import com.cloudera.thunderhead.service.environments2api.model.AwsFreeIpaInstanceTemplateParams;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -30,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Instance template that specifies the core information for the instances.
@@ -51,10 +47,11 @@ public class InstanceTemplate {
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
   private String instanceType;
 
-  public InstanceTemplate() { 
+  public InstanceTemplate() {
   }
 
   public InstanceTemplate attachedVolumes(List<AttachedVolume> attachedVolumes) {
+    
     this.attachedVolumes = attachedVolumes;
     return this;
   }
@@ -88,6 +85,7 @@ public class InstanceTemplate {
 
 
   public InstanceTemplate awsProperties(AwsFreeIpaInstanceTemplateParams awsProperties) {
+    
     this.awsProperties = awsProperties;
     return this;
   }
@@ -113,6 +111,7 @@ public class InstanceTemplate {
 
 
   public InstanceTemplate instanceType(String instanceType) {
+    
     this.instanceType = instanceType;
     return this;
   }
@@ -136,10 +135,6 @@ public class InstanceTemplate {
     this.instanceType = instanceType;
   }
 
-
-  /**
-   * Return true if this InstanceTemplate object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -181,59 +176,5 @@ public class InstanceTemplate {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `attachedVolumes` to the URL query string
-    if (getAttachedVolumes() != null) {
-      for (int i = 0; i < getAttachedVolumes().size(); i++) {
-        if (getAttachedVolumes().get(i) != null) {
-          joiner.add(getAttachedVolumes().get(i).toUrlQueryString(String.format("%sattachedVolumes%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `awsProperties` to the URL query string
-    if (getAwsProperties() != null) {
-      joiner.add(getAwsProperties().toUrlQueryString(prefix + "awsProperties" + suffix));
-    }
-
-    // add `instanceType` to the URL query string
-    if (getInstanceType() != null) {
-      joiner.add(String.format("%sinstanceType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

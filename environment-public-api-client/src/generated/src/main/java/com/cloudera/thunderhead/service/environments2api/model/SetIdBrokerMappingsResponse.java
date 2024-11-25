@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.IdBrokerMapping;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for setting ID Broker mappings for an environment.
@@ -62,10 +58,11 @@ public class SetIdBrokerMappingsResponse {
   public static final String JSON_PROPERTY_MAPPINGS = "mappings";
   private List<IdBrokerMapping> mappings = new ArrayList<>();
 
-  public SetIdBrokerMappingsResponse() { 
+  public SetIdBrokerMappingsResponse() {
   }
 
   public SetIdBrokerMappingsResponse mappingsVersion(Long mappingsVersion) {
+    
     this.mappingsVersion = mappingsVersion;
     return this;
   }
@@ -91,6 +88,7 @@ public class SetIdBrokerMappingsResponse {
 
 
   public SetIdBrokerMappingsResponse dataAccessRole(String dataAccessRole) {
+    
     this.dataAccessRole = dataAccessRole;
     return this;
   }
@@ -116,6 +114,7 @@ public class SetIdBrokerMappingsResponse {
 
 
   public SetIdBrokerMappingsResponse rangerAuditRole(String rangerAuditRole) {
+    
     this.rangerAuditRole = rangerAuditRole;
     return this;
   }
@@ -141,6 +140,7 @@ public class SetIdBrokerMappingsResponse {
 
 
   public SetIdBrokerMappingsResponse rangerCloudAccessAuthorizerRole(String rangerCloudAccessAuthorizerRole) {
+    
     this.rangerCloudAccessAuthorizerRole = rangerCloudAccessAuthorizerRole;
     return this;
   }
@@ -166,6 +166,7 @@ public class SetIdBrokerMappingsResponse {
 
 
   public SetIdBrokerMappingsResponse baselineRole(String baselineRole) {
+    
     this.baselineRole = baselineRole;
     return this;
   }
@@ -191,6 +192,7 @@ public class SetIdBrokerMappingsResponse {
 
 
   public SetIdBrokerMappingsResponse mappings(List<IdBrokerMapping> mappings) {
+    
     this.mappings = mappings;
     return this;
   }
@@ -222,10 +224,6 @@ public class SetIdBrokerMappingsResponse {
     this.mappings = mappings;
   }
 
-
-  /**
-   * Return true if this SetIdBrokerMappingsResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -273,74 +271,5 @@ public class SetIdBrokerMappingsResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `mappingsVersion` to the URL query string
-    if (getMappingsVersion() != null) {
-      joiner.add(String.format("%smappingsVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getMappingsVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dataAccessRole` to the URL query string
-    if (getDataAccessRole() != null) {
-      joiner.add(String.format("%sdataAccessRole%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDataAccessRole()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `rangerAuditRole` to the URL query string
-    if (getRangerAuditRole() != null) {
-      joiner.add(String.format("%srangerAuditRole%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRangerAuditRole()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `rangerCloudAccessAuthorizerRole` to the URL query string
-    if (getRangerCloudAccessAuthorizerRole() != null) {
-      joiner.add(String.format("%srangerCloudAccessAuthorizerRole%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRangerCloudAccessAuthorizerRole()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `baselineRole` to the URL query string
-    if (getBaselineRole() != null) {
-      joiner.add(String.format("%sbaselineRole%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getBaselineRole()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `mappings` to the URL query string
-    if (getMappings() != null) {
-      for (int i = 0; i < getMappings().size(); i++) {
-        if (getMappings().get(i) != null) {
-          joiner.add(getMappings().get(i).toUrlQueryString(String.format("%smappings%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

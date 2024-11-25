@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Additional configurations needed for app-based authentication.
@@ -35,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   SetAzureAuditCredentialRequestAppBased.JSON_PROPERTY_APPLICATION_ID,
   SetAzureAuditCredentialRequestAppBased.JSON_PROPERTY_SECRET_KEY
 })
+@JsonTypeName("SetAzureAuditCredentialRequest_appBased")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class SetAzureAuditCredentialRequestAppBased {
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
@@ -43,10 +39,11 @@ public class SetAzureAuditCredentialRequestAppBased {
   public static final String JSON_PROPERTY_SECRET_KEY = "secretKey";
   private String secretKey;
 
-  public SetAzureAuditCredentialRequestAppBased() { 
+  public SetAzureAuditCredentialRequestAppBased() {
   }
 
   public SetAzureAuditCredentialRequestAppBased applicationId(String applicationId) {
+    
     this.applicationId = applicationId;
     return this;
   }
@@ -72,6 +69,7 @@ public class SetAzureAuditCredentialRequestAppBased {
 
 
   public SetAzureAuditCredentialRequestAppBased secretKey(String secretKey) {
+    
     this.secretKey = secretKey;
     return this;
   }
@@ -95,10 +93,6 @@ public class SetAzureAuditCredentialRequestAppBased {
     this.secretKey = secretKey;
   }
 
-
-  /**
-   * Return true if this SetAzureAuditCredentialRequest_appBased object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -138,49 +132,5 @@ public class SetAzureAuditCredentialRequestAppBased {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `applicationId` to the URL query string
-    if (getApplicationId() != null) {
-      joiner.add(String.format("%sapplicationId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getApplicationId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `secretKey` to the URL query string
-    if (getSecretKey() != null) {
-      joiner.add(String.format("%ssecretKey%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSecretKey()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for set password request. (deprecated)
@@ -45,10 +41,11 @@ public class SetPasswordRequest {
   public static final String JSON_PROPERTY_ENVIRONMENT_C_R_NS = "environmentCRNs";
   private List<String> environmentCRNs = new ArrayList<>();
 
-  public SetPasswordRequest() { 
+  public SetPasswordRequest() {
   }
 
   public SetPasswordRequest password(String password) {
+    
     this.password = password;
     return this;
   }
@@ -74,6 +71,7 @@ public class SetPasswordRequest {
 
 
   public SetPasswordRequest environmentCRNs(List<String> environmentCRNs) {
+    
     this.environmentCRNs = environmentCRNs;
     return this;
   }
@@ -105,10 +103,6 @@ public class SetPasswordRequest {
     this.environmentCRNs = environmentCRNs;
   }
 
-
-  /**
-   * Return true if this SetPasswordRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -148,53 +142,5 @@ public class SetPasswordRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `password` to the URL query string
-    if (getPassword() != null) {
-      joiner.add(String.format("%spassword%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPassword()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `environmentCRNs` to the URL query string
-    if (getEnvironmentCRNs() != null) {
-      for (int i = 0; i < getEnvironmentCRNs().size(); i++) {
-        joiner.add(String.format("%senvironmentCRNs%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getEnvironmentCRNs().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

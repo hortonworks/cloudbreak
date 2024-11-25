@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Security control configuration for FreeIPA and Datalake deployment.
@@ -47,10 +42,11 @@ public class SecurityAccess {
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_ID = "defaultSecurityGroupId";
   private String defaultSecurityGroupId;
 
-  public SecurityAccess() { 
+  public SecurityAccess() {
   }
 
   public SecurityAccess cidr(String cidr) {
+    
     this.cidr = cidr;
     return this;
   }
@@ -76,6 +72,7 @@ public class SecurityAccess {
 
 
   public SecurityAccess securityGroupIdForKnox(String securityGroupIdForKnox) {
+    
     this.securityGroupIdForKnox = securityGroupIdForKnox;
     return this;
   }
@@ -101,6 +98,7 @@ public class SecurityAccess {
 
 
   public SecurityAccess defaultSecurityGroupId(String defaultSecurityGroupId) {
+    
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
@@ -124,10 +122,6 @@ public class SecurityAccess {
     this.defaultSecurityGroupId = defaultSecurityGroupId;
   }
 
-
-  /**
-   * Return true if this SecurityAccess object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,54 +163,5 @@ public class SecurityAccess {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `cidr` to the URL query string
-    if (getCidr() != null) {
-      joiner.add(String.format("%scidr%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCidr()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `securityGroupIdForKnox` to the URL query string
-    if (getSecurityGroupIdForKnox() != null) {
-      joiner.add(String.format("%ssecurityGroupIdForKnox%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSecurityGroupIdForKnox()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `defaultSecurityGroupId` to the URL query string
-    if (getDefaultSecurityGroupId() != null) {
-      joiner.add(String.format("%sdefaultSecurityGroupId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDefaultSecurityGroupId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

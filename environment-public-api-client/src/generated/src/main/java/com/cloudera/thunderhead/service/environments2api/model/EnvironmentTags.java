@@ -13,22 +13,17 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Environment tags object containing the tag values defined for the environment.
@@ -45,10 +40,11 @@ public class EnvironmentTags {
   public static final String JSON_PROPERTY_DEFAULTS = "defaults";
   private Map<String, String> defaults = new HashMap<>();
 
-  public EnvironmentTags() { 
+  public EnvironmentTags() {
   }
 
   public EnvironmentTags userDefined(Map<String, String> userDefined) {
+    
     this.userDefined = userDefined;
     return this;
   }
@@ -82,6 +78,7 @@ public class EnvironmentTags {
 
 
   public EnvironmentTags defaults(Map<String, String> defaults) {
+    
     this.defaults = defaults;
     return this;
   }
@@ -113,10 +110,6 @@ public class EnvironmentTags {
     this.defaults = defaults;
   }
 
-
-  /**
-   * Return true if this EnvironmentTags object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -156,57 +149,5 @@ public class EnvironmentTags {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `userDefined` to the URL query string
-    if (getUserDefined() != null) {
-      for (String _key : getUserDefined().keySet()) {
-        joiner.add(String.format("%suserDefined%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getUserDefined().get(_key), URLEncoder.encode(String.valueOf(getUserDefined().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `defaults` to the URL query string
-    if (getDefaults() != null) {
-      for (String _key : getDefaults().keySet()) {
-        joiner.add(String.format("%sdefaults%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getDefaults().get(_key), URLEncoder.encode(String.valueOf(getDefaults().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

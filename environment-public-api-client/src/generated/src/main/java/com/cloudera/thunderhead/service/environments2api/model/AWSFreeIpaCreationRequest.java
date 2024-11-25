@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for creating FreeIPA in the environment.
@@ -61,10 +57,11 @@ public class AWSFreeIpaCreationRequest {
   public static final String JSON_PROPERTY_SPOT_MAX_PRICE = "spotMaxPrice";
   private Double spotMaxPrice;
 
-  public AWSFreeIpaCreationRequest() { 
+  public AWSFreeIpaCreationRequest() {
   }
 
   public AWSFreeIpaCreationRequest instanceCountByGroup(Integer instanceCountByGroup) {
+    
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
@@ -90,6 +87,7 @@ public class AWSFreeIpaCreationRequest {
 
 
   public AWSFreeIpaCreationRequest recipes(List<String> recipes) {
+    
     this.recipes = recipes;
     return this;
   }
@@ -123,6 +121,7 @@ public class AWSFreeIpaCreationRequest {
 
 
   public AWSFreeIpaCreationRequest instanceType(String instanceType) {
+    
     this.instanceType = instanceType;
     return this;
   }
@@ -148,6 +147,7 @@ public class AWSFreeIpaCreationRequest {
 
 
   public AWSFreeIpaCreationRequest multiAz(Boolean multiAz) {
+    
     this.multiAz = multiAz;
     return this;
   }
@@ -173,6 +173,7 @@ public class AWSFreeIpaCreationRequest {
 
 
   public AWSFreeIpaCreationRequest spotPercentage(Integer spotPercentage) {
+    
     this.spotPercentage = spotPercentage;
     return this;
   }
@@ -200,6 +201,7 @@ public class AWSFreeIpaCreationRequest {
 
 
   public AWSFreeIpaCreationRequest spotMaxPrice(Double spotMaxPrice) {
+    
     this.spotMaxPrice = spotMaxPrice;
     return this;
   }
@@ -225,10 +227,6 @@ public class AWSFreeIpaCreationRequest {
     this.spotMaxPrice = spotMaxPrice;
   }
 
-
-  /**
-   * Return true if this AWSFreeIpaCreationRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -276,73 +274,5 @@ public class AWSFreeIpaCreationRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `instanceCountByGroup` to the URL query string
-    if (getInstanceCountByGroup() != null) {
-      joiner.add(String.format("%sinstanceCountByGroup%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceCountByGroup()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `recipes` to the URL query string
-    if (getRecipes() != null) {
-      for (int i = 0; i < getRecipes().size(); i++) {
-        joiner.add(String.format("%srecipes%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getRecipes().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `instanceType` to the URL query string
-    if (getInstanceType() != null) {
-      joiner.add(String.format("%sinstanceType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `multiAz` to the URL query string
-    if (getMultiAz() != null) {
-      joiner.add(String.format("%smultiAz%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getMultiAz()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `spotPercentage` to the URL query string
-    if (getSpotPercentage() != null) {
-      joiner.add(String.format("%sspotPercentage%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSpotPercentage()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `spotMaxPrice` to the URL query string
-    if (getSpotMaxPrice() != null) {
-      joiner.add(String.format("%sspotMaxPrice%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSpotMaxPrice()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for updating AWS encryption parameters.
@@ -43,10 +38,11 @@ public class UpdateAwsDiskEncryptionParametersRequest {
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_ARN = "encryptionKeyArn";
   private String encryptionKeyArn;
 
-  public UpdateAwsDiskEncryptionParametersRequest() { 
+  public UpdateAwsDiskEncryptionParametersRequest() {
   }
 
   public UpdateAwsDiskEncryptionParametersRequest environment(String environment) {
+    
     this.environment = environment;
     return this;
   }
@@ -72,6 +68,7 @@ public class UpdateAwsDiskEncryptionParametersRequest {
 
 
   public UpdateAwsDiskEncryptionParametersRequest encryptionKeyArn(String encryptionKeyArn) {
+    
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
@@ -95,10 +92,6 @@ public class UpdateAwsDiskEncryptionParametersRequest {
     this.encryptionKeyArn = encryptionKeyArn;
   }
 
-
-  /**
-   * Return true if this UpdateAwsDiskEncryptionParametersRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -138,49 +131,5 @@ public class UpdateAwsDiskEncryptionParametersRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environment` to the URL query string
-    if (getEnvironment() != null) {
-      joiner.add(String.format("%senvironment%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironment()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionKeyArn` to the URL query string
-    if (getEncryptionKeyArn() != null) {
-      joiner.add(String.format("%sencryptionKeyArn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionKeyArn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

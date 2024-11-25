@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a describe environment request.
@@ -78,10 +73,11 @@ public class DescribeEnvironmentRequest {
   public static final String JSON_PROPERTY_OUTPUT_VIEW = "outputView";
   private OutputViewEnum outputView;
 
-  public DescribeEnvironmentRequest() { 
+  public DescribeEnvironmentRequest() {
   }
 
   public DescribeEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -107,6 +103,7 @@ public class DescribeEnvironmentRequest {
 
 
   public DescribeEnvironmentRequest outputView(OutputViewEnum outputView) {
+    
     this.outputView = outputView;
     return this;
   }
@@ -130,10 +127,6 @@ public class DescribeEnvironmentRequest {
     this.outputView = outputView;
   }
 
-
-  /**
-   * Return true if this DescribeEnvironmentRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -173,49 +166,5 @@ public class DescribeEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `outputView` to the URL query string
-    if (getOutputView() != null) {
-      joiner.add(String.format("%soutputView%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOutputView()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

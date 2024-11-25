@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AzureAuthenticationTypeProperties;
 import com.cloudera.thunderhead.service.environments2api.model.AzureCredentialCertificateProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The credential properties that closely related to those that have been created on Azure.
@@ -57,10 +52,11 @@ public class AzureCredentialProperties {
   public static final String JSON_PROPERTY_CERTIFICATE = "certificate";
   private AzureCredentialCertificateProperties certificate;
 
-  public AzureCredentialProperties() { 
+  public AzureCredentialProperties() {
   }
 
   public AzureCredentialProperties subscriptionId(String subscriptionId) {
+    
     this.subscriptionId = subscriptionId;
     return this;
   }
@@ -86,6 +82,7 @@ public class AzureCredentialProperties {
 
 
   public AzureCredentialProperties tenantId(String tenantId) {
+    
     this.tenantId = tenantId;
     return this;
   }
@@ -111,6 +108,7 @@ public class AzureCredentialProperties {
 
 
   public AzureCredentialProperties appId(String appId) {
+    
     this.appId = appId;
     return this;
   }
@@ -136,6 +134,7 @@ public class AzureCredentialProperties {
 
 
   public AzureCredentialProperties authenticationType(AzureAuthenticationTypeProperties authenticationType) {
+    
     this.authenticationType = authenticationType;
     return this;
   }
@@ -161,6 +160,7 @@ public class AzureCredentialProperties {
 
 
   public AzureCredentialProperties certificate(AzureCredentialCertificateProperties certificate) {
+    
     this.certificate = certificate;
     return this;
   }
@@ -184,10 +184,6 @@ public class AzureCredentialProperties {
     this.certificate = certificate;
   }
 
-
-  /**
-   * Return true if this AzureCredentialProperties object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -233,64 +229,5 @@ public class AzureCredentialProperties {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `subscriptionId` to the URL query string
-    if (getSubscriptionId() != null) {
-      joiner.add(String.format("%ssubscriptionId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSubscriptionId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tenantId` to the URL query string
-    if (getTenantId() != null) {
-      joiner.add(String.format("%stenantId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTenantId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `appId` to the URL query string
-    if (getAppId() != null) {
-      joiner.add(String.format("%sappId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAppId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `authenticationType` to the URL query string
-    if (getAuthenticationType() != null) {
-      joiner.add(String.format("%sauthenticationType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAuthenticationType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `certificate` to the URL query string
-    if (getCertificate() != null) {
-      joiner.add(getCertificate().toUrlQueryString(prefix + "certificate" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

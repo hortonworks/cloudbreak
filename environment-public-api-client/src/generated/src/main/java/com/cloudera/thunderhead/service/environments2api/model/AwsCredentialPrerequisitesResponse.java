@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CredentialGranularPolicyResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for getting AWS credential prerequisites.
@@ -50,10 +46,11 @@ public class AwsCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_POLICIES = "policies";
   private List<CredentialGranularPolicyResponse> policies = new ArrayList<>();
 
-  public AwsCredentialPrerequisitesResponse() { 
+  public AwsCredentialPrerequisitesResponse() {
   }
 
   public AwsCredentialPrerequisitesResponse externalId(String externalId) {
+    
     this.externalId = externalId;
     return this;
   }
@@ -79,6 +76,7 @@ public class AwsCredentialPrerequisitesResponse {
 
 
   public AwsCredentialPrerequisitesResponse policyJson(String policyJson) {
+    
     this.policyJson = policyJson;
     return this;
   }
@@ -104,6 +102,7 @@ public class AwsCredentialPrerequisitesResponse {
 
 
   public AwsCredentialPrerequisitesResponse policies(List<CredentialGranularPolicyResponse> policies) {
+    
     this.policies = policies;
     return this;
   }
@@ -135,10 +134,6 @@ public class AwsCredentialPrerequisitesResponse {
     this.policies = policies;
   }
 
-
-  /**
-   * Return true if this AwsCredentialPrerequisitesResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -180,59 +175,5 @@ public class AwsCredentialPrerequisitesResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `externalId` to the URL query string
-    if (getExternalId() != null) {
-      joiner.add(String.format("%sexternalId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getExternalId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `policyJson` to the URL query string
-    if (getPolicyJson() != null) {
-      joiner.add(String.format("%spolicyJson%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPolicyJson()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `policies` to the URL query string
-    if (getPolicies() != null) {
-      for (int i = 0; i < getPolicies().size(); i++) {
-        if (getPolicies().get(i) != null) {
-          joiner.add(getPolicies().get(i).toUrlQueryString(String.format("%spolicies%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

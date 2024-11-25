@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for creating FreeIPA in the environment.
@@ -36,7 +32,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
   GCPFreeIpaCreationRequest.JSON_PROPERTY_INSTANCE_COUNT_BY_GROUP,
   GCPFreeIpaCreationRequest.JSON_PROPERTY_RECIPES,
-  GCPFreeIpaCreationRequest.JSON_PROPERTY_INSTANCE_TYPE
+  GCPFreeIpaCreationRequest.JSON_PROPERTY_INSTANCE_TYPE,
+  GCPFreeIpaCreationRequest.JSON_PROPERTY_MULTI_AZ
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class GCPFreeIpaCreationRequest {
@@ -49,10 +46,14 @@ public class GCPFreeIpaCreationRequest {
   public static final String JSON_PROPERTY_INSTANCE_TYPE = "instanceType";
   private String instanceType;
 
-  public GCPFreeIpaCreationRequest() { 
+  public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
+  private Boolean multiAz = false;
+
+  public GCPFreeIpaCreationRequest() {
   }
 
   public GCPFreeIpaCreationRequest instanceCountByGroup(Integer instanceCountByGroup) {
+    
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
@@ -78,6 +79,7 @@ public class GCPFreeIpaCreationRequest {
 
 
   public GCPFreeIpaCreationRequest recipes(List<String> recipes) {
+    
     this.recipes = recipes;
     return this;
   }
@@ -111,6 +113,7 @@ public class GCPFreeIpaCreationRequest {
 
 
   public GCPFreeIpaCreationRequest instanceType(String instanceType) {
+    
     this.instanceType = instanceType;
     return this;
   }
@@ -135,9 +138,31 @@ public class GCPFreeIpaCreationRequest {
   }
 
 
-  /**
-   * Return true if this GCPFreeIpaCreationRequest object is equal to o.
-   */
+  public GCPFreeIpaCreationRequest multiAz(Boolean multiAz) {
+    
+    this.multiAz = multiAz;
+    return this;
+  }
+
+   /**
+   * Flag that enables deployment of the FreeIPA in a multi-availability zone.
+   * @return multiAz
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_MULTI_AZ)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getMultiAz() {
+    return multiAz;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_MULTI_AZ)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setMultiAz(Boolean multiAz) {
+    this.multiAz = multiAz;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -149,12 +174,13 @@ public class GCPFreeIpaCreationRequest {
     GCPFreeIpaCreationRequest gcPFreeIpaCreationRequest = (GCPFreeIpaCreationRequest) o;
     return Objects.equals(this.instanceCountByGroup, gcPFreeIpaCreationRequest.instanceCountByGroup) &&
         Objects.equals(this.recipes, gcPFreeIpaCreationRequest.recipes) &&
-        Objects.equals(this.instanceType, gcPFreeIpaCreationRequest.instanceType);
+        Objects.equals(this.instanceType, gcPFreeIpaCreationRequest.instanceType) &&
+        Objects.equals(this.multiAz, gcPFreeIpaCreationRequest.multiAz);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(instanceCountByGroup, recipes, instanceType);
+    return Objects.hash(instanceCountByGroup, recipes, instanceType, multiAz);
   }
 
   @Override
@@ -164,6 +190,7 @@ public class GCPFreeIpaCreationRequest {
     sb.append("    instanceCountByGroup: ").append(toIndentedString(instanceCountByGroup)).append("\n");
     sb.append("    recipes: ").append(toIndentedString(recipes)).append("\n");
     sb.append("    instanceType: ").append(toIndentedString(instanceType)).append("\n");
+    sb.append("    multiAz: ").append(toIndentedString(multiAz)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -179,58 +206,5 @@ public class GCPFreeIpaCreationRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `instanceCountByGroup` to the URL query string
-    if (getInstanceCountByGroup() != null) {
-      joiner.add(String.format("%sinstanceCountByGroup%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceCountByGroup()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `recipes` to the URL query string
-    if (getRecipes() != null) {
-      for (int i = 0; i < getRecipes().size(); i++) {
-        joiner.add(String.format("%srecipes%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getRecipes().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `instanceType` to the URL query string
-    if (getInstanceType() != null) {
-      joiner.add(String.format("%sinstanceType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

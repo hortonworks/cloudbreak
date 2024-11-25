@@ -13,21 +13,17 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
+import com.cloudera.thunderhead.service.environments2api.model.VmEncryptionDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The environment summary.
@@ -42,10 +38,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   EnvironmentSummary.JSON_PROPERTY_DESCRIPTION,
   EnvironmentSummary.JSON_PROPERTY_CREATED,
   EnvironmentSummary.JSON_PROPERTY_PROXY_CONFIG_NAME,
-  EnvironmentSummary.JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION,
+  EnvironmentSummary.JSON_PROPERTY_VM_ENCRYPTION_DETAILS,
   EnvironmentSummary.JSON_PROPERTY_CDP_RUNTIME_VERSION,
   EnvironmentSummary.JSON_PROPERTY_CLOUDERA_MANAGER_VERSION,
-  EnvironmentSummary.JSON_PROPERTY_CDP_PVC_VERSION
+  EnvironmentSummary.JSON_PROPERTY_CDP_PVC_VERSION,
+  EnvironmentSummary.JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class EnvironmentSummary {
@@ -76,8 +73,8 @@ public class EnvironmentSummary {
   public static final String JSON_PROPERTY_PROXY_CONFIG_NAME = "proxyConfigName";
   private String proxyConfigName;
 
-  public static final String JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION = "enableSecretEncryption";
-  private Boolean enableSecretEncryption;
+  public static final String JSON_PROPERTY_VM_ENCRYPTION_DETAILS = "vmEncryptionDetails";
+  private VmEncryptionDetails vmEncryptionDetails;
 
   public static final String JSON_PROPERTY_CDP_RUNTIME_VERSION = "cdpRuntimeVersion";
   private String cdpRuntimeVersion;
@@ -88,10 +85,14 @@ public class EnvironmentSummary {
   public static final String JSON_PROPERTY_CDP_PVC_VERSION = "cdpPvcVersion";
   private String cdpPvcVersion;
 
-  public EnvironmentSummary() { 
+  public static final String JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED = "computeClusterEnabled";
+  private Boolean computeClusterEnabled;
+
+  public EnvironmentSummary() {
   }
 
   public EnvironmentSummary environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -117,6 +118,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary crn(String crn) {
+    
     this.crn = crn;
     return this;
   }
@@ -142,6 +144,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary status(String status) {
+    
     this.status = status;
     return this;
   }
@@ -167,6 +170,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary region(String region) {
+    
     this.region = region;
     return this;
   }
@@ -192,6 +196,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary cloudPlatform(String cloudPlatform) {
+    
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -217,6 +222,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -242,6 +248,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -267,6 +274,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary created(OffsetDateTime created) {
+    
     this.created = created;
     return this;
   }
@@ -292,6 +300,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary proxyConfigName(String proxyConfigName) {
+    
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -316,32 +325,34 @@ public class EnvironmentSummary {
   }
 
 
-  public EnvironmentSummary enableSecretEncryption(Boolean enableSecretEncryption) {
-    this.enableSecretEncryption = enableSecretEncryption;
+  public EnvironmentSummary vmEncryptionDetails(VmEncryptionDetails vmEncryptionDetails) {
+    
+    this.vmEncryptionDetails = vmEncryptionDetails;
     return this;
   }
 
    /**
-   * True if the secret encryption feature is enabled for the environment.
-   * @return enableSecretEncryption
+   * Get vmEncryptionDetails
+   * @return vmEncryptionDetails
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
+  @JsonProperty(JSON_PROPERTY_VM_ENCRYPTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Boolean getEnableSecretEncryption() {
-    return enableSecretEncryption;
+  public VmEncryptionDetails getVmEncryptionDetails() {
+    return vmEncryptionDetails;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
+  @JsonProperty(JSON_PROPERTY_VM_ENCRYPTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableSecretEncryption(Boolean enableSecretEncryption) {
-    this.enableSecretEncryption = enableSecretEncryption;
+  public void setVmEncryptionDetails(VmEncryptionDetails vmEncryptionDetails) {
+    this.vmEncryptionDetails = vmEncryptionDetails;
   }
 
 
   public EnvironmentSummary cdpRuntimeVersion(String cdpRuntimeVersion) {
+    
     this.cdpRuntimeVersion = cdpRuntimeVersion;
     return this;
   }
@@ -367,6 +378,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary clouderaManagerVersion(String clouderaManagerVersion) {
+    
     this.clouderaManagerVersion = clouderaManagerVersion;
     return this;
   }
@@ -392,6 +404,7 @@ public class EnvironmentSummary {
 
 
   public EnvironmentSummary cdpPvcVersion(String cdpPvcVersion) {
+    
     this.cdpPvcVersion = cdpPvcVersion;
     return this;
   }
@@ -416,9 +429,31 @@ public class EnvironmentSummary {
   }
 
 
-  /**
-   * Return true if this EnvironmentSummary object is equal to o.
-   */
+  public EnvironmentSummary computeClusterEnabled(Boolean computeClusterEnabled) {
+    
+    this.computeClusterEnabled = computeClusterEnabled;
+    return this;
+  }
+
+   /**
+   * Compute clusters enabled
+   * @return computeClusterEnabled
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getComputeClusterEnabled() {
+    return computeClusterEnabled;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setComputeClusterEnabled(Boolean computeClusterEnabled) {
+    this.computeClusterEnabled = computeClusterEnabled;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -437,15 +472,16 @@ public class EnvironmentSummary {
         Objects.equals(this.description, environmentSummary.description) &&
         Objects.equals(this.created, environmentSummary.created) &&
         Objects.equals(this.proxyConfigName, environmentSummary.proxyConfigName) &&
-        Objects.equals(this.enableSecretEncryption, environmentSummary.enableSecretEncryption) &&
+        Objects.equals(this.vmEncryptionDetails, environmentSummary.vmEncryptionDetails) &&
         Objects.equals(this.cdpRuntimeVersion, environmentSummary.cdpRuntimeVersion) &&
         Objects.equals(this.clouderaManagerVersion, environmentSummary.clouderaManagerVersion) &&
-        Objects.equals(this.cdpPvcVersion, environmentSummary.cdpPvcVersion);
+        Objects.equals(this.cdpPvcVersion, environmentSummary.cdpPvcVersion) &&
+        Objects.equals(this.computeClusterEnabled, environmentSummary.computeClusterEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, crn, status, region, cloudPlatform, credentialName, description, created, proxyConfigName, enableSecretEncryption, cdpRuntimeVersion, clouderaManagerVersion, cdpPvcVersion);
+    return Objects.hash(environmentName, crn, status, region, cloudPlatform, credentialName, description, created, proxyConfigName, vmEncryptionDetails, cdpRuntimeVersion, clouderaManagerVersion, cdpPvcVersion, computeClusterEnabled);
   }
 
   @Override
@@ -461,10 +497,11 @@ public class EnvironmentSummary {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    created: ").append(toIndentedString(created)).append("\n");
     sb.append("    proxyConfigName: ").append(toIndentedString(proxyConfigName)).append("\n");
-    sb.append("    enableSecretEncryption: ").append(toIndentedString(enableSecretEncryption)).append("\n");
+    sb.append("    vmEncryptionDetails: ").append(toIndentedString(vmEncryptionDetails)).append("\n");
     sb.append("    cdpRuntimeVersion: ").append(toIndentedString(cdpRuntimeVersion)).append("\n");
     sb.append("    clouderaManagerVersion: ").append(toIndentedString(clouderaManagerVersion)).append("\n");
     sb.append("    cdpPvcVersion: ").append(toIndentedString(cdpPvcVersion)).append("\n");
+    sb.append("    computeClusterEnabled: ").append(toIndentedString(computeClusterEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -480,104 +517,5 @@ public class EnvironmentSummary {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `crn` to the URL query string
-    if (getCrn() != null) {
-      joiner.add(String.format("%scrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `region` to the URL query string
-    if (getRegion() != null) {
-      joiner.add(String.format("%sregion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRegion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudPlatform` to the URL query string
-    if (getCloudPlatform() != null) {
-      joiner.add(String.format("%scloudPlatform%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudPlatform()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `created` to the URL query string
-    if (getCreated() != null) {
-      joiner.add(String.format("%screated%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreated()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `proxyConfigName` to the URL query string
-    if (getProxyConfigName() != null) {
-      joiner.add(String.format("%sproxyConfigName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProxyConfigName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableSecretEncryption` to the URL query string
-    if (getEnableSecretEncryption() != null) {
-      joiner.add(String.format("%senableSecretEncryption%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableSecretEncryption()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cdpRuntimeVersion` to the URL query string
-    if (getCdpRuntimeVersion() != null) {
-      joiner.add(String.format("%scdpRuntimeVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCdpRuntimeVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `clouderaManagerVersion` to the URL query string
-    if (getClouderaManagerVersion() != null) {
-      joiner.add(String.format("%sclouderaManagerVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getClouderaManagerVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cdpPvcVersion` to the URL query string
-    if (getCdpPvcVersion() != null) {
-      joiner.add(String.format("%scdpPvcVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCdpPvcVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

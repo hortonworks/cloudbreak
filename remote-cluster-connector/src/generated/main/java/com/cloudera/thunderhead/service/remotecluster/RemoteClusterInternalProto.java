@@ -15,6 +15,1934 @@ public final class RemoteClusterInternalProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  public interface GeneratePvcWorkloadAuthTokenRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.GeneratePvcWorkloadAuthTokenRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The account ID of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvcId.
+     */
+    java.lang.String getPvcId();
+    /**
+     * <pre>
+     * The account ID of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvcId.
+     */
+    com.google.protobuf.ByteString
+        getPvcIdBytes();
+
+    /**
+     * <pre>
+     * the workload name for the Workload
+     * </pre>
+     *
+     * <code>string workloadName = 2;</code>
+     * @return The workloadName.
+     */
+    java.lang.String getWorkloadName();
+    /**
+     * <pre>
+     * the workload name for the Workload
+     * </pre>
+     *
+     * <code>string workloadName = 2;</code>
+     * @return The bytes for workloadName.
+     */
+    com.google.protobuf.ByteString
+        getWorkloadNameBytes();
+
+    /**
+     * <pre>
+     * the PvC environment CRN, and valid for workload name DF only.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * the PvC environment CRN, and valid for workload name DF only.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+  }
+  /**
+   * <pre>
+   * Request object for the GeneratePvcWorkloadAuthToken method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.GeneratePvcWorkloadAuthTokenRequest}
+   */
+  public static final class GeneratePvcWorkloadAuthTokenRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.GeneratePvcWorkloadAuthTokenRequest)
+      GeneratePvcWorkloadAuthTokenRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GeneratePvcWorkloadAuthTokenRequest.newBuilder() to construct.
+    private GeneratePvcWorkloadAuthTokenRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GeneratePvcWorkloadAuthTokenRequest() {
+      pvcId_ = "";
+      workloadName_ = "";
+      environmentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GeneratePvcWorkloadAuthTokenRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.Builder.class);
+    }
+
+    public static final int PVCID_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object pvcId_ = "";
+    /**
+     * <pre>
+     * The account ID of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The pvcId.
+     */
+    @java.lang.Override
+    public java.lang.String getPvcId() {
+      java.lang.Object ref = pvcId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvcId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The account ID of the Private Cloud control plane.
+     * </pre>
+     *
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for pvcId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvcIdBytes() {
+      java.lang.Object ref = pvcId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvcId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int WORKLOADNAME_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object workloadName_ = "";
+    /**
+     * <pre>
+     * the workload name for the Workload
+     * </pre>
+     *
+     * <code>string workloadName = 2;</code>
+     * @return The workloadName.
+     */
+    @java.lang.Override
+    public java.lang.String getWorkloadName() {
+      java.lang.Object ref = workloadName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        workloadName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the workload name for the Workload
+     * </pre>
+     *
+     * <code>string workloadName = 2;</code>
+     * @return The bytes for workloadName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getWorkloadNameBytes() {
+      java.lang.Object ref = workloadName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        workloadName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object environmentCrn_ = "";
+    /**
+     * <pre>
+     * the PvC environment CRN, and valid for workload name DF only.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the PvC environment CRN, and valid for workload name DF only.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvcId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workloadName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, workloadName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, environmentCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pvcId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvcId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workloadName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, workloadName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, environmentCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest) obj;
+
+      if (!getPvcId()
+          .equals(other.getPvcId())) return false;
+      if (!getWorkloadName()
+          .equals(other.getWorkloadName())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVCID_FIELD_NUMBER;
+      hash = (53 * hash) + getPvcId().hashCode();
+      hash = (37 * hash) + WORKLOADNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getWorkloadName().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the GeneratePvcWorkloadAuthToken method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.GeneratePvcWorkloadAuthTokenRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.GeneratePvcWorkloadAuthTokenRequest)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        pvcId_ = "";
+        workloadName_ = "";
+        environmentCrn_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pvcId_ = pvcId_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.workloadName_ = workloadName_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.environmentCrn_ = environmentCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest.getDefaultInstance()) return this;
+        if (!other.getPvcId().isEmpty()) {
+          pvcId_ = other.pvcId_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getWorkloadName().isEmpty()) {
+          workloadName_ = other.workloadName_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                pvcId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                workloadName_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                environmentCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object pvcId_ = "";
+      /**
+       * <pre>
+       * The account ID of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The pvcId.
+       */
+      public java.lang.String getPvcId() {
+        java.lang.Object ref = pvcId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvcId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account ID of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for pvcId.
+       */
+      public com.google.protobuf.ByteString
+          getPvcIdBytes() {
+        java.lang.Object ref = pvcId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvcId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account ID of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The pvcId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        pvcId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account ID of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvcId() {
+        pvcId_ = getDefaultInstance().getPvcId();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account ID of the Private Cloud control plane.
+       * </pre>
+       *
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for pvcId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvcIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        pvcId_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object workloadName_ = "";
+      /**
+       * <pre>
+       * the workload name for the Workload
+       * </pre>
+       *
+       * <code>string workloadName = 2;</code>
+       * @return The workloadName.
+       */
+      public java.lang.String getWorkloadName() {
+        java.lang.Object ref = workloadName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          workloadName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the workload name for the Workload
+       * </pre>
+       *
+       * <code>string workloadName = 2;</code>
+       * @return The bytes for workloadName.
+       */
+      public com.google.protobuf.ByteString
+          getWorkloadNameBytes() {
+        java.lang.Object ref = workloadName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          workloadName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the workload name for the Workload
+       * </pre>
+       *
+       * <code>string workloadName = 2;</code>
+       * @param value The workloadName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWorkloadName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        workloadName_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the workload name for the Workload
+       * </pre>
+       *
+       * <code>string workloadName = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearWorkloadName() {
+        workloadName_ = getDefaultInstance().getWorkloadName();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the workload name for the Workload
+       * </pre>
+       *
+       * <code>string workloadName = 2;</code>
+       * @param value The bytes for workloadName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWorkloadNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        workloadName_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * the PvC environment CRN, and valid for workload name DF only.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the PvC environment CRN, and valid for workload name DF only.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the PvC environment CRN, and valid for workload name DF only.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the PvC environment CRN, and valid for workload name DF only.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the PvC environment CRN, and valid for workload name DF only.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        environmentCrn_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.GeneratePvcWorkloadAuthTokenRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.GeneratePvcWorkloadAuthTokenRequest)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GeneratePvcWorkloadAuthTokenRequest>
+        PARSER = new com.google.protobuf.AbstractParser<GeneratePvcWorkloadAuthTokenRequest>() {
+      @java.lang.Override
+      public GeneratePvcWorkloadAuthTokenRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<GeneratePvcWorkloadAuthTokenRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GeneratePvcWorkloadAuthTokenRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface GeneratePvcWorkloadAuthTokenResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:remotecluster.GeneratePvcWorkloadAuthTokenResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * the endpoint URL for the workload which the token was generated.
+     * </pre>
+     *
+     * <code>string endpointUrl = 1;</code>
+     * @return The endpointUrl.
+     */
+    java.lang.String getEndpointUrl();
+    /**
+     * <pre>
+     * the endpoint URL for the workload which the token was generated.
+     * </pre>
+     *
+     * <code>string endpointUrl = 1;</code>
+     * @return The bytes for endpointUrl.
+     */
+    com.google.protobuf.ByteString
+        getEndpointUrlBytes();
+
+    /**
+     * <pre>
+     * The authentication token.
+     * </pre>
+     *
+     * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The token.
+     */
+    java.lang.String getToken();
+    /**
+     * <pre>
+     * The authentication token.
+     * </pre>
+     *
+     * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for token.
+     */
+    com.google.protobuf.ByteString
+        getTokenBytes();
+
+    /**
+     * <pre>
+     * When the token  will expire
+     * </pre>
+     *
+     * <code>string expireAt = 3;</code>
+     * @return The expireAt.
+     */
+    java.lang.String getExpireAt();
+    /**
+     * <pre>
+     * When the token  will expire
+     * </pre>
+     *
+     * <code>string expireAt = 3;</code>
+     * @return The bytes for expireAt.
+     */
+    com.google.protobuf.ByteString
+        getExpireAtBytes();
+  }
+  /**
+   * <pre>
+   * Response object for the GeneratePvcWorkloadAuthToken method.
+   * </pre>
+   *
+   * Protobuf type {@code remotecluster.GeneratePvcWorkloadAuthTokenResponse}
+   */
+  public static final class GeneratePvcWorkloadAuthTokenResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:remotecluster.GeneratePvcWorkloadAuthTokenResponse)
+      GeneratePvcWorkloadAuthTokenResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GeneratePvcWorkloadAuthTokenResponse.newBuilder() to construct.
+    private GeneratePvcWorkloadAuthTokenResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GeneratePvcWorkloadAuthTokenResponse() {
+      endpointUrl_ = "";
+      token_ = "";
+      expireAt_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GeneratePvcWorkloadAuthTokenResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.Builder.class);
+    }
+
+    public static final int ENDPOINTURL_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object endpointUrl_ = "";
+    /**
+     * <pre>
+     * the endpoint URL for the workload which the token was generated.
+     * </pre>
+     *
+     * <code>string endpointUrl = 1;</code>
+     * @return The endpointUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getEndpointUrl() {
+      java.lang.Object ref = endpointUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        endpointUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the endpoint URL for the workload which the token was generated.
+     * </pre>
+     *
+     * <code>string endpointUrl = 1;</code>
+     * @return The bytes for endpointUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEndpointUrlBytes() {
+      java.lang.Object ref = endpointUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        endpointUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TOKEN_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object token_ = "";
+    /**
+     * <pre>
+     * The authentication token.
+     * </pre>
+     *
+     * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The token.
+     */
+    @java.lang.Override
+    public java.lang.String getToken() {
+      java.lang.Object ref = token_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        token_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The authentication token.
+     * </pre>
+     *
+     * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for token.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getTokenBytes() {
+      java.lang.Object ref = token_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        token_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EXPIREAT_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object expireAt_ = "";
+    /**
+     * <pre>
+     * When the token  will expire
+     * </pre>
+     *
+     * <code>string expireAt = 3;</code>
+     * @return The expireAt.
+     */
+    @java.lang.Override
+    public java.lang.String getExpireAt() {
+      java.lang.Object ref = expireAt_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        expireAt_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * When the token  will expire
+     * </pre>
+     *
+     * <code>string expireAt = 3;</code>
+     * @return The bytes for expireAt.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getExpireAtBytes() {
+      java.lang.Object ref = expireAt_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        expireAt_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpointUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, endpointUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(token_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, token_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(expireAt_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, expireAt_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpointUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, endpointUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(token_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, token_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(expireAt_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, expireAt_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse other = (com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse) obj;
+
+      if (!getEndpointUrl()
+          .equals(other.getEndpointUrl())) return false;
+      if (!getToken()
+          .equals(other.getToken())) return false;
+      if (!getExpireAt()
+          .equals(other.getExpireAt())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ENDPOINTURL_FIELD_NUMBER;
+      hash = (53 * hash) + getEndpointUrl().hashCode();
+      hash = (37 * hash) + TOKEN_FIELD_NUMBER;
+      hash = (53 * hash) + getToken().hashCode();
+      hash = (37 * hash) + EXPIREAT_FIELD_NUMBER;
+      hash = (53 * hash) + getExpireAt().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the GeneratePvcWorkloadAuthToken method.
+     * </pre>
+     *
+     * Protobuf type {@code remotecluster.GeneratePvcWorkloadAuthTokenResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:remotecluster.GeneratePvcWorkloadAuthTokenResponse)
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.class, com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        endpointUrl_ = "";
+        token_ = "";
+        expireAt_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse build() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse buildPartial() {
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse result = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.endpointUrl_ = endpointUrl_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.token_ = token_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.expireAt_ = expireAt_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse other) {
+        if (other == com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse.getDefaultInstance()) return this;
+        if (!other.getEndpointUrl().isEmpty()) {
+          endpointUrl_ = other.endpointUrl_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getToken().isEmpty()) {
+          token_ = other.token_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getExpireAt().isEmpty()) {
+          expireAt_ = other.expireAt_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                endpointUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                token_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                expireAt_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object endpointUrl_ = "";
+      /**
+       * <pre>
+       * the endpoint URL for the workload which the token was generated.
+       * </pre>
+       *
+       * <code>string endpointUrl = 1;</code>
+       * @return The endpointUrl.
+       */
+      public java.lang.String getEndpointUrl() {
+        java.lang.Object ref = endpointUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          endpointUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the endpoint URL for the workload which the token was generated.
+       * </pre>
+       *
+       * <code>string endpointUrl = 1;</code>
+       * @return The bytes for endpointUrl.
+       */
+      public com.google.protobuf.ByteString
+          getEndpointUrlBytes() {
+        java.lang.Object ref = endpointUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          endpointUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the endpoint URL for the workload which the token was generated.
+       * </pre>
+       *
+       * <code>string endpointUrl = 1;</code>
+       * @param value The endpointUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEndpointUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        endpointUrl_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the endpoint URL for the workload which the token was generated.
+       * </pre>
+       *
+       * <code>string endpointUrl = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEndpointUrl() {
+        endpointUrl_ = getDefaultInstance().getEndpointUrl();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the endpoint URL for the workload which the token was generated.
+       * </pre>
+       *
+       * <code>string endpointUrl = 1;</code>
+       * @param value The bytes for endpointUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEndpointUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        endpointUrl_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object token_ = "";
+      /**
+       * <pre>
+       * The authentication token.
+       * </pre>
+       *
+       * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The token.
+       */
+      public java.lang.String getToken() {
+        java.lang.Object ref = token_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          token_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The authentication token.
+       * </pre>
+       *
+       * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The bytes for token.
+       */
+      public com.google.protobuf.ByteString
+          getTokenBytes() {
+        java.lang.Object ref = token_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          token_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The authentication token.
+       * </pre>
+       *
+       * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The token to set.
+       * @return This builder for chaining.
+       */
+      public Builder setToken(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        token_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The authentication token.
+       * </pre>
+       *
+       * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearToken() {
+        token_ = getDefaultInstance().getToken();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The authentication token.
+       * </pre>
+       *
+       * <code>string token = 2 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The bytes for token to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTokenBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        token_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object expireAt_ = "";
+      /**
+       * <pre>
+       * When the token  will expire
+       * </pre>
+       *
+       * <code>string expireAt = 3;</code>
+       * @return The expireAt.
+       */
+      public java.lang.String getExpireAt() {
+        java.lang.Object ref = expireAt_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          expireAt_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * When the token  will expire
+       * </pre>
+       *
+       * <code>string expireAt = 3;</code>
+       * @return The bytes for expireAt.
+       */
+      public com.google.protobuf.ByteString
+          getExpireAtBytes() {
+        java.lang.Object ref = expireAt_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          expireAt_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * When the token  will expire
+       * </pre>
+       *
+       * <code>string expireAt = 3;</code>
+       * @param value The expireAt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExpireAt(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        expireAt_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * When the token  will expire
+       * </pre>
+       *
+       * <code>string expireAt = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearExpireAt() {
+        expireAt_ = getDefaultInstance().getExpireAt();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * When the token  will expire
+       * </pre>
+       *
+       * <code>string expireAt = 3;</code>
+       * @param value The bytes for expireAt to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExpireAtBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        expireAt_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:remotecluster.GeneratePvcWorkloadAuthTokenResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:remotecluster.GeneratePvcWorkloadAuthTokenResponse)
+    private static final com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GeneratePvcWorkloadAuthTokenResponse>
+        PARSER = new com.google.protobuf.AbstractParser<GeneratePvcWorkloadAuthTokenResponse>() {
+      @java.lang.Override
+      public GeneratePvcWorkloadAuthTokenResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<GeneratePvcWorkloadAuthTokenResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GeneratePvcWorkloadAuthTokenResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcWorkloadAuthTokenResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ListAllPvcControlPlanesRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:remotecluster.ListAllPvcControlPlanesRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -1798,7 +3726,7 @@ public final class RemoteClusterInternalProto {
      * The account ID of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string pvcId = 1;</code>
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
      * @return The pvcId.
      */
     java.lang.String getPvcId();
@@ -1807,7 +3735,7 @@ public final class RemoteClusterInternalProto {
      * The account ID of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string pvcId = 1;</code>
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
      * @return The bytes for pvcId.
      */
     com.google.protobuf.ByteString
@@ -1861,7 +3789,7 @@ public final class RemoteClusterInternalProto {
      * The account ID of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string pvcId = 1;</code>
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
      * @return The pvcId.
      */
     @java.lang.Override
@@ -1882,7 +3810,7 @@ public final class RemoteClusterInternalProto {
      * The account ID of the Private Cloud control plane.
      * </pre>
      *
-     * <code>string pvcId = 1;</code>
+     * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
      * @return The bytes for pvcId.
      */
     @java.lang.Override
@@ -2236,7 +4164,7 @@ public final class RemoteClusterInternalProto {
        * The account ID of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string pvcId = 1;</code>
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
        * @return The pvcId.
        */
       public java.lang.String getPvcId() {
@@ -2256,7 +4184,7 @@ public final class RemoteClusterInternalProto {
        * The account ID of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string pvcId = 1;</code>
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
        * @return The bytes for pvcId.
        */
       public com.google.protobuf.ByteString
@@ -2277,7 +4205,7 @@ public final class RemoteClusterInternalProto {
        * The account ID of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string pvcId = 1;</code>
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
        * @param value The pvcId to set.
        * @return This builder for chaining.
        */
@@ -2294,7 +4222,7 @@ public final class RemoteClusterInternalProto {
        * The account ID of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string pvcId = 1;</code>
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearPvcId() {
@@ -2308,7 +4236,7 @@ public final class RemoteClusterInternalProto {
        * The account ID of the Private Cloud control plane.
        * </pre>
        *
-       * <code>string pvcId = 1;</code>
+       * <code>string pvcId = 1 [(.options.FieldExtension.required) = true];</code>
        * @param value The bytes for pvcId to set.
        * @return This builder for chaining.
        */
@@ -2394,7 +4322,7 @@ public final class RemoteClusterInternalProto {
      * The authentication token.
      * </pre>
      *
-     * <code>string token = 1;</code>
+     * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The token.
      */
     java.lang.String getToken();
@@ -2403,7 +4331,7 @@ public final class RemoteClusterInternalProto {
      * The authentication token.
      * </pre>
      *
-     * <code>string token = 1;</code>
+     * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The bytes for token.
      */
     com.google.protobuf.ByteString
@@ -2457,7 +4385,7 @@ public final class RemoteClusterInternalProto {
      * The authentication token.
      * </pre>
      *
-     * <code>string token = 1;</code>
+     * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The token.
      */
     @java.lang.Override
@@ -2478,7 +4406,7 @@ public final class RemoteClusterInternalProto {
      * The authentication token.
      * </pre>
      *
-     * <code>string token = 1;</code>
+     * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
      * @return The bytes for token.
      */
     @java.lang.Override
@@ -2832,7 +4760,7 @@ public final class RemoteClusterInternalProto {
        * The authentication token.
        * </pre>
        *
-       * <code>string token = 1;</code>
+       * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
        * @return The token.
        */
       public java.lang.String getToken() {
@@ -2852,7 +4780,7 @@ public final class RemoteClusterInternalProto {
        * The authentication token.
        * </pre>
        *
-       * <code>string token = 1;</code>
+       * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
        * @return The bytes for token.
        */
       public com.google.protobuf.ByteString
@@ -2873,7 +4801,7 @@ public final class RemoteClusterInternalProto {
        * The authentication token.
        * </pre>
        *
-       * <code>string token = 1;</code>
+       * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
        * @param value The token to set.
        * @return This builder for chaining.
        */
@@ -2890,7 +4818,7 @@ public final class RemoteClusterInternalProto {
        * The authentication token.
        * </pre>
        *
-       * <code>string token = 1;</code>
+       * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearToken() {
@@ -2904,7 +4832,7 @@ public final class RemoteClusterInternalProto {
        * The authentication token.
        * </pre>
        *
-       * <code>string token = 1;</code>
+       * <code>string token = 1 [(.options.FieldExtension.sensitive) = true];</code>
        * @param value The bytes for token to set.
        * @return This builder for chaining.
        */
@@ -3094,6 +5022,46 @@ public final class RemoteClusterInternalProto {
      * @return The knoxPort.
      */
     int getKnoxPort();
+
+    /**
+     * <pre>
+     * The Cloudera Manager URL.
+     * </pre>
+     *
+     * <code>string cmUrl = 8;</code>
+     * @return The cmUrl.
+     */
+    java.lang.String getCmUrl();
+    /**
+     * <pre>
+     * The Cloudera Manager URL.
+     * </pre>
+     *
+     * <code>string cmUrl = 8;</code>
+     * @return The bytes for cmUrl.
+     */
+    com.google.protobuf.ByteString
+        getCmUrlBytes();
+
+    /**
+     * <pre>
+     * The optional Knox Gateway URL.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 9;</code>
+     * @return The knoxGatewayUrl.
+     */
+    java.lang.String getKnoxGatewayUrl();
+    /**
+     * <pre>
+     * The optional Knox Gateway URL.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 9;</code>
+     * @return The bytes for knoxGatewayUrl.
+     */
+    com.google.protobuf.ByteString
+        getKnoxGatewayUrlBytes();
   }
   /**
    * <pre>
@@ -3116,6 +5084,8 @@ public final class RemoteClusterInternalProto {
       cmHostname_ = "";
       dcName_ = "";
       knoxIpAddress_ = "";
+      cmUrl_ = "";
+      knoxGatewayUrl_ = "";
     }
 
     @java.lang.Override
@@ -3371,6 +5341,100 @@ public final class RemoteClusterInternalProto {
       return knoxPort_;
     }
 
+    public static final int CMURL_FIELD_NUMBER = 8;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object cmUrl_ = "";
+    /**
+     * <pre>
+     * The Cloudera Manager URL.
+     * </pre>
+     *
+     * <code>string cmUrl = 8;</code>
+     * @return The cmUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getCmUrl() {
+      java.lang.Object ref = cmUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        cmUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Cloudera Manager URL.
+     * </pre>
+     *
+     * <code>string cmUrl = 8;</code>
+     * @return The bytes for cmUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCmUrlBytes() {
+      java.lang.Object ref = cmUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        cmUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KNOXGATEWAYURL_FIELD_NUMBER = 9;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object knoxGatewayUrl_ = "";
+    /**
+     * <pre>
+     * The optional Knox Gateway URL.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 9;</code>
+     * @return The knoxGatewayUrl.
+     */
+    @java.lang.Override
+    public java.lang.String getKnoxGatewayUrl() {
+      java.lang.Object ref = knoxGatewayUrl_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        knoxGatewayUrl_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The optional Knox Gateway URL.
+     * </pre>
+     *
+     * <code>string knoxGatewayUrl = 9;</code>
+     * @return The bytes for knoxGatewayUrl.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKnoxGatewayUrlBytes() {
+      java.lang.Object ref = knoxGatewayUrl_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        knoxGatewayUrl_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3406,6 +5470,12 @@ public final class RemoteClusterInternalProto {
       if (knoxPort_ != 0) {
         output.writeInt32(7, knoxPort_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, cmUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxGatewayUrl_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, knoxGatewayUrl_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -3439,6 +5509,12 @@ public final class RemoteClusterInternalProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, knoxPort_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cmUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, cmUrl_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxGatewayUrl_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, knoxGatewayUrl_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -3468,6 +5544,10 @@ public final class RemoteClusterInternalProto {
           .equals(other.getKnoxIpAddress())) return false;
       if (getKnoxPort()
           != other.getKnoxPort()) return false;
+      if (!getCmUrl()
+          .equals(other.getCmUrl())) return false;
+      if (!getKnoxGatewayUrl()
+          .equals(other.getKnoxGatewayUrl())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -3494,6 +5574,10 @@ public final class RemoteClusterInternalProto {
       hash = (53 * hash) + getKnoxIpAddress().hashCode();
       hash = (37 * hash) + KNOXPORT_FIELD_NUMBER;
       hash = (53 * hash) + getKnoxPort();
+      hash = (37 * hash) + CMURL_FIELD_NUMBER;
+      hash = (53 * hash) + getCmUrl().hashCode();
+      hash = (37 * hash) + KNOXGATEWAYURL_FIELD_NUMBER;
+      hash = (53 * hash) + getKnoxGatewayUrl().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3636,6 +5720,8 @@ public final class RemoteClusterInternalProto {
         isHttpSecure_ = false;
         knoxIpAddress_ = "";
         knoxPort_ = 0;
+        cmUrl_ = "";
+        knoxGatewayUrl_ = "";
         return this;
       }
 
@@ -3689,6 +5775,12 @@ public final class RemoteClusterInternalProto {
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
           result.knoxPort_ = knoxPort_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.cmUrl_ = cmUrl_;
+        }
+        if (((from_bitField0_ & 0x00000100) != 0)) {
+          result.knoxGatewayUrl_ = knoxGatewayUrl_;
         }
       }
 
@@ -3765,6 +5857,16 @@ public final class RemoteClusterInternalProto {
         if (other.getKnoxPort() != 0) {
           setKnoxPort(other.getKnoxPort());
         }
+        if (!other.getCmUrl().isEmpty()) {
+          cmUrl_ = other.cmUrl_;
+          bitField0_ |= 0x00000080;
+          onChanged();
+        }
+        if (!other.getKnoxGatewayUrl().isEmpty()) {
+          knoxGatewayUrl_ = other.knoxGatewayUrl_;
+          bitField0_ |= 0x00000100;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -3826,6 +5928,16 @@ public final class RemoteClusterInternalProto {
                 bitField0_ |= 0x00000040;
                 break;
               } // case 56
+              case 66: {
+                cmUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 66
+              case 74: {
+                knoxGatewayUrl_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000100;
+                break;
+              } // case 74
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -4339,6 +6451,190 @@ public final class RemoteClusterInternalProto {
       public Builder clearKnoxPort() {
         bitField0_ = (bitField0_ & ~0x00000040);
         knoxPort_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object cmUrl_ = "";
+      /**
+       * <pre>
+       * The Cloudera Manager URL.
+       * </pre>
+       *
+       * <code>string cmUrl = 8;</code>
+       * @return The cmUrl.
+       */
+      public java.lang.String getCmUrl() {
+        java.lang.Object ref = cmUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          cmUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager URL.
+       * </pre>
+       *
+       * <code>string cmUrl = 8;</code>
+       * @return The bytes for cmUrl.
+       */
+      public com.google.protobuf.ByteString
+          getCmUrlBytes() {
+        java.lang.Object ref = cmUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          cmUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager URL.
+       * </pre>
+       *
+       * <code>string cmUrl = 8;</code>
+       * @param value The cmUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        cmUrl_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager URL.
+       * </pre>
+       *
+       * <code>string cmUrl = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCmUrl() {
+        cmUrl_ = getDefaultInstance().getCmUrl();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Cloudera Manager URL.
+       * </pre>
+       *
+       * <code>string cmUrl = 8;</code>
+       * @param value The bytes for cmUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCmUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        cmUrl_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object knoxGatewayUrl_ = "";
+      /**
+       * <pre>
+       * The optional Knox Gateway URL.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 9;</code>
+       * @return The knoxGatewayUrl.
+       */
+      public java.lang.String getKnoxGatewayUrl() {
+        java.lang.Object ref = knoxGatewayUrl_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          knoxGatewayUrl_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The optional Knox Gateway URL.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 9;</code>
+       * @return The bytes for knoxGatewayUrl.
+       */
+      public com.google.protobuf.ByteString
+          getKnoxGatewayUrlBytes() {
+        java.lang.Object ref = knoxGatewayUrl_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          knoxGatewayUrl_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The optional Knox Gateway URL.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 9;</code>
+       * @param value The knoxGatewayUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxGatewayUrl(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        knoxGatewayUrl_ = value;
+        bitField0_ |= 0x00000100;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional Knox Gateway URL.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKnoxGatewayUrl() {
+        knoxGatewayUrl_ = getDefaultInstance().getKnoxGatewayUrl();
+        bitField0_ = (bitField0_ & ~0x00000100);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The optional Knox Gateway URL.
+       * </pre>
+       *
+       * <code>string knoxGatewayUrl = 9;</code>
+       * @param value The bytes for knoxGatewayUrl to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxGatewayUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        knoxGatewayUrl_ = value;
+        bitField0_ |= 0x00000100;
         onChanged();
         return this;
       }
@@ -5003,6 +7299,16 @@ public final class RemoteClusterInternalProto {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_remotecluster_ListAllPvcControlPlanesRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -5043,36 +7349,46 @@ public final class RemoteClusterInternalProto {
     java.lang.String[] descriptorData = {
       "\n\033remoteclusterinternal.proto\022\rremoteclu" +
       "ster\032\roptions.proto\032\023remotecluster.proto" +
-      "\"E\n\036ListAllPvcControlPlanesRequest\022\020\n\010pa" +
-      "geSize\030\001 \001(\005\022\021\n\tpageToken\030\002 \001(\t\"\211\001\n\037List" +
-      "AllPvcControlPlanesResponse\022O\n\032controlPl" +
-      "aneConfigurations\030\001 \003(\0132+.remotecluster." +
-      "PvcControlPlaneConfiguration\022\025\n\rnextPage" +
-      "Token\030\002 \001(\t\"8\n\'GeneratePvcControlPlaneAu" +
-      "thTokenRequest\022\r\n\005pvcId\030\001 \001(\t\"9\n(Generat" +
-      "ePvcControlPlaneAuthTokenResponse\022\r\n\005tok" +
-      "en\030\001 \001(\t\"\300\001\n\035RegisterPvcBaseClusterReque" +
-      "st\022\024\n\006pvcCrn\030\001 \001(\tB\004\320\265\030\001\022\030\n\ncmHostname\030\002" +
-      " \001(\tB\004\320\265\030\001\022\024\n\006cmPort\030\003 \001(\005B\004\320\265\030\001\022\024\n\006dcNa" +
-      "me\030\004 \001(\tB\004\320\265\030\001\022\032\n\014isHttpSecure\030\005 \001(\010B\004\320\265" +
-      "\030\001\022\025\n\rknoxIpAddress\030\006 \001(\t\022\020\n\010knoxPort\030\007 " +
-      "\001(\005\"4\n\036RegisterPvcBaseClusterResponse\022\022\n" +
-      "\nclusterCrn\030\001 \001(\t2\330\003\n\025RemoteClusterInter" +
-      "nal\022z\n\027ListAllPvcControlPlanes\022-.remotec" +
-      "luster.ListAllPvcControlPlanesRequest\032.." +
-      "remotecluster.ListAllPvcControlPlanesRes" +
-      "ponse\"\000\022\225\001\n GeneratePvcControlPlaneAuthT" +
-      "oken\0226.remotecluster.GeneratePvcControlP" +
-      "laneAuthTokenRequest\0327.remotecluster.Gen" +
-      "eratePvcControlPlaneAuthTokenResponse\"\000\022" +
-      "w\n\026RegisterPvcBaseCluster\022,.remotecluste" +
-      "r.RegisterPvcBaseClusterRequest\032-.remote" +
-      "cluster.RegisterPvcBaseClusterResponse\"\000" +
-      "\0322\212\304\023.\n\025remoteclusterinternal\022\025RemoteClu" +
-      "sterInternalBg\n.com.cloudera.thunderhead" +
-      ".service.remoteclusterB\032RemoteClusterInt" +
-      "ernalProtoZ\031com/cloudera/cdp/protobufb\006p" +
-      "roto3"
+      "\"h\n#GeneratePvcWorkloadAuthTokenRequest\022" +
+      "\023\n\005pvcId\030\001 \001(\tB\004\320\265\030\001\022\024\n\014workloadName\030\002 \001" +
+      "(\t\022\026\n\016environmentCrn\030\003 \001(\t\"b\n$GeneratePv" +
+      "cWorkloadAuthTokenResponse\022\023\n\013endpointUr" +
+      "l\030\001 \001(\t\022\023\n\005token\030\002 \001(\tB\004\200\265\030\001\022\020\n\010expireAt" +
+      "\030\003 \001(\t\"E\n\036ListAllPvcControlPlanesRequest" +
+      "\022\020\n\010pageSize\030\001 \001(\005\022\021\n\tpageToken\030\002 \001(\t\"\211\001" +
+      "\n\037ListAllPvcControlPlanesResponse\022O\n\032con" +
+      "trolPlaneConfigurations\030\001 \003(\0132+.remotecl" +
+      "uster.PvcControlPlaneConfiguration\022\025\n\rne" +
+      "xtPageToken\030\002 \001(\t\">\n\'GeneratePvcControlP" +
+      "laneAuthTokenRequest\022\023\n\005pvcId\030\001 \001(\tB\004\320\265\030" +
+      "\001\"?\n(GeneratePvcControlPlaneAuthTokenRes" +
+      "ponse\022\023\n\005token\030\001 \001(\tB\004\200\265\030\001\"\347\001\n\035RegisterP" +
+      "vcBaseClusterRequest\022\024\n\006pvcCrn\030\001 \001(\tB\004\320\265" +
+      "\030\001\022\030\n\ncmHostname\030\002 \001(\tB\004\320\265\030\001\022\024\n\006cmPort\030\003" +
+      " \001(\005B\004\320\265\030\001\022\024\n\006dcName\030\004 \001(\tB\004\320\265\030\001\022\032\n\014isHt" +
+      "tpSecure\030\005 \001(\010B\004\320\265\030\001\022\025\n\rknoxIpAddress\030\006 " +
+      "\001(\t\022\020\n\010knoxPort\030\007 \001(\005\022\r\n\005cmUrl\030\010 \001(\t\022\026\n\016" +
+      "knoxGatewayUrl\030\t \001(\t\"4\n\036RegisterPvcBaseC" +
+      "lusterResponse\022\022\n\nclusterCrn\030\001 \001(\t2\344\004\n\025R" +
+      "emoteClusterInternal\022z\n\027ListAllPvcContro" +
+      "lPlanes\022-.remotecluster.ListAllPvcContro" +
+      "lPlanesRequest\032..remotecluster.ListAllPv" +
+      "cControlPlanesResponse\"\000\022\225\001\n GeneratePvc" +
+      "ControlPlaneAuthToken\0226.remotecluster.Ge" +
+      "neratePvcControlPlaneAuthTokenRequest\0327." +
+      "remotecluster.GeneratePvcControlPlaneAut" +
+      "hTokenResponse\"\000\022\211\001\n\034GeneratePvcWorkload" +
+      "AuthToken\0222.remotecluster.GeneratePvcWor" +
+      "kloadAuthTokenRequest\0323.remotecluster.Ge" +
+      "neratePvcWorkloadAuthTokenResponse\"\000\022w\n\026" +
+      "RegisterPvcBaseCluster\022,.remotecluster.R" +
+      "egisterPvcBaseClusterRequest\032-.remoteclu" +
+      "ster.RegisterPvcBaseClusterResponse\"\000\0322\212" +
+      "\304\023.\n\025remoteclusterinternal\022\025RemoteCluste" +
+      "rInternalBg\n.com.cloudera.thunderhead.se" +
+      "rvice.remoteclusterB\032RemoteClusterIntern" +
+      "alProtoZ\031com/cloudera/cdp/protobufb\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5080,38 +7396,50 @@ public final class RemoteClusterInternalProto {
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.getDescriptor(),
         });
-    internal_static_remotecluster_ListAllPvcControlPlanesRequest_descriptor =
+    internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
+    internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_GeneratePvcWorkloadAuthTokenRequest_descriptor,
+        new java.lang.String[] { "PvcId", "WorkloadName", "EnvironmentCrn", });
+    internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_remotecluster_GeneratePvcWorkloadAuthTokenResponse_descriptor,
+        new java.lang.String[] { "EndpointUrl", "Token", "ExpireAt", });
+    internal_static_remotecluster_ListAllPvcControlPlanesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(2);
     internal_static_remotecluster_ListAllPvcControlPlanesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_ListAllPvcControlPlanesRequest_descriptor,
         new java.lang.String[] { "PageSize", "PageToken", });
     internal_static_remotecluster_ListAllPvcControlPlanesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(3);
     internal_static_remotecluster_ListAllPvcControlPlanesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_ListAllPvcControlPlanesResponse_descriptor,
         new java.lang.String[] { "ControlPlaneConfigurations", "NextPageToken", });
     internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenRequest_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenRequest_descriptor,
         new java.lang.String[] { "PvcId", });
     internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenResponse_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_GeneratePvcControlPlaneAuthTokenResponse_descriptor,
         new java.lang.String[] { "Token", });
     internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_remotecluster_RegisterPvcBaseClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_RegisterPvcBaseClusterRequest_descriptor,
-        new java.lang.String[] { "PvcCrn", "CmHostname", "CmPort", "DcName", "IsHttpSecure", "KnoxIpAddress", "KnoxPort", });
+        new java.lang.String[] { "PvcCrn", "CmHostname", "CmPort", "DcName", "IsHttpSecure", "KnoxIpAddress", "KnoxPort", "CmUrl", "KnoxGatewayUrl", });
     internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_remotecluster_RegisterPvcBaseClusterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_remotecluster_RegisterPvcBaseClusterResponse_descriptor,
@@ -5119,6 +7447,7 @@ public final class RemoteClusterInternalProto {
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.apiServiceName);
     com.google.protobuf.Descriptors.FileDescriptor
         .internalUpdateFileDescriptor(descriptor, registry);

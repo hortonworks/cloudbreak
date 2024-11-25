@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.SyncOperationAdditionalDetail;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Details object of the sync operation for success or falure.
@@ -50,10 +46,11 @@ public class SyncOperationDetails {
   public static final String JSON_PROPERTY_ADDITIONAL_DETAILS = "additionalDetails";
   private List<SyncOperationAdditionalDetail> additionalDetails = new ArrayList<>();
 
-  public SyncOperationDetails() { 
+  public SyncOperationDetails() {
   }
 
   public SyncOperationDetails environmentCrn(String environmentCrn) {
+    
     this.environmentCrn = environmentCrn;
     return this;
   }
@@ -79,6 +76,7 @@ public class SyncOperationDetails {
 
 
   public SyncOperationDetails message(String message) {
+    
     this.message = message;
     return this;
   }
@@ -104,6 +102,7 @@ public class SyncOperationDetails {
 
 
   public SyncOperationDetails additionalDetails(List<SyncOperationAdditionalDetail> additionalDetails) {
+    
     this.additionalDetails = additionalDetails;
     return this;
   }
@@ -135,10 +134,6 @@ public class SyncOperationDetails {
     this.additionalDetails = additionalDetails;
   }
 
-
-  /**
-   * Return true if this SyncOperationDetails object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -180,59 +175,5 @@ public class SyncOperationDetails {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentCrn` to the URL query string
-    if (getEnvironmentCrn() != null) {
-      joiner.add(String.format("%senvironmentCrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `message` to the URL query string
-    if (getMessage() != null) {
-      joiner.add(String.format("%smessage%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getMessage()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `additionalDetails` to the URL query string
-    if (getAdditionalDetails() != null) {
-      for (int i = 0; i < getAdditionalDetails().size(); i++) {
-        if (getAdditionalDetails().get(i) != null) {
-          joiner.add(getAdditionalDetails().get(i).toUrlQueryString(String.format("%sadditionalDetails%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

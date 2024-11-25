@@ -13,20 +13,18 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A proxy config object.
@@ -40,7 +38,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   ProxyConfig.JSON_PROPERTY_DESCRIPTION,
   ProxyConfig.JSON_PROPERTY_NO_PROXY_HOSTS,
   ProxyConfig.JSON_PROPERTY_USER,
-  ProxyConfig.JSON_PROPERTY_PASSWORD
+  ProxyConfig.JSON_PROPERTY_PASSWORD,
+  ProxyConfig.JSON_PROPERTY_INBOUND_PROXY_CIDR
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class ProxyConfig {
@@ -71,10 +70,14 @@ public class ProxyConfig {
   public static final String JSON_PROPERTY_PASSWORD = "password";
   private String password;
 
-  public ProxyConfig() { 
+  public static final String JSON_PROPERTY_INBOUND_PROXY_CIDR = "inboundProxyCidr";
+  private List<String> inboundProxyCidr = new ArrayList<>();
+
+  public ProxyConfig() {
   }
 
   public ProxyConfig proxyConfigName(String proxyConfigName) {
+    
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -100,6 +103,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig crn(String crn) {
+    
     this.crn = crn;
     return this;
   }
@@ -125,6 +129,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig protocol(String protocol) {
+    
     this.protocol = protocol;
     return this;
   }
@@ -150,6 +155,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig host(String host) {
+    
     this.host = host;
     return this;
   }
@@ -175,6 +181,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig port(Integer port) {
+    
     this.port = port;
     return this;
   }
@@ -200,6 +207,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -225,6 +233,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig noProxyHosts(String noProxyHosts) {
+    
     this.noProxyHosts = noProxyHosts;
     return this;
   }
@@ -250,6 +259,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig user(String user) {
+    
     this.user = user;
     return this;
   }
@@ -275,6 +285,7 @@ public class ProxyConfig {
 
 
   public ProxyConfig password(String password) {
+    
     this.password = password;
     return this;
   }
@@ -299,9 +310,39 @@ public class ProxyConfig {
   }
 
 
-  /**
-   * Return true if this ProxyConfig object is equal to o.
-   */
+  public ProxyConfig inboundProxyCidr(List<String> inboundProxyCidr) {
+    
+    this.inboundProxyCidr = inboundProxyCidr;
+    return this;
+  }
+
+  public ProxyConfig addInboundProxyCidrItem(String inboundProxyCidrItem) {
+    if (this.inboundProxyCidr == null) {
+      this.inboundProxyCidr = new ArrayList<>();
+    }
+    this.inboundProxyCidr.add(inboundProxyCidrItem);
+    return this;
+  }
+
+   /**
+   * Allow these CIDR for Inbound communication.
+   * @return inboundProxyCidr
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_INBOUND_PROXY_CIDR)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<String> getInboundProxyCidr() {
+    return inboundProxyCidr;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_INBOUND_PROXY_CIDR)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setInboundProxyCidr(List<String> inboundProxyCidr) {
+    this.inboundProxyCidr = inboundProxyCidr;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -319,12 +360,13 @@ public class ProxyConfig {
         Objects.equals(this.description, proxyConfig.description) &&
         Objects.equals(this.noProxyHosts, proxyConfig.noProxyHosts) &&
         Objects.equals(this.user, proxyConfig.user) &&
-        Objects.equals(this.password, proxyConfig.password);
+        Objects.equals(this.password, proxyConfig.password) &&
+        Objects.equals(this.inboundProxyCidr, proxyConfig.inboundProxyCidr);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(proxyConfigName, crn, protocol, host, port, description, noProxyHosts, user, password);
+    return Objects.hash(proxyConfigName, crn, protocol, host, port, description, noProxyHosts, user, password, inboundProxyCidr);
   }
 
   @Override
@@ -340,6 +382,7 @@ public class ProxyConfig {
     sb.append("    noProxyHosts: ").append(toIndentedString(noProxyHosts)).append("\n");
     sb.append("    user: ").append(toIndentedString(user)).append("\n");
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
+    sb.append("    inboundProxyCidr: ").append(toIndentedString(inboundProxyCidr)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -355,84 +398,5 @@ public class ProxyConfig {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `proxyConfigName` to the URL query string
-    if (getProxyConfigName() != null) {
-      joiner.add(String.format("%sproxyConfigName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProxyConfigName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `crn` to the URL query string
-    if (getCrn() != null) {
-      joiner.add(String.format("%scrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `protocol` to the URL query string
-    if (getProtocol() != null) {
-      joiner.add(String.format("%sprotocol%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProtocol()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `host` to the URL query string
-    if (getHost() != null) {
-      joiner.add(String.format("%shost%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getHost()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `port` to the URL query string
-    if (getPort() != null) {
-      joiner.add(String.format("%sport%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPort()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `noProxyHosts` to the URL query string
-    if (getNoProxyHosts() != null) {
-      joiner.add(String.format("%snoProxyHosts%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNoProxyHosts()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `user` to the URL query string
-    if (getUser() != null) {
-      joiner.add(String.format("%suser%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUser()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `password` to the URL query string
-    if (getPassword() != null) {
-      joiner.add(String.format("%spassword%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPassword()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

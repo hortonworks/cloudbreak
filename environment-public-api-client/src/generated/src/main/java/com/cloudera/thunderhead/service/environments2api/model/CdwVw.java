@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The CDW virtual warehouse.
@@ -55,10 +50,11 @@ public class CdwVw {
   public static final String JSON_PROPERTY_DBC_ID = "dbcId";
   private String dbcId;
 
-  public CdwVw() { 
+  public CdwVw() {
   }
 
   public CdwVw crn(String crn) {
+    
     this.crn = crn;
     return this;
   }
@@ -84,6 +80,7 @@ public class CdwVw {
 
 
   public CdwVw id(String id) {
+    
     this.id = id;
     return this;
   }
@@ -109,6 +106,7 @@ public class CdwVw {
 
 
   public CdwVw name(String name) {
+    
     this.name = name;
     return this;
   }
@@ -134,6 +132,7 @@ public class CdwVw {
 
 
   public CdwVw vwType(String vwType) {
+    
     this.vwType = vwType;
     return this;
   }
@@ -159,6 +158,7 @@ public class CdwVw {
 
 
   public CdwVw dbcId(String dbcId) {
+    
     this.dbcId = dbcId;
     return this;
   }
@@ -182,10 +182,6 @@ public class CdwVw {
     this.dbcId = dbcId;
   }
 
-
-  /**
-   * Return true if this CdwVw object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -231,64 +227,5 @@ public class CdwVw {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `crn` to the URL query string
-    if (getCrn() != null) {
-      joiner.add(String.format("%scrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `id` to the URL query string
-    if (getId() != null) {
-      joiner.add(String.format("%sid%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `name` to the URL query string
-    if (getName() != null) {
-      joiner.add(String.format("%sname%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `vwType` to the URL query string
-    if (getVwType() != null) {
-      joiner.add(String.format("%svwType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getVwType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dbcId` to the URL query string
-    if (getDbcId() != null) {
-      joiner.add(String.format("%sdbcId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDbcId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

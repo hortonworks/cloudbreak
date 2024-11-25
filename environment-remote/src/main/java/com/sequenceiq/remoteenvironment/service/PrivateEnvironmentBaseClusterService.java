@@ -23,12 +23,6 @@ public class PrivateEnvironmentBaseClusterService {
 
     private static final String DATA_CENTER_NAME_PATTERN = "%s_%s_datacenter";
 
-    private static final Integer CM_HTTPS_PORT = 7183;
-
-    private static final int CM_HOST_PATTERN_HOSTNAME_GROUP_ID = 2;
-
-    private static final int CM_HOST_PATTERN_PORT_GROUP_ID = 3;
-
     private final GrpcRemoteClusterClient grpcRemoteClusterClient;
 
     private final Pattern compiledCmHostPattern;
@@ -45,12 +39,13 @@ public class PrivateEnvironmentBaseClusterService {
         if (pvcEnvironmentDetailsOpt.isPresent()) {
             String cmHost = pvcEnvironmentDetailsOpt.get().getCmHost();
             String environmentName = envDetails.getEnvironment().getEnvironmentName();
+            String knoxGatewayUrl = pvcEnvironmentDetailsOpt.get().getKnoxGatewayUrl();
             LOGGER.info("Register base cluster for CM host({}) of environment({}) in control plane ({})/({})", cmHost, environmentName, controlPlaneName,
                     controlPlaneCrn);
             if (StringUtils.isNotEmpty(cmHost)) {
                 Matcher cmHostMatcher = compiledCmHostPattern.matcher(cmHost);
                 if (cmHostMatcher.matches()) {
-                    result = createRequestAndRegister(controlPlaneCrn, controlPlaneName, cmHostMatcher, environmentName);
+                    result = createRequestAndRegister(controlPlaneCrn, controlPlaneName, cmHost, knoxGatewayUrl, environmentName);
                 } else {
                     LOGGER.warn("Could not register because environment's CM host({}) doesn't match with our pattern for control plane({}) and environment({})",
                             cmHost, controlPlaneCrn, envDetails.getEnvironment().getEnvironmentName());
@@ -66,19 +61,17 @@ public class PrivateEnvironmentBaseClusterService {
         return result;
     }
 
-    private String createRequestAndRegister(String controlPlaneCrn, String controlPlaneName, Matcher cmHostMatcher, String environmentName) {
-        String cmHostName = cmHostMatcher.group(CM_HOST_PATTERN_HOSTNAME_GROUP_ID);
-        int cmPort = Integer.parseInt(cmHostMatcher.group(CM_HOST_PATTERN_PORT_GROUP_ID));
+    private String createRequestAndRegister(String controlPlaneCrn, String controlPlaneName, String cmUrl, String knoxGatewayUrl, String environmentName) {
         String dcName = String.format(DATA_CENTER_NAME_PATTERN, controlPlaneName, environmentName);
-        LOGGER.info("Sending base cluster registration request with dcName({}), CM hostname({}) and port({}), control plane CRN({})", dcName,
-                cmHostName, cmPort, controlPlaneName);
-        RemoteClusterInternalProto.RegisterPvcBaseClusterRequest request = RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.newBuilder()
-                .setCmHostname(cmHostName)
-                .setCmPort(cmPort)
+        LOGGER.info("Sending base cluster registration request with dcName({}), CM URL({}) and Knox gateway URL({}), control plane CRN({})", dcName,
+                cmUrl, knoxGatewayUrl, controlPlaneName);
+        RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.Builder requestBuilder = RemoteClusterInternalProto.RegisterPvcBaseClusterRequest.newBuilder()
+                .setCmUrl(cmUrl)
                 .setPvcCrn(controlPlaneCrn)
-                .setIsHttpSecure(CM_HTTPS_PORT.equals(cmPort))
-                .setDcName(dcName)
-                .build();
-        return grpcRemoteClusterClient.registerPrivateEnvironmentBaseCluster(request);
+                .setDcName(dcName);
+        if (StringUtils.isNotEmpty(knoxGatewayUrl)) {
+            requestBuilder = requestBuilder.setKnoxGatewayUrl(knoxGatewayUrl);
+        }
+        return grpcRemoteClusterClient.registerPrivateEnvironmentBaseCluster(requestBuilder.build());
     }
 }

@@ -597,9 +597,6 @@ paths:
       description: Returns status of the sync operation for the environment based on crn.
       operationId: lastSyncStatus
       x-mutating: false
-      x-hidden: true
-      x-hidden-reason: IN_DEVELOPMENT
-      x-no-compatibility-guarantee: true
       parameters:
         - name: input
           in: body
@@ -1166,6 +1163,30 @@ paths:
           description: Expected response to a valid request.
           schema:
             $ref: '#/definitions/RepairFreeipaResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/rebuildFreeipa:
+    post:
+      summary: Recreate FreeIPA in case of disaster.
+      description: If FreeIPA backups are available and all of the FreeIPA nodes are lost, this command recreates FreeIPA from scratch and restores backup.
+      operationId: rebuildFreeipa
+      x-mutating: true
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      x-hidden-retention: BETA
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/RebuildFreeipaRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/RebuildFreeipaResponse'
         default:
           description: The default response on an error.
           schema:
@@ -1916,6 +1937,27 @@ paths:
           description: The default response on an error.
           schema:
             $ref: '#/definitions/Error'
+  /api/v1/environments2/getFreeipaUpgradeOptions:
+    post:
+      summary: Get available images for FreeIPA upgrade.
+      description: Get available images for FreeIPA upgrade. If catalog is defined use the catalog as image source.
+      operationId: getFreeipaUpgradeOptions
+      x-mutating: false
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/GetFreeipaUpgradeOptionsRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/GetFreeipaUpgradeOptionsResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
   /api/v1/environments2/upscaleFreeipa:
     post:
       summary: Upscales FreeIPA instances.
@@ -2052,6 +2094,7 @@ paths:
       x-mutating: true
       x-hidden: true
       x-hidden-reason: IN_DEVELOPMENT
+      x-hidden-retention: BETA
       parameters:
         - name: input
           in: body
@@ -2075,6 +2118,7 @@ paths:
       x-mutating: false
       x-hidden: true
       x-hidden-reason: IN_DEVELOPMENT
+      x-hidden-retention: BETA
       parameters:
         - name: input
           in: body
@@ -2254,6 +2298,71 @@ paths:
           description: Expected response to a valid request.
           schema:
             $ref: '#/definitions/UpdateFreeipaToAwsImdsV1Response'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/initializeAWSComputeCluster:
+    post:
+      summary: Initialize compute cluster for AWS environment.
+      description: Initialize compute cluster for AWS environment.
+      operationId: initializeAWSComputeCluster
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InitializeAWSComputeClusterRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/InitializeAWSComputeClusterResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/initializeAzureComputeCluster:
+    post:
+      summary: Initialize compute cluster for Azure environment.
+      description: Initialize compute cluster for Azure environment.
+      operationId: initializeAzureComputeCluster
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/InitializeAzureComputeClusterRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/InitializeAzureComputeClusterResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
+  /api/v1/environments2/getFreeipaSecretEncryptionKeyIds:
+    post:
+      summary: Get the secret encryption keys' IDs of the FreeIPA cluster.
+      description: Get the secret encryption keys' IDs of the FreeIPA cluster.
+      operationId: getFreeipaSecretEncryptionKeyIds
+      x-mutating: false
+      x-hidden: true
+      x-hidden-reason: IN_DEVELOPMENT
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/GetFreeipaSecretEncryptionKeyIdsRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/GetFreeipaSecretEncryptionKeyIdsResponse'
         default:
           description: The default response on an error.
           schema:
@@ -2652,9 +2761,27 @@ definitions:
       cloudPlatform:
         type: string
         description: The cloud provider.
+      created:
+        type: string
+        format: date-time
+        description: Creation date
       description:
         type: string
         description: A description for the credential.
+      skipOrgPolicyDecisions:
+        type: boolean
+        default: false
+        x-hidden: true
+        x-hidden-retention: BETA
+        x-hidden-reason: IN_DEVELOPMENT
+        description: Skips organization policy decisions during cloud storage validation.
+      verifyPermissions:
+        type: boolean
+        default: false
+        x-hidden: true
+        x-hidden-retention: BETA
+        x-hidden-reason: IN_DEVELOPMENT
+        description: When true, verifies credential permissions.
       awsCredentialProperties:
         description: The credential properties that closely related to those that have been created on AWS.
         $ref: '#/definitions/AwsCredentialProperties'
@@ -2843,6 +2970,30 @@ definitions:
       policyJson:
         type: string
         description: The policy JSON encoded in base64.
+  InitializeAWSComputeClusterRequest:
+    type: object
+    description: Request object for a initialize AWS default compute cluster.
+    required:
+      - environmentName
+    properties:
+      environmentName:
+        type: string
+        description: The name of the environment.
+      computeClusterConfiguration:
+        description: The Externalized k8s configuration create request for the environment
+        $ref: '#/definitions/AWSComputeClusterConfigurationRequest'
+  InitializeAzureComputeClusterRequest:
+    type: object
+    description: Request object for a initialize Azure default compute cluster.
+    required:
+      - environmentName
+    properties:
+      environmentName:
+        type: string
+        description: The name of the environment.
+      computeClusterConfiguration:
+        description: The Externalized k8s configuration create request for the environment
+        $ref: '#/definitions/AzureComputeClusterConfigurationRequest'
   CreateAWSEnvironmentRequest:
     type: object
     description: Request object for a create AWS environment request.
@@ -2903,7 +3054,7 @@ definitions:
         description: The subnets to use for endpoint access gateway.
       s3GuardTableName:
         type: string
-        description: The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+        description: Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
         x-deprecated: true
       description:
         type: string
@@ -2939,15 +3090,11 @@ definitions:
       freeIpa:
         $ref: '#/definitions/AWSFreeIpaCreationRequest'
         description: The FreeIPA creation request for the environment
-      environmentVersion:
-        description: The environment version can be defined in this parameter. Valid values are v1,v2. Default is v1 at the moment
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        type: string
+      enableComputeCluster:
+        description: Enable compute clusters for environment
+        type: boolean
       computeClusterConfiguration:
         description: The Externalized k8s configuration create request for the environment
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
         $ref: '#/definitions/AWSComputeClusterConfigurationRequest'
       image:
         $ref: '#/definitions/FreeIpaImageRequest'
@@ -2971,6 +3118,12 @@ definitions:
       customDockerRegistry:
         description: Configures the desired custom docker registry for data services.
         $ref: '#/definitions/CustomDockerRegistryRequest'
+      security:
+        $ref: '#/definitions/SecurityRequest'
+        description: Security related configurations for Data Hub clusters.
+        x-no-compatibility-guarantee: true
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
   CreateAWSGovCloudEnvironmentRequest:
     type: object
     description: Request object for a create AWS GovCloud environment request.
@@ -3031,7 +3184,7 @@ definitions:
         description: The subnets to use for endpoint access gateway.
       s3GuardTableName:
         type: string
-        description: The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+        description: Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
         x-deprecated: true
       description:
         type: string
@@ -3073,6 +3226,12 @@ definitions:
       freeIpa:
         $ref: '#/definitions/AWSFreeIpaCreationRequest'
         description: The FreeIPA creation request for the environment
+      security:
+        $ref: '#/definitions/SecurityRequest'
+        description: Security related configurations for Data Hub clusters.
+        x-no-compatibility-guarantee: true
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
       image:
         $ref: '#/definitions/FreeIpaImageRequest'
         description: The FreeIPA image request for the environment
@@ -3415,6 +3574,20 @@ definitions:
       environment:
         $ref: '#/definitions/Environment'
         description: Created environment object.
+  InitializeAWSComputeClusterResponse:
+    type: object
+    description: Response object for an initialize AWS default compute cluster request.
+    properties:
+      operationId:
+        type: string
+        description: The id of the related operation.
+  InitializeAzureComputeClusterResponse:
+    type: object
+    description: Response object for an initialize Azure default compute cluster request.
+    properties:
+      operationId:
+        type: string
+        description: The id of the related operation.
   CreateAzureEnvironmentResponse:
     type: object
     description: Response object for a create Azure environment request.
@@ -3573,15 +3746,11 @@ definitions:
       freeIpa:
         $ref: '#/definitions/AzureFreeIpaCreationRequest'
         description: The FreeIPA creation request for the environment
-      environmentVersion:
-        description: The environment version can be defined in this parameter. Valid values are v1,v2. Default is v1 at the moment.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
-        type: string
+      enableComputeCluster:
+        description: Enable compute clusters for environment
+        type: boolean
       computeClusterConfiguration:
         description: The Externalized k8s configuration create request for the environment.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
         $ref: '#/definitions/AzureComputeClusterConfigurationRequest'
       image:
         $ref: '#/definitions/FreeIpaImageRequest'
@@ -3662,6 +3831,12 @@ definitions:
       customDockerRegistry:
         description: Configures the desired custom docker registry for data services.
         $ref: '#/definitions/CustomDockerRegistryRequest'
+      security:
+        $ref: '#/definitions/SecurityRequest'
+        description: Security related configurations for Data Hub clusters.
+        x-no-compatibility-guarantee: true
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
   CreateGCPEnvironmentRequest:
     type: object
     description: Request object for a create GCP environment request.
@@ -3771,6 +3946,12 @@ definitions:
       customDockerRegistry:
         description: Configures the desired custom docker registry for data services.
         $ref: '#/definitions/CustomDockerRegistryRequest'
+      security:
+        $ref: '#/definitions/SecurityRequest'
+        description: Security related configurations for Data Hub clusters.
+        x-no-compatibility-guarantee: true
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
   ExistingAzureNetworkRequest:
     type: object
     description: Request object for creating an Azure environment using existing VNet and subnets.
@@ -3810,6 +3991,11 @@ definitions:
       aksPrivateDnsZoneId:
         type: string
         description: The full Azure resource ID of an existing Private DNS zone used for the AKS.
+      usePublicDnsForPrivateAks:
+        type: boolean
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        description: Use public DNS for all DNS records in a private cluster.
   ExistingGCPNetworkRequest:
     type: object
     description: Request object for creating an GCP environment using existing VPC and subnets.
@@ -3905,6 +4091,12 @@ definitions:
         items:
           type: string
         description: The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
+      serviceEndpointsCreation:
+        $ref: '#/definitions/ServiceEndpointsCreation'
+        description: The access pattern for the database; options are to create private endpoints, service endpoints or a public setup.
+        x-no-compatibility-guarantee: true
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
   UpdateAzureDatabaseResourcesResponse:
     type: object
     description: Response object for a update Azure Database resources request.
@@ -4096,11 +4288,11 @@ definitions:
       proxyConfigName:
         type: string
         description: Name of the proxy config of the environment.
-      enableSecretEncryption:
-        type: boolean
-        description: True if the secret encryption feature is enabled for the environment.
+      vmEncryptionDetails:
+        description: VM encryption related environment configuration information.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+        $ref: '#/definitions/VmEncryptionDetails'
       cdpRuntimeVersion:
         type: string
         description: The version of CDP runtime.
@@ -4114,6 +4306,20 @@ definitions:
       cdpPvcVersion:
         type: string
         description: The version of CDP PVC.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+      computeClusterEnabled:
+        description: Compute clusters enabled
+        type: boolean
+  VmEncryptionDetails:
+    type: object
+    description: VM encryption related environment configuration information.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      enableSecretEncryption:
+        type: boolean
+        description: True if the secret encryption feature is enabled for the environment.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
   Environment:
@@ -4195,21 +4401,17 @@ definitions:
         properties:
           s3GuardTableName:
             type: string
-            description: The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+            description: Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
             x-deprecated: true
       azureDetails:
         type: object
         description: Azure specific environment configuration information.
-        x-hidden: true
-        x-hidden-reason: IN_DEVELOPMENT
         properties:
           resourceGroupName:
             type: string
             description: Name of an existing Azure resource group to be used for the environment. If it is not specified then new resource groups will be generated.
           resourceEncryptionParameters:
             $ref: '#/definitions/AzureResourceEncryptionParameters'
-            x-hidden: true
-            x-hidden-reason: IN_DEVELOPMENT
             description: Object containing details of encryption parameters for Azure cloud.
       gcpDetails:
         type: object
@@ -4257,11 +4459,11 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
         x-no-compatibility-guarantee: true
-      enableSecretEncryption:
-        type: boolean
-        description: True if the secret encryption feature is enabled for the environment.
+      vmEncryptionDetails:
+        description: VM encryption related environment configuration information.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+        $ref: '#/definitions/VmEncryptionDetails'
       dataServices:
         description: Data Services parameters of the environment.
         $ref: '#/definitions/DataServices'
@@ -4288,6 +4490,21 @@ definitions:
         description: The version of CDP PVC.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+      awsComputeClusterConfiguration:
+        description: The Externalized AWS k8s configuration for the environment.
+        $ref: '#/definitions/AWSComputeClusterConfiguration'
+      azureComputeClusterConfiguration:
+        description: The Externalized Azure k8s configuration for the environment.
+        $ref: '#/definitions/AzureComputeClusterConfiguration'
+      computeClusterEnabled:
+        description: Compute clusters enabled
+        type: boolean
+      security:
+        $ref: '#/definitions/SecurityResponse'
+        description: Security related configurations for Data Hub clusters.
+        x-no-compatibility-guarantee: true
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
   PvcEnvironmentDetails:
     type: object
     description: Configuration details specific to the Private Cloud environment. Only returned when the output view is set to 'FULL'.
@@ -4300,16 +4517,21 @@ definitions:
       cmlSummary:
         $ref: '#/definitions/CmlSummary'
         description: The CML summary.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        x-nullable: true
       cdwSummary:
         $ref: '#/definitions/CdwSummary'
         description: The CDW summary.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+        x-nullable: true
       cdeSummary:
         $ref: '#/definitions/CdeSummary'
         description: The CDE summary.
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
+        x-nullable: true
       applications:
         type: object
         description: A map of applications that provide services for the Service Discovery
@@ -4318,6 +4540,9 @@ definitions:
         additionalProperties:
           $ref: '#/definitions/Application'
           description: The application details.
+      knoxGatewayUrl:
+        type: string
+        description: The knox gateway url in the base cluster.
   ServiceEndPoint:
     type: object
     description: Endpoint of an Service Discovery Service
@@ -4386,6 +4611,7 @@ definitions:
       cmlWorkspaces:
         type: array
         description: List of CML workspaces based on the environment.
+        x-nullable: true
         items:
           $ref: '#/definitions/CmlWorkspace'
   CmlWorkspace:
@@ -4420,9 +4646,11 @@ definitions:
     properties:
       cdwCluster:
         description: The CDW Cluster.
+        x-nullable: true
         $ref: '#/definitions/CdwCluster'
       cdwDbc:
         description: The CDW Database Catalog.
+        x-nullable: true
         $ref: '#/definitions/CdwDbc'
   CdwCluster:
     type: object
@@ -4466,6 +4694,7 @@ definitions:
       cdwVws:
         type: array
         description: List of virtual warehouse based on the Database Catalog.
+        x-nullable: true
         items:
           $ref: '#/definitions/CdwVw'
   CdwVw:
@@ -4498,6 +4727,7 @@ definitions:
       cdeServices:
         type: array
         description: The list of CDE services associated with the environment.
+        x-nullable: true
         items:
           $ref: '#/definitions/CdeService'
   CdeService:
@@ -4521,6 +4751,7 @@ definitions:
       cdeVcs:
         type: array
         description: List of virtual clusters associated with the CDE service.
+        x-nullable: true
         items:
           $ref: '#/definitions/CdeVc'
   CdeVc:
@@ -4632,12 +4863,8 @@ definitions:
           description: The subnet information.
           $ref: '#/definitions/CloudSubnet'
       serviceEndpointsCreation:
-        type: string
-        enum:
-          - ENABLED
-          - ENABLED_PRIVATE_ENDPOINT
-          - DISABLED
         description: Whether to create service endpoints or not.
+        $ref: '#/definitions/ServiceEndpointsCreation'
         x-no-compatibility-guarantee: true
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
@@ -4646,6 +4873,16 @@ definitions:
         x-hidden-reason: IN_DEVELOPMENT
         type: boolean
         description: The load balancer creation mode for all Data Lakes and Data Hubs in the environment. This will override the load balancer creation mode at the cluster level.
+  ServiceEndpointsCreation:
+    type: string
+    description: Whether to create service endpoints or not.
+    enum:
+      - ENABLED
+      - ENABLED_PRIVATE_ENDPOINT
+      - DISABLED
+    x-no-compatibility-guarantee: true
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
   CloudSubnet:
     type: object
     description: Information about a cloud provider subnet.
@@ -4707,6 +4944,11 @@ definitions:
         items:
           type: string
         description: The subnets delegated for Flexible Server database. Accepts either the name or the full resource id.
+      usePublicDnsForPrivateAks:
+        type: boolean
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        description: Use public DNS for all DNS records in a private cluster.
   NetworkGcpParams:
     type: object
     description: GCP network parameters.
@@ -5019,9 +5261,6 @@ definitions:
         x-hidden-reason: IN_DEVELOPMENT
         x-no-compatibility-guarantee: true
   LastSyncStatusRequest:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-no-compatibility-guarantee: true
     type: object
     description: Request object for Sync Status.
     required:
@@ -5066,9 +5305,6 @@ definitions:
         items:
           type: string
   LastSyncStatusResponse:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-no-compatibility-guarantee: true
     type: object
     description: Response object for Sync Operation.
     required:
@@ -5976,6 +6212,59 @@ definitions:
         type: string
         format: date-time
         description: Date when the operation ended. Omitted if operation has not ended.
+  RebuildFreeipaRequest:
+    type: object
+    description: Request object for rebuilding the FreeIPA servers.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
+    required:
+      - environment
+      - freeipaCrn
+      - instanceToRestoreFqdn
+      - fullBackupStorageLocation
+      - dataBackupStorageLocation
+    properties:
+      environment:
+        type: string
+        description: The environment name or CRN.
+      freeipaCrn:
+        type: string
+        description: CRN of the FreeIPA to rebuild. Must be in the environment specified in 'environmentName'.
+      instanceToRestoreFqdn:
+        type: string
+        description: The instance's Fully Qualified Domain Name (FQDN) that will be restored from the backups. This must match the FQDN of the instance from which the backup was taken.
+      fullBackupStorageLocation:
+        type: string
+        description: Full backup location on the cloud storage. This backup was created during the provisioning of the instance. By default, no additional full backups are created for a single instance.
+      dataBackupStorageLocation:
+        type: string
+        description: Data/hourly backup location on the cloud storage. These are created in every hour. Usually the lastest one is required, so there won't be any data loss.
+  RebuildFreeipaResponse:
+    type: object
+    description: Response object for a FreeIPA rebuild request.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
+    properties:
+      operation:
+        $ref: '#/definitions/OperationResponse'
+        description: Operation response of the request for this operation.
+      environmentCrn:
+        type: string
+        description: The environment CRN of the FreeIPA to rebuild
+      freeipaCrn:
+        type: string
+        description: CRN of the FreeIPA to rebuild. Must be in the environment specified in 'environmentName'.
+      instanceToRestoreFqdn:
+        type: string
+        description: The instance's Fully Qualified Domain Name (FQDN) that will be restored from the backups. This must match the FQDN of the instance from which the backup was taken.
+      fullBackupStorageLocation:
+        type: string
+        description: Full backup location on the cloud storage. This backup was created during the provisioning of the instance. By default, no additional full backups are created for a single instance.
+      dataBackupStorageLocation:
+        type: string
+        description: Data/hourly backup location on the cloud storage. These are created in every hour. Usually the lastest one is required, so there won't be any data loss.
   AWSFreeIpaCreationRequest:
     description: Request object for creating FreeIPA in the environment.
     type: object
@@ -6047,6 +6336,12 @@ definitions:
       instanceType:
         type: string
         description: Custom instance type of FreeIPA instances.
+      multiAz:
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        type: boolean
+        default: false
+        description: Flag that enables deployment of the FreeIPA in a multi-availability zone.
   FreeIpaImageRequest:
     description: Request object for FreeIPA image.
     type: object
@@ -6176,32 +6471,79 @@ definitions:
   AWSComputeClusterConfigurationRequest:
     description: Request object for creating Externalized compute cluster for the environment.
     type: object
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
     properties:
       privateCluster:
         type: boolean
         description: If true, creates private cluster.
       kubeApiAuthorizedIpRanges:
-        type: string
-        description: Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster. Default value is 0.0.0.0/0.
+        type: array
+        items:
+          type: string
+        description: Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster.
+      workerNodeSubnets:
+        type: array
+        items:
+          type: string
+        description: Specify subnets for Kubernetes Worker Nodes
   AzureComputeClusterConfigurationRequest:
     description: Request object for creating Externalized compute cluster for the environment.
     type: object
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
     properties:
       privateCluster:
         type: boolean
         description: If true, creates private cluster
       kubeApiAuthorizedIpRanges:
-        type: string
-        description: Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster. Default value is 0.0.0.0/0.
+        type: array
+        items:
+          type: string
+        description: Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster.
       outboundType:
         type: string
         enum:
           - udr
         description: Customize cluster egress with defined outbound type in Azure Kubernetes Service.
+      workerNodeSubnets:
+        type: array
+        items:
+          type: string
+        description: Specify subnets for Kubernetes Worker Nodes
+  AWSComputeClusterConfiguration:
+    description: Externalized compute cluster configuration for the environment.
+    type: object
+    properties:
+      privateCluster:
+        type: boolean
+        description: If true, creates private cluster.
+      kubeApiAuthorizedIpRanges:
+        type: array
+        items:
+          type: string
+        description: Kubernetes API authorized IP ranges in CIDR notation.
+      workerNodeSubnets:
+        type: array
+        items:
+          type: string
+        description: Subnets for Kubernetes Worker Nodes
+  AzureComputeClusterConfiguration:
+    description: Externalized compute cluster configuration for the environment.
+    type: object
+    properties:
+      privateCluster:
+        type: boolean
+        description: If true, creates private cluster.
+      kubeApiAuthorizedIpRanges:
+        type: array
+        items:
+          type: string
+        description: Kubernetes API authorized IP ranges in CIDR notation.
+      outboundType:
+        type: string
+        description: Cluster egress with defined outbound type in Azure Kubernetes Service.
+      workerNodeSubnets:
+        type: array
+        items:
+          type: string
+        description: Subnets for Kubernetes Worker Nodes
   AttachedVolumeDetail:
     type: object
     description: The attached volume configuration.
@@ -6255,6 +6597,13 @@ definitions:
       password:
         type: string
         description: The proxy password.
+      inboundProxyCidr:
+        type: array
+        items:
+          type: string
+          x-hidden: true
+          x-hidden-reason: IN_DEVELOPMENT
+        description: Allow these CIDR for Inbound communication.
   CreateProxyConfigRequest:
     type: object
     description: Request object for a create proxy config request.
@@ -6289,6 +6638,13 @@ definitions:
       password:
         type: string
         description: The proxy password.
+      inboundProxyCidr:
+        type: array
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        items:
+          type: string
+        description: Allow these CIDR for Inbound communication.
   CreateProxyConfigResponse:
     type: object
     description: Response object for a create proxy config request.
@@ -7246,15 +7602,9 @@ definitions:
       imageId:
         type: string
         description: Target image ID for upgrade.
-        x-hidden: true
-        x-hidden-retention: BETA
-        x-hidden-reason: IN_DEVELOPMENT
       allowMajorOsUpgrade:
         type: boolean
         description: Allows the upgrade to a subsequent major OS version in the series.
-        x-hidden: true
-        x-hidden-retention: BETA
-        x-hidden-reason: IN_DEVELOPMENT
   UpgradeFreeipaResponse:
     type: object
     description: The response object for FreeIPA upgrade.
@@ -7268,6 +7618,33 @@ definitions:
       operationId:
         description: UUID of the request for this operation. This ID can be used for geting status on the operation.
         type: string
+  GetFreeipaUpgradeOptionsRequest:
+    type: object
+    description: The request object for retrieving FreeIPA upgrade candidates.
+    required:
+      - environment
+    properties:
+      environment:
+        type: string
+        description: The name or the CRN of the environment.
+      catalog:
+        type: string
+        description: The URL of the source image catalog. If not specify this option we'll use image catalog of the current image.
+      allowMajorOsUpgrade:
+        type: boolean
+        description: Allows the upgrade to a subsequent major OS version in the series.
+  GetFreeipaUpgradeOptionsResponse:
+    type: object
+    description: The response object with available FreeIPA upgrade candidates.
+    properties:
+      images:
+        type: array
+        description: The list of the upgrade candidates.
+        items:
+          $ref: '#/definitions/ImageInfoResponse'
+      currentImage:
+        description: The current image.
+        $ref: '#/definitions/ImageInfoResponse'
   UpscaleFreeipaRequest:
     type: object
     description: The request object for FreeIPA upscale.
@@ -7470,6 +7847,7 @@ definitions:
     description: Request object for starting secret rotation for FreeIPA.
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     required:
       - environment
       - secretTypes
@@ -7485,6 +7863,7 @@ definitions:
   RotateFreeipaSecretsResponse:
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     type: object
     description: Response object for rotating secrets.
   ListFreeipaSecretTypesRequest:
@@ -7492,6 +7871,7 @@ definitions:
     description: Request for listing possible secret values for Freeipa.
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     required:
       - environment
     properties:
@@ -7501,6 +7881,7 @@ definitions:
   ListFreeipaSecretTypesResponse:
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     type: object
     description: Response for listing possible secret values for Freeipa.
     required:
@@ -7514,6 +7895,7 @@ definitions:
   SecretTypeResponse:
     x-hidden: true
     x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
     x-mutating: false
     type: object
     description: Response object for showing the secret types and descriptions.
@@ -7672,3 +8054,115 @@ definitions:
   UpdateFreeipaToAwsImdsV1Response:
     type: object
     description: Response object for updating corresponding FreeIPA of the given environment to AWS IMDSv1.
+  OperationResponse:
+    type: object
+    description: Response object for a FreeIPA operation.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
+    properties:
+      operationId:
+        type: string
+        description: Operation ID of the request for this operation. This ID can be used for getting status of the operation.
+      status:
+        description: Status of this operation.
+        $ref: '#/definitions/OperationStatus'
+      successfulOperationDetails:
+        type: array
+        description: List of details for all successful operations. If the operation is only partially successful both successful and failure operation details will be populated.
+        items:
+          $ref: '#/definitions/OperationDetails'
+      failureOperationDetails:
+        type: array
+        description: List of details for failed operations. If the operation is only partially successful both successful and failure operation details will be populated.
+        items:
+          $ref: '#/definitions/OperationDetails'
+      error:
+        type: string
+        description: The error will be populated on any error and it may be populated when the operation failure details are empty. Typically contains high level information such as the associated failure phase.
+      startDate:
+        type: string
+        format: date-time
+        description: Date when the operation started.
+      endDate:
+        type: string
+        format: date-time
+        description: Date when the operation ended. Omitted if operation has not ended.
+  OperationStatus:
+    type: string
+    description: Status of an operation.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
+    enum:
+      - NEVER_RUN
+      - REQUESTED
+      - REJECTED
+      - RUNNING
+      - COMPLETED
+      - FAILED
+      - TIMEDOUT
+  OperationDetails:
+    type: object
+    description: Details object of the operation for success or falure.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    x-hidden-retention: BETA
+    required:
+      - environmentCrn
+    properties:
+      environmentCrn:
+        description: environment crn.
+        type: string
+      message:
+        type: string
+        description: The detail of the success or failure.
+  GetFreeipaSecretEncryptionKeyIdsRequest:
+    type: object
+    description: Request object for getting the secret encryption keys' IDs of the FreeIPA cluster.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    required:
+      - environmentCrn
+    properties:
+      environmentCrn:
+        type: string
+        description: The CRN of the environment.
+  GetFreeipaSecretEncryptionKeyIdsResponse:
+    type: object
+    description: Response object containing the secret encryption keys' IDs of the FreeIPA cluster.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      encryptionKeyLuks:
+        type: string
+        description: The LUKS (Linux Unified Key Setup) encryption key of the cluster.
+      encryptionKeyCloudSecretManager:
+        type: string
+        description: The Cloud Secret Manager encryption key of the cluster.
+  SecurityRequest:
+    type: object
+    description: Security related configuration for Data Hub cluster.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      seLinux:
+        x-entitlement: CDP_SECURITY_ENFORCING_SELINUX
+        type: string
+        description: Override default SELinux configuration which is PERMISSIVE by default
+        enum:
+          - PERMISSIVE
+          - ENFORCING
+  SecurityResponse:
+    type: object
+    description: Security related configuration for Data Hub cluster.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      seLinux:
+        x-entitlement: CDP_SECURITY_ENFORCING_SELINUX
+        type: string
+        description: Override default SELinux configuration which is PERMISSIVE by default
+        enum:
+          - PERMISSIVE
+          - ENFORCING

@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.FreeipaDiagnosticsCollectionDetailsResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for diagnostic collection flow details.
@@ -100,10 +95,11 @@ public class FreeipaDiagnosticsCollectionResponse {
   public static final String JSON_PROPERTY_COLLECTION_DETAILS = "collectionDetails";
   private FreeipaDiagnosticsCollectionDetailsResponse collectionDetails;
 
-  public FreeipaDiagnosticsCollectionResponse() { 
+  public FreeipaDiagnosticsCollectionResponse() {
   }
 
   public FreeipaDiagnosticsCollectionResponse status(StatusEnum status) {
+    
     this.status = status;
     return this;
   }
@@ -129,6 +125,7 @@ public class FreeipaDiagnosticsCollectionResponse {
 
 
   public FreeipaDiagnosticsCollectionResponse flowId(String flowId) {
+    
     this.flowId = flowId;
     return this;
   }
@@ -154,6 +151,7 @@ public class FreeipaDiagnosticsCollectionResponse {
 
 
   public FreeipaDiagnosticsCollectionResponse flowState(String flowState) {
+    
     this.flowState = flowState;
     return this;
   }
@@ -179,6 +177,7 @@ public class FreeipaDiagnosticsCollectionResponse {
 
 
   public FreeipaDiagnosticsCollectionResponse created(OffsetDateTime created) {
+    
     this.created = created;
     return this;
   }
@@ -204,6 +203,7 @@ public class FreeipaDiagnosticsCollectionResponse {
 
 
   public FreeipaDiagnosticsCollectionResponse progressPercentage(Integer progressPercentage) {
+    
     this.progressPercentage = progressPercentage;
     return this;
   }
@@ -229,6 +229,7 @@ public class FreeipaDiagnosticsCollectionResponse {
 
 
   public FreeipaDiagnosticsCollectionResponse collectionDetails(FreeipaDiagnosticsCollectionDetailsResponse collectionDetails) {
+    
     this.collectionDetails = collectionDetails;
     return this;
   }
@@ -252,10 +253,6 @@ public class FreeipaDiagnosticsCollectionResponse {
     this.collectionDetails = collectionDetails;
   }
 
-
-  /**
-   * Return true if this FreeipaDiagnosticsCollectionResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -303,69 +300,5 @@ public class FreeipaDiagnosticsCollectionResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `flowId` to the URL query string
-    if (getFlowId() != null) {
-      joiner.add(String.format("%sflowId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getFlowId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `flowState` to the URL query string
-    if (getFlowState() != null) {
-      joiner.add(String.format("%sflowState%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getFlowState()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `created` to the URL query string
-    if (getCreated() != null) {
-      joiner.add(String.format("%screated%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreated()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `progressPercentage` to the URL query string
-    if (getProgressPercentage() != null) {
-      joiner.add(String.format("%sprogressPercentage%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProgressPercentage()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `collectionDetails` to the URL query string
-    if (getCollectionDetails() != null) {
-      joiner.add(getCollectionDetails().toUrlQueryString(prefix + "collectionDetails" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

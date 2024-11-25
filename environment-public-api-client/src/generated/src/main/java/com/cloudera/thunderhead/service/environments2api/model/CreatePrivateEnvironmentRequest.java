@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CreatePrivateEnvironmentRequestDockerUserPass;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a create private cloud environment request.
@@ -127,10 +123,11 @@ public class CreatePrivateEnvironmentRequest {
   public static final String JSON_PROPERTY_STORAGE_CLASS = "storageClass";
   private String storageClass;
 
-  public CreatePrivateEnvironmentRequest() { 
+  public CreatePrivateEnvironmentRequest() {
   }
 
   public CreatePrivateEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -156,6 +153,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest address(String address) {
+    
     this.address = address;
     return this;
   }
@@ -181,6 +179,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest user(String user) {
+    
     this.user = user;
     return this;
   }
@@ -206,6 +205,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest authenticationToken(String authenticationToken) {
+    
     this.authenticationToken = authenticationToken;
     return this;
   }
@@ -231,6 +231,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest clusterNames(List<String> clusterNames) {
+    
     this.clusterNames = clusterNames;
     return this;
   }
@@ -264,6 +265,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest kubeConfig(String kubeConfig) {
+    
     this.kubeConfig = kubeConfig;
     return this;
   }
@@ -289,6 +291,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest authenticationTokenType(AuthenticationTokenTypeEnum authenticationTokenType) {
+    
     this.authenticationTokenType = authenticationTokenType;
     return this;
   }
@@ -314,6 +317,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest namespacePrefix(String namespacePrefix) {
+    
     this.namespacePrefix = namespacePrefix;
     return this;
   }
@@ -339,6 +343,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest domain(String domain) {
+    
     this.domain = domain;
     return this;
   }
@@ -364,6 +369,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest platform(String platform) {
+    
     this.platform = platform;
     return this;
   }
@@ -389,6 +395,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest dockerConfigJson(String dockerConfigJson) {
+    
     this.dockerConfigJson = dockerConfigJson;
     return this;
   }
@@ -414,6 +421,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest dockerUserPass(CreatePrivateEnvironmentRequestDockerUserPass dockerUserPass) {
+    
     this.dockerUserPass = dockerUserPass;
     return this;
   }
@@ -439,6 +447,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -464,6 +473,7 @@ public class CreatePrivateEnvironmentRequest {
 
 
   public CreatePrivateEnvironmentRequest storageClass(String storageClass) {
+    
     this.storageClass = storageClass;
     return this;
   }
@@ -487,10 +497,6 @@ public class CreatePrivateEnvironmentRequest {
     this.storageClass = storageClass;
   }
 
-
-  /**
-   * Return true if this CreatePrivateEnvironmentRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -554,113 +560,5 @@ public class CreatePrivateEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `address` to the URL query string
-    if (getAddress() != null) {
-      joiner.add(String.format("%saddress%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAddress()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `user` to the URL query string
-    if (getUser() != null) {
-      joiner.add(String.format("%suser%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUser()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `authenticationToken` to the URL query string
-    if (getAuthenticationToken() != null) {
-      joiner.add(String.format("%sauthenticationToken%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAuthenticationToken()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `clusterNames` to the URL query string
-    if (getClusterNames() != null) {
-      for (int i = 0; i < getClusterNames().size(); i++) {
-        joiner.add(String.format("%sclusterNames%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getClusterNames().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `kubeConfig` to the URL query string
-    if (getKubeConfig() != null) {
-      joiner.add(String.format("%skubeConfig%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getKubeConfig()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `authenticationTokenType` to the URL query string
-    if (getAuthenticationTokenType() != null) {
-      joiner.add(String.format("%sauthenticationTokenType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAuthenticationTokenType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `namespacePrefix` to the URL query string
-    if (getNamespacePrefix() != null) {
-      joiner.add(String.format("%snamespacePrefix%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNamespacePrefix()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `domain` to the URL query string
-    if (getDomain() != null) {
-      joiner.add(String.format("%sdomain%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDomain()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `platform` to the URL query string
-    if (getPlatform() != null) {
-      joiner.add(String.format("%splatform%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPlatform()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dockerConfigJson` to the URL query string
-    if (getDockerConfigJson() != null) {
-      joiner.add(String.format("%sdockerConfigJson%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDockerConfigJson()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dockerUserPass` to the URL query string
-    if (getDockerUserPass() != null) {
-      joiner.add(getDockerUserPass().toUrlQueryString(prefix + "dockerUserPass" + suffix));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `storageClass` to the URL query string
-    if (getStorageClass() != null) {
-      joiner.add(String.format("%sstorageClass%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStorageClass()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

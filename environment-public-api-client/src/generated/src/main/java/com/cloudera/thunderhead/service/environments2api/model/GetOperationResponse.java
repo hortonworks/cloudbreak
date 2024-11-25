@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for tracking the latest (current/last) operation on the environment resource.
@@ -92,10 +87,11 @@ public class GetOperationResponse {
   public static final String JSON_PROPERTY_PROGRESS = "progress";
   private Integer progress;
 
-  public GetOperationResponse() { 
+  public GetOperationResponse() {
   }
 
   public GetOperationResponse operationId(String operationId) {
+    
     this.operationId = operationId;
     return this;
   }
@@ -121,6 +117,7 @@ public class GetOperationResponse {
 
 
   public GetOperationResponse operationType(String operationType) {
+    
     this.operationType = operationType;
     return this;
   }
@@ -146,6 +143,7 @@ public class GetOperationResponse {
 
 
   public GetOperationResponse operationStatus(OperationStatusEnum operationStatus) {
+    
     this.operationStatus = operationStatus;
     return this;
   }
@@ -171,6 +169,7 @@ public class GetOperationResponse {
 
 
   public GetOperationResponse progress(Integer progress) {
+    
     this.progress = progress;
     return this;
   }
@@ -194,10 +193,6 @@ public class GetOperationResponse {
     this.progress = progress;
   }
 
-
-  /**
-   * Return true if this GetOperationResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -241,59 +236,5 @@ public class GetOperationResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `operationId` to the URL query string
-    if (getOperationId() != null) {
-      joiner.add(String.format("%soperationId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `operationType` to the URL query string
-    if (getOperationType() != null) {
-      joiner.add(String.format("%soperationType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `operationStatus` to the URL query string
-    if (getOperationStatus() != null) {
-      joiner.add(String.format("%soperationStatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `progress` to the URL query string
-    if (getProgress() != null) {
-      joiner.add(String.format("%sprogress%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProgress()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

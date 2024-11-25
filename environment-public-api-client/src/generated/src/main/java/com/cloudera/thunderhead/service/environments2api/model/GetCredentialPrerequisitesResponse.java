@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AwsCredentialPrerequisitesResponse;
 import com.cloudera.thunderhead.service.environments2api.model.AzureCredentialPrerequisitesResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The credential prerequisites for AWS.
@@ -53,10 +48,11 @@ public class GetCredentialPrerequisitesResponse {
   public static final String JSON_PROPERTY_AZURE = "azure";
   private AzureCredentialPrerequisitesResponse azure;
 
-  public GetCredentialPrerequisitesResponse() { 
+  public GetCredentialPrerequisitesResponse() {
   }
 
   public GetCredentialPrerequisitesResponse cloudPlatform(String cloudPlatform) {
+    
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -82,6 +78,7 @@ public class GetCredentialPrerequisitesResponse {
 
 
   public GetCredentialPrerequisitesResponse accountId(String accountId) {
+    
     this.accountId = accountId;
     return this;
   }
@@ -107,6 +104,7 @@ public class GetCredentialPrerequisitesResponse {
 
 
   public GetCredentialPrerequisitesResponse aws(AwsCredentialPrerequisitesResponse aws) {
+    
     this.aws = aws;
     return this;
   }
@@ -132,6 +130,7 @@ public class GetCredentialPrerequisitesResponse {
 
 
   public GetCredentialPrerequisitesResponse azure(AzureCredentialPrerequisitesResponse azure) {
+    
     this.azure = azure;
     return this;
   }
@@ -155,10 +154,6 @@ public class GetCredentialPrerequisitesResponse {
     this.azure = azure;
   }
 
-
-  /**
-   * Return true if this GetCredentialPrerequisitesResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -202,59 +197,5 @@ public class GetCredentialPrerequisitesResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `cloudPlatform` to the URL query string
-    if (getCloudPlatform() != null) {
-      joiner.add(String.format("%scloudPlatform%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudPlatform()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `accountId` to the URL query string
-    if (getAccountId() != null) {
-      joiner.add(String.format("%saccountId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAccountId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `aws` to the URL query string
-    if (getAws() != null) {
-      joiner.add(getAws().toUrlQueryString(prefix + "aws" + suffix));
-    }
-
-    // add `azure` to the URL query string
-    if (getAzure() != null) {
-      joiner.add(getAzure().toUrlQueryString(prefix + "azure" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

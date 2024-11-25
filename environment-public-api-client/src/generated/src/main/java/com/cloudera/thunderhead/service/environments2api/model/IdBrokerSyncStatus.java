@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.SyncStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Status of an ID Broker mappings sync operation.
@@ -53,10 +48,11 @@ public class IdBrokerSyncStatus {
   public static final String JSON_PROPERTY_ERROR_DETAIL = "errorDetail";
   private String errorDetail;
 
-  public IdBrokerSyncStatus() { 
+  public IdBrokerSyncStatus() {
   }
 
   public IdBrokerSyncStatus status(SyncStatus status) {
+    
     this.status = status;
     return this;
   }
@@ -82,6 +78,7 @@ public class IdBrokerSyncStatus {
 
 
   public IdBrokerSyncStatus startDate(OffsetDateTime startDate) {
+    
     this.startDate = startDate;
     return this;
   }
@@ -107,6 +104,7 @@ public class IdBrokerSyncStatus {
 
 
   public IdBrokerSyncStatus endDate(OffsetDateTime endDate) {
+    
     this.endDate = endDate;
     return this;
   }
@@ -132,6 +130,7 @@ public class IdBrokerSyncStatus {
 
 
   public IdBrokerSyncStatus errorDetail(String errorDetail) {
+    
     this.errorDetail = errorDetail;
     return this;
   }
@@ -155,10 +154,6 @@ public class IdBrokerSyncStatus {
     this.errorDetail = errorDetail;
   }
 
-
-  /**
-   * Return true if this IdBrokerSyncStatus object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -202,59 +197,5 @@ public class IdBrokerSyncStatus {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `startDate` to the URL query string
-    if (getStartDate() != null) {
-      joiner.add(String.format("%sstartDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStartDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endDate` to the URL query string
-    if (getEndDate() != null) {
-      joiner.add(String.format("%sendDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `errorDetail` to the URL query string
-    if (getErrorDetail() != null) {
-      joiner.add(String.format("%serrorDetail%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getErrorDetail()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

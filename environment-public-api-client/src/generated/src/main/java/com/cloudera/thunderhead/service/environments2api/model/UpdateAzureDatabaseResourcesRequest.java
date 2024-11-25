@@ -13,12 +13,9 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
+import com.cloudera.thunderhead.service.environments2api.model.ServiceEndpointsCreation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for updating Azure Database resources.
@@ -36,7 +33,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
   UpdateAzureDatabaseResourcesRequest.JSON_PROPERTY_ENVIRONMENT,
   UpdateAzureDatabaseResourcesRequest.JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID,
-  UpdateAzureDatabaseResourcesRequest.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS
+  UpdateAzureDatabaseResourcesRequest.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS,
+  UpdateAzureDatabaseResourcesRequest.JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class UpdateAzureDatabaseResourcesRequest {
@@ -49,10 +47,14 @@ public class UpdateAzureDatabaseResourcesRequest {
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
-  public UpdateAzureDatabaseResourcesRequest() { 
+  public static final String JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION = "serviceEndpointsCreation";
+  private ServiceEndpointsCreation serviceEndpointsCreation;
+
+  public UpdateAzureDatabaseResourcesRequest() {
   }
 
   public UpdateAzureDatabaseResourcesRequest environment(String environment) {
+    
     this.environment = environment;
     return this;
   }
@@ -78,6 +80,7 @@ public class UpdateAzureDatabaseResourcesRequest {
 
 
   public UpdateAzureDatabaseResourcesRequest databasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+    
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
@@ -103,6 +106,7 @@ public class UpdateAzureDatabaseResourcesRequest {
 
 
   public UpdateAzureDatabaseResourcesRequest flexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+    
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
   }
@@ -135,9 +139,31 @@ public class UpdateAzureDatabaseResourcesRequest {
   }
 
 
-  /**
-   * Return true if this UpdateAzureDatabaseResourcesRequest object is equal to o.
-   */
+  public UpdateAzureDatabaseResourcesRequest serviceEndpointsCreation(ServiceEndpointsCreation serviceEndpointsCreation) {
+    
+    this.serviceEndpointsCreation = serviceEndpointsCreation;
+    return this;
+  }
+
+   /**
+   * Get serviceEndpointsCreation
+   * @return serviceEndpointsCreation
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public ServiceEndpointsCreation getServiceEndpointsCreation() {
+    return serviceEndpointsCreation;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setServiceEndpointsCreation(ServiceEndpointsCreation serviceEndpointsCreation) {
+    this.serviceEndpointsCreation = serviceEndpointsCreation;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -149,12 +175,13 @@ public class UpdateAzureDatabaseResourcesRequest {
     UpdateAzureDatabaseResourcesRequest updateAzureDatabaseResourcesRequest = (UpdateAzureDatabaseResourcesRequest) o;
     return Objects.equals(this.environment, updateAzureDatabaseResourcesRequest.environment) &&
         Objects.equals(this.databasePrivateDnsZoneId, updateAzureDatabaseResourcesRequest.databasePrivateDnsZoneId) &&
-        Objects.equals(this.flexibleServerSubnetIds, updateAzureDatabaseResourcesRequest.flexibleServerSubnetIds);
+        Objects.equals(this.flexibleServerSubnetIds, updateAzureDatabaseResourcesRequest.flexibleServerSubnetIds) &&
+        Objects.equals(this.serviceEndpointsCreation, updateAzureDatabaseResourcesRequest.serviceEndpointsCreation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environment, databasePrivateDnsZoneId, flexibleServerSubnetIds);
+    return Objects.hash(environment, databasePrivateDnsZoneId, flexibleServerSubnetIds, serviceEndpointsCreation);
   }
 
   @Override
@@ -164,6 +191,7 @@ public class UpdateAzureDatabaseResourcesRequest {
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    databasePrivateDnsZoneId: ").append(toIndentedString(databasePrivateDnsZoneId)).append("\n");
     sb.append("    flexibleServerSubnetIds: ").append(toIndentedString(flexibleServerSubnetIds)).append("\n");
+    sb.append("    serviceEndpointsCreation: ").append(toIndentedString(serviceEndpointsCreation)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -179,58 +207,5 @@ public class UpdateAzureDatabaseResourcesRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environment` to the URL query string
-    if (getEnvironment() != null) {
-      joiner.add(String.format("%senvironment%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironment()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `databasePrivateDnsZoneId` to the URL query string
-    if (getDatabasePrivateDnsZoneId() != null) {
-      joiner.add(String.format("%sdatabasePrivateDnsZoneId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDatabasePrivateDnsZoneId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `flexibleServerSubnetIds` to the URL query string
-    if (getFlexibleServerSubnetIds() != null) {
-      for (int i = 0; i < getFlexibleServerSubnetIds().size(); i++) {
-        joiner.add(String.format("%sflexibleServerSubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getFlexibleServerSubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

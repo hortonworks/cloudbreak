@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Endpoint of an Service Discovery Service
@@ -47,10 +42,11 @@ public class ServiceEndPoint {
   public static final String JSON_PROPERTY_URI = "uri";
   private String uri;
 
-  public ServiceEndPoint() { 
+  public ServiceEndPoint() {
   }
 
   public ServiceEndPoint host(String host) {
+    
     this.host = host;
     return this;
   }
@@ -76,6 +72,7 @@ public class ServiceEndPoint {
 
 
   public ServiceEndPoint port(Integer port) {
+    
     this.port = port;
     return this;
   }
@@ -101,6 +98,7 @@ public class ServiceEndPoint {
 
 
   public ServiceEndPoint uri(String uri) {
+    
     this.uri = uri;
     return this;
   }
@@ -124,10 +122,6 @@ public class ServiceEndPoint {
     this.uri = uri;
   }
 
-
-  /**
-   * Return true if this ServiceEndPoint object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,54 +163,5 @@ public class ServiceEndPoint {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `host` to the URL query string
-    if (getHost() != null) {
-      joiner.add(String.format("%shost%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getHost()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `port` to the URL query string
-    if (getPort() != null) {
-      joiner.add(String.format("%sport%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPort()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `uri` to the URL query string
-    if (getUri() != null) {
-      joiner.add(String.format("%suri%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUri()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

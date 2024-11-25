@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Alternative to dockerConfigJson.
@@ -37,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreatePrivateEnvironmentRequestDockerUserPass.JSON_PROPERTY_EMAIL,
   CreatePrivateEnvironmentRequestDockerUserPass.JSON_PROPERTY_SERVER
 })
+@JsonTypeName("CreatePrivateEnvironmentRequest_dockerUserPass")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class CreatePrivateEnvironmentRequestDockerUserPass {
   public static final String JSON_PROPERTY_USERNAME = "username";
@@ -51,10 +47,11 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
   public static final String JSON_PROPERTY_SERVER = "server";
   private String server;
 
-  public CreatePrivateEnvironmentRequestDockerUserPass() { 
+  public CreatePrivateEnvironmentRequestDockerUserPass() {
   }
 
   public CreatePrivateEnvironmentRequestDockerUserPass username(String username) {
+    
     this.username = username;
     return this;
   }
@@ -80,6 +77,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
 
   public CreatePrivateEnvironmentRequestDockerUserPass password(String password) {
+    
     this.password = password;
     return this;
   }
@@ -105,6 +103,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
 
   public CreatePrivateEnvironmentRequestDockerUserPass email(String email) {
+    
     this.email = email;
     return this;
   }
@@ -130,6 +129,7 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
 
 
   public CreatePrivateEnvironmentRequestDockerUserPass server(String server) {
+    
     this.server = server;
     return this;
   }
@@ -153,10 +153,6 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
     this.server = server;
   }
 
-
-  /**
-   * Return true if this CreatePrivateEnvironmentRequest_dockerUserPass object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -200,59 +196,5 @@ public class CreatePrivateEnvironmentRequestDockerUserPass {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `username` to the URL query string
-    if (getUsername() != null) {
-      joiner.add(String.format("%susername%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUsername()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `password` to the URL query string
-    if (getPassword() != null) {
-      joiner.add(String.format("%spassword%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPassword()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `email` to the URL query string
-    if (getEmail() != null) {
-      joiner.add(String.format("%semail%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEmail()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `server` to the URL query string
-    if (getServer() != null) {
-      joiner.add(String.format("%sserver%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getServer()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

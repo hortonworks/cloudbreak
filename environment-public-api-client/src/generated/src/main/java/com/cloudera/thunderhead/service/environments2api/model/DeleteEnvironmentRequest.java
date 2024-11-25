@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a delete environment request.
@@ -47,10 +42,11 @@ public class DeleteEnvironmentRequest {
   public static final String JSON_PROPERTY_FORCED = "forced";
   private Boolean forced;
 
-  public DeleteEnvironmentRequest() { 
+  public DeleteEnvironmentRequest() {
   }
 
   public DeleteEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -76,6 +72,7 @@ public class DeleteEnvironmentRequest {
 
 
   public DeleteEnvironmentRequest cascading(Boolean cascading) {
+    
     this.cascading = cascading;
     return this;
   }
@@ -101,6 +98,7 @@ public class DeleteEnvironmentRequest {
 
 
   public DeleteEnvironmentRequest forced(Boolean forced) {
+    
     this.forced = forced;
     return this;
   }
@@ -124,10 +122,6 @@ public class DeleteEnvironmentRequest {
     this.forced = forced;
   }
 
-
-  /**
-   * Return true if this DeleteEnvironmentRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,54 +163,5 @@ public class DeleteEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cascading` to the URL query string
-    if (getCascading() != null) {
-      joiner.add(String.format("%scascading%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCascading()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `forced` to the URL query string
-    if (getForced() != null) {
-      joiner.add(String.format("%sforced%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getForced()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

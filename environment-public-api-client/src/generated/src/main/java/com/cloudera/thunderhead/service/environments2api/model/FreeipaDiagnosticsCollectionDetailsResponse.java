@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for diagnostic collection details.
@@ -67,10 +62,11 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
   public static final String JSON_PROPERTY_STATUS_REASON = "statusReason";
   private String statusReason;
 
-  public FreeipaDiagnosticsCollectionDetailsResponse() { 
+  public FreeipaDiagnosticsCollectionDetailsResponse() {
   }
 
   public FreeipaDiagnosticsCollectionDetailsResponse _case(String _case) {
+    
     this._case = _case;
     return this;
   }
@@ -96,6 +92,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse output(String output) {
+    
     this.output = output;
     return this;
   }
@@ -121,6 +118,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse destination(String destination) {
+    
     this.destination = destination;
     return this;
   }
@@ -146,6 +144,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -171,6 +170,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse accountId(String accountId) {
+    
     this.accountId = accountId;
     return this;
   }
@@ -196,6 +196,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse resourceCrn(String resourceCrn) {
+    
     this.resourceCrn = resourceCrn;
     return this;
   }
@@ -221,6 +222,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse clusterVersion(String clusterVersion) {
+    
     this.clusterVersion = clusterVersion;
     return this;
   }
@@ -246,6 +248,7 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
 
 
   public FreeipaDiagnosticsCollectionDetailsResponse statusReason(String statusReason) {
+    
     this.statusReason = statusReason;
     return this;
   }
@@ -269,10 +272,6 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
     this.statusReason = statusReason;
   }
 
-
-  /**
-   * Return true if this FreeipaDiagnosticsCollectionDetailsResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -324,79 +323,5 @@ public class FreeipaDiagnosticsCollectionDetailsResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `case` to the URL query string
-    if (getCase() != null) {
-      joiner.add(String.format("%scase%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCase()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `output` to the URL query string
-    if (getOutput() != null) {
-      joiner.add(String.format("%soutput%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOutput()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `destination` to the URL query string
-    if (getDestination() != null) {
-      joiner.add(String.format("%sdestination%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDestination()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `accountId` to the URL query string
-    if (getAccountId() != null) {
-      joiner.add(String.format("%saccountId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAccountId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `resourceCrn` to the URL query string
-    if (getResourceCrn() != null) {
-      joiner.add(String.format("%sresourceCrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getResourceCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `clusterVersion` to the URL query string
-    if (getClusterVersion() != null) {
-      joiner.add(String.format("%sclusterVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getClusterVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `statusReason` to the URL query string
-    if (getStatusReason() != null) {
-      joiner.add(String.format("%sstatusReason%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatusReason()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

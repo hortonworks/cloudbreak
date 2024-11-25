@@ -13,21 +13,16 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.ImageInfoResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The response object for FreeIPA upgrade.
@@ -48,10 +43,11 @@ public class UpgradeFreeipaResponse {
   public static final String JSON_PROPERTY_OPERATION_ID = "operationId";
   private String operationId;
 
-  public UpgradeFreeipaResponse() { 
+  public UpgradeFreeipaResponse() {
   }
 
   public UpgradeFreeipaResponse targetImage(ImageInfoResponse targetImage) {
+    
     this.targetImage = targetImage;
     return this;
   }
@@ -77,6 +73,7 @@ public class UpgradeFreeipaResponse {
 
 
   public UpgradeFreeipaResponse originalImage(ImageInfoResponse originalImage) {
+    
     this.originalImage = originalImage;
     return this;
   }
@@ -102,6 +99,7 @@ public class UpgradeFreeipaResponse {
 
 
   public UpgradeFreeipaResponse operationId(String operationId) {
+    
     this.operationId = operationId;
     return this;
   }
@@ -125,10 +123,6 @@ public class UpgradeFreeipaResponse {
     this.operationId = operationId;
   }
 
-
-  /**
-   * Return true if this UpgradeFreeipaResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -170,54 +164,5 @@ public class UpgradeFreeipaResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `targetImage` to the URL query string
-    if (getTargetImage() != null) {
-      joiner.add(getTargetImage().toUrlQueryString(prefix + "targetImage" + suffix));
-    }
-
-    // add `originalImage` to the URL query string
-    if (getOriginalImage() != null) {
-      joiner.add(getOriginalImage().toUrlQueryString(prefix + "originalImage" + suffix));
-    }
-
-    // add `operationId` to the URL query string
-    if (getOperationId() != null) {
-      joiner.add(String.format("%soperationId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The attached volume configuration.
@@ -47,10 +42,11 @@ public class AttachedVolumeDetail {
   public static final String JSON_PROPERTY_SIZE = "size";
   private Integer size;
 
-  public AttachedVolumeDetail() { 
+  public AttachedVolumeDetail() {
   }
 
   public AttachedVolumeDetail count(Integer count) {
+    
     this.count = count;
     return this;
   }
@@ -76,6 +72,7 @@ public class AttachedVolumeDetail {
 
 
   public AttachedVolumeDetail volumeType(String volumeType) {
+    
     this.volumeType = volumeType;
     return this;
   }
@@ -101,6 +98,7 @@ public class AttachedVolumeDetail {
 
 
   public AttachedVolumeDetail size(Integer size) {
+    
     this.size = size;
     return this;
   }
@@ -124,10 +122,6 @@ public class AttachedVolumeDetail {
     this.size = size;
   }
 
-
-  /**
-   * Return true if this AttachedVolumeDetail object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,54 +163,5 @@ public class AttachedVolumeDetail {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `count` to the URL query string
-    if (getCount() != null) {
-      joiner.add(String.format("%scount%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCount()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `volumeType` to the URL query string
-    if (getVolumeType() != null) {
-      joiner.add(String.format("%svolumeType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getVolumeType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `size` to the URL query string
-    if (getSize() != null) {
-      joiner.add(String.format("%ssize%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSize()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

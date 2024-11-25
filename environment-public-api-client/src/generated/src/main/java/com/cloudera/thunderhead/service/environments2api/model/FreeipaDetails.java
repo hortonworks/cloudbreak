@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaInstance;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Details of a FreeIPA cluster.
@@ -73,10 +69,11 @@ public class FreeipaDetails {
   public static final String JSON_PROPERTY_MULTI_AZ = "multiAz";
   private Boolean multiAz;
 
-  public FreeipaDetails() { 
+  public FreeipaDetails() {
   }
 
   public FreeipaDetails crn(String crn) {
+    
     this.crn = crn;
     return this;
   }
@@ -102,6 +99,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails domain(String domain) {
+    
     this.domain = domain;
     return this;
   }
@@ -127,6 +125,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails hostname(String hostname) {
+    
     this.hostname = hostname;
     return this;
   }
@@ -152,6 +151,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails serverIP(Set<String> serverIP) {
+    
     this.serverIP = serverIP;
     return this;
   }
@@ -186,6 +186,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails recipes(List<String> recipes) {
+    
     this.recipes = recipes;
     return this;
   }
@@ -219,6 +220,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails instances(Set<FreeIpaInstance> instances) {
+    
     this.instances = instances;
     return this;
   }
@@ -253,6 +255,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails instanceCountByGroup(Integer instanceCountByGroup) {
+    
     this.instanceCountByGroup = instanceCountByGroup;
     return this;
   }
@@ -278,6 +281,7 @@ public class FreeipaDetails {
 
 
   public FreeipaDetails multiAz(Boolean multiAz) {
+    
     this.multiAz = multiAz;
     return this;
   }
@@ -301,10 +305,6 @@ public class FreeipaDetails {
     this.multiAz = multiAz;
   }
 
-
-  /**
-   * Return true if this FreeipaDetails object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -356,96 +356,5 @@ public class FreeipaDetails {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `crn` to the URL query string
-    if (getCrn() != null) {
-      joiner.add(String.format("%scrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `domain` to the URL query string
-    if (getDomain() != null) {
-      joiner.add(String.format("%sdomain%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDomain()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `hostname` to the URL query string
-    if (getHostname() != null) {
-      joiner.add(String.format("%shostname%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getHostname()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `serverIP` to the URL query string
-    if (getServerIP() != null) {
-      int i = 0;
-      for (String _item : getServerIP()) {
-        joiner.add(String.format("%sserverIP%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `recipes` to the URL query string
-    if (getRecipes() != null) {
-      for (int i = 0; i < getRecipes().size(); i++) {
-        joiner.add(String.format("%srecipes%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getRecipes().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `instances` to the URL query string
-    if (getInstances() != null) {
-      int i = 0;
-      for (FreeIpaInstance _item : getInstances()) {
-        if (_item != null) {
-          joiner.add(_item.toUrlQueryString(String.format("%sinstances%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-      i++;
-    }
-
-    // add `instanceCountByGroup` to the URL query string
-    if (getInstanceCountByGroup() != null) {
-      joiner.add(String.format("%sinstanceCountByGroup%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceCountByGroup()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `multiAz` to the URL query string
-    if (getMultiAz() != null) {
-      joiner.add(String.format("%smultiAz%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getMultiAz()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

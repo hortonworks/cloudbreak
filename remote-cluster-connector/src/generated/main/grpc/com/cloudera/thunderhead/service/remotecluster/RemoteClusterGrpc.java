@@ -173,6 +173,99 @@ public final class RemoteClusterGrpc {
     return getTestPvcControlPlaneConnectivityMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> getListRemoteClustersMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListRemoteClusters",
+      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.class,
+      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> getListRemoteClustersMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> getListRemoteClustersMethod;
+    if ((getListRemoteClustersMethod = RemoteClusterGrpc.getListRemoteClustersMethod) == null) {
+      synchronized (RemoteClusterGrpc.class) {
+        if ((getListRemoteClustersMethod = RemoteClusterGrpc.getListRemoteClustersMethod) == null) {
+          RemoteClusterGrpc.getListRemoteClustersMethod = getListRemoteClustersMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListRemoteClusters"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("ListRemoteClusters"))
+              .build();
+        }
+      }
+    }
+    return getListRemoteClustersMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getGetRemoteClusterMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetRemoteCluster",
+      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.class,
+      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getGetRemoteClusterMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getGetRemoteClusterMethod;
+    if ((getGetRemoteClusterMethod = RemoteClusterGrpc.getGetRemoteClusterMethod) == null) {
+      synchronized (RemoteClusterGrpc.class) {
+        if ((getGetRemoteClusterMethod = RemoteClusterGrpc.getGetRemoteClusterMethod) == null) {
+          RemoteClusterGrpc.getGetRemoteClusterMethod = getGetRemoteClusterMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetRemoteCluster"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("GetRemoteCluster"))
+              .build();
+        }
+      }
+    }
+    return getGetRemoteClusterMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getGetServiceDetailsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetServiceDetails",
+      requestType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.class,
+      responseType = com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest,
+      com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getGetServiceDetailsMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getGetServiceDetailsMethod;
+    if ((getGetServiceDetailsMethod = RemoteClusterGrpc.getGetServiceDetailsMethod) == null) {
+      synchronized (RemoteClusterGrpc.class) {
+        if ((getGetServiceDetailsMethod = RemoteClusterGrpc.getGetServiceDetailsMethod) == null) {
+          RemoteClusterGrpc.getGetServiceDetailsMethod = getGetServiceDetailsMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest, com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetServiceDetails"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new RemoteClusterMethodDescriptorSupplier("GetServiceDetails"))
+              .build();
+        }
+      }
+    }
+    return getGetServiceDetailsMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -273,6 +366,36 @@ public final class RemoteClusterGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getTestPvcControlPlaneConnectivityMethod(), responseObserver);
     }
+
+    /**
+     * <pre>
+     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * </pre>
+     */
+    default void listRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRemoteClustersMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get the remote cluster details. :: Get the remote cluster details.
+     * </pre>
+     */
+    default void getRemoteCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetRemoteClusterMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Gets the service details of the cluster. :: Gets the service details of the cluster.
+     * </pre>
+     */
+    default void getServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetServiceDetailsMethod(), responseObserver);
+    }
   }
 
   /**
@@ -362,6 +485,39 @@ public final class RemoteClusterGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getTestPvcControlPlaneConnectivityMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * </pre>
+     */
+    public void listRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListRemoteClustersMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get the remote cluster details. :: Get the remote cluster details.
+     * </pre>
+     */
+    public void getRemoteCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetRemoteClusterMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Gets the service details of the cluster. :: Gets the service details of the cluster.
+     * </pre>
+     */
+    public void getServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetServiceDetailsMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -431,6 +587,36 @@ public final class RemoteClusterGrpc {
     public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse testPvcControlPlaneConnectivity(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getTestPvcControlPlaneConnectivityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse listRemoteClusters(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListRemoteClustersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the remote cluster details. :: Get the remote cluster details.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse getRemoteCluster(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetRemoteClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Gets the service details of the cluster. :: Gets the service details of the cluster.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse getServiceDetails(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetServiceDetailsMethod(), getCallOptions(), request);
     }
   }
 
@@ -507,6 +693,39 @@ public final class RemoteClusterGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getTestPvcControlPlaneConnectivityMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Lists all the registered remote clusters. :: Lists all the registered remote clusters.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse> listRemoteClusters(
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListRemoteClustersMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get the remote cluster details. :: Get the remote cluster details.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse> getRemoteCluster(
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetRemoteClusterMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Gets the service details of the cluster. :: Gets the service details of the cluster.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse> getServiceDetails(
+        com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetServiceDetailsMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_REGISTER_PVC_CONTROL_PLANE = 0;
@@ -514,6 +733,9 @@ public final class RemoteClusterGrpc {
   private static final int METHODID_DESCRIBE_PVC_CONTROL_PLANE = 2;
   private static final int METHODID_LIST_PVC_CONTROL_PLANES = 3;
   private static final int METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY = 4;
+  private static final int METHODID_LIST_REMOTE_CLUSTERS = 5;
+  private static final int METHODID_GET_REMOTE_CLUSTER = 6;
+  private static final int METHODID_GET_SERVICE_DETAILS = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -551,6 +773,18 @@ public final class RemoteClusterGrpc {
         case METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY:
           serviceImpl.testPvcControlPlaneConnectivity((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse>) responseObserver);
+          break;
+        case METHODID_LIST_REMOTE_CLUSTERS:
+          serviceImpl.listRemoteClusters((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse>) responseObserver);
+          break;
+        case METHODID_GET_REMOTE_CLUSTER:
+          serviceImpl.getRemoteCluster((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse>) responseObserver);
+          break;
+        case METHODID_GET_SERVICE_DETAILS:
+          serviceImpl.getServiceDetails((com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -605,6 +839,27 @@ public final class RemoteClusterGrpc {
               com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest,
               com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse>(
                 service, METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY)))
+        .addMethod(
+          getListRemoteClustersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListRemoteClustersResponse>(
+                service, METHODID_LIST_REMOTE_CLUSTERS)))
+        .addMethod(
+          getGetRemoteClusterMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetRemoteClusterResponse>(
+                service, METHODID_GET_REMOTE_CLUSTER)))
+        .addMethod(
+          getGetServiceDetailsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.GetServiceDetailsResponse>(
+                service, METHODID_GET_SERVICE_DETAILS)))
         .build();
   }
 
@@ -658,6 +913,9 @@ public final class RemoteClusterGrpc {
               .addMethod(getDescribePvcControlPlaneMethod())
               .addMethod(getListPvcControlPlanesMethod())
               .addMethod(getTestPvcControlPlaneConnectivityMethod())
+              .addMethod(getListRemoteClustersMethod())
+              .addMethod(getGetRemoteClusterMethod())
+              .addMethod(getGetServiceDetailsMethod())
               .build();
         }
       }

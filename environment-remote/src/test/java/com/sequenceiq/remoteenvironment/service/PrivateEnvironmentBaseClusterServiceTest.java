@@ -44,21 +44,22 @@ class PrivateEnvironmentBaseClusterServiceTest {
 
     static Stream<Arguments> testRegisterHappyPathsValueProvider() {
         return Stream.of(
-                Arguments.of("https://testcloud:7183", "testcloud", 7183, true),
-                Arguments.of("https://testcloud-1.test-hybrid.root.comops.site:7183", "testcloud-1.test-hybrid.root.comops.site", 7183, true),
-                Arguments.of("https://testcloud-1.test-hybrid.root.comops.site:7183/almafa", "testcloud-1.test-hybrid.root.comops.site", 7183, true),
-                Arguments.of("http://testcloud-1.test-hybrid.root.comops.site:7180/almafa", "testcloud-1.test-hybrid.root.comops.site", 7180, false),
-                Arguments.of("http://testcloud-1.test-hybrid.root.comops.site:7180/", "testcloud-1.test-hybrid.root.comops.site", 7180, false),
-                Arguments.of("https://testcloud-1.test-hybrid.root.comops.site:7183/cdp-proxy...", "testcloud-1.test-hybrid.root.comops.site", 7183, true)
+                Arguments.of("https://testcloud:7183", ""),
+                Arguments.of("https://testcloud-1.test-hybrid.root.comops.site:7183", ""),
+                Arguments.of("https://testcloud-1.test-hybrid.root.comops.site:7183/almafa", "https://testcloudknox:7183"),
+                Arguments.of("http://testcloud-1.test-hybrid.root.comops.site:7180/almafa", "https://knoxGatewayUrl:7183/knoxknox"),
+                Arguments.of("http://testcloud-1.test-hybrid.root.comops.site:7180/", ""),
+                Arguments.of("https://testcloud-1.test-hybrid.root.comops.site:7183/cdp-proxy...", "https://knoxGatewayUrl:7183/knox/....")
         );
     }
 
     @ParameterizedTest
     @MethodSource("testRegisterHappyPathsValueProvider")
-    void testRegisterHappyPaths(String cmHost, String expectedHostname, int expectedCmPort, boolean expectedIsHttpsEnabled) {
+    void testRegisterHappyPaths(String cmUrl, String knoxGatewayUrl) {
         String baseClusterCrn = "baseClusterCrn";
         DescribeEnvironmentResponse envDetails = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
-        when(envDetails.getEnvironment().getPvcEnvironmentDetails().getCmHost()).thenReturn(cmHost);
+        when(envDetails.getEnvironment().getPvcEnvironmentDetails().getCmHost()).thenReturn(cmUrl);
+        when(envDetails.getEnvironment().getPvcEnvironmentDetails().getKnoxGatewayUrl()).thenReturn(knoxGatewayUrl);
         when(envDetails.getEnvironment().getEnvironmentName()).thenReturn(ENVIRONMENT_NAME);
         when(grpcRemoteClusterClient.registerPrivateEnvironmentBaseCluster(any())).thenReturn(baseClusterCrn);
 
@@ -68,9 +69,8 @@ class PrivateEnvironmentBaseClusterServiceTest {
         verify(grpcRemoteClusterClient, times(1)).registerPrivateEnvironmentBaseCluster(regRequestCaptor.capture());
         assertEquals(baseClusterCrn, registerBaseClusterCrn);
         RegisterPvcBaseClusterRequest capturedRequest = regRequestCaptor.getValue();
-        assertEquals(expectedHostname, capturedRequest.getCmHostname());
-        assertEquals(expectedCmPort, capturedRequest.getCmPort());
-        assertEquals(expectedIsHttpsEnabled, capturedRequest.getIsHttpSecure());
+        assertEquals(cmUrl, capturedRequest.getCmUrl());
+        assertEquals(knoxGatewayUrl, capturedRequest.getKnoxGatewayUrl());
         assertEquals(CONTROL_PLANE_NAME + "_" + ENVIRONMENT_NAME + "_datacenter", capturedRequest.getDcName());
     }
 

@@ -13,22 +13,17 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The request object for updating the tags of the given environment.
@@ -45,10 +40,11 @@ public class UpdateTagsRequest {
   public static final String JSON_PROPERTY_TAGS = "tags";
   private Map<String, String> tags = new HashMap<>();
 
-  public UpdateTagsRequest() { 
+  public UpdateTagsRequest() {
   }
 
   public UpdateTagsRequest environment(String environment) {
+    
     this.environment = environment;
     return this;
   }
@@ -74,14 +70,12 @@ public class UpdateTagsRequest {
 
 
   public UpdateTagsRequest tags(Map<String, String> tags) {
+    
     this.tags = tags;
     return this;
   }
 
   public UpdateTagsRequest putTagsItem(String key, String tagsItem) {
-    if (this.tags == null) {
-      this.tags = new HashMap<>();
-    }
     this.tags.put(key, tagsItem);
     return this;
   }
@@ -105,10 +99,6 @@ public class UpdateTagsRequest {
     this.tags = tags;
   }
 
-
-  /**
-   * Return true if this UpdateTagsRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -148,53 +138,5 @@ public class UpdateTagsRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environment` to the URL query string
-    if (getEnvironment() != null) {
-      joiner.add(String.format("%senvironment%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironment()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tags` to the URL query string
-    if (getTags() != null) {
-      for (String _key : getTags().keySet()) {
-        joiner.add(String.format("%stags%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getTags().get(_key), URLEncoder.encode(String.valueOf(getTags().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

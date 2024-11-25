@@ -13,22 +13,17 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Detailed set of cloud providers region to image mappings.
@@ -49,10 +44,11 @@ public class ImageReferenceSet {
   public static final String JSON_PROPERTY_GCP = "gcp";
   private Map<String, String> gcp = new HashMap<>();
 
-  public ImageReferenceSet() { 
+  public ImageReferenceSet() {
   }
 
   public ImageReferenceSet aws(Map<String, String> aws) {
+    
     this.aws = aws;
     return this;
   }
@@ -86,6 +82,7 @@ public class ImageReferenceSet {
 
 
   public ImageReferenceSet azure(Map<String, String> azure) {
+    
     this.azure = azure;
     return this;
   }
@@ -119,6 +116,7 @@ public class ImageReferenceSet {
 
 
   public ImageReferenceSet gcp(Map<String, String> gcp) {
+    
     this.gcp = gcp;
     return this;
   }
@@ -150,10 +148,6 @@ public class ImageReferenceSet {
     this.gcp = gcp;
   }
 
-
-  /**
-   * Return true if this ImageReferenceSet object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -195,66 +189,5 @@ public class ImageReferenceSet {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `aws` to the URL query string
-    if (getAws() != null) {
-      for (String _key : getAws().keySet()) {
-        joiner.add(String.format("%saws%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getAws().get(_key), URLEncoder.encode(String.valueOf(getAws().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `azure` to the URL query string
-    if (getAzure() != null) {
-      for (String _key : getAzure().keySet()) {
-        joiner.add(String.format("%sazure%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getAzure().get(_key), URLEncoder.encode(String.valueOf(getAzure().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `gcp` to the URL query string
-    if (getGcp() != null) {
-      for (String _key : getGcp().keySet()) {
-        joiner.add(String.format("%sgcp%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getGcp().get(_key), URLEncoder.encode(String.valueOf(getGcp().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,27 +13,26 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for creating Externalized compute cluster for the environment.
  */
 @JsonPropertyOrder({
   AWSComputeClusterConfigurationRequest.JSON_PROPERTY_PRIVATE_CLUSTER,
-  AWSComputeClusterConfigurationRequest.JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES
+  AWSComputeClusterConfigurationRequest.JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES,
+  AWSComputeClusterConfigurationRequest.JSON_PROPERTY_WORKER_NODE_SUBNETS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class AWSComputeClusterConfigurationRequest {
@@ -41,12 +40,16 @@ public class AWSComputeClusterConfigurationRequest {
   private Boolean privateCluster;
 
   public static final String JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES = "kubeApiAuthorizedIpRanges";
-  private String kubeApiAuthorizedIpRanges;
+  private List<String> kubeApiAuthorizedIpRanges = new ArrayList<>();
 
-  public AWSComputeClusterConfigurationRequest() { 
+  public static final String JSON_PROPERTY_WORKER_NODE_SUBNETS = "workerNodeSubnets";
+  private List<String> workerNodeSubnets = new ArrayList<>();
+
+  public AWSComputeClusterConfigurationRequest() {
   }
 
   public AWSComputeClusterConfigurationRequest privateCluster(Boolean privateCluster) {
+    
     this.privateCluster = privateCluster;
     return this;
   }
@@ -71,34 +74,73 @@ public class AWSComputeClusterConfigurationRequest {
   }
 
 
-  public AWSComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
+  public AWSComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(List<String> kubeApiAuthorizedIpRanges) {
+    
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     return this;
   }
 
+  public AWSComputeClusterConfigurationRequest addKubeApiAuthorizedIpRangesItem(String kubeApiAuthorizedIpRangesItem) {
+    if (this.kubeApiAuthorizedIpRanges == null) {
+      this.kubeApiAuthorizedIpRanges = new ArrayList<>();
+    }
+    this.kubeApiAuthorizedIpRanges.add(kubeApiAuthorizedIpRangesItem);
+    return this;
+  }
+
    /**
-   * Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster. Default value is 0.0.0.0/0.
+   * Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster.
    * @return kubeApiAuthorizedIpRanges
   **/
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getKubeApiAuthorizedIpRanges() {
+  public List<String> getKubeApiAuthorizedIpRanges() {
     return kubeApiAuthorizedIpRanges;
   }
 
 
   @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
+  public void setKubeApiAuthorizedIpRanges(List<String> kubeApiAuthorizedIpRanges) {
     this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
   }
 
 
-  /**
-   * Return true if this AWSComputeClusterConfigurationRequest object is equal to o.
-   */
+  public AWSComputeClusterConfigurationRequest workerNodeSubnets(List<String> workerNodeSubnets) {
+    
+    this.workerNodeSubnets = workerNodeSubnets;
+    return this;
+  }
+
+  public AWSComputeClusterConfigurationRequest addWorkerNodeSubnetsItem(String workerNodeSubnetsItem) {
+    if (this.workerNodeSubnets == null) {
+      this.workerNodeSubnets = new ArrayList<>();
+    }
+    this.workerNodeSubnets.add(workerNodeSubnetsItem);
+    return this;
+  }
+
+   /**
+   * Specify subnets for Kubernetes Worker Nodes
+   * @return workerNodeSubnets
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<String> getWorkerNodeSubnets() {
+    return workerNodeSubnets;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_WORKER_NODE_SUBNETS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setWorkerNodeSubnets(List<String> workerNodeSubnets) {
+    this.workerNodeSubnets = workerNodeSubnets;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -109,12 +151,13 @@ public class AWSComputeClusterConfigurationRequest {
     }
     AWSComputeClusterConfigurationRequest awSComputeClusterConfigurationRequest = (AWSComputeClusterConfigurationRequest) o;
     return Objects.equals(this.privateCluster, awSComputeClusterConfigurationRequest.privateCluster) &&
-        Objects.equals(this.kubeApiAuthorizedIpRanges, awSComputeClusterConfigurationRequest.kubeApiAuthorizedIpRanges);
+        Objects.equals(this.kubeApiAuthorizedIpRanges, awSComputeClusterConfigurationRequest.kubeApiAuthorizedIpRanges) &&
+        Objects.equals(this.workerNodeSubnets, awSComputeClusterConfigurationRequest.workerNodeSubnets);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(privateCluster, kubeApiAuthorizedIpRanges);
+    return Objects.hash(privateCluster, kubeApiAuthorizedIpRanges, workerNodeSubnets);
   }
 
   @Override
@@ -123,6 +166,7 @@ public class AWSComputeClusterConfigurationRequest {
     sb.append("class AWSComputeClusterConfigurationRequest {\n");
     sb.append("    privateCluster: ").append(toIndentedString(privateCluster)).append("\n");
     sb.append("    kubeApiAuthorizedIpRanges: ").append(toIndentedString(kubeApiAuthorizedIpRanges)).append("\n");
+    sb.append("    workerNodeSubnets: ").append(toIndentedString(workerNodeSubnets)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -138,49 +182,5 @@ public class AWSComputeClusterConfigurationRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `privateCluster` to the URL query string
-    if (getPrivateCluster() != null) {
-      joiner.add(String.format("%sprivateCluster%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPrivateCluster()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `kubeApiAuthorizedIpRanges` to the URL query string
-    if (getKubeApiAuthorizedIpRanges() != null) {
-      joiner.add(String.format("%skubeApiAuthorizedIpRanges%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getKubeApiAuthorizedIpRanges()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

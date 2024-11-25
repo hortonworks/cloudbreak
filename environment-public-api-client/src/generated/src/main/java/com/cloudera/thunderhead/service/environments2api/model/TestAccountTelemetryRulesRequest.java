@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AnonymizationRuleRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for testing text input against provided account telemetry anonymization rules.
@@ -46,10 +42,11 @@ public class TestAccountTelemetryRulesRequest {
   public static final String JSON_PROPERTY_RULES = "rules";
   private List<AnonymizationRuleRequest> rules = new ArrayList<>();
 
-  public TestAccountTelemetryRulesRequest() { 
+  public TestAccountTelemetryRulesRequest() {
   }
 
   public TestAccountTelemetryRulesRequest testInput(String testInput) {
+    
     this.testInput = testInput;
     return this;
   }
@@ -75,6 +72,7 @@ public class TestAccountTelemetryRulesRequest {
 
 
   public TestAccountTelemetryRulesRequest rules(List<AnonymizationRuleRequest> rules) {
+    
     this.rules = rules;
     return this;
   }
@@ -106,10 +104,6 @@ public class TestAccountTelemetryRulesRequest {
     this.rules = rules;
   }
 
-
-  /**
-   * Return true if this TestAccountTelemetryRulesRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -149,54 +143,5 @@ public class TestAccountTelemetryRulesRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `testInput` to the URL query string
-    if (getTestInput() != null) {
-      joiner.add(String.format("%stestInput%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTestInput()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `rules` to the URL query string
-    if (getRules() != null) {
-      for (int i = 0; i < getRules().size(); i++) {
-        if (getRules().get(i) != null) {
-          joiner.add(getRules().get(i).toUrlQueryString(String.format("%srules%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

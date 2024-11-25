@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Azure network parameters.
@@ -41,7 +37,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   NetworkAzureParams.JSON_PROPERTY_DATABASE_PRIVATE_DNS_ZONE_ID,
   NetworkAzureParams.JSON_PROPERTY_AKS_PRIVATE_DNS_ZONE_ID,
   NetworkAzureParams.JSON_PROPERTY_ENABLE_OUTBOUND_LOAD_BALANCER,
-  NetworkAzureParams.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS
+  NetworkAzureParams.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS,
+  NetworkAzureParams.JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class NetworkAzureParams {
@@ -69,10 +66,14 @@ public class NetworkAzureParams {
   public static final String JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS = "flexibleServerSubnetIds";
   private List<String> flexibleServerSubnetIds = new ArrayList<>();
 
-  public NetworkAzureParams() { 
+  public static final String JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS = "usePublicDnsForPrivateAks";
+  private Boolean usePublicDnsForPrivateAks;
+
+  public NetworkAzureParams() {
   }
 
   public NetworkAzureParams networkId(String networkId) {
+    
     this.networkId = networkId;
     return this;
   }
@@ -98,6 +99,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams resourceGroupName(String resourceGroupName) {
+    
     this.resourceGroupName = resourceGroupName;
     return this;
   }
@@ -123,6 +125,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams usePublicIp(Boolean usePublicIp) {
+    
     this.usePublicIp = usePublicIp;
     return this;
   }
@@ -148,6 +151,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams networkName(String networkName) {
+    
     this.networkName = networkName;
     return this;
   }
@@ -173,6 +177,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams databasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+    
     this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     return this;
   }
@@ -198,6 +203,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams aksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+    
     this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
     return this;
   }
@@ -223,6 +229,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams enableOutboundLoadBalancer(Boolean enableOutboundLoadBalancer) {
+    
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
     return this;
   }
@@ -248,6 +255,7 @@ public class NetworkAzureParams {
 
 
   public NetworkAzureParams flexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+    
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
   }
@@ -280,9 +288,31 @@ public class NetworkAzureParams {
   }
 
 
-  /**
-   * Return true if this NetworkAzureParams object is equal to o.
-   */
+  public NetworkAzureParams usePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+    
+    this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
+    return this;
+  }
+
+   /**
+   * Use public DNS for all DNS records in a private cluster.
+   * @return usePublicDnsForPrivateAks
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getUsePublicDnsForPrivateAks() {
+    return usePublicDnsForPrivateAks;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setUsePublicDnsForPrivateAks(Boolean usePublicDnsForPrivateAks) {
+    this.usePublicDnsForPrivateAks = usePublicDnsForPrivateAks;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -299,12 +329,13 @@ public class NetworkAzureParams {
         Objects.equals(this.databasePrivateDnsZoneId, networkAzureParams.databasePrivateDnsZoneId) &&
         Objects.equals(this.aksPrivateDnsZoneId, networkAzureParams.aksPrivateDnsZoneId) &&
         Objects.equals(this.enableOutboundLoadBalancer, networkAzureParams.enableOutboundLoadBalancer) &&
-        Objects.equals(this.flexibleServerSubnetIds, networkAzureParams.flexibleServerSubnetIds);
+        Objects.equals(this.flexibleServerSubnetIds, networkAzureParams.flexibleServerSubnetIds) &&
+        Objects.equals(this.usePublicDnsForPrivateAks, networkAzureParams.usePublicDnsForPrivateAks);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(networkId, resourceGroupName, usePublicIp, networkName, databasePrivateDnsZoneId, aksPrivateDnsZoneId, enableOutboundLoadBalancer, flexibleServerSubnetIds);
+    return Objects.hash(networkId, resourceGroupName, usePublicIp, networkName, databasePrivateDnsZoneId, aksPrivateDnsZoneId, enableOutboundLoadBalancer, flexibleServerSubnetIds, usePublicDnsForPrivateAks);
   }
 
   @Override
@@ -319,6 +350,7 @@ public class NetworkAzureParams {
     sb.append("    aksPrivateDnsZoneId: ").append(toIndentedString(aksPrivateDnsZoneId)).append("\n");
     sb.append("    enableOutboundLoadBalancer: ").append(toIndentedString(enableOutboundLoadBalancer)).append("\n");
     sb.append("    flexibleServerSubnetIds: ").append(toIndentedString(flexibleServerSubnetIds)).append("\n");
+    sb.append("    usePublicDnsForPrivateAks: ").append(toIndentedString(usePublicDnsForPrivateAks)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -334,83 +366,5 @@ public class NetworkAzureParams {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `networkId` to the URL query string
-    if (getNetworkId() != null) {
-      joiner.add(String.format("%snetworkId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNetworkId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `resourceGroupName` to the URL query string
-    if (getResourceGroupName() != null) {
-      joiner.add(String.format("%sresourceGroupName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getResourceGroupName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `usePublicIp` to the URL query string
-    if (getUsePublicIp() != null) {
-      joiner.add(String.format("%susePublicIp%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUsePublicIp()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `networkName` to the URL query string
-    if (getNetworkName() != null) {
-      joiner.add(String.format("%snetworkName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNetworkName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `databasePrivateDnsZoneId` to the URL query string
-    if (getDatabasePrivateDnsZoneId() != null) {
-      joiner.add(String.format("%sdatabasePrivateDnsZoneId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDatabasePrivateDnsZoneId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `aksPrivateDnsZoneId` to the URL query string
-    if (getAksPrivateDnsZoneId() != null) {
-      joiner.add(String.format("%saksPrivateDnsZoneId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAksPrivateDnsZoneId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableOutboundLoadBalancer` to the URL query string
-    if (getEnableOutboundLoadBalancer() != null) {
-      joiner.add(String.format("%senableOutboundLoadBalancer%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableOutboundLoadBalancer()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `flexibleServerSubnetIds` to the URL query string
-    if (getFlexibleServerSubnetIds() != null) {
-      for (int i = 0; i < getFlexibleServerSubnetIds().size(); i++) {
-        joiner.add(String.format("%sflexibleServerSubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getFlexibleServerSubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,21 +13,16 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The certificate used for the credential
@@ -91,10 +86,11 @@ public class AzureCredentialCertificateProperties {
   public static final String JSON_PROPERTY_BASE64 = "base64";
   private String base64;
 
-  public AzureCredentialCertificateProperties() { 
+  public AzureCredentialCertificateProperties() {
   }
 
   public AzureCredentialCertificateProperties status(StatusEnum status) {
+    
     this.status = status;
     return this;
   }
@@ -120,6 +116,7 @@ public class AzureCredentialCertificateProperties {
 
 
   public AzureCredentialCertificateProperties expiration(String expiration) {
+    
     this.expiration = expiration;
     return this;
   }
@@ -145,6 +142,7 @@ public class AzureCredentialCertificateProperties {
 
 
   public AzureCredentialCertificateProperties expirationDate(OffsetDateTime expirationDate) {
+    
     this.expirationDate = expirationDate;
     return this;
   }
@@ -170,6 +168,7 @@ public class AzureCredentialCertificateProperties {
 
 
   public AzureCredentialCertificateProperties sha512(String sha512) {
+    
     this.sha512 = sha512;
     return this;
   }
@@ -195,6 +194,7 @@ public class AzureCredentialCertificateProperties {
 
 
   public AzureCredentialCertificateProperties base64(String base64) {
+    
     this.base64 = base64;
     return this;
   }
@@ -218,10 +218,6 @@ public class AzureCredentialCertificateProperties {
     this.base64 = base64;
   }
 
-
-  /**
-   * Return true if this AzureCredentialCertificateProperties object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -267,64 +263,5 @@ public class AzureCredentialCertificateProperties {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `expiration` to the URL query string
-    if (getExpiration() != null) {
-      joiner.add(String.format("%sexpiration%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getExpiration()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `expirationDate` to the URL query string
-    if (getExpirationDate() != null) {
-      joiner.add(String.format("%sexpirationDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getExpirationDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `sha512` to the URL query string
-    if (getSha512() != null) {
-      joiner.add(String.format("%ssha512%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSha512()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `base64` to the URL query string
-    if (getBase64() != null) {
-      joiner.add(String.format("%sbase64%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getBase64()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

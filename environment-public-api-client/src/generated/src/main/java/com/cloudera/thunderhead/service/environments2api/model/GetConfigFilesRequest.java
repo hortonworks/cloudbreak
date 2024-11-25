@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for Datalake client configs.
@@ -110,10 +106,11 @@ public class GetConfigFilesRequest {
   public static final String JSON_PROPERTY_ADDITIONAL_SERVICES = "additionalServices";
   private String additionalServices;
 
-  public GetConfigFilesRequest() { 
+  public GetConfigFilesRequest() {
   }
 
   public GetConfigFilesRequest datalakeCrn(String datalakeCrn) {
+    
     this.datalakeCrn = datalakeCrn;
     return this;
   }
@@ -139,6 +136,7 @@ public class GetConfigFilesRequest {
 
 
   public GetConfigFilesRequest configSet(ConfigSetEnum configSet) {
+    
     this.configSet = configSet;
     return this;
   }
@@ -164,6 +162,7 @@ public class GetConfigFilesRequest {
 
 
   public GetConfigFilesRequest serviceOverrideList(List<String> serviceOverrideList) {
+    
     this.serviceOverrideList = serviceOverrideList;
     return this;
   }
@@ -197,6 +196,7 @@ public class GetConfigFilesRequest {
 
 
   public GetConfigFilesRequest additionalServices(String additionalServices) {
+    
     this.additionalServices = additionalServices;
     return this;
   }
@@ -220,10 +220,6 @@ public class GetConfigFilesRequest {
     this.additionalServices = additionalServices;
   }
 
-
-  /**
-   * Return true if this GetConfigFilesRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -267,63 +263,5 @@ public class GetConfigFilesRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `datalakeCrn` to the URL query string
-    if (getDatalakeCrn() != null) {
-      joiner.add(String.format("%sdatalakeCrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDatalakeCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `configSet` to the URL query string
-    if (getConfigSet() != null) {
-      joiner.add(String.format("%sconfigSet%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getConfigSet()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `serviceOverrideList` to the URL query string
-    if (getServiceOverrideList() != null) {
-      for (int i = 0; i < getServiceOverrideList().size(); i++) {
-        joiner.add(String.format("%sserviceOverrideList%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getServiceOverrideList().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `additionalServices` to the URL query string
-    if (getAdditionalServices() != null) {
-      joiner.add(String.format("%sadditionalServices%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAdditionalServices()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

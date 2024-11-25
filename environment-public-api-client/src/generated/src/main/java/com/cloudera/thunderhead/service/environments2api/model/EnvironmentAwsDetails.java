@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * AWS-specific environment configuration information.
@@ -34,21 +29,23 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
   EnvironmentAwsDetails.JSON_PROPERTY_S3_GUARD_TABLE_NAME
 })
+@JsonTypeName("Environment_awsDetails")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class EnvironmentAwsDetails {
   public static final String JSON_PROPERTY_S3_GUARD_TABLE_NAME = "s3GuardTableName";
   private String s3GuardTableName;
 
-  public EnvironmentAwsDetails() { 
+  public EnvironmentAwsDetails() {
   }
 
   public EnvironmentAwsDetails s3GuardTableName(String s3GuardTableName) {
+    
     this.s3GuardTableName = s3GuardTableName;
     return this;
   }
 
    /**
-   * The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+   * Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
    * @return s3GuardTableName
   **/
   @javax.annotation.Nullable
@@ -66,10 +63,6 @@ public class EnvironmentAwsDetails {
     this.s3GuardTableName = s3GuardTableName;
   }
 
-
-  /**
-   * Return true if this Environment_awsDetails object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -107,44 +100,5 @@ public class EnvironmentAwsDetails {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `s3GuardTableName` to the URL query string
-    if (getS3GuardTableName() != null) {
-      joiner.add(String.format("%ss3GuardTableName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getS3GuardTableName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for repairing the FreeIPA servers.
@@ -90,10 +86,11 @@ public class RepairFreeipaRequest {
   public static final String JSON_PROPERTY_REPAIR_TYPE = "repairType";
   private RepairTypeEnum repairType;
 
-  public RepairFreeipaRequest() { 
+  public RepairFreeipaRequest() {
   }
 
   public RepairFreeipaRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -119,6 +116,7 @@ public class RepairFreeipaRequest {
 
 
   public RepairFreeipaRequest force(Boolean force) {
+    
     this.force = force;
     return this;
   }
@@ -144,6 +142,7 @@ public class RepairFreeipaRequest {
 
 
   public RepairFreeipaRequest instances(List<String> instances) {
+    
     this.instances = instances;
     return this;
   }
@@ -177,6 +176,7 @@ public class RepairFreeipaRequest {
 
 
   public RepairFreeipaRequest repairType(RepairTypeEnum repairType) {
+    
     this.repairType = repairType;
     return this;
   }
@@ -200,10 +200,6 @@ public class RepairFreeipaRequest {
     this.repairType = repairType;
   }
 
-
-  /**
-   * Return true if this RepairFreeipaRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -247,63 +243,5 @@ public class RepairFreeipaRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `force` to the URL query string
-    if (getForce() != null) {
-      joiner.add(String.format("%sforce%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getForce()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instances` to the URL query string
-    if (getInstances() != null) {
-      for (int i = 0; i < getInstances().size(); i++) {
-        joiner.add(String.format("%sinstances%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getInstances().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `repairType` to the URL query string
-    if (getRepairType() != null) {
-      joiner.add(String.format("%srepairType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRepairType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

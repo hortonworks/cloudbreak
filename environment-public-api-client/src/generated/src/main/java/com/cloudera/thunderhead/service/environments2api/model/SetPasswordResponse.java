@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.OperationType;
 import com.cloudera.thunderhead.service.environments2api.model.SyncOperationDetails;
 import com.cloudera.thunderhead.service.environments2api.model.SyncStatus;
@@ -32,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for set password request. (deprecated)
@@ -81,10 +77,11 @@ public class SetPasswordResponse {
   public static final String JSON_PROPERTY_END_DATE = "endDate";
   private OffsetDateTime endDate;
 
-  public SetPasswordResponse() { 
+  public SetPasswordResponse() {
   }
 
   public SetPasswordResponse operationId(String operationId) {
+    
     this.operationId = operationId;
     return this;
   }
@@ -110,6 +107,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse operationType(OperationType operationType) {
+    
     this.operationType = operationType;
     return this;
   }
@@ -135,6 +133,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse status(SyncStatus status) {
+    
     this.status = status;
     return this;
   }
@@ -160,6 +159,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse success(List<SyncOperationDetails> success) {
+    
     this.success = success;
     return this;
   }
@@ -193,6 +193,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse failure(List<SyncOperationDetails> failure) {
+    
     this.failure = failure;
     return this;
   }
@@ -226,6 +227,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse error(String error) {
+    
     this.error = error;
     return this;
   }
@@ -251,6 +253,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse startTime(String startTime) {
+    
     this.startTime = startTime;
     return this;
   }
@@ -276,6 +279,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse endTime(String endTime) {
+    
     this.endTime = endTime;
     return this;
   }
@@ -301,6 +305,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse startDate(OffsetDateTime startDate) {
+    
     this.startDate = startDate;
     return this;
   }
@@ -326,6 +331,7 @@ public class SetPasswordResponse {
 
 
   public SetPasswordResponse endDate(OffsetDateTime endDate) {
+    
     this.endDate = endDate;
     return this;
   }
@@ -349,10 +355,6 @@ public class SetPasswordResponse {
     this.endDate = endDate;
   }
 
-
-  /**
-   * Return true if this SetPasswordResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -408,99 +410,5 @@ public class SetPasswordResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `operationId` to the URL query string
-    if (getOperationId() != null) {
-      joiner.add(String.format("%soperationId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `operationType` to the URL query string
-    if (getOperationType() != null) {
-      joiner.add(String.format("%soperationType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `success` to the URL query string
-    if (getSuccess() != null) {
-      for (int i = 0; i < getSuccess().size(); i++) {
-        if (getSuccess().get(i) != null) {
-          joiner.add(getSuccess().get(i).toUrlQueryString(String.format("%ssuccess%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `failure` to the URL query string
-    if (getFailure() != null) {
-      for (int i = 0; i < getFailure().size(); i++) {
-        if (getFailure().get(i) != null) {
-          joiner.add(getFailure().get(i).toUrlQueryString(String.format("%sfailure%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `error` to the URL query string
-    if (getError() != null) {
-      joiner.add(String.format("%serror%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getError()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `startTime` to the URL query string
-    if (getStartTime() != null) {
-      joiner.add(String.format("%sstartTime%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStartTime()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endTime` to the URL query string
-    if (getEndTime() != null) {
-      joiner.add(String.format("%sendTime%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndTime()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `startDate` to the URL query string
-    if (getStartDate() != null) {
-      joiner.add(String.format("%sstartDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStartDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endDate` to the URL query string
-    if (getEndDate() != null) {
-      joiner.add(String.format("%sendDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

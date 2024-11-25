@@ -27,10 +27,35 @@ service RemoteClusterInternal {
       returns (GeneratePvcControlPlaneAuthTokenResponse) {
   }
 
+  // GeneratePvcWorkloadAuthToken method :: Generates a workload auth token for the requests sent to Private Cloud workload.
+  rpc GeneratePvcWorkloadAuthToken(GeneratePvcWorkloadAuthTokenRequest)
+      returns (GeneratePvcWorkloadAuthTokenResponse) {
+  }
+
   // RegisterPvcBaseCluster method :: Partially registers a base cluster from an already registered PvC Control Plane.
   rpc RegisterPvcBaseCluster (RegisterPvcBaseClusterRequest)
       returns (RegisterPvcBaseClusterResponse) {
   }
+}
+
+// Request object for the GeneratePvcWorkloadAuthToken method.
+message GeneratePvcWorkloadAuthTokenRequest {
+  // The account ID of the Private Cloud control plane.
+  string pvcId = 1 [(options.FieldExtension.required) = true];
+  // the workload name for the Workload
+  string workloadName = 2;
+  // the PvC environment CRN, and valid for workload name DF only.
+  string environmentCrn = 3;
+}
+
+// Response object for the GeneratePvcWorkloadAuthToken method.
+message GeneratePvcWorkloadAuthTokenResponse {
+  // the endpoint URL for the workload which the token was generated.
+  string endpointUrl = 1;
+  // The authentication token.
+  string token = 2 [(options.FieldExtension.sensitive) = true];
+  // When the token  will expire
+  string expireAt = 3;
 }
 
 // Request object for the ListAllPvcControlPlanes method.
@@ -52,13 +77,13 @@ message ListAllPvcControlPlanesResponse {
 // Request object for the GeneratePvcControlPlaneAuthToken method.
 message GeneratePvcControlPlaneAuthTokenRequest {
   // The account ID of the Private Cloud control plane.
-  string pvcId = 1;
+  string pvcId = 1 [(options.FieldExtension.required) = true];;
 }
 
 // Response object for the GeneratePvcControlPlaneAuthToken method.
 message GeneratePvcControlPlaneAuthTokenResponse {
   // The authentication token.
-  string token = 1;
+  string token = 1 [(options.FieldExtension.sensitive) = true];
 }
 
 // Request Object for RegisterPvcBaseCluster method.
@@ -77,6 +102,10 @@ message RegisterPvcBaseClusterRequest {
   string knoxIpAddress = 6;
   // The optional Knox IP Port.
   int32 knoxPort = 7;
+  // The Cloudera Manager URL.
+  string cmUrl = 8;
+  // The optional Knox Gateway URL.
+  string knoxGatewayUrl = 9;
 }
 
 // Response Object for RegisterPvcBaseCluster method.

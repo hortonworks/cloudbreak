@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AwsDiskEncryptionParameters;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,9 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for an update AWS encryption parameters request.
@@ -45,10 +40,11 @@ public class UpdateAwsDiskEncryptionParametersResponse {
   public static final String JSON_PROPERTY_AWS_DISK_ENCRYPTION_PARAMETERS = "awsDiskEncryptionParameters";
   private AwsDiskEncryptionParameters awsDiskEncryptionParameters;
 
-  public UpdateAwsDiskEncryptionParametersResponse() { 
+  public UpdateAwsDiskEncryptionParametersResponse() {
   }
 
   public UpdateAwsDiskEncryptionParametersResponse environment(Environment environment) {
+    
     this.environment = environment;
     return this;
   }
@@ -74,6 +70,7 @@ public class UpdateAwsDiskEncryptionParametersResponse {
 
 
   public UpdateAwsDiskEncryptionParametersResponse awsDiskEncryptionParameters(AwsDiskEncryptionParameters awsDiskEncryptionParameters) {
+    
     this.awsDiskEncryptionParameters = awsDiskEncryptionParameters;
     return this;
   }
@@ -97,10 +94,6 @@ public class UpdateAwsDiskEncryptionParametersResponse {
     this.awsDiskEncryptionParameters = awsDiskEncryptionParameters;
   }
 
-
-  /**
-   * Return true if this UpdateAwsDiskEncryptionParametersResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -140,49 +133,5 @@ public class UpdateAwsDiskEncryptionParametersResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environment` to the URL query string
-    if (getEnvironment() != null) {
-      joiner.add(getEnvironment().toUrlQueryString(prefix + "environment" + suffix));
-    }
-
-    // add `awsDiskEncryptionParameters` to the URL query string
-    if (getAwsDiskEncryptionParameters() != null) {
-      joiner.add(getAwsDiskEncryptionParameters().toUrlQueryString(prefix + "awsDiskEncryptionParameters" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

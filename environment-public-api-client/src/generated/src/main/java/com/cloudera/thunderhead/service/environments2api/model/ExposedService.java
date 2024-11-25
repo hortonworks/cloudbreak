@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.EnvValidation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Exposed CDP DC service object.
@@ -66,10 +62,11 @@ public class ExposedService {
   public static final String JSON_PROPERTY_SERVICE_VALIDATION_MESSAGES = "serviceValidationMessages";
   private List<EnvValidation> serviceValidationMessages = new ArrayList<>();
 
-  public ExposedService() { 
+  public ExposedService() {
   }
 
   public ExposedService name(String name) {
+    
     this.name = name;
     return this;
   }
@@ -95,6 +92,7 @@ public class ExposedService {
 
 
   public ExposedService type(String type) {
+    
     this.type = type;
     return this;
   }
@@ -120,6 +118,7 @@ public class ExposedService {
 
 
   public ExposedService displayName(String displayName) {
+    
     this.displayName = displayName;
     return this;
   }
@@ -145,6 +144,7 @@ public class ExposedService {
 
 
   public ExposedService serviceUrl(String serviceUrl) {
+    
     this.serviceUrl = serviceUrl;
     return this;
   }
@@ -170,6 +170,7 @@ public class ExposedService {
 
 
   public ExposedService serviceVersion(String serviceVersion) {
+    
     this.serviceVersion = serviceVersion;
     return this;
   }
@@ -195,6 +196,7 @@ public class ExposedService {
 
 
   public ExposedService status(String status) {
+    
     this.status = status;
     return this;
   }
@@ -220,6 +222,7 @@ public class ExposedService {
 
 
   public ExposedService serviceValidationMessages(List<EnvValidation> serviceValidationMessages) {
+    
     this.serviceValidationMessages = serviceValidationMessages;
     return this;
   }
@@ -251,10 +254,6 @@ public class ExposedService {
     this.serviceValidationMessages = serviceValidationMessages;
   }
 
-
-  /**
-   * Return true if this ExposedService object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -304,79 +303,5 @@ public class ExposedService {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `name` to the URL query string
-    if (getName() != null) {
-      joiner.add(String.format("%sname%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `type` to the URL query string
-    if (getType() != null) {
-      joiner.add(String.format("%stype%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `displayName` to the URL query string
-    if (getDisplayName() != null) {
-      joiner.add(String.format("%sdisplayName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDisplayName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `serviceUrl` to the URL query string
-    if (getServiceUrl() != null) {
-      joiner.add(String.format("%sserviceUrl%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getServiceUrl()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `serviceVersion` to the URL query string
-    if (getServiceVersion() != null) {
-      joiner.add(String.format("%sserviceVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getServiceVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `serviceValidationMessages` to the URL query string
-    if (getServiceValidationMessages() != null) {
-      for (int i = 0; i < getServiceValidationMessages().size(); i++) {
-        if (getServiceValidationMessages().get(i) != null) {
-          joiner.add(getServiceValidationMessages().get(i).toUrlQueryString(String.format("%sserviceValidationMessages%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

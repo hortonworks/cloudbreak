@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.FreeipaVmLogRequest;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for collecting FreeIPA diagnostics.
@@ -149,10 +145,11 @@ public class CollectFreeipaDiagnosticsRequest {
   public static final String JSON_PROPERTY_STORAGE_VALIDATION = "storageValidation";
   private Boolean storageValidation = false;
 
-  public CollectFreeipaDiagnosticsRequest() { 
+  public CollectFreeipaDiagnosticsRequest() {
   }
 
   public CollectFreeipaDiagnosticsRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -178,6 +175,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest destination(DestinationEnum destination) {
+    
     this.destination = destination;
     return this;
   }
@@ -203,6 +201,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -228,6 +227,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest caseNumber(String caseNumber) {
+    
     this.caseNumber = caseNumber;
     return this;
   }
@@ -253,6 +253,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest labels(Set<String> labels) {
+    
     this.labels = labels;
     return this;
   }
@@ -287,6 +288,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest startDate(OffsetDateTime startDate) {
+    
     this.startDate = startDate;
     return this;
   }
@@ -312,6 +314,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest endDate(OffsetDateTime endDate) {
+    
     this.endDate = endDate;
     return this;
   }
@@ -337,6 +340,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest additionalLogs(List<FreeipaVmLogRequest> additionalLogs) {
+    
     this.additionalLogs = additionalLogs;
     return this;
   }
@@ -370,6 +374,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest hosts(Set<String> hosts) {
+    
     this.hosts = hosts;
     return this;
   }
@@ -404,6 +409,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest hostGroups(Set<String> hostGroups) {
+    
     this.hostGroups = hostGroups;
     return this;
   }
@@ -438,6 +444,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest excludeHosts(Set<String> excludeHosts) {
+    
     this.excludeHosts = excludeHosts;
     return this;
   }
@@ -472,6 +479,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest skipUnresponsiveHosts(Boolean skipUnresponsiveHosts) {
+    
     this.skipUnresponsiveHosts = skipUnresponsiveHosts;
     return this;
   }
@@ -497,6 +505,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest includeNginxReport(Boolean includeNginxReport) {
+    
     this.includeNginxReport = includeNginxReport;
     return this;
   }
@@ -522,6 +531,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest includeSaltLogs(Boolean includeSaltLogs) {
+    
     this.includeSaltLogs = includeSaltLogs;
     return this;
   }
@@ -547,6 +557,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest includeSarOutput(Boolean includeSarOutput) {
+    
     this.includeSarOutput = includeSarOutput;
     return this;
   }
@@ -572,6 +583,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest updatePackage(Boolean updatePackage) {
+    
     this.updatePackage = updatePackage;
     return this;
   }
@@ -597,6 +609,7 @@ public class CollectFreeipaDiagnosticsRequest {
 
 
   public CollectFreeipaDiagnosticsRequest storageValidation(Boolean storageValidation) {
+    
     this.storageValidation = storageValidation;
     return this;
   }
@@ -620,10 +633,6 @@ public class CollectFreeipaDiagnosticsRequest {
     this.storageValidation = storageValidation;
   }
 
-
-  /**
-   * Return true if this CollectFreeipaDiagnosticsRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -693,153 +702,5 @@ public class CollectFreeipaDiagnosticsRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `destination` to the URL query string
-    if (getDestination() != null) {
-      joiner.add(String.format("%sdestination%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDestination()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `caseNumber` to the URL query string
-    if (getCaseNumber() != null) {
-      joiner.add(String.format("%scaseNumber%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCaseNumber()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `labels` to the URL query string
-    if (getLabels() != null) {
-      int i = 0;
-      for (String _item : getLabels()) {
-        joiner.add(String.format("%slabels%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `startDate` to the URL query string
-    if (getStartDate() != null) {
-      joiner.add(String.format("%sstartDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStartDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endDate` to the URL query string
-    if (getEndDate() != null) {
-      joiner.add(String.format("%sendDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `additionalLogs` to the URL query string
-    if (getAdditionalLogs() != null) {
-      for (int i = 0; i < getAdditionalLogs().size(); i++) {
-        if (getAdditionalLogs().get(i) != null) {
-          joiner.add(getAdditionalLogs().get(i).toUrlQueryString(String.format("%sadditionalLogs%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `hosts` to the URL query string
-    if (getHosts() != null) {
-      int i = 0;
-      for (String _item : getHosts()) {
-        joiner.add(String.format("%shosts%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `hostGroups` to the URL query string
-    if (getHostGroups() != null) {
-      int i = 0;
-      for (String _item : getHostGroups()) {
-        joiner.add(String.format("%shostGroups%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `excludeHosts` to the URL query string
-    if (getExcludeHosts() != null) {
-      int i = 0;
-      for (String _item : getExcludeHosts()) {
-        joiner.add(String.format("%sexcludeHosts%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `skipUnresponsiveHosts` to the URL query string
-    if (getSkipUnresponsiveHosts() != null) {
-      joiner.add(String.format("%sskipUnresponsiveHosts%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSkipUnresponsiveHosts()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `includeNginxReport` to the URL query string
-    if (getIncludeNginxReport() != null) {
-      joiner.add(String.format("%sincludeNginxReport%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIncludeNginxReport()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `includeSaltLogs` to the URL query string
-    if (getIncludeSaltLogs() != null) {
-      joiner.add(String.format("%sincludeSaltLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIncludeSaltLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `includeSarOutput` to the URL query string
-    if (getIncludeSarOutput() != null) {
-      joiner.add(String.format("%sincludeSarOutput%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIncludeSarOutput()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `updatePackage` to the URL query string
-    if (getUpdatePackage() != null) {
-      joiner.add(String.format("%supdatePackage%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUpdatePackage()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `storageValidation` to the URL query string
-    if (getStorageValidation() != null) {
-      joiner.add(String.format("%sstorageValidation%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStorageValidation()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,29 +13,25 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.CloudSubnet;
 import com.cloudera.thunderhead.service.environments2api.model.NetworkAwsParams;
 import com.cloudera.thunderhead.service.environments2api.model.NetworkAzureParams;
 import com.cloudera.thunderhead.service.environments2api.model.NetworkGcpParams;
+import com.cloudera.thunderhead.service.environments2api.model.ServiceEndpointsCreation;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The network.
@@ -125,53 +121,17 @@ public class Network {
   public static final String JSON_PROPERTY_SUBNET_METADATA = "subnetMetadata";
   private Map<String, CloudSubnet> subnetMetadata = new HashMap<>();
 
-  /**
-   * Whether to create service endpoints or not.
-   */
-  public enum ServiceEndpointsCreationEnum {
-    ENABLED("ENABLED"),
-    
-    ENABLED_PRIVATE_ENDPOINT("ENABLED_PRIVATE_ENDPOINT"),
-    
-    DISABLED("DISABLED");
-
-    private String value;
-
-    ServiceEndpointsCreationEnum(String value) {
-      this.value = value;
-    }
-
-    @JsonValue
-    public String getValue() {
-      return value;
-    }
-
-    @Override
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static ServiceEndpointsCreationEnum fromValue(String value) {
-      for (ServiceEndpointsCreationEnum b : ServiceEndpointsCreationEnum.values()) {
-        if (b.value.equals(value)) {
-          return b;
-        }
-      }
-      throw new IllegalArgumentException("Unexpected value '" + value + "'");
-    }
-  }
-
   public static final String JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION = "serviceEndpointsCreation";
-  private ServiceEndpointsCreationEnum serviceEndpointsCreation;
+  private ServiceEndpointsCreation serviceEndpointsCreation;
 
   public static final String JSON_PROPERTY_ENABLE_LOAD_BALANCERS = "enableLoadBalancers";
   private Boolean enableLoadBalancers;
 
-  public Network() { 
+  public Network() {
   }
 
   public Network networkName(String networkName) {
+    
     this.networkName = networkName;
     return this;
   }
@@ -197,6 +157,7 @@ public class Network {
 
 
   public Network subnetIds(Set<String> subnetIds) {
+    
     this.subnetIds = subnetIds;
     return this;
   }
@@ -231,6 +192,7 @@ public class Network {
 
 
   public Network endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+    
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -256,6 +218,7 @@ public class Network {
 
 
   public Network endpointAccessGatewaySubnetIds(Set<String> endpointAccessGatewaySubnetIds) {
+    
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -290,6 +253,7 @@ public class Network {
 
 
   public Network aws(NetworkAwsParams aws) {
+    
     this.aws = aws;
     return this;
   }
@@ -315,6 +279,7 @@ public class Network {
 
 
   public Network azure(NetworkAzureParams azure) {
+    
     this.azure = azure;
     return this;
   }
@@ -340,6 +305,7 @@ public class Network {
 
 
   public Network gcp(NetworkGcpParams gcp) {
+    
     this.gcp = gcp;
     return this;
   }
@@ -365,6 +331,7 @@ public class Network {
 
 
   public Network networkCidr(String networkCidr) {
+    
     this.networkCidr = networkCidr;
     return this;
   }
@@ -390,6 +357,7 @@ public class Network {
 
 
   public Network dwxSubnets(Map<String, CloudSubnet> dwxSubnets) {
+    
     this.dwxSubnets = dwxSubnets;
     return this;
   }
@@ -423,6 +391,7 @@ public class Network {
 
 
   public Network liftieSubnets(Map<String, CloudSubnet> liftieSubnets) {
+    
     this.liftieSubnets = liftieSubnets;
     return this;
   }
@@ -456,6 +425,7 @@ public class Network {
 
 
   public Network subnetMetadata(Map<String, CloudSubnet> subnetMetadata) {
+    
     this.subnetMetadata = subnetMetadata;
     return this;
   }
@@ -488,32 +458,34 @@ public class Network {
   }
 
 
-  public Network serviceEndpointsCreation(ServiceEndpointsCreationEnum serviceEndpointsCreation) {
+  public Network serviceEndpointsCreation(ServiceEndpointsCreation serviceEndpointsCreation) {
+    
     this.serviceEndpointsCreation = serviceEndpointsCreation;
     return this;
   }
 
    /**
-   * Whether to create service endpoints or not.
+   * Get serviceEndpointsCreation
    * @return serviceEndpointsCreation
   **/
   @javax.annotation.Nullable
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public ServiceEndpointsCreationEnum getServiceEndpointsCreation() {
+  public ServiceEndpointsCreation getServiceEndpointsCreation() {
     return serviceEndpointsCreation;
   }
 
 
   @JsonProperty(JSON_PROPERTY_SERVICE_ENDPOINTS_CREATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setServiceEndpointsCreation(ServiceEndpointsCreationEnum serviceEndpointsCreation) {
+  public void setServiceEndpointsCreation(ServiceEndpointsCreation serviceEndpointsCreation) {
     this.serviceEndpointsCreation = serviceEndpointsCreation;
   }
 
 
   public Network enableLoadBalancers(Boolean enableLoadBalancers) {
+    
     this.enableLoadBalancers = enableLoadBalancers;
     return this;
   }
@@ -537,10 +509,6 @@ public class Network {
     this.enableLoadBalancers = enableLoadBalancers;
   }
 
-
-  /**
-   * Return true if this Network object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -602,131 +570,5 @@ public class Network {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `networkName` to the URL query string
-    if (getNetworkName() != null) {
-      joiner.add(String.format("%snetworkName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNetworkName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `subnetIds` to the URL query string
-    if (getSubnetIds() != null) {
-      int i = 0;
-      for (String _item : getSubnetIds()) {
-        joiner.add(String.format("%ssubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `endpointAccessGatewayScheme` to the URL query string
-    if (getEndpointAccessGatewayScheme() != null) {
-      joiner.add(String.format("%sendpointAccessGatewayScheme%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndpointAccessGatewayScheme()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewaySubnetIds` to the URL query string
-    if (getEndpointAccessGatewaySubnetIds() != null) {
-      int i = 0;
-      for (String _item : getEndpointAccessGatewaySubnetIds()) {
-        joiner.add(String.format("%sendpointAccessGatewaySubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `aws` to the URL query string
-    if (getAws() != null) {
-      joiner.add(getAws().toUrlQueryString(prefix + "aws" + suffix));
-    }
-
-    // add `azure` to the URL query string
-    if (getAzure() != null) {
-      joiner.add(getAzure().toUrlQueryString(prefix + "azure" + suffix));
-    }
-
-    // add `gcp` to the URL query string
-    if (getGcp() != null) {
-      joiner.add(getGcp().toUrlQueryString(prefix + "gcp" + suffix));
-    }
-
-    // add `networkCidr` to the URL query string
-    if (getNetworkCidr() != null) {
-      joiner.add(String.format("%snetworkCidr%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNetworkCidr()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dwxSubnets` to the URL query string
-    if (getDwxSubnets() != null) {
-      for (String _key : getDwxSubnets().keySet()) {
-        if (getDwxSubnets().get(_key) != null) {
-          joiner.add(getDwxSubnets().get(_key).toUrlQueryString(String.format("%sdwxSubnets%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    // add `liftieSubnets` to the URL query string
-    if (getLiftieSubnets() != null) {
-      for (String _key : getLiftieSubnets().keySet()) {
-        if (getLiftieSubnets().get(_key) != null) {
-          joiner.add(getLiftieSubnets().get(_key).toUrlQueryString(String.format("%sliftieSubnets%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    // add `subnetMetadata` to the URL query string
-    if (getSubnetMetadata() != null) {
-      for (String _key : getSubnetMetadata().keySet()) {
-        if (getSubnetMetadata().get(_key) != null) {
-          joiner.add(getSubnetMetadata().get(_key).toUrlQueryString(String.format("%ssubnetMetadata%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    // add `serviceEndpointsCreation` to the URL query string
-    if (getServiceEndpointsCreation() != null) {
-      joiner.add(String.format("%sserviceEndpointsCreation%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getServiceEndpointsCreation()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableLoadBalancers` to the URL query string
-    if (getEnableLoadBalancers() != null) {
-      joiner.add(String.format("%senableLoadBalancers%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableLoadBalancers()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

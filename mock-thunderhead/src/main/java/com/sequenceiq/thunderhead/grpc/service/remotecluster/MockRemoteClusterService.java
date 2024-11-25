@@ -69,8 +69,8 @@ public class MockRemoteClusterService extends RemoteClusterInternalGrpc.RemoteCl
             StreamObserver<RegisterPvcBaseClusterResponse> responseObserver) {
         String pvcAccountId = Crn.safeFromString(request.getPvcCrn()).getAccountId();
         String baseClusterCrn = regionAwareCrnGenerator.generateCrnStringWithUuid(REMOTE_CLUSTER, pvcAccountId);
-        LOGGER.info("Registering private base cluster with control plane crn '{}', DC name: '{}' and CM hostname: '{}', generated base cluster CRN: '{}'",
-                request.getPvcCrn(), request.getDcName(), request.getCmHostname(), baseClusterCrn);
+        LOGGER.info("Registering private base cluster with control plane crn '{}', DC name: '{}' and CM URL: '{}', Knox gateway URL: '{}', generated base " +
+                        "cluster CRN: '{}'", request.getPvcCrn(), request.getDcName(), request.getCmUrl(), request.getKnoxGatewayUrl(), baseClusterCrn);
         RegisterPvcBaseClusterResponse registerPvcBaseClusterResponse = RegisterPvcBaseClusterResponse.newBuilder()
                 .setClusterCrn(baseClusterCrn)
                 .build();

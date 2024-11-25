@@ -13,27 +13,18 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.ImageReferenceSet;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.openapitools.jackson.nullable.JsonNullable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.openapitools.jackson.nullable.JsonNullable;
-import java.util.NoSuchElementException;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Basic information about an image.
@@ -61,7 +52,7 @@ public class Image {
   private String description;
 
   public static final String JSON_PROPERTY_ADVERTISED = "advertised";
-  private JsonNullable<Boolean> advertised = JsonNullable.<Boolean>undefined();
+  private Boolean advertised;
 
   public static final String JSON_PROPERTY_OS = "os";
   private String os;
@@ -78,10 +69,11 @@ public class Image {
   public static final String JSON_PROPERTY_PACKAGE_VERSIONS = "packageVersions";
   private Map<String, String> packageVersions = new HashMap<>();
 
-  public Image() { 
+  public Image() {
   }
 
   public Image created(Long created) {
+    
     this.created = created;
     return this;
   }
@@ -107,6 +99,7 @@ public class Image {
 
 
   public Image date(String date) {
+    
     this.date = date;
     return this;
   }
@@ -132,6 +125,7 @@ public class Image {
 
 
   public Image description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -157,7 +151,8 @@ public class Image {
 
 
   public Image advertised(Boolean advertised) {
-    this.advertised = JsonNullable.<Boolean>of(advertised);
+    
+    this.advertised = advertised;
     return this;
   }
 
@@ -166,30 +161,23 @@ public class Image {
    * @return advertised
   **/
   @javax.annotation.Nullable
-  @JsonIgnore
-
-  public Boolean getAdvertised() {
-        return advertised.orElse(null);
-  }
-
   @JsonProperty(JSON_PROPERTY_ADVERTISED)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public JsonNullable<Boolean> getAdvertised_JsonNullable() {
+  public Boolean getAdvertised() {
     return advertised;
   }
-  
-  @JsonProperty(JSON_PROPERTY_ADVERTISED)
-  public void setAdvertised_JsonNullable(JsonNullable<Boolean> advertised) {
-    this.advertised = advertised;
-  }
 
+
+  @JsonProperty(JSON_PROPERTY_ADVERTISED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setAdvertised(Boolean advertised) {
-    this.advertised = JsonNullable.<Boolean>of(advertised);
+    this.advertised = advertised;
   }
 
 
   public Image os(String os) {
+    
     this.os = os;
     return this;
   }
@@ -215,6 +203,7 @@ public class Image {
 
 
   public Image osType(String osType) {
+    
     this.osType = osType;
     return this;
   }
@@ -240,6 +229,7 @@ public class Image {
 
 
   public Image uuid(String uuid) {
+    
     this.uuid = uuid;
     return this;
   }
@@ -265,6 +255,7 @@ public class Image {
 
 
   public Image images(ImageReferenceSet images) {
+    
     this.images = images;
     return this;
   }
@@ -290,6 +281,7 @@ public class Image {
 
 
   public Image packageVersions(Map<String, String> packageVersions) {
+    
     this.packageVersions = packageVersions;
     return this;
   }
@@ -321,10 +313,6 @@ public class Image {
     this.packageVersions = packageVersions;
   }
 
-
-  /**
-   * Return true if this Image object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -337,7 +325,7 @@ public class Image {
     return Objects.equals(this.created, image.created) &&
         Objects.equals(this.date, image.date) &&
         Objects.equals(this.description, image.description) &&
-        equalsNullable(this.advertised, image.advertised) &&
+        Objects.equals(this.advertised, image.advertised) &&
         Objects.equals(this.os, image.os) &&
         Objects.equals(this.osType, image.osType) &&
         Objects.equals(this.uuid, image.uuid) &&
@@ -345,20 +333,9 @@ public class Image {
         Objects.equals(this.packageVersions, image.packageVersions);
   }
 
-  private static <T> boolean equalsNullable(JsonNullable<T> a, JsonNullable<T> b) {
-    return a == b || (a != null && b != null && a.isPresent() && b.isPresent() && Objects.deepEquals(a.get(), b.get()));
-  }
-
   @Override
   public int hashCode() {
-    return Objects.hash(created, date, description, hashCodeNullable(advertised), os, osType, uuid, images, packageVersions);
-  }
-
-  private static <T> int hashCodeNullable(JsonNullable<T> a) {
-    if (a == null) {
-      return 1;
-    }
-    return a.isPresent() ? Arrays.deepHashCode(new Object[]{a.get()}) : 31;
+    return Objects.hash(created, date, description, advertised, os, osType, uuid, images, packageVersions);
   }
 
   @Override
@@ -389,88 +366,5 @@ public class Image {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `created` to the URL query string
-    if (getCreated() != null) {
-      joiner.add(String.format("%screated%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreated()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `date` to the URL query string
-    if (getDate() != null) {
-      joiner.add(String.format("%sdate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `advertised` to the URL query string
-    if (getAdvertised() != null) {
-      joiner.add(String.format("%sadvertised%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAdvertised()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `os` to the URL query string
-    if (getOs() != null) {
-      joiner.add(String.format("%sos%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `osType` to the URL query string
-    if (getOsType() != null) {
-      joiner.add(String.format("%sosType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOsType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `uuid` to the URL query string
-    if (getUuid() != null) {
-      joiner.add(String.format("%suuid%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUuid()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `images` to the URL query string
-    if (getImages() != null) {
-      joiner.add(getImages().toUrlQueryString(prefix + "images" + suffix));
-    }
-
-    // add `packageVersions` to the URL query string
-    if (getPackageVersions() != null) {
-      for (String _key : getPackageVersions().keySet()) {
-        joiner.add(String.format("%spackageVersions%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getPackageVersions().get(_key), URLEncoder.encode(String.valueOf(getPackageVersions().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

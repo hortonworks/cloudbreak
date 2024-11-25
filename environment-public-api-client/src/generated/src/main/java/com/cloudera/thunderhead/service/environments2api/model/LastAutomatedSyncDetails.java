@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The details of the last sync performed by automated user sync.
@@ -87,10 +83,11 @@ public class LastAutomatedSyncDetails {
   public static final String JSON_PROPERTY_STATUS_MESSAGES = "statusMessages";
   private List<String> statusMessages = new ArrayList<>();
 
-  public LastAutomatedSyncDetails() { 
+  public LastAutomatedSyncDetails() {
   }
 
   public LastAutomatedSyncDetails timestamp(OffsetDateTime timestamp) {
+    
     this.timestamp = timestamp;
     return this;
   }
@@ -116,6 +113,7 @@ public class LastAutomatedSyncDetails {
 
 
   public LastAutomatedSyncDetails status(StatusEnum status) {
+    
     this.status = status;
     return this;
   }
@@ -141,6 +139,7 @@ public class LastAutomatedSyncDetails {
 
 
   public LastAutomatedSyncDetails statusMessages(List<String> statusMessages) {
+    
     this.statusMessages = statusMessages;
     return this;
   }
@@ -172,10 +171,6 @@ public class LastAutomatedSyncDetails {
     this.statusMessages = statusMessages;
   }
 
-
-  /**
-   * Return true if this LastAutomatedSyncDetails object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -217,58 +212,5 @@ public class LastAutomatedSyncDetails {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `timestamp` to the URL query string
-    if (getTimestamp() != null) {
-      joiner.add(String.format("%stimestamp%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTimestamp()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `statusMessages` to the URL query string
-    if (getStatusMessages() != null) {
-      for (int i = 0; i < getStatusMessages().size(); i++) {
-        joiner.add(String.format("%sstatusMessages%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getStatusMessages().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for AWS environment cloud storage validation.
@@ -47,10 +42,11 @@ public class ValidateAwsCloudStorageRequest {
   public static final String JSON_PROPERTY_INSTANCE_PROFILE = "instanceProfile";
   private String instanceProfile;
 
-  public ValidateAwsCloudStorageRequest() { 
+  public ValidateAwsCloudStorageRequest() {
   }
 
   public ValidateAwsCloudStorageRequest credentialCrn(String credentialCrn) {
+    
     this.credentialCrn = credentialCrn;
     return this;
   }
@@ -76,6 +72,7 @@ public class ValidateAwsCloudStorageRequest {
 
 
   public ValidateAwsCloudStorageRequest storageLocation(String storageLocation) {
+    
     this.storageLocation = storageLocation;
     return this;
   }
@@ -101,6 +98,7 @@ public class ValidateAwsCloudStorageRequest {
 
 
   public ValidateAwsCloudStorageRequest instanceProfile(String instanceProfile) {
+    
     this.instanceProfile = instanceProfile;
     return this;
   }
@@ -124,10 +122,6 @@ public class ValidateAwsCloudStorageRequest {
     this.instanceProfile = instanceProfile;
   }
 
-
-  /**
-   * Return true if this ValidateAwsCloudStorageRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,54 +163,5 @@ public class ValidateAwsCloudStorageRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `credentialCrn` to the URL query string
-    if (getCredentialCrn() != null) {
-      joiner.add(String.format("%scredentialCrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `storageLocation` to the URL query string
-    if (getStorageLocation() != null) {
-      joiner.add(String.format("%sstorageLocation%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStorageLocation()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instanceProfile` to the URL query string
-    if (getInstanceProfile() != null) {
-      joiner.add(String.format("%sinstanceProfile%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceProfile()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

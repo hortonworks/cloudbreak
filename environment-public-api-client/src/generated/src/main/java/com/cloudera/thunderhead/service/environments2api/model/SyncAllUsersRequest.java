@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a All Users and Groups Sync.
@@ -45,10 +41,11 @@ public class SyncAllUsersRequest {
   public static final String JSON_PROPERTY_ACTOR_CRNS = "actorCrns";
   private List<String> actorCrns = new ArrayList<>();
 
-  public SyncAllUsersRequest() { 
+  public SyncAllUsersRequest() {
   }
 
   public SyncAllUsersRequest environmentNames(List<String> environmentNames) {
+    
     this.environmentNames = environmentNames;
     return this;
   }
@@ -82,6 +79,7 @@ public class SyncAllUsersRequest {
 
 
   public SyncAllUsersRequest actorCrns(List<String> actorCrns) {
+    
     this.actorCrns = actorCrns;
     return this;
   }
@@ -113,10 +111,6 @@ public class SyncAllUsersRequest {
     this.actorCrns = actorCrns;
   }
 
-
-  /**
-   * Return true if this SyncAllUsersRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -156,57 +150,5 @@ public class SyncAllUsersRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentNames` to the URL query string
-    if (getEnvironmentNames() != null) {
-      for (int i = 0; i < getEnvironmentNames().size(); i++) {
-        joiner.add(String.format("%senvironmentNames%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getEnvironmentNames().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `actorCrns` to the URL query string
-    if (getActorCrns() != null) {
-      for (int i = 0; i < getActorCrns().size(); i++) {
-        joiner.add(String.format("%sactorCrns%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getActorCrns().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

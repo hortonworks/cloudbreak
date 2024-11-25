@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The request object for FreeIPA downscale. Either targetAvailabilityType or instances
@@ -84,10 +80,11 @@ public class DownscaleFreeipaRequest {
   public static final String JSON_PROPERTY_INSTANCES = "instances";
   private List<String> instances = new ArrayList<>();
 
-  public DownscaleFreeipaRequest() { 
+  public DownscaleFreeipaRequest() {
   }
 
   public DownscaleFreeipaRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -113,6 +110,7 @@ public class DownscaleFreeipaRequest {
 
 
   public DownscaleFreeipaRequest targetAvailabilityType(TargetAvailabilityTypeEnum targetAvailabilityType) {
+    
     this.targetAvailabilityType = targetAvailabilityType;
     return this;
   }
@@ -138,6 +136,7 @@ public class DownscaleFreeipaRequest {
 
 
   public DownscaleFreeipaRequest instances(List<String> instances) {
+    
     this.instances = instances;
     return this;
   }
@@ -169,10 +168,6 @@ public class DownscaleFreeipaRequest {
     this.instances = instances;
   }
 
-
-  /**
-   * Return true if this DownscaleFreeipaRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -214,58 +209,5 @@ public class DownscaleFreeipaRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `targetAvailabilityType` to the URL query string
-    if (getTargetAvailabilityType() != null) {
-      joiner.add(String.format("%stargetAvailabilityType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTargetAvailabilityType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `instances` to the URL query string
-    if (getInstances() != null) {
-      for (int i = 0; i < getInstances().size(); i++) {
-        joiner.add(String.format("%sinstances%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getInstances().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

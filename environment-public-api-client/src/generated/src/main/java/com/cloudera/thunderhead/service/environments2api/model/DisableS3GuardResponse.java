@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for disabling S3Guard in an environment.
@@ -39,10 +34,11 @@ public class DisableS3GuardResponse {
   public static final String JSON_PROPERTY_S3_GUARD_RESPONSE = "s3GuardResponse";
   private String s3GuardResponse;
 
-  public DisableS3GuardResponse() { 
+  public DisableS3GuardResponse() {
   }
 
   public DisableS3GuardResponse s3GuardResponse(String s3GuardResponse) {
+    
     this.s3GuardResponse = s3GuardResponse;
     return this;
   }
@@ -66,10 +62,6 @@ public class DisableS3GuardResponse {
     this.s3GuardResponse = s3GuardResponse;
   }
 
-
-  /**
-   * Return true if this DisableS3GuardResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -107,44 +99,5 @@ public class DisableS3GuardResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `s3GuardResponse` to the URL query string
-    if (getS3GuardResponse() != null) {
-      joiner.add(String.format("%ss3GuardResponse%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getS3GuardResponse()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

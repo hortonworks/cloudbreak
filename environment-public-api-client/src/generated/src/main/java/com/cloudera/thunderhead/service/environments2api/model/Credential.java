@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AwsCredentialProperties;
 import com.cloudera.thunderhead.service.environments2api.model.AzureCredentialProperties;
 import com.cloudera.thunderhead.service.environments2api.model.GCPCredentialProperties;
@@ -27,9 +23,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
+import java.time.OffsetDateTime;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A credential object.
@@ -38,7 +34,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   Credential.JSON_PROPERTY_CREDENTIAL_NAME,
   Credential.JSON_PROPERTY_CRN,
   Credential.JSON_PROPERTY_CLOUD_PLATFORM,
+  Credential.JSON_PROPERTY_CREATED,
   Credential.JSON_PROPERTY_DESCRIPTION,
+  Credential.JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS,
+  Credential.JSON_PROPERTY_VERIFY_PERMISSIONS,
   Credential.JSON_PROPERTY_AWS_CREDENTIAL_PROPERTIES,
   Credential.JSON_PROPERTY_AZURE_CREDENTIAL_PROPERTIES,
   Credential.JSON_PROPERTY_GCP_CREDENTIAL_PROPERTIES
@@ -54,8 +53,17 @@ public class Credential {
   public static final String JSON_PROPERTY_CLOUD_PLATFORM = "cloudPlatform";
   private String cloudPlatform;
 
+  public static final String JSON_PROPERTY_CREATED = "created";
+  private OffsetDateTime created;
+
   public static final String JSON_PROPERTY_DESCRIPTION = "description";
   private String description;
+
+  public static final String JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS = "skipOrgPolicyDecisions";
+  private Boolean skipOrgPolicyDecisions = false;
+
+  public static final String JSON_PROPERTY_VERIFY_PERMISSIONS = "verifyPermissions";
+  private Boolean verifyPermissions = false;
 
   public static final String JSON_PROPERTY_AWS_CREDENTIAL_PROPERTIES = "awsCredentialProperties";
   private AwsCredentialProperties awsCredentialProperties;
@@ -66,10 +74,11 @@ public class Credential {
   public static final String JSON_PROPERTY_GCP_CREDENTIAL_PROPERTIES = "gcpCredentialProperties";
   private GCPCredentialProperties gcpCredentialProperties;
 
-  public Credential() { 
+  public Credential() {
   }
 
   public Credential credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -95,6 +104,7 @@ public class Credential {
 
 
   public Credential crn(String crn) {
+    
     this.crn = crn;
     return this;
   }
@@ -120,6 +130,7 @@ public class Credential {
 
 
   public Credential cloudPlatform(String cloudPlatform) {
+    
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -144,7 +155,34 @@ public class Credential {
   }
 
 
+  public Credential created(OffsetDateTime created) {
+    
+    this.created = created;
+    return this;
+  }
+
+   /**
+   * Creation date
+   * @return created
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_CREATED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public OffsetDateTime getCreated() {
+    return created;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_CREATED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setCreated(OffsetDateTime created) {
+    this.created = created;
+  }
+
+
   public Credential description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -169,7 +207,60 @@ public class Credential {
   }
 
 
+  public Credential skipOrgPolicyDecisions(Boolean skipOrgPolicyDecisions) {
+    
+    this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
+    return this;
+  }
+
+   /**
+   * Skips organization policy decisions during cloud storage validation.
+   * @return skipOrgPolicyDecisions
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getSkipOrgPolicyDecisions() {
+    return skipOrgPolicyDecisions;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SKIP_ORG_POLICY_DECISIONS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSkipOrgPolicyDecisions(Boolean skipOrgPolicyDecisions) {
+    this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
+  }
+
+
+  public Credential verifyPermissions(Boolean verifyPermissions) {
+    
+    this.verifyPermissions = verifyPermissions;
+    return this;
+  }
+
+   /**
+   * When true, verifies credential permissions.
+   * @return verifyPermissions
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_VERIFY_PERMISSIONS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getVerifyPermissions() {
+    return verifyPermissions;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_VERIFY_PERMISSIONS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setVerifyPermissions(Boolean verifyPermissions) {
+    this.verifyPermissions = verifyPermissions;
+  }
+
+
   public Credential awsCredentialProperties(AwsCredentialProperties awsCredentialProperties) {
+    
     this.awsCredentialProperties = awsCredentialProperties;
     return this;
   }
@@ -195,6 +286,7 @@ public class Credential {
 
 
   public Credential azureCredentialProperties(AzureCredentialProperties azureCredentialProperties) {
+    
     this.azureCredentialProperties = azureCredentialProperties;
     return this;
   }
@@ -220,6 +312,7 @@ public class Credential {
 
 
   public Credential gcpCredentialProperties(GCPCredentialProperties gcpCredentialProperties) {
+    
     this.gcpCredentialProperties = gcpCredentialProperties;
     return this;
   }
@@ -243,10 +336,6 @@ public class Credential {
     this.gcpCredentialProperties = gcpCredentialProperties;
   }
 
-
-  /**
-   * Return true if this Credential object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -259,7 +348,10 @@ public class Credential {
     return Objects.equals(this.credentialName, credential.credentialName) &&
         Objects.equals(this.crn, credential.crn) &&
         Objects.equals(this.cloudPlatform, credential.cloudPlatform) &&
+        Objects.equals(this.created, credential.created) &&
         Objects.equals(this.description, credential.description) &&
+        Objects.equals(this.skipOrgPolicyDecisions, credential.skipOrgPolicyDecisions) &&
+        Objects.equals(this.verifyPermissions, credential.verifyPermissions) &&
         Objects.equals(this.awsCredentialProperties, credential.awsCredentialProperties) &&
         Objects.equals(this.azureCredentialProperties, credential.azureCredentialProperties) &&
         Objects.equals(this.gcpCredentialProperties, credential.gcpCredentialProperties);
@@ -267,7 +359,7 @@ public class Credential {
 
   @Override
   public int hashCode() {
-    return Objects.hash(credentialName, crn, cloudPlatform, description, awsCredentialProperties, azureCredentialProperties, gcpCredentialProperties);
+    return Objects.hash(credentialName, crn, cloudPlatform, created, description, skipOrgPolicyDecisions, verifyPermissions, awsCredentialProperties, azureCredentialProperties, gcpCredentialProperties);
   }
 
   @Override
@@ -277,7 +369,10 @@ public class Credential {
     sb.append("    credentialName: ").append(toIndentedString(credentialName)).append("\n");
     sb.append("    crn: ").append(toIndentedString(crn)).append("\n");
     sb.append("    cloudPlatform: ").append(toIndentedString(cloudPlatform)).append("\n");
+    sb.append("    created: ").append(toIndentedString(created)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    skipOrgPolicyDecisions: ").append(toIndentedString(skipOrgPolicyDecisions)).append("\n");
+    sb.append("    verifyPermissions: ").append(toIndentedString(verifyPermissions)).append("\n");
     sb.append("    awsCredentialProperties: ").append(toIndentedString(awsCredentialProperties)).append("\n");
     sb.append("    azureCredentialProperties: ").append(toIndentedString(azureCredentialProperties)).append("\n");
     sb.append("    gcpCredentialProperties: ").append(toIndentedString(gcpCredentialProperties)).append("\n");
@@ -296,74 +391,5 @@ public class Credential {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `crn` to the URL query string
-    if (getCrn() != null) {
-      joiner.add(String.format("%scrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudPlatform` to the URL query string
-    if (getCloudPlatform() != null) {
-      joiner.add(String.format("%scloudPlatform%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudPlatform()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `awsCredentialProperties` to the URL query string
-    if (getAwsCredentialProperties() != null) {
-      joiner.add(getAwsCredentialProperties().toUrlQueryString(prefix + "awsCredentialProperties" + suffix));
-    }
-
-    // add `azureCredentialProperties` to the URL query string
-    if (getAzureCredentialProperties() != null) {
-      joiner.add(getAzureCredentialProperties().toUrlQueryString(prefix + "azureCredentialProperties" + suffix));
-    }
-
-    // add `gcpCredentialProperties` to the URL query string
-    if (getGcpCredentialProperties() != null) {
-      joiner.add(getGcpCredentialProperties().toUrlQueryString(prefix + "gcpCredentialProperties" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

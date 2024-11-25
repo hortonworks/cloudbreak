@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AnonymizationRuleResponse;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for set account level telemetry settings.
@@ -54,10 +50,11 @@ public class SetAccountTelemetryResponse {
   public static final String JSON_PROPERTY_RULES = "rules";
   private List<AnonymizationRuleResponse> rules = new ArrayList<>();
 
-  public SetAccountTelemetryResponse() { 
+  public SetAccountTelemetryResponse() {
   }
 
   public SetAccountTelemetryResponse workloadAnalytics(Boolean workloadAnalytics) {
+    
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -83,6 +80,7 @@ public class SetAccountTelemetryResponse {
 
 
   public SetAccountTelemetryResponse reportDeploymentLogs(Boolean reportDeploymentLogs) {
+    
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -108,6 +106,7 @@ public class SetAccountTelemetryResponse {
 
 
   public SetAccountTelemetryResponse cloudStorageLogging(Boolean cloudStorageLogging) {
+    
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -133,6 +132,7 @@ public class SetAccountTelemetryResponse {
 
 
   public SetAccountTelemetryResponse rules(List<AnonymizationRuleResponse> rules) {
+    
     this.rules = rules;
     return this;
   }
@@ -164,10 +164,6 @@ public class SetAccountTelemetryResponse {
     this.rules = rules;
   }
 
-
-  /**
-   * Return true if this SetAccountTelemetryResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -211,64 +207,5 @@ public class SetAccountTelemetryResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `workloadAnalytics` to the URL query string
-    if (getWorkloadAnalytics() != null) {
-      joiner.add(String.format("%sworkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `reportDeploymentLogs` to the URL query string
-    if (getReportDeploymentLogs() != null) {
-      joiner.add(String.format("%sreportDeploymentLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getReportDeploymentLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudStorageLogging` to the URL query string
-    if (getCloudStorageLogging() != null) {
-      joiner.add(String.format("%scloudStorageLogging%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudStorageLogging()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `rules` to the URL query string
-    if (getRules() != null) {
-      for (int i = 0; i < getRules().size(); i++) {
-        if (getRules().get(i) != null) {
-          joiner.add(getRules().get(i).toUrlQueryString(String.format("%srules%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

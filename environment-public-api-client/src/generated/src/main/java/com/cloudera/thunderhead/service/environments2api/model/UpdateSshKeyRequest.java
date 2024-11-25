@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The request object for updating the environment SSH key.
@@ -47,10 +42,11 @@ public class UpdateSshKeyRequest {
   public static final String JSON_PROPERTY_EXISTING_PUBLIC_KEY_ID = "existingPublicKeyId";
   private String existingPublicKeyId;
 
-  public UpdateSshKeyRequest() { 
+  public UpdateSshKeyRequest() {
   }
 
   public UpdateSshKeyRequest environment(String environment) {
+    
     this.environment = environment;
     return this;
   }
@@ -76,6 +72,7 @@ public class UpdateSshKeyRequest {
 
 
   public UpdateSshKeyRequest newPublicKey(String newPublicKey) {
+    
     this.newPublicKey = newPublicKey;
     return this;
   }
@@ -101,6 +98,7 @@ public class UpdateSshKeyRequest {
 
 
   public UpdateSshKeyRequest existingPublicKeyId(String existingPublicKeyId) {
+    
     this.existingPublicKeyId = existingPublicKeyId;
     return this;
   }
@@ -124,10 +122,6 @@ public class UpdateSshKeyRequest {
     this.existingPublicKeyId = existingPublicKeyId;
   }
 
-
-  /**
-   * Return true if this UpdateSshKeyRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -169,54 +163,5 @@ public class UpdateSshKeyRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environment` to the URL query string
-    if (getEnvironment() != null) {
-      joiner.add(String.format("%senvironment%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironment()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `newPublicKey` to the URL query string
-    if (getNewPublicKey() != null) {
-      joiner.add(String.format("%snewPublicKey%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNewPublicKey()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `existingPublicKeyId` to the URL query string
-    if (getExistingPublicKeyId() != null) {
-      joiner.add(String.format("%sexistingPublicKeyId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getExistingPublicKeyId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

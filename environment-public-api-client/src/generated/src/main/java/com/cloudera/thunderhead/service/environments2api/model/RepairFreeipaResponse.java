@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.RepairOperationDetails;
 import com.cloudera.thunderhead.service.environments2api.model.RepairStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Response object for an FreeIPA repair request.
@@ -68,10 +64,11 @@ public class RepairFreeipaResponse {
   public static final String JSON_PROPERTY_END_DATE = "endDate";
   private OffsetDateTime endDate;
 
-  public RepairFreeipaResponse() { 
+  public RepairFreeipaResponse() {
   }
 
   public RepairFreeipaResponse operationId(String operationId) {
+    
     this.operationId = operationId;
     return this;
   }
@@ -97,6 +94,7 @@ public class RepairFreeipaResponse {
 
 
   public RepairFreeipaResponse status(RepairStatus status) {
+    
     this.status = status;
     return this;
   }
@@ -122,6 +120,7 @@ public class RepairFreeipaResponse {
 
 
   public RepairFreeipaResponse successfulOperationDetails(List<RepairOperationDetails> successfulOperationDetails) {
+    
     this.successfulOperationDetails = successfulOperationDetails;
     return this;
   }
@@ -155,6 +154,7 @@ public class RepairFreeipaResponse {
 
 
   public RepairFreeipaResponse failureOperationDetails(List<RepairOperationDetails> failureOperationDetails) {
+    
     this.failureOperationDetails = failureOperationDetails;
     return this;
   }
@@ -188,6 +188,7 @@ public class RepairFreeipaResponse {
 
 
   public RepairFreeipaResponse error(String error) {
+    
     this.error = error;
     return this;
   }
@@ -213,6 +214,7 @@ public class RepairFreeipaResponse {
 
 
   public RepairFreeipaResponse startDate(OffsetDateTime startDate) {
+    
     this.startDate = startDate;
     return this;
   }
@@ -238,6 +240,7 @@ public class RepairFreeipaResponse {
 
 
   public RepairFreeipaResponse endDate(OffsetDateTime endDate) {
+    
     this.endDate = endDate;
     return this;
   }
@@ -261,10 +264,6 @@ public class RepairFreeipaResponse {
     this.endDate = endDate;
   }
 
-
-  /**
-   * Return true if this RepairFreeipaResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -314,84 +313,5 @@ public class RepairFreeipaResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `operationId` to the URL query string
-    if (getOperationId() != null) {
-      joiner.add(String.format("%soperationId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOperationId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `successfulOperationDetails` to the URL query string
-    if (getSuccessfulOperationDetails() != null) {
-      for (int i = 0; i < getSuccessfulOperationDetails().size(); i++) {
-        if (getSuccessfulOperationDetails().get(i) != null) {
-          joiner.add(getSuccessfulOperationDetails().get(i).toUrlQueryString(String.format("%ssuccessfulOperationDetails%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `failureOperationDetails` to the URL query string
-    if (getFailureOperationDetails() != null) {
-      for (int i = 0; i < getFailureOperationDetails().size(); i++) {
-        if (getFailureOperationDetails().get(i) != null) {
-          joiner.add(getFailureOperationDetails().get(i).toUrlQueryString(String.format("%sfailureOperationDetails%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `error` to the URL query string
-    if (getError() != null) {
-      joiner.add(String.format("%serror%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getError()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `startDate` to the URL query string
-    if (getStartDate() != null) {
-      joiner.add(String.format("%sstartDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStartDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endDate` to the URL query string
-    if (getEndDate() != null) {
-      joiner.add(String.format("%sendDate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.Application;
 import com.cloudera.thunderhead.service.environments2api.model.CdeSummary;
 import com.cloudera.thunderhead.service.environments2api.model.CdwSummary;
@@ -28,11 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Configuration details specific to the Private Cloud environment. Only returned when the output view is set to &#39;FULL&#39;.
@@ -42,7 +37,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   PvcEnvironmentDetails.JSON_PROPERTY_CML_SUMMARY,
   PvcEnvironmentDetails.JSON_PROPERTY_CDW_SUMMARY,
   PvcEnvironmentDetails.JSON_PROPERTY_CDE_SUMMARY,
-  PvcEnvironmentDetails.JSON_PROPERTY_APPLICATIONS
+  PvcEnvironmentDetails.JSON_PROPERTY_APPLICATIONS,
+  PvcEnvironmentDetails.JSON_PROPERTY_KNOX_GATEWAY_URL
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class PvcEnvironmentDetails {
@@ -61,10 +57,14 @@ public class PvcEnvironmentDetails {
   public static final String JSON_PROPERTY_APPLICATIONS = "applications";
   private Map<String, Application> applications = new HashMap<>();
 
-  public PvcEnvironmentDetails() { 
+  public static final String JSON_PROPERTY_KNOX_GATEWAY_URL = "knoxGatewayUrl";
+  private String knoxGatewayUrl;
+
+  public PvcEnvironmentDetails() {
   }
 
   public PvcEnvironmentDetails cmHost(String cmHost) {
+    
     this.cmHost = cmHost;
     return this;
   }
@@ -90,6 +90,7 @@ public class PvcEnvironmentDetails {
 
 
   public PvcEnvironmentDetails cmlSummary(CmlSummary cmlSummary) {
+    
     this.cmlSummary = cmlSummary;
     return this;
   }
@@ -115,6 +116,7 @@ public class PvcEnvironmentDetails {
 
 
   public PvcEnvironmentDetails cdwSummary(CdwSummary cdwSummary) {
+    
     this.cdwSummary = cdwSummary;
     return this;
   }
@@ -140,6 +142,7 @@ public class PvcEnvironmentDetails {
 
 
   public PvcEnvironmentDetails cdeSummary(CdeSummary cdeSummary) {
+    
     this.cdeSummary = cdeSummary;
     return this;
   }
@@ -165,6 +168,7 @@ public class PvcEnvironmentDetails {
 
 
   public PvcEnvironmentDetails applications(Map<String, Application> applications) {
+    
     this.applications = applications;
     return this;
   }
@@ -197,9 +201,31 @@ public class PvcEnvironmentDetails {
   }
 
 
-  /**
-   * Return true if this PvcEnvironmentDetails object is equal to o.
-   */
+  public PvcEnvironmentDetails knoxGatewayUrl(String knoxGatewayUrl) {
+    
+    this.knoxGatewayUrl = knoxGatewayUrl;
+    return this;
+  }
+
+   /**
+   * The knox gateway url in the base cluster.
+   * @return knoxGatewayUrl
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_KNOX_GATEWAY_URL)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getKnoxGatewayUrl() {
+    return knoxGatewayUrl;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_KNOX_GATEWAY_URL)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setKnoxGatewayUrl(String knoxGatewayUrl) {
+    this.knoxGatewayUrl = knoxGatewayUrl;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -213,12 +239,13 @@ public class PvcEnvironmentDetails {
         Objects.equals(this.cmlSummary, pvcEnvironmentDetails.cmlSummary) &&
         Objects.equals(this.cdwSummary, pvcEnvironmentDetails.cdwSummary) &&
         Objects.equals(this.cdeSummary, pvcEnvironmentDetails.cdeSummary) &&
-        Objects.equals(this.applications, pvcEnvironmentDetails.applications);
+        Objects.equals(this.applications, pvcEnvironmentDetails.applications) &&
+        Objects.equals(this.knoxGatewayUrl, pvcEnvironmentDetails.knoxGatewayUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(cmHost, cmlSummary, cdwSummary, cdeSummary, applications);
+    return Objects.hash(cmHost, cmlSummary, cdwSummary, cdeSummary, applications, knoxGatewayUrl);
   }
 
   @Override
@@ -230,6 +257,7 @@ public class PvcEnvironmentDetails {
     sb.append("    cdwSummary: ").append(toIndentedString(cdwSummary)).append("\n");
     sb.append("    cdeSummary: ").append(toIndentedString(cdeSummary)).append("\n");
     sb.append("    applications: ").append(toIndentedString(applications)).append("\n");
+    sb.append("    knoxGatewayUrl: ").append(toIndentedString(knoxGatewayUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -245,69 +273,5 @@ public class PvcEnvironmentDetails {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `cmHost` to the URL query string
-    if (getCmHost() != null) {
-      joiner.add(String.format("%scmHost%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCmHost()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cmlSummary` to the URL query string
-    if (getCmlSummary() != null) {
-      joiner.add(getCmlSummary().toUrlQueryString(prefix + "cmlSummary" + suffix));
-    }
-
-    // add `cdwSummary` to the URL query string
-    if (getCdwSummary() != null) {
-      joiner.add(getCdwSummary().toUrlQueryString(prefix + "cdwSummary" + suffix));
-    }
-
-    // add `cdeSummary` to the URL query string
-    if (getCdeSummary() != null) {
-      joiner.add(getCdeSummary().toUrlQueryString(prefix + "cdeSummary" + suffix));
-    }
-
-    // add `applications` to the URL query string
-    if (getApplications() != null) {
-      for (String _key : getApplications().keySet()) {
-        if (getApplications().get(_key) != null) {
-          joiner.add(getApplications().get(_key).toUrlQueryString(String.format("%sapplications%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

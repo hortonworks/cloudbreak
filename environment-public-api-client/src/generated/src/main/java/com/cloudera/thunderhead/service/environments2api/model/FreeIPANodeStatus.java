@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The status and issues of an individual FreeIPA node.
@@ -112,10 +108,11 @@ public class FreeIPANodeStatus {
   public static final String JSON_PROPERTY_INSTANCE_ID = "instanceId";
   private String instanceId;
 
-  public FreeIPANodeStatus() { 
+  public FreeIPANodeStatus() {
   }
 
   public FreeIPANodeStatus hostname(String hostname) {
+    
     this.hostname = hostname;
     return this;
   }
@@ -141,6 +138,7 @@ public class FreeIPANodeStatus {
 
 
   public FreeIPANodeStatus status(StatusEnum status) {
+    
     this.status = status;
     return this;
   }
@@ -166,6 +164,7 @@ public class FreeIPANodeStatus {
 
 
   public FreeIPANodeStatus issues(List<String> issues) {
+    
     this.issues = issues;
     return this;
   }
@@ -199,6 +198,7 @@ public class FreeIPANodeStatus {
 
 
   public FreeIPANodeStatus instanceId(String instanceId) {
+    
     this.instanceId = instanceId;
     return this;
   }
@@ -222,10 +222,6 @@ public class FreeIPANodeStatus {
     this.instanceId = instanceId;
   }
 
-
-  /**
-   * Return true if this FreeIPANodeStatus object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -269,63 +265,5 @@ public class FreeIPANodeStatus {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `hostname` to the URL query string
-    if (getHostname() != null) {
-      joiner.add(String.format("%shostname%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getHostname()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `issues` to the URL query string
-    if (getIssues() != null) {
-      for (int i = 0; i < getIssues().size(); i++) {
-        joiner.add(String.format("%sissues%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getIssues().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `instanceId` to the URL query string
-    if (getInstanceId() != null) {
-      joiner.add(String.format("%sinstanceId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getInstanceId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

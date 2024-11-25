@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AWSFreeIpaCreationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AuthenticationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AwsLogStorageRequest;
@@ -26,6 +22,7 @@ import com.cloudera.thunderhead.service.environments2api.model.CcmV2TlsType;
 import com.cloudera.thunderhead.service.environments2api.model.CustomDockerRegistryRequest;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaImageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.SecurityAccessRequest;
+import com.cloudera.thunderhead.service.environments2api.model.SecurityRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TagRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TunnelType;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -40,7 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a create AWS GovCloud environment request.
@@ -69,6 +66,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_CCM_V2_TLS_TYPE,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_CLOUD_STORAGE_LOGGING,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_FREE_IPA,
+  CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_SECURITY,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_IMAGE,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_TAGS,
   CreateAWSGovCloudEnvironmentRequest.JSON_PROPERTY_PROXY_CONFIG_NAME,
@@ -182,6 +180,9 @@ public class CreateAWSGovCloudEnvironmentRequest {
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
   private AWSFreeIpaCreationRequest freeIpa;
 
+  public static final String JSON_PROPERTY_SECURITY = "security";
+  private SecurityRequest security;
+
   public static final String JSON_PROPERTY_IMAGE = "image";
   private FreeIpaImageRequest image;
 
@@ -200,10 +201,11 @@ public class CreateAWSGovCloudEnvironmentRequest {
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
   private CustomDockerRegistryRequest customDockerRegistry;
 
-  public CreateAWSGovCloudEnvironmentRequest() { 
+  public CreateAWSGovCloudEnvironmentRequest() {
   }
 
   public CreateAWSGovCloudEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -229,6 +231,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -254,6 +257,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest region(String region) {
+    
     this.region = region;
     return this;
   }
@@ -279,6 +283,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest securityAccess(SecurityAccessRequest securityAccess) {
+    
     this.securityAccess = securityAccess;
     return this;
   }
@@ -304,6 +309,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest authentication(AuthenticationRequest authentication) {
+    
     this.authentication = authentication;
     return this;
   }
@@ -329,6 +335,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest logStorage(AwsLogStorageRequest logStorage) {
+    
     this.logStorage = logStorage;
     return this;
   }
@@ -354,6 +361,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest networkCidr(String networkCidr) {
+    
     this.networkCidr = networkCidr;
     return this;
   }
@@ -379,6 +387,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest vpcId(String vpcId) {
+    
     this.vpcId = vpcId;
     return this;
   }
@@ -404,6 +413,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest subnetIds(Set<String> subnetIds) {
+    
     this.subnetIds = subnetIds;
     return this;
   }
@@ -438,6 +448,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest createPrivateSubnets(Boolean createPrivateSubnets) {
+    
     this.createPrivateSubnets = createPrivateSubnets;
     return this;
   }
@@ -463,6 +474,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest createServiceEndpoints(Boolean createServiceEndpoints) {
+    
     this.createServiceEndpoints = createServiceEndpoints;
     return this;
   }
@@ -488,6 +500,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+    
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -513,6 +526,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+    
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -546,12 +560,13 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest s3GuardTableName(String s3GuardTableName) {
+    
     this.s3GuardTableName = s3GuardTableName;
     return this;
   }
 
    /**
-   * The name for the DynamoDB table backing S3Guard. Deprecated due to S3 strong consistency.
+   * Deprecated. S3Guard was used to ensure consistent S3 updates when S3 was still eventually consistent. With the introduction of Consistent S3, the goal and usage of S3 Guard have become superfluous and defunct.
    * @return s3GuardTableName
   **/
   @javax.annotation.Nullable
@@ -571,6 +586,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -596,6 +612,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest enableTunnel(Boolean enableTunnel) {
+    
     this.enableTunnel = enableTunnel;
     return this;
   }
@@ -621,6 +638,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest enableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+    
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
     return this;
   }
@@ -646,6 +664,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest workloadAnalytics(Boolean workloadAnalytics) {
+    
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -671,6 +690,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+    
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -696,6 +716,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest tunnelType(TunnelType tunnelType) {
+    
     this.tunnelType = tunnelType;
     return this;
   }
@@ -721,6 +742,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest ccmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+    
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
@@ -746,6 +768,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+    
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -771,6 +794,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest freeIpa(AWSFreeIpaCreationRequest freeIpa) {
+    
     this.freeIpa = freeIpa;
     return this;
   }
@@ -795,7 +819,34 @@ public class CreateAWSGovCloudEnvironmentRequest {
   }
 
 
+  public CreateAWSGovCloudEnvironmentRequest security(SecurityRequest security) {
+    
+    this.security = security;
+    return this;
+  }
+
+   /**
+   * Get security
+   * @return security
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public SecurityRequest getSecurity() {
+    return security;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSecurity(SecurityRequest security) {
+    this.security = security;
+  }
+
+
   public CreateAWSGovCloudEnvironmentRequest image(FreeIpaImageRequest image) {
+    
     this.image = image;
     return this;
   }
@@ -821,6 +872,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest tags(List<TagRequest> tags) {
+    
     this.tags = tags;
     return this;
   }
@@ -854,6 +906,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest proxyConfigName(String proxyConfigName) {
+    
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -879,6 +932,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest encryptionKeyArn(String encryptionKeyArn) {
+    
     this.encryptionKeyArn = encryptionKeyArn;
     return this;
   }
@@ -904,6 +958,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest idBrokerMappingSource(String idBrokerMappingSource) {
+    
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
@@ -929,6 +984,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
 
   public CreateAWSGovCloudEnvironmentRequest customDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+    
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
@@ -952,10 +1008,6 @@ public class CreateAWSGovCloudEnvironmentRequest {
     this.customDockerRegistry = customDockerRegistry;
   }
 
-
-  /**
-   * Return true if this CreateAWSGovCloudEnvironmentRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -988,6 +1040,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
         Objects.equals(this.ccmV2TlsType, createAWSGovCloudEnvironmentRequest.ccmV2TlsType) &&
         Objects.equals(this.cloudStorageLogging, createAWSGovCloudEnvironmentRequest.cloudStorageLogging) &&
         Objects.equals(this.freeIpa, createAWSGovCloudEnvironmentRequest.freeIpa) &&
+        Objects.equals(this.security, createAWSGovCloudEnvironmentRequest.security) &&
         Objects.equals(this.image, createAWSGovCloudEnvironmentRequest.image) &&
         Objects.equals(this.tags, createAWSGovCloudEnvironmentRequest.tags) &&
         Objects.equals(this.proxyConfigName, createAWSGovCloudEnvironmentRequest.proxyConfigName) &&
@@ -998,7 +1051,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, networkCidr, vpcId, subnetIds, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry);
+    return Objects.hash(environmentName, credentialName, region, securityAccess, authentication, logStorage, networkCidr, vpcId, subnetIds, createPrivateSubnets, createServiceEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, s3GuardTableName, description, enableTunnel, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, tunnelType, ccmV2TlsType, cloudStorageLogging, freeIpa, security, image, tags, proxyConfigName, encryptionKeyArn, idBrokerMappingSource, customDockerRegistry);
   }
 
   @Override
@@ -1028,6 +1081,7 @@ public class CreateAWSGovCloudEnvironmentRequest {
     sb.append("    ccmV2TlsType: ").append(toIndentedString(ccmV2TlsType)).append("\n");
     sb.append("    cloudStorageLogging: ").append(toIndentedString(cloudStorageLogging)).append("\n");
     sb.append("    freeIpa: ").append(toIndentedString(freeIpa)).append("\n");
+    sb.append("    security: ").append(toIndentedString(security)).append("\n");
     sb.append("    image: ").append(toIndentedString(image)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    proxyConfigName: ").append(toIndentedString(proxyConfigName)).append("\n");
@@ -1049,199 +1103,5 @@ public class CreateAWSGovCloudEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `region` to the URL query string
-    if (getRegion() != null) {
-      joiner.add(String.format("%sregion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRegion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `securityAccess` to the URL query string
-    if (getSecurityAccess() != null) {
-      joiner.add(getSecurityAccess().toUrlQueryString(prefix + "securityAccess" + suffix));
-    }
-
-    // add `authentication` to the URL query string
-    if (getAuthentication() != null) {
-      joiner.add(getAuthentication().toUrlQueryString(prefix + "authentication" + suffix));
-    }
-
-    // add `logStorage` to the URL query string
-    if (getLogStorage() != null) {
-      joiner.add(getLogStorage().toUrlQueryString(prefix + "logStorage" + suffix));
-    }
-
-    // add `networkCidr` to the URL query string
-    if (getNetworkCidr() != null) {
-      joiner.add(String.format("%snetworkCidr%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getNetworkCidr()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `vpcId` to the URL query string
-    if (getVpcId() != null) {
-      joiner.add(String.format("%svpcId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getVpcId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `subnetIds` to the URL query string
-    if (getSubnetIds() != null) {
-      int i = 0;
-      for (String _item : getSubnetIds()) {
-        joiner.add(String.format("%ssubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `createPrivateSubnets` to the URL query string
-    if (getCreatePrivateSubnets() != null) {
-      joiner.add(String.format("%screatePrivateSubnets%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreatePrivateSubnets()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `createServiceEndpoints` to the URL query string
-    if (getCreateServiceEndpoints() != null) {
-      joiner.add(String.format("%screateServiceEndpoints%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreateServiceEndpoints()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewayScheme` to the URL query string
-    if (getEndpointAccessGatewayScheme() != null) {
-      joiner.add(String.format("%sendpointAccessGatewayScheme%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndpointAccessGatewayScheme()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewaySubnetIds` to the URL query string
-    if (getEndpointAccessGatewaySubnetIds() != null) {
-      for (int i = 0; i < getEndpointAccessGatewaySubnetIds().size(); i++) {
-        joiner.add(String.format("%sendpointAccessGatewaySubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getEndpointAccessGatewaySubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `s3GuardTableName` to the URL query string
-    if (getS3GuardTableName() != null) {
-      joiner.add(String.format("%ss3GuardTableName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getS3GuardTableName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableTunnel` to the URL query string
-    if (getEnableTunnel() != null) {
-      joiner.add(String.format("%senableTunnel%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableTunnel()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableWorkloadAnalytics` to the URL query string
-    if (getEnableWorkloadAnalytics() != null) {
-      joiner.add(String.format("%senableWorkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `workloadAnalytics` to the URL query string
-    if (getWorkloadAnalytics() != null) {
-      joiner.add(String.format("%sworkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `reportDeploymentLogs` to the URL query string
-    if (getReportDeploymentLogs() != null) {
-      joiner.add(String.format("%sreportDeploymentLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getReportDeploymentLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tunnelType` to the URL query string
-    if (getTunnelType() != null) {
-      joiner.add(String.format("%stunnelType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTunnelType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `ccmV2TlsType` to the URL query string
-    if (getCcmV2TlsType() != null) {
-      joiner.add(String.format("%sccmV2TlsType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCcmV2TlsType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudStorageLogging` to the URL query string
-    if (getCloudStorageLogging() != null) {
-      joiner.add(String.format("%scloudStorageLogging%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudStorageLogging()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `freeIpa` to the URL query string
-    if (getFreeIpa() != null) {
-      joiner.add(getFreeIpa().toUrlQueryString(prefix + "freeIpa" + suffix));
-    }
-
-    // add `image` to the URL query string
-    if (getImage() != null) {
-      joiner.add(getImage().toUrlQueryString(prefix + "image" + suffix));
-    }
-
-    // add `tags` to the URL query string
-    if (getTags() != null) {
-      for (int i = 0; i < getTags().size(); i++) {
-        if (getTags().get(i) != null) {
-          joiner.add(getTags().get(i).toUrlQueryString(String.format("%stags%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `proxyConfigName` to the URL query string
-    if (getProxyConfigName() != null) {
-      joiner.add(String.format("%sproxyConfigName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProxyConfigName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionKeyArn` to the URL query string
-    if (getEncryptionKeyArn() != null) {
-      joiner.add(String.format("%sencryptionKeyArn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionKeyArn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `idBrokerMappingSource` to the URL query string
-    if (getIdBrokerMappingSource() != null) {
-      joiner.add(String.format("%sidBrokerMappingSource%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIdBrokerMappingSource()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `customDockerRegistry` to the URL query string
-    if (getCustomDockerRegistry() != null) {
-      joiner.add(getCustomDockerRegistry().toUrlQueryString(prefix + "customDockerRegistry" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 

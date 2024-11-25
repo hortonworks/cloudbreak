@@ -13,23 +13,18 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.Service;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A Service Discovery Application grouping
@@ -50,10 +45,11 @@ public class Application {
   public static final String JSON_PROPERTY_CONFIG = "config";
   private Map<String, String> config = new HashMap<>();
 
-  public Application() { 
+  public Application() {
   }
 
   public Application name(String name) {
+    
     this.name = name;
     return this;
   }
@@ -79,6 +75,7 @@ public class Application {
 
 
   public Application services(Map<String, Service> services) {
+    
     this.services = services;
     return this;
   }
@@ -112,6 +109,7 @@ public class Application {
 
 
   public Application config(Map<String, String> config) {
+    
     this.config = config;
     return this;
   }
@@ -143,10 +141,6 @@ public class Application {
     this.config = config;
   }
 
-
-  /**
-   * Return true if this Application object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -188,63 +182,5 @@ public class Application {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `name` to the URL query string
-    if (getName() != null) {
-      joiner.add(String.format("%sname%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `services` to the URL query string
-    if (getServices() != null) {
-      for (String _key : getServices().keySet()) {
-        if (getServices().get(_key) != null) {
-          joiner.add(getServices().get(_key).toUrlQueryString(String.format("%sservices%s%s", prefix, suffix,
-              "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix))));
-        }
-      }
-    }
-
-    // add `config` to the URL query string
-    if (getConfig() != null) {
-      for (String _key : getConfig().keySet()) {
-        joiner.add(String.format("%sconfig%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, _key, containerSuffix),
-            getConfig().get(_key), URLEncoder.encode(String.valueOf(getConfig().get(_key)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

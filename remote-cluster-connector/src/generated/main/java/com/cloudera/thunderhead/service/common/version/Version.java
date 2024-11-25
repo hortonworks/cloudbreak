@@ -499,18 +499,6 @@ public final class Version {
      */
     com.google.protobuf.ByteString
         getUserBytes();
-
-    /**
-     * <code>string pokemon = 8;</code>
-     * @return The pokemon.
-     */
-    java.lang.String getPokemon();
-    /**
-     * <code>string pokemon = 8;</code>
-     * @return The bytes for pokemon.
-     */
-    com.google.protobuf.ByteString
-        getPokemonBytes();
   }
   /**
    * Protobuf type {@code version.VersionResponse}
@@ -532,7 +520,6 @@ public final class Version {
       buildNumber_ = "";
       host_ = "";
       user_ = "";
-      pokemon_ = "";
     }
 
     @java.lang.Override
@@ -828,45 +815,6 @@ public final class Version {
       }
     }
 
-    public static final int POKEMON_FIELD_NUMBER = 8;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object pokemon_ = "";
-    /**
-     * <code>string pokemon = 8;</code>
-     * @return The pokemon.
-     */
-    @java.lang.Override
-    public java.lang.String getPokemon() {
-      java.lang.Object ref = pokemon_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pokemon_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pokemon = 8;</code>
-     * @return The bytes for pokemon.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPokemonBytes() {
-      java.lang.Object ref = pokemon_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pokemon_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -902,9 +850,6 @@ public final class Version {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, user_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pokemon_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, pokemon_);
-      }
       getUnknownFields().writeTo(output);
     }
 
@@ -935,9 +880,6 @@ public final class Version {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, user_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pokemon_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, pokemon_);
-      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -967,8 +909,6 @@ public final class Version {
           .equals(other.getHost())) return false;
       if (!getUser()
           .equals(other.getUser())) return false;
-      if (!getPokemon()
-          .equals(other.getPokemon())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -994,8 +934,6 @@ public final class Version {
       hash = (53 * hash) + getHost().hashCode();
       hash = (37 * hash) + USER_FIELD_NUMBER;
       hash = (53 * hash) + getUser().hashCode();
-      hash = (37 * hash) + POKEMON_FIELD_NUMBER;
-      hash = (53 * hash) + getPokemon().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1134,7 +1072,6 @@ public final class Version {
         buildNumber_ = "";
         host_ = "";
         user_ = "";
-        pokemon_ = "";
         return this;
       }
 
@@ -1188,9 +1125,6 @@ public final class Version {
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
           result.user_ = user_;
-        }
-        if (((from_bitField0_ & 0x00000080) != 0)) {
-          result.pokemon_ = pokemon_;
         }
       }
 
@@ -1273,11 +1207,6 @@ public final class Version {
           bitField0_ |= 0x00000040;
           onChanged();
         }
-        if (!other.getPokemon().isEmpty()) {
-          pokemon_ = other.pokemon_;
-          bitField0_ |= 0x00000080;
-          onChanged();
-        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -1339,11 +1268,6 @@ public final class Version {
                 bitField0_ |= 0x00000040;
                 break;
               } // case 58
-              case 66: {
-                pokemon_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000080;
-                break;
-              } // case 66
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1864,78 +1788,6 @@ public final class Version {
         onChanged();
         return this;
       }
-
-      private java.lang.Object pokemon_ = "";
-      /**
-       * <code>string pokemon = 8;</code>
-       * @return The pokemon.
-       */
-      public java.lang.String getPokemon() {
-        java.lang.Object ref = pokemon_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pokemon_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string pokemon = 8;</code>
-       * @return The bytes for pokemon.
-       */
-      public com.google.protobuf.ByteString
-          getPokemonBytes() {
-        java.lang.Object ref = pokemon_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pokemon_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pokemon = 8;</code>
-       * @param value The pokemon to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPokemon(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        pokemon_ = value;
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pokemon = 8;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPokemon() {
-        pokemon_ = getDefaultInstance().getPokemon();
-        bitField0_ = (bitField0_ & ~0x00000080);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pokemon = 8;</code>
-       * @param value The bytes for pokemon to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPokemonBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        pokemon_ = value;
-        bitField0_ |= 0x00000080;
-        onChanged();
-        return this;
-      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2020,13 +1872,12 @@ public final class Version {
   static {
     java.lang.String[] descriptorData = {
       "\n\rversion.proto\022\007version\"\020\n\016VersionReque" +
-      "st\"\225\001\n\017VersionResponse\022\014\n\004name\030\001 \001(\t\022\017\n\007" +
+      "st\"\204\001\n\017VersionResponse\022\014\n\004name\030\001 \001(\t\022\017\n\007" +
       "version\030\002 \001(\t\022\016\n\006commit\030\003 \001(\t\022\021\n\ttimesta" +
       "mp\030\004 \001(\t\022\023\n\013buildNumber\030\005 \001(\t\022\014\n\004host\030\006 " +
-      "\001(\t\022\014\n\004user\030\007 \001(\t\022\017\n\007pokemon\030\010 \001(\tBU\n/co" +
-      "m.cloudera.thunderhead.service.common.ve" +
-      "rsionB\007VersionZ\031com/cloudera/cdp/protobu" +
-      "fb\006proto3"
+      "\001(\t\022\014\n\004user\030\007 \001(\tBU\n/com.cloudera.thunde" +
+      "rhead.service.common.versionB\007VersionZ\031c" +
+      "om/cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2043,7 +1894,7 @@ public final class Version {
     internal_static_version_VersionResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_version_VersionResponse_descriptor,
-        new java.lang.String[] { "Name", "Version", "Commit", "Timestamp", "BuildNumber", "Host", "User", "Pokemon", });
+        new java.lang.String[] { "Name", "Version", "Commit", "Timestamp", "BuildNumber", "Host", "User", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -13,20 +13,15 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Information about FreeIPA image.
@@ -59,10 +54,11 @@ public class ImageInfoResponse {
   public static final String JSON_PROPERTY_CATALOG_NAME = "catalogName";
   private String catalogName;
 
-  public ImageInfoResponse() { 
+  public ImageInfoResponse() {
   }
 
   public ImageInfoResponse catalog(String catalog) {
+    
     this.catalog = catalog;
     return this;
   }
@@ -88,6 +84,7 @@ public class ImageInfoResponse {
 
 
   public ImageInfoResponse id(String id) {
+    
     this.id = id;
     return this;
   }
@@ -113,6 +110,7 @@ public class ImageInfoResponse {
 
 
   public ImageInfoResponse os(String os) {
+    
     this.os = os;
     return this;
   }
@@ -138,6 +136,7 @@ public class ImageInfoResponse {
 
 
   public ImageInfoResponse imageName(String imageName) {
+    
     this.imageName = imageName;
     return this;
   }
@@ -163,6 +162,7 @@ public class ImageInfoResponse {
 
 
   public ImageInfoResponse date(String date) {
+    
     this.date = date;
     return this;
   }
@@ -188,6 +188,7 @@ public class ImageInfoResponse {
 
 
   public ImageInfoResponse catalogName(String catalogName) {
+    
     this.catalogName = catalogName;
     return this;
   }
@@ -211,10 +212,6 @@ public class ImageInfoResponse {
     this.catalogName = catalogName;
   }
 
-
-  /**
-   * Return true if this ImageInfoResponse object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -262,69 +259,5 @@ public class ImageInfoResponse {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `catalog` to the URL query string
-    if (getCatalog() != null) {
-      joiner.add(String.format("%scatalog%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCatalog()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `id` to the URL query string
-    if (getId() != null) {
-      joiner.add(String.format("%sid%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `os` to the URL query string
-    if (getOs() != null) {
-      joiner.add(String.format("%sos%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getOs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `imageName` to the URL query string
-    if (getImageName() != null) {
-      joiner.add(String.format("%simageName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getImageName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `date` to the URL query string
-    if (getDate() != null) {
-      joiner.add(String.format("%sdate%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDate()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `catalogName` to the URL query string
-    if (getCatalogName() != null) {
-      joiner.add(String.format("%scatalogName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCatalogName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

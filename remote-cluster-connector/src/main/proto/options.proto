@@ -28,7 +28,21 @@ message ServiceExtension {
     repeated string formFactor = 40004;
     // The version of the service definition.
     string version = 40005;
+    // The Tag Groups for the Service
+    repeated TagGroup tagGroup = 40006;
+    // Backend
+    repeated string additionalBackend = 40007;
   }
+}
+
+// The Swagger Tag Group
+message TagGroup {
+  // The name of the tag group to use in the MethodExtention.
+  string name = 1;
+  // The description pf the tag group.
+  string description = 2;
+  // The external docs url link for the tag group.
+  string externalDocs = 3;
 }
 
 // The definition of an API rate limit group. See the Java classes
@@ -103,6 +117,14 @@ message FieldExtension {
     bool deprecated = 50015;
     // This field doesn't reference a parameter file.
     bool noParamfile = 50016;
+    // Default value for this field.
+    string default = 50017;
+    // The form factor(s) that the field is part of, e.g., public, private.
+    // By default, a parameter is part of every form factor of its operation or service.
+    repeated string formFactor = 50018;
+    // The plural name of the field, which will be used in yaml definition
+    // for repeated field.
+    string pluralName = 50019;
   }
 }
 
@@ -136,6 +158,11 @@ message MethodExtension {
     repeated string formFactor = 60011;
     // This method has extensions
     repeated string extension = 60012;
+    // The grouping tag for this method
+    string tag = 60013;
+    // The alternate name for this method, which is usually the previous name after
+    // a refactoring to keep the backward compatibility and should be deprecated.
+    string altName = 60014;
   }
 }
 
@@ -149,6 +176,8 @@ message MessageExtension {
     string hiddenRetention = 70002;
     // This message has been deprecated.
     bool deprecated = 70003;
+    // The form factor(s) for the message.
+    repeated string formFactor = 70004;
   }
 }
 
@@ -162,5 +191,7 @@ message EnumValueExtension {
     string hiddenReason = 90001;
     // This conditions under this hidden value is made visible.
     string hiddenRetention = 90002;
+    // this value is deprecated.
+    bool deprecated = 90003;
   }
 }

@@ -14,6 +14,8 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.admin);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.formFactor);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.version);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.tagGroup);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.additionalBackend);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.audit);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FileExtension.auditEntitlement);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.sensitive);
@@ -33,6 +35,9 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.maximumLength);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.deprecated);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.noParamfile);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.default_);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.formFactor);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.pluralName);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.right);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.entitlement);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.paginates);
@@ -46,13 +51,17 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.skipAuditing);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.formFactor);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.extension);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.tag);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.altName);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenRetention);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.deprecated);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.formFactor);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.hiddenRetention);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.deprecated);
   }
 
   public static void registerAllExtensions(
@@ -563,6 +572,1004 @@ public final class Options {
           5,
           java.lang.String.class,
           null);
+    public static final int TAGGROUP_FIELD_NUMBER = 40006;
+    /**
+     * <pre>
+     * The Tag Groups for the Service
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.util.List<com.cloudera.thunderhead.service.common.options.Options.TagGroup>> tagGroup = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          6,
+          com.cloudera.thunderhead.service.common.options.Options.TagGroup.class,
+          com.cloudera.thunderhead.service.common.options.Options.TagGroup.getDefaultInstance());
+    public static final int ADDITIONALBACKEND_FIELD_NUMBER = 40007;
+    /**
+     * <pre>
+     * Backend
+     * </pre>
+     *
+     * <code>extend .google.protobuf.ServiceOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.ServiceOptions,
+        java.util.List<java.lang.String>> additionalBackend = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.getDefaultInstance(),
+          7,
+          java.lang.String.class,
+          null);
+  }
+
+  public interface TagGroupOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:options.TagGroup)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The description.
+     */
+    java.lang.String getDescription();
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The bytes for description.
+     */
+    com.google.protobuf.ByteString
+        getDescriptionBytes();
+
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The externalDocs.
+     */
+    java.lang.String getExternalDocs();
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The bytes for externalDocs.
+     */
+    com.google.protobuf.ByteString
+        getExternalDocsBytes();
+  }
+  /**
+   * <pre>
+   * The Swagger Tag Group
+   * </pre>
+   *
+   * Protobuf type {@code options.TagGroup}
+   */
+  public static final class TagGroup extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:options.TagGroup)
+      TagGroupOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TagGroup.newBuilder() to construct.
+    private TagGroup(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TagGroup() {
+      name_ = "";
+      description_ = "";
+      externalDocs_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new TagGroup();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.options.Options.TagGroup.class, com.cloudera.thunderhead.service.common.options.Options.TagGroup.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the tag group to use in the MethodExtention.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DESCRIPTION_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object description_ = "";
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The description.
+     */
+    @java.lang.Override
+    public java.lang.String getDescription() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        description_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The description pf the tag group.
+     * </pre>
+     *
+     * <code>string description = 2;</code>
+     * @return The bytes for description.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDescriptionBytes() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        description_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int EXTERNALDOCS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object externalDocs_ = "";
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The externalDocs.
+     */
+    @java.lang.Override
+    public java.lang.String getExternalDocs() {
+      java.lang.Object ref = externalDocs_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        externalDocs_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The external docs url link for the tag group.
+     * </pre>
+     *
+     * <code>string externalDocs = 3;</code>
+     * @return The bytes for externalDocs.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getExternalDocsBytes() {
+      java.lang.Object ref = externalDocs_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        externalDocs_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, description_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(externalDocs_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, externalDocs_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, description_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(externalDocs_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, externalDocs_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.options.Options.TagGroup)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.options.Options.TagGroup other = (com.cloudera.thunderhead.service.common.options.Options.TagGroup) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getDescription()
+          .equals(other.getDescription())) return false;
+      if (!getExternalDocs()
+          .equals(other.getExternalDocs())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
+      hash = (53 * hash) + getDescription().hashCode();
+      hash = (37 * hash) + EXTERNALDOCS_FIELD_NUMBER;
+      hash = (53 * hash) + getExternalDocs().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.options.Options.TagGroup prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The Swagger Tag Group
+     * </pre>
+     *
+     * Protobuf type {@code options.TagGroup}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:options.TagGroup)
+        com.cloudera.thunderhead.service.common.options.Options.TagGroupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.options.Options.TagGroup.class, com.cloudera.thunderhead.service.common.options.Options.TagGroup.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.options.Options.TagGroup.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        name_ = "";
+        description_ = "";
+        externalDocs_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.internal_static_options_TagGroup_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.TagGroup getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.options.Options.TagGroup.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.TagGroup build() {
+        com.cloudera.thunderhead.service.common.options.Options.TagGroup result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.options.Options.TagGroup buildPartial() {
+        com.cloudera.thunderhead.service.common.options.Options.TagGroup result = new com.cloudera.thunderhead.service.common.options.Options.TagGroup(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.common.options.Options.TagGroup result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.description_ = description_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.externalDocs_ = externalDocs_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.options.Options.TagGroup) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.options.Options.TagGroup)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.options.Options.TagGroup other) {
+        if (other == com.cloudera.thunderhead.service.common.options.Options.TagGroup.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        if (!other.getDescription().isEmpty()) {
+          description_ = other.description_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        if (!other.getExternalDocs().isEmpty()) {
+          externalDocs_ = other.externalDocs_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              case 18: {
+                description_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                externalDocs_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the tag group to use in the MethodExtention.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        name_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object description_ = "";
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @return The description.
+       */
+      public java.lang.String getDescription() {
+        java.lang.Object ref = description_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          description_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @return The bytes for description.
+       */
+      public com.google.protobuf.ByteString
+          getDescriptionBytes() {
+        java.lang.Object ref = description_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          description_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @param value The description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescription(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        description_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDescription() {
+        description_ = getDefaultInstance().getDescription();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The description pf the tag group.
+       * </pre>
+       *
+       * <code>string description = 2;</code>
+       * @param value The bytes for description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescriptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        description_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object externalDocs_ = "";
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @return The externalDocs.
+       */
+      public java.lang.String getExternalDocs() {
+        java.lang.Object ref = externalDocs_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          externalDocs_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @return The bytes for externalDocs.
+       */
+      public com.google.protobuf.ByteString
+          getExternalDocsBytes() {
+        java.lang.Object ref = externalDocs_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          externalDocs_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @param value The externalDocs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExternalDocs(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        externalDocs_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearExternalDocs() {
+        externalDocs_ = getDefaultInstance().getExternalDocs();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The external docs url link for the tag group.
+       * </pre>
+       *
+       * <code>string externalDocs = 3;</code>
+       * @param value The bytes for externalDocs to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExternalDocsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        externalDocs_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:options.TagGroup)
+    }
+
+    // @@protoc_insertion_point(class_scope:options.TagGroup)
+    private static final com.cloudera.thunderhead.service.common.options.Options.TagGroup DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.options.Options.TagGroup();
+    }
+
+    public static com.cloudera.thunderhead.service.common.options.Options.TagGroup getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<TagGroup>
+        PARSER = new com.google.protobuf.AbstractParser<TagGroup>() {
+      @java.lang.Override
+      public TagGroup parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<TagGroup> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<TagGroup> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.options.Options.TagGroup getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
   public interface RateLimitGroupDefinitionOrBuilder extends
@@ -3355,6 +4362,59 @@ public final class Options {
           16,
           java.lang.Boolean.class,
           null);
+    public static final int DEFAULT_FIELD_NUMBER = 50017;
+    /**
+     * <pre>
+     * Default value for this field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.String> default_ = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          17,
+          java.lang.String.class,
+          null);
+    public static final int FORMFACTOR_FIELD_NUMBER = 50018;
+    /**
+     * <pre>
+     * The form factor(s) that the field is part of, e.g., public, private.
+     * By default, a parameter is part of every form factor of its operation or service.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.util.List<java.lang.String>> formFactor = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          18,
+          java.lang.String.class,
+          null);
+    public static final int PLURALNAME_FIELD_NUMBER = 50019;
+    /**
+     * <pre>
+     * The plural name of the field, which will be used in yaml definition
+     * for repeated field.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.FieldOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.FieldOptions,
+        java.lang.String> pluralName = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.FieldExtension.getDefaultInstance(),
+          19,
+          java.lang.String.class,
+          null);
   }
 
   public interface MethodExtensionOrBuilder extends
@@ -3975,6 +5035,41 @@ public final class Options {
           12,
           java.lang.String.class,
           null);
+    public static final int TAG_FIELD_NUMBER = 60013;
+    /**
+     * <pre>
+     * The grouping tag for this method
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.String> tag = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          13,
+          java.lang.String.class,
+          null);
+    public static final int ALTNAME_FIELD_NUMBER = 60014;
+    /**
+     * <pre>
+     * The alternate name for this method, which is usually the previous name after
+     * a refactoring to keep the backward compatibility and should be deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.String> altName = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          14,
+          java.lang.String.class,
+          null);
   }
 
   public interface MessageExtensionOrBuilder extends
@@ -4440,6 +5535,23 @@ public final class Options {
           3,
           java.lang.Boolean.class,
           null);
+    public static final int FORMFACTOR_FIELD_NUMBER = 70004;
+    /**
+     * <pre>
+     * The form factor(s) for the message.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MessageOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MessageOptions,
+        java.util.List<java.lang.String>> formFactor = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MessageExtension.getDefaultInstance(),
+          4,
+          java.lang.String.class,
+          null);
   }
 
   public interface EnumValueExtensionOrBuilder extends
@@ -4888,6 +6000,23 @@ public final class Options {
           2,
           java.lang.String.class,
           null);
+    public static final int DEPRECATED_FIELD_NUMBER = 90003;
+    /**
+     * <pre>
+     * this value is deprecated.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.EnumValueOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.EnumValueOptions,
+        java.lang.Boolean> deprecated = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.EnumValueExtension.getDefaultInstance(),
+          3,
+          java.lang.Boolean.class,
+          null);
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
@@ -4895,6 +6024,11 @@ public final class Options {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_options_ServiceExtension_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_options_TagGroup_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_options_TagGroup_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_options_RateLimitGroupDefinition_descriptor;
   private static final 
@@ -4940,7 +6074,7 @@ public final class Options {
   static {
     java.lang.String[] descriptorData = {
       "\n\roptions.proto\022\007options\032 google/protobu" +
-      "f/descriptor.proto\"\237\003\n\020ServiceExtension2" +
+      "f/descriptor.proto\"\245\004\n\020ServiceExtension2" +
       "f\n\030rateLimitGroupDefinition\022\037.google.pro" +
       "tobuf.ServiceOptions\030\300\270\002 \001(\0132!.options.R" +
       "ateLimitGroupDefinition2R\n\016apiServiceNam" +
@@ -4950,70 +6084,84 @@ public final class Options {
       "0\n\005admin\022\037.google.protobuf.ServiceOption" +
       "s\030\303\270\002 \001(\01025\n\nformFactor\022\037.google.protobu" +
       "f.ServiceOptions\030\304\270\002 \003(\t22\n\007version\022\037.go" +
-      "ogle.protobuf.ServiceOptions\030\305\270\002 \001(\t\"k\n\030" +
-      "RateLimitGroupDefinition\022\014\n\004name\030\001 \001(\t\022\027" +
-      "\n\017byRemoteAddress\030\002 \001(\005\022\025\n\rbyAccessKeyId" +
-      "\030\003 \001(\005\022\021\n\tbyAccount\030\004 \001(\005\"6\n\016ApiServiceN" +
-      "ame\022\021\n\tlowercase\030\001 \001(\t\022\021\n\tcamelcase\030\002 \001(" +
-      "\t\"\202\001\n\rFileExtension2-\n\005audit\022\034.google.pr" +
-      "otobuf.FileOptions\030\200\361\004 \001(\01028\n\020auditEntit" +
-      "lement\022\034.google.protobuf.FileOptions\030\201\361\004" +
-      " \001(\tJ\010\010\202\361\004\020\203\361\004\"\250\007\n\016FieldExtension22\n\tsen" +
-      "sitive\022\035.google.protobuf.FieldOptions\030\320\206" +
-      "\003 \001(\01024\n\013skipLogging\022\035.google.protobuf.F" +
-      "ieldOptions\030\321\206\003 \001(\01027\n\016pagingPageSize\022\035." +
-      "google.protobuf.FieldOptions\030\322\206\003 \001(\01029\n\020" +
-      "pagingInputToken\022\035.google.protobuf.Field" +
-      "Options\030\323\206\003 \001(\01025\n\014pagingResult\022\035.google" +
-      ".protobuf.FieldOptions\030\324\206\003 \001(\0102:\n\021paging" +
-      "OutputToken\022\035.google.protobuf.FieldOptio" +
-      "ns\030\325\206\003 \001(\01021\n\010datetime\022\035.google.protobuf" +
-      ".FieldOptions\030\326\206\003 \001(\0102/\n\006hidden\022\035.google" +
-      ".protobuf.FieldOptions\030\327\206\003 \001(\01025\n\014hidden" +
-      "Reason\022\035.google.protobuf.FieldOptions\030\330\206" +
-      "\003 \001(\t28\n\017hiddenRetention\022\035.google.protob" +
-      "uf.FieldOptions\030\331\206\003 \001(\t21\n\010required\022\035.go" +
-      "ogle.protobuf.FieldOptions\030\332\206\003 \001(\01020\n\007mi" +
-      "nimum\022\035.google.protobuf.FieldOptions\030\333\206\003" +
-      " \001(\00520\n\007maximum\022\035.google.protobuf.FieldO" +
-      "ptions\030\334\206\003 \001(\00526\n\rminimumLength\022\035.google" +
-      ".protobuf.FieldOptions\030\335\206\003 \001(\00526\n\rmaximu" +
-      "mLength\022\035.google.protobuf.FieldOptions\030\336" +
-      "\206\003 \001(\00523\n\ndeprecated\022\035.google.protobuf.F" +
-      "ieldOptions\030\337\206\003 \001(\01024\n\013noParamfile\022\035.goo" +
-      "gle.protobuf.FieldOptions\030\340\206\003 \001(\010\"\333\005\n\017Me" +
-      "thodExtension2/\n\005right\022\036.google.protobuf" +
-      ".MethodOptions\030\340\324\003 \001(\t25\n\013entitlement\022\036." +
-      "google.protobuf.MethodOptions\030\341\324\003 \001(\t23\n" +
-      "\tpaginates\022\036.google.protobuf.MethodOptio" +
-      "ns\030\342\324\003 \001(\0102?\n\025pagingDefaultMaxItems\022\036.go" +
-      "ogle.protobuf.MethodOptions\030\343\324\003 \001(\00520\n\006h" +
-      "idden\022\036.google.protobuf.MethodOptions\030\344\324" +
-      "\003 \001(\01026\n\014hiddenReason\022\036.google.protobuf." +
-      "MethodOptions\030\345\324\003 \001(\t29\n\017hiddenRetention" +
-      "\022\036.google.protobuf.MethodOptions\030\346\324\003 \001(\t" +
-      "24\n\ndeprecated\022\036.google.protobuf.MethodO" +
-      "ptions\030\347\324\003 \001(\01028\n\016rateLimitGroup\022\036.googl" +
-      "e.protobuf.MethodOptions\030\350\324\003 \001(\t22\n\010muta" +
-      "ting\022\036.google.protobuf.MethodOptions\030\351\324\003" +
-      " \001(\01026\n\014skipAuditing\022\036.google.protobuf.M" +
-      "ethodOptions\030\352\324\003 \001(\01024\n\nformFactor\022\036.goo" +
-      "gle.protobuf.MethodOptions\030\353\324\003 \003(\t23\n\tex" +
-      "tension\022\036.google.protobuf.MethodOptions\030" +
-      "\354\324\003 \003(\t\"\361\001\n\020MessageExtension21\n\006hidden\022\037" +
-      ".google.protobuf.MessageOptions\030\360\242\004 \001(\0102" +
-      "7\n\014hiddenReason\022\037.google.protobuf.Messag" +
-      "eOptions\030\361\242\004 \001(\t2:\n\017hiddenRetention\022\037.go" +
-      "ogle.protobuf.MessageOptions\030\362\242\004 \001(\t25\n\n" +
-      "deprecated\022\037.google.protobuf.MessageOpti" +
-      "ons\030\363\242\004 \001(\010\"\302\001\n\022EnumValueExtension23\n\006hi" +
-      "dden\022!.google.protobuf.EnumValueOptions\030" +
-      "\220\277\005 \001(\01029\n\014hiddenReason\022!.google.protobu" +
-      "f.EnumValueOptions\030\221\277\005 \001(\t2<\n\017hiddenRete" +
-      "ntion\022!.google.protobuf.EnumValueOptions" +
-      "\030\222\277\005 \001(\tBU\n/com.cloudera.thunderhead.ser" +
-      "vice.common.optionsB\007OptionsZ\031com/cloude" +
-      "ra/cdp/protobufb\006proto3"
+      "ogle.protobuf.ServiceOptions\030\305\270\002 \001(\t2F\n\010" +
+      "tagGroup\022\037.google.protobuf.ServiceOption" +
+      "s\030\306\270\002 \003(\0132\021.options.TagGroup2<\n\021addition" +
+      "alBackend\022\037.google.protobuf.ServiceOptio" +
+      "ns\030\307\270\002 \003(\t\"C\n\010TagGroup\022\014\n\004name\030\001 \001(\t\022\023\n\013" +
+      "description\030\002 \001(\t\022\024\n\014externalDocs\030\003 \001(\t\"" +
+      "k\n\030RateLimitGroupDefinition\022\014\n\004name\030\001 \001(" +
+      "\t\022\027\n\017byRemoteAddress\030\002 \001(\005\022\025\n\rbyAccessKe" +
+      "yId\030\003 \001(\005\022\021\n\tbyAccount\030\004 \001(\005\"6\n\016ApiServi" +
+      "ceName\022\021\n\tlowercase\030\001 \001(\t\022\021\n\tcamelcase\030\002" +
+      " \001(\t\"\202\001\n\rFileExtension2-\n\005audit\022\034.google" +
+      ".protobuf.FileOptions\030\200\361\004 \001(\01028\n\020auditEn" +
+      "titlement\022\034.google.protobuf.FileOptions\030" +
+      "\201\361\004 \001(\tJ\010\010\202\361\004\020\203\361\004\"\304\010\n\016FieldExtension22\n\t" +
+      "sensitive\022\035.google.protobuf.FieldOptions" +
+      "\030\320\206\003 \001(\01024\n\013skipLogging\022\035.google.protobu" +
+      "f.FieldOptions\030\321\206\003 \001(\01027\n\016pagingPageSize" +
+      "\022\035.google.protobuf.FieldOptions\030\322\206\003 \001(\0102" +
+      "9\n\020pagingInputToken\022\035.google.protobuf.Fi" +
+      "eldOptions\030\323\206\003 \001(\01025\n\014pagingResult\022\035.goo" +
+      "gle.protobuf.FieldOptions\030\324\206\003 \001(\0102:\n\021pag" +
+      "ingOutputToken\022\035.google.protobuf.FieldOp" +
+      "tions\030\325\206\003 \001(\01021\n\010datetime\022\035.google.proto" +
+      "buf.FieldOptions\030\326\206\003 \001(\0102/\n\006hidden\022\035.goo" +
+      "gle.protobuf.FieldOptions\030\327\206\003 \001(\01025\n\014hid" +
+      "denReason\022\035.google.protobuf.FieldOptions" +
+      "\030\330\206\003 \001(\t28\n\017hiddenRetention\022\035.google.pro" +
+      "tobuf.FieldOptions\030\331\206\003 \001(\t21\n\010required\022\035" +
+      ".google.protobuf.FieldOptions\030\332\206\003 \001(\01020\n" +
+      "\007minimum\022\035.google.protobuf.FieldOptions\030" +
+      "\333\206\003 \001(\00520\n\007maximum\022\035.google.protobuf.Fie" +
+      "ldOptions\030\334\206\003 \001(\00526\n\rminimumLength\022\035.goo" +
+      "gle.protobuf.FieldOptions\030\335\206\003 \001(\00526\n\rmax" +
+      "imumLength\022\035.google.protobuf.FieldOption" +
+      "s\030\336\206\003 \001(\00523\n\ndeprecated\022\035.google.protobu" +
+      "f.FieldOptions\030\337\206\003 \001(\01024\n\013noParamfile\022\035." +
+      "google.protobuf.FieldOptions\030\340\206\003 \001(\01020\n\007" +
+      "default\022\035.google.protobuf.FieldOptions\030\341" +
+      "\206\003 \001(\t23\n\nformFactor\022\035.google.protobuf.F" +
+      "ieldOptions\030\342\206\003 \003(\t23\n\npluralName\022\035.goog" +
+      "le.protobuf.FieldOptions\030\343\206\003 \001(\t\"\275\006\n\017Met" +
+      "hodExtension2/\n\005right\022\036.google.protobuf." +
+      "MethodOptions\030\340\324\003 \001(\t25\n\013entitlement\022\036.g" +
+      "oogle.protobuf.MethodOptions\030\341\324\003 \001(\t23\n\t" +
+      "paginates\022\036.google.protobuf.MethodOption" +
+      "s\030\342\324\003 \001(\0102?\n\025pagingDefaultMaxItems\022\036.goo" +
+      "gle.protobuf.MethodOptions\030\343\324\003 \001(\00520\n\006hi" +
+      "dden\022\036.google.protobuf.MethodOptions\030\344\324\003" +
+      " \001(\01026\n\014hiddenReason\022\036.google.protobuf.M" +
+      "ethodOptions\030\345\324\003 \001(\t29\n\017hiddenRetention\022" +
+      "\036.google.protobuf.MethodOptions\030\346\324\003 \001(\t2" +
+      "4\n\ndeprecated\022\036.google.protobuf.MethodOp" +
+      "tions\030\347\324\003 \001(\01028\n\016rateLimitGroup\022\036.google" +
+      ".protobuf.MethodOptions\030\350\324\003 \001(\t22\n\010mutat" +
+      "ing\022\036.google.protobuf.MethodOptions\030\351\324\003 " +
+      "\001(\01026\n\014skipAuditing\022\036.google.protobuf.Me" +
+      "thodOptions\030\352\324\003 \001(\01024\n\nformFactor\022\036.goog" +
+      "le.protobuf.MethodOptions\030\353\324\003 \003(\t23\n\text" +
+      "ension\022\036.google.protobuf.MethodOptions\030\354" +
+      "\324\003 \003(\t2-\n\003tag\022\036.google.protobuf.MethodOp" +
+      "tions\030\355\324\003 \001(\t21\n\007altName\022\036.google.protob" +
+      "uf.MethodOptions\030\356\324\003 \001(\t\"\250\002\n\020MessageExte" +
+      "nsion21\n\006hidden\022\037.google.protobuf.Messag" +
+      "eOptions\030\360\242\004 \001(\01027\n\014hiddenReason\022\037.googl" +
+      "e.protobuf.MessageOptions\030\361\242\004 \001(\t2:\n\017hid" +
+      "denRetention\022\037.google.protobuf.MessageOp" +
+      "tions\030\362\242\004 \001(\t25\n\ndeprecated\022\037.google.pro" +
+      "tobuf.MessageOptions\030\363\242\004 \001(\01025\n\nformFact" +
+      "or\022\037.google.protobuf.MessageOptions\030\364\242\004 " +
+      "\003(\t\"\373\001\n\022EnumValueExtension23\n\006hidden\022!.g" +
+      "oogle.protobuf.EnumValueOptions\030\220\277\005 \001(\0102" +
+      "9\n\014hiddenReason\022!.google.protobuf.EnumVa" +
+      "lueOptions\030\221\277\005 \001(\t2<\n\017hiddenRetention\022!." +
+      "google.protobuf.EnumValueOptions\030\222\277\005 \001(\t" +
+      "27\n\ndeprecated\022!.google.protobuf.EnumVal" +
+      "ueOptions\030\223\277\005 \001(\010BU\n/com.cloudera.thunde" +
+      "rhead.service.common.optionsB\007OptionsZ\031c" +
+      "om/cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5026,44 +6174,50 @@ public final class Options {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_ServiceExtension_descriptor,
         new java.lang.String[] { });
-    internal_static_options_RateLimitGroupDefinition_descriptor =
+    internal_static_options_TagGroup_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_options_TagGroup_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_options_TagGroup_descriptor,
+        new java.lang.String[] { "Name", "Description", "ExternalDocs", });
+    internal_static_options_RateLimitGroupDefinition_descriptor =
+      getDescriptor().getMessageTypes().get(2);
     internal_static_options_RateLimitGroupDefinition_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_RateLimitGroupDefinition_descriptor,
         new java.lang.String[] { "Name", "ByRemoteAddress", "ByAccessKeyId", "ByAccount", });
     internal_static_options_ApiServiceName_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(3);
     internal_static_options_ApiServiceName_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_ApiServiceName_descriptor,
         new java.lang.String[] { "Lowercase", "Camelcase", });
     internal_static_options_FileExtension_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_options_FileExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_FileExtension_descriptor,
         new java.lang.String[] { });
     internal_static_options_FieldExtension_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_options_FieldExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_FieldExtension_descriptor,
         new java.lang.String[] { });
     internal_static_options_MethodExtension_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_options_MethodExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_MethodExtension_descriptor,
         new java.lang.String[] { });
     internal_static_options_MessageExtension_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_options_MessageExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_MessageExtension_descriptor,
         new java.lang.String[] { });
     internal_static_options_EnumValueExtension_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_options_EnumValueExtension_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_options_EnumValueExtension_descriptor,

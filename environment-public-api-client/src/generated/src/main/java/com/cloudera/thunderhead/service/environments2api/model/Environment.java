@@ -13,13 +13,11 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
+import com.cloudera.thunderhead.service.environments2api.model.AWSComputeClusterConfiguration;
 import com.cloudera.thunderhead.service.environments2api.model.Authentication;
+import com.cloudera.thunderhead.service.environments2api.model.AzureComputeClusterConfiguration;
 import com.cloudera.thunderhead.service.environments2api.model.BackupStorage;
 import com.cloudera.thunderhead.service.environments2api.model.CustomDockerRegistryResponse;
 import com.cloudera.thunderhead.service.environments2api.model.DataServices;
@@ -33,16 +31,17 @@ import com.cloudera.thunderhead.service.environments2api.model.Network;
 import com.cloudera.thunderhead.service.environments2api.model.ProxyConfig;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.cloudera.thunderhead.service.environments2api.model.SecurityAccess;
+import com.cloudera.thunderhead.service.environments2api.model.SecurityResponse;
 import com.cloudera.thunderhead.service.environments2api.model.TunnelType;
+import com.cloudera.thunderhead.service.environments2api.model.VmEncryptionDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * The environment.
@@ -77,13 +76,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   Environment.JSON_PROPERTY_TAGS,
   Environment.JSON_PROPERTY_PARENT_ENVIRONMENT_NAME,
   Environment.JSON_PROPERTY_CLOUDBREAK_VERSION,
-  Environment.JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION,
+  Environment.JSON_PROPERTY_VM_ENCRYPTION_DETAILS,
   Environment.JSON_PROPERTY_DATA_SERVICES,
   Environment.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
   Environment.JSON_PROPERTY_PVC_ENVIRONMENT_DETAILS,
   Environment.JSON_PROPERTY_CDP_RUNTIME_VERSION,
   Environment.JSON_PROPERTY_CLOUDERA_MANAGER_VERSION,
-  Environment.JSON_PROPERTY_CDP_PVC_VERSION
+  Environment.JSON_PROPERTY_CDP_PVC_VERSION,
+  Environment.JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION,
+  Environment.JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION,
+  Environment.JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED,
+  Environment.JSON_PROPERTY_SECURITY
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class Environment {
@@ -174,8 +177,8 @@ public class Environment {
   public static final String JSON_PROPERTY_CLOUDBREAK_VERSION = "cloudbreakVersion";
   private String cloudbreakVersion;
 
-  public static final String JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION = "enableSecretEncryption";
-  private Boolean enableSecretEncryption;
+  public static final String JSON_PROPERTY_VM_ENCRYPTION_DETAILS = "vmEncryptionDetails";
+  private VmEncryptionDetails vmEncryptionDetails;
 
   public static final String JSON_PROPERTY_DATA_SERVICES = "dataServices";
   private DataServices dataServices;
@@ -195,10 +198,23 @@ public class Environment {
   public static final String JSON_PROPERTY_CDP_PVC_VERSION = "cdpPvcVersion";
   private String cdpPvcVersion;
 
-  public Environment() { 
+  public static final String JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION = "awsComputeClusterConfiguration";
+  private AWSComputeClusterConfiguration awsComputeClusterConfiguration;
+
+  public static final String JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION = "azureComputeClusterConfiguration";
+  private AzureComputeClusterConfiguration azureComputeClusterConfiguration;
+
+  public static final String JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED = "computeClusterEnabled";
+  private Boolean computeClusterEnabled;
+
+  public static final String JSON_PROPERTY_SECURITY = "security";
+  private SecurityResponse security;
+
+  public Environment() {
   }
 
   public Environment environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -224,6 +240,7 @@ public class Environment {
 
 
   public Environment crn(String crn) {
+    
     this.crn = crn;
     return this;
   }
@@ -249,6 +266,7 @@ public class Environment {
 
 
   public Environment status(String status) {
+    
     this.status = status;
     return this;
   }
@@ -274,6 +292,7 @@ public class Environment {
 
 
   public Environment region(String region) {
+    
     this.region = region;
     return this;
   }
@@ -299,6 +318,7 @@ public class Environment {
 
 
   public Environment cloudPlatform(String cloudPlatform) {
+    
     this.cloudPlatform = cloudPlatform;
     return this;
   }
@@ -324,6 +344,7 @@ public class Environment {
 
 
   public Environment credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -349,6 +370,7 @@ public class Environment {
 
 
   public Environment network(Network network) {
+    
     this.network = network;
     return this;
   }
@@ -374,6 +396,7 @@ public class Environment {
 
 
   public Environment logStorage(LogStorage logStorage) {
+    
     this.logStorage = logStorage;
     return this;
   }
@@ -399,6 +422,7 @@ public class Environment {
 
 
   public Environment backupStorage(BackupStorage backupStorage) {
+    
     this.backupStorage = backupStorage;
     return this;
   }
@@ -424,6 +448,7 @@ public class Environment {
 
 
   public Environment authentication(Authentication authentication) {
+    
     this.authentication = authentication;
     return this;
   }
@@ -449,6 +474,7 @@ public class Environment {
 
 
   public Environment securityAccess(SecurityAccess securityAccess) {
+    
     this.securityAccess = securityAccess;
     return this;
   }
@@ -474,6 +500,7 @@ public class Environment {
 
 
   public Environment description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -499,6 +526,7 @@ public class Environment {
 
 
   public Environment statusReason(String statusReason) {
+    
     this.statusReason = statusReason;
     return this;
   }
@@ -524,6 +552,7 @@ public class Environment {
 
 
   public Environment created(OffsetDateTime created) {
+    
     this.created = created;
     return this;
   }
@@ -549,6 +578,7 @@ public class Environment {
 
 
   public Environment creator(String creator) {
+    
     this.creator = creator;
     return this;
   }
@@ -574,6 +604,7 @@ public class Environment {
 
 
   public Environment tunnelEnabled(Boolean tunnelEnabled) {
+    
     this.tunnelEnabled = tunnelEnabled;
     return this;
   }
@@ -599,6 +630,7 @@ public class Environment {
 
 
   public Environment tunnelType(TunnelType tunnelType) {
+    
     this.tunnelType = tunnelType;
     return this;
   }
@@ -624,6 +656,7 @@ public class Environment {
 
 
   public Environment awsDetails(EnvironmentAwsDetails awsDetails) {
+    
     this.awsDetails = awsDetails;
     return this;
   }
@@ -649,6 +682,7 @@ public class Environment {
 
 
   public Environment azureDetails(EnvironmentAzureDetails azureDetails) {
+    
     this.azureDetails = azureDetails;
     return this;
   }
@@ -674,6 +708,7 @@ public class Environment {
 
 
   public Environment gcpDetails(EnvironmentGcpDetails gcpDetails) {
+    
     this.gcpDetails = gcpDetails;
     return this;
   }
@@ -699,6 +734,7 @@ public class Environment {
 
 
   public Environment enableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+    
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
     return this;
   }
@@ -724,6 +760,7 @@ public class Environment {
 
 
   public Environment workloadAnalytics(Boolean workloadAnalytics) {
+    
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -749,6 +786,7 @@ public class Environment {
 
 
   public Environment reportDeploymentLogs(Boolean reportDeploymentLogs) {
+    
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -774,6 +812,7 @@ public class Environment {
 
 
   public Environment cloudStorageLogging(Boolean cloudStorageLogging) {
+    
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -799,6 +838,7 @@ public class Environment {
 
 
   public Environment freeipa(FreeipaDetails freeipa) {
+    
     this.freeipa = freeipa;
     return this;
   }
@@ -824,6 +864,7 @@ public class Environment {
 
 
   public Environment proxyConfig(ProxyConfig proxyConfig) {
+    
     this.proxyConfig = proxyConfig;
     return this;
   }
@@ -849,6 +890,7 @@ public class Environment {
 
 
   public Environment tags(EnvironmentTags tags) {
+    
     this.tags = tags;
     return this;
   }
@@ -874,6 +916,7 @@ public class Environment {
 
 
   public Environment parentEnvironmentName(String parentEnvironmentName) {
+    
     this.parentEnvironmentName = parentEnvironmentName;
     return this;
   }
@@ -899,6 +942,7 @@ public class Environment {
 
 
   public Environment cloudbreakVersion(String cloudbreakVersion) {
+    
     this.cloudbreakVersion = cloudbreakVersion;
     return this;
   }
@@ -923,32 +967,34 @@ public class Environment {
   }
 
 
-  public Environment enableSecretEncryption(Boolean enableSecretEncryption) {
-    this.enableSecretEncryption = enableSecretEncryption;
+  public Environment vmEncryptionDetails(VmEncryptionDetails vmEncryptionDetails) {
+    
+    this.vmEncryptionDetails = vmEncryptionDetails;
     return this;
   }
 
    /**
-   * True if the secret encryption feature is enabled for the environment.
-   * @return enableSecretEncryption
+   * Get vmEncryptionDetails
+   * @return vmEncryptionDetails
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
+  @JsonProperty(JSON_PROPERTY_VM_ENCRYPTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Boolean getEnableSecretEncryption() {
-    return enableSecretEncryption;
+  public VmEncryptionDetails getVmEncryptionDetails() {
+    return vmEncryptionDetails;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION)
+  @JsonProperty(JSON_PROPERTY_VM_ENCRYPTION_DETAILS)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnableSecretEncryption(Boolean enableSecretEncryption) {
-    this.enableSecretEncryption = enableSecretEncryption;
+  public void setVmEncryptionDetails(VmEncryptionDetails vmEncryptionDetails) {
+    this.vmEncryptionDetails = vmEncryptionDetails;
   }
 
 
   public Environment dataServices(DataServices dataServices) {
+    
     this.dataServices = dataServices;
     return this;
   }
@@ -974,6 +1020,7 @@ public class Environment {
 
 
   public Environment customDockerRegistry(CustomDockerRegistryResponse customDockerRegistry) {
+    
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
@@ -999,6 +1046,7 @@ public class Environment {
 
 
   public Environment pvcEnvironmentDetails(PvcEnvironmentDetails pvcEnvironmentDetails) {
+    
     this.pvcEnvironmentDetails = pvcEnvironmentDetails;
     return this;
   }
@@ -1024,6 +1072,7 @@ public class Environment {
 
 
   public Environment cdpRuntimeVersion(String cdpRuntimeVersion) {
+    
     this.cdpRuntimeVersion = cdpRuntimeVersion;
     return this;
   }
@@ -1049,6 +1098,7 @@ public class Environment {
 
 
   public Environment clouderaManagerVersion(String clouderaManagerVersion) {
+    
     this.clouderaManagerVersion = clouderaManagerVersion;
     return this;
   }
@@ -1074,6 +1124,7 @@ public class Environment {
 
 
   public Environment cdpPvcVersion(String cdpPvcVersion) {
+    
     this.cdpPvcVersion = cdpPvcVersion;
     return this;
   }
@@ -1098,9 +1149,109 @@ public class Environment {
   }
 
 
-  /**
-   * Return true if this Environment object is equal to o.
-   */
+  public Environment awsComputeClusterConfiguration(AWSComputeClusterConfiguration awsComputeClusterConfiguration) {
+    
+    this.awsComputeClusterConfiguration = awsComputeClusterConfiguration;
+    return this;
+  }
+
+   /**
+   * Get awsComputeClusterConfiguration
+   * @return awsComputeClusterConfiguration
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public AWSComputeClusterConfiguration getAwsComputeClusterConfiguration() {
+    return awsComputeClusterConfiguration;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AWS_COMPUTE_CLUSTER_CONFIGURATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAwsComputeClusterConfiguration(AWSComputeClusterConfiguration awsComputeClusterConfiguration) {
+    this.awsComputeClusterConfiguration = awsComputeClusterConfiguration;
+  }
+
+
+  public Environment azureComputeClusterConfiguration(AzureComputeClusterConfiguration azureComputeClusterConfiguration) {
+    
+    this.azureComputeClusterConfiguration = azureComputeClusterConfiguration;
+    return this;
+  }
+
+   /**
+   * Get azureComputeClusterConfiguration
+   * @return azureComputeClusterConfiguration
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public AzureComputeClusterConfiguration getAzureComputeClusterConfiguration() {
+    return azureComputeClusterConfiguration;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_AZURE_COMPUTE_CLUSTER_CONFIGURATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setAzureComputeClusterConfiguration(AzureComputeClusterConfiguration azureComputeClusterConfiguration) {
+    this.azureComputeClusterConfiguration = azureComputeClusterConfiguration;
+  }
+
+
+  public Environment computeClusterEnabled(Boolean computeClusterEnabled) {
+    
+    this.computeClusterEnabled = computeClusterEnabled;
+    return this;
+  }
+
+   /**
+   * Compute clusters enabled
+   * @return computeClusterEnabled
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getComputeClusterEnabled() {
+    return computeClusterEnabled;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_ENABLED)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setComputeClusterEnabled(Boolean computeClusterEnabled) {
+    this.computeClusterEnabled = computeClusterEnabled;
+  }
+
+
+  public Environment security(SecurityResponse security) {
+    
+    this.security = security;
+    return this;
+  }
+
+   /**
+   * Get security
+   * @return security
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public SecurityResponse getSecurity() {
+    return security;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSecurity(SecurityResponse security) {
+    this.security = security;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -1139,18 +1290,22 @@ public class Environment {
         Objects.equals(this.tags, environment.tags) &&
         Objects.equals(this.parentEnvironmentName, environment.parentEnvironmentName) &&
         Objects.equals(this.cloudbreakVersion, environment.cloudbreakVersion) &&
-        Objects.equals(this.enableSecretEncryption, environment.enableSecretEncryption) &&
+        Objects.equals(this.vmEncryptionDetails, environment.vmEncryptionDetails) &&
         Objects.equals(this.dataServices, environment.dataServices) &&
         Objects.equals(this.customDockerRegistry, environment.customDockerRegistry) &&
         Objects.equals(this.pvcEnvironmentDetails, environment.pvcEnvironmentDetails) &&
         Objects.equals(this.cdpRuntimeVersion, environment.cdpRuntimeVersion) &&
         Objects.equals(this.clouderaManagerVersion, environment.clouderaManagerVersion) &&
-        Objects.equals(this.cdpPvcVersion, environment.cdpPvcVersion);
+        Objects.equals(this.cdpPvcVersion, environment.cdpPvcVersion) &&
+        Objects.equals(this.awsComputeClusterConfiguration, environment.awsComputeClusterConfiguration) &&
+        Objects.equals(this.azureComputeClusterConfiguration, environment.azureComputeClusterConfiguration) &&
+        Objects.equals(this.computeClusterEnabled, environment.computeClusterEnabled) &&
+        Objects.equals(this.security, environment.security);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, crn, status, region, cloudPlatform, credentialName, network, logStorage, backupStorage, authentication, securityAccess, description, statusReason, created, creator, tunnelEnabled, tunnelType, awsDetails, azureDetails, gcpDetails, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, cloudStorageLogging, freeipa, proxyConfig, tags, parentEnvironmentName, cloudbreakVersion, enableSecretEncryption, dataServices, customDockerRegistry, pvcEnvironmentDetails, cdpRuntimeVersion, clouderaManagerVersion, cdpPvcVersion);
+    return Objects.hash(environmentName, crn, status, region, cloudPlatform, credentialName, network, logStorage, backupStorage, authentication, securityAccess, description, statusReason, created, creator, tunnelEnabled, tunnelType, awsDetails, azureDetails, gcpDetails, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, cloudStorageLogging, freeipa, proxyConfig, tags, parentEnvironmentName, cloudbreakVersion, vmEncryptionDetails, dataServices, customDockerRegistry, pvcEnvironmentDetails, cdpRuntimeVersion, clouderaManagerVersion, cdpPvcVersion, awsComputeClusterConfiguration, azureComputeClusterConfiguration, computeClusterEnabled, security);
   }
 
   @Override
@@ -1186,13 +1341,17 @@ public class Environment {
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    parentEnvironmentName: ").append(toIndentedString(parentEnvironmentName)).append("\n");
     sb.append("    cloudbreakVersion: ").append(toIndentedString(cloudbreakVersion)).append("\n");
-    sb.append("    enableSecretEncryption: ").append(toIndentedString(enableSecretEncryption)).append("\n");
+    sb.append("    vmEncryptionDetails: ").append(toIndentedString(vmEncryptionDetails)).append("\n");
     sb.append("    dataServices: ").append(toIndentedString(dataServices)).append("\n");
     sb.append("    customDockerRegistry: ").append(toIndentedString(customDockerRegistry)).append("\n");
     sb.append("    pvcEnvironmentDetails: ").append(toIndentedString(pvcEnvironmentDetails)).append("\n");
     sb.append("    cdpRuntimeVersion: ").append(toIndentedString(cdpRuntimeVersion)).append("\n");
     sb.append("    clouderaManagerVersion: ").append(toIndentedString(clouderaManagerVersion)).append("\n");
     sb.append("    cdpPvcVersion: ").append(toIndentedString(cdpPvcVersion)).append("\n");
+    sb.append("    awsComputeClusterConfiguration: ").append(toIndentedString(awsComputeClusterConfiguration)).append("\n");
+    sb.append("    azureComputeClusterConfiguration: ").append(toIndentedString(azureComputeClusterConfiguration)).append("\n");
+    sb.append("    computeClusterEnabled: ").append(toIndentedString(computeClusterEnabled)).append("\n");
+    sb.append("    security: ").append(toIndentedString(security)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -1208,219 +1367,5 @@ public class Environment {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `crn` to the URL query string
-    if (getCrn() != null) {
-      joiner.add(String.format("%scrn%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCrn()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `status` to the URL query string
-    if (getStatus() != null) {
-      joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `region` to the URL query string
-    if (getRegion() != null) {
-      joiner.add(String.format("%sregion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRegion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudPlatform` to the URL query string
-    if (getCloudPlatform() != null) {
-      joiner.add(String.format("%scloudPlatform%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudPlatform()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `network` to the URL query string
-    if (getNetwork() != null) {
-      joiner.add(getNetwork().toUrlQueryString(prefix + "network" + suffix));
-    }
-
-    // add `logStorage` to the URL query string
-    if (getLogStorage() != null) {
-      joiner.add(getLogStorage().toUrlQueryString(prefix + "logStorage" + suffix));
-    }
-
-    // add `backupStorage` to the URL query string
-    if (getBackupStorage() != null) {
-      joiner.add(getBackupStorage().toUrlQueryString(prefix + "backupStorage" + suffix));
-    }
-
-    // add `authentication` to the URL query string
-    if (getAuthentication() != null) {
-      joiner.add(getAuthentication().toUrlQueryString(prefix + "authentication" + suffix));
-    }
-
-    // add `securityAccess` to the URL query string
-    if (getSecurityAccess() != null) {
-      joiner.add(getSecurityAccess().toUrlQueryString(prefix + "securityAccess" + suffix));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `statusReason` to the URL query string
-    if (getStatusReason() != null) {
-      joiner.add(String.format("%sstatusReason%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getStatusReason()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `created` to the URL query string
-    if (getCreated() != null) {
-      joiner.add(String.format("%screated%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreated()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `creator` to the URL query string
-    if (getCreator() != null) {
-      joiner.add(String.format("%screator%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreator()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tunnelEnabled` to the URL query string
-    if (getTunnelEnabled() != null) {
-      joiner.add(String.format("%stunnelEnabled%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTunnelEnabled()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tunnelType` to the URL query string
-    if (getTunnelType() != null) {
-      joiner.add(String.format("%stunnelType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTunnelType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `awsDetails` to the URL query string
-    if (getAwsDetails() != null) {
-      joiner.add(getAwsDetails().toUrlQueryString(prefix + "awsDetails" + suffix));
-    }
-
-    // add `azureDetails` to the URL query string
-    if (getAzureDetails() != null) {
-      joiner.add(getAzureDetails().toUrlQueryString(prefix + "azureDetails" + suffix));
-    }
-
-    // add `gcpDetails` to the URL query string
-    if (getGcpDetails() != null) {
-      joiner.add(getGcpDetails().toUrlQueryString(prefix + "gcpDetails" + suffix));
-    }
-
-    // add `enableWorkloadAnalytics` to the URL query string
-    if (getEnableWorkloadAnalytics() != null) {
-      joiner.add(String.format("%senableWorkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `workloadAnalytics` to the URL query string
-    if (getWorkloadAnalytics() != null) {
-      joiner.add(String.format("%sworkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `reportDeploymentLogs` to the URL query string
-    if (getReportDeploymentLogs() != null) {
-      joiner.add(String.format("%sreportDeploymentLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getReportDeploymentLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudStorageLogging` to the URL query string
-    if (getCloudStorageLogging() != null) {
-      joiner.add(String.format("%scloudStorageLogging%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudStorageLogging()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `freeipa` to the URL query string
-    if (getFreeipa() != null) {
-      joiner.add(getFreeipa().toUrlQueryString(prefix + "freeipa" + suffix));
-    }
-
-    // add `proxyConfig` to the URL query string
-    if (getProxyConfig() != null) {
-      joiner.add(getProxyConfig().toUrlQueryString(prefix + "proxyConfig" + suffix));
-    }
-
-    // add `tags` to the URL query string
-    if (getTags() != null) {
-      joiner.add(getTags().toUrlQueryString(prefix + "tags" + suffix));
-    }
-
-    // add `parentEnvironmentName` to the URL query string
-    if (getParentEnvironmentName() != null) {
-      joiner.add(String.format("%sparentEnvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getParentEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudbreakVersion` to the URL query string
-    if (getCloudbreakVersion() != null) {
-      joiner.add(String.format("%scloudbreakVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudbreakVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableSecretEncryption` to the URL query string
-    if (getEnableSecretEncryption() != null) {
-      joiner.add(String.format("%senableSecretEncryption%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableSecretEncryption()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dataServices` to the URL query string
-    if (getDataServices() != null) {
-      joiner.add(getDataServices().toUrlQueryString(prefix + "dataServices" + suffix));
-    }
-
-    // add `customDockerRegistry` to the URL query string
-    if (getCustomDockerRegistry() != null) {
-      joiner.add(getCustomDockerRegistry().toUrlQueryString(prefix + "customDockerRegistry" + suffix));
-    }
-
-    // add `pvcEnvironmentDetails` to the URL query string
-    if (getPvcEnvironmentDetails() != null) {
-      joiner.add(getPvcEnvironmentDetails().toUrlQueryString(prefix + "pvcEnvironmentDetails" + suffix));
-    }
-
-    // add `cdpRuntimeVersion` to the URL query string
-    if (getCdpRuntimeVersion() != null) {
-      joiner.add(String.format("%scdpRuntimeVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCdpRuntimeVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `clouderaManagerVersion` to the URL query string
-    if (getClouderaManagerVersion() != null) {
-      joiner.add(String.format("%sclouderaManagerVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getClouderaManagerVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cdpPvcVersion` to the URL query string
-    if (getCdpPvcVersion() != null) {
-      joiner.add(String.format("%scdpPvcVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCdpPvcVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

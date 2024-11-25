@@ -13,21 +13,16 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AzureAuthenticationTypeProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Additional configurations needed for app-based authentication.
@@ -36,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   UpdateAzureCredentialRequestAppBased.JSON_PROPERTY_AUTHENTICATION_TYPE,
   UpdateAzureCredentialRequestAppBased.JSON_PROPERTY_APPLICATION_ID
 })
+@JsonTypeName("UpdateAzureCredentialRequest_appBased")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class UpdateAzureCredentialRequestAppBased {
   public static final String JSON_PROPERTY_AUTHENTICATION_TYPE = "authenticationType";
@@ -44,10 +40,11 @@ public class UpdateAzureCredentialRequestAppBased {
   public static final String JSON_PROPERTY_APPLICATION_ID = "applicationId";
   private String applicationId;
 
-  public UpdateAzureCredentialRequestAppBased() { 
+  public UpdateAzureCredentialRequestAppBased() {
   }
 
   public UpdateAzureCredentialRequestAppBased authenticationType(AzureAuthenticationTypeProperties authenticationType) {
+    
     this.authenticationType = authenticationType;
     return this;
   }
@@ -73,6 +70,7 @@ public class UpdateAzureCredentialRequestAppBased {
 
 
   public UpdateAzureCredentialRequestAppBased applicationId(String applicationId) {
+    
     this.applicationId = applicationId;
     return this;
   }
@@ -96,10 +94,6 @@ public class UpdateAzureCredentialRequestAppBased {
     this.applicationId = applicationId;
   }
 
-
-  /**
-   * Return true if this UpdateAzureCredentialRequest_appBased object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -139,49 +133,5 @@ public class UpdateAzureCredentialRequestAppBased {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `authenticationType` to the URL query string
-    if (getAuthenticationType() != null) {
-      joiner.add(String.format("%sauthenticationType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getAuthenticationType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `applicationId` to the URL query string
-    if (getApplicationId() != null) {
-      joiner.add(String.format("%sapplicationId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getApplicationId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    return joiner.toString();
-  }
 }
 

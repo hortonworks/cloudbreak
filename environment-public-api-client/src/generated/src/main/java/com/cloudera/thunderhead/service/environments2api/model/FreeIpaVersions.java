@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * FreeIPA-related versions and images.
@@ -49,10 +45,11 @@ public class FreeIpaVersions {
   public static final String JSON_PROPERTY_VERSIONS = "versions";
   private List<String> versions = new ArrayList<>();
 
-  public FreeIpaVersions() { 
+  public FreeIpaVersions() {
   }
 
   public FreeIpaVersions images(List<String> images) {
+    
     this.images = images;
     return this;
   }
@@ -86,6 +83,7 @@ public class FreeIpaVersions {
 
 
   public FreeIpaVersions defaults(List<String> defaults) {
+    
     this.defaults = defaults;
     return this;
   }
@@ -119,6 +117,7 @@ public class FreeIpaVersions {
 
 
   public FreeIpaVersions versions(List<String> versions) {
+    
     this.versions = versions;
     return this;
   }
@@ -150,10 +149,6 @@ public class FreeIpaVersions {
     this.versions = versions;
   }
 
-
-  /**
-   * Return true if this FreeIpaVersions object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -195,66 +190,5 @@ public class FreeIpaVersions {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `images` to the URL query string
-    if (getImages() != null) {
-      for (int i = 0; i < getImages().size(); i++) {
-        joiner.add(String.format("%simages%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getImages().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `defaults` to the URL query string
-    if (getDefaults() != null) {
-      for (int i = 0; i < getDefaults().size(); i++) {
-        joiner.add(String.format("%sdefaults%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getDefaults().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `versions` to the URL query string
-    if (getVersions() != null) {
-      for (int i = 0; i < getVersions().size(); i++) {
-        joiner.add(String.format("%sversions%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getVersions().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

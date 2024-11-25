@@ -13,23 +13,18 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Security control configuration for FreeIPA and Datalake deployment. Choosing a CIDR will automatically create security groups. Alternatively existing security groups can be specified.
@@ -58,10 +53,11 @@ public class SecurityAccessRequest {
   public static final String JSON_PROPERTY_DEFAULT_SECURITY_GROUP_I_DS = "defaultSecurityGroupIDs";
   private Set<String> defaultSecurityGroupIDs = new LinkedHashSet<>();
 
-  public SecurityAccessRequest() { 
+  public SecurityAccessRequest() {
   }
 
   public SecurityAccessRequest cidr(String cidr) {
+    
     this.cidr = cidr;
     return this;
   }
@@ -87,6 +83,7 @@ public class SecurityAccessRequest {
 
 
   public SecurityAccessRequest securityGroupIdForKnox(String securityGroupIdForKnox) {
+    
     this.securityGroupIdForKnox = securityGroupIdForKnox;
     return this;
   }
@@ -112,6 +109,7 @@ public class SecurityAccessRequest {
 
 
   public SecurityAccessRequest defaultSecurityGroupId(String defaultSecurityGroupId) {
+    
     this.defaultSecurityGroupId = defaultSecurityGroupId;
     return this;
   }
@@ -137,6 +135,7 @@ public class SecurityAccessRequest {
 
 
   public SecurityAccessRequest securityGroupIDsForKnox(Set<String> securityGroupIDsForKnox) {
+    
     this.securityGroupIDsForKnox = securityGroupIDsForKnox;
     return this;
   }
@@ -171,6 +170,7 @@ public class SecurityAccessRequest {
 
 
   public SecurityAccessRequest defaultSecurityGroupIDs(Set<String> defaultSecurityGroupIDs) {
+    
     this.defaultSecurityGroupIDs = defaultSecurityGroupIDs;
     return this;
   }
@@ -203,10 +203,6 @@ public class SecurityAccessRequest {
     this.defaultSecurityGroupIDs = defaultSecurityGroupIDs;
   }
 
-
-  /**
-   * Return true if this SecurityAccessRequest object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -252,76 +248,5 @@ public class SecurityAccessRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `cidr` to the URL query string
-    if (getCidr() != null) {
-      joiner.add(String.format("%scidr%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCidr()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `securityGroupIdForKnox` to the URL query string
-    if (getSecurityGroupIdForKnox() != null) {
-      joiner.add(String.format("%ssecurityGroupIdForKnox%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getSecurityGroupIdForKnox()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `defaultSecurityGroupId` to the URL query string
-    if (getDefaultSecurityGroupId() != null) {
-      joiner.add(String.format("%sdefaultSecurityGroupId%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDefaultSecurityGroupId()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `securityGroupIDsForKnox` to the URL query string
-    if (getSecurityGroupIDsForKnox() != null) {
-      int i = 0;
-      for (String _item : getSecurityGroupIDsForKnox()) {
-        joiner.add(String.format("%ssecurityGroupIDsForKnox%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    // add `defaultSecurityGroupIDs` to the URL query string
-    if (getDefaultSecurityGroupIDs() != null) {
-      int i = 0;
-      for (String _item : getDefaultSecurityGroupIDs()) {
-        joiner.add(String.format("%sdefaultSecurityGroupIDs%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(_item), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-      i++;
-    }
-
-    return joiner.toString();
-  }
 }
 

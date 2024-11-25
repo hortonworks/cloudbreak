@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.Image;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * List of the images.
@@ -42,10 +38,11 @@ public class Images {
   public static final String JSON_PROPERTY_FREE_IPA_IMAGES = "freeIpaImages";
   private List<Image> freeIpaImages = new ArrayList<>();
 
-  public Images() { 
+  public Images() {
   }
 
   public Images freeIpaImages(List<Image> freeIpaImages) {
+    
     this.freeIpaImages = freeIpaImages;
     return this;
   }
@@ -77,10 +74,6 @@ public class Images {
     this.freeIpaImages = freeIpaImages;
   }
 
-
-  /**
-   * Return true if this Images object is equal to o.
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -118,49 +111,5 @@ public class Images {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `freeIpaImages` to the URL query string
-    if (getFreeIpaImages() != null) {
-      for (int i = 0; i < getFreeIpaImages().size(); i++) {
-        if (getFreeIpaImages().get(i) != null) {
-          joiner.add(getFreeIpaImages().get(i).toUrlQueryString(String.format("%sfreeIpaImages%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    return joiner.toString();
-  }
 }
 

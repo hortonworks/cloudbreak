@@ -13,12 +13,8 @@
 
 package com.cloudera.thunderhead.service.environments2api.model;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
 import java.util.Objects;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Arrays;
 import com.cloudera.thunderhead.service.environments2api.model.AzureComputeClusterConfigurationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AzureFreeIpaCreationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AzureLogStorageRequest;
@@ -29,6 +25,7 @@ import com.cloudera.thunderhead.service.environments2api.model.DataServicesReque
 import com.cloudera.thunderhead.service.environments2api.model.ExistingAzureNetworkRequest;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaImageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.SecurityAccessRequest;
+import com.cloudera.thunderhead.service.environments2api.model.SecurityRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TagRequest;
 import com.cloudera.thunderhead.service.environments2api.model.TunnelType;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -40,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Request object for a create Azure environment request.
@@ -64,7 +61,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateAzureEnvironmentRequest.JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_CLOUD_STORAGE_LOGGING,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_FREE_IPA,
-  CreateAzureEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_VERSION,
+  CreateAzureEnvironmentRequest.JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_IMAGE,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_TAGS,
@@ -85,7 +82,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateAzureEnvironmentRequest.JSON_PROPERTY_AVAILABILITY_ZONES,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_FLEXIBLE_SERVER_SUBNET_IDS,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_DATA_SERVICES,
-  CreateAzureEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY
+  CreateAzureEnvironmentRequest.JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY,
+  CreateAzureEnvironmentRequest.JSON_PROPERTY_SECURITY
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class CreateAzureEnvironmentRequest {
@@ -143,8 +141,8 @@ public class CreateAzureEnvironmentRequest {
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
   private AzureFreeIpaCreationRequest freeIpa;
 
-  public static final String JSON_PROPERTY_ENVIRONMENT_VERSION = "environmentVersion";
-  private String environmentVersion;
+  public static final String JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER = "enableComputeCluster";
+  private Boolean enableComputeCluster;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
   private AzureComputeClusterConfigurationRequest computeClusterConfiguration;
@@ -244,10 +242,14 @@ public class CreateAzureEnvironmentRequest {
   public static final String JSON_PROPERTY_CUSTOM_DOCKER_REGISTRY = "customDockerRegistry";
   private CustomDockerRegistryRequest customDockerRegistry;
 
-  public CreateAzureEnvironmentRequest() { 
+  public static final String JSON_PROPERTY_SECURITY = "security";
+  private SecurityRequest security;
+
+  public CreateAzureEnvironmentRequest() {
   }
 
   public CreateAzureEnvironmentRequest environmentName(String environmentName) {
+    
     this.environmentName = environmentName;
     return this;
   }
@@ -273,6 +275,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest credentialName(String credentialName) {
+    
     this.credentialName = credentialName;
     return this;
   }
@@ -298,6 +301,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest region(String region) {
+    
     this.region = region;
     return this;
   }
@@ -323,6 +327,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest publicKey(String publicKey) {
+    
     this.publicKey = publicKey;
     return this;
   }
@@ -348,6 +353,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest securityAccess(SecurityAccessRequest securityAccess) {
+    
     this.securityAccess = securityAccess;
     return this;
   }
@@ -373,6 +379,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest usePublicIp(Boolean usePublicIp) {
+    
     this.usePublicIp = usePublicIp;
     return this;
   }
@@ -398,6 +405,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest logStorage(AzureLogStorageRequest logStorage) {
+    
     this.logStorage = logStorage;
     return this;
   }
@@ -423,6 +431,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest existingNetworkParams(ExistingAzureNetworkRequest existingNetworkParams) {
+    
     this.existingNetworkParams = existingNetworkParams;
     return this;
   }
@@ -448,6 +457,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest newNetworkParams(CreateAzureEnvironmentRequestNewNetworkParams newNetworkParams) {
+    
     this.newNetworkParams = newNetworkParams;
     return this;
   }
@@ -473,6 +483,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest description(String description) {
+    
     this.description = description;
     return this;
   }
@@ -498,6 +509,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest enableTunnel(Boolean enableTunnel) {
+    
     this.enableTunnel = enableTunnel;
     return this;
   }
@@ -523,6 +535,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest tunnelType(TunnelType tunnelType) {
+    
     this.tunnelType = tunnelType;
     return this;
   }
@@ -548,6 +561,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest ccmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+    
     this.ccmV2TlsType = ccmV2TlsType;
     return this;
   }
@@ -573,6 +587,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest enableWorkloadAnalytics(Boolean enableWorkloadAnalytics) {
+    
     this.enableWorkloadAnalytics = enableWorkloadAnalytics;
     return this;
   }
@@ -598,6 +613,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest workloadAnalytics(Boolean workloadAnalytics) {
+    
     this.workloadAnalytics = workloadAnalytics;
     return this;
   }
@@ -623,6 +639,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest reportDeploymentLogs(Boolean reportDeploymentLogs) {
+    
     this.reportDeploymentLogs = reportDeploymentLogs;
     return this;
   }
@@ -648,6 +665,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest cloudStorageLogging(Boolean cloudStorageLogging) {
+    
     this.cloudStorageLogging = cloudStorageLogging;
     return this;
   }
@@ -673,6 +691,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest freeIpa(AzureFreeIpaCreationRequest freeIpa) {
+    
     this.freeIpa = freeIpa;
     return this;
   }
@@ -697,32 +716,34 @@ public class CreateAzureEnvironmentRequest {
   }
 
 
-  public CreateAzureEnvironmentRequest environmentVersion(String environmentVersion) {
-    this.environmentVersion = environmentVersion;
+  public CreateAzureEnvironmentRequest enableComputeCluster(Boolean enableComputeCluster) {
+    
+    this.enableComputeCluster = enableComputeCluster;
     return this;
   }
 
    /**
-   * The environment version can be defined in this parameter. Valid values are v1,v2. Default is v1 at the moment.
-   * @return environmentVersion
+   * Enable compute clusters for environment
+   * @return enableComputeCluster
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_VERSION)
+  @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public String getEnvironmentVersion() {
-    return environmentVersion;
+  public Boolean getEnableComputeCluster() {
+    return enableComputeCluster;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_VERSION)
+  @JsonProperty(JSON_PROPERTY_ENABLE_COMPUTE_CLUSTER)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setEnvironmentVersion(String environmentVersion) {
-    this.environmentVersion = environmentVersion;
+  public void setEnableComputeCluster(Boolean enableComputeCluster) {
+    this.enableComputeCluster = enableComputeCluster;
   }
 
 
   public CreateAzureEnvironmentRequest computeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+    
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
@@ -748,6 +769,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest image(FreeIpaImageRequest image) {
+    
     this.image = image;
     return this;
   }
@@ -773,6 +795,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest tags(List<TagRequest> tags) {
+    
     this.tags = tags;
     return this;
   }
@@ -806,6 +829,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest proxyConfigName(String proxyConfigName) {
+    
     this.proxyConfigName = proxyConfigName;
     return this;
   }
@@ -831,6 +855,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest resourceGroupName(String resourceGroupName) {
+    
     this.resourceGroupName = resourceGroupName;
     return this;
   }
@@ -856,6 +881,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest dedicatedStorageAccount(Boolean dedicatedStorageAccount) {
+    
     this.dedicatedStorageAccount = dedicatedStorageAccount;
     return this;
   }
@@ -881,6 +907,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest createPrivateEndpoints(Boolean createPrivateEndpoints) {
+    
     this.createPrivateEndpoints = createPrivateEndpoints;
     return this;
   }
@@ -906,6 +933,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest endpointAccessGatewayScheme(EndpointAccessGatewaySchemeEnum endpointAccessGatewayScheme) {
+    
     this.endpointAccessGatewayScheme = endpointAccessGatewayScheme;
     return this;
   }
@@ -931,6 +959,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest endpointAccessGatewaySubnetIds(List<String> endpointAccessGatewaySubnetIds) {
+    
     this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
     return this;
   }
@@ -964,6 +993,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest encryptionAtHost(Boolean encryptionAtHost) {
+    
     this.encryptionAtHost = encryptionAtHost;
     return this;
   }
@@ -989,6 +1019,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest userManagedIdentity(String userManagedIdentity) {
+    
     this.userManagedIdentity = userManagedIdentity;
     return this;
   }
@@ -1014,6 +1045,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+    
     this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
     return this;
   }
@@ -1039,6 +1071,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest encryptionKeyUrl(String encryptionKeyUrl) {
+    
     this.encryptionKeyUrl = encryptionKeyUrl;
     return this;
   }
@@ -1064,6 +1097,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest encryptionKeyResourceGroupName(String encryptionKeyResourceGroupName) {
+    
     this.encryptionKeyResourceGroupName = encryptionKeyResourceGroupName;
     return this;
   }
@@ -1089,6 +1123,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest idBrokerMappingSource(String idBrokerMappingSource) {
+    
     this.idBrokerMappingSource = idBrokerMappingSource;
     return this;
   }
@@ -1114,6 +1149,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest enableLoadBalancers(Boolean enableLoadBalancers) {
+    
     this.enableLoadBalancers = enableLoadBalancers;
     return this;
   }
@@ -1139,6 +1175,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest enableOutboundLoadBalancer(Boolean enableOutboundLoadBalancer) {
+    
     this.enableOutboundLoadBalancer = enableOutboundLoadBalancer;
     return this;
   }
@@ -1164,6 +1201,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest availabilityZones(List<String> availabilityZones) {
+    
     this.availabilityZones = availabilityZones;
     return this;
   }
@@ -1197,6 +1235,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest flexibleServerSubnetIds(List<String> flexibleServerSubnetIds) {
+    
     this.flexibleServerSubnetIds = flexibleServerSubnetIds;
     return this;
   }
@@ -1230,6 +1269,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest dataServices(DataServicesRequest dataServices) {
+    
     this.dataServices = dataServices;
     return this;
   }
@@ -1255,6 +1295,7 @@ public class CreateAzureEnvironmentRequest {
 
 
   public CreateAzureEnvironmentRequest customDockerRegistry(CustomDockerRegistryRequest customDockerRegistry) {
+    
     this.customDockerRegistry = customDockerRegistry;
     return this;
   }
@@ -1279,9 +1320,31 @@ public class CreateAzureEnvironmentRequest {
   }
 
 
-  /**
-   * Return true if this CreateAzureEnvironmentRequest object is equal to o.
-   */
+  public CreateAzureEnvironmentRequest security(SecurityRequest security) {
+    
+    this.security = security;
+    return this;
+  }
+
+   /**
+   * Get security
+   * @return security
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public SecurityRequest getSecurity() {
+    return security;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_SECURITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setSecurity(SecurityRequest security) {
+    this.security = security;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -1309,7 +1372,7 @@ public class CreateAzureEnvironmentRequest {
         Objects.equals(this.reportDeploymentLogs, createAzureEnvironmentRequest.reportDeploymentLogs) &&
         Objects.equals(this.cloudStorageLogging, createAzureEnvironmentRequest.cloudStorageLogging) &&
         Objects.equals(this.freeIpa, createAzureEnvironmentRequest.freeIpa) &&
-        Objects.equals(this.environmentVersion, createAzureEnvironmentRequest.environmentVersion) &&
+        Objects.equals(this.enableComputeCluster, createAzureEnvironmentRequest.enableComputeCluster) &&
         Objects.equals(this.computeClusterConfiguration, createAzureEnvironmentRequest.computeClusterConfiguration) &&
         Objects.equals(this.image, createAzureEnvironmentRequest.image) &&
         Objects.equals(this.tags, createAzureEnvironmentRequest.tags) &&
@@ -1330,12 +1393,13 @@ public class CreateAzureEnvironmentRequest {
         Objects.equals(this.availabilityZones, createAzureEnvironmentRequest.availabilityZones) &&
         Objects.equals(this.flexibleServerSubnetIds, createAzureEnvironmentRequest.flexibleServerSubnetIds) &&
         Objects.equals(this.dataServices, createAzureEnvironmentRequest.dataServices) &&
-        Objects.equals(this.customDockerRegistry, createAzureEnvironmentRequest.customDockerRegistry);
+        Objects.equals(this.customDockerRegistry, createAzureEnvironmentRequest.customDockerRegistry) &&
+        Objects.equals(this.security, createAzureEnvironmentRequest.security);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, publicKey, securityAccess, usePublicIp, logStorage, existingNetworkParams, newNetworkParams, description, enableTunnel, tunnelType, ccmV2TlsType, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, cloudStorageLogging, freeIpa, environmentVersion, computeClusterConfiguration, image, tags, proxyConfigName, resourceGroupName, dedicatedStorageAccount, createPrivateEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, encryptionAtHost, userManagedIdentity, encryptionUserManagedIdentity, encryptionKeyUrl, encryptionKeyResourceGroupName, idBrokerMappingSource, enableLoadBalancers, enableOutboundLoadBalancer, availabilityZones, flexibleServerSubnetIds, dataServices, customDockerRegistry);
+    return Objects.hash(environmentName, credentialName, region, publicKey, securityAccess, usePublicIp, logStorage, existingNetworkParams, newNetworkParams, description, enableTunnel, tunnelType, ccmV2TlsType, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, cloudStorageLogging, freeIpa, enableComputeCluster, computeClusterConfiguration, image, tags, proxyConfigName, resourceGroupName, dedicatedStorageAccount, createPrivateEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, encryptionAtHost, userManagedIdentity, encryptionUserManagedIdentity, encryptionKeyUrl, encryptionKeyResourceGroupName, idBrokerMappingSource, enableLoadBalancers, enableOutboundLoadBalancer, availabilityZones, flexibleServerSubnetIds, dataServices, customDockerRegistry, security);
   }
 
   @Override
@@ -1360,7 +1424,7 @@ public class CreateAzureEnvironmentRequest {
     sb.append("    reportDeploymentLogs: ").append(toIndentedString(reportDeploymentLogs)).append("\n");
     sb.append("    cloudStorageLogging: ").append(toIndentedString(cloudStorageLogging)).append("\n");
     sb.append("    freeIpa: ").append(toIndentedString(freeIpa)).append("\n");
-    sb.append("    environmentVersion: ").append(toIndentedString(environmentVersion)).append("\n");
+    sb.append("    enableComputeCluster: ").append(toIndentedString(enableComputeCluster)).append("\n");
     sb.append("    computeClusterConfiguration: ").append(toIndentedString(computeClusterConfiguration)).append("\n");
     sb.append("    image: ").append(toIndentedString(image)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
@@ -1382,6 +1446,7 @@ public class CreateAzureEnvironmentRequest {
     sb.append("    flexibleServerSubnetIds: ").append(toIndentedString(flexibleServerSubnetIds)).append("\n");
     sb.append("    dataServices: ").append(toIndentedString(dataServices)).append("\n");
     sb.append("    customDockerRegistry: ").append(toIndentedString(customDockerRegistry)).append("\n");
+    sb.append("    security: ").append(toIndentedString(security)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -1397,256 +1462,5 @@ public class CreateAzureEnvironmentRequest {
     return o.toString().replace("\n", "\n    ");
   }
 
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @return URL query string
-   */
-  public String toUrlQueryString() {
-    return toUrlQueryString(null);
-  }
-
-  /**
-   * Convert the instance into URL query string.
-   *
-   * @param prefix prefix of the query string
-   * @return URL query string
-   */
-  public String toUrlQueryString(String prefix) {
-    String suffix = "";
-    String containerSuffix = "";
-    String containerPrefix = "";
-    if (prefix == null) {
-      // style=form, explode=true, e.g. /pet?name=cat&type=manx
-      prefix = "";
-    } else {
-      // deepObject style e.g. /pet?id[name]=cat&id[type]=manx
-      prefix = prefix + "[";
-      suffix = "]";
-      containerSuffix = "]";
-      containerPrefix = "[";
-    }
-
-    StringJoiner joiner = new StringJoiner("&");
-
-    // add `environmentName` to the URL query string
-    if (getEnvironmentName() != null) {
-      joiner.add(String.format("%senvironmentName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `credentialName` to the URL query string
-    if (getCredentialName() != null) {
-      joiner.add(String.format("%scredentialName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCredentialName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `region` to the URL query string
-    if (getRegion() != null) {
-      joiner.add(String.format("%sregion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getRegion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `publicKey` to the URL query string
-    if (getPublicKey() != null) {
-      joiner.add(String.format("%spublicKey%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPublicKey()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `securityAccess` to the URL query string
-    if (getSecurityAccess() != null) {
-      joiner.add(getSecurityAccess().toUrlQueryString(prefix + "securityAccess" + suffix));
-    }
-
-    // add `usePublicIp` to the URL query string
-    if (getUsePublicIp() != null) {
-      joiner.add(String.format("%susePublicIp%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUsePublicIp()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `logStorage` to the URL query string
-    if (getLogStorage() != null) {
-      joiner.add(getLogStorage().toUrlQueryString(prefix + "logStorage" + suffix));
-    }
-
-    // add `existingNetworkParams` to the URL query string
-    if (getExistingNetworkParams() != null) {
-      joiner.add(getExistingNetworkParams().toUrlQueryString(prefix + "existingNetworkParams" + suffix));
-    }
-
-    // add `newNetworkParams` to the URL query string
-    if (getNewNetworkParams() != null) {
-      joiner.add(getNewNetworkParams().toUrlQueryString(prefix + "newNetworkParams" + suffix));
-    }
-
-    // add `description` to the URL query string
-    if (getDescription() != null) {
-      joiner.add(String.format("%sdescription%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDescription()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableTunnel` to the URL query string
-    if (getEnableTunnel() != null) {
-      joiner.add(String.format("%senableTunnel%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableTunnel()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `tunnelType` to the URL query string
-    if (getTunnelType() != null) {
-      joiner.add(String.format("%stunnelType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getTunnelType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `ccmV2TlsType` to the URL query string
-    if (getCcmV2TlsType() != null) {
-      joiner.add(String.format("%sccmV2TlsType%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCcmV2TlsType()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableWorkloadAnalytics` to the URL query string
-    if (getEnableWorkloadAnalytics() != null) {
-      joiner.add(String.format("%senableWorkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `workloadAnalytics` to the URL query string
-    if (getWorkloadAnalytics() != null) {
-      joiner.add(String.format("%sworkloadAnalytics%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getWorkloadAnalytics()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `reportDeploymentLogs` to the URL query string
-    if (getReportDeploymentLogs() != null) {
-      joiner.add(String.format("%sreportDeploymentLogs%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getReportDeploymentLogs()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `cloudStorageLogging` to the URL query string
-    if (getCloudStorageLogging() != null) {
-      joiner.add(String.format("%scloudStorageLogging%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCloudStorageLogging()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `freeIpa` to the URL query string
-    if (getFreeIpa() != null) {
-      joiner.add(getFreeIpa().toUrlQueryString(prefix + "freeIpa" + suffix));
-    }
-
-    // add `environmentVersion` to the URL query string
-    if (getEnvironmentVersion() != null) {
-      joiner.add(String.format("%senvironmentVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `computeClusterConfiguration` to the URL query string
-    if (getComputeClusterConfiguration() != null) {
-      joiner.add(getComputeClusterConfiguration().toUrlQueryString(prefix + "computeClusterConfiguration" + suffix));
-    }
-
-    // add `image` to the URL query string
-    if (getImage() != null) {
-      joiner.add(getImage().toUrlQueryString(prefix + "image" + suffix));
-    }
-
-    // add `tags` to the URL query string
-    if (getTags() != null) {
-      for (int i = 0; i < getTags().size(); i++) {
-        if (getTags().get(i) != null) {
-          joiner.add(getTags().get(i).toUrlQueryString(String.format("%stags%s%s", prefix, suffix,
-          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
-        }
-      }
-    }
-
-    // add `proxyConfigName` to the URL query string
-    if (getProxyConfigName() != null) {
-      joiner.add(String.format("%sproxyConfigName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getProxyConfigName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `resourceGroupName` to the URL query string
-    if (getResourceGroupName() != null) {
-      joiner.add(String.format("%sresourceGroupName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getResourceGroupName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `dedicatedStorageAccount` to the URL query string
-    if (getDedicatedStorageAccount() != null) {
-      joiner.add(String.format("%sdedicatedStorageAccount%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getDedicatedStorageAccount()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `createPrivateEndpoints` to the URL query string
-    if (getCreatePrivateEndpoints() != null) {
-      joiner.add(String.format("%screatePrivateEndpoints%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCreatePrivateEndpoints()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewayScheme` to the URL query string
-    if (getEndpointAccessGatewayScheme() != null) {
-      joiner.add(String.format("%sendpointAccessGatewayScheme%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEndpointAccessGatewayScheme()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `endpointAccessGatewaySubnetIds` to the URL query string
-    if (getEndpointAccessGatewaySubnetIds() != null) {
-      for (int i = 0; i < getEndpointAccessGatewaySubnetIds().size(); i++) {
-        joiner.add(String.format("%sendpointAccessGatewaySubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getEndpointAccessGatewaySubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `encryptionAtHost` to the URL query string
-    if (getEncryptionAtHost() != null) {
-      joiner.add(String.format("%sencryptionAtHost%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionAtHost()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `userManagedIdentity` to the URL query string
-    if (getUserManagedIdentity() != null) {
-      joiner.add(String.format("%suserManagedIdentity%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUserManagedIdentity()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionUserManagedIdentity` to the URL query string
-    if (getEncryptionUserManagedIdentity() != null) {
-      joiner.add(String.format("%sencryptionUserManagedIdentity%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionUserManagedIdentity()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionKeyUrl` to the URL query string
-    if (getEncryptionKeyUrl() != null) {
-      joiner.add(String.format("%sencryptionKeyUrl%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionKeyUrl()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `encryptionKeyResourceGroupName` to the URL query string
-    if (getEncryptionKeyResourceGroupName() != null) {
-      joiner.add(String.format("%sencryptionKeyResourceGroupName%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionKeyResourceGroupName()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `idBrokerMappingSource` to the URL query string
-    if (getIdBrokerMappingSource() != null) {
-      joiner.add(String.format("%sidBrokerMappingSource%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getIdBrokerMappingSource()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableLoadBalancers` to the URL query string
-    if (getEnableLoadBalancers() != null) {
-      joiner.add(String.format("%senableLoadBalancers%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableLoadBalancers()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `enableOutboundLoadBalancer` to the URL query string
-    if (getEnableOutboundLoadBalancer() != null) {
-      joiner.add(String.format("%senableOutboundLoadBalancer%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnableOutboundLoadBalancer()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-    }
-
-    // add `availabilityZones` to the URL query string
-    if (getAvailabilityZones() != null) {
-      for (int i = 0; i < getAvailabilityZones().size(); i++) {
-        joiner.add(String.format("%savailabilityZones%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getAvailabilityZones().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `flexibleServerSubnetIds` to the URL query string
-    if (getFlexibleServerSubnetIds() != null) {
-      for (int i = 0; i < getFlexibleServerSubnetIds().size(); i++) {
-        joiner.add(String.format("%sflexibleServerSubnetIds%s%s=%s", prefix, suffix,
-            "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
-            URLEncoder.encode(String.valueOf(getFlexibleServerSubnetIds().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
-      }
-    }
-
-    // add `dataServices` to the URL query string
-    if (getDataServices() != null) {
-      joiner.add(getDataServices().toUrlQueryString(prefix + "dataServices" + suffix));
-    }
-
-    // add `customDockerRegistry` to the URL query string
-    if (getCustomDockerRegistry() != null) {
-      joiner.add(getCustomDockerRegistry().toUrlQueryString(prefix + "customDockerRegistry" + suffix));
-    }
-
-    return joiner.toString();
-  }
 }
 
