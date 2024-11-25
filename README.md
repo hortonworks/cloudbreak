@@ -483,18 +483,29 @@ CB_AWS_GOV_ACCOUNT_ID=
 
 ### Running the Remote Environment Service in IDEA
 
-After importing the `cloudbreak` repo root, launch the Remote Environment application by executing the `com.sequenceiq.remoteenvironment.RemoteEnvironmentApplication` class (set `Use classpath of module` to `cloudbreak.remoteenvironment.main`) with the following JVM options:
+After importing the `cloudbreak` repo root, launch the Remote Environment application by executing the `com.sequenceiq.remoteenvironment.RemoteEnvironmentApplication` class (set `Use classpath of module` to `cloudbreak.remoteenvironment.main`) with the following JVM options. 
+Please do not forget to replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` respectively from the `Profile` file.
+
+#### JVM options for local development setup with mocked cluster-proxy and remote-cluster service endpoints
 ```
--Dremoteenvironment.identity.server.url=http://localhost:8089
--Dserver.port=8089
--Daltus.ums.host=localhost
+-Dremoteenvironment.identity.server.url=http://localhost:8092
+-Dserver.port=8092
+-DclusterProxy.url=http://localhost:8080/cluster-proxy/
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
+```
+
+
+
+#### JVM options for local development setup with cluster-proxy and remote-cluster services port-forwarded from Manowar-dev environment
+```
+-Dremoteenvironment.identity.server.url=http://localhost:8092
+-Dserver.port=8092
+-Daltus.ums.host=ums.thunderhead-dev.cloudera.com
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dremotecluster.host=localhost
 -Dremotecluster.port=9983
--DclusterProxy.url=<CLUSTER_PROXY_URL>
+-DclusterProxy.url=http://localhost:10082/cluster-proxy
 ```
-
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` respectively from the `Profile` file.
 
 You need remote cluster service from thunderhead with:
 ```
@@ -506,6 +517,7 @@ Also if you want to test the e2e flow then you need cluster proxy with:
 kubectl -n cluster-proxy port-forward svc/cluster-proxy-cluster-proxy 10082:10080
 ```
 
+#### Example cURL commands
 You can register a control with:
 ```
 curl -X POST -H "Content-Type: application/json" \
