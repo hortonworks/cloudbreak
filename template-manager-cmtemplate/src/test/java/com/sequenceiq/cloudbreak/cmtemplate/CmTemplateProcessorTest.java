@@ -809,6 +809,31 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void mergeHueSafetyValuesIniFile() {
+        when(iniFileFactory.create()).thenReturn(safetyValveService, safetyValveRole);
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"), iniFileFactory);
+
+        ApiClusterTemplateService hue = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "HUE".equals(service.getServiceType()))
+                .findFirst().get();
+
+        List<ApiClusterTemplateConfig> serviceConfigsAppend = new ArrayList<>();
+        serviceConfigsAppend.add(new ApiClusterTemplateConfig()
+                .name("hue_service_safety_valve")
+                .value("[desktop]\n[[knox]]\nknox_proxyhosts=foo.com"));
+
+        String expectedSafetyValveValueService =
+                "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig\n[[knox]]\nknox_proxyhosts=foo.com";
+        when(safetyValveService.print()).thenReturn(expectedSafetyValveValueService);
+
+        underTest.mergeCustomServiceConfigs(hue, serviceConfigsAppend);
+
+        verify(safetyValveService).addContent("[desktop]\n[[knox]]\nknox_proxyhosts=foo.com");
+        verify(safetyValveService).addContent("[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig");
+    }
+
+    @Test
     public void testIfSingleValuedCustomRoleConfigAreMerged() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/de.bp"));
 

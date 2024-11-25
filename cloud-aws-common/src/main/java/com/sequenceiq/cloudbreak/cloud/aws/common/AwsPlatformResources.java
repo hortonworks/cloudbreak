@@ -136,7 +136,6 @@ import software.amazon.awssdk.services.ec2.model.DiskInfo;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.InstanceStorageInfo;
-import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.InstanceTypeInfo;
 import software.amazon.awssdk.services.ec2.model.InstanceTypeOffering;
 import software.amazon.awssdk.services.ec2.model.InternetGateway;
@@ -747,12 +746,11 @@ public class AwsPlatformResources implements PlatformResources {
             CloudRegions regions = regions(cloudCredential, region, filters, true);
             AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
             AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
-            List<InstanceType> instanceTypes = ec2Client
+            List<String> instanceTypes = ec2Client
                     .describeInstanceTypeOfferings(getOfferingsRequest(region))
                     .instanceTypeOfferings()
                     .stream()
-                    .map(InstanceTypeOffering::instanceType)
-                    .filter(instanceType -> InstanceType.UNKNOWN_TO_SDK_VERSION != instanceType)
+                    .map(InstanceTypeOffering::instanceTypeAsString)
                     .collect(Collectors.toList());
 
             Set<VmType> awsInstances = new HashSet<>();
@@ -764,7 +762,7 @@ public class AwsPlatformResources implements PlatformResources {
                                 .name("processor-info.supported-architecture")
                                 .values(processorArchitectures)
                                 .build())
-                        .instanceTypes(getInstanceTypes(instanceTypes, actualSegment))
+                        .instanceTypesWithStrings(getInstanceTypes(instanceTypes, actualSegment))
                         .build();
                 getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
             }
@@ -878,7 +876,7 @@ public class AwsPlatformResources implements PlatformResources {
         return (float) instanceType.memoryInfo().sizeInMiB() / ONE_THOUSAND_TWENTY_FOUR;
     }
 
-    private List<InstanceType> getInstanceTypes(List<InstanceType> instanceTypes, int i) {
+    private List<String> getInstanceTypes(List<String> instanceTypes, int i) {
         return instanceTypes.subList(i, (i + SEGMENT) < instanceTypes.size() ? (i + SEGMENT) : instanceTypes.size());
     }
 
