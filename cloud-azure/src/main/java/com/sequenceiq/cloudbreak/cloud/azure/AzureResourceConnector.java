@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.resources.models.Deployment;
@@ -141,7 +142,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                             azureMarketplaceImageProviderService.getSourceImage(stackImage) : null);
         }
 
-        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stackImage);
+        String parameters = azureTemplateBuilder.buildParameters();
 
         boolean resourcesPersisted = false;
         try {
@@ -209,9 +210,63 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
-        // todo: we're implementing this method as part of the work to add LBs to an existing environment. See CB-11647
-        return ImmutableList.of();
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        String stackName = azureUtils.getStackName(cloudContext);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+
+        AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
+        AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, authenticatedContext);
+        String template = azureTemplateBuilder.buildLoadBalancer(stackName, azureCredentialView, azureStackView, cloudContext, stack,
+                AzureInstanceTemplateOperation.PROVISION);
+        if (!StringUtils.hasText(template)) {
+            LOGGER.info("Load balancer template is null. Only FreeIPA load balancer is deployed through it's own template. Nothing to do here.");
+            return ImmutableList.of();
+        } else {
+            createLbTemplateDeployment(authenticatedContext, stack, notifier, stackName, resourceGroupName, template);
+
+            CloudResource cloudResource = CloudResource.builder()
+                    .withType(ResourceType.ARM_TEMPLATE)
+                    .withName(resourceGroupName)
+                    .build();
+            List<CloudResourceStatus> resources = check(authenticatedContext, Collections.singletonList(cloudResource));
+            LOGGER.debug("Launched Load Balancer resources: {}", resources);
+            return resources;
+        }
+    }
+
+    private void createLbTemplateDeployment(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier notifier, String stackName,
+            String resourceGroupName, String template) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        boolean resourcesPersisted = false;
+        try {
+            if (shouldCreateTemplateDeployment(stackName, resourceGroupName, client)) {
+                String parameters = azureTemplateBuilder.buildParameters();
+                Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+                LOGGER.debug("Created template deployment for Load Balancer launch: {}", templateDeployment.exportTemplate().template());
+                persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+            } else {
+                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                LOGGER.debug("Get template deployment for Load Balancer launch as it exists: {}", templateDeployment.exportTemplate().template());
+                persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+            }
+            resourcesPersisted = true;
+        } catch (ManagementException e) {
+            throw azureUtils.convertToCloudConnectorException(e, "Load Balancer provisioning");
+        } catch (Exception e) {
+            LOGGER.warn("Load Balancer Provisioning error:", e);
+            throw new CloudConnectorException(String.format("Error in provisioning load balancer %s: %s", stackName, e.getMessage()));
+        } finally {
+            if (!resourcesPersisted) {
+                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
+                if (templateDeployment != null && templateDeployment.exportTemplate() != null) {
+                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
+                    persistCloudResources(authenticatedContext, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                }
+            }
+        }
     }
 
     private boolean shouldCreateTemplateDeployment(String stackName, String resourceGroupName, AzureClient client) {
@@ -377,7 +432,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-        UpdateType type, Optional<String> group) throws QuotaExceededException {
+            UpdateType type, Optional<String> group) throws QuotaExceededException {
         LOGGER.info("The update method which will be followed is {}.", type);
         if (type.equals(UpdateType.VERTICAL_SCALE)) {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);

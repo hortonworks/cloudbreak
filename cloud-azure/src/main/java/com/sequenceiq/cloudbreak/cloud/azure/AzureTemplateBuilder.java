@@ -14,10 +14,12 @@ import java.util.Set;
 import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
@@ -28,10 +30,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -47,6 +47,9 @@ public class AzureTemplateBuilder {
 
     @Value("${cb.arm.template.path:}")
     private String armTemplatePath;
+
+    @Value("${cb.arm.template.lb.path:}")
+    private String armTemplateLbPath;
 
     @Value("${cb.arm.parameter.path:}")
     private String armTemplateParametersPath;
@@ -151,6 +154,51 @@ public class AzureTemplateBuilder {
         }
     }
 
+    public String buildLoadBalancer(String stackName, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
+            CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
+        if (!StringUtils.hasText(armTemplateLbPath)) {
+            LOGGER.debug("No ARM template for Load Balancer. Skipping template generation");
+            return null;
+        } else {
+            try {
+                Network network = cloudStack.getNetwork();
+                AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
+
+                AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName, false);
+                Region region = cloudContext.getLocation().getRegion();
+                CloudVmTypes cloudVmTypes = platformResources.virtualMachinesNonExtended(armCredentialView.getCloudCredential(), region, null);
+
+                Map<String, Object> model = buildLbModelForTemplate(stackName, armStack, cloudStack, region, armSecurityView, network, cloudVmTypes,
+                        loadBalancerModelBuilder);
+                String generatedTemplate = freeMarkerTemplateUtils
+                        .processTemplateIntoString(getTemplate(armTemplateLbPath), model);
+                LOGGER.info("Generated Arm template for Load Balancer: {}", generatedTemplate);
+                return generatedTemplate;
+            } catch (IOException | TemplateException e) {
+                throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
+            }
+        }
+    }
+
+    private @NotNull Map<String, Object> buildLbModelForTemplate(String stackName, AzureStackView armStack, CloudStack cloudStack, Region region,
+            AzureSecurityView armSecurityView, Network network, CloudVmTypes cloudVmTypes, AzureLoadBalancerModelBuilder loadBalancerModelBuilder) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("stackname", stackName);
+        model.put("region", region.value());
+        model.put("groups", armStack.getInstancesByGroupType());
+        model.put("igs", armStack.getInstanceGroups());
+        model.put("securityGroups", armSecurityView.getSecurityGroupIds());
+        model.put("existingVPC", azureUtils.isExistingNetwork(network));
+        model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
+        model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
+        model.put("userDefinedTags", cloudStack.getTags());
+        model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator
+                .validate(armStack, cloudVmTypes.getCloudVmResponses().getOrDefault(region.value(), Set.of())));
+        model.putAll(loadBalancerModelBuilder.buildModel());
+        model.put("multiAz", cloudStack.isMultiAz());
+        return model;
+    }
+
     private boolean isRedHatByos(AzureMarketplaceImage azureMarketplaceImage) {
         return Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getPublisherId).orElse("").equalsIgnoreCase(REDHAT.getPublisher())
                 && Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getOfferId).orElse("").matches(REDHAT.getOffer());
@@ -161,7 +209,7 @@ public class AzureTemplateBuilder {
                 && Optional.ofNullable(azureMarketplaceImage).map(AzureMarketplaceImage::getOfferId).orElse("").matches(CLOUDERA.getOffer());
     }
 
-    public String buildParameters(CloudCredential credential, Network network, Image image) {
+    public String buildParameters() {
         try {
             return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
         } catch (IOException | TemplateException e) {
@@ -170,7 +218,7 @@ public class AzureTemplateBuilder {
     }
 
     public String getTemplateString() {
-        return getTemplate().toString();
+        return getTemplate(armTemplatePath).toString();
     }
 
     // Quickfix for https://jira.cloudera.com/browse/CB-24844
@@ -189,16 +237,16 @@ public class AzureTemplateBuilder {
                 return new Template(armTemplatePath, storedTemplate, freemarkerConfiguration);
             } else {
                 LOGGER.debug("Stored arm template doesn't contains marketplace image details, we will use the latest one.");
-                return getTemplate();
+                return getTemplate(armTemplatePath);
             }
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't create template object", e);
         }
     }
 
-    private Template getTemplate() {
+    private Template getTemplate(String templatePath) {
         try {
-            return freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8");
+            return freemarkerConfiguration.getTemplate(templatePath, "UTF-8");
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't get ARM template", e);
         }

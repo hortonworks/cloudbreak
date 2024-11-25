@@ -2,10 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
@@ -43,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -54,16 +59,20 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
 import freemarker.template.Configuration;
@@ -107,6 +116,8 @@ public class AzureTemplateBuilderFreeIpaTest {
 
     private static final String LATEST_TEMPLATE_PATH_FREEIPA = "templates/arm-v2-freeipa.ftl";
 
+    private static final String LATEST_TEMPLATE_PATH_FREEIPA_LB = "templates/arm-v2-freeipa-lb.ftl";
+
     private static final int ROOT_VOLUME_SIZE = 50;
 
     private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
@@ -114,6 +125,8 @@ public class AzureTemplateBuilderFreeIpaTest {
     private static final String SUBNET_CIDR = "10.0.0.0/24";
 
     private static final String FIELD_ARM_TEMPLATE_PATH = "armTemplatePath";
+
+    private static final String FIELD_ARM_TEMPLATE_LB_PATH = "armTemplateLbPath";
 
     @Mock
     private AzureUtils azureUtils;
@@ -228,6 +241,64 @@ public class AzureTemplateBuilderFreeIpaTest {
 
     @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
     @MethodSource("templatesPathDataProviderFreeIPA")
+    public void testLoadBalancer(String templatePath) {
+        reset(customVMImageNameProvider);
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_LB_PATH, LATEST_TEMPLATE_PATH_FREEIPA_LB);
+        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters-freeipa.ftl");
+
+        Network network = new Network(new Subnet(SUBNET_CIDR), Map.of("networkId", "network1", "resourceGroupName", "cdp-rg", "subnetId", "existingSubnet"));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        Group masterGroup = Group.builder()
+                .withName("MASTER")
+                .withType(InstanceGroupType.GATEWAY)
+                .withInstances(Collections.singletonList(instance))
+                .withSecurity(security)
+                .withInstanceAuthentication(instanceAuthentication)
+                .withLoginUserName(instanceAuthentication.getLoginUserName())
+                .withPublicKey(instanceAuthentication.getPublicKey())
+                .withRootVolumeSize(ROOT_VOLUME_SIZE)
+                .withNetwork(createGroupNetwork())
+                .build();
+        Map<String, Object> asMap = new HashMap<>();
+        String availabilitySetName = masterGroup.getType().name().toLowerCase(Locale.ROOT) + "-as";
+        asMap.put("name", availabilitySetName);
+        asMap.put("faultDomainCount", 2);
+        asMap.put("updateDomainCount", 20);
+        masterGroup.putParameter("availabilitySet", asMap);
+        groups.add(masterGroup);
+
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE, LoadBalancerSku.STANDARD, false);
+        loadBalancer.addPortToTargetGroupMapping(
+                new TargetGroupPortPair(636, NetworkProtocol.TCP, 5030, "/lb-healthcheck", NetworkProtocol.HTTPS),
+                Set.of(masterGroup));
+        List<CloudLoadBalancer> loadBalancers = List.of(loadBalancer);
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, "",
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
+                null, loadBalancers, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, false, null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        String templateString = azureTemplateBuilder.buildLoadBalancer(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                AzureInstanceTemplateOperation.PROVISION);
+        ObjectMapper objectMapper = new ObjectMapper();
+        assertDoesNotThrow(() -> {
+            objectMapper.readTree(templateString);
+        });
+        assertTrue(templateString.contains("loadBalancers"));
+        assertTrue(templateString.contains("\"name\": \"port-636TCP-rule\","));
+        assertTrue(templateString.contains("\"name\": \"port-5030-probe\","));
+        assertTrue(templateString.contains("{ \"id\": \"[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', " +
+                "'LoadBalancertestStackPRIVATE', 'LoadBalancertestStackPRIVATE-pool')]\" }"));
+        assertTrue(templateString.contains("\"requestPath\": \"/lb-healthcheck\","));
+    }
+
+    @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
+    @MethodSource("templatesPathDataProviderFreeIPA")
     public void buildTestAvailabilitySetInFreeIPATemplate(String templatePath) {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
@@ -263,7 +334,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -323,7 +394,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .coreUserData(CORE_CUSTOM_DATA)
                 .multiAz(true)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -385,7 +456,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .coreUserData(CORE_CUSTOM_DATA)
                 .multiAz(true)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -439,7 +510,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);

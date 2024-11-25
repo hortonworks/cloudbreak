@@ -62,7 +62,7 @@ public class AzureTemplateDeploymentService {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         String template = getTemplate(stack, azureStackView, ac, stackName, client, azureInstanceTemplateOperation);
-        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        String parameters = azureTemplateBuilder.buildParameters();
 
         return retry.testWith1SecDelayMax5Times(() -> {
             try {
