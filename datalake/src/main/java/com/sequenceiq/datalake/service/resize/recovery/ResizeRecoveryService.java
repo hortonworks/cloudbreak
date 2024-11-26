@@ -16,6 +16,7 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOPPED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOP_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.SYNC_FAILED;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -142,7 +143,12 @@ public class ResizeRecoveryService implements RecoveryService {
     }
 
     private SdxRecoverableResponse validateRecoveryOnlyOriginalCluster(SdxCluster sdxCluster, DatalakeStatusEnum status, String statusReason) {
-        if (STOPPED.equals(status)) {
+        List<SdxCluster> sdxClusters = sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getEnvCrn());
+        if (sdxClusters.size() > 1) {
+            return new SdxRecoverableResponse(
+                    "Resize can not be recovered from original cluster. It must have exactly one datalake in the environment",
+                    RecoveryStatus.NON_RECOVERABLE);
+        } else if (STOPPED.equals(status)) {
             if (sdxCluster.isDetached()) {
                 return new SdxRecoverableResponse("Resize can recover detached cluster", RecoveryStatus.RECOVERABLE);
             } else if (statusReason != null && statusReason.contains("SDX detach failed")) {

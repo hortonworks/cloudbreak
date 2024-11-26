@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +81,8 @@ class ResizeRecoveryServiceTest {
         lenient().when(otherCluster.getId()).thenReturn(1L);
         lenient().when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
                 .thenReturn(Optional.of(otherCluster));
+        lenient().when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(any(), any()))
+                .thenReturn(List.of(otherCluster));
         sdxStatusEntity.setStatusReason("");
     }
 
@@ -192,5 +196,21 @@ class ResizeRecoveryServiceTest {
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request));
         verify(sdxReactorFlowManager).triggerSdxResizeRecovery(cluster, Optional.empty());
         assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
+    }
+
+    @Test
+    public void testWhenRecoveringFromDetachedDatalakeOnlyOneDatalakeShouldNotBeMarkedAsDeleted() {
+        sdxStatusEntity.setStatus(RUNNING);
+
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(any(), any()))
+                .thenReturn(List.of(mock(SdxCluster.class), mock(SdxCluster.class)));
+
+        SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
+
+        assertEquals(RecoveryStatus.NON_RECOVERABLE, sdxRecoverableResponse.getStatus());
+        assertEquals("Resize can not be recovered from original cluster. It must have exactly one datalake in the environment",
+                sdxRecoverableResponse.getReason());
     }
 }
