@@ -148,8 +148,9 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withNetwork()
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
+                    .withFreeIpaNodes(getFreeIpaInstanceCountByProvider(testContext))
                     .withFreeIpaRecipe(Set.of(recipeName))
+                    .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
                 .then(this::getTelemetryStorageLocation)
@@ -206,7 +207,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         List<String> instanceTypesOnProvider = testContext.getCloudProvider().getCloudFunctionality()
                 .listInstanceTypes(freeipa.getName(), listOfInstanceIdsInIG);
 
-        Assertions.assertThat(instanceTypesOnProvider).hasSize(getFreeIpaInstanceCountByProdiver(testContext));
+        Assertions.assertThat(instanceTypesOnProvider).hasSize(getFreeIpaInstanceCountByProvider(testContext));
         LOGGER.info("FreeIPA {} instances {} on provider {}.", freeipa.getResponse().getName(), instanceTypesOnProvider,
                 testContext.getCloudPlatform().name());
         instanceTypesOnProvider.forEach(instanceTypeOnProvider -> {

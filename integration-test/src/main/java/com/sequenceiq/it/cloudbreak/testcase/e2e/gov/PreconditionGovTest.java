@@ -79,7 +79,7 @@ public class PreconditionGovTest extends AbstractE2ETest {
                     .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode()
+                    .withFreeIpaNodes(getFreeIpaInstanceCountByProvider(testContext))
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(getEnvironmentTestClient().create())

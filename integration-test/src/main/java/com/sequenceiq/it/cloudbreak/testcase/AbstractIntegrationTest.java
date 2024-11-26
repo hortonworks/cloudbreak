@@ -385,7 +385,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withTunnel(testContext.getTunnel())
                 .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                 .withCreateFreeIpa(Boolean.TRUE)
-                .withFreeIpaNodes(getFreeIpaInstanceCountByProdiver(testContext))
+                .withFreeIpaNodes(getFreeIpaInstanceCountByProvider(testContext))
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
@@ -455,7 +455,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return cloudStorage.getRequest();
     }
 
-    protected int getFreeIpaInstanceCountByProdiver(TestContext testContext) {
+    protected int getFreeIpaInstanceCountByProvider(TestContext testContext) {
         return environmentUtil.getFreeIpaInstanceCountByProdiver(testContext);
     }
 
