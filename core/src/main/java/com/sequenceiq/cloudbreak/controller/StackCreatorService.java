@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -275,6 +278,7 @@ public class StackCreatorService {
                 StatedImage imgFromCatalog = measure(() -> getImageFromCatalog(imgFromCatalogFuture),
                         LOGGER,
                         "Select the correct image took {} ms");
+                validateImageAndInstanceTypeArchitectureForAws(stackRequest, imgFromCatalog);
                 int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), blueprint.getStackVersion());
                 setJavaVersion(stackRequest, stack, javaVersion);
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion());
@@ -326,6 +330,33 @@ public class StackCreatorService {
         metricService.gauge(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    void validateImageAndInstanceTypeArchitectureForAws(StackV4Request stackRequest, StatedImage image) {
+        if (CloudPlatform.AWS.equals(stackRequest.getCloudPlatform())) {
+            Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
+            List<Pair<String, Architecture>> instanceTypeArchitectures = stackRequest.getInstanceGroups()
+                    .stream()
+                    .filter(group -> !Objects.isNull(group.getTemplate()) && !Objects.isNull(group.getTemplate().getInstanceType()))
+                    .map(group -> {
+                        String instanceType = group.getTemplate().getInstanceType();
+                        if (DistroxEnabledInstanceTypes.AWS_ENABLED_ARM64_TYPES_LIST.contains(instanceType)) {
+                            return Pair.of(instanceType, Architecture.ARM64);
+                        } else {
+                            return Pair.of(instanceType, Architecture.X86_64);
+                        }
+                    })
+                    .toList();
+            instanceTypeArchitectures.forEach(value -> {
+                String instanceType = value.getKey();
+                Architecture instanceArchitecture = value.getValue();
+                if (!Objects.equals(imageArchitecture, instanceArchitecture)) {
+                    throw new BadRequestException(String.format(
+                            "The selected image %s has different architecture %s than the selected %s instance type's %s architecture.",
+                            image.getImage().getUuid(), imageArchitecture.getName(), instanceType, instanceArchitecture.getName()));
+                }
+            });
+        }
     }
 
     private void setJavaVersion(StackV4Request stackRequest, Stack stack, int javaVersion) {

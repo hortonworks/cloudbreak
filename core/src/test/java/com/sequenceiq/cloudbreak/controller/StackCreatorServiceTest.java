@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,19 +53,23 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidatorAndUpdater;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -82,6 +87,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.java.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
@@ -233,6 +239,9 @@ public class StackCreatorServiceTest {
     @Mock
     private DetailedEnvironmentResponse environment;
 
+    @Mock
+    private StackV4RequestToStackConverter stackV4RequestToStackConverter;
+
     @BeforeEach
     void before() {
         underTestSpy = spy(new StackCreatorService());
@@ -360,6 +369,65 @@ public class StackCreatorServiceTest {
         verify(entitlementService, never()).isCODUseGraviton(any());
         verify(entitlementService, never()).isArmInstanceEnabled(any());
         verify(entitlementService, times(1)).isDataHubArmEnabled(any());
+    }
+
+    @Test
+    void throwExceptionIfImageAndInstanceTypeArchitectureIsNotTheSameImageIsX86AndInstanceIsArm64() {
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setCloudPlatform(CloudPlatform.AWS);
+        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
+        template.setInstanceType("r7gd.2xlarge");
+        stackRequest.getInstanceGroups().getFirst().setTemplate(template);
+
+        StatedImage statedImage = mock(StatedImage.class);
+        Image image = mock(Image.class);
+        when(statedImage.getImage()).thenReturn(image);
+        when(image.getUuid()).thenReturn("a-b-c-1");
+        when(image.getArchitecture()).thenReturn("x86_64");
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateImageAndInstanceTypeArchitectureForAws(stackRequest, statedImage)));
+
+        assertEquals("The selected image a-b-c-1 has different architecture x86_64 than the selected r7gd.2xlarge instance type's arm64 architecture.",
+                exception.getMessage());
+    }
+
+    @Test
+    void throwExceptionIfImageAndInstanceTypeArchitectureIsNotTheSameImageIsArm64AndInstanceIsX86() {
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setCloudPlatform(CloudPlatform.AWS);
+        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
+        template.setInstanceType("m5.xlarge");
+        stackRequest.getInstanceGroups().getFirst().setTemplate(template);
+
+        StatedImage statedImage = mock(StatedImage.class);
+        Image image = mock(Image.class);
+        when(statedImage.getImage()).thenReturn(image);
+        when(image.getUuid()).thenReturn("a-b-c-1");
+        when(image.getArchitecture()).thenReturn("arm64");
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateImageAndInstanceTypeArchitectureForAws(stackRequest, statedImage)));
+
+        assertEquals("The selected image a-b-c-1 has different architecture arm64 than the selected m5.xlarge instance type's x86_64 architecture.",
+                exception.getMessage());
+    }
+
+    @Test
+    void doNotThrowExceptionIfImageAndInstanceHasTheSameArchitecture() {
+        StackV4Request stackRequest = getStackV4Request();
+        stackRequest.setCloudPlatform(CloudPlatform.AWS);
+        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
+        template.setInstanceType("m5.xlarge");
+        stackRequest.getInstanceGroups().getFirst().setTemplate(template);
+
+        StatedImage statedImage = mock(StatedImage.class);
+        Image image = mock(Image.class);
+        when(statedImage.getImage()).thenReturn(image);
+        when(image.getArchitecture()).thenReturn("x86_64");
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.validateImageAndInstanceTypeArchitectureForAws(stackRequest, statedImage)));
     }
 
     private TagsV4Request isCodClusterTag(boolean codRequest) {
