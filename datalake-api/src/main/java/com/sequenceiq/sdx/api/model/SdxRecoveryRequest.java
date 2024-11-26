@@ -15,6 +15,9 @@ public class SdxRecoveryRequest {
     @Schema(description = ModelDescriptions.RECOVERY_TYPE)
     private SdxRecoveryType type;
 
+    @Schema(description = ModelDescriptions.RECOVERY_FORCE)
+    private boolean force;
+
     public SdxRecoveryType getType() {
         return type;
     }
@@ -23,8 +26,19 @@ public class SdxRecoveryRequest {
         this.type = type;
     }
 
+    public boolean isForced() {
+        return force;
+    }
+
+    public void setForceFlag(boolean force) {
+        this.force = force;
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(", ", SdxRecoveryRequest.class.getSimpleName() + "[", "]").add("type=" + type).toString();
+        return new StringJoiner(", ", SdxRecoveryRequest.class.getSimpleName() + "[", "]")
+                .add("type=" + type)
+                .add("force=" + force)
+                .toString();
     }
 }

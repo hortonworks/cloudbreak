@@ -80,8 +80,8 @@ public class ResizeRecoveryService implements RecoveryService {
         DatalakeStatusEnum status = actualStatusForSdx.getStatus();
         String statusReason = actualStatusForSdx.getStatusReason();
 
-        if (getDetachedCluster(sdxCluster).isPresent()) {
-            return validateRecoveryResizedClusterPresent(status, statusReason);
+        if (getDetachedClusterFromResizedCluster(sdxCluster).isPresent()) {
+            return validateRecoveryResizedClusterPresent(status, statusReason, request != null && request.isForced());
         }
         return validateRecoveryOnlyOriginalCluster(sdxCluster, status, statusReason);
     }
@@ -93,14 +93,14 @@ public class ResizeRecoveryService implements RecoveryService {
 
     @Override
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest sdxRecoveryRequest) {
-        Optional<SdxCluster> detachedCluster = getDetachedCluster(sdxCluster);
+        Optional<SdxCluster> detachedCluster = getDetachedClusterFromResizedCluster(sdxCluster);
         if (detachedCluster.isPresent()) {
             return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(detachedCluster.get(), Optional.ofNullable(sdxCluster)));
         }
         return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, Optional.empty()));
     }
 
-    private Optional<SdxCluster> getDetachedCluster(SdxCluster cluster) {
+    private Optional<SdxCluster> getDetachedClusterFromResizedCluster(SdxCluster cluster) {
         Optional<SdxCluster> detachedCluster = sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(
                 cluster.getAccountId(), cluster.getEnvCrn()
         );
@@ -120,7 +120,12 @@ public class ResizeRecoveryService implements RecoveryService {
         return reason.isEmpty() ? reason : (": " + reason);
     }
 
-    private SdxRecoverableResponse validateRecoveryResizedClusterPresent(DatalakeStatusEnum status, String statusReason) {
+    private SdxRecoverableResponse validateRecoveryResizedClusterPresent(DatalakeStatusEnum status, String statusReason, boolean force) {
+        if (force) {
+            return new SdxRecoverableResponse("Force flag provided. Resized datalake with status " + status + " will be recovered by force, " +
+                    "deleting the new resized datalake and recovering the old detached datalake.", RecoveryStatus.RECOVERABLE);
+        }
+
         if (FAILURE_STATES.contains(status)) {
             return new SdxRecoverableResponse("Resized data lake is in a failed state. Recovery will restart the original data lake, " +
                     "and delete the new one", RecoveryStatus.RECOVERABLE);

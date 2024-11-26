@@ -37,7 +37,7 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 
 @ExtendWith(MockitoExtension.class)
-public class ResizeRecoveryServiceTest {
+class ResizeRecoveryServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
