@@ -43,10 +43,6 @@ public interface ClusterApi {
         clusterSecurityService().updateUserNamePassword(newPassword);
     }
 
-    default void prepareSecurity() {
-        clusterSecurityService().prepareSecurity();
-    }
-
     default void disableSecurity() {
         clusterSecurityService().disableSecurity();
     }

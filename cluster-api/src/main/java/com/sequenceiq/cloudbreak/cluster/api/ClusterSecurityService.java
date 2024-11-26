@@ -23,8 +23,6 @@ public interface ClusterSecurityService {
 
     void updateUserNamePassword(String newPassword) throws CloudbreakException;
 
-    void prepareSecurity();
-
     void disableSecurity();
 
     void deregisterServices(String clusterName, Optional<DatalakeDto> datalakeDto);

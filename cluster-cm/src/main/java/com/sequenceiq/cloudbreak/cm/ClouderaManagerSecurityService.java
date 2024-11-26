@@ -210,11 +210,6 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void prepareSecurity() {
-
-    }
-
-    @Override
     public void disableSecurity() {
         try {
             kerberosService.deleteCredentials(clientConfig, stack);

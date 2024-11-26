@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -111,12 +112,19 @@ public class TerminationTriggerService {
     private void fireTerminationEvent(Stack stack, boolean forced) {
         Long stackId = stack.getId();
         boolean secure = isKerberosConfigAvailableForCluster(stack);
-        String selector = (secure && !stack.getStackStatus().getStatus().isStopState())
+        boolean securityConfigAvailable = isSecurityConfigAvailable(stack);
+        String selector = (secure && securityConfigAvailable && !stack.getStackStatus().getStatus().isStopState())
                 ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT
                 : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
         reactorNotifier.notify(stackId, selector, new TerminationEvent(selector, stackId, forced ? TerminationType.FORCED : TerminationType.REGULAR));
 
         flowCancelService.cancelRunningFlows(stackId);
+    }
+
+    private boolean isSecurityConfigAvailable(Stack stack) {
+        return stack.getSecurityConfig() != null
+                && StringUtils.isNotEmpty(stack.getSecurityConfig().getClientCert())
+                && StringUtils.isNotEmpty(stack.getSecurityConfig().getClientKey());
     }
 
     private boolean isKerberosConfigAvailableForCluster(Stack stack) {

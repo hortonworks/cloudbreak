@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -177,7 +178,7 @@ public class TlsSecurityService {
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String cloudPlatform, String apiAddress, InstanceMetadataView gateway) {
         Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
-        if (securityConfig.isEmpty()) {
+        if (!isSecurityConfigAvailable(securityConfig)) {
             return decorateWithClusterProxyConfig(stackId, cloudPlatform, new HttpClientConfig(apiAddress));
         } else {
             LOGGER.info("Security config is not empty");
@@ -188,6 +189,12 @@ public class TlsSecurityService {
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
             return decorateWithClusterProxyConfig(stackId, cloudPlatform, httpClientConfig);
         }
+    }
+
+    private boolean isSecurityConfigAvailable(Optional<SecurityConfig> securityConfig) {
+        return securityConfig.isPresent()
+                && StringUtils.isNotEmpty(securityConfig.get().getClientCert())
+                && StringUtils.isNotEmpty(securityConfig.get().getClientKey());
     }
 
     private HttpClientConfig decorateWithClusterProxyConfig(Long stackId, String cloudPlatform, HttpClientConfig httpClientConfig) {

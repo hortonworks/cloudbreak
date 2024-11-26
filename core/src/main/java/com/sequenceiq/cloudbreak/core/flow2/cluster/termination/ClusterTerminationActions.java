@@ -46,7 +46,6 @@ public class ClusterTerminationActions {
 
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
-                jobService.unschedule(String.valueOf(context.getStackId()));
                 clusterTerminationFlowService.terminateCluster(context);
                 sendEvent(context);
             }
@@ -115,6 +114,7 @@ public class ClusterTerminationActions {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables) {
                 clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
+                jobService.unschedule(String.valueOf(context.getStackId()));
                 syncJobService.unschedule(String.valueOf(context.getStackId()));
                 sendEvent(context);
             }

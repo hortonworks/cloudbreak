@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -77,7 +78,19 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(true, false, false);
+        verifyTerminationEventFired(true, false, false, false);
+    }
+
+    @Test
+    void whenStackNotDeletedAndNoFlowLogAndKerbAndNotForcedAndSecurityConfEmptyShouldTerminate() {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of());
+        setupKerberized();
+        Stack stack = getAvailableStack();
+        stack.getSecurityConfig().setClientKey("");
+
+        underTest.triggerTermination(stack, false);
+
+        verifyTerminationEventFired(true, false, false, true);
     }
 
     @Test
@@ -87,7 +100,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(false, false, false);
+        verifyTerminationEventFired(false, false, false, false);
     }
 
     @Test
@@ -97,7 +110,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(true, true, false);
+        verifyTerminationEventFired(true, true, false, false);
     }
 
     @Test
@@ -107,7 +120,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(false, true, false);
+        verifyTerminationEventFired(false, true, false, false);
     }
 
     @Test
@@ -119,7 +132,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(true, false, false);
+        verifyTerminationEventFired(true, false, false, false);
     }
 
     @Test
@@ -131,7 +144,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(true, true, false);
+        verifyTerminationEventFired(true, true, false, false);
     }
 
     @Test
@@ -143,7 +156,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), false);
 
-        verifyTerminationEventFired(false, false, false);
+        verifyTerminationEventFired(false, false, false, false);
     }
 
     @Test
@@ -155,7 +168,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(false, true, false);
+        verifyTerminationEventFired(false, true, false, false);
     }
 
     @Test
@@ -193,7 +206,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(getAvailableStack(), true);
 
-        verifyTerminationEventFired(true, true, false);
+        verifyTerminationEventFired(true, true, false, false);
         verify(flowCancelService).cancelFlowSilently(flowLog);
     }
 
@@ -213,7 +226,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(stack, true);
 
-        verifyTerminationEventFired(false, true, false);
+        verifyTerminationEventFired(false, true, false, false);
     }
 
     @Test
@@ -222,7 +235,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(stack, false);
 
-        verifyTerminationEventFired(true, false, true);
+        verifyTerminationEventFired(true, false, true, false);
     }
 
     @Test
@@ -231,7 +244,7 @@ class TerminationTriggerServiceTest {
 
         underTest.triggerTermination(stack, false);
 
-        verifyTerminationEventFired(false, false, true);
+        verifyTerminationEventFired(false, false, true, false);
     }
 
     private Stack stackWithStatus(Status status) {
@@ -242,6 +255,10 @@ class TerminationTriggerServiceTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(status);
         stack.setStackStatus(stackStatus);
+        SecurityConfig securityConfig = new SecurityConfig();
+        securityConfig.setClientCert("test");
+        securityConfig.setClientKey("test");
+        stack.setSecurityConfig(securityConfig);
         return stack;
     }
 
@@ -249,7 +266,7 @@ class TerminationTriggerServiceTest {
         return stackWithStatus(Status.AVAILABLE);
     }
 
-    private void verifyTerminationEventFired(boolean kerberized, boolean forced, boolean stopped) {
+    private void verifyTerminationEventFired(boolean kerberized, boolean forced, boolean stopped, boolean securityconfigMissing) {
         ArgumentCaptor<String> selectorCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<TerminationEvent> eventCaptor = ArgumentCaptor.forClass(TerminationEvent.class);
         verify(reactorNotifier).notify(anyLong(), selectorCaptor.capture(), eventCaptor.capture());
@@ -257,7 +274,7 @@ class TerminationTriggerServiceTest {
 
         String selector = selectorCaptor.getValue();
         TerminationEvent event = eventCaptor.getValue();
-        if (kerberized && !stopped) {
+        if (kerberized && !stopped && !securityconfigMissing) {
             assertEquals(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT, selector);
             assertEquals(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT, event.selector());
         } else {

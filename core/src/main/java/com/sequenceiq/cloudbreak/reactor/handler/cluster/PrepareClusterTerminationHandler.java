@@ -34,8 +34,6 @@ public class PrepareClusterTerminationHandler implements EventHandler<PrepareClu
     public void accept(Event<PrepareClusterTerminationRequest> event) {
         PrepareClusterTerminationResult result;
         try {
-            clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getResourceId()))
-                    .clusterSecurityService().prepareSecurity();
             result = new PrepareClusterTerminationResult(event.getData());
         } catch (Exception e) {
             result = new PrepareClusterTerminationResult(e.getMessage(), e, event.getData());
