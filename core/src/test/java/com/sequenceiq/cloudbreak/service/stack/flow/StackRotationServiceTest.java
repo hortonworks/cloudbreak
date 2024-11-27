@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_ADMIN_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_MGMT_ADMIN_PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -92,8 +93,8 @@ public class StackRotationServiceTest {
         underTest.rotateSecrets(CRN, List.of(CM_ADMIN_PASSWORD.name()), null, Map.of());
 
         verify(stackDtoService).getStackViewByCrn(eq(CRN));
-        verify(secretRotationValidationService).validate(eq(CRN), eq(List.of(CM_ADMIN_PASSWORD)), eq(null), any());
-        verify(secretRotationValidationService).validateEnabledSecretTypes(eq(List.of(CM_ADMIN_PASSWORD)), isNull());
+        verify(secretRotationValidationService).validate(eq(CRN), eq(List.of(CM_ADMIN_PASSWORD, CM_MGMT_ADMIN_PASSWORD)), eq(null), any());
+        verify(secretRotationValidationService).validateEnabledSecretTypes(eq(List.of(CM_ADMIN_PASSWORD, CM_MGMT_ADMIN_PASSWORD)), isNull());
         verify(flowManager).triggerSecretRotation(anyLong(), anyString(), any(), any(), anyMap());
     }
 }

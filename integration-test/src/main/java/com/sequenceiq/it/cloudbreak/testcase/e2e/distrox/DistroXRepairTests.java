@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_MGMT_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.LDAP_BIND_PASSWORD;
@@ -103,7 +102,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
                     SALT_BOOT_SECRETS,
                     SALT_MASTER_KEY_PAIR,
                     SALT_SIGN_KEY_PAIR,
-                    CM_MGMT_ADMIN_PASSWORD,
                     CM_ADMIN_PASSWORD,
                     CM_DB_PASSWORD,
                     // CB-24849 and CB-25311

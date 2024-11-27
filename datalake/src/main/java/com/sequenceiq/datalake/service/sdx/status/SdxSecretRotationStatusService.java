@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.service.notification.SecretListField;
 import com.sequenceiq.cloudbreak.rotation.service.status.SecretRotationStatusService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -100,6 +101,6 @@ public class SdxSecretRotationStatusService implements SecretRotationStatusServi
     }
 
     private String getCode(SecretType secretType) {
-        return secretType.getClazz().getSimpleName() + "." + secretType.value();
+        return secretType.getClazz().getSimpleName() + "." + SecretListField.DISPLAY_NAME.name() + "." + secretType.value();
     }
 }

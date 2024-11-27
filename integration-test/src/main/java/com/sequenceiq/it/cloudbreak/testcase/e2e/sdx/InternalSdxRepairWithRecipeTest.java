@@ -8,7 +8,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_MGMT_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
@@ -178,7 +177,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                     USER_KEYPAIR,
                     IDBROKER_CERT,
                     SALT_BOOT_SECRETS,
-                    CM_MGMT_ADMIN_PASSWORD,
                     CM_ADMIN_PASSWORD,
                     EXTERNAL_DATABASE_ROOT_PASSWORD,
                     CM_DB_PASSWORD,
