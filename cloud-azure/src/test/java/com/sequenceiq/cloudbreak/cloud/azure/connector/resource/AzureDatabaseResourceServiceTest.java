@@ -477,9 +477,9 @@ class AzureDatabaseResourceServiceTest {
         DatabaseServer databaseServer = buildDatabaseServer(SINGLE_SERVER);
 
         CloudResource dbResource = buildResource(AZURE_DATABASE);
-        CloudResource pe1Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe1");
-        CloudResource pe2Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe2");
-        CloudResource pe3Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe3");
+        CloudResource pe1Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe1", CommonStatus.DETACHED);
+        CloudResource pe2Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe2", CommonStatus.FAILED);
+        CloudResource pe3Resource = buildResource(AZURE_PRIVATE_ENDPOINT, "pe3", CommonStatus.CREATED);
         CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
         List<CloudResource> cloudResourceList = List.of(pe1Resource, pe2Resource, pe3Resource, dzgResource, dbResource);
         List<CloudResource> expectedCloudResourceList = List.of(pe3Resource, dzgResource, dbResource);
@@ -614,9 +614,9 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldReturnExceptionWhenUpgradeDatabaseServerThrowsCloudException() {
-        CloudResource dbResource = buildResource(AZURE_DATABASE);
-        CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT);
-        CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP);
+        CloudResource dbResource = buildResource(AZURE_DATABASE, CommonStatus.DETACHED);
+        CloudResource peResource = buildResource(AZURE_PRIVATE_ENDPOINT, CommonStatus.DETACHED);
+        CloudResource dzgResource = buildResource(AZURE_DNS_ZONE_GROUP, CommonStatus.DETACHED);
         List<CloudResource> cloudResourceList = List.of(peResource, dzgResource, dbResource);
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
@@ -954,15 +954,19 @@ class AzureDatabaseResourceServiceTest {
     }
 
     private CloudResource buildResource(ResourceType resourceType) {
-        return buildResource(resourceType, "name");
+        return buildResource(resourceType, CommonStatus.CREATED);
     }
 
-    private CloudResource buildResource(ResourceType resourceType, String name) {
+    private CloudResource buildResource(ResourceType resourceType, CommonStatus status) {
+        return buildResource(resourceType, "name", status);
+    }
+
+    private CloudResource buildResource(ResourceType resourceType, String name, CommonStatus status) {
         return CloudResource.builder()
                 .withType(resourceType)
                 .withReference(RESOURCE_REFERENCE)
                 .withName(name)
-                .withStatus(CommonStatus.CREATED)
+                .withStatus(status)
                 .withParameters(Map.of())
                 .build();
     }

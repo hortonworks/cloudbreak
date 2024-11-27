@@ -547,7 +547,7 @@ public class AzureDatabaseResourceService {
     }
 
     private void deleteDatabaseServer(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, List<CloudResource> resources, AzureClient client) {
-        Optional<CloudResource> databaseServer = getResources(resources, AZURE_DATABASE).stream().findFirst();
+        Optional<CloudResource> databaseServer = getResources(resources, AZURE_DATABASE, false).stream().findFirst();
         databaseServer.ifPresentOrElse(
                 databaseServerResource -> deleteDatabaseServer(client, databaseServerResource, persistenceNotifier, cloudContext),
                 () -> {
@@ -560,7 +560,7 @@ public class AzureDatabaseResourceService {
             AzureClient client) {
         azureCloudResourceService.getPrivateEndpointRdsResourceTypes()
                 .stream()
-                .map(resourceType -> getResources(resources, resourceType))
+                .map(resourceType -> getResources(resources, resourceType, false))
                 .forEach(filteredResources -> filteredResources.forEach(
                         resource -> deleteResource(client, resource, persistenceNotifier, cloudContext)));
     }
@@ -578,9 +578,13 @@ public class AzureDatabaseResourceService {
     }
 
     private List<CloudResource> getResources(List<CloudResource> resources, ResourceType resourceType) {
+        return getResources(resources, resourceType, true);
+    }
+
+    private List<CloudResource> getResources(List<CloudResource> resources, ResourceType resourceType, boolean createdOnly) {
         return resources.stream()
                 .filter(resource -> resource.getType() == resourceType)
-                .filter(resource -> resource.getStatus() == CommonStatus.CREATED)
+                .filter(resource -> !createdOnly || resource.getStatus() == CommonStatus.CREATED)
                 .collect(Collectors.toList());
     }
 
