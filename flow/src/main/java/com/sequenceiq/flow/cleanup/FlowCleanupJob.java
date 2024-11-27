@@ -49,7 +49,7 @@ public class FlowCleanupJob extends MdcQuartzJob {
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         try {
-            purgeFinalisedFlowLogs(flowCleanupConfig.getRetentionPeriodInHours());
+            purgeFinalisedFlowLogs(flowCleanupConfig.getRetentionPeriodInHours(), flowCleanupConfig.getRetentionPeriodInHoursForFailedFlows());
             purgeFlowStatCache();
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Transaction failed for flow cleanup.", e);
@@ -61,11 +61,15 @@ public class FlowCleanupJob extends MdcQuartzJob {
         flowStatCache.cleanOldCacheEntries(runningFlows.getRunningFlowIdsSnapshot());
     }
 
-    public void purgeFinalisedFlowLogs(int retentionPeriodHours) throws TransactionService.TransactionExecutionException {
+    public void purgeFinalisedFlowLogs(int retentionPeriodHours, int retentionPeriodHoursForFailedFlows)
+            throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
-            LOGGER.debug("Cleaning finalised flowlogs");
-            int purgedFinalizedFlowLogs = flowLogService.purgeFinalizedFlowLogs(retentionPeriodHours);
-            LOGGER.debug("Deleted flowlog count: {}", purgedFinalizedFlowLogs);
+            LOGGER.debug("Cleaning successful finalised flowlogs");
+            int purgedFinalizedSuccessfulFlowLogs = flowLogService.purgeFinalizedSuccessfulFlowLogs(retentionPeriodHours);
+            LOGGER.debug("Deleted successful flowlog count: {}", purgedFinalizedSuccessfulFlowLogs);
+            LOGGER.debug("Cleaning failed finalised flowlogs");
+            int purgedFinalizedFailedFlowLogs = flowLogService.purgeFinalizedFailedFlowLogs(retentionPeriodHoursForFailedFlows);
+            LOGGER.debug("Deleted failed flowlog count: {}", purgedFinalizedFailedFlowLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
             int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFlowChainLogs();
             LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);

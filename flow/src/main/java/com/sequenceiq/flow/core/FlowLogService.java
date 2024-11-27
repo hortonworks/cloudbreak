@@ -70,7 +70,9 @@ public interface FlowLogService {
 
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);
 
-    int purgeFinalizedFlowLogs(int retentionPeriodHours);
+    int purgeFinalizedSuccessfulFlowLogs(int retentionPeriodHours);
+
+    int purgeFinalizedFailedFlowLogs(int retentionPeriodHours);
 
     List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(String flowId);
 
