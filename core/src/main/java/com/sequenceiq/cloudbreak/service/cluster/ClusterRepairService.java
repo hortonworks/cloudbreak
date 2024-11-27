@@ -226,7 +226,9 @@ public class ClusterRepairService {
             return Optional.of(RepairValidation.of("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. " +
                     "This will be fixed in future releases."));
         } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
-            return Optional.of(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
+            return Optional.of(RepairValidation.of(String.format("List of unhealthy gateway nodes %s. " +
+                    "Gateway nodes must be repaired first.", findAllUnhealthyGatewayNodes(stack)
+                    .stream().map(InstanceMetadataView::getInstanceId).collect(toSet()))));
         } else if (isCMRepairAndAllStoppedNodesNotSelected(stack.getNotTerminatedInstanceMetaData(), selectedParts)) {
             return Optional.of(RepairValidation.of("Need to select all stopped nodes as CM node is selected for repair."));
         } else if (!isAllGatewaySelectedWhenSaltVersionIsOutdated(repairMode, selectedParts, stack)) {
@@ -262,13 +264,15 @@ public class ClusterRepairService {
         return false;
     }
 
+    private List<InstanceMetadataView> findAllUnhealthyGatewayNodes(StackDto stack) {
+        return stack.getNotTerminatedGatewayInstanceMetadata().stream()
+                .filter(instanceMetaData -> !instanceMetaData.isHealthy())
+                .collect(toList());
+    }
+
     private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, StackDto stack) {
-        List<InstanceMetadataView> gatewayInstances = stack.getNotTerminatedGatewayInstanceMetadata();
-        if (gatewayInstances.size() < 1) {
-            LOGGER.info("Stack has no GW");
-            return false;
-        }
-        List<InstanceMetadataView> unhealthyGWs = gatewayInstances.stream().filter(gatewayInstance -> !gatewayInstance.isHealthy()).collect(toList());
+        List<InstanceMetadataView> unhealthyGWs = findAllUnhealthyGatewayNodes(stack);
+
         if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
             LOGGER.info("Host group based repair mode, so GW hostgroup should be selected if any GW is not healthy. Unhealthy GWs: {}. Selected instances: {}",
                     unhealthyGWs.stream().map(InstanceMetadataView::getInstanceId).collect(toSet()), selectedParts);

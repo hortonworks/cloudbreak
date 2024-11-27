@@ -509,14 +509,17 @@ class ClusterRepairServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("gateway");
         primaryGW.setInstanceGroup(instanceGroup);
+        primaryGW.setInstanceId("i-ffffaaaa");
 
         InstanceMetaData secondaryGW = new InstanceMetaData();
         secondaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         secondaryGW.setInstanceGroup(instanceGroup);
+        secondaryGW.setInstanceId("i-acbdef1");
 
         ArrayList<InstanceMetadataView> gatewayInstances = new ArrayList<>();
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
+
 
         when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
@@ -524,8 +527,8 @@ class ClusterRepairServiceTest {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
                     underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false);
             assertEquals(1, actual.getError().getValidationErrors().size());
-            assertEquals("Gateway node is unhealthy, it must be repaired first.",
-                    actual.getError().getValidationErrors().get(0));
+            assertEquals("List of unhealthy gateway nodes [i-ffffaaaa]. Gateway nodes must be repaired first.",
+                    actual.getError().getValidationErrors().getFirst());
         });
     }
 
@@ -540,10 +543,12 @@ class ClusterRepairServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("gateway");
         primaryGW.setInstanceGroup(instanceGroup);
+        primaryGW.setInstanceId("i-ffffaaaa");
 
         InstanceMetaData secondaryGW = new InstanceMetaData();
         secondaryGW.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         secondaryGW.setInstanceGroup(instanceGroup);
+        secondaryGW.setInstanceId("i-ffffbbbb");
 
         ArrayList<InstanceMetadataView> gatewayInstances = new ArrayList<>();
         gatewayInstances.add(primaryGW);
@@ -555,8 +560,8 @@ class ClusterRepairServiceTest {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
                     underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false);
             assertEquals(1, actual.getError().getValidationErrors().size());
-            assertEquals("Gateway node is unhealthy, it must be repaired first.",
-                    actual.getError().getValidationErrors().get(0));
+            assertEquals("List of unhealthy gateway nodes [i-ffffbbbb, i-ffffaaaa]. Gateway nodes must be repaired first.",
+                    actual.getError().getValidationErrors().getFirst());
         });
     }
 
