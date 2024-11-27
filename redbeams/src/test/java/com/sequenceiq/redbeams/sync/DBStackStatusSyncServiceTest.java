@@ -36,8 +36,10 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
+import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,6 +96,15 @@ public class DBStackStatusSyncServiceTest {
     @Mock
     private DBStackToDatabaseStackConverter databaseStackConverter;
 
+    @Mock
+    private DatabaseServer dbServer;
+
+    @Mock
+    private DBResourceService dbResourceService;
+
+    @Mock
+    private com.sequenceiq.cloudbreak.cloud.model.DatabaseServer databaseServer;
+
     private ArgumentCaptor<CloudContext> cloudContextArgumentCaptor;
 
     @InjectMocks
@@ -141,6 +152,7 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(savedStatus);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
         victim.sync(dbStack);
 
@@ -160,6 +172,7 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
         when(dbStack.getName()).thenReturn(DB_NAME);
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
 
         victim.sync(dbStack);
 
