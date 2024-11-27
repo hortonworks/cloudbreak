@@ -8,4 +8,6 @@ public interface DatabaseType {
     default boolean isDatabasePauseSupported() {
         return true;
     }
+
+    String referenceType();
 }
