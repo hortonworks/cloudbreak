@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -180,5 +181,26 @@ class StackDtoServiceTest {
 
         assertTrue(sdx.isPresent());
         assertEquals(sdx.get().runtime(), "7.2.18");
+    }
+
+    @Test
+    public void testGetSdxBasicViewReturnsInTheCorrectOrder() {
+        StackViewDelegate stack1 = mock(StackViewDelegate.class);
+        StackViewDelegate stack2 = mock(StackViewDelegate.class);
+        StackViewDelegate stack3 = mock(StackViewDelegate.class);
+
+        when(stack1.getName()).thenReturn("stack1");
+        when(stack2.getName()).thenReturn("stack2");
+        when(stack2.getOriginalName()).thenReturn("stack2");
+        when(stack3.getName()).thenReturn("stack3");
+
+        when(stackDtoRepository.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(stack1, stack2, stack3));
+        when(clusterDtoRepository.findByStackId(anyLong())).thenReturn(Optional.of(clusterViewDelegate));
+        when(workspaceService.getByIdWithoutAuth(any())).thenReturn(new Workspace());
+
+        Optional<SdxBasicView> sdx = underTest.getSdxBasicView("env");
+
+        assertTrue(sdx.isPresent());
+        assertEquals("stack2", sdx.get().name());
     }
 }

@@ -4,6 +4,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -373,7 +374,8 @@ public class StackDtoService implements LocalPaasSdxService {
     public List<StackDto> findAllByEnvironmentCrnAndStackType(String environmentCrn, List<StackType> stackTypes) {
         Objects.requireNonNull(environmentCrn);
         Objects.requireNonNull(stackTypes);
-        return stackDtoRepository.findAllByEnvironmentCrnAndStackType(environmentCrn, stackTypes).stream()
+        return stackDtoRepository.findAllByEnvironmentCrnAndStackType(environmentCrn, stackTypes)
+                .stream()
                 .map(stackViewDelegate -> getStackProxy(stackViewDelegate, false))
                 .collect(Collectors.toList());
     }
@@ -390,6 +392,8 @@ public class StackDtoService implements LocalPaasSdxService {
     public Optional<SdxBasicView> getSdxBasicView(String environmentCrn) {
         return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
                 .stream()
+                .sorted(Comparator.comparing(dto -> dto.getStack().getOriginalName(),
+                        Comparator.nullsLast(Comparator.naturalOrder())))
                 .findFirst()
                 .map(stackDto -> SdxBasicView.builder()
                         .withName(stackDto.getResourceName())
