@@ -23,6 +23,9 @@ import com.sequenceiq.flow.domain.StateStatus;
 @Transactional(TxType.REQUIRED)
 public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
+    String SELECT_FAILED_FLOW_IDS = "SELECT DISTINCT ifl.flowId FROM FlowLog ifl " +
+            "WHERE ifl.finalized = TRUE AND ifl.endTime <= :endTime AND ifl.stateStatus = 'FAILED'";
+
     Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 
     @Query("SELECT fl.flowId as flowId, " +
@@ -91,8 +94,12 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             @Param("reason") String reason);
 
     @Modifying
-    @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime")
-    int purgeFinalizedFlowLogs(@Param("endTime") Long endTime);
+    @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime AND fl.flowId NOT IN (" + SELECT_FAILED_FLOW_IDS + ")")
+    int purgeFinalizedSuccessfulFlowLogs(@Param("endTime") Long endTime);
+
+    @Modifying
+    @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime AND fl.flowId IN (" + SELECT_FAILED_FLOW_IDS + ")")
+    int purgeFinalizedFailedFlowLogs(@Param("endTime") Long endTime);
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
 

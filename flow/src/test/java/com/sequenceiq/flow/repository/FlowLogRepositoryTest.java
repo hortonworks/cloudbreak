@@ -45,7 +45,7 @@ class FlowLogRepositoryTest {
     private FlowLogRepository underTest;
 
     @Test
-    void testPurgeFinalizedFlowLogs() {
+    void testPurgeFinalizedSuccessfulFlowLogs() {
         FlowLog flowLog1 = createFlowLog(Boolean.TRUE, PENDING, PROVISION);
 
         FlowLog flowLog2 = createFlowLog(Boolean.TRUE, PENDING, PROVISION);
@@ -62,7 +62,7 @@ class FlowLogRepositoryTest {
 
         saveFlowLogs(flowLog1, flowLog2, flowLog3, flowLog4, flowLog5, flowLog6);
 
-        int result = underTest.purgeFinalizedFlowLogs(nowMinus(Duration.of(30, MINUTES)).toEpochMilli());
+        int result = underTest.purgeFinalizedSuccessfulFlowLogs(nowMinus(Duration.of(30, MINUTES)).toEpochMilli());
 
         assertThat(result).isEqualTo(2);
     }

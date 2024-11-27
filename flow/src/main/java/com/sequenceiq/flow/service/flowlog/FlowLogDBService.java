@@ -319,9 +319,15 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public int purgeFinalizedFlowLogs(int retentionPeriodHours) {
+    public int purgeFinalizedSuccessfulFlowLogs(int retentionPeriodHours) {
         long endTimeUpperBound = clock.nowMinus(Duration.ofHours(retentionPeriodHours)).toEpochMilli();
-        return flowLogRepository.purgeFinalizedFlowLogs(endTimeUpperBound);
+        return flowLogRepository.purgeFinalizedSuccessfulFlowLogs(endTimeUpperBound);
+    }
+
+    @Override
+    public int purgeFinalizedFailedFlowLogs(int retentionPeriodHours) {
+        long endTimeUpperBound = clock.nowMinus(Duration.ofHours(retentionPeriodHours)).toEpochMilli();
+        return flowLogRepository.purgeFinalizedFailedFlowLogs(endTimeUpperBound);
     }
 
     @Override

@@ -30,7 +30,10 @@ import org.awaitility.core.ConditionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +72,7 @@ import com.sequenceiq.flow.component.sleep.event.SleepEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
@@ -79,6 +83,7 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowService;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -86,6 +91,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 @SpringBootTest
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class, classes = ComponentTestConfig.class)
 @Testcontainers
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class FlowComponentTest {
 
     @Container
@@ -139,6 +145,12 @@ public class FlowComponentTest {
 
     @SpyBean
     private SimpleMeterRegistry meterRegistry;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private FlowChainLogService flowChainLogService;
 
     @AfterAll
     public static void afterAll() throws IOException, InterruptedException {
@@ -205,8 +217,63 @@ public class FlowComponentTest {
     }
 
     @Test
+    @Order(1)
+    public void testPurgeSuccessfulAndFailedFlowLogs() throws InterruptedException {
+        FlowAcceptResult acceptResult1 = startSleepFlow(SleepStartEvent.neverFail(getNextResourceId(), SLEEP_TIME));
+        FlowAcceptResult acceptResult2 = startSleepFlow(SleepStartEvent.alwaysFail(getNextResourceId(), SLEEP_TIME));
+        FlowAcceptResult acceptResult3 = startSleepFlow(SleepStartEvent.neverFail(getNextResourceId(), SLEEP_TIME));
+
+        waitFlowToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult1);
+        waitFlowToFail(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult2);
+        waitFlowToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult3);
+
+        assertEquals(8, flowLogService.purgeFinalizedSuccessfulFlowLogs(0));
+        assertEquals(4, flowLogService.purgeFinalizedFailedFlowLogs(0));
+        assertEquals(0, flowChainLogService.purgeOrphanFlowChainLogs());
+    }
+
+    @Test
+    @Order(2)
+    public void testPurgeSuccessfulAndFailedFlowChainLogs() throws InterruptedException {
+        FlowAcceptResult acceptResult = startSleepFlowChain(new SleepChainTriggerEvent(getNextResourceId(), Lists.newArrayList(
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
+        )));
+
+        waitFlowChainToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
+
+        assertEquals(8, flowLogService.purgeFinalizedSuccessfulFlowLogs(0));
+        assertEquals(0, flowLogService.purgeFinalizedFailedFlowLogs(0));
+        assertEquals(3, flowChainLogService.purgeOrphanFlowChainLogs());
+    }
+
+    @Test
+    @Order(3)
+    public void testPurgeSuccessfulAndFailedNestedFlowChainLogs() throws InterruptedException {
+        long resourceId = getNextResourceId();
+        Promise<AcceptResult> promise = new Promise<>();
+        NestedSleepChainTriggerEvent nestedSleepChainTriggerEvent1 = new NestedSleepChainTriggerEvent(resourceId, Lists.newArrayList(
+                new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
+                        new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
+                        new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
+                ), promise),
+                new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
+                        new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
+                        new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
+                ), promise)), promise);
+
+        FlowAcceptResult acceptResult1 = startNestedSleepFlowChain(nestedSleepChainTriggerEvent1);
+
+        waitFlowChainToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult1);
+
+        assertEquals(16, flowLogService.purgeFinalizedSuccessfulFlowLogs(0));
+        assertEquals(0, flowLogService.purgeFinalizedFailedFlowLogs(0));
+        assertEquals(9, flowChainLogService.purgeOrphanFlowChainLogs());
+    }
+
+    @Test
     public void startFlowThenWaitForComplete() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
 
         FlowAcceptResult acceptResult = startSleepFlow(sleepStartEvent);
@@ -217,7 +284,7 @@ public class FlowComponentTest {
 
     @Test
     public void startSecondFlowWhenFirstCompletedThenWaitForComplete() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent1 = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
 
         FlowAcceptResult acceptResult1 = startSleepFlow(sleepStartEvent1);
@@ -235,7 +302,7 @@ public class FlowComponentTest {
 
     @Test
     public void startFlowThenWaitForFail() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = SleepStartEvent.alwaysFail(resourceId, SLEEP_TIME);
 
         FlowAcceptResult acceptResult = startSleepFlow(sleepStartEvent);
@@ -246,7 +313,7 @@ public class FlowComponentTest {
 
     @Test
     public void startingDifferentFlowFailsBeforeFirstCompletes() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent1 = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
         SleepStartEvent sleepStartEvent2 = SleepStartEvent.alwaysFail(resourceId, SLEEP_TIME);
 
@@ -260,7 +327,7 @@ public class FlowComponentTest {
 
     @Test
     public void startIdempotentFlowWhileTheOtherIsRunningReturnsOriginalFlowId() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent1 = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
         SleepStartEvent sleepStartEvent2 = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
 
@@ -274,7 +341,7 @@ public class FlowComponentTest {
 
     @Test
     public void startFlowChainThenWaitForComplete() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
@@ -293,7 +360,7 @@ public class FlowComponentTest {
                 .thenReturn(FlowTriggerConditionResult.ok())
                 .thenReturn(FlowTriggerConditionResult.fail("Error"));
 
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
@@ -312,7 +379,7 @@ public class FlowComponentTest {
                 .thenReturn(FlowTriggerConditionResult.ok())
                 .thenReturn(FlowTriggerConditionResult.skip("Skip"));
 
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
@@ -325,7 +392,7 @@ public class FlowComponentTest {
 
     @Test
     public void startFlowChainThenWaitForFail() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.ALWAYS_FAIL)
@@ -338,7 +405,7 @@ public class FlowComponentTest {
 
     @Test
     public void startingDifferentFlowChainFailsBeforeFirstCompletes() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent1 = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
@@ -358,7 +425,7 @@ public class FlowComponentTest {
 
     @Test
     public void startIdempotentFlowChainWhileTheOtherIsRunningReturnsOriginalFlowChainId() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent1 = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
@@ -378,7 +445,7 @@ public class FlowComponentTest {
 
     @Test
     public void startingFlowChainFailsWhenFlowIsAlreadyRunning() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
@@ -395,7 +462,7 @@ public class FlowComponentTest {
 
     @Test
     public void startNestedFlowChainThenWaitForComplete() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         Promise<AcceptResult> accepted1 = new Promise<>();
         SleepChainTriggerEvent sleepChainTriggerEvent1 = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
@@ -427,7 +494,7 @@ public class FlowComponentTest {
 
     @Test
     public void retryPendingFlowFails() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
 
         FlowAcceptResult acceptResult = startSleepFlow(sleepStartEvent);
@@ -440,7 +507,7 @@ public class FlowComponentTest {
 
     @Test
     public void retryCompletedFlowFails() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = SleepStartEvent.neverFail(resourceId, SLEEP_TIME);
 
         FlowAcceptResult acceptResult = startSleepFlow(sleepStartEvent);
@@ -454,7 +521,7 @@ public class FlowComponentTest {
 
     @Test
     public void retryFirstFailedThenCompletedFlowFails() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = new SleepStartEvent(resourceId, SLEEP_TIME, LocalDateTime.now().plus(SLEEP_TIME.multipliedBy(2)));
 
         FlowAcceptResult acceptResult = startSleepFlow(sleepStartEvent);
@@ -473,7 +540,7 @@ public class FlowComponentTest {
 
     @Test
     public void retryFailedFlowAllowedMultipleTimes() throws InterruptedException {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         SleepStartEvent sleepStartEvent = SleepStartEvent.alwaysFail(resourceId, SLEEP_TIME);
 
         FlowAcceptResult acceptResult = startSleepFlow(sleepStartEvent);
@@ -496,7 +563,7 @@ public class FlowComponentTest {
 
     @Test
     public void shouldTolerateWhenFlowLogTypeOrPayloadTypeClassIsNotOnClassPath() {
-        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        long resourceId = getNextResourceId();
         FlowLog flowLog = new FlowLog(
                 resourceId,
                 "test-flow-id",
@@ -518,6 +585,10 @@ public class FlowComponentTest {
         ClassValue payloadType = flowLogs.get(0).getPayloadType();
         assertFalse(flowType.isOnClassPath());
         assertFalse(payloadType.isOnClassPath());
+    }
+
+    private long getNextResourceId() {
+        return RESOURCE_ID_SEC.incrementAndGet();
     }
 
     private void assertRunningInFlow(FlowAcceptResult acceptResult) {

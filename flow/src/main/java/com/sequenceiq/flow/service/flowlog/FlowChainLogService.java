@@ -31,6 +31,8 @@ import com.sequenceiq.flow.repository.FlowChainLogRepository;
 @Service
 public class FlowChainLogService {
 
+    private static final int MAX_REMOVAL_ITERATION = 5;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowChainLogService.class);
 
     @Inject
@@ -125,7 +127,15 @@ public class FlowChainLogService {
     }
 
     public int purgeOrphanFlowChainLogs() {
-        return repository.purgeOrphanFlowChainLogs();
+        int removedFlowChainLog = repository.purgeOrphanFlowChainLogs();
+        int allRemovedFlowChainLog = removedFlowChainLog;
+        int iteration = 1;
+        while (iteration < MAX_REMOVAL_ITERATION && removedFlowChainLog > 0) {
+            removedFlowChainLog = repository.purgeOrphanFlowChainLogs();
+            allRemovedFlowChainLog += removedFlowChainLog;
+            iteration++;
+        }
+        return allRemovedFlowChainLog;
     }
 
     public FlowChainLog save(FlowChainLog chainLog) {

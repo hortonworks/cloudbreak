@@ -12,11 +12,18 @@ public class FlowCleanupConfig {
     @Value("${flowcleanup.retention.period.hours:24}")
     private int retentionPeriodInHours;
 
+    @Value("${flowcleanup.retention.period.hours.failed:336}")
+    private int retentionPeriodInHoursForFailedFlows;
+
     public int getIntervalInHours() {
         return intervalInHours;
     }
 
     public int getRetentionPeriodInHours() {
         return retentionPeriodInHours;
+    }
+
+    public int getRetentionPeriodInHoursForFailedFlows() {
+        return retentionPeriodInHoursForFailedFlows;
     }
 }
