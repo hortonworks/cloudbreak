@@ -265,6 +265,22 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return metaData.orElse(null);
     }
 
+    public Optional<String> getPrimaryGatewayFQDN() {
+        return getAllAvailableInstances().stream()
+                .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType()))
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .filter(StringUtils::isNotBlank)
+                .findFirst();
+    }
+
+    public Set<String> getSecondaryGatewayFQDNs() {
+        return getAllAvailableInstances().stream()
+                .filter(im -> InstanceMetadataType.GATEWAY.equals(im.getInstanceMetadataType()))
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toSet());
+    }
+
     public List<InstanceMetadataView> getNotTerminatedAndNotZombieGatewayInstanceMetadata() {
         return getAllAvailableInstances().stream()
                 .filter(im -> im.getInstanceGroupType() == InstanceGroupType.GATEWAY)

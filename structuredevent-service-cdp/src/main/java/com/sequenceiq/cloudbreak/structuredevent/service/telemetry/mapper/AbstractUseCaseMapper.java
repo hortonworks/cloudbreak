@@ -73,7 +73,7 @@ public abstract class AbstractUseCaseMapper<T, R extends UseCaseAware<T>> {
         AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
         Enum nextFlowState = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState(), flow.getFlowEvent());
         if (nextFlowState == null) {
-            LOGGER.warn("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
+            LOGGER.debug("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
             return unset();
         }
         Optional<String> rootFlowChainType = getRootFlowChainType(flow.getFlowChainType());
@@ -86,7 +86,7 @@ public abstract class AbstractUseCaseMapper<T, R extends UseCaseAware<T>> {
 
     private T getUseCaseFromFlowConfiguration(Enum nextFlowState, String flowType) {
         if (!useCaseAwareFlowConfigurationMap.containsKey(flowType)) {
-            LOGGER.warn("Missing use case aware flow configuration for type: {}", flowType);
+            LOGGER.debug("Missing use case aware flow configuration for type: {}", flowType);
             return unset();
         } else {
             R useCaseAwareFlowConfiguration = useCaseAwareFlowConfigurationMap.get(flowType);

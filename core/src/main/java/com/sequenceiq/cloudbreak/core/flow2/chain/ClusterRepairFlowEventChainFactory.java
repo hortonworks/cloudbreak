@@ -207,7 +207,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         if (rootDiskRepairMigrationEnabled) {
             addRootDiskUpdateIfNecessary(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
         }
-        addDownscaleAndUpscaleEvents(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackView);
+        addDownscaleAndUpscaleEvents(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackDto);
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
@@ -267,27 +267,27 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addDownscaleAndUpscaleEvents(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String,
-            Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW, StackView stackView) {
+            Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW, StackDto stack) {
         if (ALL_AT_ONCE.equals(event.getRepairType())) {
             LOGGER.info("Upgrading all the nodes by groups, upgrading all the nodes within a group at the same time, for stack: '{}'", event.getStackId());
-            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackView);
+            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stack.getStack());
         } else {
             LOGGER.info("Special repair: '{}'", event.getRepairType());
-            specialRepair(event, flowTriggers, repairableGroupsWithHostNames, stackView, event.getRepairType());
+            specialRepair(event, flowTriggers, repairableGroupsWithHostNames, stack, event.getRepairType());
         }
     }
 
     private void specialRepair(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView, ClusterRepairTriggerEvent.RepairType repairType) {
-        Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId())
-                .map(InstanceMetadataView::getDiscoveryFQDN);
+            Map<String, Set<String>> repairableGroupsWithHostNames, StackDto stack, ClusterRepairTriggerEvent.RepairType repairType) {
+        Optional<String> primaryGwFQDN = stack.getPrimaryGatewayFQDN();
+        Set<String> secondaryGwFQDNs = stack.getSecondaryGatewayFQDNs();
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
         repairableGroupsWithHostNames.forEach(repairableGroupsWithHostNameMultimap::putAll);
-        LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw =
-                collectHostsByHostGroupAndSortByPgwAndName(primaryGwFQDN, repairableGroupsWithHostNameMultimap);
+        LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgwAndGw =
+                collectHostsByHostGroupAndSortByPGwGwAndName(primaryGwFQDN, secondaryGwFQDNs, repairableGroupsWithHostNameMultimap);
         switch (repairType) {
-            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
-            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
+            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack.getStack());
+            case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgwAndGw, primaryGwFQDN, stack.getStack());
             default -> throw new IllegalStateException("Unknown repair type:" + repairType);
         }
     }
@@ -301,15 +301,32 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         });
     }
 
-    private LinkedHashMultimap<String, String> collectHostsByHostGroupAndSortByPgwAndName(Optional<String> primaryGwFQDN,
+    private LinkedHashMultimap<String, String> collectHostsByHostGroupAndSortByPGwGwAndName(Optional<String> primaryGwFQDN, Set<String> secondaryGwFQDNs,
             HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
         return repairableGroupsWithHostNameMultimap.entries().stream()
                 .sorted(Entry.comparingByValue((o1, o2) -> {
+
+                    // primary gw first
                     if (primaryGwFQDN.filter(o1::equals).isPresent()) {
                         return -1;
                     } else if (primaryGwFQDN.filter(o2::equals).isPresent()) {
                         return +1;
-                    } else if (o1.length() > o2.length()) {
+                    }
+
+                    // secondary gateways come after primary but before others (lexicographic between secondaries)
+                    boolean o1IsSecondary = secondaryGwFQDNs.contains(o1);
+                    boolean o2IsSecondary = secondaryGwFQDNs.contains(o2);
+
+                    if (o1IsSecondary && o2IsSecondary) {
+                        return o1.compareTo(o2);
+                    } else if (o1IsSecondary) {
+                        return -1;
+                    } else if (o2IsSecondary) {
+                        return +1;
+                    }
+
+                    // fallback
+                    if (o1.length() > o2.length()) {
                         return +1;
                     } else if (o2.length() > o1.length()) {
                         return -1;
