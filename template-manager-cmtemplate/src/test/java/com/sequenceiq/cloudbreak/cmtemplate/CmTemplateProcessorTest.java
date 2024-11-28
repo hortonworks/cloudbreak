@@ -643,7 +643,7 @@ public class CmTemplateProcessorTest {
                 .recommendAutoscale(blueprintVersion, List.of()));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha.bp"));
-        assertEquals(new AutoscaleRecommendation(Set.of("gateway"), Set.of("gateway")), underTest.recommendAutoscale(blueprintVersion, List.of()));
+        assertEquals(new AutoscaleRecommendation(Set.of("gateway"), Set.of()), underTest.recommendAutoscale(blueprintVersion, List.of()));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale(blueprintVersion, List.of()));
@@ -653,6 +653,9 @@ public class CmTemplateProcessorTest {
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/data-mart.bp"));
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), underTest.recommendAutoscale(blueprintVersion, List.of()));
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-streaming-small.bp"));
+        assertEquals(new AutoscaleRecommendation(Set.of("kraft"), Set.of()), underTest.recommendAutoscale(blueprintVersion, List.of()));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/data-mart.bp"));
         assertEquals(new AutoscaleRecommendation(Set.of("executor"), Set.of()), underTest.recommendAutoscale(blueprintVersion,

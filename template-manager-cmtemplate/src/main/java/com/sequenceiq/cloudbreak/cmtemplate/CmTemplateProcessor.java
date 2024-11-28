@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.annotation.Nonnull;
 
@@ -444,10 +445,39 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 version, List.of(), componentsByHostGroup);
         Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true,
                 version, List.of(), componentsByHostGroup);
+        if (!load.isEmpty()) {
+            load = getRecommendationForLoadBasedByRequiredRoles(load, componentsByHostGroup);
+        }
         if (!time.isEmpty()) {
             time = getRecommendationForTimeBasedScaling(time, componentsByHostGroup, entitlements);
         }
         return new AutoscaleRecommendation(time, load);
+    }
+
+    private Set<String> getRecommendationForLoadBasedByRequiredRoles(Set<String> nonBlacklistedLoadBasedHostgroups,
+            Map<String, Set<String>> componentsByHostGroup) {
+        LOGGER.info("Recommendation for load based scaling based on blacklisted roles: {}", nonBlacklistedLoadBasedHostgroups);
+
+        Set<String> finalLoadBasedHostGroups = new HashSet<>();
+        Set<String> requiredRoles = Stream.of(RequiredLoadBasedAutoscaleRole.values())
+                .map(RequiredLoadBasedAutoscaleRole::name)
+                .collect(toSet());
+        for (String loadBasedHostgroup : nonBlacklistedLoadBasedHostgroups) {
+            Set<String> rolesPresentInHostgroup = componentsByHostGroup.get(loadBasedHostgroup);
+            boolean allRequiredRolesPresent = true;
+            for (String requiredRole : requiredRoles) {
+                if (!rolesPresentInHostgroup.contains(requiredRole)) {
+                    LOGGER.info("Discarding hostgroup because required roles are not present on this hostgroup: '{}'", loadBasedHostgroup);
+                    allRequiredRolesPresent = false;
+                    break;
+                }
+            }
+            if (allRequiredRolesPresent) {
+                finalLoadBasedHostGroups.add(loadBasedHostgroup);
+            }
+        }
+        LOGGER.info("Recommendation for load based scaling based on blacklisted and required roles: {}", finalLoadBasedHostGroups);
+        return finalLoadBasedHostGroups;
     }
 
     private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted,
