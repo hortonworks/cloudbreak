@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -126,7 +127,7 @@ public class DataHubCMServiceSharedDBRotationServiceTest {
         ClusterModificationService clusterModService = mock(ClusterModificationService.class);
         mockIndependentCalls(dlStack, clusterModService);
         RDSConfig dlRdsConfig = mock(RDSConfig.class);
-        when(dlRdsConfig.getClusters()).thenReturn(Set.of(dlCluster));
+        lenient().when(dlRdsConfig.getClusters()).thenReturn(Set.of(dlCluster));
         RDSConfig dhRdsConfig = mock(RDSConfig.class);
         when(dhRdsConfig.getClusters()).thenReturn(Set.of(cluster));
         RDSConfig pooledRdsConfig = mock(RDSConfig.class);
