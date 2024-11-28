@@ -26,12 +26,12 @@ public class DistroXUpgradeTestDto extends AbstractSdxTestDto<DistroXUpgradeV1Re
 
     @Override
     public DistroXUpgradeTestDto valid() {
-        return withRuntime(commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion())
-                .withReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
+        return withReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
     }
 
     public DistroXUpgradeTestDto withRuntime(String runtime) {
         getRequest().setRuntime(runtime);
+        getRequest().setImageId(null);
         return this;
     }
 
@@ -42,6 +42,7 @@ public class DistroXUpgradeTestDto extends AbstractSdxTestDto<DistroXUpgradeV1Re
 
     public DistroXUpgradeTestDto withImageId(String imageId) {
         getRequest().setImageId(imageId);
+        getRequest().setRuntime(null);
         return this;
     }
 

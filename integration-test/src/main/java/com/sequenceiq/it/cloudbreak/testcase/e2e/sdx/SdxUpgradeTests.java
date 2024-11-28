@@ -10,6 +10,7 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -22,6 +23,8 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
+import com.sequenceiq.it.cloudbreak.util.PatchUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -52,6 +55,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
+    @Inject
+    private PatchUpgradeCandidateProvider patchUpgradeCandidateProvider;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -93,6 +99,50 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                         testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @UseSpotInstances
+    @Description(
+            given = "there is a running Cloudbreak, and an SDX cluster in available state",
+            when = "patch upgrade called on the SDX cluster",
+            then = "SDX patch upgrade should be successful, the cluster should be up and running"
+    )
+    public void testSDXPatchUpgrade(TestContext testContext) {
+        List<String> actualVolumeIds = new ArrayList<>();
+        List<String> expectedVolumeIds = new ArrayList<>();
+        Pair<String, String> patchUpgradePair = patchUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
+
+        testContext.given(SdxUpgradeTestDto.class).withImageId(patchUpgradePair.getRight());
+
+        SdxTestDto sdxTestDto = testContext.given(SdxTestDto.class)
+                .withCloudStorage()
+                .withImageId(patchUpgradePair.getLeft())
+                .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()));
+        sdxTestDto
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instances.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
+                    return testDto;
+                })
+                .when(sdxTestClient.upgrade())
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, doNotWaitForFlow())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> {
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
+                    instanceIds.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instanceIds));
+                    return testDto;
+                })
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromPrimaryGateway(
+                        testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
                 .validate();
     }
 

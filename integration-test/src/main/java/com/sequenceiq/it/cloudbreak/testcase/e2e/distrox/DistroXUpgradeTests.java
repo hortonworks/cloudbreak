@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
@@ -20,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.PatchUpgradeCandidateProvider;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -42,6 +44,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     @Inject
     private EncryptedTestUtil encryptedTestUtil;
 
+    @Inject
+    private PatchUpgradeCandidateProvider patchUpgradeCandidateProvider;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -61,15 +66,12 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                     "disks are encrypted too")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
         boolean govCloud = testContext.getCloudProvider().getGovCloud();
-        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade()
-                .getDistroXUpgradeCurrentVersion(govCloud);
-        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
-        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade()
-                .getDistroXUpgrade3rdPartyCurrentVersion(govCloud);
-        String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(govCloud);
 
         String firstDhName = resourcePropertyProvider().getName();
         String secondDhName = resourcePropertyProvider().getName();
+        String thirdDhName = resourcePropertyProvider().getName();
+        Pair<String, String> patchUpgradePair = patchUpgradeCandidateProvider.getPatchUpgradeSourceAndCandidate(testContext);
 
         encryptedTestUtil.createEnvironment(testContext);
         encryptedTestUtil.createFreeipa(testContext, commonCloudProperties());
@@ -77,53 +79,65 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, null);
         createDatalake(testContext, currentUpgradeRuntimeVersion);
         encryptedTestUtil.assertDatalake(testContext, null);
-        createDataHubs(testContext, currentUpgradeRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
+        createDataHubs(testContext, currentUpgradeRuntimeVersion, firstDhName, secondDhName, thirdDhName, patchUpgradePair.getLeft());
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
-        upgradeAndAssertUpgrade(testContext, targetRuntimeVersion, targetRuntimeVersion3rdParty, firstDhName, secondDhName);
+        upgradeAndAssertUpgrade(testContext, firstDhName, secondDhName, thirdDhName, patchUpgradePair.getRight());
     }
 
-    private void upgradeAndAssertUpgrade(TestContext testContext, String targetRuntimeVersion, String targetRuntimeVersion3rdParty,
-            String firstDhName, String secondDhName) {
+    private void upgradeAndAssertUpgrade(TestContext testContext, String firstDhName, String secondDhName, String thirdDhName, String targetImage) {
+        String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
+        String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
         testContext
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
                 .given(firstDhName, DistroXTestDto.class)
                 .when(distroXTestClient.upgrade(), key(firstDhName))
+
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion3rdParty)
                 .given(secondDhName, DistroXTestDto.class)
                 .when(distroXTestClient.upgrade(), key(secondDhName))
-                .await(STACK_AVAILABLE, key(secondDhName))
-                .awaitForHealthyInstances()
+
+                .given(DistroXUpgradeTestDto.class)
+                .withImageId(targetImage)
+                .given(thirdDhName, DistroXTestDto.class)
+                .when(distroXTestClient.upgrade(), key(thirdDhName))
+
                 .given(firstDhName, DistroXTestDto.class)
                 .await(STACK_AVAILABLE, key(firstDhName))
                 .awaitForHealthyInstances()
                 .then(new AwsAvailabilityZoneAssertion(), key(firstDhName))
+
+                .given(secondDhName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(secondDhName))
+                .awaitForHealthyInstances()
+
+                .given(thirdDhName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(thirdDhName))
+                .awaitForHealthyInstances()
                 .validate();
     }
 
-    private void createDataHubs(TestContext testContext, String currentUpgradeRuntimeVersion, String currentRuntimeVersion3rdParty,
-            String firstDhName, String secondDhName) {
+    private void createDataHubs(TestContext testContext, String currentUpgradeRuntimeVersion, String firstDhName, String secondDhName, String thirdDhName,
+            String patchUpgradeSourceImage) {
         String thirdPartyCatalogName = resourcePropertyProvider().getName();
         String imageName = resourcePropertyProvider().getName();
+        String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().
+                getDistroXUpgrade3rdPartyCurrentVersion(testContext.getCloudProvider().getGovCloud());
+
+        testContext.given(ImageCatalogTestDto.class)
+                .withUrl(commonClusterManagerProperties.getUpgrade().getImageCatalogUrl3rdParty())
+                .withoutCleanup()
+                .withName(thirdPartyCatalogName)
+                .when(imageCatalogTestClient.createIfNotExistV4());
 
         testContext
                 .given(firstDhName, DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentUpgradeRuntimeVersion))
                 .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
                 .when(distroXTestClient.create(), key(firstDhName))
-                .await(STACK_AVAILABLE, key(firstDhName))
-                .awaitForHealthyInstances()
-                .validate();
 
-        testContext.given(ImageCatalogTestDto.class)
-                .withUrl(commonClusterManagerProperties.getUpgrade().getImageCatalogUrl3rdParty())
-                .withoutCleanup()
-                .withName(thirdPartyCatalogName)
-            .when(imageCatalogTestClient.createIfNotExistV4());
-
-        testContext
                 .given(imageName, DistroXImageTestDto.class)
                 .withImageCatalog(thirdPartyCatalogName)
                 .given(secondDhName, DistroXTestDto.class)
@@ -131,13 +145,27 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
                 .withImageSettings(imageName)
                 .when(distroXTestClient.create(), key(secondDhName))
-                .await(STACK_AVAILABLE, key(secondDhName))
+
+                .given(DistroXImageTestDto.class)
+                .withImageId(patchUpgradeSourceImage)
+                .given(thirdDhName, DistroXTestDto.class)
+                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentUpgradeRuntimeVersion))
+                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
+                .when(distroXTestClient.create(), key(thirdDhName))
+
+                .given(firstDhName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(firstDhName))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> checkImageCatalog(testDto, thirdPartyCatalogName), key(secondDhName))
+
                 .given(secondDhName, DistroXTestDto.class)
                 .await(STACK_AVAILABLE, key(secondDhName))
                 .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> checkImageCatalog(testDto, thirdPartyCatalogName), key(secondDhName))
                 .then(new AwsAvailabilityZoneAssertion(), key(secondDhName))
+
+                .given(thirdDhName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(thirdDhName))
+                .awaitForHealthyInstances()
                 .validate();
     }
 

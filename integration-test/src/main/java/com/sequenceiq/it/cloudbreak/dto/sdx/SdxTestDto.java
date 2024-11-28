@@ -100,7 +100,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getResponse().getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags())
-                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion())
+                .withRuntimeVersion(getRequest().getImage() == null ? commonClusterManagerProperties.getRuntimeVersion() : null)
                 .withEnableMultiAz(getCloudProvider().isMultiAZ())
                 .withImageValidationCatalogAndImageIfPresent();
         return getCloudProvider().sdx(this);
