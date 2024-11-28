@@ -2,6 +2,6 @@ name: "aws-arm-tests"
 tests:
   - name: "aws_arm_tests"
     classes:
-     - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXImagesTests
+     - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXArmImageTest
        includedMethods:
          - testDistroXWithArm64ImageCanBeCreatedSuccessfully
