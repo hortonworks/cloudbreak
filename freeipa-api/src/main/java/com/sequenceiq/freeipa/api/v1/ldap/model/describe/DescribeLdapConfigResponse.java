@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class DescribeLdapConfigResponse extends LdapConfigBase {
 
-    @Schema(description = ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     @Schema(description = LdapConfigModelDescription.BIND_DN)

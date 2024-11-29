@@ -18,18 +18,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HealthDetailsFreeIpaResponse {
     @NotNull
-    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     @NotNull
-    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     @NotNull
-    private List<NodeHealthDetails> nodeHealthDetails;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<NodeHealthDetails> nodeHealthDetails = new ArrayList<>();
 
     private Status status;
 

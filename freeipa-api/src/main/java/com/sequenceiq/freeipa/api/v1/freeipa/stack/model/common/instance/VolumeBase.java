@@ -13,7 +13,7 @@ public abstract class VolumeBase implements Serializable {
     @Schema(description = TemplateModelDescription.VOLUME_TYPE)
     private String type;
 
-    @Schema(description = TemplateModelDescription.VOLUME_SIZE, required = true)
+    @Schema(description = TemplateModelDescription.VOLUME_SIZE, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer size;
 
     public Integer getSize() {

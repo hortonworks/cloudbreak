@@ -13,25 +13,25 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SyncOperationStatus {
 
-    @Schema(description = UserModelDescriptions.USERSYNC_ID, required = true)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private final String operationId;
 
-    @Schema(description = UserModelDescriptions.SYNC_OPERATION, required = true)
+    @Schema(description = UserModelDescriptions.SYNC_OPERATION, requiredMode = Schema.RequiredMode.REQUIRED)
     private final SyncOperationType syncOperationType;
 
-    @Schema(description = UserModelDescriptions.USERSYNC_STATUS)
+    @Schema(description = UserModelDescriptions.USERSYNC_STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private SynchronizationStatus status;
 
-    @Schema(description = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
+    @Schema(description = UserModelDescriptions.SUCCESS_ENVIRONMENTS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<SuccessDetails> success;
 
-    @Schema(description = UserModelDescriptions.FAILURE_ENVIRONMENTS)
+    @Schema(description = UserModelDescriptions.FAILURE_ENVIRONMENTS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<FailureDetails> failure;
 
     @Schema(description = UserModelDescriptions.USERSYNC_ERROR)
     private String error;
 
-    @Schema(description = UserModelDescriptions.USERSYNC_STARTTIME)
+    @Schema(description = UserModelDescriptions.USERSYNC_STARTTIME, requiredMode = Schema.RequiredMode.REQUIRED)
     private final long startTime;
 
     @Schema(description = UserModelDescriptions.USERSYNC_ENDTIME)

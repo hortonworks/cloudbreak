@@ -1,9 +1,12 @@
 package com.sequenceiq.freeipa.api.v1.util.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class UsedImageStacksV1Response {
 
     private UsedImageV1Response image;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private int numberOfStacks;
 
     public UsedImageStacksV1Response(UsedImageV1Response image) {

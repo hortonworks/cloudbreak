@@ -22,7 +22,7 @@ public abstract class LdapConfigBase {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @Size(max = 100, min = 1, message = "The length of the ldap config's name has to be in range of 1 to 100")
-    @Schema(description = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Size(max = 1000, message = "The length of the ldap config's description has to be in range of 0 to 1000")
@@ -30,24 +30,24 @@ public abstract class LdapConfigBase {
     private String description;
 
     @NotNull
-    @Schema(description = LdapConfigModelDescription.SERVER_HOST, required = true)
+    @Schema(description = LdapConfigModelDescription.SERVER_HOST, requiredMode = Schema.RequiredMode.REQUIRED)
     private String host;
 
     @NotNull
     @Max(65535)
     @Min(1)
-    @Schema(description = LdapConfigModelDescription.SERVER_PORT, required = true)
+    @Schema(description = LdapConfigModelDescription.SERVER_PORT, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer port;
 
     @Schema(description = LdapConfigModelDescription.PROTOCOL)
     private String protocol = "ldap";
 
     @NotNull
-    @Schema(description = LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
+    @Schema(description = LdapConfigModelDescription.USER_SEARCH_BASE, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userSearchBase;
 
     @NotNull
-    @Schema(description = LdapConfigModelDescription.USER_DN_PATTERN, required = true)
+    @Schema(description = LdapConfigModelDescription.USER_DN_PATTERN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String userDnPattern;
 
     @Schema(description = LdapConfigModelDescription.GROUP_SEARCH_BASE)
@@ -84,7 +84,7 @@ public abstract class LdapConfigBase {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
-    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     public String getName() {

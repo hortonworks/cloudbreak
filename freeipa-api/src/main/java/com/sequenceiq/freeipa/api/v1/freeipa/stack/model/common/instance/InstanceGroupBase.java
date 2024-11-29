@@ -13,11 +13,11 @@ public abstract class InstanceGroupBase {
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 100000, message = "The node count has to be less than 100000")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    @Schema(description = InstanceGroupModelDescription.NODE_COUNT, required = true)
+    @Schema(description = InstanceGroupModelDescription.NODE_COUNT, requiredMode = Schema.RequiredMode.REQUIRED)
     private int nodeCount;
 
     @NotNull
-    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
+    @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Schema(description = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "MASTER,SLAVE")

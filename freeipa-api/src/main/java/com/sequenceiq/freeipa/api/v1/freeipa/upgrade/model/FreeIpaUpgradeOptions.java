@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,7 +13,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FreeIpaUpgradeOptions {
 
-    private List<ImageInfoResponse> images;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<ImageInfoResponse> images = new ArrayList<>();
 
     private ImageInfoResponse currentImage;
 

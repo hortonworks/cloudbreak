@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -30,18 +32,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DescribeFreeIpaResponse {
     @NotNull
-    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     @NotNull
-    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     @NotNull
-    @Schema(description = FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
+    @Schema(description = FreeIpaModelDescriptions.PLACEMENT_SETTINGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private PlacementResponse placement;
 
     @Schema(description = FreeIpaModelDescriptions.TUNNEL)
@@ -49,11 +52,11 @@ public class DescribeFreeIpaResponse {
 
     @NotNull
     @Valid
-    @Schema(description = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
-    private List<InstanceGroupResponse> instanceGroups;
+    @Schema(description = FreeIpaModelDescriptions.INSTANCE_GROUPS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<InstanceGroupResponse> instanceGroups = new ArrayList<>();
 
     @NotNull
-    @Schema(description = FreeIpaModelDescriptions.AUTHENTICATION, required = true)
+    @Schema(description = FreeIpaModelDescriptions.AUTHENTICATION, requiredMode = Schema.RequiredMode.REQUIRED)
     private StackAuthenticationResponse authentication;
 
     @Valid
@@ -64,10 +67,11 @@ public class DescribeFreeIpaResponse {
     private ImageSettingsResponse image;
 
     @NotNull
-    @Schema(description = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
+    @Schema(description = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private FreeIpaServerResponse freeIpa;
 
-    private Set<String> recipes;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> recipes = new HashSet<>();
 
     private AvailabilityStatus availabilityStatus;
 
@@ -95,7 +99,7 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.USERSYNC_STATUS_DETAILS)
     private UserSyncStatusResponse userSyncStatus;
 
-    @Schema(description = FreeIpaModelDescriptions.MULTIAZ)
+    @Schema(description = FreeIpaModelDescriptions.MULTIAZ, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableMultiAz;
 
     @Schema(description = FreeIpaModelDescriptions.SUPPORTED_IMDS_VERSION)

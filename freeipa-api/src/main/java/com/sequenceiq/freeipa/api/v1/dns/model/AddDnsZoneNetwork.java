@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.dns.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -15,10 +16,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class AddDnsZoneNetwork {
 
     @NotEmpty
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String networkId;
 
     @NotEmpty(message = "subnet must be present and have at least one member")
-    private Set<String> subnetIds;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> subnetIds = new HashSet<>();
 
     public String getNetworkId() {
         return networkId;

@@ -7,15 +7,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FreeIpaVersions {
 
     private static final String IMAGES_PROPERTY = "images";
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final List<String> versions;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final List<String> defaults;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final List<String> imageIds;
 
     @JsonCreator

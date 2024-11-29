@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SuccessDetails {
     private String environment;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, List<String>> additionalDetails = new HashMap<>();
 
     public SuccessDetails() {

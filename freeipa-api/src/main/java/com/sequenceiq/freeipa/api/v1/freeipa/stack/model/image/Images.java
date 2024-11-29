@@ -8,11 +8,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Images {
 
     private static final String FREEIPA_IMAGES_PROPERTY = "freeipa-images";
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final List<Image> images;
 
     @JsonCreator

@@ -14,13 +14,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true, value = "type")
 public abstract class KerberosDescriptorBase {
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_PASSWORD, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_PASSWORD, requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
     @NotNull
     @NotEmpty
     private String password;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_TCP_ALLOW, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_TCP_ALLOW, requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean tcpAllowed = false;
 
     @Schema(description = KerberosConfigModelDescription.KERBEROS_KDC_VERIFY_KDC_TRUST)
@@ -34,7 +34,7 @@ public abstract class KerberosDescriptorBase {
     @Schema(description = KerberosConfigModelDescription.KERBEROS_NAMESERVERS)
     private String nameServers;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_PRINCIPAL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_PRINCIPAL, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String principal;

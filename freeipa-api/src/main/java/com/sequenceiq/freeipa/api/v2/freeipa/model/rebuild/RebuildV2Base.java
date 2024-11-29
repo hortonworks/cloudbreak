@@ -20,24 +20,24 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class RebuildV2Base {
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
-    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     @ValidCrn(resource = CrnResourceDescriptor.FREEIPA)
     @NotEmpty
-    @Schema(description = ModelDescriptions.CRN, required = true)
+    @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resourceCrn;
 
     @NotEmpty
-    @Schema(description = INSTANCE_TO_REPAIR_FQDN, required = true)
+    @Schema(description = INSTANCE_TO_REPAIR_FQDN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String instanceToRestoreFqdn;
 
     @NotEmpty
-    @Schema(description = FULL_BACKUP_STORAGE_PATH, required = true)
+    @Schema(description = FULL_BACKUP_STORAGE_PATH, requiredMode = Schema.RequiredMode.REQUIRED)
     private String fullBackupStorageLocation;
 
     @NotEmpty
-    @Schema(description = DATA_BACKUP_STORAGE_PATH, required = true)
+    @Schema(description = DATA_BACKUP_STORAGE_PATH, requiredMode = Schema.RequiredMode.REQUIRED)
     private String dataBackupStorageLocation;
 
     public String getEnvironmentCrn() {

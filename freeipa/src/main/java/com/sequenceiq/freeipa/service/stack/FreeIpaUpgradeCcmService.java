@@ -69,7 +69,7 @@ public class FreeIpaUpgradeCcmService {
         SuccessDetails successDetails = new SuccessDetails(environmentCrn);
         long timestamp = System.currentTimeMillis();
         return new OperationStatus(UUID.randomUUID().toString(), OperationType.UPGRADE_CCM, OperationState.COMPLETED, List.of(successDetails),
-                null, null, timestamp, timestamp);
+                List.of(), null, timestamp, timestamp);
     }
 
     private void validateCcmUpgrade(Stack stack) {

@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentUserSyncState {
     @NotNull
-    @Schema(description = UserModelDescriptions.USERSYNC_STATE, required = true)
+    @Schema(description = UserModelDescriptions.USERSYNC_STATE, requiredMode = Schema.RequiredMode.REQUIRED)
     private UserSyncState state;
 
     @Schema(description = UserModelDescriptions.USERSYNC_ID)

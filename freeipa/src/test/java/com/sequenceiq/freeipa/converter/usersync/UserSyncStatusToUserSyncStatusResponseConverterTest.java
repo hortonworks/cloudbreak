@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ class UserSyncStatusToUserSyncStatusResponseConverterTest {
         assertThat(response)
                 .returns(null, UserSyncStatusResponse::getLastStartedUserSyncId)
                 .returns(null, UserSyncStatusResponse::getLastSuccessfulUserSyncId)
-                .returns(null, UserSyncStatusResponse::getEventGenerationIds);
+                .returns(Collections.emptyMap(), UserSyncStatusResponse::getEventGenerationIds);
     }
 
     @Test

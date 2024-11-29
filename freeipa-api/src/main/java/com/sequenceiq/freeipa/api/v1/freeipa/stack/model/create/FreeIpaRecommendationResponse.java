@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FreeIpaRecommendationResponse {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<VmTypeResponse> vmTypes = new HashSet<>();
 
     private String defaultInstanceType;

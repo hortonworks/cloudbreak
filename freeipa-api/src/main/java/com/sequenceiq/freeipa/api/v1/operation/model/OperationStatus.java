@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.operation.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,20 +14,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationStatus {
 
-    @Schema(description = UserModelDescriptions.USERSYNC_ID, required = true)
+    @Schema(description = UserModelDescriptions.USERSYNC_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String operationId;
 
-    @Schema(description = UserModelDescriptions.SYNC_OPERATION, required = true)
+    @Schema(description = UserModelDescriptions.SYNC_OPERATION, requiredMode = Schema.RequiredMode.REQUIRED)
     private OperationType operationType;
 
-    @Schema(description = UserModelDescriptions.USERSYNC_STATUS)
+    @Schema(description = UserModelDescriptions.USERSYNC_STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private OperationState status;
 
-    @Schema(description = UserModelDescriptions.SUCCESS_ENVIRONMENTS)
-    private List<SuccessDetails> success;
+    @Schema(description = UserModelDescriptions.SUCCESS_ENVIRONMENTS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<SuccessDetails> success = new ArrayList<>();
 
-    @Schema(description = UserModelDescriptions.FAILURE_ENVIRONMENTS)
-    private List<FailureDetails> failure;
+    @Schema(description = UserModelDescriptions.FAILURE_ENVIRONMENTS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<FailureDetails> failure = new ArrayList<>();
 
     @Schema(description = UserModelDescriptions.USERSYNC_ERROR)
     private String error;

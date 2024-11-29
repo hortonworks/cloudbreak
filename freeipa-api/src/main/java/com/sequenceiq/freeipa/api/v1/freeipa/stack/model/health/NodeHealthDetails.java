@@ -17,15 +17,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class NodeHealthDetails {
 
     @NotNull
-    private List<String> issues;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> issues = new ArrayList<>();
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private InstanceStatus status;
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String instanceId;
 
     public InstanceStatus getStatus() {

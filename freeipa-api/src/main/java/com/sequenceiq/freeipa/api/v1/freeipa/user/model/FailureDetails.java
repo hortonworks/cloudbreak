@@ -15,6 +15,7 @@ public class FailureDetails {
 
     private String message;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> additionalDetails = new HashMap<>();
 
     public FailureDetails() {

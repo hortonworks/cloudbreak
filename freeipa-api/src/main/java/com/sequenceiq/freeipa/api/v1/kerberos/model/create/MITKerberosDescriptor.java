@@ -11,17 +11,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "MITKerberosV1Descriptor")
 public class MITKerberosDescriptor extends KerberosDescriptorBase {
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_URL, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String url;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_ADMIN_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_ADMIN_URL, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String adminUrl;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_REALM, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_REALM, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String realm;

@@ -15,8 +15,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AddDnsZoneForSubnetsResponse {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> success = new HashSet<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> failed = new HashMap<>();
 
     public Set<String> getSuccess() {

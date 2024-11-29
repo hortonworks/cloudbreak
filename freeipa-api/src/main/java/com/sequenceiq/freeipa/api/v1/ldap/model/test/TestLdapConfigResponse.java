@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "TestLdapConfigV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestLdapConfigResponse {
-    @Schema(description = LDAP_CONNECTION_RESULT, required = true)
+    @Schema(description = LDAP_CONNECTION_RESULT, requiredMode = Schema.RequiredMode.REQUIRED)
     private String result;
 
     public TestLdapConfigResponse() {

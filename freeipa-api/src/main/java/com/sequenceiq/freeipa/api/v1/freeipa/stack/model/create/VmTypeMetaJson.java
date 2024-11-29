@@ -9,12 +9,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.model.JsonEntity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VmTypeMetaJson implements JsonEntity {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<VolumeParameterConfigResponse> configs = new ArrayList<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> properties = new HashMap<>();
 
     public List<VolumeParameterConfigResponse> getConfigs() {

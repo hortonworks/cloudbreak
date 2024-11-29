@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class GenerateImageCatalogResponse {
 
     @NotNull
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private ImageCatalog imageCatalog;
 
     public ImageCatalog getImageCatalog() {

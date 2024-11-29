@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FreeIpaServerResponse extends FreeIpaServerBase {
 
-    @Schema(description = FreeIpaServerSettingsModelDescriptions.SERVER_IP)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.SERVER_IP, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> serverIp = new HashSet<>();
 
     @Schema(description = FreeIpaServerSettingsModelDescriptions.FREEIPA_HOST)

@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientTestBaseV1Response {
 
-    @Schema(description = ModelDescriptions.RESULT)
-    private Boolean result;
+    @Schema(description = ModelDescriptions.RESULT, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean result = Boolean.FALSE;
 
     public ClientTestBaseV1Response() {
     }

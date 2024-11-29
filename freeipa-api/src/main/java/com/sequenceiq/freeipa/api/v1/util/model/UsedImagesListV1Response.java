@@ -3,8 +3,11 @@ package com.sequenceiq.freeipa.api.v1.util.model;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class UsedImagesListV1Response {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<UsedImageStacksV1Response> usedImages;
 
     public UsedImagesListV1Response() {

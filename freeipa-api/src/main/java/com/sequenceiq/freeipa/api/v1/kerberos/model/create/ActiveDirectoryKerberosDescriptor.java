@@ -10,27 +10,27 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "ActiveDirectoryKerberosV1Descriptor")
 public class ActiveDirectoryKerberosDescriptor extends KerberosDescriptorBase {
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_URL, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String url;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_ADMIN_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_ADMIN_URL, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String adminUrl;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_REALM, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_REALM, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String realm;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_LDAP_URL, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_LDAP_URL, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String ldapUrl;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_CONTAINER_DN, required = true)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_CONTAINER_DN, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     @NotEmpty
     private String containerDn;

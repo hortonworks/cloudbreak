@@ -18,21 +18,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceGroupResponse extends InstanceGroupBase {
     @NotNull
-    @Schema(description = InstanceGroupModelDescription.TEMPLATE)
+    @Schema(description = InstanceGroupModelDescription.TEMPLATE, requiredMode = Schema.RequiredMode.REQUIRED)
     private InstanceTemplateResponse instanceTemplate;
 
     @Valid
-    @Schema(description = InstanceGroupModelDescription.SECURITYGROUP)
+    @Schema(description = InstanceGroupModelDescription.SECURITYGROUP, requiredMode = Schema.RequiredMode.REQUIRED)
     private SecurityGroupResponse securityGroup;
 
     @NotNull
-    @Schema(description = InstanceGroupModelDescription.NETWORK)
+    @Schema(description = InstanceGroupModelDescription.NETWORK, requiredMode = Schema.RequiredMode.REQUIRED)
     private InstanceGroupNetworkResponse network;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<InstanceMetaDataResponse> metaData = new HashSet<>();
 
-    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONES)
-    private Set<String> availabilityZones;
+    @Schema(description = InstanceGroupModelDescription.AVAILABILITY_ZONES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> availabilityZones = new HashSet<>();
 
     public InstanceTemplateResponse getInstanceTemplate() {
         return instanceTemplate;

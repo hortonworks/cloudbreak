@@ -15,12 +15,12 @@ public abstract class FreeIpaServerBase {
 
     @NotNull
     @Pattern(regexp = DOMAIN_MATCHER, message = "Invalid FreeIpa domain format")
-    @Schema(description = FreeIpaServerSettingsModelDescriptions.DOMAIN)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.DOMAIN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String domain;
 
     @NotNull
     @Pattern(regexp = HOSTNAME_MATCHER, message = "Invalid FreeIpa hostname format")
-    @Schema(description = FreeIpaServerSettingsModelDescriptions.HOSTNAME)
+    @Schema(description = FreeIpaServerSettingsModelDescriptions.HOSTNAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String hostname;
 
     @Schema(description = FreeIpaServerSettingsModelDescriptions.ADMIN_GROUP_NAME)

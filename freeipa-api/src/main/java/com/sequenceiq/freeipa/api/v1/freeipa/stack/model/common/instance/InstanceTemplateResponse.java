@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,8 +15,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstanceTemplateResponse extends InstanceTemplateBase {
 
-    private Set<VolumeResponse> attachedVolumes;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<VolumeResponse> attachedVolumes = new HashSet<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> attributes = new HashMap<>();
 
     public Set<VolumeResponse> getAttachedVolumes() {

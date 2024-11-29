@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.usersync;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.validation.constraints.NotNull;
@@ -22,8 +23,8 @@ public class UserSyncStatusResponse {
     private String lastSuccessfulUserSyncId;
 
     @NotNull
-    @Schema(description = UserModelDescriptions.USERSYNC_ID)
-    private Map<String, String> eventGenerationIds;
+    @Schema(description = UserModelDescriptions.USERSYNC_ID, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> eventGenerationIds = new HashMap<>();
 
     public String getLastStartedUserSyncId() {
         return lastStartedUserSyncId;

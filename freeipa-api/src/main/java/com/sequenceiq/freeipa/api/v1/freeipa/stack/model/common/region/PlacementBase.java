@@ -11,7 +11,7 @@ public abstract class PlacementBase {
     private String availabilityZone;
 
     @NotNull
-    @Schema(description = FreeIpaModelDescriptions.REGION)
+    @Schema(description = FreeIpaModelDescriptions.REGION, requiredMode = Schema.RequiredMode.REQUIRED)
     private String region;
 
     public String getAvailabilityZone() {

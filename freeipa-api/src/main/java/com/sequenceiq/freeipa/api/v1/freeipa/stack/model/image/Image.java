@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
@@ -28,6 +30,7 @@ public class Image {
 
     private static final String UUID_PROPERTY = "uuid";
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final long created;
 
     private final String date;
@@ -40,10 +43,13 @@ public class Image {
 
     private final String uuid;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final Map<String, Map<String, String>> imageSetsByProvider;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final Map<String, String> packageVersions;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final boolean advertised;
 
     @JsonCreator

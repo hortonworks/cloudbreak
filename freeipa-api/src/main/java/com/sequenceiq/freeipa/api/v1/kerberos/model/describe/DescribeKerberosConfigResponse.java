@@ -18,12 +18,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DescribeKerberosConfigResponse {
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotNull
-    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String environmentCrn;
 
     @Schema(description = KerberosConfigModelDescription.KERBEROS_URL)
@@ -43,7 +45,7 @@ public class DescribeKerberosConfigResponse {
     @NotNull(message = "Kerberos type can not be null")
     private KerberosType type;
 
-    @Schema(description = KerberosConfigModelDescription.KERBEROS_KDC_VERIFY_KDC_TRUST)
+    @Schema(description = KerberosConfigModelDescription.KERBEROS_KDC_VERIFY_KDC_TRUST, requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean verifyKdcTrust = true;
 
     @Schema(description = KerberosConfigModelDescription.KERBEROS_DOMAIN)
