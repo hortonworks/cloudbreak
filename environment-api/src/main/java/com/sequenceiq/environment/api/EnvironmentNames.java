@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentNames {
 
     @NotEmpty
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> environmentNames;
 
     public Set<String> getEnvironmentNames() {

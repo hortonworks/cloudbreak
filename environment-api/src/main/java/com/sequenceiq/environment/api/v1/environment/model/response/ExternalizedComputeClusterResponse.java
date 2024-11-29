@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalizedComputeClusterResponse {
 
-    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER)
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean privateCluster;
 
-    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES)
-    private Set<String> kubeApiAuthorizedIpRanges;
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> kubeApiAuthorizedIpRanges = new HashSet<>();
 
     /**
      * @deprecated Use provider-specific azure.outboundType field instead
@@ -28,8 +28,8 @@ public class ExternalizedComputeClusterResponse {
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_OUTBOUND_TYPE)
     private String outboundType;
 
-    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_WORKER_NODE_SUBNET_IDS)
-    private Set<String> workerNodeSubnetIds;
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_WORKER_NODE_SUBNET_IDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> workerNodeSubnetIds = new HashSet<>();
 
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_AZURE_PARAMS)
     private AzureExternalizedComputeParams azure;
@@ -105,7 +105,7 @@ public class ExternalizedComputeClusterResponse {
 
         private String outboundType;
 
-        private Set<String> workerNodeSubnetIds;
+        private Set<String> workerNodeSubnetIds = new HashSet<>();
 
         private AzureExternalizedComputeParams azure;
 

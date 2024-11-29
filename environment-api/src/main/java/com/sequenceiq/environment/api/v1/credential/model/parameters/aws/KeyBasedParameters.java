@@ -16,11 +16,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class KeyBasedParameters implements Serializable {
 
     @NotNull
-    @Schema(required = true, example = "ASIBJ34QYCJ1IBLK24KA")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "ASIBJ34QYCJ1IBLK24KA")
     private String accessKey;
 
     @NotNull
-    @Schema(required = true, example = "Ratk5cM9edxGuN6jdGb/8Jf621ZuTVGkoO14GPwN")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "Ratk5cM9edxGuN6jdGb/8Jf621ZuTVGkoO14GPwN")
     private String secretKey;
 
     public String getAccessKey() {

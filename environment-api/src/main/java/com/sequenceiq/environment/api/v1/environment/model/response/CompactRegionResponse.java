@@ -16,10 +16,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "CompactRegionV1Response", subTypes = RegionResponse.class)
 public class CompactRegionResponse implements Serializable {
 
-    @Schema(description = EnvironmentModelDescription.REGIONS)
+    @Schema(description = EnvironmentModelDescription.REGIONS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> names;
 
-    @Schema(description = EnvironmentModelDescription.REGION_DISPLAYNAMES)
+    @Schema(description = EnvironmentModelDescription.REGION_DISPLAYNAMES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> displayNames;
 
     public CompactRegionResponse() {

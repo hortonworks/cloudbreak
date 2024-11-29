@@ -17,12 +17,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public abstract class AccountTagBase implements Serializable {
 
     @NotNull
-    @Schema(description = TagDescription.KEY, required = true)
+    @Schema(description = TagDescription.KEY, requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 127, min = 3, message = "The length of the key has to be in range of 3 to 127")
     private String key;
 
     @NotNull
-    @Schema(description = TagDescription.VALUE, required = true)
+    @Schema(description = TagDescription.VALUE, requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 255, min = 3, message = "The length of the value has to be in range of 3 to 255")
     private String value;
 

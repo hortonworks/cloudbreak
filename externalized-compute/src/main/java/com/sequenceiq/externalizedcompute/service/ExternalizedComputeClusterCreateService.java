@@ -4,6 +4,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,8 @@ public class ExternalizedComputeClusterCreateService {
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
         CreateClusterRequest.Builder createClusterBuilder = CreateClusterRequest.newBuilder();
         Set<String> subnets;
-        if (environment.getExternalizedComputeCluster() != null && environment.getExternalizedComputeCluster().getWorkerNodeSubnetIds() != null) {
+        if (environment.getExternalizedComputeCluster() != null &&
+                CollectionUtils.isNotEmpty(environment.getExternalizedComputeCluster().getWorkerNodeSubnetIds())) {
             subnets = environment.getExternalizedComputeCluster().getWorkerNodeSubnetIds();
         } else {
             subnets = environment.getNetwork().getLiftieSubnets().keySet();

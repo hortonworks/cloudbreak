@@ -19,8 +19,8 @@ public class RoleBasedResponse implements Serializable {
     @Schema
     private String spDisplayName;
 
-    @Schema
-    private Boolean codeGrantFlow;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean codeGrantFlow = Boolean.FALSE;
 
     @Schema
     private String appObjectId;

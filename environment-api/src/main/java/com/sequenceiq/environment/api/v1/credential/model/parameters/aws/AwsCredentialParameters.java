@@ -25,7 +25,7 @@ public class AwsCredentialParameters implements Serializable {
     private RoleBasedParameters roleBased;
 
     @NotNull
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean govCloud = false;
 
     public KeyBasedParameters getKeyBased() {

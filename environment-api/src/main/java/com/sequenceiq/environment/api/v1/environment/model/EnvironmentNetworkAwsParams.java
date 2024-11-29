@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentNetworkAwsParams {
 
     @Size(max = 255)
-    @Schema(description = EnvironmentModelDescription.AWS_VPC_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.AWS_VPC_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String vpcId;
 
     public String getVpcId() {

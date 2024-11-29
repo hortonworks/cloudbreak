@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class IpPoolResponse implements Serializable {
@@ -15,6 +17,7 @@ public class IpPoolResponse implements Serializable {
 
     private String id;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> properties = new HashMap<>();
 
     public IpPoolResponse() {

@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public abstract class ProxyBase implements Serializable {
 
     @NotNull
-    @Schema(description = ProxyConfigDescription.NAME, required = true)
+    @Schema(description = ProxyConfigDescription.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 100, min = 4, message = "The length of the name has to be in range of 4 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -32,21 +32,21 @@ public abstract class ProxyBase implements Serializable {
     private String description;
 
     @NotNull
-    @Schema(description = ProxyConfigDescription.SERVER_HOST, required = true)
+    @Schema(description = ProxyConfigDescription.SERVER_HOST, requiredMode = Schema.RequiredMode.REQUIRED)
     @Size(max = 255, min = 1, message = "The length of the server host has to be in range of 1 to 255")
     @Pattern(regexp = "(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$)",
             message = "The server host can only contain lowercase alphanumeric characters and hyphens and dots")
     private String host;
 
     @NotNull(message = "Server port is required")
-    @Schema(description = ProxyConfigDescription.SERVER_PORT, required = true)
+    @Schema(description = ProxyConfigDescription.SERVER_PORT, requiredMode = Schema.RequiredMode.REQUIRED)
     @Min(value = 1, message = "Port value must be greater than 0")
     @Max(value = 65535, message = "Port value cannot be greater than 65535")
     private Integer port;
 
     @NotNull
     @Pattern(regexp = "^http(s)?$")
-    @Schema(description = ProxyConfigDescription.PROTOCOL, required = true)
+    @Schema(description = ProxyConfigDescription.PROTOCOL, requiredMode = Schema.RequiredMode.REQUIRED)
     private String protocol;
 
     @ValidNoProxyList

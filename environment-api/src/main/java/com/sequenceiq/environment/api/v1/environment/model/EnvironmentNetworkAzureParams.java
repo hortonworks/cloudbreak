@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.validation.constraints.NotNull;
@@ -18,11 +19,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentNetworkAzureParams {
 
     @Size(max = 255)
-    @Schema(description = EnvironmentModelDescription.AZURE_NETWORK_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.AZURE_NETWORK_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String networkId;
 
     @Size(max = 255)
-    @Schema(description = EnvironmentModelDescription.AZURE_RESOURCE_GROUP_NAME, required = true)
+    @Schema(description = EnvironmentModelDescription.AZURE_RESOURCE_GROUP_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String resourceGroupName;
 
     @Size(max = 255)
@@ -34,11 +35,11 @@ public class EnvironmentNetworkAzureParams {
     private String aksPrivateDnsZoneId;
 
     @NotNull
-    @Schema(description = EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
-    private Boolean noPublicIp;
+    @Schema(description = EnvironmentModelDescription.AZURE_NO_PUBLIC_IP, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean noPublicIp = Boolean.FALSE;
 
     @Schema(description = EnvironmentModelDescription.NO_OUTBOUND_LOAD_BALANCER)
-    private Boolean noOutboundLoadBalancer;
+    private Boolean noOutboundLoadBalancer = Boolean.FALSE;
 
     @Schema(description = EnvironmentModelDescription.AZURE_AVAILABILITY_ZONES)
     private Set<String> availabilityZones;
@@ -47,7 +48,7 @@ public class EnvironmentNetworkAzureParams {
     private Set<String> flexibleServerSubnetIds;
 
     @Schema(description = EnvironmentModelDescription.AZURE_USE_PUBLIC_DNS_FOR_PRIVATE_AKS)
-    private Boolean usePublicDnsForPrivateAks;
+    private Boolean usePublicDnsForPrivateAks = Boolean.FALSE;
 
     public String getNetworkId() {
         return networkId;
@@ -141,19 +142,19 @@ public class EnvironmentNetworkAzureParams {
 
         private String resourceGroupName;
 
-        private Boolean noPublicIp;
+        private Boolean noPublicIp = Boolean.FALSE;
 
         private String databasePrivateDnsZoneId;
 
         private String aksPrivateDnsZoneId;
 
-        private Boolean noOutboundLoadBalancer;
+        private Boolean noOutboundLoadBalancer = Boolean.FALSE;
 
-        private Set<String> availabilityZones;
+        private Set<String> availabilityZones = new HashSet<>();
 
-        private Set<String> flexibleServerSubnetIds;
+        private Set<String> flexibleServerSubnetIds = new HashSet<>();
 
-        private Boolean usePublicDnsForPrivateAks;
+        private Boolean usePublicDnsForPrivateAks = Boolean.FALSE;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }

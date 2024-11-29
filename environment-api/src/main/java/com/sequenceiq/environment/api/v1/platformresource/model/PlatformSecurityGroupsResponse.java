@@ -7,9 +7,12 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformSecurityGroupsResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Set<PlatformSecurityGroupResponse>> securityGroups = new HashMap<>();
 
     public PlatformSecurityGroupsResponse() {

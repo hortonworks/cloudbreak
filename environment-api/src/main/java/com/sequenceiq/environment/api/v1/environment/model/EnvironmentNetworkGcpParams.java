@@ -20,20 +20,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentNetworkGcpParams implements Serializable {
 
     @Size(max = 255)
-    @Schema(description = EnvironmentModelDescription.GCP_NETWORK_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.GCP_NETWORK_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String networkId;
 
-    @Schema(description = EnvironmentModelDescription.GCP_SHARED_PROJECT_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.GCP_SHARED_PROJECT_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String sharedProjectId;
 
-    @Schema(description = EnvironmentModelDescription.GCP_NO_PUBLIC_IP, required = true)
-    private Boolean noPublicIp;
+    @Schema(description = EnvironmentModelDescription.GCP_NO_PUBLIC_IP, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean noPublicIp = Boolean.FALSE;
 
-    @Schema(description = EnvironmentModelDescription.GCP_NO_FIREWALL_RULES, required = true)
-    private Boolean noFirewallRules;
+    @Schema(description = EnvironmentModelDescription.GCP_NO_FIREWALL_RULES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean noFirewallRules = Boolean.FALSE;
 
     @Schema(description = EnvironmentModelDescription.GCP_AVAILABILITY_ZONES)
-    private Set<String> availabilityZones = Set.of();
+    private Set<String> availabilityZones = new HashSet<>();
 
     public String getNetworkId() {
         return networkId;
@@ -91,9 +91,9 @@ public class EnvironmentNetworkGcpParams implements Serializable {
 
         private String sharedProjectId;
 
-        private Boolean noPublicIp;
+        private Boolean noPublicIp = Boolean.FALSE;
 
-        private Boolean noFirewallRules;
+        private Boolean noFirewallRules = Boolean.FALSE;
 
         private final Set<String> availabilityZones = new HashSet<>();
 

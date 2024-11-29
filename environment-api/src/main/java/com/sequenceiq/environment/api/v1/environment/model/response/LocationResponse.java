@@ -11,16 +11,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationResponse implements Serializable {
 
-    @Schema(description = EnvironmentModelDescription.LOCATION)
+    @Schema(description = EnvironmentModelDescription.LOCATION, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = EnvironmentModelDescription.LOCATION_DISPLAY_NAME)
+    @Schema(description = EnvironmentModelDescription.LOCATION_DISPLAY_NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String displayName;
 
-    @Schema(description = EnvironmentModelDescription.LATITUDE)
+    @Schema(description = EnvironmentModelDescription.LATITUDE, requiredMode = Schema.RequiredMode.REQUIRED)
     private Double latitude;
 
-    @Schema(description = EnvironmentModelDescription.LONGITUDE)
+    @Schema(description = EnvironmentModelDescription.LONGITUDE, requiredMode = Schema.RequiredMode.REQUIRED)
     private Double longitude;
 
     public String getName() {

@@ -14,6 +14,7 @@ public class PlatformSshKeyResponse implements Serializable {
 
     private String name;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Object> properties = new HashMap<>();
 
     public PlatformSshKeyResponse() {

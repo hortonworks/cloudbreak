@@ -19,7 +19,7 @@ public class DetailedExpressOnboardingRegionResponse implements Serializable {
     @Schema(description = "")
     private TenantInformationResponse tenantInformation;
 
-    @Schema(description = "")
+    @Schema(description = "", requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, ExpressOnboardingCloudProvidersResponse> cloudProviders = new HashMap<>();
 
     public DeploymentInformationResponse getDeploymentInformation() {

@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FreeIpaResponse implements Serializable {
 
-    @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer instanceCountByGroup = 1;
 
     @Schema(description = EnvironmentModelDescription.FREEIPA_INSTANCE_TYPE)
@@ -25,10 +25,10 @@ public class FreeIpaResponse implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_IMAGE)
     private FreeIpaImageResponse image;
 
-    @Schema(description = EnvironmentModelDescription.MULTIAZ_FREEIPA)
+    @Schema(description = EnvironmentModelDescription.MULTIAZ_FREEIPA, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableMultiAz;
 
-    @Schema(description = EnvironmentModelDescription.FREEIPA_RECIPES)
+    @Schema(description = EnvironmentModelDescription.FREEIPA_RECIPES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> recipes = new HashSet<>();
 
     @Schema(description = EnvironmentModelDescription.FREEIPA_SECURITY)

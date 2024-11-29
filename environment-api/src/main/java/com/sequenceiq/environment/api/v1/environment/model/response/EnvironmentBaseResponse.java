@@ -25,10 +25,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
 public abstract class EnvironmentBaseResponse implements TaggedResponse {
-    @Schema(description = ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
-    @Schema(description = ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Schema(description = ModelDescriptions.ORIGINAL_NAME)
@@ -37,7 +37,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @Schema(description = EnvironmentModelDescription.CLOUD_PLATFORM)
+    @Schema(description = EnvironmentModelDescription.CLOUD_PLATFORM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String cloudPlatform;
 
     /**
@@ -48,16 +48,16 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @Schema(description = EnvironmentModelDescription.CREATE_FREEIPA)
+    @Schema(description = EnvironmentModelDescription.CREATE_FREEIPA, requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean createFreeIpa = Boolean.TRUE;
 
     @Schema(description = EnvironmentModelDescription.FREEIPA)
     private FreeIpaResponse freeIpa;
 
-    @Schema(description = EnvironmentModelDescription.REGIONS)
+    @Schema(description = EnvironmentModelDescription.REGIONS, requiredMode = Schema.RequiredMode.REQUIRED)
     private CompactRegionResponse regions;
 
-    @Schema(description = EnvironmentModelDescription.LOCATION)
+    @Schema(description = EnvironmentModelDescription.LOCATION, requiredMode = Schema.RequiredMode.REQUIRED)
     private LocationResponse location;
 
     @Schema(description = EnvironmentModelDescription.TELEMETRY)
@@ -79,6 +79,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     private Long created;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String accountId;
 
     @Schema(description = EnvironmentModelDescription.TUNNEL)
@@ -134,10 +135,10 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesResponse dataServices;
 
-    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_SECRET_ENCRYPTION)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_SECRET_ENCRYPTION, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableSecretEncryption;
 
-    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_COMPUTE_CLUSTER)
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_COMPUTE_CLUSTER, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean enableComputeCluster;
 
     @JsonIgnore

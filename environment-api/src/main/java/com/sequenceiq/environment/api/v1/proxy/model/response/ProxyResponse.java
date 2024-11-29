@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class ProxyResponse extends ProxyBase {
 
-    @Schema(description = ProxyConfigDescription.PROXY_CONFIG_ID)
+    @Schema(description = ProxyConfigDescription.PROXY_CONFIG_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     @Schema(description = ProxyConfigDescription.USERNAME)

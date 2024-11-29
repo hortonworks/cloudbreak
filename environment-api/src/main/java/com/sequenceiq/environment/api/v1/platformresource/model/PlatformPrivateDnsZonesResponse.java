@@ -8,9 +8,12 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformPrivateDnsZonesResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<PlatformPrivateDnsZoneResponse> privateDnsZoneResponses = new ArrayList<>();
 
     public PlatformPrivateDnsZonesResponse() {

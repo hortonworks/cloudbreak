@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CredentialResponse extends CredentialBase {
 
-    @Schema(description = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @Schema(description = CredentialModelDescription.ATTRIBUTES)
@@ -33,7 +33,7 @@ public class CredentialResponse extends CredentialBase {
     @Schema(description = CredentialModelDescription.AZURE_PARAMETERS)
     private AzureCredentialResponseParameters azure;
 
-    @Schema(description = CRN)
+    @Schema(description = CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     /**
@@ -44,16 +44,17 @@ public class CredentialResponse extends CredentialBase {
     @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @Schema(description = CredentialModelDescription.ACCOUNT_IDENTIFIER)
+    @Schema(description = CredentialModelDescription.ACCOUNT_IDENTIFIER, requiredMode = Schema.RequiredMode.REQUIRED)
     private String accountId;
 
-    @Schema(description = CredentialModelDescription.CREATED)
+    @Schema(description = CredentialModelDescription.CREATED, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long created;
 
-    @Schema(description = CredentialModelDescription.CREDENTIAL_TYPE, required = true)
+    @Schema(description = CredentialModelDescription.CREDENTIAL_TYPE, requiredMode = Schema.RequiredMode.REQUIRED)
     private CredentialType type;
 
-    private Boolean govCloud;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean govCloud = Boolean.FALSE;
 
     public String getName() {
         return name;
@@ -191,7 +192,7 @@ public class CredentialResponse extends CredentialBase {
 
         private CredentialType type;
 
-        private Boolean govCloud;
+        private Boolean govCloud = Boolean.FALSE;
 
         private Builder() {
         }

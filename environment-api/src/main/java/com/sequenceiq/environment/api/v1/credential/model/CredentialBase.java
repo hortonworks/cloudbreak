@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public abstract class CredentialBase implements Serializable {
 
     @NotNull
-    @Schema(description = CredentialModelDescription.CLOUD_PLATFORM, required = true)
+    @Schema(description = CredentialModelDescription.CLOUD_PLATFORM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String cloudPlatform;
 
     @Valid

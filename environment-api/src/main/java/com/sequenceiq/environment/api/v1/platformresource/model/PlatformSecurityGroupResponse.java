@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.platformresource.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,7 +16,8 @@ public class PlatformSecurityGroupResponse implements Serializable {
 
     private String groupId;
 
-    private Map<String, Object> properties;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Object> properties = new HashMap<>();
 
     public PlatformSecurityGroupResponse() {
     }

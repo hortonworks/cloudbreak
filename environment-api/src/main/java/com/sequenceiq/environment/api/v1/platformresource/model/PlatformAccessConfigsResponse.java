@@ -6,9 +6,12 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformAccessConfigsResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<AccessConfigResponse> accessConfigs = new ArrayList<>();
 
     public List<AccessConfigResponse> getAccessConfigs() {

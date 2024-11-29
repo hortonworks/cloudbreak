@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VirtualMachinesResponse implements Serializable {
 
-    @Schema(description = PlatformResourceModelDescription.VIRTUAL_MACHNES)
+    @Schema(description = PlatformResourceModelDescription.VIRTUAL_MACHNES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<VmTypeResponse> virtualMachines = new HashSet<>();
 
     @Schema(description = PlatformResourceModelDescription.DEFAULT_VIRTUAL_MACHINES)

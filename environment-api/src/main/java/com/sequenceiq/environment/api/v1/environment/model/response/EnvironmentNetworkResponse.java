@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,41 +27,41 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
-    @Schema(description = ModelDescriptions.ID)
+    @Schema(description = ModelDescriptions.ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
-    @Schema(description = ModelDescriptions.NAME, required = true)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = EnvironmentModelDescription.SUBNET_METAS)
-    private Map<String, CloudSubnet> subnetMetas;
+    @Schema(description = EnvironmentModelDescription.SUBNET_METAS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> subnetMetas = new HashMap<>();
 
-    @Schema(description = EnvironmentModelDescription.CB_SUBNETS)
-    private Map<String, CloudSubnet> cbSubnets;
+    @Schema(description = EnvironmentModelDescription.CB_SUBNETS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> cbSubnets = new HashMap<>();
 
-    @Schema(description = EnvironmentModelDescription.DWX_SUBNETS)
-    private Map<String, CloudSubnet> dwxSubnets;
+    @Schema(description = EnvironmentModelDescription.DWX_SUBNETS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> dwxSubnets = new HashMap<>();
 
-    @Schema(description = EnvironmentModelDescription.MLX_SUBNETS)
-    private Map<String, CloudSubnet> mlxSubnets;
+    @Schema(description = EnvironmentModelDescription.MLX_SUBNETS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> mlxSubnets = new HashMap<>();
 
-    @Schema(description = EnvironmentModelDescription.CB_SUBNETS)
-    private Map<String, CloudSubnet> liftieSubnets;
+    @Schema(description = EnvironmentModelDescription.CB_SUBNETS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> liftieSubnets = new HashMap<>();
 
-    @Schema(description = EnvironmentModelDescription.EXISTING_NETWORK)
+    @Schema(description = EnvironmentModelDescription.EXISTING_NETWORK, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean existingNetwork;
 
     @Schema(description = EnvironmentModelDescription.PREFERED_SUBNET_ID)
     private String preferedSubnetId;
 
-    @Schema(description = EnvironmentModelDescription.PREFERED_SUBNET_IDS)
-    private Set<String> preferedSubnetIds;
+    @Schema(description = EnvironmentModelDescription.PREFERED_SUBNET_IDS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> preferedSubnetIds = new HashSet<>();
 
-    @Schema(description = EnvironmentModelDescription.NETWORKCIDRS)
+    @Schema(description = EnvironmentModelDescription.NETWORKCIDRS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Set<String> networkCidrs = new HashSet<>();
 
-    @Schema(description = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS)
-    private Map<String, CloudSubnet> gatewayEndpointSubnetMetas = Map.of();
+    @Schema(description = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> gatewayEndpointSubnetMetas = new HashMap<>();
 
     public String getCrn() {
         return crn;
@@ -185,19 +186,19 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private String name;
 
-        private Set<String> subnetIds;
+        private Set<String> subnetIds = new HashSet<>();
 
         private String networkCidr;
 
-        private Map<String, CloudSubnet> subnetMetas;
+        private Map<String, CloudSubnet> subnetMetas = new HashMap<>();
 
-        private Map<String, CloudSubnet> cbSubnets;
+        private Map<String, CloudSubnet> cbSubnets = new HashMap<>();
 
-        private Map<String, CloudSubnet> dwxSubnets;
+        private Map<String, CloudSubnet> dwxSubnets = new HashMap<>();
 
-        private Map<String, CloudSubnet> mlxSubnets;
+        private Map<String, CloudSubnet> mlxSubnets = new HashMap<>();
 
-        private Map<String, CloudSubnet> liftieSubnets;
+        private Map<String, CloudSubnet> liftieSubnets = new HashMap<>();
 
         private boolean existingNetwork;
 
@@ -209,9 +210,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private String preferedSubnetId;
 
-        private Set<String> preferedSubnetIds;
+        private Set<String> preferedSubnetIds = new HashSet<>();
 
-        private Set<String> networkCidrs;
+        private Set<String> networkCidrs = new HashSet<>();
 
         private EnvironmentNetworkAwsParams aws;
 
@@ -225,9 +226,9 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private PublicEndpointAccessGateway publicEndpointAccessGateway;
 
-        private Map<String, CloudSubnet> endpointGatewaySubnetMetas;
+        private Map<String, CloudSubnet> endpointGatewaySubnetMetas = new HashMap<>();
 
-        private Set<String> endpointGatewaySubnetIds;
+        private Set<String> endpointGatewaySubnetIds = new HashSet<>();
 
         private LoadBalancerCreation loadBalancerCreation;
 

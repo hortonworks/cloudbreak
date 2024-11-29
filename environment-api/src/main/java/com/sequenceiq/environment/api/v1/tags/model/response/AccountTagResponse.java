@@ -4,11 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.tags.model.AccountTagBase;
 import com.sequenceiq.environment.api.v1.tags.model.AccountTagStatus;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountTagResponse extends AccountTagBase {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String accountId;
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String resourceCrn;
 
     private AccountTagStatus status = AccountTagStatus.DEFAULT;

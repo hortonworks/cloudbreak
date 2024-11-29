@@ -6,9 +6,12 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformVmtypesResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, VirtualMachinesResponse> vmTypes = new HashMap<>();
 
     public PlatformVmtypesResponse() {

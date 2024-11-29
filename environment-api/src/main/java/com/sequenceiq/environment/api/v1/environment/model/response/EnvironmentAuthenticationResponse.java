@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentAuthenticationResponse implements Serializable {
 
-    @Schema(description = EnvironmentModelDescription.PUBLIC_KEY)
+    @Schema(description = EnvironmentModelDescription.PUBLIC_KEY, requiredMode = Schema.RequiredMode.REQUIRED)
     private String publicKey;
 
     @Schema(description = EnvironmentModelDescription.PUBLIC_KEY_ID)

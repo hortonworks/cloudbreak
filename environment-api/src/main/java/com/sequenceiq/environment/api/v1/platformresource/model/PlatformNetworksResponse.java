@@ -7,9 +7,12 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformNetworksResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Set<PlatformNetworkResponse>> networks = new HashMap<>();
 
     public PlatformNetworksResponse() {

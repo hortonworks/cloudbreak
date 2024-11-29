@@ -9,11 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @SuppressFBWarnings("SE_BAD_FIELD")
 public class PlatformNoSqlTablesResponse implements Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private List<PlatformNoSqlTableResponse> noSqlTables = new ArrayList<>();
 
     public PlatformNoSqlTablesResponse() {

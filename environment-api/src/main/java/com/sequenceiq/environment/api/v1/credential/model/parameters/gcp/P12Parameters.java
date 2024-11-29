@@ -16,15 +16,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class P12Parameters implements Serializable {
 
     @NotNull
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String projectId;
 
     @NotNull
-    @Schema(required = true, example = "serviceaccountemailaddress@example.com")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "serviceaccountemailaddress@example.com")
     private String serviceAccountId;
 
     @NotNull
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String serviceAccountPrivateKey;
 
     public String getProjectId() {

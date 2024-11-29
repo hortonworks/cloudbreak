@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class JsonParameters implements Serializable {
 
     @NotNull
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String credentialJson;
 
     private String projectId;

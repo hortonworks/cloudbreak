@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "EnvironmentNetworkYarnV1Params")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentNetworkYarnParams {
-    @Schema(description = EnvironmentModelDescription.YARN_QUEUE, required = true)
+    @Schema(description = EnvironmentModelDescription.YARN_QUEUE, requiredMode = Schema.RequiredMode.REQUIRED)
     private String queue;
 
     @Schema(description = EnvironmentModelDescription.YARN_LIFETIME)

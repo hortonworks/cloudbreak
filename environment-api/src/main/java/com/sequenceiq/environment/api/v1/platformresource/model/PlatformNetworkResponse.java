@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.platformresource.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,11 +17,14 @@ public class PlatformNetworkResponse implements Serializable {
 
     private String id;
 
-    private Map<String, String> subnets;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, String> subnets = new HashMap<>();
 
-    private Map<String, CloudSubnet> subnetMetadata;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, CloudSubnet> subnetMetadata = new HashMap<>();
 
-    private Map<String, Object> properties;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Object> properties = new HashMap<>();
 
     public PlatformNetworkResponse() {
     }

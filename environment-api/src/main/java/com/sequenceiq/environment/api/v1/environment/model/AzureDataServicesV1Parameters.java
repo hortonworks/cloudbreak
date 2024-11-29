@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class AzureDataServicesV1Parameters extends BaseDataServicesV1Parameters {
 
-    @Schema(description = DataServicesModelDescription.SHARED_MANAGED_IDENTITY)
+    @Schema(description = DataServicesModelDescription.SHARED_MANAGED_IDENTITY, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private String sharedManagedIdentity;
 

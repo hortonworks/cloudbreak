@@ -66,7 +66,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         @Deprecated
         private String creator;
 
-        private boolean createFreeIpa;
+        private boolean createFreeIpa = true;
 
         private FreeIpaResponse freeIpa;
 

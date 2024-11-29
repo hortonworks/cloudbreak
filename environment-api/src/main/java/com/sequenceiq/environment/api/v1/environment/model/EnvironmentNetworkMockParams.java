@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class EnvironmentNetworkMockParams {
 
     @Size(max = 255)
-    @Schema(description = EnvironmentModelDescription.AWS_VPC_ID, required = true)
+    @Schema(description = EnvironmentModelDescription.AWS_VPC_ID, requiredMode = Schema.RequiredMode.REQUIRED)
     private String vpcId;
 
     private String internetGatewayId;

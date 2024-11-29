@@ -7,10 +7,14 @@ import java.util.Optional;
 
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class TagResponse implements TaggedResponse, Serializable {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> userDefined = new HashMap<>();
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> defaults = new HashMap<>();
 
     public Map<String, String> getUserDefined() {

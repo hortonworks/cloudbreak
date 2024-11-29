@@ -21,7 +21,7 @@ public class RoleBasedParameters implements Serializable {
     static final String ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG = "RoleArn length should be between 20 and 2048 characters";
 
     @NotNull
-    @Schema(description = AWS_ROLE_ARN, required = true, example = "arn:aws:iam::981628461338:role/example-role")
+    @Schema(description = AWS_ROLE_ARN, requiredMode = Schema.RequiredMode.REQUIRED, example = "arn:aws:iam::981628461338:role/example-role")
     @Size(max = 2048, min = 20, message = ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG)
     private String roleArn;
 

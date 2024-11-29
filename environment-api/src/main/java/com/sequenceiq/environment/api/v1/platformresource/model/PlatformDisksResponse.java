@@ -13,16 +13,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformDisksResponse implements Serializable {
 
-    @Schema(description = PlatformResourceModelDescription.DISK_TYPES)
+    @Schema(description = PlatformResourceModelDescription.DISK_TYPES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Collection<String>> diskTypes;
 
-    @Schema(description = PlatformResourceModelDescription.DEFAULT_DISKS)
+    @Schema(description = PlatformResourceModelDescription.DEFAULT_DISKS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, String> defaultDisks;
 
-    @Schema(description = PlatformResourceModelDescription.DISK_MAPPINGS)
+    @Schema(description = PlatformResourceModelDescription.DISK_MAPPINGS, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Map<String, String>> diskMappings;
 
-    @Schema(description = PlatformResourceModelDescription.DISK_DISPLAYNAMES)
+    @Schema(description = PlatformResourceModelDescription.DISK_DISPLAYNAMES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Map<String, String>> displayNames;
 
     public PlatformDisksResponse() {

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.platformresource.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.validation.constraints.NotNull;
@@ -14,8 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TagSpecificationsResponse {
 
-    @Schema(description = PlatformResourceModelDescription.TAG_SPECIFICATIONS)
-    private Map<String, Map<String, Object>> specifications;
+    @Schema(description = PlatformResourceModelDescription.TAG_SPECIFICATIONS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, Map<String, Object>> specifications = new HashMap<>();
 
     public Map<String, Map<String, Object>> getSpecifications() {
         return specifications;

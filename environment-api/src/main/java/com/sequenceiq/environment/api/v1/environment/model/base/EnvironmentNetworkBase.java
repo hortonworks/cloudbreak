@@ -50,7 +50,7 @@ public abstract class EnvironmentNetworkBase implements Serializable {
     private PublicEndpointAccessGateway publicEndpointAccessGateway = PublicEndpointAccessGateway.DISABLED;
 
     @Schema(description = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
-    private Set<String> endpointGatewaySubnetIds = Set.of();
+    private Set<String> endpointGatewaySubnetIds;
 
     @Schema(description = EnvironmentModelDescription.OUTBOUND_INTERNET_TRAFFIC)
     private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;

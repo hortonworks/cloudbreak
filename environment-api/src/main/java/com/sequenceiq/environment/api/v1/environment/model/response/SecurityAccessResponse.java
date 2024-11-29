@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,11 +13,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityAccessResponse extends SecurityAccessBase {
 
-    @Schema(description = EnvironmentModelDescription.KNOX_SECURITY_GROUPS)
-    private Set<String> securityGroupIdsForKnox;
+    @Schema(description = EnvironmentModelDescription.KNOX_SECURITY_GROUPS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> securityGroupIdsForKnox = new HashSet<>();
 
-    @Schema(description = EnvironmentModelDescription.DEFAULT_SECURITY_GROUPS)
-    private Set<String> defaultSecurityGroupIds;
+    @Schema(description = EnvironmentModelDescription.DEFAULT_SECURITY_GROUPS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Set<String> defaultSecurityGroupIds = new HashSet<>();
 
     public Set<String> getSecurityGroupIdsForKnox() {
         return securityGroupIdsForKnox;
@@ -54,9 +55,9 @@ public class SecurityAccessResponse extends SecurityAccessBase {
 
         private String cidr;
 
-        private Set<String> securityGroupIdsForKnox;
+        private Set<String> securityGroupIdsForKnox = new HashSet<>();
 
-        private Set<String> defaultSecurityGroupIds;
+        private Set<String> defaultSecurityGroupIds = new HashSet<>();
 
         private Builder() {
         }

@@ -14,10 +14,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CredentialViewResponse implements Serializable {
 
-    @Schema(description = ModelDescriptions.NAME)
+    @Schema(description = ModelDescriptions.NAME, requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
-    @Schema(description = ModelDescriptions.CRN)
+    @Schema(description = ModelDescriptions.CRN, requiredMode = Schema.RequiredMode.REQUIRED)
     private String crn;
 
     /**
@@ -28,7 +28,7 @@ public class CredentialViewResponse implements Serializable {
     @Schema(description = ModelDescriptions.CREATOR)
     private String creator;
 
-    @Schema(description = CredentialModelDescription.CLOUD_PLATFORM, required = true)
+    @Schema(description = CredentialModelDescription.CLOUD_PLATFORM, requiredMode = Schema.RequiredMode.REQUIRED)
     private String cloudPlatform;
 
     @Schema(description = ModelDescriptions.DESCRIPTION)
@@ -40,7 +40,8 @@ public class CredentialViewResponse implements Serializable {
     @Schema(description = CredentialModelDescription.CREDENTIAL_TYPE)
     private CredentialType type;
 
-    private Boolean govCloud;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private Boolean govCloud = Boolean.FALSE;
 
     public String getName() {
         return name;

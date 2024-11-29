@@ -16,25 +16,26 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(name = "CompactRegionV1Response")
 public class RegionResponse extends CompactRegionResponse {
-    @Schema(description = PlatformResourceModelDescription.AVAILABILITY_ZONES)
-    private  Map<String, List<String>> availabilityZones;
+    @Schema(description = PlatformResourceModelDescription.AVAILABILITY_ZONES, requiredMode = Schema.RequiredMode.REQUIRED)
+    private Map<String, List<String>> availabilityZones;
 
     @Schema(description = PlatformResourceModelDescription.DEFAULT_REGIOS)
     private String defaultRegion;
 
-    @Schema(description = PlatformResourceModelDescription.REGION_LOCATIONS)
+    @Schema(description = PlatformResourceModelDescription.REGION_LOCATIONS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> locations;
 
-    @Schema(description = PlatformResourceModelDescription.K8S_SUPPORTED_LOCATIONS)
+    @Schema(description = PlatformResourceModelDescription.K8S_SUPPORTED_LOCATIONS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> k8sSupportedlocations;
 
-    @Schema(description = PlatformResourceModelDescription.CDP_SERVICES)
+    @Schema(description = PlatformResourceModelDescription.CDP_SERVICES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Set<String>> cdpSupportedServices;
 
     public RegionResponse() {
         availabilityZones = new HashMap<>();
         locations = new ArrayList<>();
         k8sSupportedlocations = new ArrayList<>();
+        cdpSupportedServices = new HashMap<>();
     }
 
     @JsonProperty("names")
