@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
-
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -31,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -67,6 +66,9 @@ public class StackImageUpdateService {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
+    @Inject
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+
     public StatedImage getNewImageIfVersionsMatch(StackDtoDelegate stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
             restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
@@ -82,7 +84,7 @@ public class StackImageUpdateService {
                 throw new OperationException(message);
             }
 
-            if (!isOsVersionsMatch(currentImage, newImage) && !isCentosToRedhatUpgrade(currentImage, newImage.getImage())) {
+            if (!isOsVersionsMatch(currentImage, newImage) && !isCentosToRedhatUpgrade(stack, newImage)) {
                 String message = messagesService.getMessage(Msg.OSVERSION_DIFFERENT.code(),
                         Lists.newArrayList(newImage.getImage().getOs(), newImage.getImage().getOsType(), currentImage.getOs(), currentImage.getOsType()));
                 LOGGER.debug("Image change not permitted because: {} Current image: {}, new image: {}", message, currentImage, newImage.getImage());
@@ -212,6 +214,10 @@ public class StackImageUpdateService {
             }
         }
         return false;
+    }
+
+    private boolean isCentosToRedhatUpgrade(StackDtoDelegate stack, StatedImage newImage) {
+        return centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(stack.getId(), newImage.getImage());
     }
 
     private enum Msg {

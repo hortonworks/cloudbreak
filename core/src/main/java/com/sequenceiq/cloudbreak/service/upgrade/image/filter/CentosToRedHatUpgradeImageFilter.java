@@ -15,9 +15,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.common.model.OsType;
 
 @Component
 public class CentosToRedHatUpgradeImageFilter implements UpgradeImageFilter {
@@ -30,24 +33,15 @@ public class CentosToRedHatUpgradeImageFilter implements UpgradeImageFilter {
     @Inject
     private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
-    private static boolean isRedHatImage(String os, String osType) {
-        return RHEL8.getOs().equalsIgnoreCase(os) && RHEL8.getOsType().equalsIgnoreCase(osType);
-    }
+    @Inject
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
 
-    private static boolean isCentOSImage(String os, String osType) {
-        return CENTOS7.getOs().equalsIgnoreCase(os) && CENTOS7.getOsType().equalsIgnoreCase(osType);
-    }
-
-    public static boolean isCentosToRedhatUpgrade(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
-        return currentImage.getOs().equalsIgnoreCase(CENTOS7.getOs()) &&
-                currentImage.getOsType().equalsIgnoreCase(CENTOS7.getOsType()) &&
-                newImage.getOs().equalsIgnoreCase(RHEL8.getOs()) &&
-                newImage.getOsType().equalsIgnoreCase(RHEL8.getOsType());
-    }
+    @Inject
+    private CurrentImageUsageCondition currentImageUsageCondition;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        if (isRedHatImage(imageFilterParams.getCurrentImage().getOs(), imageFilterParams.getCurrentImage().getOsType())) {
+        if (isCurrentImageUsingOs(imageFilterParams, RHEL8)) {
             return imageFilterResult;
         } else {
             List<Image> filteredImages = filterImages(imageFilterParams, imageFilterResult);
@@ -72,25 +66,39 @@ public class CentosToRedHatUpgradeImageFilter implements UpgradeImageFilter {
     private List<Image> filterImages(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult) {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
         List<Image> prefilteredImages = imageFilterResult.getImages().stream()
-                .filter(image -> !isCentosToRedhatUpgrade(currentImage, image)
+                .filter(image -> !isCentosToRedHadUpgrade(imageFilterParams, image)
                         || isCentOsToRedHatUpgradePossible(imageFilterParams, imageFilterResult, image, currentImage))
                 .toList();
-        if (isCentOSImage(currentImage.getOs(), currentImage.getOsType())) {
-            List<Image> centOsImages = new ArrayList<>(prefilteredImages.stream()
-                    .filter(image -> isCentOSImage(image.getOs(), image.getOsType()))
-                    .toList());
-            prefilteredImages.stream()
-                    .filter(image -> isRedHatImage(image.getOs(), image.getOsType()))
-                    .max(Comparator.comparing(Image::getCreated))
-                    .ifPresent(centOsImages::add);
-        }
+        List<Image> centOsImages = new ArrayList<>(prefilteredImages.stream()
+                .filter(image -> isCentOSImage(image.getOs(), image.getOsType()))
+                .toList());
+        prefilteredImages.stream()
+                .filter(image -> isRedHatImage(image.getOs(), image.getOsType()))
+                .max(Comparator.comparing(Image::getCreated))
+                .ifPresent(centOsImages::add);
         return prefilteredImages;
+    }
+
+    private boolean isCentosToRedHadUpgrade(ImageFilterParams imageFilterParams, Image image) {
+        return centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(imageFilterParams.getStackId(), image);
+    }
+
+    private boolean isCurrentImageUsingOs(ImageFilterParams imageFilterParams, OsType osType) {
+        return currentImageUsageCondition.isCurrentOsUsedOnInstances(imageFilterParams.getStackId(), osType.getOs());
     }
 
     private boolean isCentOsToRedHatUpgradePossible(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult, Image image,
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
-        return isCentOSToRedhatOsUpgrade(currentImage, image, imageFilterParams.getStackRelatedParcels())
+        return isCentOSToRedhatOsUpgradePermitted(imageFilterParams.getStackId(), currentImage, image, imageFilterParams.getStackRelatedParcels())
                 || isCentOSImageAvailableWithSameVersion(imageFilterParams, imageFilterResult, image);
+    }
+
+    private static boolean isRedHatImage(String os, String osType) {
+        return RHEL8.getOs().equalsIgnoreCase(os) && RHEL8.getOsType().equalsIgnoreCase(osType);
+    }
+
+    private static boolean isCentOSImage(String os, String osType) {
+        return CENTOS7.getOs().equalsIgnoreCase(os) && CENTOS7.getOsType().equalsIgnoreCase(osType);
     }
 
     private boolean isCentOSImageAvailableWithSameVersion(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult, Image image) {
@@ -101,7 +109,8 @@ public class CentosToRedHatUpgradeImageFilter implements UpgradeImageFilter {
                 centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(imageFilterResult.getImages(), image, stackRelatedParcels);
     }
 
-    private boolean isCentOSToRedhatOsUpgrade(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image, Map<String, String> stackRelatedParcels) {
-        return centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(currentImage, image, stackRelatedParcels);
+    private boolean isCentOSToRedhatOsUpgradePermitted(Long stackId, com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image,
+            Map<String, String> stackRelatedParcels) {
+        return centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(stackId, currentImage, image, stackRelatedParcels);
     }
 }

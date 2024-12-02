@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH;
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,6 +57,9 @@ public class CentosToRedHatUpgradeAvailabilityService {
     @Inject
     private StackDtoService stackDtoService;
 
+    @Inject
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+
     public boolean isHelperImageAvailable(List<Image> images, Image targetImage, Set<String> stackRelatedParcels) {
         Optional<Image> helperImage = findHelperImage(images, targetImage, stackRelatedParcels);
         return helperImage.isPresent();
@@ -74,7 +76,7 @@ public class CentosToRedHatUpgradeAvailabilityService {
         try {
             UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(targetImageId, resourceId);
             StatedImage targetImage = upgradeImageInfo.targetStatedImage();
-            if (isCentosToRedhatUpgrade(upgradeImageInfo.currentImage(), targetImage.getImage())) {
+            if (isCentosToRedhatUpgrade(resourceId, targetImage.getImage())) {
                 StackDto stack = stackDtoService.getById(resourceId);
                 List<Image> cdhImages = getAllCdhImages(stack, targetImage.getImageCatalogName());
                 Optional<Image> helperImage = findHelperImage(cdhImages, targetImage.getImage(), stack);
@@ -88,8 +90,13 @@ public class CentosToRedHatUpgradeAvailabilityService {
         }
     }
 
-    public boolean isOsUpgradePermitted(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image, Map<String, String> stackRelatedParcels) {
-        return isCentosToRedhatUpgrade(currentImage, image) && containsSameComponentVersions(image, getCmBuildNumber(currentImage), stackRelatedParcels);
+    public boolean isOsUpgradePermitted(Long stackId, com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image,
+            Map<String, String> stackRelatedParcels) {
+        return isCentosToRedhatUpgrade(stackId, image) && containsSameComponentVersions(image, getCmBuildNumber(currentImage), stackRelatedParcels);
+    }
+
+    private boolean isCentosToRedhatUpgrade(Long stackId, Image image) {
+        return centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(stackId, image);
     }
 
     private Optional<Image> findHelperImage(List<Image> images, Image targetImage, Set<String> stackRelatedParcels) {
