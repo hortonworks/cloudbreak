@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -52,7 +53,7 @@ class DefaultOrderedOSUpgradeTest {
                 createInstanceMetadata(IDBROKER, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(GATEWAY, 0),
+                createPrimaryGatewayInstanceMetadata(GATEWAY, 0),
                 createInstanceMetadata(GATEWAY, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
@@ -62,12 +63,15 @@ class DefaultOrderedOSUpgradeTest {
         assertEquals(0, actual.get(0).getOrder());
         assertEquals(1, actual.get(1).getOrder());
         assertEquals(2, actual.get(2).getOrder());
+        assertEquals(3, actual.get(3).getOrder());
         assertThat(actual.get(0).getInstanceIds(),
-                containsInAnyOrder(Arrays.asList("i-master0", "i-core0", "i-auxiliary0", "i-idbroker0").toArray()));
+                containsInAnyOrder(Arrays.asList("i-gateway0").toArray()));
         assertThat(actual.get(1).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-master1", "i-core1", "i-gateway0", "i-idbroker1").toArray()));
+                containsInAnyOrder(Arrays.asList("i-master0", "i-core0", "i-gateway1", "i-idbroker0").toArray()));
         assertThat(actual.get(2).getInstanceIds(),
-                containsInAnyOrder(Set.of("i-core2", "i-gateway1").toArray()));
+                containsInAnyOrder(Set.of("i-master1", "i-core1", "i-auxiliary0", "i-idbroker1").toArray()));
+        assertThat(actual.get(3).getInstanceIds(),
+                containsInAnyOrder(Set.of("i-core2").toArray()));
     }
 
     @Test
@@ -88,7 +92,7 @@ class DefaultOrderedOSUpgradeTest {
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
                 createInstanceMetadata(GATEWAY, 2),
-                createInstanceMetadata(GATEWAY, 0),
+                createPrimaryGatewayInstanceMetadata(GATEWAY, 0),
                 createInstanceMetadata(GATEWAY, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
@@ -115,7 +119,7 @@ class DefaultOrderedOSUpgradeTest {
                 createInstanceMetadata(IDBROKER, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(
-                createInstanceMetadata(GATEWAY, 0),
+                createPrimaryGatewayInstanceMetadata(GATEWAY, 0),
                 createInstanceMetadata(GATEWAY, 1)
         )));
         instanceGroups.add(createInstanceGroup(Set.of(createInstanceMetadata(AUXILIARY, 0))));
@@ -137,6 +141,12 @@ class DefaultOrderedOSUpgradeTest {
         instanceMetaDataV4Response.setInstanceId("i-" + instanceGroup.getName() + order);
         instanceMetaDataV4Response.setDiscoveryFQDN("test-dl-" + instanceGroup.getName() + order + ".test-env.cloudera.site");
         return instanceMetaDataV4Response;
+    }
+
+    private InstanceMetaDataV4Response createPrimaryGatewayInstanceMetadata(InstanceGroupName instanceGroup, int order) {
+        InstanceMetaDataV4Response instanceMetadata = createInstanceMetadata(instanceGroup, order);
+        instanceMetadata.setInstanceType(InstanceMetadataType.GATEWAY_PRIMARY);
+        return instanceMetadata;
     }
 
     private StackV4Response createStackV4Response(List<InstanceGroupV4Response> instanceGroups) {

@@ -9,6 +9,7 @@ import static com.sequenceiq.common.api.type.InstanceGroupName.MASTER;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -28,10 +29,21 @@ public class DefaultOrderedOSUpgrade extends AbstractOrderedOSUpgrade {
     public List<OrderedOSUpgradeSet> createDatalakeOrderedOSUpgrade(StackV4Response stackV4Response, String targetImageId) {
         Map<String, List<InstanceMetaDataV4Response>> instanceMetaDataByInstanceGroup = getInstanceMetaDataByInstanceGroup(stackV4Response);
         Map<String, List<String>> instanceIdsByInstanceGroup = getInstanceIdsByInstanceGroup(instanceMetaDataByInstanceGroup);
-        LOGGER.debug("Instance ids by instance group: {}", instanceIdsByInstanceGroup);
+        Optional<String> primaryGatewayInstanceId = getPrimaryGatewayInstanceId(stackV4Response);
+        LOGGER.debug("Instance ids by instance group: {}, primary gateway: {}", instanceIdsByInstanceGroup, primaryGatewayInstanceId);
 
         int order = 0;
         List<OrderedOSUpgradeSet> osUpgradeByUpgradeSets = new ArrayList<>();
+        if (primaryGatewayInstanceId.isPresent()) {
+            instanceIdsByInstanceGroup.get(GATEWAY.getName()).remove(primaryGatewayInstanceId.get());
+            osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(primaryGatewayInstanceId.get())));
+        }
+        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
+                pollInstanceId(instanceIdsByInstanceGroup, GATEWAY),
+                pollInstanceId(instanceIdsByInstanceGroup, MASTER),
+                pollInstanceId(instanceIdsByInstanceGroup, CORE),
+                pollInstanceId(instanceIdsByInstanceGroup, IDBROKER)
+        )));
         osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
                 pollInstanceId(instanceIdsByInstanceGroup, MASTER),
                 pollInstanceId(instanceIdsByInstanceGroup, CORE),
@@ -39,14 +51,7 @@ public class DefaultOrderedOSUpgrade extends AbstractOrderedOSUpgrade {
                 pollInstanceId(instanceIdsByInstanceGroup, IDBROKER)
         )));
         osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
-                pollInstanceId(instanceIdsByInstanceGroup, MASTER),
-                pollInstanceId(instanceIdsByInstanceGroup, CORE),
-                pollInstanceId(instanceIdsByInstanceGroup, GATEWAY),
-                pollInstanceId(instanceIdsByInstanceGroup, IDBROKER)
-        )));
-        osUpgradeByUpgradeSets.add(new OrderedOSUpgradeSet(order++, Set.of(
-                pollInstanceId(instanceIdsByInstanceGroup, CORE),
-                pollInstanceId(instanceIdsByInstanceGroup, GATEWAY)
+                pollInstanceId(instanceIdsByInstanceGroup, CORE)
         )));
         addServiceHostGroupsToOrderedOSUpgradeSet(instanceIdsByInstanceGroup, order, osUpgradeByUpgradeSets);
         validateThatEveryInstanceIsPresentInTheConfig(instanceIdsByInstanceGroup);

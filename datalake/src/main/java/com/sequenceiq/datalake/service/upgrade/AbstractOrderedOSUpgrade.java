@@ -12,12 +12,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -62,6 +64,14 @@ public abstract class AbstractOrderedOSUpgrade {
                         entry -> entry.getValue().stream()
                                 .map(InstanceMetaDataV4Response::getInstanceId)
                                 .collect(Collectors.toList())));
+    }
+
+    protected Optional<String> getPrimaryGatewayInstanceId(StackV4Response stackV4Response) {
+        return stackV4Response.getInstanceGroups().stream()
+                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
+                .filter(instance -> InstanceMetadataType.GATEWAY_PRIMARY.equals(instance.getInstanceType()))
+                .map(InstanceMetaDataV4Response::getInstanceId)
+                .findAny();
     }
 
     protected String pollInstanceId(Map<String, List<String>> instanceIdsByInstanceGroup, InstanceGroupName instanceGroup) {
