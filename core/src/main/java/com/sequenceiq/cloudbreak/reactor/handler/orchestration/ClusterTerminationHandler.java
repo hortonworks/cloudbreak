@@ -40,15 +40,17 @@ public class ClusterTerminationHandler implements EventHandler<ClusterTerminatio
     @Override
     public void accept(Event<ClusterTerminationRequest> event) {
         ClusterTerminationRequest request = event.getData();
-        ClusterTerminationResult result;
+        ClusterTerminationResult result = new ClusterTerminationResult(request);
         try {
             StackDto stack = stackDtoService.getByIdWithoutResources(request.getStackId());
             meteringService.unscheduleSync(request.getStackId());
             meteringService.sendMeteringStatusChangeEventForStack(stack, DELETED);
-            result = new ClusterTerminationResult(request);
         } catch (RuntimeException e) {
             LOGGER.warn("Failed to delete cluster containers", e);
-            result = new ClusterTerminationResult(e.getMessage(), e, request);
+            if (!event.getData().isForced()) {
+                LOGGER.debug("Ignoring error during deleting cluster containers because forced termination flag.");
+                result = new ClusterTerminationResult(e.getMessage(), e, request);
+            }
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,14 +17,17 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -44,7 +50,9 @@ class DeregisterServicesHandlerTest {
     @InjectMocks
     private DeregisterServicesHandler underTest;
 
-    private Event<DeregisterServicesRequest> event = new Event<>(new DeregisterServicesRequest(TEST_STACK_ID));
+    private Event<DeregisterServicesRequest> event = new Event<>(new DeregisterServicesRequest(TEST_STACK_ID, false));
+
+    private Event<DeregisterServicesRequest> eventForced = new Event<>(new DeregisterServicesRequest(TEST_STACK_ID, true));
 
     @Test
     void testAcceptEvent() {
@@ -75,10 +83,32 @@ class DeregisterServicesHandlerTest {
     @Test
     void testAcceptEventThrowsException() {
         when(stackDtoService.getStackViewById(anyLong())).thenReturn(new Stack());
-        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenThrow(new RuntimeException());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenThrow(new RuntimeException("the message"));
 
         underTest.accept(event);
 
-        verify(eventBus, times(1)).notify(any(), any(Event.class));
+        ArgumentCaptor<Event<DeregisterServicesResult>> argumentCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus, times(1)).notify(any(), argumentCaptor.capture());
+        Event resultEvent = argumentCaptor.getValue();
+        DeregisterServicesResult result = (DeregisterServicesResult) resultEvent.getData();
+        assertNotNull(result.getErrorDetails());
+        assertNotNull(result.getStatusReason());
+        assertEquals(EventStatus.FAILED, result.getStatus());
+    }
+
+    @Test
+    void testResultWhenExceptionThrownAndForcedFlag() {
+        when(stackDtoService.getStackViewById(anyLong())).thenReturn(new Stack());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenThrow(new RuntimeException("the message"));
+
+        underTest.accept(eventForced);
+
+        ArgumentCaptor<Event<DeregisterServicesResult>> argumentCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus, times(1)).notify(any(), argumentCaptor.capture());
+        Event resultEvent = argumentCaptor.getValue();
+        DeregisterServicesResult result = (DeregisterServicesResult) resultEvent.getData();
+        assertNull(result.getException());
+        assertNull(result.getErrorDetails());
+        assertEquals(EventStatus.OK, result.getStatus());
     }
 }

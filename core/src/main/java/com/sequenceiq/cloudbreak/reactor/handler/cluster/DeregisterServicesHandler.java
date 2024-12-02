@@ -40,17 +40,19 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
 
     @Override
     public void accept(Event<DeregisterServicesRequest> event) {
-        DeregisterServicesResult result;
+        DeregisterServicesResult result = new DeregisterServicesResult(event.getData());
         try {
             LOGGER.info("Received DeregisterServicesRequest event: {}", event.getData());
             StackView stackView = stackDtoService.getStackViewById(event.getData().getStackId());
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());
             sdxBasicView.ifPresent(sdx -> platformAwareSdxConnector.tearDownDatahub(sdx.crn(), stackView.getResourceCrn()));
             LOGGER.info("Finished disabling Security");
-            result = new DeregisterServicesResult(event.getData());
         } catch (Exception e) {
-            LOGGER.warn("An error has occured during disabling security", e);
-            result = new DeregisterServicesResult(e.getMessage(), e, event.getData());
+            LOGGER.warn("An error has occured during deregistering services.", e);
+            if (!event.getData().isForced()) {
+                LOGGER.warn("Ignoring error during deregistering services because forced flag.");
+                result = new DeregisterServicesResult(e.getMessage(), e, event.getData());
+            }
         }
         LOGGER.info("Sending out DeregisterServicesResult: {}", result);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

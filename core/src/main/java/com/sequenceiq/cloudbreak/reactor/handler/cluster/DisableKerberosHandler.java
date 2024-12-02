@@ -38,17 +38,19 @@ public class DisableKerberosHandler implements EventHandler<DisableKerberosReque
 
     @Override
     public void accept(Event<DisableKerberosRequest> event) {
-        DisableKerberosResult result;
+        DisableKerberosResult result = new DisableKerberosResult(event.getData());
         try {
             LOGGER.info("Received DisableKerberosRequest event: {}", event.getData());
             StackDto stackDto = stackDtoService.getById(event.getData().getResourceId());
             ClusterApi clusterApi = clusterApiConnectors.getConnector(stackDto);
             clusterApi.clusterSecurityService().disableSecurity();
             LOGGER.info("Finished disabling Security");
-            result = new DisableKerberosResult(event.getData());
         } catch (Exception e) {
             LOGGER.warn("An error has occured during disabling security", e);
-            result = new DisableKerberosResult(e.getMessage(), e, event.getData());
+            if (!event.getData().isForced()) {
+                LOGGER.debug("Ignoring error during disabling security because forced termination flag.");
+                result = new DisableKerberosResult(e.getMessage(), e, event.getData());
+            }
         }
         LOGGER.info("Sending out DisableKerberosResult: {}", result);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
