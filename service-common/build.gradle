@@ -40,7 +40,8 @@ dependencies {
   implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
-  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: '1.9.22.1'
+  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: aspectjVersion
+  implementation group: 'org.aspectj',                      name: 'aspectjweaver',                  version: aspectjVersion
   implementation group: 'dnsjava',                          name: 'dnsjava',                        version: dnsjavaVersion
   implementation group: 'org.apache.tomcat.embed',          name: 'tomcat-embed-core',              version: tomcatVersion
   implementation group: 'software.amazon.awssdk',           name: 'rds',                            version: awsSdkVersion

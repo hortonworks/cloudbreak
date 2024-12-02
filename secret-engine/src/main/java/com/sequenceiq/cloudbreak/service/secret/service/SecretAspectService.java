@@ -3,14 +3,17 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -26,11 +29,37 @@ public class SecretAspectService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretAspectService.class);
 
+    @Inject
+    private List<CrudRepository> crudRepositories;
+
     private SecretService secretService;
 
     @Inject
     public SecretAspectService(SecretService secretService) {
         this.secretService = secretService;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.info("Preinvoke all repository methods to avoid Aspectj bug. More details under CB-28003");
+        for (CrudRepository crudRepository : crudRepositories) {
+            try {
+                crudRepository.save(null);
+            } catch (Exception ignored) {
+            }
+            try {
+                crudRepository.saveAll(null);
+            } catch (Exception ignored) {
+            }
+            try {
+                crudRepository.delete(null);
+            } catch (Exception ignored) {
+            }
+            try {
+                crudRepository.deleteAll(null);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     public Object proceedSave(ProceedingJoinPoint proceedingJoinPoint) {

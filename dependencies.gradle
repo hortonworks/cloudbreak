@@ -17,6 +17,7 @@ ext {
   springSecurityVersion = '6.4.0'
   springStateMachineCoreVersion = '2.5.0'
   springVaultCoreVersion = '3.0.4'
+  aspectjVersion = '1.9.22.1'
 
   // Polling
   dyngrPollingVersion = '1.1.3'
