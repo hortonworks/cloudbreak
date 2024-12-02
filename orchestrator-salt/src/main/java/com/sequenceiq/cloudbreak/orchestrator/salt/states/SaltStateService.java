@@ -310,10 +310,12 @@ public class SaltStateService {
         return minionStatus;
     }
 
+    @Retryable(retryFor = WebApplicationException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public PingResponse ping(SaltConnector sc, Target<String> target) {
         return measure(() -> sc.run(target, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
 
+    @Retryable(retryFor = WebApplicationException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public PingResponse ping(SaltConnector sc) {
         return measure(() -> sc.run(Glob.ALL, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
