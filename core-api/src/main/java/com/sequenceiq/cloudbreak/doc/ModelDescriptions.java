@@ -8,7 +8,7 @@ public class ModelDescriptions {
     public static final String PUBLIC_IN_ACCOUNT = "resource is visible in account";
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
-    public static final String ARCHITECTURE = "CPU architecture";
+    public static final String ARCHITECTURE = "CPU architecture allowedValues: { X86_64, ARM64 }";
     public static final String TOPOLOGY_ID = "id of the topology the resource belongs to";
     public static final String RESPONSE = "response object";
     public static final String FIXINPUTS = "fixinputs object";

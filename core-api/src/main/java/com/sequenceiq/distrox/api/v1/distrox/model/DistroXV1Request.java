@@ -63,6 +63,7 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     private boolean enableMultiAz;
 
+    @Schema(description = ModelDescriptions.ARCHITECTURE)
     private String architecture;
 
     @Schema(description = ModelDescriptions.Database.DISABLE_DB_SSL_ENFORCEMENT)
