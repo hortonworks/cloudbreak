@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
-
 import java.util.List;
+
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -19,13 +20,15 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final int ORDER_NUMBER = 8;
 
+    @Inject
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         String currentOs = imageFilterParams.getCurrentImage().getOs();
         String currentOsType = imageFilterParams.getCurrentImage().getOsType();
         List<Image> filteredImages = filterImages(imageFilterResult,
-                image -> isOsVersionsMatch(imageFilterParams.getCurrentImage().getOs(), imageFilterParams.getCurrentImage().getOsType(), image)
-                        || isCentosToRedhatUpgrade(imageFilterParams.getCurrentImage(), image));
+                image -> isOsVersionsMatch(imageFilterParams.getCurrentImage(), image) || isCentosToRedhatUpgrade(imageFilterParams, image));
         LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), currentOs, currentOsType);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
@@ -44,7 +47,11 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
         return ORDER_NUMBER;
     }
 
-    private boolean isOsVersionsMatch(String currentOs, String currentOsType, Image newImage) {
-        return newImage.getOs().equalsIgnoreCase(currentOs) && newImage.getOsType().equalsIgnoreCase(currentOsType);
+    private boolean isOsVersionsMatch(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
+        return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
+    }
+
+    private boolean isCentosToRedhatUpgrade(ImageFilterParams imageFilterParams, Image image) {
+        return centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(imageFilterParams.getStackId(), image);
     }
 }

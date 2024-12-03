@@ -7,18 +7,30 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
+@ExtendWith(MockitoExtension.class)
 class OsVersionBasedUpgradeImageFilterTest {
 
     private static final String CURRENT_OS = "centos";
 
     private static final String CURRENT_OS_TYPE = "redhat7";
 
-    private final OsVersionBasedUpgradeImageFilter underTest = new OsVersionBasedUpgradeImageFilter();
+    private static final long STACK_ID = 1L;
+
+    @InjectMocks
+    private OsVersionBasedUpgradeImageFilter underTest;
+
+    @Mock
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
 
     @Test
     public void testFilterShouldReturnAllImages() {
@@ -77,7 +89,7 @@ class OsVersionBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, createCurrentImage(), null, false, null, null, null, null, null, null, null, null, false);
+        return new ImageFilterParams(null, createCurrentImage(), null, false, null, null, null, STACK_ID, null, null, null, null, false);
     }
 
     private Image createImage(String imageId, String os, String osType) {

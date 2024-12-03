@@ -104,6 +104,9 @@ class CentosToRedHatUpgradeAvailabilityServiceTest {
     @Mock
     private ImageCatalogPlatform imageCatalogPlatform;
 
+    @Mock
+    private CentosToRedHatUpgradeCondition centosToRedHatUpgradeCondition;
+
     @BeforeEach
     void before() {
         lenient().when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
@@ -115,24 +118,32 @@ class CentosToRedHatUpgradeAvailabilityServiceTest {
     void testIsOsUpgradePermittedShouldReturnTrue() {
         Image targetImage = createTargetImage(RHEL8);
         when(lockedComponentChecker.isUpgradePermitted(targetImage, stackRelatedParcels, CM_BUILD_NUMBER)).thenReturn(true);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, targetImage)).thenReturn(true);
 
-        assertTrue(underTest.isOsUpgradePermitted(createModelImage(CENTOS7), targetImage, stackRelatedParcels));
+        assertTrue(underTest.isOsUpgradePermitted(STACK_ID, createModelImage(CENTOS7), targetImage, stackRelatedParcels));
 
         verify(lockedComponentChecker).isUpgradePermitted(targetImage, stackRelatedParcels, CM_BUILD_NUMBER);
     }
 
     @Test
     void testIsOsUpgradePermittedShouldReturnFalseWhenTheUpgradePathIsRedhatToCentOs() {
-        assertFalse(underTest.isOsUpgradePermitted(createModelImage(RHEL8), createTargetImage(CENTOS7), stackRelatedParcels));
+        Image targetImage = getTargetImage();
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, targetImage)).thenReturn(false);
+        assertFalse(underTest.isOsUpgradePermitted(STACK_ID, createModelImage(RHEL8), targetImage, stackRelatedParcels));
         verifyNoInteractions(lockedComponentChecker);
+    }
+
+    private Image getTargetImage() {
+        return createTargetImage(CENTOS7);
     }
 
     @Test
     void testIsOsUpgradePermittedShouldReturnFalseWhenTheComponentVersionsAreNotMatching() {
         Image targetImage = createTargetImage(RHEL8);
         when(lockedComponentChecker.isUpgradePermitted(targetImage, stackRelatedParcels, CM_BUILD_NUMBER)).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, targetImage)).thenReturn(true);
 
-        assertFalse(underTest.isOsUpgradePermitted(createModelImage(CENTOS7), targetImage, stackRelatedParcels));
+        assertFalse(underTest.isOsUpgradePermitted(STACK_ID, createModelImage(CENTOS7), targetImage, stackRelatedParcels));
 
         verify(lockedComponentChecker).isUpgradePermitted(targetImage, stackRelatedParcels, CM_BUILD_NUMBER);
     }
@@ -199,6 +210,7 @@ class CentosToRedHatUpgradeAvailabilityServiceTest {
         Map<String, String> packageVersions = Map.of(CDH.name(), CDH_VERSION, CFM.getKey(), "1.2.3");
         when(lockedComponentChecker.isUpgradePermitted(image1, packageVersions, CM_BUILD_NUMBER)).thenReturn(false);
         when(lockedComponentChecker.isUpgradePermitted(image2, packageVersions, CM_BUILD_NUMBER)).thenReturn(true);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, upgradeImageInfo.targetStatedImage().getImage())).thenReturn(true);
 
         Optional<Image> actual = doAs(ACTOR, () -> underTest.findHelperImageIfNecessary(TARGET_IMAGE_ID, STACK_ID));
 
@@ -224,6 +236,7 @@ class CentosToRedHatUpgradeAvailabilityServiceTest {
         Map<String, String> packageVersions = Map.of(CDH.name(), CDH_VERSION, CFM.getKey(), "1.2.3");
         when(lockedComponentChecker.isUpgradePermitted(image1, packageVersions, CM_BUILD_NUMBER)).thenReturn(false);
         when(lockedComponentChecker.isUpgradePermitted(image2, packageVersions, CM_BUILD_NUMBER)).thenReturn(false);
+        when(centosToRedHatUpgradeCondition.isCentosToRedhatUpgrade(STACK_ID, upgradeImageInfo.targetStatedImage().getImage())).thenReturn(true);
 
         assertTrue(doAs(ACTOR, () -> underTest.findHelperImageIfNecessary(TARGET_IMAGE_ID, STACK_ID)).isEmpty());
     }

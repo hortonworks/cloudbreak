@@ -173,7 +173,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         when(distroXUpgradeResponseFilterService.filterForLatestImagePerRuntimeAndOs(response.getUpgradeCandidates(), response.getCurrent()))
                 .thenReturn(List.of(image2));
 
@@ -199,7 +199,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
         when(distroXUpgradeResponseFilterService.filterForLatestImagePerRuntimeAndOs(response.getUpgradeCandidates(), response.getCurrent()))
                 .thenReturn(List.of(image2, image5, image7));
@@ -228,7 +228,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         when(distroXUpgradeResponseFilterService.filterForDatalakeVersion(ENVIRONMENT_CRN, response)).thenReturn(List.of(image7));
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
@@ -247,7 +247,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         response.setCurrent(new ImageInfoV4Response());
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -268,7 +268,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         String expectedMessage = "Data Hub can only be upgraded to the same version as the Data Lake. "
                 + "To upgrade your Data Hub, please upgrade your Data Lake first.";
         when(distroXUpgradeResponseFilterService.filterForDatalakeVersion(ENVIRONMENT_CRN, response)).thenReturn(Collections.emptyList());
@@ -292,7 +292,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -312,7 +312,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         when(distroXUpgradeResponseFilterService.filterForDatalakeVersion(ENVIRONMENT_CRN, response)).thenReturn(List.of(image2));
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
@@ -334,7 +334,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         stack.getCluster().getBlueprint().setBlueprintUpgradeOption(BlueprintUpgradeOption.GA);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
@@ -357,7 +357,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         stack.getCluster().getBlueprint().setBlueprintUpgradeOption(BlueprintUpgradeOption.OS_UPGRADE_DISABLED);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
-        when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
+        when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
