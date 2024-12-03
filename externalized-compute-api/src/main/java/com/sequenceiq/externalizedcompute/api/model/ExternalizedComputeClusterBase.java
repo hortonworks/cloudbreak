@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class ExternalizedComputeClusterBase {
 
     @NotEmpty
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotEmpty
-    @Schema
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     @TenantAwareParam
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     private String environmentCrn;

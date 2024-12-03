@@ -1,14 +1,19 @@
 package com.sequenceiq.externalizedcompute.api.model;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public class ExternalizedComputeClusterCredentialValidationResponse {
 
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean successful = true;
 
     private String message;
 
-    private List<String> validationResults;
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> validationResults = new ArrayList<>();
 
     public ExternalizedComputeClusterCredentialValidationResponse() {
     }
